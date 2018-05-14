@@ -1,0 +1,17 @@
+gunicorn
+
+Flask
+Flask-Migrate
+Flask-Script
+Flask-Moment
+Flask-SQLAlchemy
+Flask-RESTplus
+Flask-Marshmallow
+Flask-OIDC
+
+python-dotenv
+python-jose-cryptodome
+psycopg2-binary
+marshmallow
+marshmallow-sqlalchemy
+six

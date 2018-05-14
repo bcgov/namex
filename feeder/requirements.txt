@@ -1,0 +1,10 @@
+gunicorn
+
+Flask
+Flask-Migrate
+Flask-Script
+Flask-Moment
+Flask-SQLAlchemy
+Flask-RESTplus
+
+psycopg2-binary

@@ -1,0 +1,55 @@
+SOLR build notes
+
+* Need S2I for "solr-base" image.  See TorOrgBook/docker/manage for original bulid files.
+
+Make sure you're in tools
+(venv) NDM050057:openshift vboettch$ oc status
+In project names examination (tools) (servicebc-ne-tools) on server https://console.pathfinder.gov.bc.ca:8443
+
+created templates/solr-build.json
+
+* Make sure you're in the solr openshift folder
+(venv) NDM050057:openshift vboettch$ pwd
+/Users/vboettch/Development/namex-api/solr/openshift
+
+* Sanity check
+oc process -f templates/solr-build.json --param-file=solr-build.param
+
+If it outputs the JSON file then it's valid.  Not necessarily right, but it's valid JSON.
+
+* upload the template with parameters (first time)
+(venv) NDM050057:openshift vboettch$ oc process -f templates/solr-build.json --param-file=solr-build.param | oc create -f -
+                                     oc process -f templates/solr-build.json --param-file=solr-build.param | oc replace -f -
+imagestream "solr" created
+buildconfig "solr" created
+
+* If you need to run it against an existing object (not first time) use "| oc replace -f -" instead of "| oc create -f -"
+
+* And now tag the image
+
+(venv) NDM050057:openshift vboettch$ oc tag servicebc-ne-tools/solr:latest servicebc-ne-tools/solr:dev
+Tag solr:dev set to servicebc-ne-tools/solr@sha256:184122663e61dbc27003242d9493aedfd84219b3a079ce0181638717090c959b.
+
+
+* Deploy
+** Make sure you're in the servicebc-ne-dev namespace
+(venv) NDM050057:openshift vboettch$ oc project servicebc-ne-dev
+Now using project "servicebc-ne-dev" on server "https://console.pathfinder.gov.bc.ca:8443".
+
+(venv) NDM050057:openshift vboettch$ oc process -f templates/solr-deploy.json --param-file=solr-deploy.dev.param | oc create -f -
+service "solr" created
+route "solr" created
+persistentvolumeclaim "solr" created
+deploymentconfig "solr" created
+
+
+
+* BUILDNOTES for namex-solr
+As per the project documentation but build will only work for local OpenShift
+
+
+
+
+
+
+

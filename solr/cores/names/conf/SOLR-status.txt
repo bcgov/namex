@@ -1,0 +1,26 @@
+Notes for searches required
+
+Identify Name Parts
+
+1) Pull back  parts of speech for each word in a name as part of the query.  Set-up an english  dictionary table with word, part of speech, definition or we get the examiner to flag words an distinctive or descriptive.
+let the miro-service determine their is at least one noun that is not the designation and at least one pro-noun or adjective,  strip out all stops words.
+
+Cant do this at names import time, doesnt make sense.  do we have another document index that is the english dictionary? then we can pass the name formatted in teh query against the dictionary index to get the payload back..
+
+Prepare Names (DONE)
+	text_en_splitting field type (all done at part at index time and part at query time)
+
+Identify Restricted words (DONE)
+Using restwords field type and keepwords.txt and synonyms.txt.  Microservice is articulated in the story.
+
+Determine and Display Approved/Rejected name Request with an Exact Match (234) -done with text_en_splitting query with exact name -APPLY relevance so exact match goes to the top.
+Search and Display Similar Approved Name Requests (do we want rejected one as well?) - done with text_en_splitting (all synonyms, stemming )
+
+
+
+Wahts not done.
+
+Corporate Index
+Search and Display Company names - Exact Match and similars.
+
+
