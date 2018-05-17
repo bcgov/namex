@@ -14,7 +14,7 @@ ora_con = cx_Oracle.connect(Config.ORA_USER,
 pg_conn = psycopg2.connect("host='{0}' dbname='{1}' user='{2}' password='{3}' port='{4}'".
                            format(Config.PG_HOST, Config.PG_NAME, Config.PG_USER, Config.PG_PASSWORD, Config.PG_PORT))
 
-# make sure PG is doing the roght level of transaction management
+# make sure PG is doing the right level of transaction management
 pg_conn.set_session(isolation_level='REPEATABLE READ', readonly=False, deferrable=False, autocommit=False)
 
 start_time = datetime.utcnow()
@@ -48,8 +48,8 @@ try:
                       "FROM requests r " +
                       "WHERE state in ('APPROVED', 'REJECTED') " +
                       "  AND last_update <= current_timestamp - (%s ||' minutes')::interval "
-                      "  AND (nro_updated != 'Y' " +
-                      "       OR nro_updated is NULL) " +
+                      "  AND (furnished != 'Y' " +
+                      "       OR furnished is NULL) " +
                       " FOR UPDATE "
                       "LIMIT %s",
                       [Config.MIN_DELAY_MINUTES, Config.MAX_ROW_LIMIT]
@@ -72,7 +72,7 @@ try:
                                      pg_row['admin_comment']] #p_exam_comment
                                 )
 
-            pg_upd_cursor.execute("""UPDATE requests SET nro_updated = %s WHERE id = %s""",
+            pg_upd_cursor.execute("""UPDATE requests SET furnished = %s WHERE id = %s""",
                                   ['Y', pg_row['id']])
 
             pg_cur_track.execute(

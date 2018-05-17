@@ -5,7 +5,8 @@ TODO: Fill in a larger description once the API is defined for V1
 from flask import request, jsonify, g # _request_ctx_stack
 from flask_restplus import Resource, fields, cors
 from marshmallow import ValidationError
-from app import api, auth_services, oidc
+from app import api, oidc
+from app.auth_services import required_scope, AuthError
 from app.models import User
 from sqlalchemy.orm.exc import NoResultFound
 from app.utils.util import cors_preflight
@@ -118,8 +119,23 @@ class Request(Resource):
     @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
     def patch(nr, *args, **kwargs):
+        """  Patches the NR, only STATE can be changed with some business rules around roles/scopes
+
+        :param nr (str): NameRequest Number in the format of 'NR 000000000'
+        :param args:  __futures__
+        :param kwargs: __futures__
+        :return: 200 - success; 40X for errors
+
+        :HEADER: Valid JWT Bearer Token for a valid REALM
+        :JWT Scopes: - USER.APPROVER, USER.EDITOR, USER.VIEWONLY
+
+        APPROVERS: Can change from almost any state, other than CANCELLED, EXPIRED and ( COMPLETED not yet furnished )
+        EDITOR: Can't change to a COMPLETED state (ACCEPTED, REJECTED, CONDITION)
+        VIEWONLY: Can't change anything, so that are bounced
+        """
 
         # do the cheap check first before the more expensive ones
+        #check states
         json_input = request.get_json()
         if not json_input:
             return jsonify({'message': 'No input data provided'}), 400
@@ -133,6 +149,20 @@ class Request(Resource):
         if state not in RequestDAO.VALID_STATES:
             return jsonify({"message": "not a valid state"}), 406
 
+        #check user scopes
+        if not (required_scope(User.EDITOR) or required_scope(User.APPROVER)):
+            raise AuthError({
+                "code": "Unauthorized",
+                "description": "You don't have access to this resource."
+            }, 403)
+
+
+        if (state in (RequestDAO.STATE_APPROVED,
+                     RequestDAO.STATE_REJECTED,
+                     RequestDAO.STATE_CONDITIONAL))\
+                and not required_scope(User.APPROVER):
+            return jsonify({"message": "Only Names Examiners can set state: {}".format(state)}), 428
+
         try:
             nrd = RequestDAO.find_by_nr(nr)
             if not nrd:
@@ -142,7 +172,19 @@ class Request(Resource):
             if not user:
                 user = User.create_from_jwtToken(g.oidc_token_info)
 
-            if state in RequestDAO.RELEASE_STATES:
+            #NR is in a final state, but maybe the user wants to pull it back for corrections
+            if nrd.state in RequestDAO.COMPLETED_STATE:
+                if not required_scope(User.APPROVER):
+                    return jsonify({"message": "Only Names Examiners can alter completed Requests"}), 401
+
+                if nrd.furnished == RequestDAO.REQUEST_FURNISHED:
+                    return jsonify({"message": "Request has already been furnished and cannot be altered"}), 409
+
+                if state != RequestDAO.STATE_INPROGRESS:
+                    return jsonify({"message": "Completed unfurnished Requests can only be set to an INPROGRESS state"
+                                    }), 400
+
+            elif state in RequestDAO.RELEASE_STATES:
                 if nrd.userId != user.id or nrd.state != RequestDAO.STATE_INPROGRESS:
                     return jsonify({"message": "The Request must be INPROGRESS and assigned to you before you can change it."}), 401
 

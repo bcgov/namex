@@ -1,5 +1,8 @@
 import os
+from dotenv import load_dotenv
 
+#this will load all the envars from a .env file located in the project root (api)
+load_dotenv()
 
 class Config(object):
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -23,7 +26,7 @@ class Config(object):
     # OIDC
     SECRET_KEY = os.getenv('SECRET_KEY','')
     OIDC_OPENID_REALM = os.getenv('OIDC_OPENID_REALM','')
-    OIDC_CLIENT_SECRETS = 'client_secrets/client_secrets.json'
+    OIDC_CLIENT_SECRETS = os.getenv('OIDC_SECRETS_FILE','client_secrets/client_secrets.json')
     OIDC_USER_INFO_ENABLED = True
     OIDC_SCOPES = ['openid', 'email', 'profile']
     TESTING = True,
