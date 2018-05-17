@@ -17,6 +17,10 @@ class User(db.Model):
 
     requests = db.relationship('Request', lazy='dynamic')
 
+    APPROVER='names_approver'
+    EDITOR='names_editor'
+    VIEWONLY='names_viewer'
+
     def __init__(self, username, firstname, lastname, sub, iss ):
         self.username = username
         self.firstname = firstname

@@ -52,7 +52,7 @@ class Request(db.Model):
     lastNuansUpdateRole = db.Column('last_nuans_update_role', db.String(10))
 
     #legacy sync tracking
-    nroUpdated = db.Column('nro_updated', db.String(1), default='N')
+    furnished = db.Column('furnished', db.String(1), default='N')
 
     # Relationship
     names = db.relationship('Name', lazy='dynamic')
@@ -61,6 +61,7 @@ class Request(db.Model):
     # user = db.relationship('User')
 
     ##### end of table definitions
+    REQUEST_FURNISHED = 'Y'
 
     # Request States
     STATE_DRAFT = 'DRAFT'
@@ -72,6 +73,7 @@ class Request(db.Model):
     STATE_CONDITIONAL = 'CONDITIONAL'
     VALID_STATES = { STATE_DRAFT, STATE_INPROGRESS, STATE_CANCELLED, STATE_HOLD, STATE_APPROVED, STATE_REJECTED, STATE_CONDITIONAL }
     RELEASE_STATES = { STATE_DRAFT, STATE_CANCELLED, STATE_HOLD, STATE_APPROVED, STATE_REJECTED, STATE_CONDITIONAL }
+    COMPLETED_STATE = { STATE_APPROVED, STATE_REJECTED, STATE_CONDITIONAL }
 
 
     def __init__(self, timestamp, lastUpdate, state, nrNum, userId, adminComment, applicant, phoneNumber, contact, abPartner, skPartner, consentFlag, examComment, expiryDate, requestId, requestTypeCd, priorityCd, tilmaInd, tilmaTransactionId, xproJurisdiction, additionalInfo, natureBusinessInfo, userNote, nuansNum, nuansExpirationDate, assumedNuansNum, assumedNuansName, assumedNuansExpirationDate, lastNuansUpdateRole):
