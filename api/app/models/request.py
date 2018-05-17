@@ -138,6 +138,7 @@ class Request(db.Model):
                 'assumedNuansName' : self.assumedNuansName,
                 'assumedNuansExpirationDate' : self.assumedNuansExpirationDate,
                 'lastNuansUpdateRole' : self.lastNuansUpdateRole,
+                'furnished': self.furnished,
                 'names': [name.json() for name in self.names.all()]}
 
     @classmethod
