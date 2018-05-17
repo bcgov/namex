@@ -13,6 +13,8 @@ from app.utils.util import cors_preflight
 from datetime import datetime
 import logging
 
+from . import temp_hackery
+
 from app.auth_services import AuthError
 from app.models import Request as RequestDAO, RequestsSchema
 
@@ -268,3 +270,20 @@ class Request(Resource):
         logging.log(logging.INFO,"nrd: {}".format(nrd.state))
 
         return jsonify({'message': '{} successfully replaced'.format(nr)}), 202
+
+
+@cors_preflight("GET")
+@api.route('/requests/<string:nr>/analysis/<string:choice>/conflicts', methods=['GET','OPTIONS'])
+class RequestsQueue(Resource):
+    """Acting like a QUEUE this gets the next NR (just the NR number)
+    and assigns it to your auth id
+    """
+
+    # @auth_services.requires_auth
+    # noinspection PyUnusedLocal,PyUnusedLocal
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @oidc.accept_token(require_token=True)
+    def get(*args, **kwargs):
+
+        return jsonify(temp_hackery.hackery.conflict_names) , 200
