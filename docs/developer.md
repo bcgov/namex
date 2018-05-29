@@ -4,7 +4,7 @@
 
 ### 1 Fork in the GitHub
 
-1. Visit https://github.com/bcgov/namex.git
+1. Visit https://github.com/bcgov/namex
 2. Click `Fork` button (top right)
 
 ### 2 Clone fork to your workstation
