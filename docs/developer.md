@@ -1,11 +1,10 @@
 ## Workflow
 
-![Git workflow](img/namex-gitflow.png)
+![Git workflow](img/namexflow.png)
 
 ### 1 Fork in the GitHub
 
-1. Visit https://github.com/bcgov/namex-api
-2. Click `Fork` button (top right)
+1. Visit https://github.com/bcgov/namexClick `Fork` button (top right)
 
 ### 2 Clone fork to your workstation
 
@@ -16,10 +15,9 @@ export working_dir=<your workstations dir>
 export user=<your github account name>
 mkdir -p $working_dir
 cd $working_dir
-git clone https://github.com/$user/namex-api.git
+git clone https://github.com/$user/namex
  
-cd $working_dir/namex-api
-git remote add upstream https://github.com/bcgov/namex-api.git
+cd $working_dir/namex remote add upstream https://github.com/bcgov/namex
  
 # Never push to upstream master
 git remote set-url --push upstream no_push
@@ -33,8 +31,7 @@ git remote -v
 Get your local master up to date:
 
 ```sh
-cd $working_dir/namex-api
-git fetch upstream
+cd $working_dir/namex fetch upstream
 git checkout master
 git rebase upstream/master
 ```
@@ -82,7 +79,7 @@ git push origin myfeature
 
 ### 7 Create a pull request
 
-1. Visit your fork at https://github.com/<username>/namex-app
+1. Visit your fork at https://github.com/<username>/namex
 2. Click the `Compare & Pull Request` button next to your `myfeature` branch.
 
 
