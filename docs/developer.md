@@ -1,10 +1,11 @@
 ## Workflow
 
-![Git workflow](img/namexflow.png)
+![Git workflow](img/namex-gitflow.png)
 
 ### 1 Fork in the GitHub
 
-1. Visit https://github.com/bcgov/namexClick `Fork` button (top right)
+1. Visit https://github.com/bcgov/namex.git
+   Click `Fork` button (top right)
 
 ### 2 Clone fork to your workstation
 
@@ -17,7 +18,8 @@ mkdir -p $working_dir
 cd $working_dir
 git clone https://github.com/$user/namex
  
-cd $working_dir/namex remote add upstream https://github.com/bcgov/namex
+cd $working_dir/namex 
+git remote add upstream https://github.com/bcgov/namex.git
  
 # Never push to upstream master
 git remote set-url --push upstream no_push
@@ -31,7 +33,8 @@ git remote -v
 Get your local master up to date:
 
 ```sh
-cd $working_dir/namex fetch upstream
+cd $working_dir/namex 
+git fetch upstream
 git checkout master
 git rebase upstream/master
 ```
