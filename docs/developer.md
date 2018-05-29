@@ -5,7 +5,7 @@
 ### 1 Fork in the GitHub
 
 1. Visit https://github.com/bcgov/namex.git
-   Click `Fork` button (top right)
+2. Click `Fork` button (top right)
 
 ### 2 Clone fork to your workstation
 
@@ -16,7 +16,7 @@ export working_dir=<your workstations dir>
 export user=<your github account name>
 mkdir -p $working_dir
 cd $working_dir
-git clone https://github.com/$user/namex
+git clone https://github.com/$user/namex.git
  
 cd $working_dir/namex 
 git remote add upstream https://github.com/bcgov/namex.git
