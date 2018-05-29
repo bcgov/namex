@@ -1,0 +1,23 @@
+
+export FLASK_APP="wsgi.py"
+export SECRET="some md5 hash"
+export APP_SETTINGS="dev"
+export DATABASE_URL="postgresql://thor:@localhost/namex"
+export DATABASE_USERNAME=kial
+export DATABASE_PASSWORD="Shadow13slober"
+export DATABASE_NAME="namex"
+export DATABASE_HOST="localhost"
+export DATABASE_PORT="5432"
+
+export SECRET_KEY="dd36ad17-a245-4966-9857-56368a7c6523"
+export OIDC_OPENID_REALM="master"
+export OIDC_SECRETS_FILE="client_secrets/client_secrets.dev.json"
+
+AUTH0_DOMAIN=wolpert.auth0.com
+API_IDENTIFIER=http://namex.bcgov
+
+echo FLASK_APP=$FLASK_APP
+echo SECRET=$SECRET
+echo APP_SETTINGS=$APP_SETTINGS
+echo DATABASE_URL=$DATABASE_URL
+
