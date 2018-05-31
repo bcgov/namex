@@ -131,7 +131,7 @@ class Request(db.Model):
         """
         existing_nr = db.session.query(Request).\
             filter(Request.userId == userObj.id, Request.state == Request.STATE_INPROGRESS).\
-            order_by(Request.timestamp.asc()).\
+            order_by(Request.submittedDate.asc()).\
             one_or_none()
 
         if existing_nr:
