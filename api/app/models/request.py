@@ -139,7 +139,7 @@ class Request(db.Model):
 
         r = db.session.query(Request).\
                 filter(Request.state.in_([Request.STATE_DRAFT])).\
-                order_by(Request.timestamp.asc()).\
+                order_by(Request.submittedDate.asc()).\
                 with_for_update().first()
         # this row is now locked
 
@@ -160,7 +160,6 @@ class Request(db.Model):
         """
         existing_nr = db.session.query(Request).\
             filter(Request.userId == userObj.id, Request.state == Request.STATE_INPROGRESS).\
-            order_by(Request.timestamp.asc()).\
             one_or_none()
 
         return existing_nr
