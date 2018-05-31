@@ -1,10 +1,13 @@
 # Backend namex/api setup
 
-1. Follow instructions from namex/docs/developer.md first
+1. Follow instructions from https://github.com/bcgov/namex/blob/master/docs/developer.md first
 
 2. Install PyCharm
+	- download JetBrains Toolbox
+	- create acount (if student create free account, otherwise start 30 day free trail)
+	- open JetBrains Toolbox and install PyCharm
 
-3. Create new project in PyCharm	
+3. Open new project in PyCharm	
 	- open PyCharm
 	- File > New Project (select api folder from within your local namex)
 
@@ -21,24 +24,18 @@
 	- a banner should have appeared in your project window after setting up your venv asking you to install these
 	- click install
 
-6. Change "config.py"
-	```
-	- change "from dotenv import load_dotenv" to "from dotenv import load_dotenv, find_dotenv"
-	- change "load_dotenv()" to "load_dotenv(find_dotenv())"
-	```
+6. Create postgres database named "namex"
 
-7. Create postgres database named "namex"
-
-8. Get .env file from developer
+7. Get .env file from developer
 	```
 	- change username/password to your username/password in postgres
 	- place .env in api folder (make sure it is named ".env")
 	```
 
-9. Get "client_secrets.dev.json" file from developer
+8. Get "client_secrets.dev.json" file from developer
 	- place in "client_secrets" folder
 
-10. Run wsgi in PyCharm
+9. Run wsgi in PyCharm
 	- select wsgi.py
 	- select wsgi dropdown at top righthand corner of window > edit configurations
 	- select '+' at top left corner > Flask Server
@@ -49,14 +46,14 @@
 		- Python Interpreter = Python 3.6 (venv)
 		```
 
-11. Create database tables
+10. Create database tables
 	- open terminal in PyCharm (view > tool widndows > terminal)
 		```sh
 		python manage.py db upgrade
 		```
 	- list tables in postgres namex database (make sure tables were created)
 
-12. Run api
+11. Run api
 	- open terminal in PyCharm
 		```sh
 		source .env (not needed if direnv working)
