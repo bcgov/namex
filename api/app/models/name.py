@@ -9,6 +9,7 @@ class Name(db.Model):
     name = db.Column(db.String(1024))
     state = db.Column(db.String(15), default='DRAFT')
     choice = db.Column(db.Integer)
+    designation = db.Column(db.String(50), default='DRAFT')
     consumptionDate = db.Column('consumption_date', db.DateTime)
     remoteNameId = db.Column('remote_name_id', db.BigInteger)
 
@@ -24,6 +25,9 @@ class Name(db.Model):
     #     self.remoteNameId = remoteNameId
 
     def json(self):
+        return {"name": self.name, "choice": self.choice, "state": self.state, "consumptionDate": self.consumptionDate }
+
+    def as_dict(self):
         return {"name": self.name, "choice": self.choice, "state": self.state, "consumptionDate": self.consumptionDate }
 
     @classmethod

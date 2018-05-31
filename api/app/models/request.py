@@ -3,10 +3,16 @@
 from app import db, ma
 from app.exceptions import BusinessException
 from sqlalchemy import Sequence
+from sqlalchemy.orm import backref
 from marshmallow import Schema, fields, post_load
-from app.models import Name, NameSchema
+from .nwpta import PartnerNameSystem
+from .user import User
+from .comment import Comment
+from .applicant import Applicant
+from .name import Name, NameSchema
 from datetime import datetime
 import logging
+
 
 # create sequence if not exists nr_seq;
 # noinspection PyPep8Naming
@@ -18,47 +24,40 @@ class Request(db.Model):
 
     # core fields
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    submittedDate = db.Column('submitted_date', db.DateTime, default=datetime.utcnow)
     lastUpdate = db.Column('last_update', db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     state = db.Column(db.String(40), default='DRAFT')
     nrNum = db.Column('nr_num', db.String(10), unique=True)
-    adminComment = db.Column('admin_comment', db.String(1000))
-    applicant = db.Column(db.String(50))
-    phoneNumber = db.Column('phone_number', db.String(30))
-    contact = db.Column(db.String(150))
-    abPartner = db.Column('ab_partner', db.String(4000))
-    skPartner = db.Column('sk_partner', db.String(4000))
-    consentFlag = db.Column('consent_flag', db.String(1))
-    examComment = db.Column('exam_comment', db.String(4000))
-    expiryDate = db.Column('expiry_date', db.DateTime)
-
-    # legacy fields
-    requestId = db.Column('request_id', db.Integer)
     requestTypeCd = db.Column('request_type_cd', db.String(10))
     priorityCd = db.Column('priority_cd', db.String(2))
-    tilmaInd = db.Column('tilma_ind', db.String(1))
-    tilmaTransactionId = db.Column('tilma_transaction_id', db.Integer)
-    xproJurisdiction = db.Column('xpro_jurisdiction', db.String(40))
+    expirationDate = db.Column('expiration_date', db.DateTime)
+    consentFlag = db.Column('consent_flag', db.String(1))
     additionalInfo = db.Column('additional_info', db.String(150))
     natureBusinessInfo = db.Column('nature_business_info', db.String(1000))
-    userNote = db.Column('user_note', db.String(1000))
-
-    #nuans fields
-    nuansNum = db.Column('nuans_num', db.String(20))
-    nuansExpirationDate = db.Column('nuans_expiration_date', db.DateTime)
-    assumedNuansNum = db.Column('assumed_nuans_num', db.String(20))
-    assumedNuansName = db.Column('assumed_nuans_name', db.String(255))
-    assumedNuansExpirationDate = db.Column('assumed_nuans_expiration_date', db.DateTime)
-    lastNuansUpdateRole = db.Column('last_nuans_update_role', db.String(10))
-
+    xproJurisdiction = db.Column('xpro_jurisdiction', db.String(40))
+    submitter_userid = db.Column('submitter_userid', db.Integer, db.ForeignKey('users.id'))
     #legacy sync tracking
     furnished = db.Column('furnished', db.String(1), default='N')
 
-    # Relationship
-    names = db.relationship('Name', lazy='dynamic')
-
+    # parent keys
     userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
-    # user = db.relationship('User')
+
+    # legacy fields
+    requestId = db.Column('request_id', db.Integer)
+    previousRequestId = db.Column('previous_request_id', db.Integer)
+    submitCount = db.Column('submit_count', db.Integer)
+
+    # Relationships - Users
+    active_user = db.relationship('User', backref=backref('active_user', uselist=False), foreign_keys=[userId])
+    submitter = db.relationship('User', backref=backref('submitter', uselist=False), foreign_keys=[submitter_userid])
+    # Relationships - Names
+    names = db.relationship('Name', lazy='dynamic')
+    # Relationships - Applicants
+    applicants = db.relationship('Applicant', lazy='dynamic')
+    # Relationships - Examiner Comments
+    comments = db.relationship('Comment', lazy='dynamic')
+    # Relationships - Examiner Comments
+    partnerNS = db.relationship('PartnerNameSystem', lazy='dynamic')
 
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
@@ -76,70 +75,31 @@ class Request(db.Model):
     COMPLETED_STATE = { STATE_APPROVED, STATE_REJECTED, STATE_CONDITIONAL }
 
 
-    def __init__(self, timestamp, lastUpdate, state, nrNum, userId, adminComment, applicant, phoneNumber, contact, abPartner, skPartner, consentFlag, examComment, expiryDate, requestId, requestTypeCd, priorityCd, tilmaInd, tilmaTransactionId, xproJurisdiction, additionalInfo, natureBusinessInfo, userNote, nuansNum, nuansExpirationDate, assumedNuansNum, assumedNuansName, assumedNuansExpirationDate, lastNuansUpdateRole):
-        self.timestamp = timestamp
-        self.lastUpdate = lastUpdate
-        self.state = state
-        self.nrNum = nrNum
-        self.adminComment = adminComment
-        self.applicant = applicant
-        self.phoneNumber = phoneNumber
-        self.contact = contact
-        self.abPartner = abPartner
-        self.skPartner = skPartner
-        self.consentFlag = consentFlag
-        self.examComment = examComment
-        self.expiryDate = expiryDate
-        self.requestId = requestId
-        self.requestTypeCd = requestTypeCd
-        self.priorityCd = priorityCd
-        self.tilmaInd = tilmaInd
-        self.tilmaTransactionId = tilmaTransactionId
-        self.xproJurisdiction = xproJurisdiction
-        self.additionalInfo = additionalInfo
-        self.natureBusinessInfo = natureBusinessInfo
-        self.userNote = userNote
-        self.nuansNum = nuansNum
-        self.nuansExpirationDate = nuansExpirationDate
-        self.assumedNuansNum = assumedNuansNum
-        self.assumedNuansName = assumedNuansName
-        self.assumedNuansExpirationDate = assumedNuansExpirationDate
-        self.lastNuansUpdateRole = lastNuansUpdateRole
-        self.userId = userId
+    def __init__(self, *args, **kwargs):
+        pass
 
     def json(self):
+
         return {'id' : self.id,
-                'timestamp' : self.timestamp,
+                'submittedDate' : self.submittedDate,
                 'lastUpdate' : self.lastUpdate,
-                'userId' : self.userId,
+                'userId' : '' if (self.active_user is None) else self.active_user.username,
+                'submitter_userid' : '' if (self.submitter is None) else self.submitter.username,
                 'state' : self.state,
                 'nrNum' : self.nrNum,
-                'adminComment' : self.adminComment,
-                'applicant' : self.applicant,
-                'phoneNumber' : self.phoneNumber,
-                'contact' : self.contact,
-                'abPartner' : self.abPartner,
-                'skPartner' : self.skPartner,
                 'consentFlag' : self.consentFlag,
-                'examComment' : self.examComment,
-                'expiryDate' : self.expiryDate,
-                'requestId' : self.requestId,
+                'expirationDate' : self.expirationDate,
                 'requestTypeCd' : self.requestTypeCd,
                 'priorityCd' : self.priorityCd,
-                'tilmaInd' : self.tilmaInd,
-                'tilmaTransactionId' : self.tilmaTransactionId,
                 'xproJurisdiction' : self.xproJurisdiction,
                 'additionalInfo' : self.additionalInfo,
                 'natureBusinessInfo' : self.natureBusinessInfo,
-                'userNote' : self.userNote,
-                'nuansNum' : self.nuansNum,
-                'nuansExpirationDate' : self.nuansExpirationDate,
-                'assumedNuansNum' : self.assumedNuansNum,
-                'assumedNuansName' : self.assumedNuansName,
-                'assumedNuansExpirationDate' : self.assumedNuansExpirationDate,
-                'lastNuansUpdateRole' : self.lastNuansUpdateRole,
-                'furnished': self.furnished,
-                'names': [name.json() for name in self.names.all()]}
+                'furnished': self.furnished if (self.furnished is not None) else 'N',
+                'names': [name.as_dict() for name in self.names.all()],
+                'applicants': [applicant.as_dict() for applicant in self.applicants.all()],
+                'comments': [comment.as_dict() for comment in self.comments.all()],
+                'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
+                }
 
     @classmethod
     def find_by_nr(cls, nr):

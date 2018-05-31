@@ -5,6 +5,7 @@ from app import db
 from app.exceptions import BusinessException
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
+from app.models.request import Request
 import bz2
 
 
