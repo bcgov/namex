@@ -56,7 +56,7 @@ class RequestsQueue(Resource):
             nr = RequestDAO.get_queued_oldest(user)
         except exc.SQLAlchemyError as err:
             #TODO should put some span trace on the error message
-            logging.log(logging.ERROR, 'error in getting next NR. {}'.format(err))
+
             return {"message": "An error occurred getting the next Name Request."}, 500
         except AttributeError as err:
             return {"message": "There are no Name Requests to work on."}, 404
@@ -286,4 +286,24 @@ class RequestsQueue(Resource):
     @oidc.accept_token(require_token=True)
     def get(*args, **kwargs):
 
-        return jsonify(temp_hackery.hackery.conflict_names) , 200
+        highlighting = dict(mergedicts(temp_hackery.hackery.conflict_names['highlighting'], temp_hackery.hackery.registry['highlighting']))
+        names = temp_hackery.hackery.conflict_names['response']['docs'] + temp_hackery.hackery.registry['response']['docs']
+
+        conflicts = {'names':names, 'highlighting':highlighting}
+
+        return jsonify(conflicts), 200
+
+def mergedicts(dict1, dict2):
+    for k in set(dict1.keys()).union(dict2.keys()):
+        if k in dict1 and k in dict2:
+            if isinstance(dict1[k], dict) and isinstance(dict2[k], dict):
+                yield (k, dict(mergedicts(dict1[k], dict2[k])))
+            else:
+                # If one of the values is not a dict, you can't continue merging it.
+                # Value from second dict overrides one in first and we move on.
+                yield (k, dict2[k])
+                # Alternatively, replace this with exception raiser to alert you of value conflicts
+        elif k in dict1:
+            yield (k, dict1[k])
+        else:
+            yield (k, dict2[k])

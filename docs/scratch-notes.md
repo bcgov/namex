@@ -17,4 +17,6 @@ oc port-forward postgresql-2-d7blw 15432:5432
 
 ## psql <dbname> <username> --host=<hotname> --port=<port>
 psql namex <username> --host=127.0.0.1 --port=15432
+
+SET search_path TO bc_registries_names, public ;
 ```

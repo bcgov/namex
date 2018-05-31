@@ -129,3 +129,94 @@ class hackery():
       "name":["2ND <b>CONSENT</b> <b>EXPIRY</b> <b>TEST</b> B INC."]},
     "574748":{
       "name":["<b>A</b> STAFF <b>THIRD</b> SOCIETY INCORPORATION"]}}}
+
+
+    registry = {
+        "responseHeader": {
+            "status": 0,
+            "QTime": 14,
+            "params": {
+                "q": "name:  THIRD  CONSENT  EXPIRY  TEST  A  INC.",
+                "defType": "dismax",
+                "hl.simple.post": "</b>",
+                "hl": "on",
+                "indent": "on",
+                "qf": "name",
+                "fl": "corp_num, name, state_typ_cd,score",
+                "pf": "name^100",
+                "hl.fl": "name",
+                "wt": "json",
+                "hl.simple.pre": "<b>"}},
+        "response": {"numFound": 18223, "start": 0, "maxScore": 16.591677, "docs": [
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "LLC0000405",
+                "name": "MIKE'S THIRD TEST LLC",
+                "score": 16.591677},
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "LLC0000406",
+                "name": "LINDA'S THIRD TEST LLC",
+                "score": 16.591677},
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "A0053181",
+                "name": "EXPIRY CORPORATION",
+                "score": 16.519533},
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "FM1002871",
+                "name": "TESTING EXPIRY DATE",
+                "score": 16.499966},
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "0874434",
+                "name": "EXPIRY TESTS AB & SK LIMITED",
+                "score": 16.499966},
+            {
+                "state_typ_cd": "D1F",
+                "corp_num": "A0054068",
+                "name": "REINSTATEMENT NR EXPIRY TESTING INC.",
+                "score": 16.499966},
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "FM1000204",
+                "name": "TEST OF CONSENT AGAIN",
+                "score": 16.226864},
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "FM1000205",
+                "name": "TEST OF CONSENT AGAIN",
+                "score": 16.226864},
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "FM1004759",
+                "name": "TEST PROP WITH CONSENT",
+                "score": 16.226864},
+            {
+                "state_typ_cd": "ACT",
+                "corp_num": "FM1000206",
+                "name": "TEST OF CONSENT AGAIN",
+                "score": 16.226864}]
+                     },
+        "highlighting": {
+            "LLC0000405": {
+                "name": ["MIKE'S <b>THIRD</b> <b>TEST</b> LLC"]},
+            "LLC0000406": {
+                "name": ["LINDA'S <b>THIRD</b> <b>TEST</b> LLC"]},
+            "A0053181": {
+                "name": ["<b>EXPIRY</b> CORPORATION"]},
+            "FM1002871": {
+                "name": ["<b>TESTING</b> <b>EXPIRY</b> DATE"]},
+            "0874434": {
+                "name": ["<b>EXPIRY</b> <b>TESTS</b> AB & SK LIMITED"]},
+            "A0054068": {
+                "name": ["REINSTATEMENT NR <b>EXPIRY</b> <b>TESTING</b> INC."]},
+            "FM1000204": {
+                "name": ["<b>TEST</b> OF <b>CONSENT</b> AGAIN"]},
+            "FM1000205": {
+                "name": ["<b>TEST</b> OF <b>CONSENT</b> AGAIN"]},
+            "FM1004759": {
+                "name": ["<b>TEST</b> PROP WITH <b>CONSENT</b>"]},
+            "FM1000206": {
+                "name": ["<b>TEST</b> OF <b>CONSENT</b> AGAIN"]}}}

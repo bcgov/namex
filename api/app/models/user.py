@@ -15,8 +15,6 @@ class User(db.Model):
     iss = db.Column(db.String(1024))
     creationDate = db.Column(db.DateTime, default=datetime.utcnow)
 
-    requests = db.relationship('Request', lazy='dynamic')
-
     APPROVER='names_approver'
     EDITOR='names_editor'
     VIEWONLY='names_viewer'
@@ -86,11 +84,12 @@ class User(db.Model):
     #                 sub=data['sub'],
     #                 iss=data['iss'])
 
-class KeycloakUserSchema(Schema):
-    id = fields.Int(dump_only=True)
-    username = fields.String(attribute="username")
-    firstname = fields.String(attribute="given_name")
-    lastname = fields.String(attribute="family_name")
-    sub = fields.String(attribute="sub")
-    iss = fields.String(attribute="iss")
-    creationDate = fields.DateTime(dump_only=True)
+# class KeycloakUserSchema(Schema):
+#     id = fields.Int(dump_only=True)
+#     username = fields.String(attribute="username")
+#     firstname = fields.String(attribute="given_name")
+#     lastname = fields.String(attribute="family_name")
+#     sub = fields.String(attribute="sub")
+#     iss = fields.String(attribute="iss")
+#     creationDate = fields.DateTime(dump_only=True)
+#
