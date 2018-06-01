@@ -53,17 +53,6 @@ class Applicant(db.Model):
             'countryTypeCd': self.countryTypeCd
         }
 
-    # def __init__(self, *args, **kwargs):
-    #     self.name = name
-    #     self.state = state
-    #     self.choice = choice
-    #     self.nrId = nrId
-    #     self.consumptionDate = consumptionDate
-    #     self.remoteNameId = remoteNameId
-
-    # def json(self):
-    #     return {"name": self.name, "choice": self.choice, "state": self.state, "consumptionDate": self.consumptionDate }
-    #
     # @classmethod
     # def find_by_name(cls, name):
     #     return cls.query.filter_by(name=name).first()

@@ -16,17 +16,6 @@ class Name(db.Model):
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
     # nameRequest = db.relationship('Request')
 
-    # def __init__(self, *args, **kwargs):
-    #     self.name = name
-    #     self.state = state
-    #     self.choice = choice
-    #     self.nrId = nrId
-    #     self.consumptionDate = consumptionDate
-    #     self.remoteNameId = remoteNameId
-
-    def json(self):
-        return {"name": self.name, "choice": self.choice, "state": self.state, "consumptionDate": self.consumptionDate }
-
     def as_dict(self):
         return {"name": self.name, "choice": self.choice, "state": self.state, "consumptionDate": self.consumptionDate }
 
