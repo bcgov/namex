@@ -95,8 +95,9 @@ class Request(db.Model):
                 'additionalInfo' : self.additionalInfo,
                 'natureBusinessInfo' : self.natureBusinessInfo,
                 'furnished': self.furnished if (self.furnished is not None) else 'N',
+                'submitCount': self.submitCount,
                 'names': [name.as_dict() for name in self.names.all()],
-                'applicants': [applicant.as_dict() for applicant in self.applicants.all()],
+                'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
                 'comments': [comment.as_dict() for comment in self.comments.all()],
                 'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
                 }
@@ -157,6 +158,7 @@ class Request(db.Model):
         """Gets the Next NR# from the database
            where the STATUS == INPROGRESS
            and assigned to the user
+           this assumes that a user can ONLY EVER have 1 Request in progress at a time.
         """
         existing_nr = db.session.query(Request).\
             filter(Request.userId == userObj.id, Request.state == Request.STATE_INPROGRESS).\

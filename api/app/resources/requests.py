@@ -212,6 +212,10 @@ class Request(Resource):
     @oidc.accept_token(require_token=True)
     def put(nr, *args, **kwargs):
 
+         # Stubbed out for the UX folks to test and send anything from the UI.
+        pass
+        return jsonify({'message': '{} successfully replaced'.format(nr)}), 202
+
         # do the cheap check first before the more expensive ones
         json_input = request.get_json()
         if not json_input:
