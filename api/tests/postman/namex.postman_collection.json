@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b1aeffa3-3364-4301-beb1-bbda25e51f0f",
+		"_postman_id": "8877f537-fcd2-4b5a-b4d4-c088e19a2607",
 		"name": "namex",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -8,7 +8,7 @@
 	"item": [
 		{
 			"name": "setup",
-			"description": "",
+			"description": null,
 			"item": [
 				{
 					"name": "Install Postman BDD Copy",
@@ -225,7 +225,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "authurl = pm.environment.get(\"authurl\");\nrealm = pm.environment.get(\"realm\");\nclientid = pm.environment.get(\"clientid\");\nuserid = pm.environment.get(\"userid\");\npassword = pm.environment.get(\"password\");\nclient_secret = pm.environment.get(\"client_secret\");\n\nconst echoPostRequest = {\n  url: authurl +'/auth/realms/' +realm + '/protocol/openid-connect/token',\n  method: 'POST',\n  header: 'Content-Type:application/x-www-form-urlencoded',\n  body: {\n    mode: 'raw',\n    raw: 'grant_type=password&client_id=' \n         +clientid \n         +'&username=' \n         +userid \n         +'&password='\n         +password\n         +'&client_secret='\n         +client_secret\n  }\n};\npm.sendRequest(echoPostRequest, function (err, res) {\n    var jsonData = res.json();\n    pm.environment.set(\"token\", jsonData.access_token);\n    pm.environment.set(\"refresh_token\", jsonData.refresh_token);\n    console.log(err ? err : res.json());\n});"
+							"raw": "authurl = pm.environment.get(\"authurl\");\nrealm = pm.environment.get(\"realm\");\nclientid = pm.environment.get(\"clientid\");\nuserid = pm.environment.get(\"userid\");\npassword = pm.environment.get(\"password\");\nclient_secret = pm.environment.get(\"client_secret\");\n\nconst echoPostRequest = {\n  url: authurl +'/auth/realms/' +realm + '/protocol/openid-connect/token',\n  method: 'POST',\n  header: 'Content-Type:application/x-www-form-urlencoded',\n  body: {\n    mode: 'raw',\n    raw: 'grant_type=password&client_id=' \n         +clientid \n         +'&username=' \n         +userid \n         +'&password='\n         +password\n         +'&client_secret='\n         +client_secret\n  }\n};\npm.sendRequest(echoPostRequest, function (err, res) {\n    var jsonData = res.json();\n    if (jsonData.hasOwnProperty('access_token')) {\n    \tpm.environment.set(\"token\", jsonData.access_token);\n\t    pm.environment.set(\"refresh_token\", jsonData.refresh_token);\n\t    console.log(err ? err : res.json());\n\t} else {\n\t    pm.environment.set(\"token\", 0);\n\t    pm.environment.set(\"refresh_token\", 0);\n\t    pm.environment.set(\"token_expires\", 0);\n\t    pm.environment.set(\"refresh_token_expires\", 0);\n\t}\n});"
 						},
 						"url": {
 							"raw": "https://postman-echo.com/post",
@@ -245,7 +245,7 @@
 		},
 		{
 			"name": "ops",
-			"description": "",
+			"description": null,
 			"item": [
 				{
 					"name": "healthz",
@@ -277,7 +277,10 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/api/v1/healthz",
 							"host": [
@@ -322,7 +325,10 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/api/v1/readyz",
 							"host": [
@@ -372,7 +378,10 @@
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/api/v1/echo",
 							"host": [
@@ -391,7 +400,7 @@
 		},
 		{
 			"name": "authenticate",
-			"description": "",
+			"description": null,
 			"item": [
 				{
 					"name": "authenticate",
@@ -423,10 +432,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "grant_type=password&client_id={{clientid}}&username={{userid}}&password={{password}}&client_secret={{client_secret}}"
+							"raw": "grant_type=password&client_id={{clientid}}&username={{userid}}&password=WhatEver1&client_secret={{client_secret}}"
 						},
 						"url": {
-							"raw": "{{authurl}}/auth/realms/{{realm}}/protocol/openid-connect/token",
+							"raw": "{{authurl}}/auth/realms/{{realm}}/protocol/openid-connect/token?Content-Type=application/x-www-form-urlencoded",
 							"host": [
 								"{{authurl}}"
 							],
@@ -437,6 +446,12 @@
 								"protocol",
 								"openid-connect",
 								"token"
+							],
+							"query": [
+								{
+									"key": "Content-Type",
+									"value": "application/x-www-form-urlencoded"
+								}
 							]
 						}
 					},
@@ -491,7 +506,7 @@
 		},
 		{
 			"name": "analysis",
-			"description": "",
+			"description": null,
 			"item": [
 				{
 					"name": "conflicts",
@@ -515,7 +530,10 @@
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/api/v1/requests/NR00000001/analysis/1/conflicts",
 							"host": [
@@ -537,12 +555,143 @@
 			]
 		},
 		{
+			"name": "GetNext testing",
+			"description": "",
+			"item": [
+				{
+					"name": "requests/queues/@me/oldest getnext_test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f4c66699-a1b6-4384-a237-ba186c5b8037",
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"if (typeof jsonData.nameRequest !== 'undefined' || jsonData.nameRequest !== null) {",
+									"   pm.environment.set(\"queued_nr\", jsonData.nameRequest);",
+									"}else{",
+									"   pm.environment.unset(\"queued_nr\");    ",
+									"}",
+									"",
+									"//tests what type of authorization the userid has",
+									"var userid = pm.environment.get(\"userid\");",
+									"function getnext_auth_test () {",
+									"    if (userid == \"postman-examiner\" || userid == \"postman-manager\") {",
+									"        return 'authorized';",
+									"    } else if (userid == \"postman-support\") {",
+									"        return 'forbidden';",
+									"    } else {",
+									"        return 'unauthorized';",
+									"    }",
+									"}",
+									"",
+									"//test for correct status code",
+									"if (getnext_auth_test() == 'authorized') {",
+									"    pm.test(\"Status code is 200\", function () {",
+									"        pm.response.to.have.status(200);",
+									"    });",
+									"} else if (getnext_auth_test() == 'forbidden') {",
+									"    pm.test(\"Status code is 403\", function () {",
+									"        pm.response.to.have.status(403);",
+									"    });",
+									"} else {",
+									"    pm.test(\"Status code is 401\", function () {",
+									"        pm.response.to.have.status(401);    ",
+									"    });",
+									"}",
+									"",
+									"//test userid -- check if authorized to get next from queue",
+									"if (getnext_auth_test() == 'authorized') {",
+									"    pm.test(\"Authorized for GetNext\", function () {",
+									"        if (userid !== \"postman-examiner\") {",
+									"            pm.expect(userid).to.eql(\"postman-manager\");",
+									"        }",
+									"    });",
+									"} else if (getnext_auth_test() == 'forbidden') {",
+									"    pm.test(\"Not Authorized for GetNext\", function () {",
+									"        pm.expect(userid).to.eql(\"postman-support\");",
+									"    });",
+									"    pm.test(\"Correct error message\", function () {",
+									"        pm.expect(jsonData.message).to.eql(\"Error: You do not have access to the Name Request queue.\")",
+									"    });",
+									"} else {",
+									"    pm.test(\"Unauthorized user\", function () {",
+									"        pm.expect(jsonData.error).to.eql(\"invalid_token\");",
+									"        pm.expect(jsonData.error_description).to.eql(\"Token required but invalid\");",
+									"    });",
+									"}",
+									"//set user types in users -- add new ones to this array to test more",
+									"//run GetNext testing folder from runner -- set iterations to length of users array to test all user types",
+									"var users = [\"jeff\", \"postman-examiner\",\"postman-manager\",\"postman-support\"];",
+									"pm.environment.unset(\"token\");",
+									"var i;",
+									"for (i=0;i<users.length;i++) {",
+									"    if (userid == users[i]) {",
+									"        if (i < users.length-1) {",
+									"            pm.environment.set(\"userid\", users[i+1]);",
+									"        } else {",
+									"            pm.environment.set(\"userid\", users[0]);",
+									"        }",
+									"        break;",
+									"    }",
+									"}"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "0c5c23e3-8dc8-4c37-8e7a-d8bc2ce49073",
+								"type": "text/javascript",
+								"exec": [
+									"eval(environment.auth_script);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/queues/@me/oldest",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"queues",
+								"@me",
+								"oldest"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "echo Copy",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
-						"id": "69d4a6ca-480e-48e1-b2f2-2dc57556c21e",
+						"id": "10b16c87-7d38-4adc-bae1-152d4d25b74c",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Response time is less than 200ms\", function () {",
@@ -559,6 +708,8 @@
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData.message).to.eql('api is ready');",
 							"});",
+							"",
+							"pm.environment.set(\"userid\", pm.response.json().username);",
 							"",
 							"console.log('expired:'+(environment.token_expires-Date.now()));"
 						]
@@ -585,7 +736,10 @@
 						"value": "Bearer {{token}}"
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{url}}/api/v1/echo",
 					"host": [
@@ -606,15 +760,11 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "b8a40ff8-2595-44e3-afb6-843b0e676cba",
+						"id": "c95a9ccd-648e-4f33-b227-ef2921b5586d",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Response time is less than 200ms\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(200);",
-							"});",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
 							"});",
 							"",
 							"var jsonData = pm.response.json();",
@@ -623,7 +773,54 @@
 							"}else{",
 							"   pm.environment.unset(\"queued_nr\");    ",
 							"}",
-							""
+							"",
+							"//tests what type of authorization the userid has",
+							"var userid = pm.environment.get(\"userid\");",
+							"function getnext_auth_test () {",
+							"    if (userid == \"postman-examiner\" || userid == \"postman-manager\") {",
+							"        return 'authorized';",
+							"    } else if (userid == \"postman-support\") {",
+							"        return 'forbidden';",
+							"    } else {",
+							"        return 'unauthorized';",
+							"    }",
+							"}",
+							"",
+							"//test for correct status code",
+							"if (getnext_auth_test() == 'authorized') {",
+							"    pm.test(\"Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"} else if (getnext_auth_test() == 'forbidden') {",
+							"    pm.test(\"Status code is 403\", function () {",
+							"        pm.response.to.have.status(403);",
+							"    });",
+							"} else {",
+							"    pm.test(\"Status code is 401\", function () {",
+							"        pm.response.to.have.status(401);    ",
+							"    });",
+							"}",
+							"",
+							"//test userid -- check if authorized to get next from queue",
+							"if (getnext_auth_test() == 'authorized') {",
+							"    pm.test(\"Authorized for GetNext\", function () {",
+							"        if (userid !== \"postman-examiner\") {",
+							"            pm.expect(userid).to.eql(\"postman-manager\");",
+							"        }",
+							"    });",
+							"} else if (getnext_auth_test() == 'forbidden') {",
+							"    pm.test(\"Not Authorized for GetNext\", function () {",
+							"        pm.expect(userid).to.eql(\"postman-support\");",
+							"    });",
+							"    pm.test(\"Correct error message\", function () {",
+							"        pm.expect(jsonData.message).to.eql(\"Error: You do not have access to the Name Request queue.\")",
+							"    });",
+							"} else {",
+							"    pm.test(\"Unauthorized user\", function () {",
+							"        pm.expect(jsonData.error).to.eql(\"invalid_token\");",
+							"        pm.expect(jsonData.error_description).to.eql(\"Token required but invalid\");",
+							"    });",
+							"}"
 						]
 					}
 				},
@@ -646,7 +843,10 @@
 						"value": "Bearer {{token}}"
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{url}}/api/v1/requests/queues/@me/oldest",
 					"host": [
@@ -699,7 +899,10 @@
 						"value": "Bearer {{token}}"
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{url}}/api/v1/requests/queues/@me/oldest",
 					"host": [
@@ -740,7 +943,10 @@
 						"value": "Bearer {{token}}"
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{url}}/api/v1/requests/NR00000001",
 					"host": [
@@ -758,6 +964,21 @@
 		},
 		{
 			"name": "requests/NR00000001",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6b7a2483-df80-457a-ac0d-a5ead08019b3",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"State Patched\", function() {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.equal(\"Request:NR00000001 - patched\");",
+							"});"
+						]
+					}
+				}
+			],
 			"request": {
 				"method": "PATCH",
 				"header": [
