@@ -277,11 +277,20 @@ class Request(Resource):
 
 
 @cors_preflight("GET")
-@api.route('/requests/<string:nr>/analysis/<string:choice>/conflicts', methods=['GET','OPTIONS'])
-class RequestsQueue(Resource):
+@api.route('/requests/<string:nr>/analysis/<int:choice>/conflicts', methods=['GET','OPTIONS'])
+class RequestsAnalysis(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
     and assigns it to your auth id
+
+        :param nr (str): NameRequest Number in the format of 'NR 000000000'
+        :param choice (int): name choice number (1..3)
+        :param args: start: number of hits to start from, default is 0
+        :param args: names_per_page: number of names to return per page, default is 50
+        :param kwargs: __futures__
+        :return: 200 - success; 40X for errors
     """
+    START = 0
+    PER_PAGE = 50
 
     # @auth_services.requires_auth
     # noinspection PyUnusedLocal,PyUnusedLocal
@@ -290,10 +299,14 @@ class RequestsQueue(Resource):
     @oidc.accept_token(require_token=True)
     def get(*args, **kwargs):
 
-        highlighting = dict(mergedicts(temp_hackery.hackery.conflict_names['highlighting'], temp_hackery.hackery.registry['highlighting']))
-        names = temp_hackery.hackery.conflict_names['response']['docs'] + temp_hackery.hackery.registry['response']['docs']
+        start = request.args.get('start', RequestsAnalysis.START)
+        names_per_page = request.args.get('names_per_page',RequestsAnalysis.PER_PAGE)
 
-        conflicts = {'names':names, 'highlighting':highlighting}
+
+
+        conflicts = {"response": {"numFound": 13606, "start": 0, "maxScore": 17.179962},
+                     'names':temp_hackery.hackery.conflict_names['response']['docs'],
+                     'highlighting':temp_hackery.hackery.conflict_names['highlighting']}
 
         return jsonify(conflicts), 200
 
