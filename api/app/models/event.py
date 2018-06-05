@@ -5,7 +5,8 @@ from app import db
 from app.exceptions import BusinessException
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
-from app.models.request import Request
+from .request import Request
+from sqlalchemy.orm import backref
 import bz2
 
 
@@ -19,9 +20,9 @@ class Event(db.Model):
 
     # relationships
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
-    request = db.relationship('Request')
+    request = db.relationship('Request', backref=backref('request_events', uselist=False), foreign_keys=[nrId])
     userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User')
+    user = db.relationship('User', backref=backref('user_events', uselist=False), foreign_keys=[userId])
 
     def __init__(self, action, jsonData):
         self.action = action
