@@ -1,7 +1,6 @@
 from app import db, ma
 from datetime import datetime
 from sqlalchemy.orm import backref
-from app.models.user import User
 
 
 class State(db.Model):
