@@ -7,8 +7,9 @@ from flask_restplus import Resource, fields, cors
 from marshmallow import ValidationError
 from app import api, oidc
 from app.auth_services import required_scope, AuthError
-from app.models import User
+from app.models import User, State
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import SQLAlchemyError
 from app.utils.util import cors_preflight
 from datetime import datetime
 import logging
@@ -49,14 +50,20 @@ class RequestsQueue(Resource):
     @oidc.accept_token(require_token=True)
     def get():
         if not (required_scope(User.EDITOR) or required_scope(User.APPROVER)):
-            return jsonify({'message':"Error: You do not have access to the Name Request queue."}), 403
+            return {"message": "Error: You do not have access to the Name Request queue."}, 403
+
         try:
             user = User.find_by_jwtToken(g.oidc_token_info)
             if not user:
                 user = User.create_from_jwtToken(g.oidc_token_info)
+
+            logging.log(logging.ERROR, 'got here')
             nr = RequestDAO.get_queued_oldest(user)
-        except exc.SQLAlchemyError as err:
+            logging.log(logging.ERROR, 'and x here')
+
+        except SQLAlchemyError as err:
             #TODO should put some span trace on the error message
+            logging.log(logging.ERROR, 'maybe here')
 
             return {"message": "An error occurred getting the next Name Request."}, 500
         except AttributeError as err:
@@ -113,7 +120,7 @@ class Request(Resource):
         nrd = RequestDAO.find_by_nr(nr)
         # even if not found we still return a 204, which is expected spec behaviour
         if nrd:
-            nrd.state = RequestDAO.STATE_CANCELLED
+            nrd.stateCd = State.CANCELLED
             nrd.save_to_db()
 
         return '', 204
@@ -149,7 +156,7 @@ class Request(Resource):
         if not state:
             return jsonify({"message": "state not set"}), 406
 
-        if state not in RequestDAO.VALID_STATES:
+        if state not in State.VALID_STATES:
             return jsonify({"message": "not a valid state"}), 406
 
         #check user scopes
@@ -160,9 +167,9 @@ class Request(Resource):
             }, 403)
 
 
-        if (state in (RequestDAO.STATE_APPROVED,
-                     RequestDAO.STATE_REJECTED,
-                     RequestDAO.STATE_CONDITIONAL))\
+        if (state in (State.APPROVED,
+                     State.REJECTED,
+                     State.CONDITIONAL))\
                 and not required_scope(User.APPROVER):
             return jsonify({"message": "Only Names Examiners can set state: {}".format(state)}), 428
 
@@ -176,27 +183,27 @@ class Request(Resource):
                 user = User.create_from_jwtToken(g.oidc_token_info)
 
             #NR is in a final state, but maybe the user wants to pull it back for corrections
-            if nrd.state in RequestDAO.COMPLETED_STATE:
+            if nrd.stateCd in State.COMPLETED_STATE:
                 if not required_scope(User.APPROVER):
                     return jsonify({"message": "Only Names Examiners can alter completed Requests"}), 401
 
                 if nrd.furnished == RequestDAO.REQUEST_FURNISHED:
                     return jsonify({"message": "Request has already been furnished and cannot be altered"}), 409
 
-                if state != RequestDAO.STATE_INPROGRESS:
+                if state != State.INPROGRESS:
                     return jsonify({"message": "Completed unfurnished Requests can only be set to an INPROGRESS state"
                                     }), 400
 
-            elif state in RequestDAO.RELEASE_STATES:
-                if nrd.userId != user.id or nrd.state != RequestDAO.STATE_INPROGRESS:
+            elif state in State.RELEASE_STATES:
+                if nrd.userId != user.id or nrd.stateCd != State.INPROGRESS:
                     return jsonify({"message": "The Request must be INPROGRESS and assigned to you before you can change it."}), 401
 
             existing_nr = RequestDAO.get_inprogress(user)
             if existing_nr:
-                existing_nr.state = RequestDAO.STATE_HOLD
+                existing_nr.stateCd = State.HOLD
                 existing_nr.save_to_db()
 
-            nrd.state = state
+            nrd.stateCd = state
             nrd.userId = user.id
             nrd.save_to_db()
         except NoResultFound as nrf:
@@ -233,11 +240,11 @@ class Request(Resource):
 
 
 
-        if not user or nrd.state != RequestDAO.STATE_INPROGRESS or nrd.userId != user.id:
+        if not user or nrd.stateCd != State.INPROGRESS or nrd.userId != user.id:
             return jsonify({"message": "The Request must be INPROGRESS and assigned to you before you can change it."}), 401
 
 
-        nrd.state = in_nr['state']
+        nrd.stateCd = in_nr['state']
         nrd.adminComment = in_nr['adminComment']
         nrd.applicant = in_nr['applicant']
         nrd.phoneNumber = in_nr['phoneNumber']
