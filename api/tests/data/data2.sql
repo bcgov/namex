@@ -1,6 +1,6 @@
 
 insert into requests
-(id,last_update,state,nr_num,consent_flag,request_id,request_type_cd,priority_cd,xpro_jurisdiction,additional_info,
+(id,last_update,state_cd,nr_num,consent_flag,request_id,request_type_cd,priority_cd,xpro_jurisdiction,additional_info,
 nature_business_info,user_id,furnished,expiration_date,previous_request_id,submit_count,submitted_date,submitter_userid)
 values
 (nextval('requests_id_seq'), '2018-04-02 20:09:03.626463', 'DRAFT', 'NR00000022', null, null, 'CR', 'Y', null, null,

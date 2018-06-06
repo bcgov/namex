@@ -8,4 +8,4 @@ from .nwpta import PartnerNameSystem
 from .name import Name, NameSchema
 from .request import Request, RequestsSchema
 from .user import User
-
+from .state import State

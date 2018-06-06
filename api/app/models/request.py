@@ -10,6 +10,7 @@ from .user import User
 from .comment import Comment
 from .applicant import Applicant
 from .name import Name, NameSchema
+from .state import State
 from datetime import datetime
 import logging
 
@@ -26,7 +27,7 @@ class Request(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submittedDate = db.Column('submitted_date', db.DateTime, default=datetime.utcnow)
     lastUpdate = db.Column('last_update', db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    state = db.Column(db.String(40), default='DRAFT')
+
     nrNum = db.Column('nr_num', db.String(10), unique=True)
     requestTypeCd = db.Column('request_type_cd', db.String(10))
     priorityCd = db.Column('priority_cd', db.String(2))
@@ -47,8 +48,10 @@ class Request(db.Model):
     previousRequestId = db.Column('previous_request_id', db.Integer)
     submitCount = db.Column('submit_count', db.Integer)
 
+    # Relationship State
+    stateCd = db.Column('state_cd', db.String(40), db.ForeignKey('states.cd'))
     # Relationships - Users
-    active_user = db.relationship('User', backref=backref('active_user', uselist=False), foreign_keys=[userId])
+    activeUser = db.relationship('User', backref=backref('active_user', uselist=False), foreign_keys=[userId])
     submitter = db.relationship('User', backref=backref('submitter', uselist=False), foreign_keys=[submitter_userid])
     # Relationships - Names
     names = db.relationship('Name', lazy='dynamic')
@@ -62,17 +65,6 @@ class Request(db.Model):
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
 
-    # Request States
-    STATE_DRAFT = 'DRAFT'
-    STATE_INPROGRESS ='INPROGRESS'
-    STATE_CANCELLED = 'CANCELLED'
-    STATE_HOLD = 'HOLD'
-    STATE_APPROVED = 'APPROVED'
-    STATE_REJECTED = 'REJECTED'
-    STATE_CONDITIONAL = 'CONDITIONAL'
-    VALID_STATES = { STATE_DRAFT, STATE_INPROGRESS, STATE_CANCELLED, STATE_HOLD, STATE_APPROVED, STATE_REJECTED, STATE_CONDITIONAL }
-    RELEASE_STATES = { STATE_DRAFT, STATE_CANCELLED, STATE_HOLD, STATE_APPROVED, STATE_REJECTED, STATE_CONDITIONAL }
-    COMPLETED_STATE = { STATE_APPROVED, STATE_REJECTED, STATE_CONDITIONAL }
 
 
     def __init__(self, *args, **kwargs):
@@ -83,9 +75,9 @@ class Request(db.Model):
         return {'id' : self.id,
                 'submittedDate' : self.submittedDate,
                 'lastUpdate' : self.lastUpdate,
-                'userId' : '' if (self.active_user is None) else self.active_user.username,
+                'userId' : '' if (self.activeUser is None) else self.activeUser.username,
                 'submitter_userid' : '' if (self.submitter is None) else self.submitter.username,
-                'state' : self.state,
+                'state' : self.stateCd,
                 'nrNum' : self.nrNum,
                 'consentFlag' : self.consentFlag,
                 'expirationDate' : self.expirationDate,
@@ -131,21 +123,21 @@ class Request(db.Model):
            error out with a SQLAlchemy Error type
         """
         existing_nr = db.session.query(Request).\
-            filter(Request.userId == userObj.id, Request.state == Request.STATE_INPROGRESS).\
-            order_by(Request.submittedDate.asc()).\
+            filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS).\
             one_or_none()
 
+        logging.log(logging.ERROR,'inside here: existing nr {}'.format(existing_nr))
         if existing_nr:
             return existing_nr.nrNum
 
         r = db.session.query(Request).\
-                filter(Request.state.in_([Request.STATE_DRAFT])).\
-                order_by(Request.submittedDate.asc()).\
+                filter(Request.stateCd.in_([State.DRAFT])).\
+                order_by(Request.submittedDate.asc(), Request.priorityCd.desc()).\
                 with_for_update().first()
         # this row is now locked
 
         # mark this as assigned to the user, masking it from others.
-        r.state= Request.STATE_INPROGRESS
+        r.stateCd= State.INPROGRESS
         r.userId = userObj.id
 
         db.session.add(r)
@@ -161,7 +153,7 @@ class Request(db.Model):
            this assumes that a user can ONLY EVER have 1 Request in progress at a time.
         """
         existing_nr = db.session.query(Request).\
-            filter(Request.userId == userObj.id, Request.state == Request.STATE_INPROGRESS).\
+            filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS).\
             one_or_none()
 
         return existing_nr
