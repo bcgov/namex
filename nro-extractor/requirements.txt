@@ -8,3 +8,4 @@ python-dotenv
 marshmallow-sqlalchemy
 pytest
 gunicorn
+gunicorn[eventlet]
