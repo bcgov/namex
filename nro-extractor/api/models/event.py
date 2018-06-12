@@ -1,8 +1,7 @@
 """Events keep an audit trail of all changes submitted to the datastore
 
 """
-from app import db
-from app.exceptions import BusinessException
+from api import db
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
 from .request import Request
@@ -38,4 +37,4 @@ class Event(db.Model):
         db.session.add(self)
 
     def delete_from_db(self):
-        raise BusinessException()
+        raise Exception()
