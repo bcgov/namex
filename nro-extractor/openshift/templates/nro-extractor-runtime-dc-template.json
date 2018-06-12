@@ -2,7 +2,7 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "nro-extractor-runtime",
+        "name": "nro-extractor-runtime-dc-template.json",
         "creationTimestamp": null
     },
     "objects": [
@@ -15,6 +15,9 @@
                 "creationTimestamp": null,
                 "labels": {
                     "app": "nro-extractor-runtime"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftWebConsole"
                 }
             },
             "spec": {
@@ -61,13 +64,16 @@
                         "labels": {
                             "app": "nro-extractor-runtime",
                             "deploymentconfig": "nro-extractor-runtime"
+                        },
+                        "annotations": {
+                            "openshift.io/generated-by": "OpenShiftWebConsole"
                         }
                     },
                     "spec": {
                         "containers": [
                             {
                                 "name": "nro-extractor-runtime",
-                                "image": "docker-registry.default.svc:5000/servicebc-ne-tools/nro-extractor-runtime@sha256:d329527be460ee3d448b7521d93ac988f0bfcac09efc4288ef9f94f090a15d8a",
+                                "image": "docker-registry.default.svc:5000/servicebc-ne-tools/nro-extractor-runtime@sha256:3910dfa71fe19803fa1ce696c953b2ea66d92e7e865c7f0b5ddc280759908861",
                                 "ports": [
                                     {
                                         "containerPort": 8080,
@@ -125,13 +131,13 @@
                                     },
                                     {
                                         "name": "FDW_DATABASE_HOST",
-                                        "value": "postgresql-oracle-names-fdw"
+                                        "value": "postgresql-oracle-fdw-names"
                                     },
                                     {
                                         "name": "FDW_DATABASE_USERNAME",
                                         "valueFrom": {
                                             "secretKeyRef": {
-                                                "name": "postgresql-oracle-names-fdw",
+                                                "name": "postgresql-oracle-fdw-names",
                                                 "key": "database-user"
                                             }
                                         }
@@ -140,8 +146,8 @@
                                         "name": "FDW_DATABASE_PASSWORD",
                                         "valueFrom": {
                                             "secretKeyRef": {
-                                                "name": "postgresql-oracle-names-fdw",
-                                                "key": "database-password"
+                                                "name": "postgresql-oracle-fdw-names",
+                                                "key": "fdw-password"
                                             }
                                         }
                                     }
@@ -153,6 +159,7 @@
                                         "port": 8080,
                                         "scheme": "HTTP"
                                     },
+                                    "initialDelaySeconds": 300,
                                     "timeoutSeconds": 1,
                                     "periodSeconds": 10,
                                     "successThreshold": 1,
