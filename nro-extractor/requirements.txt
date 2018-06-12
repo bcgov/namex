@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+Flask-Restplus
+Flask-Marshmallow
+
+psycopg2-binary
+python-dotenv
+marshmallow-sqlalchemy
+pytest

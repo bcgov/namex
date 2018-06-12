@@ -1,0 +1,412 @@
+{
+	"info": {
+		"_postman_id": "5f660cc1-bb1e-4e64-a4b9-a48204ab98fd",
+		"name": "namex-feeder",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "setup",
+			"description": "",
+			"item": [
+				{
+					"name": "Install Postman BDD Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// If the \"postman_bdd_path\" environment variable is set, then we'll use it.",
+									"// Otherwise, we'll default to the published version",
+									"if (!environment.postman_bdd_path) {",
+									"    postman.setGlobalVariable('postman_bdd_path', 'http://bigstickcarpet.com/postman-bdd/dist/postman-bdd.min.js');",
+									"}",
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// \"install\" Postman BDD",
+									"postman.setGlobalVariable('postmanBDD', responseBody);",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{postman_bdd_path}}",
+							"host": [
+								"{{postman_bdd_path}}"
+							]
+						},
+						"description": "This request downloads [Postman BDD](https://github.com/BigstickCarpet/postman-bdd) and then \"installs\" it by setting a global variable\n"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "nro-request - invalid NR format",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f9a4df6d-51e7-4219-9bbf-171d2eea010b",
+						"type": "text/javascript",
+						"exec": [
+							"eval(globals.postmanBDD);",
+							"",
+							"it('should be an error response', () => {",
+							"    response.ok.should.be.false;            // 2XX",
+							"    response.error.should.be.true;          // 4XX or 5XX",
+							"    response.clientError.should.be.true;    // 4XX",
+							"    response.serverError.should.be.false;   // 5XX",
+							"    response.should.have.status(400);",
+							"    response.statusType.should.equal(4);",
+							"});",
+							"",
+							"it('should return JSON', () => {",
+							"    response.should.be.json;",
+							"    response.should.have.header('Content-Type', 'application/json');",
+							"    response.type.should.equal('application/json');",
+							"});",
+							"",
+							"it('should contain the un-parsed JSON text', () => {",
+							"    response.text.should.be.a('string').with.length.above(10);",
+							"    response.text.should.contain('\"message\":');",
+							"    response.text.should.match(/^\\{\\n(.*\\n)+\\}\\n$/);",
+							"});",
+							"",
+							"it('should contain the parsed JSON object', () => {",
+							"    response.body.should.be.an('object').with.keys(['message']);",
+							"    response.body.message.should.equal('Valid NR format required - \\'NR 9999999\\'');",
+							"});",
+							"",
+							"it('should match against a JSON Schema', () => {",
+							"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+							"    response.body.should.have.schema({",
+							"        type: 'object',",
+							"        required: ['message'],",
+							"        properties: {",
+							"            message: {",
+							"                type: 'string',",
+							"                minLength: 7,",
+							"                pattern: '\\\\a*[NR]\\\\s\\\\d{7}'",
+							"            }",
+							"        }",
+							"    });",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nameRequest\": \"NR-1234567\"}"
+				},
+				"url": {
+					"raw": "{{url}}/nro-extract/nro-requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nro-extract",
+						"nro-requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "nro-request - success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1537470e-a57a-431b-847d-febc6446b56b",
+						"type": "text/javascript",
+						"exec": [
+							"eval(globals.postmanBDD);",
+							"",
+							"it('should be an success response', () => {",
+							"    response.ok.should.be.true;            // 2XX",
+							"    response.error.should.be.false;          // 4XX or 5XX",
+							"    response.clientError.should.be.false;    // 4XX",
+							"    response.serverError.should.be.false;   // 5XX",
+							"    response.should.have.status(200);",
+							"    response.statusType.should.equal(2);",
+							"});",
+							"",
+							"it('should return JSON', () => {",
+							"    response.should.be.json;",
+							"    response.should.have.header('Content-Type', 'application/json');",
+							"    response.type.should.equal('application/json');",
+							"});",
+							"",
+							"it('should contain the un-parsed JSON text', () => {",
+							"    response.text.should.be.a('string').with.length.above(10);",
+							"    response.text.should.contain('\"message\":');",
+							"    response.text.should.match(/^\\{\\n(.*\\n)+\\}\\n$/);",
+							"});",
+							"",
+							"it('should contain the parsed JSON object', () => {",
+							"    response.body.should.be.an('object').with.keys(['message']);",
+							"    response.body.message.should.have.string('has been successfully copied');",
+							"});",
+							"",
+							"it('should match against a JSON Schema', () => {",
+							"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+							"    response.body.should.have.schema({",
+							"        type: 'object',",
+							"        required: ['message'],",
+							"        properties: {",
+							"            message: {",
+							"                type: 'string',",
+							"                minLength: 7,",
+							"                pattern: '[NR]\\\\s\\\\d{7}\\\\a*'",
+							"            }",
+							"        }",
+							"    });",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nameRequest\": \"NR 2629658\"}"
+				},
+				"url": {
+					"raw": "{{url}}/nro-extract/nro-requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nro-extract",
+						"nro-requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "nro-request - error - duplicate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d59f5e2b-8a89-48b6-8dce-49cd52711999",
+						"type": "text/javascript",
+						"exec": [
+							"eval(globals.postmanBDD);",
+							"",
+							"it('should be an error response', () => {",
+							"    response.ok.should.be.false;            // 2XX",
+							"    response.error.should.be.true;          // 4XX or 5XX",
+							"    response.clientError.should.be.true;    // 4XX",
+							"    response.serverError.should.be.false;   // 5XX",
+							"    response.should.have.status(409);",
+							"    response.statusType.should.equal(4);",
+							"});",
+							"",
+							"it('should return JSON', () => {",
+							"    response.should.be.json;",
+							"    response.should.have.header('Content-Type', 'application/json');",
+							"    response.type.should.equal('application/json');",
+							"});",
+							"",
+							"it('should contain the un-parsed JSON text', () => {",
+							"    response.text.should.be.a('string').with.length.above(10);",
+							"    response.text.should.contain('\"message\":');",
+							"    response.text.should.match(/^\\{\\n(.*\\n)+\\}\\n$/);",
+							"});",
+							"",
+							"it('should contain the parsed JSON object', () => {",
+							"    response.body.should.be.an('object').with.keys(['message']);",
+							"    response.body.message.should.have.string('already exists in namex, unable to create a duplicate');",
+							"});",
+							"",
+							"it('should match against a JSON Schema', () => {",
+							"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+							"    response.body.should.have.schema({",
+							"        type: 'object',",
+							"        required: ['message'],",
+							"        properties: {",
+							"            message: {",
+							"                type: 'string',",
+							"                minLength: 7,",
+							"                pattern: '[NR]\\\\s\\\\d{7}\\\\a*'",
+							"            }",
+							"        }",
+							"    });",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nameRequest\": \"NR 2629658\"}"
+				},
+				"url": {
+					"raw": "{{url}}/nro-extract/nro-requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nro-extract",
+						"nro-requests"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "nro-request - error - doesn't exist in legacy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dafd359d-bbf7-49e8-87f2-172189025495",
+						"type": "text/javascript",
+						"exec": [
+							"eval(globals.postmanBDD);",
+							"",
+							"it('should be an error response', () => {",
+							"    response.ok.should.be.false;            // 2XX",
+							"    response.error.should.be.true;          // 4XX or 5XX",
+							"    response.clientError.should.be.true;    // 4XX",
+							"    response.serverError.should.be.false;   // 5XX",
+							"    response.should.have.status(404);",
+							"    response.statusType.should.equal(4);",
+							"});",
+							"",
+							"it('should return JSON', () => {",
+							"    response.should.be.json;",
+							"    response.should.have.header('Content-Type', 'application/json');",
+							"    response.type.should.equal('application/json');",
+							"});",
+							"",
+							"it('should contain the un-parsed JSON text', () => {",
+							"    response.text.should.be.a('string').with.length.above(10);",
+							"    response.text.should.contain('\"message\":');",
+							"    response.text.should.match(/^\\{\\n(.*\\n)+\\}\\n$/);",
+							"});",
+							"",
+							"it('should contain the parsed JSON object', () => {",
+							"    response.body.should.be.an('object').with.keys(['message']);",
+							"    response.body.message.should.have.string('not found, unable to complete extraction to new system');",
+							"});",
+							"",
+							"it('should match against a JSON Schema', () => {",
+							"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+							"    response.body.should.have.schema({",
+							"        type: 'object',",
+							"        required: ['message'],",
+							"        properties: {",
+							"            message: {",
+							"                type: 'string',",
+							"                minLength: 7,",
+							"                pattern: '[NR]\\\\s\\\\d{7}\\\\a*'",
+							"            }",
+							"        }",
+							"    });",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nameRequest\": \"NR 9999999\"}"
+				},
+				"url": {
+					"raw": "{{url}}/nro-extract/nro-requests",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nro-extract",
+						"nro-requests"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "25cfcaf7-499d-48d9-8d3a-478a45e58152",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "3e53877a-cd2d-43db-825e-af3cacb82265",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

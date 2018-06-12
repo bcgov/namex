@@ -1,0 +1,172 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "nro-extractor-runtime-template",
+        "creationTimestamp": null
+    },
+    "objects": [
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "nro-extractor-runtime",
+                "generation": 1,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "nro-extractor-runtime"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {},
+                    "activeDeadlineSeconds": 21600
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "namex-feeder"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "servicebc-ne-tools",
+                                "name": "nro-extractor-runtime:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "nro-extractor-runtime",
+                    "deploymentconfig": "nro-extractor-runtime"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "nro-extractor-runtime",
+                            "deploymentconfig": "nro-extractor-runtime"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "nro-extractor-runtime",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "DATABASE_USERNAME",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "postgresql",
+                                                "key": "database-user"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "DATABASE_PASSWORD",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "postgresql",
+                                                "key": "database-password"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "DATABASE_NAME",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "postgresql",
+                                                "key": "database-name"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "DATABASE_HOST",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-api-config",
+                                                "key": "DB_HOST"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "DATABASE_PORT",
+                                        "value": "5432"
+                                    },
+                                    {
+                                        "name": "FDW_DATABASE_PORT",
+                                        "value": "5432"
+                                    },
+                                    {
+                                        "name": "FDW_DATABASE_NAME",
+                                        "value": "BC_REGISTRIES_NAMES"
+                                    },
+                                    {
+                                        "name": "FDW_DATABASE_HOST",
+                                        "value": "postgresql-oracle-names-fdw"
+                                    },
+                                    {
+                                        "name": "FDW_DATABASE_USERNAME",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "postgresql-oracle-names-fdw",
+                                                "key": "database-user"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "FDW_DATABASE_PASSWORD",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "postgresql-oracle-names-fdw",
+                                                "key": "database-password"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {},
+                        "schedulerName": "default-scheduler"
+                    }
+                }
+            },
+            "status": {
+                "latestVersion": 0,
+                "observedGeneration": 0,
+                "replicas": 0,
+                "updatedReplicas": 0,
+                "availableReplicas": 0,
+                "unavailableReplicas": 0
+            }
+        }
+    ]
+}
