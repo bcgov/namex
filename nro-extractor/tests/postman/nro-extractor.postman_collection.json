@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "5f660cc1-bb1e-4e64-a4b9-a48204ab98fd",
-		"name": "namex-feeder",
+		"name": "nro-extractor",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -57,6 +57,100 @@
 							]
 						},
 						"description": "This request downloads [Postman BDD](https://github.com/BigstickCarpet/postman-bdd) and then \"installs\" it by setting a global variable\n"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ops",
+			"description": "",
+			"item": [
+				{
+					"name": "healthz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2b3cd3b3-dec2-4b39-81c9-e406b63793ac",
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"",
+									"pm.test(\"api is healthy\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('api is healthy');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{url}}/nro-extract-ops/healthz",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"nro-extract-ops",
+								"healthz"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "readyz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ceec5748-a38a-4b7d-afab-ae773e30484e",
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"",
+									"pm.test(\"api is healthy\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('api is ready');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{url}}/nro-extract-ops/readyz",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"nro-extract-ops",
+								"readyz"
+							]
+						}
 					},
 					"response": []
 				}

@@ -1,6 +1,7 @@
 from flask_restplus import Api
 
 from .requests import api as nro_ext_api
+from .ops import api as nro_ext_ops
 
 api = Api(
     title='NRO Extract API',
@@ -9,3 +10,4 @@ api = Api(
 )
 
 api.add_namespace(nro_ext_api, path='/nro-extract')
+api.add_namespace(nro_ext_ops, path='/nro-extract-ops')
