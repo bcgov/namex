@@ -2,7 +2,7 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "nro-extractor-runtime-template",
+        "name": "nro-extractor-runtime",
         "creationTimestamp": null
     },
     "objects": [
@@ -36,12 +36,12 @@
                         "imageChangeParams": {
                             "automatic": true,
                             "containerNames": [
-                                "namex-feeder"
+                                "nro-extractor-runtime"
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "servicebc-ne-tools",
-                                "name": "nro-extractor-runtime:latest"
+                                "name": "nro-extractor-runtime:dev"
                             }
                         }
                     },
@@ -67,6 +67,7 @@
                         "containers": [
                             {
                                 "name": "nro-extractor-runtime",
+                                "image": "docker-registry.default.svc:5000/servicebc-ne-tools/nro-extractor-runtime@sha256:d329527be460ee3d448b7521d93ac988f0bfcac09efc4288ef9f94f090a15d8a",
                                 "ports": [
                                     {
                                         "containerPort": 8080,
@@ -146,6 +147,28 @@
                                     }
                                 ],
                                 "resources": {},
+                                "livenessProbe": {
+                                    "httpGet": {
+                                        "path": "/nro-extract-ops/healthz",
+                                        "port": 8080,
+                                        "scheme": "HTTP"
+                                    },
+                                    "timeoutSeconds": 1,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "failureThreshold": 3
+                                },
+                                "readinessProbe": {
+                                    "httpGet": {
+                                        "path": "/nro-extract-ops/readyz",
+                                        "port": 8080,
+                                        "scheme": "HTTP"
+                                    },
+                                    "timeoutSeconds": 1,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "failureThreshold": 3
+                                },
                                 "terminationMessagePath": "/dev/termination-log",
                                 "terminationMessagePolicy": "File",
                                 "imagePullPolicy": "Always"
