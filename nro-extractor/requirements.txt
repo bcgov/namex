@@ -9,3 +9,5 @@ marshmallow-sqlalchemy
 pytest
 gunicorn
 gunicorn[eventlet]
+greenlet
+eventlet
