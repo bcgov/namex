@@ -45,7 +45,7 @@ class BaseConfig(object):
 
 
 class Config(BaseConfig):
-    DEBUG = True
+    DEBUG = False
     TESTING = False
 
 class TestConfig(BaseConfig):
