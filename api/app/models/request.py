@@ -126,7 +126,6 @@ class Request(db.Model):
             filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS).\
             one_or_none()
 
-        logging.log(logging.ERROR,'inside here: existing nr {}'.format(existing_nr))
         if existing_nr:
             return existing_nr.nrNum
 
@@ -157,6 +156,10 @@ class Request(db.Model):
             one_or_none()
 
         return existing_nr
+
+    @classmethod
+    def find_name(cls, nr, choice):
+        return cls.query.filter_by(nrNum=nr).names.filter_by(choice=choice).one_or_none()
 
 
 class RequestsSchema(ma.ModelSchema):
