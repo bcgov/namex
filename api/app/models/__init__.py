@@ -9,3 +9,4 @@ from .name import Name, NameSchema
 from .request import Request, RequestsSchema
 from .user import User
 from .state import State
+from .decision_reason import DecisionReason
