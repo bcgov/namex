@@ -2,7 +2,7 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from flask import request, jsonify, g # _request_ctx_stack
+from flask import request, jsonify, g, current_app # _request_ctx_stack
 from flask_restplus import Resource, fields, cors
 from marshmallow import ValidationError
 from app import api, oidc
@@ -15,6 +15,7 @@ from datetime import datetime
 import logging
 
 from . import temp_hackery
+from .solr import SolrQueries
 
 from app.auth_services import AuthError
 from app.models import Request as RequestDAO, RequestsSchema
@@ -37,14 +38,13 @@ class Echo(Resource):
             return {"error": "{}".format(err)}, 500
 
 
+#################### QUEUES #######################
 @cors_preflight("GET")
 @api.route('/requests/queues/@me/oldest', methods=['GET','OPTIONS'])
 class RequestsQueue(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
-    and assigns it to your auth id
+    and assigns it to your auth id, and marks it as INPROGRESS
     """
-    # @auth_services.requires_auth
-    # noinspection PyUnusedLocal,PyUnusedLocal
     @staticmethod
     @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
@@ -57,17 +57,13 @@ class RequestsQueue(Resource):
             if not user:
                 user = User.create_from_jwtToken(g.oidc_token_info)
 
-            logging.log(logging.ERROR, 'got here')
             nr = RequestDAO.get_queued_oldest(user)
-            logging.log(logging.ERROR, 'and x here')
 
         except SQLAlchemyError as err:
             #TODO should put some span trace on the error message
-            logging.log(logging.ERROR, 'maybe here')
-
-            return {"message": "An error occurred getting the next Name Request."}, 500
+            return jsonify({'message': 'An error occurred getting the next Name Request.'}), 500
         except AttributeError as err:
-            return {"message": "There are no Name Requests to work on."}, 404
+            return jsonify({'message': 'There are no Name Requests to work on.'}), 404
 
         return '{{"nameRequest": "{0}" }}'.format(nr), 200
 
@@ -298,23 +294,43 @@ class RequestsAnalysis(Resource):
         :return: 200 - success; 40X for errors
     """
     START = 0
-    PER_PAGE = 50
+    ROWS = 50
 
     # @auth_services.requires_auth
     # noinspection PyUnusedLocal,PyUnusedLocal
     @staticmethod
     @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
-    def get(*args, **kwargs):
+    def get(nr, choice, *args, **kwargs):
 
         start = request.args.get('start', RequestsAnalysis.START)
-        names_per_page = request.args.get('names_per_page',RequestsAnalysis.PER_PAGE)
+        rows = request.args.get('rows',RequestsAnalysis.ROWS)
+
+        solr_base_url = current_app.config.get('SOLR_BASE_URL')
+        if not solr_base_url:
+            logging.log(logging.ERROR,'SOLR: SOLR_BASE_URL is not set')
+            return jsonify({"message": "Internal error"}) , 500
+
+        nrd = RequestDAO.find_by_nr(nr)
+        if not nrd:
+            return jsonify({"message": "{nr} not found".format(nr=nr)}), 404
+
+        nrd_name = nrd.names.filter_by(choice=choice).one_or_none()
+
+        if not nrd_name:
+            return jsonify({"message": "Name choice:{choice} not found for {nr}".format(nr=nr, choice=choice)}), 404
 
 
+        solr = SolrQueries.get_name_conflicts(solr_base_url, nrd_name.name, start=start, rows=rows)
 
-        conflicts = {"response": {"numFound": 13606, "start": 0, "maxScore": 17.179962},
-                     'names':temp_hackery.hackery.conflict_names['response']['docs'],
-                     'highlighting':temp_hackery.hackery.conflict_names['highlighting']}
+        conflicts = {"response": {"numFound": solr['response']['numFound'],
+                                  "start": solr['response']['start'],
+                                  "rows": solr['responseHeader']['params']['rows'],
+                                  "maxScore": solr['response']['maxScore'],
+                                  "name": solr['responseHeader']['params']['q'][5:]
+                                  },
+                     'names':solr['response']['docs'],
+                     'highlighting':solr['highlighting']}
 
         return jsonify(conflicts), 200
 

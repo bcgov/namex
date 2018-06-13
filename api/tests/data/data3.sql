@@ -13,11 +13,11 @@ values( nextval('names_id_seq'), 'my good company', 'NE', 1, null, null, (select
 ;
 insert into names
 (id,name,state,choice,consumption_date,remote_name_id,nr_id)
-values( nextval('names_id_seq'), 'my better company', 'NE', 1, null, null, (select id from requests where nr_num='NR00000023'))
+values( nextval('names_id_seq'), 'my better company', 'NE', 2, null, null, (select id from requests where nr_num='NR00000023'))
 ;
 insert into names
 (id,name,state,choice,consumption_date,remote_name_id,nr_id)
-values( nextval('names_id_seq'), 'my best company', 'NE', 1, null, null, (select id from requests where nr_num='NR00000023'))
+values( nextval('names_id_seq'), 'my best company', 'NE', 3, null, null, (select id from requests where nr_num='NR00000023'))
 ;
 
 
@@ -47,7 +47,7 @@ values
 insert into partner_name_system (id, partner_name_type_cd, partner_name_number, partner_jurisdiction_type_cd,
 partner_name_date,partner_name,nr_id)
 values
-(nextval('partner_name_system_id_seq'), 'A', '123456', 'AB',null,'Sponge Bob',
+(nextval('partner_name_system_id_seq'), 'AS', '123456', 'AB',null,'Sponge Bob',
 (select id from requests where nr_num='NR00000023'))
 ;
 

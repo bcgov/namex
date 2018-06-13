@@ -13,11 +13,11 @@ values( nextval('names_id_seq'), 'my good company', 'NE', 1, null, null, (select
 ;
 insert into names
 (id,name,state,choice,consumption_date,remote_name_id,nr_id)
-values( nextval('names_id_seq'), 'my better company', 'NE', 1, null, null, (select id from requests where nr_num='NR00000021'))
+values( nextval('names_id_seq'), 'my better company', 'NE', 2, null, null, (select id from requests where nr_num='NR00000021'))
 ;
 insert into names
 (id,name,state,choice,consumption_date,remote_name_id,nr_id)
-values( nextval('names_id_seq'), 'my best company', 'NE', 1, null, null, (select id from requests where nr_num='NR00000021'))
+values( nextval('names_id_seq'), 'my best company', 'NE', 3, null, null, (select id from requests where nr_num='NR00000021'))
 ;
 
 
