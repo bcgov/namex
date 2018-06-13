@@ -10,7 +10,7 @@ Flask-Marshmallow
 Flask-OIDC
 
 python-dotenv
-python-jose-cryptodome
+python-jose
 psycopg2-binary
 marshmallow
 marshmallow-sqlalchemy
