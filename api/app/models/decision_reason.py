@@ -1,4 +1,4 @@
-"""Name hold a name choice for a Request
+"""List of decision/rejection reasons for front end UI.
 """
 from app import db, ma
 
