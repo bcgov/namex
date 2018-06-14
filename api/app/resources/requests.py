@@ -19,6 +19,8 @@ from .solr import SolrQueries
 
 from app.auth_services import AuthError
 from app.models import Request as RequestDAO, RequestsSchema
+from app.models import DecisionReason
+
 
 request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
@@ -336,6 +338,29 @@ class RequestsAnalysis(Resource):
                      'highlighting':solr['highlighting']}
 
         return jsonify(conflicts), 200
+
+
+@cors_preflight("GET")
+@api.route('/decisionreasons', methods=['GET', 'OPTIONS'])
+class DecisionReasons(Resource):
+    '''
+    @api.errorhandler(AuthError)
+    def handle_auth_error(ex):
+        # response = jsonify(ex.error)
+        # response.status_code = ex.status_code
+        # return response, 401
+        return {}, 401
+    '''
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @auth_services.requires_auth
+    #@oidc.accept_token(require_token=True)
+    def get():
+        response = []
+        for reason in DecisionReason.query.order_by(DecisionReason.name).all():
+            response.append(reason.json())
+        return jsonify(response), 200
+
 
 def mergedicts(dict1, dict2):
     for k in set(dict1.keys()).union(dict2.keys()):
