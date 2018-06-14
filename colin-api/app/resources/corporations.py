@@ -43,16 +43,6 @@ class RequestColin(Resource):
                                "left outer join bc_registries.corp_type ct ON ct.corp_typ_cd = c.corp_typ_cd "
                                "where c.corp_num = {} and corp.end_event_id IS NULL and corp.corp_name_seq_num = 0".format(corp_num_sql))
 
-        incorp_reg_addr_sql = text("select addr. addr_line_1, "
-                                   "       addr.addr_line_2, "
-                                   "       addr.addr_line_3, "
-                                   "       addr.city, "
-                                   "       addr.province, "
-                                   "       addr.country_typ_cd, "
-                                   "       addr.postal_cd "
-                                   "from bc_registries.office o "
-                                   "left outer join bc_registries.address addr ON addr.addr_id = o.DELIVERY_ADDR_ID "
-                                   "where o.CORP_NUM = {} and  o.end_event_id IS NULL and o.OFFICE_TYP_CD = 'RG'".format(corp_num_sql))
         incorp_rec_addr_sql = text("select addr. addr_line_1, "
                                    "       addr.addr_line_2, "
                                    "       addr.addr_line_3, "
@@ -73,9 +63,9 @@ class RequestColin(Resource):
                                     "from bc_registries.corp_party cp "
                                     "where cp.corp_num = {} and cp.end_event_id IS NULL and cp.party_typ_cd = 'DIR'".format(corp_num_sql))
 
-        incorp_ho_addr_id_sql = text("select delivery_addr_id "
+        incorp_addr_id_sql = text("select delivery_addr_id "
                                      "from bc_registries.office "
-                                     "where corp_num='A0003650' and end_event_id IS NULL;")
+                                     "where corp_num={} and end_event_id IS NULL;".format(corp_num_sql))
         incorp_jurisdiction_sql = text("select j.can_jur_typ_cd||'-'||jt.full_desc  home_jurisdiction "
                                        "from bc_registries.jurisdiction j "
                                        "inner join bc_registries.jurisdiction_type jt ON jt.can_jur_typ_cd = j.can_jur_typ_cd "
@@ -101,30 +91,56 @@ class RequestColin(Resource):
             incorp_directors_obj = db.engine.execute(incorp_directors_sql)
 
             if incorp_class == 'XPRO':
-                incorp_ho_addr_id_obj = db.engine.execute(incorp_ho_addr_id_sql)
+
+                incorp_ho_addr_id_obj = db.engine.execute(incorp_addr_id_sql)
                 incorp_ho_addr_id = incorp_ho_addr_id_obj.fetchall()[0][0]
-                incorp_ho_addr_sql = '\'' + str(incorp_ho_addr_id) + '\''
+                incorp_ho_addr_id_sql = '\'' + str(incorp_ho_addr_id) + '\''
                 incorp_ho_addr_sql = text("select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
                                      "from bc_registries.address "
-                                     "where addr_id= {};".format(incorp_ho_addr_sql))
+                                     "where addr_id= {};".format(incorp_ho_addr_id_sql))
                 incorp_head_office_obj = db.engine.execute(incorp_ho_addr_sql)
 
                 incorp_attorneys_obj = db.engine.execute(incorp_attorneys_sql)
                 incorp_jurisdiction_obj = db.engine.execute(incorp_jurisdiction_sql)
             else:
+                incorp_addr_id_obj = db.engine.execute(incorp_addr_id_sql)
+                incorp_addr_ids = incorp_addr_id_obj.fetchall()
+                incorp_reg_addr_id = incorp_addr_ids[0][0]
+                incorp_reg_addr_id_sql = '\'' + str(incorp_reg_addr_id) + '\''
+                incorp_reg_addr_sql = text(
+                    "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
+                    "from bc_registries.address "
+                    "where addr_id= {};".format(incorp_reg_addr_id_sql))
                 incorp_registered_addr_obj = db.engine.execute(incorp_reg_addr_sql)
-                incorp_records_addr_obj = db.engine.execute(incorp_rec_addr_sql)
-
+                try:
+                    incorp_rec_addr_id = incorp_addr_ids[1][0]
+                except:
+                    incorp_records_addr_obj = None
+                else:
+                    incorp_rec_addr_id_sql = '\'' + str(incorp_rec_addr_id) + '\''
+                    incorp_rec_addr_sql = text(
+                        "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
+                        "from bc_registries.address "
+                        "where addr_id= {};".format(incorp_rec_addr_id_sql))
+                    incorp_records_addr_obj = db.engine.execute(incorp_rec_addr_sql)
             incorp_nr_obj = db.engine.execute(incorp_nr_sql)
+            try:
+                incorp_nr = incorp_nr_obj.fetchall()[0][1]
+            except:
+                incorp_nob = 'Not Available'
+            else:
+                incorp_nr_sql = '\'NR ' + incorp_nr[1:] + '\''
 
-            incorp_nr = incorp_nr_obj.fetchall()[0][1]
-            incorp_nr_sql = '\'NR ' + incorp_nr[1:] + '\''
-
-            incorp_nob_sql = text("select ri.NATURE_BUSINESS_INFO "
-                                  "from bc_registries_names.request_instance ri "
-                                  "inner join bc_registries_names.request r ON r.request_id = ri.request_id "
-                                  "where r.nr_num = {}".format(incorp_nr_sql))
-            incorp_nob_obj = db.get_engine(app, 'db2').execute(incorp_nob_sql)
+                incorp_nob_sql = text("select ri.NATURE_BUSINESS_INFO "
+                                      "from bc_registries_names.request_instance ri "
+                                      "inner join bc_registries_names.request r ON r.request_id = ri.request_id "
+                                      "where r.nr_num = {}".format(incorp_nr_sql))
+                incorp_nob_obj = db.get_engine(app, 'db2').execute(incorp_nob_sql)
+                incorp_nob = incorp_nob_obj.fetchall()
+                if any(incorp_nob):
+                    incorp_nob = incorp_nob[0][0]
+                else:
+                    incorp_nob = 'Not Available'
         except exc.SQLAlchemyError:
             print(exc.SQLAlchemyError)
             return jsonify({"message": "An error occurred getting the corporation details"}), 500
@@ -144,12 +160,6 @@ class RequestColin(Resource):
             pass
         else:
             incorp_directors_list = 'Not Available'
-
-        incorp_nob = incorp_nob_obj.fetchall()
-        if any(incorp_nob):
-            incorp_nob = incorp_nob[0][0]
-        else:
-            incorp_nob = 'Not Available'
 
         if incorp_class == 'XPRO':
             try:
@@ -187,33 +197,41 @@ class RequestColin(Resource):
                                  'jurisdiction': incorp_jurisdiction,
                                  'nature of business': incorp_nob}
         else:
-            incorp_registered_addr_test = incorp_registered_addr_obj.fetchall()
-            if any(incorp_registered_addr_test):
-                incorp_registered_addr = incorp_registered_addr_test[0]
-                incorp_registered_addr_list = []
-                for item in incorp_registered_addr:
-                    if item is not None:
-                        incorp_registered_addr_list.append(item)
-                if any(incorp_registered_addr_list):
-                    pass
+            try:
+                incorp_registered_addr_test = incorp_registered_addr_obj.fetchall()
+            except:
+                incorp_registered_addr_list = 'Not Available'
+            else:
+                if any(incorp_registered_addr_test):
+                    incorp_registered_addr = incorp_registered_addr_test[0]
+                    incorp_registered_addr_list = []
+                    for item in incorp_registered_addr:
+                        if item is not None:
+                            incorp_registered_addr_list.append(item)
+                    if any(incorp_registered_addr_list):
+                        pass
+                    else:
+                        incorp_registered_addr_list = 'Not Available'
                 else:
                     incorp_registered_addr_list = 'Not Available'
-            else:
-                incorp_registered_addr_list = 'Not Available'
 
-            incorp_records_addr_test = incorp_records_addr_obj.fetchall()
-            if any(incorp_records_addr_test):
-                incorp_records_addr = incorp_records_addr_test[0]
-                incorp_records_addr_list = []
-                for item in incorp_records_addr:
-                    if item is not None:
-                        incorp_records_addr_list.append(item)
-                if any(incorp_records_addr_list):
-                    pass
+            try:
+                incorp_records_addr_test = incorp_records_addr_obj.fetchall()
+            except:
+                incorp_records_addr_list = 'Not Available'
+            else:
+                if any(incorp_records_addr_test):
+                    incorp_records_addr = incorp_records_addr_test[0]
+                    incorp_records_addr_list = []
+                    for item in incorp_records_addr:
+                        if item is not None:
+                            incorp_records_addr_list.append(item)
+                    if any(incorp_records_addr_list):
+                        pass
+                    else:
+                        incorp_records_addr_list = 'Not Available'
                 else:
                     incorp_records_addr_list = 'Not Available'
-            else:
-                incorp_records_addr_list = 'Not Available'
 
             corp_details_dict = {'incorp #': corp_num,
                                  'incorporated': incorp_date_str,
