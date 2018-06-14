@@ -165,19 +165,18 @@ def get_nr_header(conn, nr_num):
     #############################
     sql = text(
         'set search_path to bc_registries_names;'
-        'select  r.request_id,'
-        'r.nr_num,'
-        'r.previous_request_id,'
-        'r.submit_count,'
-        'ri.priority_cd,'
-        'ri.request_type_cd,'
-        'ri.expiration_date,'
-        'ri.additional_info,'
-        'ri.nature_business_info,'
-        'ri.xpro_jurisdiction '
-        'from request r '
-        'left outer join request_instance ri ON ri.request_instance_id = r.request_id '
-        'where r.nr_num = :nr'
+        'select  request_id,'
+        'nr_num,'
+        'previous_request_id,'
+        'submit_count,'
+        'priority_cd,'
+        'request_type_cd,'
+        'expiration_date,'
+        'additional_info,'
+        'nature_business_info,'
+        'xpro_jurisdiction'
+        ' from namex_request_vw'
+        ' where nr_num = :nr'
     )
     result = conn.execute(sql.params(nr=nr_num), multi=True)
     row = result.fetchone()
@@ -191,16 +190,10 @@ def get_nr_submitter(conn, request_id):
     #############################
     sql = text(
         'set search_path to bc_registries_names;'
-        'select submit_event.event_timestamp submitted_date,'
-        'CASE'
-        ' WHEN (t.BCOL_ACCOUNT_NUM IS NOT NULL)'
-        ' THEN  TO_CHAR(t.BCOL_ACCOUNT_NUM, \'9999999999\')||\'-\'||t.BCOL_RACF_ID'
-        ' WHEN (T.STAFF_IDIR IS NOT NULL)'
-        ' THEN T.STAFF_IDIR'
-        ' END submitter'
-        ' from transaction t'
-        ' left outer join event submit_event on submit_event.event_id = t.event_id'
-        ' where t.transaction_type_cd = \'NRREQ\' and t.request_id = :req_id'
+        'select submitted_date,'
+        ' submitter'
+        ' from namex_submitter_vw'
+        ' where request_id = :req_id'
     )
     result = conn.execute(sql.params(req_id=request_id), multi=True)
     row = result.fetchone()
@@ -248,13 +241,12 @@ def get_exam_comments(conn, request_id):
     #############################
     sql = text(
         'set search_path to bc_registries_names;'
-        'select rs.examiner_IDIR,'
-        ' rs.examiner_comment,'
-        ' rs.state_comment,'
-        ' e.event_timestamp'
-        ' from request_state rs'
-        ' left outer join event e on e.event_id=rs.start_event_id'
-        ' where rs.request_id= :req_id'
+        'select examiner_IDIR,'
+        ' examiner_comment,'
+        ' state_comment,'
+        ' event_timestamp'
+        ' from namex_examiner_comments_vw'
+        ' where request_id= :req_id'
     )
     result = conn.execute(sql.params(req_id=request_id), multi=True)
     ex_comments = []
@@ -295,12 +287,11 @@ def get_names(conn, request_id):
     #############################
     sql = text(
         'set search_path to bc_registries_names;'
-        'select ni.choice_number,'
-        ' ni.name,'
-        ' ni.designation'
-        ' from name_instance ni'
-        ' left outer join name nm on nm.name_id=ni.name_id'
-        ' where nm.request_id = :req_id'
+        'select choice_number,'
+        ' name,'
+        ' designation'
+        ' from namex_names_vw'
+        ' where request_id = :req_id'
     )
     result = conn.execute(sql.params(req_id=request_id), multi=True)
     names = []
