@@ -10,9 +10,8 @@ def make_shell_context():
             'db': db,
             'ma': ma}
 
-# app = Flask(__name__)
-application.wsgi_app = ProxyFix(application.wsgi_app)
+# application.wsgi_app = ProxyFix(application.wsgi_app)
 
 
 if __name__ == "__main__":
-    application.run(debug=True)
+    application.run()
