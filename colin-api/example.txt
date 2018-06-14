@@ -1,0 +1,64 @@
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [13/Jun/2018 16:47:57] "GET /corporations/A0003650 HTTP/1.1" 500 -
+INFO:werkzeug: * Detected change in '/Users/kial/work/backend/namex/colin-api/app/resources/corporations.py', reloading
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [13/Jun/2018 16:48:36] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in '/Users/kial/work/backend/namex/colin-api/app/resources/corporations.py', reloading
+INFO:root:logging works
+ERROR:flask.app:Exception on /corporations/A0003650 [GET]
+Traceback (most recent call last):
+  File "/Users/kial/work/backend/namex/colin-api/venv/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/kial/work/backend/namex/colin-api/venv/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/kial/work/backend/namex/colin-api/venv/lib/python3.6/site-packages/flask_restplus/api.py", line 323, in wrapper
+    return self.make_response(data, code, headers=headers)
+  File "/Users/kial/work/backend/namex/colin-api/venv/lib/python3.6/site-packages/flask_restplus/api.py", line 344, in make_response
+    resp = self.representations[mediatype](data, *args, **kwargs)
+  File "/Users/kial/work/backend/namex/colin-api/venv/lib/python3.6/site-packages/flask_restplus/representations.py", line 25, in output_json
+    dumped = dumps(data, **settings) + "\n"
+  File "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/json/encoder.py", line 201, in encode
+    chunks = list(chunks)
+  File "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/json/encoder.py", line 437, in _iterencode
+    o = _default(o)
+  File "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/json/encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'Response' is not JSON serializable
+INFO:werkzeug:127.0.0.1 - - [13/Jun/2018 16:51:16] "GET /corporations/A0003650 HTTP/1.1" 500 -
+INFO:werkzeug: * Detected change in '/Users/kial/work/backend/namex/colin-api/app/resources/corporations.py', reloading
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [13/Jun/2018 16:52:11] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in '/Users/kial/work/backend/namex/colin-api/app/resources/ops.py', reloading
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 08:22:32] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 08:23:13] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 08:23:41] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 08:26:50] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 08:34:57] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 09:04:36] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:18:36] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:19:38] "GET /corporations/A0003650 HTTP/1.1" 200 -
+ERROR:flask_oidc:ERROR: Unable to get token info
+ERROR:flask_oidc:[Errno 60] Operation timed out
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:26:25] "GET /corporations/A0003650 HTTP/1.1" 401 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:28:37] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:29:30] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:29:38] "GET /corporations/A0003650 HTTP/1.1" 401 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:30:55] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:31:08] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:root:logging works
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:31:21] "GET /corporations/A0003650 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2018 10:31:21] "GET /corporations/A0003650 HTTP/1.1" 401 -
