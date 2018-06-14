@@ -281,7 +281,7 @@ class Request(Resource):
 
 
 @cors_preflight("GET")
-@api.route('/requests/<string:nr>/analysis/<int:choice>/conflicts', methods=['GET','OPTIONS'])
+@api.route('/requests/<string:nr>/analysis/<int:choice>/<string:types>', methods=['GET','OPTIONS'])
 class RequestsAnalysis(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
     and assigns it to your auth id
@@ -301,15 +301,13 @@ class RequestsAnalysis(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
-    def get(nr, choice, *args, **kwargs):
+    def get(nr, choice, types, *args, **kwargs):
 
         start = request.args.get('start', RequestsAnalysis.START)
         rows = request.args.get('rows',RequestsAnalysis.ROWS)
 
-        solr_base_url = current_app.config.get('SOLR_BASE_URL')
-        if not solr_base_url:
-            logging.log(logging.ERROR,'SOLR: SOLR_BASE_URL is not set')
-            return jsonify({"message": "Internal error"}) , 500
+        if types not in SolrQueries.VALID_QUERIES:
+            return jsonify({"message": "{type} is not a valid analysis type for that name choice".format(type=type)}), 404
 
         nrd = RequestDAO.find_by_nr(nr)
         if not nrd:
@@ -321,9 +319,9 @@ class RequestsAnalysis(Resource):
             return jsonify({"message": "Name choice:{choice} not found for {nr}".format(nr=nr, choice=choice)}), 404
 
         try:
-            solr = SolrQueries.get_name_conflicts(solr_base_url, nrd_name.name, start=start, rows=rows)
+            solr = SolrQueries.get_results(types, nrd_name.name, start=start, rows=rows)
         except Exception as err:
-            logging.log(logging.ERROR, err, solr_base_url, nrd_name.name)
+            logging.log(logging.ERROR, err, type, nrd_name.name)
             return jsonify({"message": "Internal server error"}) , 500
 
         conflicts = {"response": {"numFound": solr['response']['numFound'],
