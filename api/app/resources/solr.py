@@ -1,5 +1,6 @@
 from urllib import request, parse
 import json
+import logging
 
 class SolrQueries:
     queries ={
@@ -15,7 +16,10 @@ class SolrQueries:
             rows=rows,
             name=parse.quote(name)
         )
-        connection = request.urlopen(query)
-        print (connection)
+        try:
+            connection = request.urlopen(query)
+        except Exception as err:
+            logging.log(logging.ERROR, err, query)
+            raise err
         return json.load(connection)
 

@@ -320,8 +320,11 @@ class RequestsAnalysis(Resource):
         if not nrd_name:
             return jsonify({"message": "Name choice:{choice} not found for {nr}".format(nr=nr, choice=choice)}), 404
 
-
-        solr = SolrQueries.get_name_conflicts(solr_base_url, nrd_name.name, start=start, rows=rows)
+        try:
+            solr = SolrQueries.get_name_conflicts(solr_base_url, nrd_name.name, start=start, rows=rows)
+        except Exception as err:
+            logging.log(logging.ERROR, err, solr_base_url, nrd_name.name)
+            return jsonify({"message": "Internal server error"}) , 500
 
         conflicts = {"response": {"numFound": solr['response']['numFound'],
                                   "start": solr['response']['start'],
