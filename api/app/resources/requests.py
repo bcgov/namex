@@ -7,12 +7,13 @@ from flask_restplus import Resource, fields, cors
 from marshmallow import ValidationError
 from app import api, oidc
 from app.auth_services import required_scope, AuthError
-from app.models import User, State
+from app.models import User, State, Name, NameSchema
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
 from app.utils.util import cors_preflight
 from datetime import datetime
 import logging
+import types
 
 from . import temp_hackery
 from .solr import SolrQueries
@@ -24,6 +25,9 @@ from app.models import DecisionReason
 
 request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
+names_schema = NameSchema(many=False)
+names_schemas = NameSchema(many=True)
+
 
 # noinspection PyUnresolvedReferences
 @cors_preflight("GET")
@@ -338,6 +342,97 @@ class RequestsAnalysis(Resource):
         return jsonify(conflicts), 200
 
 
+@cors_preflight("GET, PUT, PATCH")
+@api.route('/requests/<string:nr>/names/<int:choice>', methods=['GET', "PUT", "PATCH",'OPTIONS'])
+class NRNames(Resource):
+
+    @staticmethod
+    def common(nr, choice):
+        """:returns: object, code, msg
+        """
+        if not validNRFormat(nr):
+            return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
+
+        nrd = RequestDAO.find_by_nr(nr)
+        if not nrd:
+            return None, None, jsonify({"message": "{nr} not found".format(nr=nr)}), 404
+
+        name = nrd.names.filter_by(choice=choice).one_or_none()
+        if not name:
+            return None, None, jsonify({"message": "Choice {choice} for {nr} not found".format(choice=choice, nr=nr)}), 404
+
+        return nrd, name, None, 200
+
+    # noinspection PyUnusedLocal,PyUnusedLocal
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @oidc.accept_token(require_token=True)
+    def get(nr, choice, *args, **kwargs):
+
+        nrd, nrd_name, msg, code = NRNames.common(nr, choice)
+        if not nrd:
+            return msg, code
+
+        return names_schema.dumps(nrd_name).data, 200
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @oidc.accept_token(require_token=True)
+    def put(nr, choice, *args, **kwargs):
+        json_data = request.get_json()
+        if not json_data:
+            return jsonify({'message': 'No input data provided'}), 400
+
+        errors = names_schema.validate(json_data, partial=False)
+        if errors:
+            return jsonify(errors), 400
+
+        nrd, nrd_name, msg, code = NRNames.common(nr, choice)
+        if not nrd:
+            return msg, code
+
+        user = User.find_by_jwtToken(g.oidc_token_info)
+        if not check_ownership(nrd, user):
+            return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
+
+        names_schema.load(json_data, instance=nrd_name, partial=False)
+        nrd_name.save_to_db()
+
+        return jsonify({"message": "Replace {nr} choice:{choice} with {json}".format(nr=nr, choice=choice, json=json_data)}), 200
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @oidc.accept_token(require_token=True)
+    def patch(nr, choice, *args, **kwargs):
+
+        json_data = request.get_json()
+        if not json_data:
+            return jsonify({'message': 'No input data provided'}), 400
+
+        errors = names_schema.validate(json_data, partial=True)
+        if errors:
+            return jsonify(errors), 400
+
+        nrd, nrd_name, msg, code = NRNames.common(nr, choice)
+        if not nrd:
+            return msg, code
+
+        user = User.find_by_jwtToken(g.oidc_token_info)
+        if not check_ownership(nrd, user):
+            return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
+
+        names_schema.load(json_data, instance=nrd_name, partial=True)
+        nrd_name.save_to_db()
+
+        return jsonify({"message": "Patched {nr} - {json}".format(nr=nr, json=json_data)}), 200
+
+
+def check_ownership(nrd, user):
+    if nrd.stateCd == State.INPROGRESS and nrd.userId == user.id:
+        return True
+    return False
+
+# TODO: This should be in it's own file, not in the requests
 @cors_preflight("GET")
 @api.route('/decisionreasons', methods=['GET', 'OPTIONS'])
 class DecisionReasons(Resource):
@@ -374,3 +469,16 @@ def mergedicts(dict1, dict2):
             yield (k, dict1[k])
         else:
             yield (k, dict2[k])
+
+def validNRFormat(nr):
+    '''NR should be of the format "NR 1234567"
+    '''
+    if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':
+        return False
+
+    try:
+        num = int(nr[3:])
+    except:
+        return False
+
+    return True

@@ -1,6 +1,7 @@
 """Name hold a name choice for a Request
 """
 from app import db, ma
+from marshmallow import fields
 
 class Name(db.Model):
     __tablename__ = 'names'
@@ -31,7 +32,13 @@ class Name(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+
 class NameSchema(ma.ModelSchema):
     class Meta:
         model = Name
-        # fields = ('choice', 'name', 'state')
+        fields = ('name', 'state', 'choice', 'designation', 'consumptionDate')
+    name = fields.String(
+        required=True,
+        error_messages={'required': {'message': 'name is a required field'}}
+    )
+    # additional = ("name", "email", "created_at")
