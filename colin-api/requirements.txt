@@ -1,19 +1,16 @@
-gunicorn
 
 Flask
-Flask-Migrate
-Flask-Script
-Flask-Moment
-Flask-SQLAlchemy
 Flask-RESTplus
+Flask-SQLAlchemy
 Flask-Marshmallow
 Flask-OIDC
 
+pytest-flask
+python-jose-cryptodome
 python-dotenv
-python-jose
 psycopg2-binary
 marshmallow
 marshmallow-sqlalchemy
+sqlalchemy
+httplib2
 six
-
-pytest
