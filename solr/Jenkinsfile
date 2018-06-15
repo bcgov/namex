@@ -10,7 +10,7 @@ def APP_NAME = 'solr'
 def TAG_NAMES = ['dev', 'test', 'prod']
 
 // Edit your application's context directory here
-def CONTEXT_DIRECTORY = 'tob-solr'
+def CONTEXT_DIRECTORY = 'solr'
 
 // You shouldn't have to edit these if you're following the conventions
 def BUILD_CONFIG = APP_NAME

@@ -1,0 +1,1214 @@
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#********Descriptive substitutions ***********************
+#---------------------------------------------------------
+#Group 5 from thesaurus
+# thesaurus group->5
+autocourt,bedbreacfast,guest,hotel,in,lodge,motel,motorcourt,motorhotel,motorin,resort,suites=>autocourt,bedbreacfast,guest,hotel,in,lodge,motel,motorcourt,motorhotel,motorin,resort,suites
+# thesaurus group->6
+acept,asset,capital,capitol,credit,equit,financ,fund,invest,lend,loan,mortgag,mutualfund,payday,securit,wealth=>acept,aset,capital,capitol,credit,equit,financ,fund,invest,lend,loan,mortgag,mutualfund,payday,securit,wealth
+# thesaurus group->7
+apartment,apt,condo,court,loft,manor,residen,strata,stratum,townhome,townhouse,vila=>apartment,apt,condo,court,loft,manor,residen,strata,stratum,townhome,townhouse,vila
+# thesaurus group->8
+agregat,crush,fil,gravel,mater,sand,soil=>agregat,crush,fil,gravel,mater,sand,soil
+# thesaurus group->9
+container,depot,reload,stor,terminal,transload,warehous=>container,depot,reload,stor,terminal,transload,warehous
+# thesaurus group->10
+aplianc,coldstorage,fodlocer,frez,fridg,ice,refrig=>aplianc,coldstorage,fodlocer,frez,fridg,ice,refrig
+# thesaurus group->11
+aircondition,balanc,climate,comfort,furnac,furnace,gasfit,heat,hvac,mechanical,pipefit,plum,shetmetal,vent=>aircondition,balanc,climate,comfort,furnac,furnace,gasfit,heat,hvac,mechanical,pipefit,plum,shetmetal,vent
+# thesaurus group->13
+abode,acre,bil,bilt,buil,build,civil,const,contract,develop,estate,handyman,home,land,listing,meadow,medo,propert,real,remodel,reno,restor,structur=>abode,acre,bil,bilt,buil,build,civil,const,contract,develop,estate,handyman,home,land,listing,meadow,medo,propert,real,remodel,reno,restor,structur
+# thesaurus group->14
+hir,leas,rent=>hir,leas,rent
+# thesaurus group->18
+automat,cabl,control,electric,instrument,led,light,lite,lyte,measur,robot,wir=>automat,cabl,control,electric,instrument,led,light,lite,lyte,measur,robot,wir
+# thesaurus group->19
+aplication,aps,cloud,comp,data,interactiv,laptop,pc,peripheral,program,soft,solution,system,ware,were,where=>aplication,aps,cloud,comp,data,interactiv,laptop,pc,peripheral,program,soft,solution,system,ware,were,where
+# thesaurus group->20
+barge,carier,cartage,courier,deliver,diesel,dispatch,dray,erand,expres,forward,freight,haul,hawl,hotshot,intermodal,line,lobed,logistic,lowbed,mail,mesenger,mov,navigat,parcel,recovery,refer,shiper,shiping,transfer,transport,truc,tug,wrecer,xpres=>barge,carier,cartage,courier,deliver,diesel,dispatch,dray,erand,expres,forward,freight,haul,hawl,hotshot,intermodal,line,lobed,logistic,lowbed,mail,mesenger,mov,navigat,parcel,recovery,refer,shiper,shiping,transfer,transport,truc,tug,wrecer,xpres
+# thesaurus group->23
+blind,cover,curtain,drape,shade,shuter,windo=>blind,cover,curtain,drape,shade,shuter,windo
+# thesaurus group->24
+garden,gardner,gras,grenhous,ground,horticultur,hydroponic,landscap,lawn,mow,nurser,plant,sod,suculent,turf,xeri,yard=>garden,gardner,gras,grenhous,ground,horticultur,hydroponic,landscap,lawn,mow,nurser,plant,sod,suculent,turf,xeri,yard
+# thesaurus group->26
+adventur,cruis,getaway,holiday,safari,tour,travel,trip,vacation,xpedition=>adventur,cruis,getaway,holiday,safari,tour,travel,trip,vacation,xpedition
+# thesaurus group->29
+airport,blac car,blacar,cab,chaufeur,limo,livery,taxi,towncar,uber=>airport,blac car,blacar,cab,chaufeur,limo,livery,taxi,towncar,uber
+# thesaurus group->30
+aloy,casting,duct,fab,forg,foundry,iron,mchin,metal,rail,reinfor,stainles,stamping,stel,tol,weld=>aloy,casting,duct,fab,forg,foundry,iron,mchin,metal,rail,reinfor,stainles,stamping,stel,tol,weld
+# thesaurus group->31
+irigat,sprinc,watering,watersystem=>irigat,sprinc,watering,watersystem
+# thesaurus group->32
+drain,outfal,septic,sewage,sewer,wastewater=>drain,outfal,septic,sewage,sewer,wastewater
+# thesaurus group->34
+alarm,forensic,gard,guard,investigat,locksmith,monitor,patrol,protect,response,security,surveillance,tactic,watch=>alarm,forensic,gard,guard,investigat,locksmith,monitor,patrol,protect,response,security,surveillance,tactic,watch
+# thesaurus group->35
+bistro,bufet,cafe,cantina,capucino,chai,citchen,cofe,convenience,cuisine,deli,dine,diner,dining,eat,eater,eats,edibl,espreso,fod,galley,gril,grocer,java,late,marcet,mart,restaurant,roast,sandwich,shop,snac,snax,steac,store,takeout,taverna,tea,tifin,tratoria,variety,xpreso=>bistro,bufet,cafe,cantina,capucino,chai,citchen,cofe,convenience,cuisine,deli,dine,diner,dining,eat,eater,eats,edibl,espreso,fod,galley,gril,grocer,java,late,marcet,mart,restaurant,roast,sandwich,shop,snac,snax,steac,store,takeout,taverna,tea,tifin,tratoria,variety,xpreso
+# thesaurus group->37
+apothecary,chemist,dispens,drug,med,medicin,pharm,prescri,rx=>apothecary,chemist,dispens,drug,med,medicin,pharm,prescri,rx
+# thesaurus group->38
+cey,loc,quay=>cey,loc,quay
+# thesaurus group->39
+cartograph,chart,geomat,gis,map=>cartograph,chart,geomat,gis,map
+# thesaurus group->40
+bereav,cemetery,cremat,funeral,memorial,mortuary=>bereav,cemetery,cremat,funeral,memorial,mortuary
+# thesaurus group->41
+elevat,lift=>elevat,lift
+# thesaurus group->44
+cigar,cigarete,ecig,ejuic,hoocah,juic,pipe,smoce,tobaco,vap=>cigar,cigarete,ecig,ejuic,hoocah,juic,pipe,smoce,tobaco,vap
+# thesaurus group->45
+banquet,canten,cater,concesion,fodserv,fodtruc,mealprep=>banquet,canten,cater,concesion,fodserv,fodtruc,mealprep
+# thesaurus group->46
+angling,aquacultur,aquafarm,charter,fish,guid,maricultur,outfit,oyster,salmon,seafarm,seafod,shelfish,sightse,sport fish,xcursion=>angling,aquacultur,aquafarm,charter,fish,guid,maricultur,outfit,oyster,salmon,seafarm,seafod,shelfish,sightse,sport fish,xcursion
+# thesaurus group->47
+bus,cariage,coach,shutle,stage,trail,transit=>bus,cariage,coach,shutle,stage,trail,transit
+# thesaurus group->48
+aesthetic,barber,beard,beaut,brow,coif,coifure,cosmetic,cosmetolog,cut,day spa,dayspa,electrolysis,esthetic,grom,hair,lash,manicure,mceup,nail,salon,scin,styl,xtens=>aesthetic,barber,beard,beaut,brow,coif,coifure,cosmetic,cosmetolog,cut,day spa,dayspa,electrolysis,esthetic,grom,hair,lash,manicure,mceup,nail,salon,scin,styl,xtens
+# thesaurus group->50
+awning,canop,canvas,tarp,tent=>awning,canop,canvas,tarp,tent
+# thesaurus group->51
+forester,forestmanag,forestr,reforest,silvicultur,timbermanag,treplant=>forester,forestmanag,forestr,reforest,silvicultur,timbermanag,treplant
+# thesaurus group->54
+cng,coal,dril,energy,fuel,gas,lng,lubric,nrg,oil,petro,pipeline,propane,resour=>cng,coal,dril,energy,fuel,gas,lng,lubric,nrg,oil,petro,pipeline,propane,resour
+# thesaurus group->56
+manufacturedhome,mobilehome,modularhome,prefab=>manufacturedhome,mobilehome,modularhome,prefab
+# thesaurus group->57
+camper,motorhome,recreationalvehicle,recreationvehicle,rv,trailer=>camper,motorhome,recreationalvehicle,recreationvehicle,rv,trailer
+# thesaurus group->58
+cement,concrete,crete,form,icf,placing,precast,readymix,rebar,redimix,redmix,reinforc,shotcrete=>cement,concrete,crete,form,icf,placing,precast,readymix,rebar,redimix,redmix,reinforc,shotcrete
+# thesaurus group->60
+import,impx,imx,trade,trading,xim,xport=>import,impx,imx,trade,trading,xim,xport
+# thesaurus group->61
+agen,brocer,factor=>agen,brocer,factor
+# thesaurus group->64
+auto,bod,car,colision,fix,garage,mechanic,motor,repair,service,tune,vehic=>auto,bod,car,colision,fix,garage,mechanic,motor,repair,service,tune,vehic
+# thesaurus group->66
+glas,glaz,miror,shower,window,windshield=>glas,glaz,miror,shower,window,windshield
+# thesaurus group->67
+bric,brix,bryc,granite,mason,monument,quar,roc,slate,stone=>bric,brix,bryc,granite,mason,monument,quar,roc,slate,stone
+# thesaurus group->69
+carpet,ceramic,flor,hardwod,laminat,lino,marble,poter,rug,terazo,til,tile=>carpet,ceramic,flor,hardwod,laminat,lino,marble,poter,rug,terazo,til,tile
+# thesaurus group->70
+lath,plaster,stuco=>lath,plaster,stuco
+# thesaurus group->71
+asphalt,blactop,interloc,pav,rhode,road,rode,tar=>asphalt,blactop,interloc,pav,rhode,road,rode,tar
+# thesaurus group->72
+acoustic,ceiling,drywal,gypsum,panel,taper,taping,txtur,wal=>acoustic,ceiling,drywal,gypsum,panel,taper,taping,txtur,wal
+# thesaurus group->73
+clean,clen,custod,domestic,handym,housecep,janitor,made,maid,maint=>clean,clen,custod,domestic,handym,housecep,janitor,made,maid,maint
+# thesaurus group->76
+atrium,conservator,grenhouse,hothouse,scylight,scylite,solar,sunrom=>atrium,conservator,grenhouse,hothouse,scylight,scylite,solar,sunrom
+# thesaurus group->77
+acoustics,audio,broadcast,cd,dejay,dj,electronic,homeentertain,music,radio,record,sound,stereo,tape=>acoustics,audio,broadcast,cd,dejay,dj,electronic,homeentertain,music,radio,record,sound,stereo,tape
+# thesaurus group->79
+art,galer,sculptur,studio=>art,galer,sculptur,studio
+# thesaurus group->81
+amo,amunition,armament,armo,arms,artiler,firearm,gun,pistol,rifl,weapon=>amo,amunition,armament,armo,arms,artiler,firearm,gun,pistol,rifl,weapon
+# thesaurus group->82
+aero,aeroplane,aerospace,air,airo,arow,aviat,ayr,choper,ero,flight,flite,fly,flyte,heli,jet,plane,prop,space,ultrali=>aero,aeroplane,aerospace,air,airo,arow,aviat,ayr,choper,ero,flight,flite,fly,flyte,heli,jet,plane,prop,space,ultrali
+# thesaurus group->83
+cloth,drygod,fabric,material,rag,tx,txtile=>cloth,drygod,fabric,material,rag,tx,txtile
+# thesaurus group->84
+atelier,coating,decor,design,interior,living,paint,stag,walcover,walpaper=>atelier,coating,decor,design,interior,living,paint,stag,walcover,walpaper
+# thesaurus group->87
+shear,sher,shur,sur,sure=>shear,sher,shur,sur,sure
+# thesaurus group->88
+abel,able=>abel,able
+# thesaurus group->93
+baha,baja=>baha,baja
+# thesaurus group->95
+fraeme,frame=>fraeme,frame
+# thesaurus group->96
+quail,quayle=>quail,quayle
+# thesaurus group->98
+cirus,cyrus,sirus,syrus=>cirus,cyrus,sirus,syrus
+# thesaurus group->99
+straight,strait,strate=>straight,strait,strate
+# thesaurus group->101
+scene,sen,son,sun=>scene,sen,son,sun
+# thesaurus group->103
+avatar,avitar,avtar=>avatar,avitar,avtar
+# thesaurus group->105
+color,colour=>color,colour
+# thesaurus group->109
+sharen,sharon=>sharen,sharon
+# thesaurus group->110
+shay,shea=>shay,shea
+# thesaurus group->114
+sol,sole,soul=>sol,sole,soul
+# thesaurus group->116
+saint,st,street=>saint,st,street
+# thesaurus group->117
+father,fr=>father,fr
+# thesaurus group->120
+schaefer,shaefer,shafer=>schaefer,shaefer,shafer
+# thesaurus group->121
+bite,byte=>bite,byte
+# thesaurus group->122
+atraction,carnival,celebrat,conferenc,convention,event,fair,fare,fayre,festival,hapening,meting,ocasion,ocurenc,present,show,xhibit,xpo=>atraction,carnival,celebrat,conferenc,convention,event,fair,fare,fayre,festival,hapening,meting,ocasion,ocurenc,present,show,xhibit,xpo
+# thesaurus group->123
+ciel,seal,sel=>ciel,seal,sel
+# thesaurus group->124
+cmor,seamore,semore,seymour=>cmor,seamore,semore,seymour
+# thesaurus group->125
+cher,shair,shar=>cher,shair,shar
+# thesaurus group->126
+win,wyn=>win,wyn
+# thesaurus group->127
+wise,wyse=>wise,wyse
+# thesaurus group->128
+robin,robyn=>robin,robyn
+# thesaurus group->129
+saber,sabre=>saber,sabre
+# thesaurus group->130
+savor,savour=>savor,savour
+# thesaurus group->131
+daily,daley,daly=>daily,daley,daly
+# thesaurus group->132
+jantsen,jantzen,janzen=>jantsen,jantzen,janzen
+# thesaurus group->133
+sampson,samson=>sampson,samson
+# thesaurus group->134
+johnson,johnston,jonson=>johnson,johnston,jonson
+# thesaurus group->135
+aron,erin,eron=>aron,erin,eron
+# thesaurus group->136
+rae,rai,ray=>rae,rai,ray
+# thesaurus group->137
+mile,myle=>mile,myle
+# thesaurus group->140
+right,rite,wright,write=>right,rite,wright,write
+# thesaurus group->141
+magic,majic,majix=>magic,majic,majix
+# thesaurus group->142
+thompson,thomson,tomson=>thompson,thomson,tomson
+# thesaurus group->145
+price,pryce=>price,pryce
+# thesaurus group->147
+beau,bough,bow=>beau,bough,bow
+# thesaurus group->148
+planet,planit=>planet,planit
+# thesaurus group->152
+erwin,irwin=>erwin,irwin
+# thesaurus group->156
+neu,new,nieu,nu=>neu,new,nieu,nu
+# thesaurus group->157
+wind,wynd=>wind,wynd
+# thesaurus group->158
+read,red,reid=>read,red,reid
+# thesaurus group->159
+cnel,neal,neil=>cnel,neal,neil
+# thesaurus group->161
+minit,minut=>minit,minut
+# thesaurus group->162
+miser,mizer=>miser,mizer
+# thesaurus group->163
+monro,munro=>monro,munro
+# thesaurus group->164
+stephen,steven=>stephen,steven
+# thesaurus group->166
+midas,midys=>midas,midys
+# thesaurus group->167
+love,luv=>love,luv
+# thesaurus group->169
+linda,lynda=>linda,lynda
+# thesaurus group->170
+cnight,night,nite=>cnight,night,nite
+# thesaurus group->172
+lewis,louis=>lewis,louis
+# thesaurus group->173
+lay,le,lea,lei,leigh,ly=>lay,le,lea,lei,leigh,ly
+# thesaurus group->174
+lidle,lil,litle,lytle=>lidle,lil,litle,lytle
+# thesaurus group->176
+cosy,cozy=>cosy,cozy
+# thesaurus group->179
+delight,delite=>delight,delite
+# thesaurus group->180
+landsdowne,lansdowne=>landsdowne,lansdowne
+# thesaurus group->181
+cain,cane=>cain,cane
+# thesaurus group->185
+jaemar,jaymar=>jaemar,jaymar
+# thesaurus group->188
+isis,isys=>isis,isys
+# thesaurus group->189
+haidaway,hideaway=>haidaway,hideaway
+# thesaurus group->190
+hai,hi,high,hy=>hai,hi,high,hy
+# thesaurus group->191
+bilboard,neon,sign,sine=>bilboard,neon,sign,sine
+# thesaurus group->194
+lion,lyon=>lion,lyon
+# thesaurus group->195
+goar,gore=>goar,gore
+# thesaurus group->196
+graeme,graham=>graeme,graham
+# thesaurus group->197
+view,vu=>view,vu
+# thesaurus group->198
+governor,guvnor=>governor,guvnor
+# thesaurus group->199
+day,dey=>day,dey
+# thesaurus group->200
+gail,gale,gayle=>gail,gale,gayle
+# thesaurus group->202
+fenix,feonix,pheonix,phoenix=>fenix,feonix,pheonix,phoenix
+# thesaurus group->203
+dinamo,dynamo=>dinamo,dynamo
+# thesaurus group->205
+dew,do,du=>dew,do,du
+# thesaurus group->206
+ewe,yew,you=>ewe,yew,you
+# thesaurus group->207
+dri,dry=>dri,dry
+# thesaurus group->208
+gray,grey=>gray,grey
+# thesaurus group->209
+done,dun=>done,dun
+# thesaurus group->211
+chrystal,cristal,crystal=>chrystal,cristal,crystal
+# thesaurus group->213
+caesar,ceasar,cesar,cesare=>caesar,ceasar,cesar,cesare
+# thesaurus group->214
+white,whyte=>white,whyte
+# thesaurus group->215
+citi,city=>citi,city
+# thesaurus group->216
+bi,buy,by=>bi,buy,by
+# thesaurus group->217
+cando,candu=>cando,candu
+# thesaurus group->218
+chec,cheque=>chec,cheque
+# thesaurus group->219
+bright,brite=>bright,brite
+# thesaurus group->220
+clubmaker,clubs,golf,gulf=>clubmaker,clubs,golf,gulf
+# thesaurus group->221
+barbecue,barbq,bq=>barbecue,barbq,bq
+# thesaurus group->223
+acqua,acwa,aqua=>acqua,acwa,aqua
+# thesaurus group->224
+arctic,artec,artic=>arctic,artec,artic
+# thesaurus group->227
+cataract,cite,contact,eyewear,lens,lenz,opt,retina,sight,site,vision=>cataract,cite,contact,eyewear,lens,lenz,opt,retina,sight,site,vision
+# thesaurus group->228
+fiber,fibre=>fiber,fibre
+# thesaurus group->229
+alfa,alpha=>alfa,alpha
+# thesaurus group->231
+highway,hiway,hwy,hyway=>highway,hiway,hwy,hyway
+# thesaurus group->232
+easi,easy,eazy,ez,eze=>easi,easy,eazy,ez,eze
+# thesaurus group->233
+prime,pryme=>prime,pryme
+# thesaurus group->235
+canine,cenel,cnine,dawg,dog,hound,poch,pup=>canine,cenel,cnine,dawg,dog,hound,poch,pup
+# thesaurus group->236
+hawg,hog=>hawg,hog
+# thesaurus group->237
+tri,try=>tri,try
+# thesaurus group->238
+first,one,onest=>first,one,onest
+# thesaurus group->239
+phase,phaze=>phase,phaze
+# thesaurus group->240
+genesis,genesys,genisis=>genesis,genesys,genisis
+# thesaurus group->241
+aeries,aries=>aeries,aries
+# thesaurus group->242
+flair,flare=>flair,flare
+# thesaurus group->244
+principal,principle=>principal,principle
+# thesaurus group->245
+triad,tryad=>triad,tryad
+# thesaurus group->247
+roe,row=>roe,row
+# thesaurus group->249
+ecel,ecsel,exel,xcel,xcl,xell,xl,xsel=>ecel,ecsel,exel,xcel,xcl,xell,xl,xsel
+# thesaurus group->250
+mohr,mor=>mohr,mor
+# thesaurus group->251
+reimer,rhymer,rimer,rymer=>reimer,rhymer,rimer,rymer
+# thesaurus group->255
+fantasy,phantasy=>fantasy,phantasy
+# thesaurus group->257
+pearce,pierce=>pearce,pierce
+# thesaurus group->258
+thyme,time,tyme=>thyme,time,tyme
+# thesaurus group->260
+pace,paice,payce=>pace,paice,payce
+# thesaurus group->262
+davey,davie,davy=>davey,davie,davy
+# thesaurus group->263
+main,maine,mayne=>main,maine,mayne
+# thesaurus group->264
+lam,lamb=>lam,lamb
+# thesaurus group->265
+cent,fragrance,fragrant,parfum,perfume,scent,sent=>cent,fragrance,fragrant,parfum,perfume,scent,sent
+# thesaurus group->269
+brons,bronze=>brons,bronze
+# thesaurus group->271
+celtic,seltic=>celtic,seltic
+# thesaurus group->272
+delux,dlux=>delux,dlux
+# thesaurus group->273
+early,irly=>early,irly
+# thesaurus group->275
+grace,grayce=>grace,grayce
+# thesaurus group->276
+hics,hix=>hics,hix
+# thesaurus group->277
+coin,coyne,numismat,vend=>coin,coyne,numismat,vend
+# thesaurus group->278
+cohlman,coleman,colman=>cohlman,coleman,colman
+# thesaurus group->279
+laura,lora=>laura,lora
+# thesaurus group->280
+laurel,lorel=>laurel,lorel
+# thesaurus group->282
+miter,mitre,myter=>miter,mitre,myter
+# thesaurus group->284
+pairadice,paradise=>pairadice,paradise
+# thesaurus group->286
+profit,prophet=>profit,prophet
+# thesaurus group->287
+cwestar,qestar,questar=>cwestar,qestar,questar
+# thesaurus group->289
+rain,raine,rayne,reign,rein=>rain,raine,rayne,reign,rein
+# thesaurus group->290
+seagul,segal,siegal,siegel=>seagul,segal,siegal,siegel
+# thesaurus group->293
+spartan,sparton=>spartan,sparton
+# thesaurus group->294
+sterling,stirling=>sterling,stirling
+# thesaurus group->295
+seumas,sumas=>seumas,sumas
+# thesaurus group->297
+telerad,telrad=>telerad,telrad
+# thesaurus group->299
+treat,treit,tret=>treat,treit,tret
+# thesaurus group->300
+weatherb,weatherby=>weatherb,weatherby
+# thesaurus group->302
+esix,esx,sx=>esix,esx,sx
+# thesaurus group->308
+bleu,blew,blu,blue=>bleu,blew,blu,blue
+# thesaurus group->309
+rainbo,raynbo=>rainbo,raynbo
+# thesaurus group->325
+ar,are=>ar,are
+# thesaurus group->329
+why,wi=>why,wi
+# thesaurus group->336
+for,four,fourth,iv=>for,four,fourth,iv
+# thesaurus group->342
+seven,seventh=>seven,seventh
+# thesaurus group->344
+eight,eighth=>eight,eighth
+# thesaurus group->346
+ix,nine,nineth,ninth=>ix,nine,nineth,ninth
+# thesaurus group->380
+hightec,hitec,hytec=>hightec,hitec,hytec
+# thesaurus group->381
+qc,quencharlote=>qc,quencharlote
+# thesaurus group->384
+newest,nuwest,nw=>newest,nuwest,nw
+# thesaurus group->385
+pege,pg,princegeorge=>pege,pg,princegeorge
+# thesaurus group->391
+apostle,apotres=>apostle,apotres
+# thesaurus group->392
+charade,shirade=>charade,shirade
+# thesaurus group->393
+caladonia,caledonia=>caladonia,caledonia
+# thesaurus group->397
+cemco,chemco=>cemco,chemco
+# thesaurus group->398
+dundarave,dunderave=>dundarave,dunderave
+# thesaurus group->400
+highland,hiland,hyland=>highland,hiland,hyland
+# thesaurus group->402
+mister,mr=>mister,mr
+# thesaurus group->404
+mount,mt,mtn=>mount,mt,mtn
+# thesaurus group->406
+persepolis,persopolis=>persepolis,persopolis
+# thesaurus group->409
+sfu,simonfraseruniversity=>sfu,simonfraseruniversity
+# thesaurus group->410
+universityvictoria,uvic=>universityvictoria,uvic
+# thesaurus group->488
+john,jon=>john,jon
+# thesaurus group->489
+thom,tom=>thom,tom
+# thesaurus group->491
+jetwash,powerclean,powerwash,presur,steam,wash=>jetwash,powerclean,powerwash,presur,steam,wash
+# thesaurus group->492
+asur,benefit,casualty,indemnit,insur,life,underwrit=>asur,benefit,casualty,indemnit,insur,life,underwrit
+# thesaurus group->493
+bijou,diamon,diamond,gem,gold,goldsmith,jem,jewel,joial,jual,mine,mineral,mining,placer,prospect,resourc,silver,silversmith,xplor=>bijou,diamon,diamond,gem,gold,goldsmith,jem,jewel,joial,jual,mine,mineral,mining,placer,prospect,resourc,silver,silversmith,xplor
+# thesaurus group->494
+academ,colege,institut,schol=>academ,colege,institut,schol
+# thesaurus group->497
+can,cdn=>can,cdn
+# thesaurus group->500
+forest,log,lumber,mil,paper,ply,precut,pulp,reman,saw,timber,wod=>forest,log,lumber,mil,paper,ply,precut,pulp,reman,saw,timber,wod
+# thesaurus group->501
+encore,oncor=>encore,oncor
+
+
+
+# thesaurus group->510
+onezero,ten,tenth,twentieth,twenty,twozero,twozeroth,x=>onezero,ten,tenth,twentieth,twenty,twozero,twozeroth,x
+# thesaurus group->512
+fifth,five,fiveth=>fifth,five,fiveth
+# thesaurus group->513
+fourten,fourtenth,onefour,onefourth,xiv=>fourten,fourtenth,onefour,onefourth,xiv
+# thesaurus group->514
+fiften,fiftenth,onefive,onefiveth,xv=>fiften,fiftenth,onefive,onefiveth,xv
+# thesaurus group->516
+six,sixth=>six,sixth
+# thesaurus group->517
+eighten,eightenth,oneight,oneighth,oneseven,oneseventh,onesix,onesixth,seventen,sevententh,sixten,sixtenth,xvi=>eighten,eightenth,oneight,oneighth,oneseven,oneseventh,onesix,onesixth,seventen,sevententh,sixten,sixtenth,xvi
+# thesaurus group->520
+nineten,ninetenth,onenine,onenineth,xix=>nineten,ninetenth,onenine,onenineth,xix
+# thesaurus group->523
+twentysecond,twentytwo,twotwo,twotwond=>twentysecond,twentytwo,twotwo,twotwond
+# thesaurus group->525
+twentyfour,twentyfourth,twofour,twofourth=>twentyfour,twentyfourth,twofour,twofourth
+# thesaurus group->526
+twentyfifth,twentyfive,twofive,twofiveth=>twentyfifth,twentyfive,twofive,twofiveth
+# thesaurus group->527
+twentysix,twentysixth,twosix,twosixth=>twentysix,twentysixth,twosix,twosixth
+# thesaurus group->528
+twentyseven,twentyseventh,twoseven,twoseventh=>twentyseven,twentyseventh,twoseven,twoseventh
+# thesaurus group->529
+twentyeight,twentyeighth,twoeight,twoeighth=>twentyeight,twentyeighth,twoeight,twoeighth
+# thesaurus group->530
+twentynine,twentyninth,twonine,twonineth=>twentynine,twentyninth,twonine,twonineth
+# thesaurus group->531
+thirtieth,thirty,threzero,threzeroth=>thirtieth,thirty,threzero,threzeroth
+# thesaurus group->532
+thirtyfirst,thirtyone,threone,threonest=>thirtyfirst,thirtyone,threone,threonest
+# thesaurus group->533
+thirtysecond,thirtytwo,thretwo,thretwond=>thirtysecond,thirtytwo,thretwo,thretwond
+# thesaurus group->535
+thirtyfour,thirtyfourth,threfour,threfourth=>thirtyfour,thirtyfourth,threfour,threfourth
+# thesaurus group->536
+thirtyfifth,thirtyfive,threfive,threfiveth=>thirtyfifth,thirtyfive,threfive,threfiveth
+# thesaurus group->537
+thirtysix,thirtysixth,thresix,thresixth=>thirtysix,thirtysixth,thresix,thresixth
+# thesaurus group->538
+thirtyseven,thirtyseventh,threseven,threseventh=>thirtyseven,thirtyseventh,threseven,threseventh
+# thesaurus group->539
+thirtyeight,thirtyeighth,threight,threighth=>thirtyeight,thirtyeighth,threight,threighth
+# thesaurus group->540
+thirtynine,thirtyninth,threnine,threnineth=>thirtynine,thirtyninth,threnine,threnineth
+# thesaurus group->541
+fortieth,forty,fourzero,fourzeroth=>fortieth,forty,fourzero,fourzeroth
+# thesaurus group->542
+fortyfirst,fortyone,fourone,fouronest=>fortyfirst,fortyone,fourone,fouronest
+# thesaurus group->543
+fortysecond,fortytwo,fourtwo,fourtwond=>fortysecond,fortytwo,fourtwo,fourtwond
+# thesaurus group->545
+fortyfour,fortyfourth,fourfour,fourfourth=>fortyfour,fortyfourth,fourfour,fourfourth
+# thesaurus group->546
+fortyfifth,fortyfive,fourfive,fourfiveth=>fortyfifth,fortyfive,fourfive,fourfiveth
+# thesaurus group->547
+fortysix,fortysixth,foursix,foursixth=>fortysix,fortysixth,foursix,foursixth
+# thesaurus group->548
+fortyseven,fortyseventh,fourseven,fourseventh=>fortyseven,fortyseventh,fourseven,fourseventh
+# thesaurus group->549
+fortyeight,fortyeighth,foureight,foureighth=>fortyeight,fortyeighth,foureight,foureighth
+# thesaurus group->550
+fortynine,fortyninth,fournine,fournineth=>fortynine,fortyninth,fournine,fournineth
+# thesaurus group->551
+fiftieth,fifty,fivezero,fivezeroth=>fiftieth,fifty,fivezero,fivezeroth
+# thesaurus group->552
+fiftyfirst,fiftyone,fiveone,fiveonest=>fiftyfirst,fiftyone,fiveone,fiveonest
+# thesaurus group->553
+fiftysecond,fiftytwo,fivetwo,fivetwond=>fiftysecond,fiftytwo,fivetwo,fivetwond
+# thesaurus group->555
+fiftyfour,fiftyfourth,fivefour,fivefourth=>fiftyfour,fiftyfourth,fivefour,fivefourth
+# thesaurus group->556
+fiftyfifth,fiftyfive,fivefive,fivefiveth=>fiftyfifth,fiftyfive,fivefive,fivefiveth
+# thesaurus group->557
+fiftysix,fiftysixth,fivesix,fivesixth=>fiftysix,fiftysixth,fivesix,fivesixth
+# thesaurus group->558
+fiftyseven,fiftyseventh,fiveseven,fiveseventh=>fiftyseven,fiftyseventh,fiveseven,fiveseventh
+# thesaurus group->559
+fiftyeight,fiftyeighth,fiveight,fiveighth=>fiftyeight,fiftyeighth,fiveight,fiveighth
+# thesaurus group->560
+fiftynine,fiftyninth,fivenine,fivenineth=>fiftynine,fiftyninth,fivenine,fivenineth
+# thesaurus group->561
+sixtieth,sixty,sixzero,sixzeroth=>sixtieth,sixty,sixzero,sixzeroth
+# thesaurus group->562
+sixone,sixonest,sixtyfirst,sixtyone=>sixone,sixonest,sixtyfirst,sixtyone
+# thesaurus group->563
+sixtwo,sixtwond,sixtysecond,sixtytwo=>sixtwo,sixtwond,sixtysecond,sixtytwo
+# thesaurus group->565
+sixfour,sixfourth,sixtyfour,sixtyfourth=>sixfour,sixfourth,sixtyfour,sixtyfourth
+# thesaurus group->566
+sixfive,sixfiveth,sixtyfifth,sixtyfive=>sixfive,sixfiveth,sixtyfifth,sixtyfive
+# thesaurus group->567
+sixsix,sixsixth,sixtysix,sixtysixth=>sixsix,sixsixth,sixtysix,sixtysixth
+# thesaurus group->568
+sixseven,sixseventh,sixtyseven,sixtyseventh=>sixseven,sixseventh,sixtyseven,sixtyseventh
+# thesaurus group->569
+sixeight,sixeighth,sixtyeight,sixtyeighth=>sixeight,sixeighth,sixtyeight,sixtyeighth
+# thesaurus group->570
+sixnine,sixnineth,sixtynine,sixtyninth=>sixnine,sixnineth,sixtynine,sixtyninth
+# thesaurus group->571
+seventieth,seventy,sevenzero,sevenzeroth=>seventieth,seventy,sevenzero,sevenzeroth
+# thesaurus group->572
+sevenone,sevenonest,seventyfirst,seventyone=>sevenone,sevenonest,seventyfirst,seventyone
+# thesaurus group->573
+seventwo,seventwond,seventysecond,seventytwo=>seventwo,seventwond,seventysecond,seventytwo
+# thesaurus group->575
+sevenfour,sevenfourth,seventyfour,seventyfourth=>sevenfour,sevenfourth,seventyfour,seventyfourth
+# thesaurus group->576
+sevenfive,sevenfiveth,seventyfifth,seventyfive=>sevenfive,sevenfiveth,seventyfifth,seventyfive
+# thesaurus group->577
+sevensix,sevensixth,seventysix,seventysixth=>sevensix,sevensixth,seventysix,seventysixth
+# thesaurus group->578
+sevenseven,sevenseventh,seventyseven,seventyseventh=>sevenseven,sevenseventh,seventyseven,seventyseventh
+# thesaurus group->579
+seveneight,seveneighth,seventyeight,seventyeighth=>seveneight,seveneighth,seventyeight,seventyeighth
+# thesaurus group->580
+sevenine,sevenineth,seventynine,seventyninth=>sevenine,sevenineth,seventynine,seventyninth
+# thesaurus group->581
+eightieth,eighty,eightzero,eightzeroth=>eightieth,eighty,eightzero,eightzeroth
+# thesaurus group->582
+eightone,eightonest,eightyfirst,eightyone=>eightone,eightonest,eightyfirst,eightyone
+# thesaurus group->583
+eightwo,eightwond,eightysecond,eightytwo=>eightwo,eightwond,eightysecond,eightytwo
+# thesaurus group->585
+eightfour,eightfourth,eightyfour,eightyfourth=>eightfour,eightfourth,eightyfour,eightyfourth
+# thesaurus group->586
+eightfive,eightfiveth,eightyfifth,eightyfive=>eightfive,eightfiveth,eightyfifth,eightyfive
+# thesaurus group->587
+eightsix,eightsixth,eightysix,eightysixth=>eightsix,eightsixth,eightysix,eightysixth
+# thesaurus group->588
+eightseven,eightseventh,eightyseven,eightyseventh=>eightseven,eightseventh,eightyseven,eightyseventh
+# thesaurus group->589
+eighteight,eighteighth,eightyeight,eightyeighth=>eighteight,eighteighth,eightyeight,eightyeighth
+# thesaurus group->590
+eightnine,eightnineth,eightynine,eightyninth=>eightnine,eightnineth,eightynine,eightyninth
+# thesaurus group->591
+ninetieth,ninety,ninezero,ninezeroth=>ninetieth,ninety,ninezero,ninezeroth
+# thesaurus group->592
+nineone,nineonest,ninetyfirst,ninetyone=>nineone,nineonest,ninetyfirst,ninetyone
+# thesaurus group->593
+ninetwo,ninetwond,ninetysecond,ninetytwo=>ninetwo,ninetwond,ninetysecond,ninetytwo
+# thesaurus group->595
+ninefour,ninefourth,ninetyfour,ninetyfourth=>ninefour,ninefourth,ninetyfour,ninetyfourth
+# thesaurus group->596
+ninefive,ninefiveth,ninetyfifth,ninetyfive=>ninefive,ninefiveth,ninetyfifth,ninetyfive
+# thesaurus group->597
+ninesix,ninesixth,ninetysix,ninetysixth=>ninesix,ninesixth,ninetysix,ninetysixth
+# thesaurus group->598
+nineseven,nineseventh,ninetyseven,ninetyseventh=>nineseven,nineseventh,ninetyseven,ninetyseventh
+# thesaurus group->600
+ninenine,ninenineth,ninetynine,ninetyninth=>ninenine,ninenineth,ninetynine,ninetyninth
+# thesaurus group->601
+hundredth,onehundred,onehundredth,onezerozeroth,onezerzero=>hundredth,onehundred,onehundredth,onezerozeroth,onezerzero
+
+
+# thesaurus group->604
+fruit,orchard,produce,sabzi,vegetable,vegi=>fruit,orchard,produce,sabzi,vegetable,vegi
+# thesaurus group->605
+agra,agri,catle,farm,livestoc,ranch,stable=>agra,agri,catle,farm,livestoc,ranch,stable
+# thesaurus group->606
+caren,caron=>caren,caron
+# thesaurus group->607
+calona,celowna,clo=>calona,celowna,clo
+# thesaurus group->609
+coat,cote=>coat,cote
+# thesaurus group->611
+cwest,quest,qwest=>cwest,quest,qwest
+# thesaurus group->612
+clad,hardy,siding,xterior=>clad,hardy,siding,xterior
+# thesaurus group->613
+auld,old,olde,ole=>auld,old,olde,ole
+# thesaurus group->616
+magnem,magnum=>magnem,magnum
+# thesaurus group->617
+cnowledge,educat,instruct,learn,seminar,teach,train,tutor=>cnowledge,educat,instruct,learn,seminar,teach,train,tutor
+# thesaurus group->620
+second,two,twond=>second,two,twond
+# thesaurus group->623
+animat,carton,cast,cine,dud,dvd,entertain,film,media,motion,movie,picture,production,releas,studios,talent,television,theat,tv,vcr,video=>animat,carton,cast,cine,dud,dvd,entertain,film,media,motion,movie,picture,production,releas,studios,talent,television,theat,tv,vcr,video
+# thesaurus group->625
+aparel,atire,boutique,casual,clothes,clothier,clothing,couture,fashion,garb,garment,wardrobe,wear=>aparel,atire,boutique,casual,clothes,clothier,clothing,couture,fashion,garb,garment,wardrobe,wear
+# thesaurus group->626
+game,play,puzle,toy=>game,play,puzle,toy
+# thesaurus group->627
+courtenay,courtney=>courtenay,courtney
+# thesaurus group->629
+bait,lure,rea,rel,rod,tacle=>bait,lure,rea,rel,rod,tacle
+# thesaurus group->630
+automatic,clutch,diferential,driveline,gear,transmision=>automatic,clutch,diferential,driveline,gear,transmision
+# thesaurus group->632
+bare,bear=>bare,bear
+# thesaurus group->635
+div,scuba,submarin,subsea,underwater=>div,scuba,submarin,subsea,underwater
+# thesaurus group->636
+euro,uro=>euro,uro
+# thesaurus group->638
+alteration,crest,dresmac,embroider,sew,stitch,tailor=>alteration,crest,dresmac,embroider,sew,stitch,tailor
+# thesaurus group->639
+equestrian,equine,hors,rid=>equestrian,equine,hors,rid
+# thesaurus group->640
+meridian,meridien=>meridian,meridien
+# thesaurus group->641
+bachoe,bobcat,buldoz,dig,ditch,doz,earth,grad,gradal,trench,xcavat=>bachoe,bobcat,buldoz,dig,ditch,doz,earth,grad,gradal,trench,xcavat
+# thesaurus group->642
+harbor,harbour=>harbor,harbour
+# thesaurus group->645
+childcare,cinder,daycare,earlylearn,montesori,nursery,playschol,preschol=>childcare,cinder,daycare,earlylearn,montesori,nursery,playschol,preschol
+# thesaurus group->647
+cat,feline=>cat,feline
+# thesaurus group->648
+animal,criter,pet,vet=>animal,criter,pet,vet
+# thesaurus group->649
+chris,cris=>chris,cris
+# thesaurus group->650
+christmas,xmas=>christmas,xmas
+# thesaurus group->652
+manufactur,mfg=>manufactur,mfg
+# thesaurus group->653
+hldg,hold,holdco,holding=>hldg,hold,holdco,holding
+# thesaurus group->654
+rof,shace,shingle=>rof,shace,shingle
+# thesaurus group->655
+part,wrec=>part,wrec
+# thesaurus group->656
+arb,brush,fal,loging,prun,stump,trecare,treprun,treservice,tresurgeon,tretop=>arb,brush,fal,loging,prun,stump,trecare,treprun,treservice,tresurgeon,tretop
+# thesaurus group->657
+coling,radiator=>coling,radiator
+# thesaurus group->658
+antiq,bailif,colect,memorab,proces,trac=>antiq,bailif,colect,memorab,proces,trac
+# thesaurus group->659
+alix,alx=>alix,alx
+# thesaurus group->660
+ce,se,sea=>ce,se,sea
+# thesaurus group->662
+strice,stryce=>strice,stryce
+# thesaurus group->664
+cinabar,cinibar=>cinabar,cinibar
+# thesaurus group->665
+efect,fx,stunt=>efect,fx,stunt
+# thesaurus group->666
+abe,abey,abie,aby=>abe,abey,abie,aby
+# thesaurus group->667
+pic,pyc=>pic,pyc
+# thesaurus group->668
+somer,sumer=>somer,sumer
+# thesaurus group->669
+deal,del=>deal,del
+# thesaurus group->670
+unec,unique=>unec,unique
+# thesaurus group->674
+elic,elis=>elic,elis
+# thesaurus group->675
+vale,valey,valy=>vale,valey,valy
+# thesaurus group->676
+peac,pec,pece,pique=>peac,pec,pece,pique
+# thesaurus group->678
+leach,lech=>leach,lech
+# thesaurus group->679
+cwic,quic=>cwic,quic
+# thesaurus group->681
+clear,cler=>clear,cler
+# thesaurus group->682
+mama,moma=>mama,moma
+# thesaurus group->683
+al,awl=>al,awl
+# thesaurus group->684
+odysea,odysey=>odysea,odysey
+# thesaurus group->686
+dahl,dol=>dahl,dol
+# thesaurus group->687
+misus,mrs=>misus,mrs
+# thesaurus group->688
+cotenai,cotenay,cutenai=>cotenai,cotenay,cutenai
+# thesaurus group->689
+cwahlicum,qualicum=>cwahlicum,qualicum
+# thesaurus group->690
+blosom,floral,florist,flower=>blosom,floral,florist,flower
+# thesaurus group->691
+fiter,instal,layer,laying=>fiter,instal,layer,laying
+# thesaurus group->692
+bridal,weding=>bridal,weding
+# thesaurus group->693
+aerobic,botcamp,cardio,circuit,condition,fit,gym,hot tub,hottub,hotub,kundalini,movement,pilates,pol,slim,spa,strength,thin,trai,weight,worcout,xercis,yoga=>aerobic,botcamp,cardio,circuit,condition,fit,gym,hot tub,hottub,hotub,kundalini,movement,pilates,pol,slim,spa,strength,thin,trai,weight,worcout,xercis,yoga
+# thesaurus group->694
+bot,cobler,fotwear,shoe=>bot,cobler,fotwear,shoe
+# thesaurus group->698
+chic,sheic=>chic,sheic
+# thesaurus group->699
+beach,bech=>beach,bech
+# thesaurus group->700
+lear,ler=>lear,ler
+# thesaurus group->701
+cned,ned,neid=>cned,ned,neid
+# thesaurus group->702
+quesnel,quinel=>quesnel,quinel
+# thesaurus group->703
+ciera,seara,siera=>ciera,seara,siera
+# thesaurus group->705
+sincoloid,syncoloid=>sincoloid,syncoloid
+# thesaurus group->708
+wesix,wesx=>wesix,wesx
+# thesaurus group->709
+acelerate,xlr8,xlreight=>acelerate,xlr8,xlreight
+# thesaurus group->711
+walace,walis=>walace,walis
+# thesaurus group->713
+ze,zed=>ze,zed
+# thesaurus group->715
+cambel,campbel=>cambel,campbel
+# thesaurus group->717
+gery,jery=>gery,jery
+# thesaurus group->719
+portocal,portofcal=>portocal,portofcal
+# thesaurus group->720
+ubc,ubysey,universitybritishcolumbia=>ubc,ubysey,universitybritishcolumbia
+# thesaurus group->722
+johny,jony=>johny,jony
+# thesaurus group->723
+crane,erect,rig,scafold=>crane,erect,rig,scafold
+# thesaurus group->724
+craft,hob,radiocontrol=>craft,hob,radiocontrol
+# thesaurus group->725
+third,thre,threrd=>third,thre,threrd
+# thesaurus group->729
+twentythird,twentythre,twothre,twothrerd=>twentythird,twentythre,twothre,twothrerd
+# thesaurus group->730
+thirtythird,thirtythre,threthre,threthrerd=>thirtythird,thirtythre,threthre,threthrerd
+# thesaurus group->731
+fortythird,fortythre,fourthre,fourthrerd=>fortythird,fortythre,fourthre,fourthrerd
+# thesaurus group->732
+fiftythird,fiftythre,fivethre,fivethrerd=>fiftythird,fiftythre,fivethre,fivethrerd
+# thesaurus group->733
+sixthre,sixthrerd,sixtythird,sixtythre=>sixthre,sixthrerd,sixtythird,sixtythre
+# thesaurus group->734
+seventhre,seventhrerd,seventythird,seventythre=>seventhre,seventhrerd,seventythird,seventythre
+# thesaurus group->735
+advis,analy,coac,consult,counsel=>advis,analy,coac,consult,counsel
+# thesaurus group->736
+hart,heart=>hart,heart
+# thesaurus group->737
+stewart,stuart=>stewart,stuart
+# thesaurus group->738
+alan,alen=>alan,alen
+# thesaurus group->739
+fumigat,pest,xterminat=>fumigat,pest,xterminat
+# thesaurus group->740
+manag,mgmt,mgr,mgt=>manag,mgmt,mgr,mgt
+# thesaurus group->741
+eighthre,eighthrerd,eightythird,eightythre=>eighthre,eighthrerd,eightythird,eightythre
+# thesaurus group->742
+ninethre,ninethrerd,ninetythird,ninetythre=>ninethre,ninethrerd,ninetythird,ninetythre
+# thesaurus group->743
+nineight,nineighth,ninetyeight,ninetyeighth=>nineight,nineighth,ninetyeight,ninetyeighth
+# thesaurus group->744
+vancouverisland,vanisle,vi=>vancouverisland,vanisle,vi
+# thesaurus group->748
+braemar,braymar=>braemar,braymar
+# thesaurus group->749
+blast,dynamite,nitro,powder,tnt,xplosi=>blast,dynamite,nitro,powder,tnt,xplosi
+# thesaurus group->750
+concept,dream,idea=>concept,dream,idea
+# thesaurus group->751
+blueprint,cad,draft,draught,draw,plan=>blueprint,cad,draft,draught,draw,plan
+# thesaurus group->752
+haus,house=>haus,house
+# thesaurus group->753
+lotery,loto,swepstake=>lotery,loto,swepstake
+# thesaurus group->754
+acount,admin,biz,bocep,busines,complian,corporate,cpa,dictat,document,ofic,secretar,tax,titl,transcri,transcript,typ,wordpro=>acount,admin,biz,bocep,busines,complian,corporate,cpa,dictat,document,ofic,secretar,tax,titl,transcri,transcript,typ,wordpro
+# thesaurus group->756
+doctor,dr=>doctor,dr
+# thesaurus group->757
+health,medic,practice,surg,welnes=>health,medic,practice,surg,welnes
+# thesaurus group->758
+brid,formal,mariag,matrimon,wed=>brid,formal,mariag,matrimon,wed
+# thesaurus group->759
+chicen,poultry,turcey=>chicen,poultry,turcey
+# thesaurus group->760
+htwo,spring,water=>htwo,spring,water
+# thesaurus group->761
+galey,kitchen=>galey,kitchen
+# thesaurus group->763
+bodyw,masag,physio,physiotherap,reflx,rehab,therap=>bodyw,masag,physio,physiotherap,reflx,rehab,therap
+# thesaurus group->764
+co-gen,cogen,ener,generat,hydro,power,utilit=>co-gen,cogen,ener,generat,hydro,power,utilit
+# thesaurus group->765
+athlet,outdor,run,sport=>athlet,outdor,run,sport
+# thesaurus group->766
+auction,bid,liquidat=>auction,bid,liquidat
+# thesaurus group->767
+island,isle=>island,isle
+# thesaurus group->768
+colateral,pawn=>colateral,pawn
+# thesaurus group->769
+international,intl=>international,intl
+# thesaurus group->771
+atlin,atlyn=>atlin,atlyn
+# thesaurus group->772
+driv,motoring=>driv,motoring
+# thesaurus group->774
+cand,chocolat,confect,swet=>cand,chocolat,confect,swet
+# thesaurus group->775
+archiv,museum,recor=>archiv,museum,recor
+# thesaurus group->777
+ceyboard,organ,piano,synthesiz=>ceyboard,organ,piano,synthesiz
+# thesaurus group->778
+philat,stamp=>philat,stamp
+# thesaurus group->779
+casino,gaming=>casino,gaming
+# thesaurus group->780
+pumpkin,punkin=>pumpkin,punkin
+# thesaurus group->781
+boat,marin,nautic,outboard,sail,ship,vesel,watercraft,yacht=>boat,marin,nautic,outboard,sail,ship,vesel,watercraft,yacht
+# thesaurus group->782
+adjust,aprais,claim=>adjust,aprais,claim
+# thesaurus group->783
+box,contain,pacag=>box,contain,pacag
+# thesaurus group->784
+autoclav,steril=>autoclav,steril
+# thesaurus group->785
+tough,tuf=>tough,tuf
+# thesaurus group->786
+audiolog,hear,here=>audiolog,hear,here
+# thesaurus group->787
+filipin,philipin=>filipin,philipin
+# thesaurus group->788
+card,greting,station=>card,greting,station
+# thesaurus group->789
+glider,sailplane=>glider,sailplane
+# thesaurus group->790
+through,thru=>through,thru
+# thesaurus group->794
+cnit,crochet,lom,spin,weav,wol,wov,yarn=>cnit,crochet,lom,spin,weav,wol,wov,yarn
+# thesaurus group->795
+boc,copi,copy,desctop,director,duplicat,edit,gazete,graf,graph,guide,litho,magazine,news,pres,print,publication,publish,report,repro,scren,wecl,writ=>boc,copi,copy,desctop,director,duplicat,edit,gazete,graf,graph,guide,litho,magazine,news,pres,print,publication,publish,report,repro,scren,wecl,writ
+# thesaurus group->796
+cygnet,signet=>cygnet,signet
+# thesaurus group->797
+blvd,boulevard=>blvd,boulevard
+# thesaurus group->798
+acryl,plastic,poli,poly,pvc,vinyl=>acryl,plastic,poli,poly,pvc,vinyl
+# thesaurus group->800
+celar,oeni,vin,vintner,viticult,wine=>celar,oeni,vin,vintner,viticult,wine
+# thesaurus group->802
+bin,compost,conserv,convers,convert,disposal,ecol,efluent,envir,garbage,recycl,refuse,rubish,sanitat,scrap,trash,waste=>bin,compost,conserv,convers,convert,disposal,ecol,efluent,envir,garbage,recycl,refuse,rubish,sanitat,scrap,trash,waste
+# thesaurus group->803
+bath,cabinet,casew,citch,counter,cupboard,solidsurfac=>bath,cabinet,casew,citch,counter,cupboard,solidsurfac
+# thesaurus group->805
+marcs,marx=>marcs,marx
+# thesaurus group->806
+marceter,marceting,mctg=>marceter,marceting,mctg
+# thesaurus group->807
+colombia,columbia=>colombia,columbia
+# thesaurus group->809
+carbonfib,composit=>carbonfib,composit
+# thesaurus group->810
+edie,edy=>edie,edy
+# thesaurus group->811
+load,lode=>load,lode
+# thesaurus group->812
+dolfin,dolphin=>dolfin,dolphin
+# thesaurus group->813
+english,esl,interpret,languag,translat=>english,esl,interpret,languag,translat
+# thesaurus group->814
+1stnation,1stpeople,aborigin,firstnation,firstpeople,indian,indigenous,native=>1stnation,1stpeople,aborigin,firstnation,firstpeople,indian,indigenous,native
+# thesaurus group->815
+armor,armour=>armor,armour
+# thesaurus group->816
+cwalit,kwalit,qualit=>cwalit,kwalit,qualit
+# thesaurus group->817
+fed,grain,hay,petfod=>fed,grain,hay,petfod
+# thesaurus group->818
+capt,captain=>capt,captain
+# thesaurus group->819
+convey,handl=>convey,handl
+# thesaurus group->820
+cypres,cyprus=>cypres,cyprus
+# thesaurus group->822
+carpent,finish,fram,join,milworc,wodcraft,wodworc=>carpent,finish,fram,join,milworc,wodcraft,wodworc
+# thesaurus group->823
+autosport,motorsport,performance,rac,sped=>autosport,motorsport,performance,rac,sped
+# thesaurus group->824
+bolt,fasten,nut,screw,spiral=>bolt,fasten,nut,screw,spiral
+# thesaurus group->825
+glid,soar=>glid,soar
+# thesaurus group->826
+bartend,beverage,mixolog=>bartend,beverage,mixolog
+# thesaurus group->827
+link,links,linx,lynx=>link,links,linx,lynx
+# thesaurus group->828
+abatoir,butcher,halal,meat,pacer,pacing,sausage,slaughter=>abatoir,butcher,halal,meat,pacer,pacing,sausage,slaughter
+# thesaurus group->829
+ale,ber,brew,lager=>ale,ber,brew,lager
+# thesaurus group->830
+teresa,theresa=>teresa,theresa
+# thesaurus group->831
+ateli,bed,furni,futon,matres,slep=>ateli,bed,furni,futon,matres,slep
+# thesaurus group->832
+center,centre,mal,plaza,shopingcent,square=>center,centre,mal,plaza,shopingcent,square
+# thesaurus group->833
+point,pt=>point,pt
+# thesaurus group->834
+sadle,tac=>sadle,tac
+# thesaurus group->835
+team,tem=>team,tem
+# thesaurus group->836
+retr,ruber,tire,tyre=>retr,ruber,tire,tyre
+# thesaurus group->837
+bace,bacing,bagel,bake,bread,cace,cocie,mufin,pastr,patis,patisier,pie=>bace,bacing,bagel,bake,bread,cace,cocie,mufin,pastr,patis,patisier,pie
+# thesaurus group->838
+werc,werx,worc,worx=>werc,werx,worc,worx
+# thesaurus group->839
+poco,port coquitlam=>poco,port coquitlam
+# thesaurus group->840
+clair,clare=>clair,clare
+# thesaurus group->841
+mufler,xhaust=>mufler,xhaust
+# thesaurus group->842
+hightek,hytek=>hightek,hytek
+# thesaurus group->843
+serious,sirius=>serious,sirius
+# thesaurus group->844
+duane,dwayne=>duane,dwayne
+# thesaurus group->845
+apiar,apicultur,apitherap,becep,honey=>apiar,apicultur,apitherap,becep,honey
+# thesaurus group->846
+cash,curenc,forx,fourx,intercambio,money,xchang=>cash,curenc,forx,fourx,intercambio,money,xchang
+# thesaurus group->847
+fungi,fungus,mushrom,mycolog=>fungi,fungus,mushrom,mycolog
+# thesaurus group->848
+4mula,4mulas,formula,fourmula=>4mula,4mulas,formula,fourmula
+# thesaurus group->849
+cib,cyb,sib,syb=>cib,cyb,sib,syb
+# thesaurus group->850
+kwantem,quantum=>kwantem,quantum
+# thesaurus group->852
+goru,guru=>goru,guru
+# thesaurus group->855
+chilcotin,tsilhqot'in=>chilcotin,tsilhqot'in
+# thesaurus group->856
+dicson,dixon,dixson=>dicson,dixon,dixson
+# thesaurus group->857
+chese,cream,dair,gelato,icecream,milc,yogourt,yogurt=>chese,cream,dair,gelato,icecream,milc,yogourt,yogurt
+# thesaurus group->858
+gofer,gopher=>gofer,gopher
+# thesaurus group->859
+flag,trafic=>flag,trafic
+# thesaurus group->860
+audit,inventor,stoc=>audit,inventor,stoc
+# thesaurus group->863
+rough,ruf=>rough,ruf
+# thesaurus group->864
+access,axis,axys=>access,axis,axys
+# thesaurus group->865
+axi,axy=>axi,axy
+# thesaurus group->866
+scale,weigh=>scale,weigh
+# thesaurus group->867
+acomodat,reservat=>acomodat,reservat
+# thesaurus group->868
+candl,parafin,wax=>candl,parafin,wax
+# thesaurus group->870
+bagage,lugage,suitcase=>bagage,lugage,suitcase
+# thesaurus group->871
+equip,implement,tractor=>equip,implement,tractor
+# thesaurus group->872
+demo,dismantl,salvag=>demo,dismantl,salvag
+# thesaurus group->874
+fras,fraz=>fras,fraz
+# thesaurus group->875
+avia,bird=>avia,bird
+# thesaurus group->876
+sonshine,sunshine=>sonshine,sunshine
+# thesaurus group->877
+geof,jef=>geof,jef
+# thesaurus group->878
+adjudicat,adr,arbitrat,disput,mediat,negotiat,resolut=>adjudicat,adr,arbitrat,disput,mediat,negotiat,resolut
+# thesaurus group->879
+no,number=>no,number
+# thesaurus group->880
+camera,foto,imag,photo=>camera,foto,imag,photo
+# thesaurus group->881
+aye,eye=>aye,eye
+# thesaurus group->883
+bic,chope,cyc,moto,mtb,mx,sbk,scoter,vtwin=>bic,chope,cyc,moto,mtb,mx,sbk,scoter,vtwin
+# thesaurus group->884
+aley,ali,biliard,bowl,lanes=>aley,ali,biliard,bowl,lanes
+# thesaurus group->885
+eleven,eleventh,oneone,oneoneth,xi=>eleven,eleventh,oneone,oneoneth,xi
+# thesaurus group->886
+onetwo,onetwoth,twelfth,twelve,twelveth=>onetwo,onetwoth,twelfth,twelve,twelveth
+# thesaurus group->887
+onethre,onethreth,thirten,thirtenth=>onethre,onethreth,thirten,thirtenth
+# thesaurus group->888
+twentyfirst,twentyone,twone,twonest=>twentyfirst,twentyone,twone,twonest
+# thesaurus group->889
+e-mail,ecom,ecomerce,email,homepage,host,isp,net,on-line,online,searchengin,seo,server,socialmedia,web=>e-mail,ecom,ecomerce,email,homepage,host,isp,net,on-line,online,searchengin,seo,server,socialmedia,web
+# thesaurus group->890
+career,carer,employ,hour,hr,humanresourc,job,labor,labour,overload,personel,placement,recruit,staf,suport,temp,worcforce=>career,carer,employ,hour,hr,humanresourc,job,labor,labour,overload,personel,placement,recruit,staf,suport,temp,worcforce
+# thesaurus group->891
+fire,fyr=>fire,fyr
+# thesaurus group->892
+johal,johel=>johal,johel
+# thesaurus group->893
+fort,ft=>fort,ft
+# thesaurus group->896
+barclay,barkley=>barclay,barkley
+# thesaurus group->899
+dent,dont,implant,ortho,periodont=>dent,dont,implant,ortho,periodont
+# thesaurus group->900
+carma,charma=>carma,charma
+# thesaurus group->901
+recover,rescue,tow=>recover,rescue,tow
+# thesaurus group->902
+2nd hand,2ndhand,consign,consignment,second hand,secondhand,thrift,used=>2nd hand,2ndhand,consign,consignment,second hand,secondhand,thrift,used
+# thesaurus group->904
+cartridge,inc,incing,incjet,laser,lazer,printer,refil,toner=>cartridge,inc,incing,incjet,laser,lazer,printer,refil,toner
+# thesaurus group->906
+argentum,bitcoin,blochain,cloudchain,crypto,ether,ethereum,fulfil,hash,pay,remit,setl=>argentum,bitcoin,blochain,cloudchain,crypto,ether,ethereum,fulfil,hash,pay,remit,setl
+# thesaurus group->908
+checer,chequer=>checer,chequer
+# thesaurus group->909
+fotbal,socer=>fotbal,socer
+# thesaurus group->910
+height,hite=>height,hite
+# thesaurus group->911
+nouveau,nuvo=>nouveau,nuvo
+# thesaurus group->912
+diet,nourish,nutri,suplement,vita,vitamin=>diet,nourish,nutri,suplement,vita,vitamin
+# thesaurus group->913
+barister,law,legal,litigat,solicitor=>barister,law,legal,litigat,solicitor
+# thesaurus group->915
+award,engrav,troph=>award,engrav,troph
+# thesaurus group->916
+ambiance,ambience=>ambiance,ambience
+# thesaurus group->917
+answer,cal,cel,celular,com,longdistance,mobile,networc,pag,phone,reconect,tel,voice,voip,wifi,wireles,wireless=>answer,cal,cel,celular,com,longdistance,mobile,networc,pag,phone,reconect,tel,voice,voip,wifi,wireles,wireless
+# thesaurus group->918
+fastfod,taceout=>fastfod,taceout
+# thesaurus group->919
+eav,guter=>eav,guter
+# thesaurus group->920
+distil,liquor,monshine,spirit=>distil,liquor,monshine,spirit
+# thesaurus group->921
+brian,bryan=>brian,bryan
+# thesaurus group->922
+aerial,arial,ariel=>aerial,arial,ariel
+# thesaurus group->923
+xstream,xtreme=>xstream,xtreme
+# thesaurus group->924
+alterain,atv,fourxfour,ofroad,quad=>alterain,atv,fourxfour,ofroad,quad
+# thesaurus group->925
+soce,tsouce=>soce,tsouce
+# thesaurus group->929
+sandalwood,sandlewood=>sandalwood,sandlewood
+# thesaurus group->930
+caisson,tunnel,underground=>caisson,tunnel,underground
+# thesaurus group->931
+fushion,fusion=>fushion,fusion
+# thesaurus group->934
+arora,aurora=>arora,aurora
+# thesaurus group->935
+bud,canabis,canibus,cbd,chroni,compasion,croni,dispensary,four twozero,ganja,marihuana,marijuana,maryjane,medicinal,pot,thc=>bud,canabis,canibus,cbd,chroni,compasion,croni,dispensary,four twozero,ganja,marihuana,marijuana,maryjane,medicinal,pot,thc
+# thesaurus group->936
+board,canoe,cayac,padl,sup,surf,whitewater=>board,canoe,cayac,padl,sup,surf,whitewater
+# thesaurus group->938
+blacsmith,farier,horseshoe=>blacsmith,farier,horseshoe
+# thesaurus group->939
+drone,uav,unmaned=>drone,uav,unmaned
+# thesaurus group->940
+rise,rize=>rise,rize
+# thesaurus group->941
+whyld,whylde,wild,wilde,wyld,wylde=>whyld,whylde,wild,wilde,wyld,wylde
+# thesaurus group->942
+post trauma,ptsd=>post trauma,ptsd
+# thesaurus group->943
+diagnostic,mri,sonograph,ultrasound,xray=>diagnostic,mri,sonograph,ultrasound,xray
+# thesaurus group->944
+virtual,vr=>virtual,vr
+# thesaurus group->945
+pointofsale,pos,register=>pointofsale,pos,register
+# thesaurus group->946
+elder,geriatric,retir,senior=>elder,geriatric,retir,senior
+# thesaurus group->947
+birth,doula,midwi,obstetric=>birth,doula,midwi,obstetric
+# thesaurus group->948
+userexerien,ux=>userexerien,ux
+# thesaurus group->949
+apnea,cpap,oxygen,respir=>apnea,cpap,oxygen,respir
+# thesaurus group->951
+asbestos,disaster,flod,haz,hazmat,mold,mould,remediat=>asbestos,disaster,flod,haz,hazmat,mold,mould,remediat
+# thesaurus group->952
+olsen,olson=>olsen,olson
+# thesaurus group->953
+emigra,immigra,visa=>emigra,immigra,visa
+# thesaurus group->954
+cymbal,drum,percusion,percussion=>cymbal,drum,percusion,percussion
+# thesaurus group->955
+aikido,aikikai,bj,capoeira,carate,cungfu,jiujitsu,judo,kicbox,martial,mma,selfdefen,taecwondo,wingchung=>aikido,aikikai,bj,capoeira,carate,cungfu,jiujitsu,judo,kicbox,martial,mma,selfdefen,taecwondo,wingchung
+# thesaurus group->956
+gaea,gaia=>gaea,gaia
+# thesaurus group->957
+foam,insul,spray=>foam,insul,spray
+# thesaurus group->958
+autospa,carwash,detail=>autospa,carwash,detail
+# thesaurus group->959
+carpol,carshar,rideshar=>carpol,carshar,rideshar
+# thesaurus group->960
+griffin,griffon,grifin,gryphon=>griffin,griffon,grifin,gryphon
+# thesaurus group->961
+natural,organic=>natural,organic
+# thesaurus group->962
+caning,jam,jell,picle,preserv=>caning,jam,jell,picle,preserv
+# thesaurus group->963
+sulfur,sulphur=>sulfur,sulphur
+# thesaurus group->964
+charit,fundrais,philanthrop=>charit,fundrais,philanthrop
+# thesaurus group->965
+caliber,calibre=>caliber,calibre
+# thesaurus group->966
+ambula,emergency,firstaid,firstrespon,paramedic,paramedical=>ambula,emergency,firstaid,firstrespon,paramedic,paramedical
+# thesaurus group->967
+sean,shaun,shawn,shon=>sean,shaun,shawn,shon
+
+
+#**********Distinctive substitutions  ****************
+#----------------------------------------------------
+# Synonym mappings for indexed number variations
+1 st, first=>1st,first
+2 nd, second=>2nd, second
+3 rd,third=>3rd,third
+4 th, fourth=>4th, fourth
+5 th, fifth=>5th, fifth
+6 th, sixth=>6th, sixth
+7 th, seventh, 7th, seventh
+8 th, eighth, 8th, eighth
+9 th, nineth, 9th, nineth
+
+
+
+
+

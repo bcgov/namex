@@ -73,7 +73,6 @@
        with their external dependencies.
     -->
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-dataimporthandler-.*\.jar" />
-
   <lib dir="${solr.install.dir:../../../..}/contrib/extraction/lib" regex=".*\.jar" />
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-cell-\d.*\.jar" />
 
@@ -85,8 +84,9 @@
 
   <lib dir="${solr.install.dir:../../../..}/contrib/velocity/lib" regex=".*\.jar" />
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-velocity-\d.*\.jar" />
-
   <lib dir="${solr.install.dir:../../../..}/contrib/dataimporthandler/lib/" regex=".*\.jar" />
+
+  <lib dir="${solr.install.dir:../../../..}/server/lib/" regex=".*\.jar" />
 
   <!-- an exact 'path' can be used instead of a 'dir' to specify a 
        specific jar file.  This will cause a serious error to be logged 
@@ -722,13 +722,14 @@
        of SearchComponents (see below) and supports distributed
        queries across multiple shards
     -->
-  
-  <requestHandler name="/dataimport" class="solr.DataImportHandler">
+	
+	 <requestHandler name="/dataimport" class="solr.DataImportHandler">
     <lst name="defaults">
       <str name="config">solr-data-config.xml</str>
     </lst>
-  </requestHandler>
-
+    </requestHandler>
+	
+		
   <requestHandler name="/select" class="solr.SearchHandler">
     <!-- default values for query parameters can be specified, these
          will be overridden by parameters in the request

@@ -85,7 +85,7 @@
       "displayName": "Git Repo URL",
       "description": "The URL to your GIT repo, don't use the default unless your just experimenting.",
       "required": true,
-      "value": "https://github.com/bcgov/namex-api.git"
+      "value": "https://github.com/bcgov/namex.git"
 
     },
     {
@@ -107,7 +107,7 @@
       "displayName": "Source Image Name",
       "required": true,
       "description": "The name of the source image.",
-      "value": "solr-base"
+      "value": "namex-solr-base"
     },
     {
       "name": "SOURCE_IMAGE_TAG",
@@ -121,7 +121,7 @@
       "displayName": "Namespace",
       "required": true,
       "description": "The OpenShift namespace where the ImageStream resides.",
-      "value": "solr"
+      "value": "servicebc-ne-tools"
     },
     {
       "name": "OUTPUT_IMAGE_TAG",

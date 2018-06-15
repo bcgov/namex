@@ -48,8 +48,8 @@
       },
       "spec":
       {
-        "host": "${APPLICATION_DOMAIN}",
-        "path": "/${NAME}",
+        "host": "namex-${NAME}.${APPLICATION_DOMAIN}",
+        "path": "/solr",
         "tls":
         {
           "insecureEdgeTerminationPolicy": "Redirect",
@@ -74,6 +74,9 @@
       "metadata":
       {
         "name": "${NAME}",
+        "annotations": {
+          "volume.beta.kubernetes.io/storage-class": "gluster-block"
+        },
         "labels":
         {
           "app": "${NAME}",
@@ -109,7 +112,7 @@
       {
         "strategy":
         {
-          "type": "Rolling",
+          "type": "Recreate",
           "rollingParams":
           {
             "updatePeriodSeconds": 1,
@@ -136,7 +139,7 @@
               {
                 "kind": "ImageStreamTag",
                 "namespace": "${IMAGE_NAMESPACE}",
-                "name": "${NAME}:${TAG_NAME}"
+                "name": "${IMAGE_NAME}:${TAG_NAME}"
               }
             }
           }
@@ -167,6 +170,40 @@
                 {
                   "claimName": "${NAME}"
                 }
+              },
+              {
+                "name": "solr-data-config-names-gxmla",
+                "configMap": {
+                  "name": "solr-data-config-names",
+                  "items": [
+                    {"key": "solr-data-config.xml",
+                     "path": "solr-data-config.xml"}
+
+                  ],
+                  "defaultMode": 420
+                }
+              },
+                {
+                  "name": "solr-data-config-possible-conflicts-m4sdc",
+                  "configMap": {
+                    "name": "solr-data-config-possible-conflicts",
+                    "items": [
+                      {"key": "solr-data-config.xml",
+                      "path": "solr-data-config.xml"}
+                    ],
+                    "defaultMode": 420
+                  }
+                },
+                {
+                  "name": "solr-data-config-trademarks-kzj9j",
+                  "configMap": {
+                    "name": "solr-data-config-trademarks",
+                    "items": [
+                      {"key": "solr-data-config.xml",
+                      "path": "solr-data-config.xml"}
+                    ],
+                    "defaultMode": 420
+                  }
               }
             ],
             "containers": [
@@ -183,6 +220,21 @@
                   {
                     "name": "${NAME}-data",
                     "mountPath": "${MOUNT_PATH}"
+                  },
+                  {
+                    "name": "solr-data-config-names-gxmla",
+                    "mountPath": "/opt/solr/server/solr/configsets/names/conf/solr-data-config.xml",
+                    "subPath": "solr-data-config.xml"
+                  },
+                  {
+                    "name": "solr-data-config-possible-conflicts-m4sdc",
+                    "mountPath": "/opt/solr/server/solr/configsets/possible.conflicts/conf/solr-data-config.xml",
+                    "subPath": "solr-data-config.xml"
+                  },
+                  {
+                    "name": "solr-data-config-trademarks-kzj9j",
+                    "mountPath": "/opt/solr/server/solr/configsets/trademarks/conf/solr-data-config.xml",
+                    "subPath": "solr-data-config.xml"
                   }
                 ],
                 "env": [
@@ -219,6 +271,13 @@
       "displayName": "Image Namespace",
       "required": true,
       "description": "The namespace of the OpenShift project containing the imagestream for the application.",
+      "value": "solr"
+    },
+    {
+      "name": "IMAGE_NAME",
+      "displayName": "Image Name",
+      "required": true,
+      "description": "The name of the source imagestream for the application.",
       "value": "solr"
     },
     {

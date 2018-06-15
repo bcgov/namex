@@ -12,7 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-a
+
+# a couple of test stopwords to test that the words are really being
+# configured from this file:
+stopworda
+stopwordb
+
+# Standard english stop words taken from Lucene's StopAnalyzer
+#a
 an
 and
 are
@@ -42,10 +49,32 @@ these
 they
 this
 to
-limited
+#words from cobrs to be removed but not included here
+#ampersand
+#plus
+#addition of designations
+association
+assoc
+assoc.
+assn
+assn.
+company
+co
+co.
 corporation
+corp
+corp.
+incorporated
+inc
+inc.
+incorporee
+liability
+limited
 ltd
 ltd.
-inc
-
-ltd.
+limitee
+ltee
+ltee.
+society
+soc
+soc.

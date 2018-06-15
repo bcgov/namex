@@ -1,3 +1,0 @@
-Notes for SOLR
-
-only find matching names that have the thesaurus  (must contain a descriptive from the thesaurus)
