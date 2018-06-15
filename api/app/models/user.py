@@ -8,10 +8,10 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(1000), unique=True)
+    username = db.Column(db.String(1000))
     firstname = db.Column(db.String(1000))
     lastname = db.Column(db.String(1000))
-    sub = db.Column(db.String(36), default='DRAFT')
+    sub = db.Column(db.String(36), unique=True)
     iss = db.Column(db.String(1024))
     creationDate = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -32,7 +32,7 @@ class User(db.Model):
 
     @classmethod
     def find_by_jwtToken(cls, token):
-        return cls.query.filter_by(username=token['username']).first()
+        return cls.query.filter_by(sub=token['sub']).one_or_none()
 
     @classmethod
     def create_from_jwtToken(cls, token):
@@ -54,8 +54,43 @@ class User(db.Model):
 
     @classmethod
     def find_by_username(cls, username):
-        return cls.query.filter_by(username=username).one_or_none()
+        return cls.query.filter_by(username=username).order_by(User.creationDate.desc()).first()
 
+    @classmethod
+    def find_by_sub(cls, sub):
+        return cls.query.filter_by(sub=sub).one_or_none()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    # class UserSchema(Schema):
+    #     id = fields.Int(dump_only=True)
+    #     username = fields.String()
+    #     firstname = fields.String()
+    #     lastname = fields.String()
+    #     sub = fields.String()
+    #     iss = fields.String()
+    #     creationDate = fields.DateTime()
+    #
+    #     We use make_object to create a new User from validated data
+    # @post_load
+    # def make_object(self, data):
+    #     if not data:
+    #         return None
+    #     return User(username=data['username'],
+    #                 firstname=data['firstname'],
+    #                 lastname=data['lastname'],
+    #                 sub=data['sub'],
+    #                 iss=data['iss'])
+
+    # class KeycloakUserSchema(Schema):
+    #     id = fields.Int(dump_only=True)
+    #     username = fields.String(attribute="username")
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
