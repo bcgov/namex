@@ -22,7 +22,7 @@ class Name(db.Model):
 
 
     def as_dict(self):
-        return {"name": self.name, "choice": self.choice, "state": self.state, "consumptionDate": self.consumptionDate }
+        return {"name": self.name, "designation": self.designation, "choice": self.choice, "state": self.state, "consumptionDate": self.consumptionDate }
 
     @classmethod
     def find_by_name(cls, name):
@@ -39,4 +39,8 @@ class Name(db.Model):
 class NameSchema(ma.ModelSchema):
     class Meta:
         model = Name
-        # fields = ('choice', 'name', 'state')
+    name = fields.String(
+        required=True,
+        error_messages={'required': {'message': 'name is a required field'}}
+    )
+    # additional = ("name", "email", "created_at")
