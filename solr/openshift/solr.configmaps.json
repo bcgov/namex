@@ -1,0 +1,169 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "solr",
+        "creationTimestamp": null
+    },
+    "objects": [
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "solr",
+                "generation": 1,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "solr"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {},
+                    "activeDeadlineSeconds": 21600
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "solr"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "servicebc-ne-tools",
+                                "name": "solr:dev"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "solr",
+                    "deploymentconfig": "solr"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "solr",
+                            "deploymentconfig": "solr"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "solr-data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "solr"
+                                }
+                            },
+                            {
+                                "name": "solr-data-config-names-gxmla",
+                                "configMap": {
+                                    "name": "solr-data-config-names",
+                                    "items": [
+                                        {"key": "solr-data-config.xml",
+                                         "path": "solr-data-config.xml"}
+                                    ],
+                                    "defaultMode": 420
+                                }
+                            },
+                            {
+                                "name": "solr-data-config-registry-8sonz",
+                                "configMap": {
+                                    "name": "solr-data-config-registry",
+                                    "items": [
+                                        {"key": "solr-data-config.xml",
+                                         "path": "solr-data-config.xml"}
+                                    ],
+                                    "defaultMode": 420
+                                }
+                            },
+                            {
+                                "name": "solr-data-config-trademarks-kzj9j",
+                                "configMap": {
+                                    "name": "solr-data-config-trademarks",
+                                    "items": [
+                                        {"key": "solr-data-config.xml",
+                                         "path": "solr-data-config.xml"}
+                                    ],
+                                    "defaultMode": 420
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "solr",
+                                "image": "docker-registry.default.svc:5000/servicebc-ne-tools/solr@sha256:08efb699837ce5ecc4ebc869c092104ff86c4f40211b2ae7c04f5959ac9792cb",
+                                "ports": [
+                                    {
+                                        "containerPort": 8983,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "CORE_NAME",
+                                        "value": "names,registry,trademarks"
+                                    }
+                                ],
+                                "resources": {},
+                                "volumeMounts": [
+                                    {
+                                        "name": "solr-data",
+                                        "mountPath": "/opt/solr/server/solr/mycores"
+                                    },
+                                    {
+                                        "name": "solr-data-config-names-gxmla",
+                                        "readOnly": true,
+                                        "mountPath": "/opt/solr/server/solr/mycores/names/conf"
+                                    },
+                                    {
+                                        "name": "solr-data-config-registry-8sonz",
+                                        "readOnly": true,
+                                        "mountPath": "/opt/solr/server/solr/mycores/registry/conf"
+                                    },
+                                    {
+                                        "name": "solr-data-config-trademarks-kzj9j",
+                                        "readOnly": true,
+                                        "mountPath": "/opt/solr/server/solr/mycores/trademarks/conf"
+                                    }
+                                ],
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {},
+                        "schedulerName": "default-scheduler"
+                    }
+                }
+            },
+            "status": {
+                "latestVersion": 0,
+                "observedGeneration": 0,
+                "replicas": 0,
+                "updatedReplicas": 0,
+                "availableReplicas": 0,
+                "unavailableReplicas": 0
+            }
+        }
+    ]
+}

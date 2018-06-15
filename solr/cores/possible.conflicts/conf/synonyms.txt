@@ -15,7 +15,7 @@
 # thesaurus group->5
 autocourt,bedbreacfast,guest,hotel,in,lodge,motel,motorcourt,motorhotel,motorin,resort,suites=>autocourt,bedbreacfast,guest,hotel,in,lodge,motel,motorcourt,motorhotel,motorin,resort,suites
 # thesaurus group->6
-acept,aset,capital,capitol,credit,equit,financ,fund,invest,lend,loan,mortgag,mutualfund,payday,securit,wealth=>acept,aset,capital,capitol,credit,equit,financ,fund,invest,lend,loan,mortgag,mutualfund,payday,securit,wealth
+acept,asset,capital,capitol,credit,equit,financ,fund,invest,lend,loan,mortgag,mutualfund,payday,securit,wealth=>acept,aset,capital,capitol,credit,equit,financ,fund,invest,lend,loan,mortgag,mutualfund,payday,securit,wealth
 # thesaurus group->7
 apartment,apt,condo,court,loft,manor,residen,strata,stratum,townhome,townhouse,vila=>apartment,apt,condo,court,loft,manor,residen,strata,stratum,townhome,townhouse,vila
 # thesaurus group->8
