@@ -1,6 +1,6 @@
 SOLR build notes
 
-* Need S2I for "solr-base" image.  See TorOrgBook/docker/manage for original bulid files.
+* Need "solr-base" image.  See TorOrgBook/docker/manage for original bulid files.
 
 Make sure you're in tools
 (venv) NDM050057:openshift vboettch$ oc status
@@ -10,7 +10,7 @@ created templates/solr-build.json
 
 * Make sure you're in the solr openshift folder
 (venv) NDM050057:openshift vboettch$ pwd
-/Users/vboettch/Development/namex-api/solr/openshift
+/Users/vboettch/Development/namex/solr/openshift
 
 * Sanity check
 oc process -f templates/solr-build.json --param-file=solr-build.param
@@ -36,7 +36,7 @@ Tag solr:dev set to servicebc-ne-tools/solr@sha256:184122663e61dbc27003242d9493a
 (venv) NDM050057:openshift vboettch$ oc project servicebc-ne-dev
 Now using project "servicebc-ne-dev" on server "https://console.pathfinder.gov.bc.ca:8443".
 
-(venv) NDM050057:openshift vboettch$ oc process -f templates/solr-deploy.json --param-file=solr-deploy.dev.param | oc create -f -
+(venv) NDM050057:openshift vboettch$ oc process -f templates/solr-deploy.json --param-file=solr-deploy.dev.namescore.param | oc create -f -
 service "solr" created
 route "solr" created
 persistentvolumeclaim "solr" created

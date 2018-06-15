@@ -49,9 +49,32 @@ these
 they
 this
 to
-limited
+#words from cobrs to be removed but not included here
+#ampersand
+#plus
+#addition of designations
+association
+assoc
+assoc.
+assn
+assn.
+company
+co
+co.
 corporation
-ltd
-ltd.
+corp
+corp.
+incorporated
 inc
 inc.
+incorporee
+liability
+limited
+ltd
+ltd.
+limitee
+ltee
+ltee.
+society
+soc
+soc.
