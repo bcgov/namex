@@ -6,7 +6,7 @@ class PartnerNameSystem(db.Model):
     __tablename__ = 'partner_name_system'
 
     id = db.Column(db.Integer, primary_key=True)
-    partnerNameTypeCd = db.Column('partner_name_type_cd', db.String(2))
+    partnerNameTypeCd = db.Column('partner_name_type_cd', db.String(10))
     partnerNameNumber = db.Column('partner_name_number', db.String(20))
     partnerJurisdictionTypeCd = db.Column('partner_jurisdiction_type_cd', db.String(3))
     partnerNameDate = db.Column('partner_name_date', db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
