@@ -34,7 +34,7 @@ def TST_NS = 'servicebc-ne-test'
 def PROD_DEPLOYMENT_NAME = 'namex-api'
 def PROD_TAG_NAME = 'prod'
 def PROD_BCK_TAG_NAME = 'prod-previous'
-def PROD_NS = 'ocp-myapp-prod'
+def PROD_NS = 'namex-api-prod'
 def SLACK_TOKEN = 'sRLVVwvJg3mOsfbNk0tXSgrn'
 
 
@@ -108,35 +108,31 @@ containerTemplate(
             echo "Build: ${BUILD_ID}"
             checkout scm
         }
-
-        stage('dependency check') {
-          dir('owasp') {
-            // content of 
-            // http://dl.bintray.com/jeremy-long/owasp/dependency-check-3.1.2-release.zip'
-            // expected in git repo in owasp/
-            sh './dependency-check/bin/dependency-check.sh --project "MyApp" --scan ../package.json --enableExperimental --enableRetired'
-            sh 'rm -rf ./dependency-check/data/'
-            publishHTML (target: [
-                                allowMissing: false,
-                                alwaysLinkToLastBuild: false,
-                                keepAll: true,
-                                reportDir: './',
-                                reportFiles: 'dependency-check-report.html',
-                                reportName: "OWASP Dependency Check Report"
-                          ])
-          }
-        }
-        stage('code quality check') {
-           SONARQUBE_URL = sh (
-               script: 'oc get routes -o wide --no-headers | awk \'/sonarqube/{ print match($0,/edge/) ?  "https://"$2 : "http://"$2 }\'',
-               returnStdout: true
-                  ).trim()
-           echo "SONARQUBE_URL: ${SONARQUBE_URL}"
-           dir('sonar-runner') {
-            sh returnStdout: true, script: "./gradlew sonarqube -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.verbose=true --stacktrace --info -Dsonar.projectName=Devex.Dev -Dsonar.branch=develop -Dsonar.projectKey=org.sonarqube:bcgov-devex-dev -Dsonar.sources=.."
-           }
-        }
-
-        
-    }
+		 stage('build') {
+				echo "Building..."
+				openshiftBuild bldCfg: BUILDCFG_NAME, verbose: 'false', showBuildLogs: 'true'
+					sleep 5
+				// openshiftVerifyBuild bldCfg: BUILDCFG_NAME
+					echo ">>> Get Image Hash"
+					IMAGE_HASH = sh (
+					  script: """oc get istag ${IMAGE_NAME}:latest -o template --template=\"{{.image.dockerImageReference}}\"|awk -F \":\" \'{print \$3}\'""",
+						returnStdout: true).trim()
+					echo ">> IMAGE_HASH: ${IMAGE_HASH}"
+				echo ">>>> Build Complete"
+			}
+		stage('Dev deploy') {
+			echo ">>> Tag ${IMAGE_HASH} with ${DEV_TAG_NAME}"
+			openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: DEV_TAG_NAME, srcStream: IMAGE_NAME, srcTag: "${IMAGE_HASH}"
+				sleep 5
+			openshiftVerifyDeployment depCfg: DEV_DEPLOYMENT_NAME, namespace: DEV_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
+			echo ">>>> Deployment Complete"
+			// send msg to slack
+			def attachment = [:]
+				attachment.fallback = 'See build log for more details'
+				attachment.title = "Build ${BUILD_ID} OK! :heart: :tada:"
+				attachment.color = '#00FF00' // Lime Green
+				attachment.text = "Changes applied:\n" + getChangeString() + "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+			notifySlack("Dev Deploy", "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
+		}
+	}
 }
