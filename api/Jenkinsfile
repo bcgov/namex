@@ -1,5 +1,5 @@
 //
-// Copyright © 2018 Province of British Columbia
+// Copyright © 2018 Province of British Columbia
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@
 // define constants
 def BUILDCFG_NAME ='namex-api'
 def IMAGE_NAME = 'namex-api'
-def DEV_DEPLOYMENT_NAME = 'namex-api-dev'
+def DEV_DEPLOYMENT_NAME = 'namex-api'
 def DEV_TAG_NAME = 'dev'
 def DEV_NS = 'servicebc-ne-dev'
-def TST_DEPLOYMENT_NAME = 'namex-api-test'
+def TST_DEPLOYMENT_NAME = 'namex-api'
 def TST_TAG_NAME = 'test'
 def TST_BCK_TAG_NAME = 'test-previous'
 def TST_NS = 'servicebc-ne-test'
@@ -123,7 +123,7 @@ containerTemplate(
 		stage('Dev deploy') {
 			echo ">>> Tag ${IMAGE_HASH} with ${DEV_TAG_NAME}"
 			openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: DEV_TAG_NAME, srcStream: IMAGE_NAME, srcTag: "${IMAGE_HASH}"
-				sleep 5
+				sleep 10
 			openshiftVerifyDeployment depCfg: DEV_DEPLOYMENT_NAME, namespace: DEV_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
 			echo ">>>> Deployment Complete"
 			// send msg to slack
