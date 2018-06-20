@@ -126,13 +126,14 @@ containerTemplate(
 				sleep 10
 			openshiftVerifyDeployment depCfg: DEV_DEPLOYMENT_NAME, namespace: DEV_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
 			echo ">>>> Deployment Complete"
+			// slack subscription is full, can't send and this func is broken
 			// send msg to slack
-			def attachment = [:]
-				attachment.fallback = 'See build log for more details'
-				attachment.title = "Build ${BUILD_ID} OK! :heart: :tada:"
-				attachment.color = '#00FF00' // Lime Green
-				attachment.text = "Changes applied:\n" + getChangeString() + "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-			notifySlack("Dev Deploy", "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
+			//def attachment = [:]
+			//	attachment.fallback = 'See build log for more details'
+			//	attachment.title = "Build ${BUILD_ID} OK! :heart: :tada:"
+			//	attachment.color = '#00FF00' // Lime Green
+			//	attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+			//notifySlack("Dev Deploy", "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
 		}
 	}
 }
