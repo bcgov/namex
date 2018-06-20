@@ -187,7 +187,7 @@ stage('API Test') {
 	])
 	{
 //		node("nodejs-${context.uuid}") {
-		node("nodejs-0000111") {
+		nnode('jenkins-python3nodejs') {
 		//the checkout is mandatory, otherwise functional test would fail
 			echo "checking out source"authurl
 			echo "Build: ${BUILD_ID}"
