@@ -164,7 +164,6 @@ podTemplate(label: zappodlabel, name: zappodlabel, serviceAccount: 'jenkins', cl
      }
   }
 
-
 stage('API Test', context) {
 	podTemplate(label: 'jenkins-python3nodejs', name: 'jenkins-python3nodejs', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
@@ -177,14 +176,6 @@ stage('API Test', context) {
 		workingDir: '/tmp',
 		command: '',
 		args: '${computer.jnlpmac} ${computer.name}'
-		envVars: [
-			envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca"),
-			secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets', secretKey: 'username'),
-			secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets', secretKey: 'password'),
-			secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets', secretKey: 'auth_server'),
-			secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets', secretKey: 'client_id'),
-			secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
-		]
 	  )
 	],envVars: [
 		envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca"),
