@@ -1,0 +1,5 @@
+[
+  "tests/unit/test_rws.py::test_readyz",
+  "tests/unit/test_rws.py::test_healthz",
+  "tests/unit/test_rws.py::test_not_authenticated"
+]

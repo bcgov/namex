@@ -1,0 +1,17 @@
+gunicorn
+
+Flask
+Flask-RESTplus
+Flask-SQLAlchemy
+Flask-Marshmallow
+Flask-OIDC
+
+pytest-flask
+python-jose
+python-dotenv
+psycopg2-binary
+marshmallow
+marshmallow-sqlalchemy
+sqlalchemy
+httplib2
+six
