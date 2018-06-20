@@ -2,7 +2,7 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "colin-api-template",
+        "name": "rw-api-template",
         "creationTimestamp": null
     },
     "objects": [
@@ -10,11 +10,11 @@
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
-                "name": "colin-api",
+                "name": "rw-api",
                 "generation": 1,
                 "creationTimestamp": null,
                 "labels": {
-                    "app": "colin-api"
+                    "app": "rw-api"
                 },
                 "annotations": {
                     "openshift.io/generated-by": "OpenShiftWebConsole"
@@ -39,12 +39,12 @@
                         "imageChangeParams": {
                             "automatic": true,
                             "containerNames": [
-                                "colin-api"
+                                "rw-api"
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "servicebc-ne-tools",
-                                "name": "colin-api:dev"
+                                "name": "rw-api:dev"
                             }
                         }
                     },
@@ -55,15 +55,15 @@
                 "replicas": 1,
                 "test": false,
                 "selector": {
-                    "app": "colin-api",
-                    "deploymentconfig": "colin-api"
+                    "app": "rw-api",
+                    "deploymentconfig": "rw-api"
                 },
                 "template": {
                     "metadata": {
                         "creationTimestamp": null,
                         "labels": {
-                            "app": "colin-api",
-                            "deploymentconfig": "colin-api"
+                            "app": "rw-api",
+                            "deploymentconfig": "rw-api"
                         },
                         "annotations": {
                             "openshift.io/generated-by": "OpenShiftWebConsole"
@@ -81,7 +81,7 @@
                         ],
                         "containers": [
                             {
-                                "name": "colin-api",
+                                "name": "rw-api",
                                 "image": "docker-registry.default.svc:5000/servicebc-ne-tools/colin-api@sha256:a6fc46a84beb1fb8190fef1c1ac309976409ad4faa420d7a1a41bb4984548868",
                                 "ports": [
                                     {
@@ -101,7 +101,7 @@
                                         "name": "DATABASE_USERNAME",
                                         "valueFrom": {
                                             "secretKeyRef": {
-                                                "name": "postgres-oracle-fdw-registry",
+                                                "name": "postgresql",
                                                 "key": "database-user"
                                             }
                                         }
@@ -110,7 +110,7 @@
                                         "name": "DATABASE_PASSWORD",
                                         "valueFrom": {
                                             "secretKeyRef": {
-                                                "name": "postgres-oracle-fdw-registry",
+                                                "name": "postgresql",
                                                 "key": "database-password"
                                             }
                                         }
@@ -134,45 +134,15 @@
                                         }
                                     },
                                     {
-                                        "name": "NAMES_DATABASE_USERNAME",
-                                        "valueFrom": {
-                                            "secretKeyRef": {
-                                                "name": "postgresql-oracle-fdw-names",
-                                                "key": "database-user"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "name": "NAMES_DATABASE_PASSWORD",
-                                        "valueFrom": {
-                                            "secretKeyRef": {
-                                                "name": "postgresql-oracle-fdw-names",
-                                                "key": "database-password"
-                                            }
-                                        }
-                                    },
-                                    {
                                         "name": "DATABASE_NAME",
-                                        "value": "BC_REGISTRIES"
+                                        "value": "namex"
                                     },
                                     {
                                         "name": "DATABASE_HOST",
-                                        "value": "postgres-oracle-fdw-registry"
+                                        "value": "postgresql"
                                     },
                                     {
                                         "name": "DATABASE_PORT",
-                                        "value": "5432"
-                                    },
-                                    {
-                                        "name": "NAMES_DATABASE_NAME",
-                                        "value": "BC_REGISTRIES_NAMES"
-                                    },
-                                    {
-                                        "name": "NAMES_DATABASE_HOST",
-                                        "value": "postgresql-oracle-fdw-names"
-                                    },
-                                    {
-                                        "name": "NAMES_DATABASE_PORT",
                                         "value": "5432"
                                     }
                                 ],
