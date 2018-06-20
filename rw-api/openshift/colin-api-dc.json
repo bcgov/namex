@@ -1,0 +1,179 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "rw-api-template",
+        "creationTimestamp": null
+    },
+    "objects": [
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "rw-api",
+                "generation": 1,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "rw-api"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftWebConsole"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {},
+                    "activeDeadlineSeconds": 21600
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "rw-api"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "servicebc-ne-tools",
+                                "name": "rw-api:dev"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "rw-api",
+                    "deploymentconfig": "rw-api"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "rw-api",
+                            "deploymentconfig": "rw-api"
+                        },
+                        "annotations": {
+                            "openshift.io/generated-by": "OpenShiftWebConsole"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "volume-92eu8",
+                                "configMap": {
+                                    "name": "namex-api-keycloak",
+                                    "defaultMode": 420
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "rw-api",
+                                "image": "docker-registry.default.svc:5000/servicebc-ne-tools/colin-api@sha256:a6fc46a84beb1fb8190fef1c1ac309976409ad4faa420d7a1a41bb4984548868",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "envFrom": [
+                                    {
+                                        "configMapRef": {
+                                            "name": "namex-api-config"
+                                        }
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "DATABASE_USERNAME",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "postgresql",
+                                                "key": "database-user"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "DATABASE_PASSWORD",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "postgresql",
+                                                "key": "database-password"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "SECRET_KEY",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-api-config",
+                                                "key": "SECRET_KEY"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "OIDC_OPENID_REALM",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-api-config",
+                                                "key": "OIDC_OPENID_REALM"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "DATABASE_NAME",
+                                        "value": "namex"
+                                    },
+                                    {
+                                        "name": "DATABASE_HOST",
+                                        "value": "postgresql"
+                                    },
+                                    {
+                                        "name": "DATABASE_PORT",
+                                        "value": "5432"
+                                    }
+                                ],
+                                "resources": {},
+                                "volumeMounts": [
+                                    {
+                                        "name": "volume-92eu8",
+                                        "mountPath": "/opt/app-root/src/client_secrets"
+                                    }
+                                ],
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {},
+                        "schedulerName": "default-scheduler"
+                    }
+                }
+            },
+            "status": {
+                "latestVersion": 0,
+                "observedGeneration": 0,
+                "replicas": 0,
+                "updatedReplicas": 0,
+                "availableReplicas": 0,
+                "unavailableReplicas": 0
+            }
+        }
+    ]
+}
