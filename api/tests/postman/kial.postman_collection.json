@@ -316,13 +316,11 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 0000021/analysis/1/conflicts?start=3&rows=35",
+							"raw": "{{url}}/requests/NR 0000021/analysis/1/conflicts?start=3&rows=35",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"requests",
 								"NR 0000021",
 								"analysis",
@@ -412,13 +410,11 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 0000021/analysis/1/histories?start=1&rows=32",
+							"raw": "{{url}}/requests/NR 0000021/analysis/1/histories?start=1&rows=32",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"requests",
 								"NR 0000021",
 								"analysis",
@@ -508,13 +504,11 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 0000021/analysis/1/trademarks?start=1&rows=32",
+							"raw": "{{url}}/requests/NR 0000021/analysis/1/trademarks?start=1&rows=32",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"api",
-								"v1",
 								"requests",
 								"NR 0000021",
 								"analysis",
@@ -604,15 +598,15 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/requests/NR 1224499/analysis/1/restricted_words",
+							"raw": "{{url}}/requests/NR 8270105/analysis/3/restricted_words",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"requests",
-								"NR 1224499",
+								"NR 8270105",
 								"analysis",
-								"1",
+								"3",
 								"restricted_words"
 							]
 						}
