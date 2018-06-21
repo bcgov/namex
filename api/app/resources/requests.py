@@ -427,12 +427,10 @@ class RequestsAnalysis(Resource):
 
     @staticmethod
     def get_restricted_words_conditions(corp_name):
-        print(corp_name)
-        print(type(corp_name))
         """ 1. put all possible restricted words/phrases in a list
                           - used later to compare against sql fn
                        parse corp_name from snake_case into sql format
-                """
+        """
         word_list = corp_name.split()
         corp_name_sql = corp_name
 
@@ -451,7 +449,6 @@ class RequestsAnalysis(Resource):
             phrase = ''
 
         word_list = word_list + phrases
-        print(word_list)
         """------------------------------------------------------"""
 
         """ 2. get words/phrases in corp_name that are restricted
@@ -462,6 +459,7 @@ class RequestsAnalysis(Resource):
         get_restricted_words_sql = text("select get_restricted_words(\'{}\')".format(corp_name_sql))
         try:
             restricted_words_obj = db.engine.execute(get_restricted_words_sql)
+
         except exc.SQLAlchemyError:
             print(exc.SQLAlchemyError)
             return jsonify({"message": "An error occurred accessing the restricted words."}), 500
@@ -470,23 +468,21 @@ class RequestsAnalysis(Resource):
 
         restricted_word_ids = []
         regex_list = []
+
         try:
             restricted_words_str = restricted_words_obj.fetchall()[0][0]
-            print(restricted_words_str)
             restricted_word_ids = re.findall(r'word_id:(.*?)word_phrase:', restricted_words_str)
             regex_list = re.findall(r'word_phrase:(.*?)(\,|$)', restricted_words_str)
+
         except:
             pass
+
         restricted_words = [word[0] for word in regex_list]
-        print(restricted_words)
         restricted_words_dict = [{'id': id, 'phrase': phrase} for id, phrase in
                                  zip(restricted_word_ids, restricted_words)]
-        print(restricted_words_dict)
 
         # make sure all words in restricted_words_dict are in word_list
         restricted_words_dict[:] = [word for word in restricted_words_dict if word['phrase'] in word_list]
-
-        print(restricted_words_dict)
         """-----------------------------------------------------------------"""
 
         """ 3. get condition info based on word_id for each restricted word """
@@ -496,27 +492,29 @@ class RequestsAnalysis(Resource):
             get_cnd_id_sql = text("select cnd_id from restricted_word_condition where word_id = {}".format(word['id']))
             try:
                 cnd_id_obj = db.engine.execute(get_cnd_id_sql)
-                # print(cnd_id_obj.fetchall())
+                cnd_ids = cnd_id_obj.fetchall()
 
-                cnd_id = cnd_id_obj.fetchall()[0][0]
-                # print(cnd_id)
-                get_cnd_sql = text("select * from restricted_condition where cnd_id = {}".format(cnd_id))
-                cnd_obj = db.engine.execute(get_cnd_sql)
+                cnd_obj_list = []
+                for id in cnd_ids:
+                    cnd_id = id[0]
+                    get_cnd_sql = text("select * from restricted_condition where cnd_id = {}".format(cnd_id))
+                    cnd_obj_list.append(db.engine.execute(get_cnd_sql))
 
-                # print(cnd_obj.fetchall())
-                cnd_info = cnd_obj.fetchall()[0]
-                cnd_text = cnd_info[1]
-                cnd_allow_use = cnd_info[2]
-                cnd_consent_req = cnd_info[3]
-                cnd_consent_body = cnd_info[4]
-                cnd_instr = cnd_info[5]
+                cnd_info = []
+                for obj in cnd_obj_list:
+                    obj_tuple = obj.fetchall()[0]
+                    cnd_text = obj_tuple[1]
+                    cnd_allow_use = obj_tuple[2]
+                    cnd_consent_req = obj_tuple[3]
+                    cnd_consent_body = obj_tuple[4]
+                    cnd_instr = obj_tuple[5]
 
-                cnd_info = {'id': cnd_id,
-                            'text': cnd_text,
-                            'allow_use': cnd_allow_use,
-                            'consent_required': cnd_consent_req,
-                            'consenting_body': cnd_consent_body,
-                            'instructions': cnd_instr}
+                    cnd_info.append({'id': cnd_id,
+                                    'text': cnd_text,
+                                    'allow_use': cnd_allow_use,
+                                    'consent_required': cnd_consent_req,
+                                    'consenting_body': cnd_consent_body,
+                                    'instructions': cnd_instr})
                 restricted_words_conditions.append({'word_info': word, 'cnd_info': cnd_info})
             except exc.SQLAlchemyError:
                 print(exc.SQLAlchemyError)
