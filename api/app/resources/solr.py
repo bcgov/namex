@@ -16,7 +16,8 @@ class SolrQueries:
     CONFLICTS='conflicts'
     HISTORY='histories'
     TRADEMARKS='trademarks'
-    VALID_QUERIES=[CONFLICTS, HISTORY, TRADEMARKS]
+    RESTRICTED_WORDS='restricted_words'
+    VALID_QUERIES=[CONFLICTS, HISTORY, TRADEMARKS, RESTRICTED_WORDS]
 
     queries ={
         'similar': '/solr/{core}/select?q=id:{name}&wt=json',
