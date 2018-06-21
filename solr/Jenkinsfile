@@ -3,6 +3,26 @@
 // which only needs to be rebuilt when there are changes to it's associated repository (https://github.com/bcgov/openshift-solr)
 // Therefore, it is unnecessary to build it as part of this pipeline.
 
+// VB - This file is a hacked hybrid between the TheOrgBook Jenkins template and Angelika's new 3.9 Jenkins template.
+
+// define constants
+def BUILDCFG_NAME ='solr'
+def IMAGE_NAME = 'solr'
+def DEV_DEPLOYMENT_NAME = 'solr-names'
+def DEV_TAG_NAME = 'dev'
+def DEV_NS = 'servicebc-ne-dev'
+
+def TST_DEPLOYMENT_NAME = 'solr-names'
+def TST_TAG_NAME = 'test'
+def TST_BCK_TAG_NAME = 'test-previous'
+def TST_NS = 'servicebc-ne-test'
+
+def PROD_DEPLOYMENT_NAME = 'solr-names'
+def PROD_TAG_NAME = 'prod'
+def PROD_BCK_TAG_NAME = 'prod-previous'
+def PROD_NS = 'servicebc-ne-prod'
+
+
 // Edit your app's name below
 def APP_NAME = 'solr'
 
@@ -52,7 +72,7 @@ boolean triggerBuild(String contextDirectory) {
 }
 
 node {
-  if( triggerBuild(CONTEXT_DIRECTORY) ) {
+  if( true ) {
 	// The changeSets contained changes within the project's context directory.
 	// Perform a build
 	stage('build ' + BUILD_CONFIG) {
@@ -70,6 +90,22 @@ node {
     stage('deploy-' + TAG_NAMES[0]) {
       openshiftTag destStream: IMAGESTREAM_NAME, verbose: 'true', destTag: TAG_NAMES[0], srcStream: IMAGESTREAM_NAME, srcTag: "${IMAGE_HASH}"
     }
+
+    stage('deploy-test') {
+        timeout(time: 1, unit: 'DAYS') {
+	        input message: "Deploy to test?", submitter: 'admin,user-view,user1-admin'
+        }
+        node('master') {
+          echo ">>> Tag ${TST_TAG_NAME} with ${TST_BCK_TAG_NAME}"
+          openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_BCK_TAG_NAME, srcStream: IMAGE_NAME, srcTag: TST_TAG_NAME
+              echo ">>> Tag ${IMAGE_HASH} with ${TST_TAG_NAME}"
+          openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_TAG_NAME, srcStream: IMAGE_NAME, srcTag: "${IMAGE_HASH}"
+              sleep 5
+          openshiftVerifyDeployment depCfg: TST_DEPLOYMENT_NAME, namespace: TST_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
+          echo ">>>> Deployment Complete"
+          notifySlack("Test Deploy, changes:\n" + getChangeString(), "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", [])
+        }
+     }
   }
   else {
     // The changeSets did not contain any changes within the project's context directory.

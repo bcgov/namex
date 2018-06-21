@@ -47,6 +47,11 @@ deploymentconfig "solr" created
 * BUILDNOTES for namex-solr
 As per the project documentation but build will only work for local OpenShift
 
+* Pipeline
+* Adapted from https://github.com/BCDevOps/openshift-tools/blob/master/provisioning/pipeline/create-pipeline.sh
+oc process -f solr-pipeline-build.json --param-file=solr-pipeline.param | oc create -f -
+
+
 
 
 
