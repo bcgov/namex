@@ -18,8 +18,6 @@ from datetime import datetime
 import logging
 import types
 import re
-
-from . import temp_hackery
 from .solr import SolrQueries
 
 from app.auth_services import AuthError
