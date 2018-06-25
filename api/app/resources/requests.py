@@ -8,10 +8,9 @@ from marshmallow import ValidationError
 from app import api, oidc, db, current_app
 from app.auth_services import required_scope, AuthError
 from app.models import User, State, Name, NameSchema
-from sqlalchemy import text, exc
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func, desc, asc, text
+from sqlalchemy import func, desc, asc, text, exc
 from sqlalchemy.inspection import inspect
 from app.utils.util import cors_preflight
 from datetime import datetime
