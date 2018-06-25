@@ -1,5 +1,5 @@
 from app import db, ma
-
+from marshmallow import fields
 
 class State(db.Model):
     __tablename__ = 'states'
@@ -31,3 +31,9 @@ class State(db.Model):
 
     def delete_from_db(self):
         pass
+
+
+class StateSchema(ma.ModelSchema):
+    class Meta:
+        model = State
+        fields = ('cd', 'description')

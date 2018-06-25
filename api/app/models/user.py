@@ -1,4 +1,4 @@
-from app import db
+from app import db, ma
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
 import logging
@@ -65,18 +65,24 @@ class User(db.Model):
         db.session.commit()
 
     def delete_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
+        pass
+        return
+        # need to intercept the ORM and stop Users from being deleted
+        # db.session.delete(self)
+        # db.session.commit()
 
-    # class UserSchema(Schema):
-    #     id = fields.Int(dump_only=True)
-    #     username = fields.String()
-    #     firstname = fields.String()
-    #     lastname = fields.String()
-    #     sub = fields.String()
-    #     iss = fields.String()
-    #     creationDate = fields.DateTime()
-    #
+class UserSchema(ma.ModelSchema):
+    class Meta:
+        model = User
+
+    # id = fields.Int(dump_only=False)
+    # username = fields.String()
+    # firstname = fields.String()
+    # lastname = fields.String()
+    # sub = fields.String()
+    # iss = fields.String()
+    # creationDate = fields.DateTime()
+
     #     We use make_object to create a new User from validated data
     # @post_load
     # def make_object(self, data):
@@ -88,36 +94,6 @@ class User(db.Model):
     #                 sub=data['sub'],
     #                 iss=data['iss'])
 
-    # class KeycloakUserSchema(Schema):
-    #     id = fields.Int(dump_only=True)
-    #     username = fields.String(attribute="username")
-    def save_to_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def delete_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
-
-# class UserSchema(Schema):
-#     id = fields.Int(dump_only=True)
-#     username = fields.String()
-#     firstname = fields.String()
-#     lastname = fields.String()
-#     sub = fields.String()
-#     iss = fields.String()
-#     creationDate = fields.DateTime()
-#
-#     We use make_object to create a new User from validated data
-    # @post_load
-    # def make_object(self, data):
-    #     if not data:
-    #         return None
-    #     return User(username=data['username'],
-    #                 firstname=data['firstname'],
-    #                 lastname=data['lastname'],
-    #                 sub=data['sub'],
-    #                 iss=data['iss'])
 
 # class KeycloakUserSchema(Schema):
 #     id = fields.Int(dump_only=True)

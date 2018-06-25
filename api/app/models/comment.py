@@ -1,7 +1,7 @@
 from app import db, ma
 from datetime import datetime
 from sqlalchemy.orm import backref
-from app.models.user import User
+from .user import User, UserSchema
 
 
 class Comment(db.Model):
@@ -32,3 +32,9 @@ class Comment(db.Model):
 
     def delete_from_db(self):
         pass
+
+class CommentSchema(ma.ModelSchema):
+    class Meta:
+        model = Comment
+        fields = ('comment', 'timestamp')
+    examiner = ma.Nested(UserSchema, many=False,  only='username')

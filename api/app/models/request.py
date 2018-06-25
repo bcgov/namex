@@ -4,13 +4,13 @@ from app import db, ma
 from app.exceptions import BusinessException
 from sqlalchemy import Sequence
 from sqlalchemy.orm import backref
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, post_dump
 from .nwpta import PartnerNameSystem
-from .user import User
-from .comment import Comment
+from .user import User, UserSchema
+from .comment import Comment, CommentSchema
 from .applicant import Applicant
 from .name import Name, NameSchema
-from .state import State
+from .state import State, StateSchema
 from datetime import datetime
 import logging
 
@@ -165,5 +165,16 @@ class Request(db.Model):
 class RequestsSchema(ma.ModelSchema):
     class Meta:
         model = Request
+        additional = ['stateCd']
 
     names = ma.Nested(NameSchema, many=True)
+    activeUser = ma.Nested(UserSchema, many=False,  only='username')
+    submitter = ma.Nested(UserSchema, many=False,  only='username')
+    comments = ma.Nested(CommentSchema, many=True,  only=['comment', 'examiner', 'timestamp'])
+
+    @post_dump
+    def clean_missing(self, data):
+        ret = data.copy()
+        for key in filter(lambda key: data[key] is None, data):
+            del ret[key]
+        return ret

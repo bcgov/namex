@@ -5,17 +5,17 @@ TODO: Fill in a larger description once the API is defined for V1
 from flask import request, jsonify, g, current_app # _request_ctx_stack
 from flask_restplus import Resource, fields, cors
 from marshmallow import ValidationError
-from app import api, oidc
+from app import api, oidc, db, current_app
 from app.auth_services import required_scope, AuthError
 from app.models import User, State, Name, NameSchema
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func, desc, asc, text
+from sqlalchemy.inspection import inspect
 from app.utils.util import cors_preflight
 from datetime import datetime
 import logging
 import types
-
-from . import temp_hackery
 from .solr import SolrQueries
 
 from app.auth_services import AuthError
@@ -73,13 +73,90 @@ class RequestsQueue(Resource):
 
         return '{{"nameRequest": "{0}" }}'.format(nr), 200
 
-@cors_preflight("POST")
-@api.route('/requests', methods=['POST', 'OPTIONS'])
+@cors_preflight("GET, POST")
+@api.route('/requests', methods=['GET', 'POST', 'OPTIONS'])
 class Requests(Resource):
     a_request = api.model('Request', {'submitter': fields.String('The submitter name'),
                                       'corpType': fields.String('The corporation type'),
                                       'reqType': fields.String('The name request type')
                                       })
+
+    START=0
+    ROWS=50
+
+    search_request_schemas = RequestsSchema(many=True
+        ,exclude=['id'
+            ,'applicants'
+            ,'partnerNS'
+            ,'requestId'
+            ,'previousRequestId'])
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @oidc.accept_token(require_token=True)
+    def get(*args, **kwargs):
+
+        ## validate row & start params
+        start = request.args.get('start', Requests.START)
+        rows = request.args.get('rows',Requests.ROWS)
+        try:
+            start = int(start)
+            rows = int(rows)
+        except Exception as err:
+            current_app.logger.info('start or rows not an int, err: {}'.format(err))
+            return jsonify({'message': 'paging parameters were not integers'}), 406
+
+        # queue must be a list of states
+        queue = request.args.get('queue', None)
+        if queue:
+            queue = queue.upper().split(',')
+            for q in queue:
+                if q not in State.VALID_STATES:
+                    return jsonify({'message': '\'{}\' is not a valid queue'.format(queue)}), 406
+
+        # order must be a string of 'column:asc,column:desc'
+        order = request.args.get('order', 'submittedDate:desc,stateCd:desc')
+        # order=dict((x.split(":")) for x in order.split(',')) // con't pass as a dict as the order is lost
+
+        # create the order by txt, looping through Request Attributes and mapping to column names
+        # TODO: this is fragile across joins, fix it up if queries are going to sort across joins
+        cols = inspect(RequestDAO).columns
+        col_keys = cols.keys()
+        sort_by = ''
+        order_list = ''
+        for k,v in ((x.split(":")) for x in order.split(',')):
+            vl = v.lower()
+            if (k in col_keys) and (vl == 'asc' or vl == 'desc'):
+                if len(sort_by) > 0:
+                    sort_by = sort_by + ', '
+                    order_list = order_list + ', '
+                sort_by = sort_by + '{columns} {direction}'.format(columns=cols[k], direction=vl)
+                order_list = order_list + '{attribute} {direction}'.format(attribute=k, direction=vl)
+
+        # Assemble the query
+        q = RequestDAO.query.filter()
+        if queue: q = q.filter(RequestDAO.stateCd.in_(queue))
+        q = q.order_by(text(sort_by))
+
+        # get a count of the full set size, this ignore the offset & limit settings
+        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+        count = db.session.execute(count_q).scalar()
+
+        # Add the paging
+        # q = q.offset(start * rows)
+        # q = q.limit(rows)
+
+        # create the response
+        rep = {'response':{'start':start,
+                           'rows': rows,
+                           'numFound': count,
+                           'queue': queue,
+                           'order': order_list
+                           },
+               'nameRequests': Requests.search_request_schemas.dump(q.all()).data
+               }
+
+        return jsonify(rep), 200
 
     @api.errorhandler(AuthError)
     def handle_auth_error(ex):
@@ -109,14 +186,13 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @auth_services.requires_auth
     @oidc.accept_token(require_token=True)
     def get(nr):
         # return jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
         return jsonify(RequestDAO.query.filter_by(nrNum =nr.upper()).first_or_404().json())
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    # @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
     def delete(nr):
         nrd = RequestDAO.find_by_nr(nr)
@@ -128,7 +204,7 @@ class Request(Resource):
         return '', 204
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    # @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
     def patch(nr, *args, **kwargs):
         """  Patches the NR, only STATE can be changed with some business rules around roles/scopes
