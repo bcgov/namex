@@ -355,6 +355,13 @@ class Request(Resource):
                 if nm.choice == choice:
                     name.name = nm.name
                     name.state= nm.state
+                    name.conflict1 = nm.conflict1
+                    name.conflict2 = nm.conflict2
+                    name.conflict3 = nm.conflict3
+                    name.conflict1_num = nm.conflict1_num
+                    name.conflict2_num = nm.conflict2_num
+                    name.conflict3_num = nm.conflict3_num
+                    name.decision_text = nm.decision_text
 
         nrd.save_to_db()
 
@@ -537,7 +544,7 @@ class NRNames(Resource):
         """:returns: object, code, msg
         """
         if not validNRFormat(nr):
-            return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
+            return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\' or \'NR99999999\''}), 400
 
         nrd = RequestDAO.find_by_nr(nr)
         if not nrd:
@@ -657,13 +664,13 @@ def mergedicts(dict1, dict2):
             yield (k, dict2[k])
 
 def validNRFormat(nr):
-    '''NR should be of the format "NR 1234567"
+    '''NR should be of the format "NR 1234567" or "NR12345678"
     '''
-    if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':
+    if len(nr) != 10 or nr[:2] != 'NR':
         return False
 
     try:
-        num = int(nr[3:])
+        num = int(nr[2:])
     except:
         return False
 
