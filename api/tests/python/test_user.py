@@ -1,4 +1,3 @@
-import sys
 from app.models import User
 
 

@@ -1,6 +1,5 @@
 import pytest
 
-import os
 from app import create_app
 from app.models import db as _db
 from config import TestConfig
@@ -14,7 +13,9 @@ def app(request):
     """
     Returns session-wide application.
     """
-    return create_app(TestConfig)
+    app = create_app(TestConfig)
+
+    return app
 
 
 @pytest.fixture(scope="session")
