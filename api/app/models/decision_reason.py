@@ -1,6 +1,6 @@
 """List of decision/rejection reasons for front end UI.
 """
-from app import db, ma
+from . import db, ma
 
 class DecisionReason(db.Model):
     __tablename__ = 'decision_reason'

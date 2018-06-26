@@ -5,35 +5,41 @@ This module is the API for the Names Examination system
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-import logging
-from flask import Flask, current_app
-from flask_restplus import Api
-from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
+from app.utils.logging import setup_logging
+setup_logging() ## important to do this first
+
+from flask import Flask
 from config import Config
 from app.patches.flask_oidc_patched import OpenIDConnect
-import os
-# from app.models import db
-from logging import config
+oidc = OpenIDConnect()
 
-logging_conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../logging.conf'))
-logging.config.fileConfig(logging_conf_path)
-log = logging.getLogger(__name__)
+from app.models import db, ma
+from app.resources import api
+from app import models
 
-db = SQLAlchemy()
 
-application = Flask(__name__, instance_relative_config=True)
-application.config.from_object(Config)
-db.init_app(application)
-ma = Marshmallow(application)
+def create_app(config=Config):
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_object(Config)
 
-api = Api(application, prefix='/api/v1')
+    db.init_app(app)
+    ma.init_app(app)
 
-oidc = OpenIDConnect(application)
+    api.init_app(app)
+    oidc.init_app(app)
 
-# noinspection PyPep8
-from app.resources.requests import Request
-import app.resources.ops
+    register_shellcontext(app)
 
-if __name__ == "__main__":
-    application.run()
+    return app
+
+
+def register_shellcontext(app):
+    """Register shell context objects."""
+    def shell_context():
+        """Shell context objects."""
+        return {
+            'app': app,
+            'db': db,
+            'models': models}
+
+    app.shell_context_processor(shell_context)

@@ -1,7 +1,7 @@
 """Events keep an audit trail of all changes submitted to the datastore
 
 """
-from app import db
+from . import db
 from app.exceptions import BusinessException
 from marshmallow import Schema, fields, post_load
 from datetime import datetime

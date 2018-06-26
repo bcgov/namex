@@ -1,8 +1,11 @@
 """Models for the business objects in the application
    This is picked up by the DB management system to maintain tables, etc.
 """
-# from flask_sqlalchemy import SQLAlchemy
-# db = SQLAlchemy()
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
+from flask_marshmallow import Marshmallow
+ma = Marshmallow()
+
 
 from .applicant import Applicant
 from .comment import Comment

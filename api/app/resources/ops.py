@@ -1,9 +1,10 @@
 from flask import jsonify
-from flask_restplus import Resource
+from flask_restplus import Resource, Namespace
 from sqlalchemy import text, exc
-from app import api, db
+# from app import api
+from app.models import db
 
-import logging
+api = Namespace('nameRequestOPS', description='Name Request System - OPS checks')
 
 
 sql = text('select 1')

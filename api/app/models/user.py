@@ -1,4 +1,4 @@
-from app import db, ma
+from . import db, ma
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
 import logging

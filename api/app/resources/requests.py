@@ -2,42 +2,51 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from flask import request, jsonify, g, current_app # _request_ctx_stack
-from flask_restplus import Resource, fields, cors
-from marshmallow import ValidationError
-from app import api, oidc, db, current_app
-from app.auth_services import required_scope, AuthError
-from app.models import User, State, Name, NameSchema
+from flask import request, jsonify, g, current_app
+from flask_restplus import Namespace, Resource, fields, cors
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func, desc, asc, text
 from sqlalchemy.inspection import inspect
-from app.utils.util import cors_preflight
-from datetime import datetime
-import logging
-import types
-from .solr import SolrQueries
 
-from app.auth_services import AuthError
+from marshmallow import ValidationError
+from app import oidc
+from app.auth_services import required_scope, AuthError
+from app.models import db, User, State, Name, NameSchema
 from app.models import Request as RequestDAO, RequestsSchema
 from app.models import DecisionReason
 
+from app.utils.util import cors_preflight
+from .solr import SolrQueries
 
+# Register a local namespace for the requests
+api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
+
+
+# Marshmallow schemas
 request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
 
 
+@api.errorhandler(AuthError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
+
+
 # noinspection PyUnresolvedReferences
 @cors_preflight("GET")
 @api.route('/echo', methods=['GET', 'OPTIONS'])
 class Echo(Resource):
-
+    """Helper method to echo back all your JWT token info
+    """
     @staticmethod
     @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
-    def get (*args, **kwargs):
+    def get(*args, **kwargs):
         try:
             return jsonify(g.oidc_token_info), 200
         except Exception as err:
@@ -46,7 +55,7 @@ class Echo(Resource):
 
 #################### QUEUES #######################
 @cors_preflight("GET")
-@api.route('/requests/queues/@me/oldest', methods=['GET','OPTIONS'])
+@api.route('/queues/@me/oldest', methods=['GET','OPTIONS'])
 class RequestsQueue(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
     and assigns it to your auth id, and marks it as INPROGRESS
@@ -66,15 +75,16 @@ class RequestsQueue(Resource):
             nr = RequestDAO.get_queued_oldest(user)
 
         except SQLAlchemyError as err:
-            #TODO should put some span trace on the error message
+            # TODO should put some span trace on the error message
             return jsonify({'message': 'An error occurred getting the next Name Request.'}), 500
         except AttributeError as err:
             return jsonify({'message': 'There are no Name Requests to work on.'}), 404
 
         return '{{"nameRequest": "{0}" }}'.format(nr), 200
 
+
 @cors_preflight("GET, POST")
-@api.route('/requests', methods=['GET', 'POST', 'OPTIONS'])
+@api.route('/', methods=['GET', 'POST', 'OPTIONS'])
 class Requests(Resource):
     a_request = api.model('Request', {'submitter': fields.String('The submitter name'),
                                       'corpType': fields.String('The corporation type'),
@@ -96,7 +106,7 @@ class Requests(Resource):
     @oidc.accept_token(require_token=True)
     def get(*args, **kwargs):
 
-        ## validate row & start params
+        # validate row & start params
         start = request.args.get('start', Requests.START)
         rows = request.args.get('rows',Requests.ROWS)
         try:
@@ -181,7 +191,7 @@ class Requests(Resource):
 
 # noinspection PyUnresolvedReferences
 @cors_preflight("GET, PATCH, PUT, DELETE")
-@api.route('/requests/<string:nr>', methods=['GET', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'])
+@api.route('/<string:nr>', methods=['GET', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'])
 class Request(Resource):
 
     @staticmethod
@@ -288,7 +298,7 @@ class Request(Resource):
             # not an error we need to track in the log
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
         except Exception as err:
-            logging.log(logging.ERROR, "Error when patching NR:{0} Err:{1}".format(nr, err))
+            current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return jsonify({"message": "NR had an internal error"}), 404
 
         return jsonify({"message": "Request:{} - patched".format(nr)}), 200
@@ -357,13 +367,13 @@ class Request(Resource):
 
         nrd.save_to_db()
 
-        logging.log(logging.INFO,"nrd: {}".format(nrd.state))
+        current_app.logger.info("nrd: {}".format(nrd.state))
 
         return jsonify({'message': '{} successfully replaced'.format(nr)}), 202
 
 
 @cors_preflight("GET")
-@api.route('/requests/<string:nr>/analysis/<int:choice>/<string:types>', methods=['GET','OPTIONS'])
+@api.route('/<string:nr>/analysis/<int:choice>/<string:types>', methods=['GET','OPTIONS'])
 class RequestsAnalysis(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
     and assigns it to your auth id
@@ -403,7 +413,7 @@ class RequestsAnalysis(Resource):
         try:
             solr = SolrQueries.get_results(types, nrd_name.name, start=start, rows=rows)
         except Exception as err:
-            logging.log(logging.ERROR, err, type, nrd_name.name)
+            current_app.logger.error('SOLR error - Name: {}, types: {} err:{}'.format(nrd_name.name, types, err))
             return jsonify({"message": "Internal server error"}) , 500
 
         conflicts = {"response": {"numFound": solr['response']['numFound'],
@@ -419,7 +429,7 @@ class RequestsAnalysis(Resource):
 
 
 @cors_preflight("GET, PUT, PATCH")
-@api.route('/requests/<string:nr>/names/<int:choice>', methods=['GET', "PUT", "PATCH",'OPTIONS'])
+@api.route('/<string:nr>/names/<int:choice>', methods=['GET', "PUT", "PATCH",'OPTIONS'])
 class NRNames(Resource):
 
     @staticmethod

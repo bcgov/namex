@@ -82,3 +82,11 @@ venv
 *.postman_environment.json
 
 solr/cores/.DS_Store
+
+# Testing
+#######################
+.tox
+.cache
+.pytest_cache
+.coverage
+.hypothesis
