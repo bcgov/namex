@@ -155,8 +155,8 @@ class Requests(Resource):
         count = db.session.execute(count_q).scalar()
 
         # Add the paging
-        # q = q.offset(start * rows)
-        # q = q.limit(rows)
+        q = q.offset(start * rows)
+        q = q.limit(rows)
 
         # create the response
         rep = {'response':{'start':start,
