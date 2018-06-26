@@ -544,7 +544,7 @@ class NRNames(Resource):
         """:returns: object, code, msg
         """
         if not validNRFormat(nr):
-            return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\' or \'NR99999999\''}), 400
+            return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
 
         nrd = RequestDAO.find_by_nr(nr)
         if not nrd:
@@ -664,13 +664,13 @@ def mergedicts(dict1, dict2):
             yield (k, dict2[k])
 
 def validNRFormat(nr):
-    '''NR should be of the format "NR 1234567" or "NR12345678"
+    '''NR should be of the format "NR 1234567"
     '''
-    if len(nr) != 10 or nr[:2] != 'NR':
+    if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':
         return False
 
     try:
-        num = int(nr[2:])
+        num = int(nr[3:])
     except:
         return False
 
