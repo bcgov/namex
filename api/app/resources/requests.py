@@ -6,8 +6,10 @@ from flask import request, jsonify, g, current_app
 from flask_restplus import Namespace, Resource, fields, cors
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func, desc, asc, text
+from sqlalchemy import func, desc, asc, text, exc
 from sqlalchemy.inspection import inspect
+import types
+import re
 
 from marshmallow import ValidationError
 from app import oidc
@@ -364,6 +366,13 @@ class Request(Resource):
                 if nm.choice == choice:
                     name.name = nm.name
                     name.state= nm.state
+                    name.conflict1 = nm.conflict1
+                    name.conflict2 = nm.conflict2
+                    name.conflict3 = nm.conflict3
+                    name.conflict1_num = nm.conflict1_num
+                    name.conflict2_num = nm.conflict2_num
+                    name.conflict3_num = nm.conflict3_num
+                    name.decision_text = nm.decision_text
 
         nrd.save_to_db()
 
@@ -394,7 +403,6 @@ class RequestsAnalysis(Resource):
     @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
     def get(nr, choice, types, *args, **kwargs):
-
         start = request.args.get('start', RequestsAnalysis.START)
         rows = request.args.get('rows',RequestsAnalysis.ROWS)
 
@@ -402,6 +410,7 @@ class RequestsAnalysis(Resource):
             return jsonify({"message": "{type} is not a valid analysis type for that name choice".format(type=type)}), 404
 
         nrd = RequestDAO.find_by_nr(nr)
+
         if not nrd:
             return jsonify({"message": "{nr} not found".format(nr=nr)}), 404
 
@@ -410,22 +419,131 @@ class RequestsAnalysis(Resource):
         if not nrd_name:
             return jsonify({"message": "Name choice:{choice} not found for {nr}".format(nr=nr, choice=choice)}), 404
 
+        if types != 'restricted_words':
+            try:
+                solr = SolrQueries.get_results(types, nrd_name.name, start=start, rows=rows)
+            except Exception as err:
+                current_app.logger.error('SOLR - name:{}, types:{}, err:{}'.format(nrd_name.name, types, err))
+                return jsonify({"message": "Internal server error"}) , 500
+
+            conflicts = {"response": {"numFound": solr['response']['numFound'],
+                                      "start": solr['response']['start'],
+                                      "rows": solr['responseHeader']['params']['rows'],
+                                      "maxScore": solr['response']['maxScore'],
+                                      "name": solr['responseHeader']['params']['q'][5:]
+                                      },
+                         'names':solr['response']['docs'],
+                         'highlighting':solr['highlighting']}
+
+            return jsonify(conflicts), 200
+
+        else:
+            return RequestsAnalysis.get_restricted_words_conditions(nrd_name.name)
+
+    @staticmethod
+    def get_restricted_words_conditions(corp_name):
+        """ 1. put all possible restricted words/phrases in a list
+                          - used later to compare against sql fn
+                       parse corp_name from snake_case into sql format
+        """
+        word_list = corp_name.split()
+        corp_name_sql = corp_name
+
+        # this adds in all possible phrases that are two or more words to word_list
+        phrases = []
+        phrase = ''
+        for indx, word in enumerate(word_list):
+            for possible_phrase in word_list[indx:]:
+                if phrase != '':
+                    phrase += possible_phrase
+                    phrases.append(phrase)
+                else:
+                    phrase += possible_phrase
+                if indx < len(word_list):
+                    phrase += ' '
+            phrase = ''
+
+        word_list = word_list + phrases
+        """------------------------------------------------------"""
+
+        """ 2. get words/phrases in corp_name that are restricted
+                - these are compared to word_list because:
+                    i.e (the fn will return KIA if kial is in the corp_name)
+        """
+
+        get_restricted_words_sql = text("select get_restricted_words(\'{}\')".format(corp_name_sql))
         try:
-            solr = SolrQueries.get_results(types, nrd_name.name, start=start, rows=rows)
-        except Exception as err:
-            current_app.logger.error('SOLR error - Name: {}, types: {} err:{}'.format(nrd_name.name, types, err))
-            return jsonify({"message": "Internal server error"}) , 500
+            restricted_words_obj = db.engine.execute(get_restricted_words_sql)
 
-        conflicts = {"response": {"numFound": solr['response']['numFound'],
-                                  "start": solr['response']['start'],
-                                  "rows": solr['responseHeader']['params']['rows'],
-                                  "maxScore": solr['response']['maxScore'],
-                                  "name": solr['responseHeader']['params']['q'][5:]
-                                  },
-                     'names':solr['response']['docs'],
-                     'highlighting':solr['highlighting']}
+        except exc.SQLAlchemyError:
+            print(exc.SQLAlchemyError)
+            return jsonify({"message": "An error occurred accessing the restricted words."}), 500
+        except AttributeError:
+            return jsonify({"message": "Could not find any restricted words."}), 404
 
-        return jsonify(conflicts), 200
+        restricted_word_ids = []
+        regex_list = []
+
+        try:
+            restricted_words_str = restricted_words_obj.fetchall()[0][0]
+            restricted_word_ids = re.findall(r'word_id:(.*?)word_phrase:', restricted_words_str)
+            regex_list = re.findall(r'word_phrase:(.*?)(\,|$)', restricted_words_str)
+
+        except:
+            pass
+
+        restricted_words = [word[0] for word in regex_list]
+        restricted_words_dict = [{'id': id, 'phrase': phrase} for id, phrase in
+                                 zip(restricted_word_ids, restricted_words)]
+
+        # make sure all words in restricted_words_dict are in word_list
+        restricted_words_dict[:] = [word for word in restricted_words_dict if word['phrase'] in word_list]
+        """-----------------------------------------------------------------"""
+
+        """ 3. get condition info based on word_id for each restricted word """
+
+        restricted_words_conditions = []
+        for word in restricted_words_dict:
+            get_cnd_id_sql = text("select cnd_id from restricted_word_condition where word_id = {}".format(word['id']))
+            try:
+                cnd_id_obj = db.engine.execute(get_cnd_id_sql)
+                cnd_ids = cnd_id_obj.fetchall()
+
+                cnd_obj_list = []
+                for id in cnd_ids:
+                    cnd_id = id[0]
+                    get_cnd_sql = text("select * from restricted_condition where cnd_id = {}".format(cnd_id))
+                    cnd_obj_list.append(db.engine.execute(get_cnd_sql))
+
+                cnd_info = []
+                for obj in cnd_obj_list:
+                    obj_tuple = obj.fetchall()[0]
+                    cnd_text = obj_tuple[1]
+                    cnd_allow_use = obj_tuple[2]
+                    cnd_consent_req = obj_tuple[3]
+                    cnd_consent_body = obj_tuple[4]
+                    cnd_instr = obj_tuple[5]
+
+                    cnd_info.append({'id': cnd_id,
+                                    'text': cnd_text,
+                                    'allow_use': cnd_allow_use,
+                                    'consent_required': cnd_consent_req,
+                                    'consenting_body': cnd_consent_body,
+                                    'instructions': cnd_instr})
+                restricted_words_conditions.append({'word_info': word, 'cnd_info': cnd_info})
+            except exc.SQLAlchemyError:
+                print(exc.SQLAlchemyError)
+                return jsonify(
+                    {"message": "An error occurred accessing the condition for {}.".format(word['id'])}), 500
+            except AttributeError:
+                return jsonify({"message": "Could not find any condition info for {}.".format(word['id'])}), 404
+            except:
+                # print('error')
+                cnd_info = 'Not Available'
+                restricted_words_conditions.append({'word_info': word, 'cnd_info': cnd_info})
+        """------------------------------------------------------------------------------------"""
+
+        return jsonify({"restricted_words_conditions": restricted_words_conditions}), 200
 
 
 @cors_preflight("GET, PUT, PATCH")
@@ -437,7 +555,7 @@ class NRNames(Resource):
         """:returns: object, code, msg
         """
         if not validNRFormat(nr):
-            return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
+            return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\' or \'NR99999999\''}), 400
 
         nrd = RequestDAO.find_by_nr(nr)
         if not nrd:
@@ -522,17 +640,8 @@ def check_ownership(nrd, user):
 @cors_preflight("GET")
 @api.route('/decisionreasons', methods=['GET', 'OPTIONS'])
 class DecisionReasons(Resource):
-    '''
-    @api.errorhandler(AuthError)
-    def handle_auth_error(ex):
-        # response = jsonify(ex.error)
-        # response.status_code = ex.status_code
-        # return response, 401
-        return {}, 401
-    '''
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @auth_services.requires_auth
     #@oidc.accept_token(require_token=True)
     def get():
         response = []
@@ -556,14 +665,15 @@ def mergedicts(dict1, dict2):
         else:
             yield (k, dict2[k])
 
+
 def validNRFormat(nr):
     '''NR should be of the format "NR 1234567"
     '''
-    if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':
+    if len(nr) != 10 or nr[:2] != 'NR':
         return False
 
     try:
-        num = int(nr[3:])
+        num = int(nr[2:])
     except:
         return False
 

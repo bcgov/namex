@@ -19,8 +19,9 @@ class Echo(Resource):
         except Exception as err:
             return jsonify({"error": "{}".format(err)}), 500
 
+
 @cors_preflight("GET")
-@api.route('/corporations/<string:corp_num>', methods=['GET','OPTIONS'])
+@api.route('/corporations/<string:corp_num>', methods=['GET', 'OPTIONS'])
 class RequestColin(Resource):
     """this gets the corporate details for the corporation specified
     """
@@ -29,7 +30,7 @@ class RequestColin(Resource):
     @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
     def get(corp_num):
-        logging.basicConfig(filename='example.txt', level=logging.INFO)
+        logging.basicConfig(filename='log.txt', level=logging.INFO)
         logging.info('logging works')
         # who has access?
         if not (required_scope("names_viewer")):  # User.VIEWONLY
