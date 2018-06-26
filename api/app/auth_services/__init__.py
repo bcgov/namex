@@ -5,7 +5,7 @@ from functools import wraps
 import json
 import logging
 from six.moves.urllib.request import urlopen
-from app import api
+# from app.resources import api
 
 from flask import Flask, request, jsonify, g
 from jose import jwt
@@ -15,13 +15,13 @@ class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
-
-
-@api.errorhandler(AuthError)
-def handle_auth_error(ex):
-    response = jsonify(ex.error)
-    response.status_code = ex.status_code
-    return response
+#
+#
+# @api.errorhandler(AuthError)
+# def handle_auth_error(ex):
+#     response = jsonify(ex.error)
+#     response.status_code = ex.status_code
+#     return response
 
 def get_token_auth_header():
     """Obtains the access token from the Authorization Header

@@ -1,6 +1,6 @@
 """Request is the main business class that is the real top level object in the system
 """
-from app import db, ma
+from . import db, ma
 from app.exceptions import BusinessException
 from sqlalchemy import Sequence
 from sqlalchemy.orm import backref

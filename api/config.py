@@ -33,3 +33,19 @@ class Config(object):
     OIDC_SCOPES = ['openid', 'email', 'profile']
     TESTING = True,
     DEBUG = True
+
+
+class TestConfig(Config):
+    # POSTGRESQL
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD','')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME','')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST','')
+    DB_PORT = os.getenv('DATABASE_TEST_PORT','5432')
+    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
+         user=DB_USER,
+         password=DB_PASSWORD,
+         host=DB_HOST,
+         port=int(DB_PORT),
+         name=DB_NAME,
+    )

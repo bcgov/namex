@@ -1,4 +1,4 @@
-from app import db, ma
+from . import db, ma
 from marshmallow import fields
 
 class State(db.Model):

@@ -1,19 +1,2 @@
-gunicorn
-
-Flask
-Flask-Migrate
-Flask-Script
-Flask-Moment
-Flask-SQLAlchemy
-Flask-RESTplus
-Flask-Marshmallow
-Flask-OIDC
-
-python-dotenv
-python-jose
-psycopg2-binary
-marshmallow
-marshmallow-sqlalchemy
-six
-
-pytest
+# Just installs the production requirements.
+-r requirements/prod.txt

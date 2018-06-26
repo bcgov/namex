@@ -1,14 +1,6 @@
-from app import api
+from flask import current_app
 from urllib import request, parse
 import json
-import logging
-
-
-SOLR_BASE_URL = api.app.config.get('SOLR_BASE_URL', None)
-
-if not SOLR_BASE_URL:
-    logging.log(logging.ERROR, 'SOLR: SOLR_BASE_URL is not set')
-    raise Exception('SOLR config error')
 
 
 class SolrQueries:
@@ -19,8 +11,10 @@ class SolrQueries:
     RESTRICTED_WORDS='restricted_words'
     VALID_QUERIES=[CONFLICTS, HISTORY, TRADEMARKS, RESTRICTED_WORDS]
 
+    #
+    # Prototype: /solr/<core name>/select? ... &start={start}&rows={rows} ... &fl=source,id,name,score ... &q=name:{name} ... &wt=json'
+    #
     queries ={
-        'similar': '/solr/{core}/select?q=id:{name}&wt=json',
         CONFLICTS: '/solr/possible.conflicts/select?indent=on&start={start}&rows={rows}&defType=dismax&fl=source,id,name,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&indent=on&pf=name%5E100&q=name:{name}&qf=name&wt=json',
         HISTORY: '/solr/names/select?defType=dismax&indent=on&start={start}&rows={rows}&defType=dismax&fl=source,id,name,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&pf=name%5E100&q=name:{name}&qf=name&wt=json',
         TRADEMARKS: '/solr/trademarks/select?defType=dismax&indent=on&start={start}&rows={rows}&defType=dismax&fl=source,id,name,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&pf=name%5E100&q=name:{name}&qf=name&wt=json'
@@ -29,6 +23,11 @@ class SolrQueries:
 
     @classmethod
     def get_results(cls, query_type, name, start=0, rows=10):
+
+        SOLR_BASE_URL = current_app.config.get('SOLR_BASE_URL', None)
+        if not SOLR_BASE_URL:
+            current_app.logger.error('SOLR: SOLR_BASE_URL is not set')
+            raise Exception('SOLR config error')
 
         if query_type not in SolrQueries.VALID_QUERIES:
             return None
@@ -41,7 +40,8 @@ class SolrQueries:
         try:
             connection = request.urlopen(query)
         except Exception as err:
-            logging.log(logging.ERROR, err, query)
+            current_app.logger.error(err, query)
             raise err
+
         return json.load(connection)
 
