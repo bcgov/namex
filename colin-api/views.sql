@@ -25,7 +25,7 @@ where corp.end_event_id IS NULL and corp.corp_name_seq_num = 0
 /
 
 create or replace view namex_corporations_jurisdiction as
-select j.can_jur_typ_cd||'-'||jt.full_desc  home_jurisdiction
+select j.corp_num, j.can_jur_typ_cd||'-'||jt.full_desc  home_jurisdiction
 from jurisdiction j
 inner join jurisdiction_type jt ON jt.can_jur_typ_cd = j.can_jur_typ_cd
 where j.end_event_id IS NULL
