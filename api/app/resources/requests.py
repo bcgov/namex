@@ -492,7 +492,7 @@ class RequestsAnalysis(Resource):
         except:
             pass
 
-        restricted_words = [word[0] for word in regex_list]
+        restricted_words = [word[0].strip() for word in regex_list]
         restricted_words_dict = [{'id': id, 'phrase': phrase} for id, phrase in
                                  zip(restricted_word_ids, restricted_words)]
 
