@@ -21,12 +21,12 @@ select c.corp_num,
 from corporation c
 left outer join corp_name corp on corp.corp_num = c.corp_num
 left outer join corp_type ct ON ct.corp_typ_cd = c.corp_typ_cd
-where c.corp_num = {} and corp.end_event_id IS NULL and corp.corp_name_seq_num = 0
+where corp.end_event_id IS NULL and corp.corp_name_seq_num = 0
 /
 
 create or replace view namex_corporations_jurisdiction as
 select j.can_jur_typ_cd||'-'||jt.full_desc  home_jurisdiction
 from jurisdiction j
 inner join jurisdiction_type jt ON jt.can_jur_typ_cd = j.can_jur_typ_cd
-where j.corp_num = {} and j.end_event_id IS NULL
+where j.end_event_id IS NULL
 /
