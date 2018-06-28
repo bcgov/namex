@@ -1,0 +1,13 @@
+flask
+flask-restplus
+flask-sqlalchemy
+flask-marshmallow
+flask-migrate
+flask-oidc
+marshmallow
+marshmallow-sqlalchemy
+psycopg2-binary
+gunicorn
+python-dotenv
+python-jose
+six

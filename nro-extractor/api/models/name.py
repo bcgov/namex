@@ -1,6 +1,7 @@
 """Name hold a name choice for a Request
 """
 from api import db, ma
+from marshmallow import fields
 
 class Name(db.Model):
     __tablename__ = 'names'

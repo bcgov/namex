@@ -94,7 +94,6 @@ def add_nr_header(new_nr, nr_header, nr_submitter, user):
     new_nr.requestId = nr_header['request_id']
     new_nr.previousRequestId = nr_header['previous_request_id']
     new_nr.submitCount = nr_header['submit_count']
-    new_nr.priorityCd = nr_header['priority_cd']
     new_nr.requestTypeCd = nr_header['request_type_cd']
     new_nr.expirationDate = nr_header['expiration_date']
     new_nr.additionalInfo = nr_header['additional_info']
@@ -102,6 +101,10 @@ def add_nr_header(new_nr, nr_header, nr_submitter, user):
     new_nr.xproJurisdiction = nr_header['xpro_jurisdiction']
     new_nr.submittedDate = nr_submitter['submitted_date']
     new_nr.submitter_userid = None if (submitter is None) else submitter.id
+    if nr_header['priority_cd'] is 'PQ':
+        new_nr.priorityCd = 'Y'
+    else:
+        new_nr.priorityCd = 'N'
 
 def add_comments(new_nr, comments):
     # TODO: link to examiner IDs somehow - examiner_IDIR
