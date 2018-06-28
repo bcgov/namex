@@ -15,9 +15,9 @@ class SolrQueries:
     # Prototype: /solr/<core name>/select? ... &start={start}&rows={rows} ... &fl=source,id,name,score ... &q=name:{name} ... &wt=json'
     #
     queries ={
-        CONFLICTS: '/solr/possible.conflicts/select?indent=on&start={start}&rows={rows}&defType=dismax&fl=source,id,name,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&indent=on&pf=name%5E100&q=name:{name}&qf=name&wt=json',
-        HISTORY: '/solr/names/select?defType=dismax&indent=on&start={start}&rows={rows}&defType=dismax&fl=source,id,name,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&pf=name%5E100&q=name:{name}&qf=name&wt=json',
-        TRADEMARKS: '/solr/trademarks/select?defType=dismax&indent=on&start={start}&rows={rows}&defType=dismax&fl=source,id,name,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&pf=name%5E100&q=name:{name}&qf=name&wt=json'
+        CONFLICTS: '/solr/possible.conflicts/select?indent=on&start={start}&rows={rows}&defType=dismax&fl=source,id,name,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&pf=name%5E100&q=name:{name}&qf=name&wt=json',
+        HISTORY:   '/solr/names/select?indent=on&start={start}&rows={rows}&defType=dismax&fl=nr_num,name,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&pf=name%5E100&q=name:{name}&qf=name&wt=json',
+        TRADEMARKS: '/solr/trademarks/select?defType=dismax&indent=on&start={start}&rows={rows}&defType=dismax&fl=application_number,name,status,description,score&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&pf=name%5E100&q=name:{name}&qf=name&wt=json'
     }
 
 
