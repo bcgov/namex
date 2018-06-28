@@ -15,13 +15,13 @@ class Name(db.Model):
     remoteNameId = db.Column('remote_name_id', db.BigInteger)
 
     # decision info
-    conflict1 = db.Column(db.String(250), default=None) # optional conflict name
-    conflict2 = db.Column(db.String(250), default=None) # optional conflict name
-    conflict3 = db.Column(db.String(250), default=None) # optional conflict name
-    conflict1_num = db.Column(db.String(250), default=None) # optional conflict name - corp or NR number
-    conflict2_num = db.Column(db.String(250), default=None) # optional conflict name - corp or NR number
-    conflict3_num = db.Column(db.String(250), default=None) # optional conflict name - corp or NR number
-    decision_text = db.Column(db.String(1000), default=None)
+    conflict1 = db.Column(db.String(250), default='') # optional conflict name
+    conflict2 = db.Column(db.String(250), default='') # optional conflict name
+    conflict3 = db.Column(db.String(250), default='') # optional conflict name
+    conflict1_num = db.Column(db.String(250), default='') # optional conflict name - corp or NR number
+    conflict2_num = db.Column(db.String(250), default='') # optional conflict name - corp or NR number
+    conflict3_num = db.Column(db.String(250), default='') # optional conflict name - corp or NR number
+    decision_text = db.Column(db.String(1000), default='')
 
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
     # nameRequest = db.relationship('Request')
