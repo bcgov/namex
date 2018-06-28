@@ -192,7 +192,6 @@ stage('API Test') {
 		//the checkout is mandatory, otherwise functional test would fail
 			echo "checking out source"
 			echo "Build: ${BUILD_ID}"
-			echo "baseURL: ${baseURL}"
 			sh '''#!/bin/bash
 				echo BASEURL=$BASEURL
 			'''
