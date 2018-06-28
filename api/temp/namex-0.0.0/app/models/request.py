@@ -1,7 +1,6 @@
 """Request is the main business class that is the real top level object in the system
 """
 from . import db, ma
-from flask import current_app
 from app.exceptions import BusinessException
 from sqlalchemy import Sequence
 from sqlalchemy.orm import backref
@@ -13,6 +12,7 @@ from .applicant import Applicant
 from .name import Name, NameSchema
 from .state import State, StateSchema
 from datetime import datetime
+import logging
 
 
 # create sequence if not exists nr_seq;
@@ -122,16 +122,16 @@ class Request(db.Model):
            and then returns the NR or
            error out with a SQLAlchemy Error type
         """
-        existing_nr = Request.get_inprogress(userObj)
+        existing_nr = db.session.query(Request).\
+            filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS).\
+            one_or_none()
 
         if existing_nr:
-            current_app.logger.info('Existing NR found, returning: {}'.format(existing_nr.nrNum))
             return existing_nr.nrNum
 
-        # this will error if there's nothing in the queue - likelihood ~ 0
         r = db.session.query(Request).\
                 filter(Request.stateCd.in_([State.DRAFT])).\
-                order_by(Request.priorityCd.desc(), Request.submittedDate.asc()).\
+                order_by(Request.submittedDate.asc(), Request.priorityCd.desc()).\
                 with_for_update().first()
         # this row is now locked
 
@@ -141,6 +141,7 @@ class Request(db.Model):
 
         db.session.add(r)
         db.session.commit()
+        # db.session.close()
         return r.nrNum
 
     @classmethod

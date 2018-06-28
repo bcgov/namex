@@ -1,0 +1,71 @@
+"""Name hold a name choice for a Request
+"""
+from . import db, ma
+from sqlalchemy.orm import backref
+
+
+class Applicant(db.Model):
+    __tablename__ = 'applicants'
+
+    partyId = db.Column('party_id', db.Integer, primary_key=True)
+    lastName = db.Column('last_name', db.String(50), nullable=False)
+    firstName = db.Column('first_name', db.String(50))
+    middleName = db.Column('middle_name', db.String(50))
+    phoneNumber = db.Column('phone_number', db.String(30))
+    faxNumber = db.Column('fax_number', db.String(30))
+    emailAddress = db.Column('email_address', db.String(75))
+    contact = db.Column('contact', db.String(150))
+    clientFirstName = db.Column('client_first_name', db.String(50))
+    clientLastName = db.Column('client_last_name', db.String(50))
+    declineNotificationInd = db.Column('decline_notification_ind', db.String(1))
+    addrLine1 = db.Column('addr_line_1', db.String(200))
+    addrLine2 = db.Column('addr_line_2', db.String(200))
+    addrLine3 = db.Column('addr_line_3', db.String(200))
+    city = db.Column('city', db.String(200))
+    postalCd = db.Column('postal_cd', db.String(20))
+    stateProvinceCd = db.Column('state_province_cd', db.String(2))
+    countryTypeCd = db.Column('country_type_cd', db.String(2))
+
+    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
+
+    # Relationships - Requests
+    # applicants = db.relationship("Requests", backref=backref("applicants", uselist=False), foreign_keys=[nrId])
+
+    def as_dict(self):
+        return {
+            'partyId': self.partyId,
+            'lastName': self.lastName,
+            'firstName': self.firstName,
+            'middleName': self.middleName,
+            'phoneNumber': self.phoneNumber,
+            'faxNumber': self.faxNumber,
+            'emailAddress': self.emailAddress,
+            'contact': self.contact,
+            'clientFirstName': self.clientFirstName,
+            'clientLastName': self.clientLastName,
+            'declineNotificationInd': self.declineNotificationInd,
+            'addrLine1': self.addrLine1,
+            'addrLine2': self.addrLine2,
+            'addrLine3': self.addrLine3,
+            'city': self.city,
+            'postalCd': self.postalCd,
+            'stateProvinceCd': self.stateProvinceCd,
+            'countryTypeCd': self.countryTypeCd
+        }
+
+    # @classmethod
+    # def find_by_name(cls, name):
+    #     return cls.query.filter_by(name=name).first()
+    #
+    # def save_to_db(self):
+    #     db.session.add(self)
+    #     db.session.commit()
+    #
+    # def delete_from_db(self):
+    #     db.session.delete(self)
+    #     db.session.commit()
+#
+# class NameSchema(ma.ModelSchema):
+#     class Meta:
+#         model = Name
+#         fields = ('choice', 'name', 'state')

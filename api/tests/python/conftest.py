@@ -1,12 +1,15 @@
 import pytest
 
 from app import create_app
+from flask import current_app
 from app.models import db as _db
 from config import TestConfig
 from sqlalchemy import event, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, DropConstraint
-
+from flask_migrate import Migrate, upgrade
+import sys
+import os
 
 @pytest.fixture(scope="session")
 def app(request):
@@ -40,8 +43,18 @@ def db(app, request):
             for fk in table.foreign_keys:
                 _db.engine.execute(DropConstraint(fk.constraint))
         metadata.drop_all()
-        # create the tables
-        _db.create_all()
+
+        # ############################################
+        # There are 2 approaches, an empty database, or the same one that the app will use
+        #     create the tables
+        #     _db.create_all()
+        # or
+        # Use Alembic to load all of the DB revisions including supporting lookup data
+        # This is the path we'll use in NAMEX!!
+
+        # even though this isn't referenced directly, it sets up the internal configs that upgrade needs
+        migrate = Migrate(app, _db)
+        upgrade()
 
 
 @pytest.fixture(scope="function", autouse=True)

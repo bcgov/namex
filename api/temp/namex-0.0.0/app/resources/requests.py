@@ -80,7 +80,6 @@ class RequestsQueue(Resource):
             # TODO should put some span trace on the error message
             return jsonify({'message': 'An error occurred getting the next Name Request.'}), 500
         except AttributeError as err:
-            current_app.logger.error(err)
             return jsonify({'message': 'There are no Name Requests to work on.'}), 404
 
         return '{{"nameRequest": "{0}" }}'.format(nr), 200
@@ -181,11 +180,15 @@ class Requests(Resource):
     # noinspection PyUnusedLocal,PyUnusedLocal
     @api.expect(a_request)
     @cors.crossdomain(origin='*')
+    # @auth_services.requires_auth
     @oidc.accept_token(require_token=True)
     def post(self, *args, **kwargs):
 
-        current_app.logger.info('Someone is trying to post a new request')
-        return jsonify({'message': 'Not Implemented'}), 501
+        json_input = request.get_json()
+        if not json_input:
+            return {'message': 'No input data provided'}, 400
+
+        return {}, 501
 
 
 # noinspection PyUnresolvedReferences
@@ -253,6 +256,7 @@ class Request(Resource):
                 "description": "You don't have access to this resource."
             }, 403)
 
+
         if (state in (State.APPROVED,
                      State.REJECTED,
                      State.CONDITIONAL))\
@@ -292,7 +296,6 @@ class Request(Resource):
             nrd.stateCd = state
             nrd.userId = user.id
             nrd.save_to_db()
-
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
@@ -300,7 +303,7 @@ class Request(Resource):
             current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return jsonify({"message": "NR had an internal error"}), 404
 
-        return {'message': 'Request:{} - patched'.format(nr)}, 200
+        return jsonify({"message": "Request:{} - patched".format(nr)}), 200
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -489,7 +492,7 @@ class RequestsAnalysis(Resource):
         except:
             pass
 
-        restricted_words = [word[0].strip() for word in regex_list]
+        restricted_words = [word[0] for word in regex_list]
         restricted_words_dict = [{'id': id, 'phrase': phrase} for id, phrase in
                                  zip(restricted_word_ids, restricted_words)]
 

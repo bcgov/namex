@@ -28,12 +28,20 @@ def upgrade():
         "COMMENT ON TABLE public.restricted_condition IS 'The conditions against a restricted word.  The conditions can apply to one or more rows.'; "
     )
     op.execute(
-        "CREATE SEQUENCE public.restricted_condition_id "
-        "START WITH 1 "
-        "INCREMENT BY 1 "
-        "NO MINVALUE "
-        "NO MAXVALUE "
-        "CACHE 1; "
+        """
+        DROP SEQUENCE public.restricted_condition_id 
+        """
+    )
+
+    op.execute(
+        """
+        CREATE SEQUENCE public.restricted_condition_id 
+        START WITH 1 
+        INCREMENT BY 1 
+        NO MINVALUE 
+        NO MAXVALUE 
+        CACHE 1; 
+        """
     )
 
     restricted_word_table = op.create_table('restricted_word',
@@ -67,36 +75,38 @@ def upgrade():
     )
 
     op.execute(
-        "CREATE FUNCTION public.get_restricted_words(p_name_choice text) RETURNS text "
-        "LANGUAGE plpgsql "
-        "AS $$DECLARE "
-        "v_word_phrase CHARACTER(100); "
-        "v_word_id INTEGER; "
-        "v_word_found CHARACTER(100); "
-        "v_words_found TEXT; "
-        "v_pos INTEGER; "
-        "rest_word_cursor CURSOR FOR "
-        "select word_id, word_phrase FROM restricted_word; "
-        "BEGIN "
-        "OPEN rest_word_cursor; "
-        "LOOP "
-        "FETCH rest_word_cursor INTO v_word_id, v_word_phrase; "
-        "EXIT WHEN NOT FOUND; "
-        "SELECT POSITION(v_word_phrase in UPPER(p_name_choice)) INTO v_pos; "
-        "IF v_pos > 0 THEN "
-        "select 'word_id:' || v_word_id || 'word_phrase:' || v_word_phrase INTO v_word_found; "
-        "IF v_words_found IS NULL THEN "
-        "select v_word_found INTO v_words_found; "
-        "ELSE "
-        "select v_words_found || ',' || v_word_found INTO v_words_found; "
-        "END IF; "
-        "END IF; "
-        "END LOOP; "
-        "CLOSE rest_word_cursor; "
-        "RETURN v_words_found; "
-        "END; $$; "
-        "SET default_tablespace = ''; "
-        "SET default_with_oids = false;"
+        """
+        CREATE OR REPLACE FUNCTION public.get_restricted_words(p_name_choice text) RETURNS text
+        LANGUAGE plpgsql
+        AS $$DECLARE 
+        v_word_phrase CHARACTER(100); 
+        v_word_id INTEGER; 
+        v_word_found CHARACTER(100);
+        v_words_found TEXT;
+        v_pos INTEGER;
+        rest_word_cursor CURSOR FOR
+        select word_id, word_phrase FROM restricted_word;
+        BEGIN
+          OPEN rest_word_cursor;
+          LOOP
+            FETCH rest_word_cursor INTO v_word_id, v_word_phrase;
+            EXIT WHEN NOT FOUND;
+            SELECT POSITION(v_word_phrase in UPPER(p_name_choice)) INTO v_pos;
+            IF v_pos > 0 THEN
+              select 'word_id:' || v_word_id || 'word_phrase:' || v_word_phrase INTO v_word_found;
+              IF v_words_found IS NULL THEN
+                select v_word_found INTO v_words_found;
+              ELSE
+                select v_words_found || ',' || v_word_found INTO v_words_found;
+              END IF;
+            END IF;
+          END LOOP;
+          CLOSE rest_word_cursor;
+          RETURN v_words_found;
+        END; $$;
+        SET default_tablespace = '';
+        SET default_with_oids = false;
+        """
     )
 
     op.bulk_insert(
@@ -2502,9 +2512,6 @@ def upgrade():
             {'cnd_id': 315, 'word_id': 690},
         ]
     )
-
-
-
     # ### end Alembic commands ###
 
 
