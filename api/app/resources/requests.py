@@ -444,7 +444,6 @@ class RequestsAnalysis(Resource):
                        parse corp_name from snake_case into sql format
         """
         word_list = corp_name.split()
-        corp_name_sql = corp_name
 
         # this adds in all possible phrases that are two or more words to word_list
         phrases = []
@@ -467,7 +466,7 @@ class RequestsAnalysis(Resource):
                 - query for list of all restricted words
                     - compare these words to word_list
         """
-        
+
         get_all_restricted_words_sql = text("select * from restricted_word;")
         try:
             restricted_words_obj = db.engine.execute(get_all_restricted_words_sql)
