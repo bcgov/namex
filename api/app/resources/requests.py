@@ -467,37 +467,24 @@ class RequestsAnalysis(Resource):
         """------------------------------------------------------"""
 
         """ 2. get words/phrases in corp_name that are restricted
-                - these are compared to word_list because:
-                    i.e (the fn will return KIA if kial is in the corp_name)
+                - query for list of all restricted words
+                    - compare these words to word_list
         """
-
-        get_restricted_words_sql = text("select get_restricted_words(\'{}\')".format(corp_name_sql))
+        
+        get_all_restricted_words_sql = text("select * from restricted_word;")
         try:
-            restricted_words_obj = db.engine.execute(get_restricted_words_sql)
+            restricted_words_obj = db.engine.execute(get_all_restricted_words_sql)
 
         except exc.SQLAlchemyError:
             print(exc.SQLAlchemyError)
             return jsonify({"message": "An error occurred accessing the restricted words."}), 500
         except AttributeError:
             return jsonify({"message": "Could not find any restricted words."}), 404
-
-        restricted_word_ids = []
-        regex_list = []
-
-        try:
-            restricted_words_str = restricted_words_obj.fetchall()[0][0]
-            restricted_word_ids = re.findall(r'word_id:(.*?)word_phrase:', restricted_words_str)
-            regex_list = re.findall(r'word_phrase:(.*?)(\,|$)', restricted_words_str)
-
-        except:
-            pass
-
-        restricted_words = [word[0].strip() for word in regex_list]
-        restricted_words_dict = [{'id': id, 'phrase': phrase} for id, phrase in
-                                 zip(restricted_word_ids, restricted_words)]
-
-        # make sure all words in restricted_words_dict are in word_list
-        restricted_words_dict[:] = [word for word in restricted_words_dict if word['phrase'] in word_list]
+        restricted_words_dict = []
+        for row in restricted_words_obj:
+            for word in word_list:
+                if row[1] == word:
+                    restricted_words_dict.append({'id':row[0],'phrase':row[1]})
         """-----------------------------------------------------------------"""
 
         """ 3. get condition info based on word_id for each restricted word """
