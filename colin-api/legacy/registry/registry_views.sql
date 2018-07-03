@@ -7,13 +7,6 @@ inner join event e ON e.event_id = f.event_id
 where f.nr_num IS NOT NULL
 /
 
-create or replace view namex_corp_nob_vw as 
-select ri.NATURE_BUSINESS_INFO, 
-    r.nr_num
-from request_instance ri
-inner join request r ON r.request_id = ri.request_id
-/
-
 create or replace view namex_corp_num_dts_class_vw as
 select c.corp_num, 
     c.recognition_dts, 
