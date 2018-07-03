@@ -1,0 +1,73 @@
+---
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: "nro-update"
+  annotations:
+    description: "Scheduled Task to update the legacy NRO database"
+    tags: "cronjob,nro"
+objects:
+- kind: "CronJob"
+  apiVersion: "batch/v1beta1"
+  metadata:
+    name: "nro-update"
+  spec:
+    schedule: "*/5 * * * *"
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            containers:
+            - name: "nro-update"
+              image: "docker-registry.default.svc:5000/servicebc-ne-tools/nro-update-runtime:dev"
+              containers:
+                - env:
+                    - name: "DATABASE_USERNAME"
+                      valueFrom:
+                        secretKeyRef:
+                          key: "database-user"
+                          name: "postgresql"
+                    - name: "DATABASE_PASSWORD"
+                      valueFrom:
+                        secretKeyRef:
+                          key: "database-password"
+                          name: "postgresql"
+                    - name: "DATABASE_NAME"
+                      valueFrom:
+                        secretKeyRef:
+                          key: "database-name"
+                          name: "postgresql"
+                    - name: "DATABASE_HOST"
+                      valueFrom:
+                        configMapKeyRef:
+                          key: "DB_HOST"
+                          name: "namex-api-config"
+                    - name: "DATABASE_PORT"
+                      value: "5432"
+                    - name: "ORA_NAME_DB_PORT"
+                      valueFrom:
+                        secretKeyRef:
+                          key: "port"
+                          name: "ora-names-secrets"
+                    - name: "ORA_NAME_DB_NAME"
+                      valueFrom:
+                        secretKeyRef:
+                          key: "name"
+                          name: "ora-names-secrets"
+                    - name: "ORA_NAME_DB_HOST"
+                      valueFrom:
+                        secretKeyRef:
+                          key: "host"
+                          name: "ora-names-secrets"
+                    - name: "ORA_NAME_USERNAME"
+                      valueFrom:
+                        secretKeyRef:
+                          key: "username"
+                          name: "ora-names-secrets"
+                    - name: "ORA_NAME_PASSWORD"
+                      valueFrom:
+                        secretKeyRef:
+                          key: "password"
+                          name: "ora-names-secrets"
+            restartPolicy: "OnFailure"
+
