@@ -123,6 +123,7 @@
     <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
     <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
 	
+  <field name="id" type="string" stored="true" required="true" indexed="true" multiValued="false" />	
   <field name="choice_number" type="pint" multiValued="false" indexed="false" required="false" stored="true"/>
   <field name="corp_num" type="string" docValues="true" multiValued="false" indexed="false" required="false" stored="true"/>
   <field name="name" type="text_en_splitting" multiValued="false" indexed="true" required="true" stored="true" termVectors="true"/>
@@ -458,15 +459,18 @@
          document "WiFi" or "wi-fi".
     -->
     <dynamicField name="*_txt_en_split" type="text_en_splitting"  indexed="true"  stored="true"/>
+	
    <fieldType name="text_en_splitting" class="solr.TextField" autoGeneratePhraseQueries="true" positionIncrementGap="100">
     <analyzer type="index">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
       <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="0" generateWordParts="1" catenateAll="0" catenateWords="0"/>
       <filter class="solr.LowerCaseFilterFactory"/>
-	   <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
+	 
 	   <filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="indexed_synonyms.txt"/>
-	   <filter class="solr.FlattenGraphFilterFactory"/> 
+	     <filter class="solr.FlattenGraphFilterFactory"/> 
+	   <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
+	  
     </analyzer>
     <analyzer type="query">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
