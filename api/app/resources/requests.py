@@ -213,7 +213,7 @@ class Request(Resource):
         return '', 204
 
     @staticmethod
-    # @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin='*')
     @oidc.accept_token(require_token=True)
     def patch(nr, *args, **kwargs):
         """  Patches the NR, only STATE can be changed with some business rules around roles/scopes
@@ -300,7 +300,7 @@ class Request(Resource):
             current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return jsonify({"message": "NR had an internal error"}), 404
 
-        return {'message': 'Request:{} - patched'.format(nr)}, 200
+        return jsonify({'message': 'Request:{} - patched'.format(nr)}), 200
 
     @staticmethod
     @cors.crossdomain(origin='*')
