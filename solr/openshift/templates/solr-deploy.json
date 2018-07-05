@@ -73,7 +73,7 @@
       "apiVersion": "v1",
       "metadata":
       {
-        "name": "${NAME}",
+        "name": "${NAME}-cores",
         "annotations": {
           "volume.beta.kubernetes.io/storage-class": "gluster-block"
         },
@@ -92,7 +92,33 @@
         {
           "requests":
           {
-            "storage": "${PERSISTENT_VOLUME_SIZE}"
+            "storage": "${CORES_PV_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}-trademarks",
+        "labels":
+        {
+          "app": "${NAME}",
+          "template": "${NAME}-deployment-template"
+        }
+      },
+      "spec":
+      {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources":
+        {
+          "requests":
+          {
+            "storage": "${TRADEMARKS_PV_SIZE}"
           }
         }
       }
@@ -219,7 +245,11 @@
                 "volumeMounts": [
                   {
                     "name": "${NAME}-data",
-                    "mountPath": "${MOUNT_PATH}"
+                    "mountPath": "${CORES_MOUNT_PATH}"
+                  },
+                  {
+                    "name": "${NAME}-trademarks",
+                    "mountPath": "${TRADEMARKS_MOUNT_PATH}"
                   },
                   {
                     "name": "solr-data-config-names-gxmla",
@@ -294,18 +324,32 @@
       "value": ""
     },
     {
-      "name": "PERSISTENT_VOLUME_SIZE",
-      "displayName": "Persistent Volume Size",
-      "description": "The size of the persistent volume , e.g. 512Mi, 1Gi, 2Gi.",
+      "name": "CORES_PV_SIZE",
+      "displayName": "Cores Persistent Volume Size",
+      "description": "The size of the persistent volume housing the cores , e.g. 512Mi, 1Gi, 2Gi.",
       "required": true,
       "value": "1Gi"
     },
     {
-      "name": "MOUNT_PATH",
-      "displayName": "Mount Path",
-      "description": "The path to mount the persistent volume.",
+      "name": "TRADEMARKS_PV_SIZE",
+      "displayName": "Trademarks Persistent Volume Size",
+      "description": "The size of the persistent volume housing the trademarks files , e.g. 512Mi, 1Gi, 2Gi.",
+      "required": true,
+      "value": "1Gi"
+    },
+    {
+      "name": "CORES_MOUNT_PATH",
+      "displayName": "Cores Mount Path",
+      "description": "The path to mount the cores persistent volume.",
       "required": true,
       "value": "/opt/solr/server/solr/mycores"
+    },
+    {
+      "name": "TRADEMARKS_MOUNT_PATH",
+      "displayName": "Trademarks Mount Path",
+      "description": "The path to mount the trademarks persistent volume.",
+      "required": true,
+      "value": "/opt/solr/trademarks_data"
     },
     {
       "name": "CORE_NAME",
