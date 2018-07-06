@@ -73,6 +73,8 @@ class DocumentAnalysis(Resource):
                 ({"message": "{analysis} is not a valid analysis".format(analysis=analysis)}), 404
 
         json_input = request.get_json()
+        if not json_input:
+            return jsonify({'message': 'No JSON data provided'}), 400
 
         err = DocumentSchema().validate(json_input)
         if err:
