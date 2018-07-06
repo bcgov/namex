@@ -750,7 +750,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"state\": \"NE\", \"choice\": 1, \"name\": \"my good company\", \"consumptionDate\": null, \"designation\": null}"
+							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"NE\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"my good company\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null}"
 						},
 						"url": {
 							"raw": "{{url}}/api/v1/requests/NR 0000021/names/1",
@@ -807,13 +807,14 @@
 						"header": [],
 						"body": {},
 						"url": {
-							"raw": "{{url}}/api/v1/healthz",
+							"raw": "{{url}}/api/v1/nr-ops/healthz",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"api",
 								"v1",
+								"nr-ops",
 								"healthz"
 							]
 						}
@@ -852,13 +853,14 @@
 						"header": [],
 						"body": {},
 						"url": {
-							"raw": "{{url}}/api/v1/readyz",
+							"raw": "{{url}}/api/v1/nr-ops/readyz",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"api",
 								"v1",
+								"nr-ops",
 								"readyz"
 							]
 						}
@@ -871,7 +873,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d5d580c0-13ec-419c-93e0-54d3e2b74a6e",
+								"id": "e4049b20-142f-4d1b-9291-6cf25d0242aa",
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"Response time is less than 200ms\", function () {",
@@ -881,8 +883,6 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"",
-									"",
 									"",
 									"pm.test(\"token includes key:preferred_username\", function () {",
 									"    var jsonData = pm.response.json();",
@@ -922,13 +922,14 @@
 						],
 						"body": {},
 						"url": {
-							"raw": "{{url}}/api/v1/echo",
+							"raw": "{{url}}/api/v1/requests/echo",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"api",
 								"v1",
+								"requests",
 								"echo"
 							]
 						}
@@ -1149,6 +1150,63 @@
 						}
 					],
 					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/NR 0000021",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"NR 0000021"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR00000021 Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "271acb63-04ef-4966-9148-e887f34de1b4",
+								"type": "text/javascript",
+								"exec": [
+									"eval(environment.auth_script);",
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "be255a56-98e4-4de6-ba27-e77d9f85e46b",
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
 						"method": "OPTIONS",
 						"header": [
 							{
@@ -1204,7 +1262,7 @@
 							"raw": "{\"state\": \"INPROGRESS\"}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR00000023",
+							"raw": "{{url}}/api/v1/requests/NR 0000021",
 							"host": [
 								"{{url}}"
 							],
@@ -1212,7 +1270,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR00000023"
+								"NR 0000021"
 							]
 						}
 					},
@@ -1220,6 +1278,33 @@
 				},
 				{
 					"name": "/requests - create 007",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "40a7b84d-3463-4ca9-9e2d-2f43933e5cbb",
+								"type": "text/javascript",
+								"exec": [
+									"eval(environment.auth_script);",
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "ba080bf4-04ba-4985-a8f8-9899b228e6e4",
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 501 - Not Implemented\", function () {",
+									"    pm.response.to.have.status(501);",
+									"});",
+									"",
+									""
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1237,14 +1322,15 @@
 							"raw": "{\n\t\"submitter\": \"thor\",\n\t\"corpType\": \"INC\",\n\t\"reqType\": \"NEW\"\n}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests",
+							"raw": "{{url}}/api/v1/requests/",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"requests"
+								"requests",
+								""
 							]
 						}
 					},
@@ -1744,7 +1830,7 @@
 					"response": []
 				},
 				{
-					"name": "/requests - all Copy",
+					"name": "/requests - PriorityCd=Y all first",
 					"event": [
 						{
 							"listen": "prerequest",
