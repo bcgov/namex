@@ -5,7 +5,7 @@ from app import api, db, app
 
 sql = text('select 1')
 
-@api.route("/healthz")
+@api.route("/corporations/healthz")
 class Healthz(Resource):
 
     @staticmethod
@@ -22,7 +22,7 @@ class Healthz(Resource):
 
         return {"message": "api is healthy"}, 200
 
-@api.route("/readyz")
+@api.route("/corporations/readyz")
 class Readyz(Resource):
 
     @staticmethod
