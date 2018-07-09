@@ -10,6 +10,7 @@ from sqlalchemy import func, desc, asc, text, exc
 from sqlalchemy.inspection import inspect
 import types
 import re
+import sys
 
 from marshmallow import ValidationError
 from app import oidc
@@ -86,8 +87,8 @@ class RequestsQueue(Resource):
         return '{{"nameRequest": "{0}" }}'.format(nr), 200
 
 
-@cors_preflight("GET, POST")
-@api.route('/', methods=['GET', 'POST', 'OPTIONS'])
+@cors_preflight('GET, POST')
+@api.route('', methods=['GET', 'POST', 'OPTIONS'])
 class Requests(Resource):
     a_request = api.model('Request', {'submitter': fields.String('The submitter name'),
                                       'corpType': fields.String('The corporation type'),
