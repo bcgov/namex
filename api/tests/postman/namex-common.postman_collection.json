@@ -313,7 +313,7 @@
 						],
 						"body": {},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 0000021/analysis/1/conflicts?start=3&rows=35",
+							"raw": "{{url}}/api/v1/requests/NR 0000021/analysis/1/conflicts?start=3&rows=4",
 							"host": [
 								"{{url}}"
 							],
@@ -333,7 +333,7 @@
 								},
 								{
 									"key": "rows",
-									"value": "35"
+									"value": "4"
 								}
 							]
 						}
@@ -511,6 +511,99 @@
 								"analysis",
 								"1",
 								"trademarks"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1"
+								},
+								{
+									"key": "rows",
+									"value": "32"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "restricted words",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "75b64372-8d70-4773-9e21-5d72f5cfba27",
+								"type": "text/javascript",
+								"exec": [
+									"eval(environment.auth_script);"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "cf6fa36e-812c-4b39-a907-0dd59d99d5cf",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['highlighting', 'names', 'response']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['names', 'highlighting', 'response']",
+									"    });",
+									"});",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/NR 0000021/analysis/3/restricted_words?start=1&rows=32",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"NR 0000021",
+								"analysis",
+								"3",
+								"restricted_words"
 							],
 							"query": [
 								{
@@ -2066,6 +2159,128 @@
 					],
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=inprogress",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "inprogress"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - queue = INPROGRESS Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "271acb63-04ef-4966-9148-e887f34de1b4",
+								"type": "text/javascript",
+								"exec": [
+									"eval(environment.auth_script);",
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "c978f6a1-5904-41a4-9936-d849cc29f013",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 200;",
+									"",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"// isn't checking schema",
+									"//TODO fix the schema checking",
+									"const searchSchema = {",
+									"    \"title\": \"nameRequest\",",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"activeUser\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"furnished\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									" //   \"required\": [\"firstName\", \"lastName\"]",
+									"}",
+									"// Test whether the response matches the schema",
+									"it('should match the search schema', () => {",
+									"//    var customerSchema = JSON.parse(environment.customerSchema));",
+									"    response.body.should.have.schema(searchSchema);",
+									"  });",
+									"",
+									"",
+									"describe('All NameRequests should be in \\'INPROGRESS\\'', () => {",
+									"  it('should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests.length; i++) {",
+									"          console.log(response.body.nameRequests[i])",
+									"          response.body.nameRequests[i].should.have.property('stateCd')",
+									"          response.body.nameRequests[i].stateCd.should.equal('INPROGRESS')",
+									"      }",
+									"  })",
+									"})",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "OPTIONS",
 						"header": [
 							{
 								"key": "Authorization",
