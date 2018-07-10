@@ -121,7 +121,7 @@ class RequestColin(Resource):
                 incorp_nr_sql = '\'NR ' + incorp_nr[1:] + '\''
 
                 incorp_nob_sql = text("select NATURE_BUSINESS_INFO "
-                                      "from nob_by_nr "
+                                      "from bc_registries_names.namex_corp_nob_vw "
                                       "where nr_num = {}".format(incorp_nr_sql))
                 incorp_nob_obj = db.get_engine(app, 'db2').execute(incorp_nob_sql)
                 incorp_nob = incorp_nob_obj.fetchall()
