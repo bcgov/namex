@@ -4,10 +4,9 @@ from marshmallow import Schema, validates, ValidationError, fields as ma_fields
 from app import oidc
 
 import enum
-import sys
 
 from app.utils.util import cors_preflight
-from .solr import SolrQueries
+from app.analytics.solr import SolrQueries
 
 
 api = Namespace('documents', description='Name Request System - OPS checks')
