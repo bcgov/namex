@@ -1,3 +1,9 @@
+<aside class="notice">
+Current settings in the api module are set to ignore tables that are not backed by a model.
+
+You have been warned.
+</aside>
+
 ## Managing database fixtures
 
 Alembic, via Flask-Migrate is used to manage our database. Changes to the models are put into a revision history.
