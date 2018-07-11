@@ -16,8 +16,7 @@ from app.models import Request as RequestDAO, RequestsSchema
 from app.models import DecisionReason
 
 from app.utils.util import cors_preflight
-from app.analytics.solr import SolrQueries
-from app.analytics.restricted_words import get_restricted_words_conditions
+from app.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
@@ -401,7 +400,7 @@ class RequestsAnalysis(Resource):
         start = request.args.get('start', RequestsAnalysis.START)
         rows = request.args.get('rows',RequestsAnalysis.ROWS)
 
-        if types not in SolrQueries.VALID_QUERIES:
+        if types not in ANALYTICS_VALID_ANALYSIS:
             return jsonify({"message": "{type} is not a valid analysis type for that name choice".format(type=type)}), 404
 
         nrd = RequestDAO.find_by_nr(nr)
@@ -414,7 +413,7 @@ class RequestsAnalysis(Resource):
         if not nrd_name:
             return jsonify({"message": "Name choice:{choice} not found for {nr}".format(nr=nr, choice=choice)}), 404
 
-        if types != 'restricted_words':
+        if types != RestrictedWords.RESTRICTED_WORDS:
             try:
                 solr = SolrQueries.get_results(types, nrd_name.name, start=start, rows=rows)
             except Exception as err:
@@ -433,7 +432,7 @@ class RequestsAnalysis(Resource):
             return jsonify(conflicts), 200
 
         else:
-            restricted, code = get_restricted_words_conditions(nrd_name.name)
+            restricted, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
             return jsonify(restricted), code
 
 

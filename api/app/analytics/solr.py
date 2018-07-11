@@ -9,7 +9,7 @@ class SolrQueries:
     HISTORY='histories'
     TRADEMARKS='trademarks'
     RESTRICTED_WORDS='restricted_words'
-    VALID_QUERIES=[CONFLICTS, HISTORY, TRADEMARKS, RESTRICTED_WORDS]
+    VALID_QUERIES=[CONFLICTS, HISTORY, TRADEMARKS]
 
     #
     # Prototype: /solr/<core name>/select? ... &start={start}&rows={rows} ... &fl=source,id,name,score ... &q=name:{name} ... &wt=json'

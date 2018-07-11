@@ -6,7 +6,7 @@ from app import oidc
 import enum
 
 from app.utils.util import cors_preflight
-from app.analytics.solr import SolrQueries
+from app.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS
 
 
 api = Namespace('documents', description='Name Request System - OPS checks')
@@ -66,7 +66,7 @@ class DocumentAnalysis(Resource):
         start = request.args.get('start', DocumentAnalysis.START)
         rows = request.args.get('rows' ,DocumentAnalysis.ROWS)
 
-        if analysis.lower() not in SolrQueries.VALID_QUERIES:
+        if analysis.lower() not in VALID_ANALYSIS:
             current_app.logger.info('requested analysis:{} is not valid'.format(analysis.lower()))
             return jsonify \
                 ({"message": "{analysis} is not a valid analysis".format(analysis=analysis)}), 404
@@ -79,22 +79,27 @@ class DocumentAnalysis(Resource):
         if err:
             return jsonify(err)
 
-        name = escape(json_input['content'])
-        print('name: {}'.format(name))
-        try:
-            solr = SolrQueries.get_results(analysis.lower(), name, start=start, rows=rows)
-        except Exception as err:
-            current_app.logger.error('SOLR - name:{}, analysis:{}, err:{}'.format(nrd_name.name, analysis, err))
-            return jsonify({"message": "Internal server error"}) , 500
+        content = escape(json_input['content'])
 
-        analyzed = {"response": {"numFound": solr['response']['numFound'],
-                                  "start": solr['response']['start'],
-                                  "rows": solr['responseHeader']['params']['rows'],
-                                  "maxScore": solr['response']['maxScore'],
-                                  "name": solr['responseHeader']['params']['q'][5:]
-                                  },
-                     'names' :solr['response']['docs'],
-                     'highlighting' :solr['highlighting']}
+        if analysis != RestrictedWords.RESTRICTED_WORDS:
 
-        return jsonify(analyzed), 200
+            try:
+                solr = SolrQueries.get_results(analysis.lower(), content, start=start, rows=rows)
+            except Exception as err:
+                current_app.logger.error('SOLR - content:{}, analysis:{}, err:{}'.format(content, analysis, err))
+                return jsonify({"message": "Internal server error"}) , 500
 
+            analyzed = {"response": {"numFound": solr['response']['numFound'],
+                                      "start": solr['response']['start'],
+                                      "rows": solr['responseHeader']['params']['rows'],
+                                      "maxScore": solr['response']['maxScore'],
+                                      "name": solr['responseHeader']['params']['q'][5:]
+                                      },
+                         'names' :solr['response']['docs'],
+                         'highlighting' :solr['highlighting']}
+
+            return jsonify(analyzed), 200
+
+        else:
+            restricted, code = RestrictedWords.get_restricted_words_conditions(content)
+            return jsonify(restricted), code
