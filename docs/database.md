@@ -1,3 +1,12 @@
+<table>
+    <tr>
+        <td bgcolor="#00FFFF">
+<p>Current settings in the api module are set to ignore tables that are not backed by a model.</p>
+<p>You have been warned.</p>
+		</td>
+    </tr>
+</table>
+
 ## Managing database fixtures
 
 Alembic, via Flask-Migrate is used to manage our database. Changes to the models are put into a revision history.
