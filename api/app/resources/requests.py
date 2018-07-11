@@ -401,39 +401,27 @@ class RequestsAnalysis(Resource):
         rows = request.args.get('rows',RequestsAnalysis.ROWS)
 
         if types not in ANALYTICS_VALID_ANALYSIS:
-            return jsonify({"message": "{type} is not a valid analysis type for that name choice".format(type=type)}), 404
+            return jsonify(message='{type} is not a valid analysis type for that name choice'.format(type=type)), 404
 
         nrd = RequestDAO.find_by_nr(nr)
 
         if not nrd:
-            return jsonify({"message": "{nr} not found".format(nr=nr)}), 404
+            return jsonify(message='{nr} not found'.format(nr=nr)), 404
 
         nrd_name = nrd.names.filter_by(choice=choice).one_or_none()
 
         if not nrd_name:
-            return jsonify({"message": "Name choice:{choice} not found for {nr}".format(nr=nr, choice=choice)}), 404
+            return jsonify(message='Name choice:{choice} not found for {nr}'.format(nr=nr, choice=choice)), 404
 
-        if types != RestrictedWords.RESTRICTED_WORDS:
-            try:
-                solr = SolrQueries.get_results(types, nrd_name.name, start=start, rows=rows)
-            except Exception as err:
-                current_app.logger.error('SOLR - name:{}, types:{}, err:{}'.format(nrd_name.name, types, err))
-                return jsonify({"message": "Internal server error"}) , 500
-
-            conflicts = {"response": {"numFound": solr['response']['numFound'],
-                                      "start": solr['response']['start'],
-                                      "rows": solr['responseHeader']['params']['rows'],
-                                      "maxScore": solr['response']['maxScore'],
-                                      "name": solr['responseHeader']['params']['q'][5:]
-                                      },
-                         'names':solr['response']['docs'],
-                         'highlighting':solr['highlighting']}
-
-            return jsonify(conflicts), 200
+        if types in RestrictedWords.RESTRICTED_WORDS:
+            results, msg, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
 
         else:
-            restricted, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
-            return jsonify(restricted), code
+            results, msg, code  = SolrQueries.get_results(types, nrd_name.name, start=start, rows=rows)
+
+        if code:
+            return jsonify(message=msg), code
+        return jsonify(results), 200
 
 
 @cors_preflight("GET, PUT, PATCH")

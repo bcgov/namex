@@ -24,15 +24,15 @@ class SolrQueries:
     @classmethod
     def get_results(cls, query_type, name, start=0, rows=10):
 
-        SOLR_BASE_URL = current_app.config.get('SOLR_BASE_URL', None)
-        if not SOLR_BASE_URL:
+        solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
+        if not solr_base_url:
             current_app.logger.error('SOLR: SOLR_BASE_URL is not set')
-            raise Exception('SOLR config error')
+            return None, 'Internal server error', 500
 
         if query_type not in SolrQueries.VALID_QUERIES:
-            return None
+            return None, 'Not a valid analysis type', 400
 
-        query = SOLR_BASE_URL + SolrQueries.queries[query_type].format(
+        query = solr_base_url + SolrQueries.queries[query_type].format(
             start=start,
             rows=rows,
             name=parse.quote(name)
@@ -41,7 +41,17 @@ class SolrQueries:
             connection = request.urlopen(query)
         except Exception as err:
             current_app.logger.error(err, query)
-            raise err
+            return None, 'Internal server error', 500
 
-        return json.load(connection)
+        solr=json.load(connection)
+        results = {"response": {"numFound": solr['response']['numFound'],
+                                  "start": solr['response']['start'],
+                                  "rows": solr['responseHeader']['params']['rows'],
+                                  "maxScore": solr['response']['maxScore'],
+                                  "name": solr['responseHeader']['params']['q'][5:]
+                                  },
+                     'names': solr['response']['docs'],
+                     'highlighting': solr['highlighting']}
+
+        return results, '', None
 

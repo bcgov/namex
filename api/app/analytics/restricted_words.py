@@ -43,10 +43,10 @@ class RestrictedWords(object):
             restricted_words_obj = db.engine.execute(get_all_restricted_words_sql)
 
         except exc.SQLAlchemyError as err:
-            current_app.logger.info(err.with_traceback(None))
-            return jsonify({"message": "An error occurred accessing the restricted words."}), 500
+            current_app.logger.debug(err.with_traceback(None))
+            return None, 'An error occurred accessing the restricted words.', 500
         except AttributeError:
-            return jsonify({"message": "Could not find any restricted words."}), 404
+            return None, 'Could not find any restricted words.', 404
         restricted_words_dict = []
         for row in restricted_words_obj:
             for word in word_list:
@@ -85,16 +85,15 @@ class RestrictedWords(object):
                                      'consenting_body': cnd_consent_body,
                                      'instructions': cnd_instr})
                 restricted_words_conditions.append({'word_info': word, 'cnd_info': cnd_info})
-            except exc.SQLAlchemyError:
-                print(exc.SQLAlchemyError)
-                return jsonify(
-                    {"message": "An error occurred accessing the condition for {}.".format(word['id'])}), 500
+            except exc.SQLAlchemyError as sql_err:
+                current_app.logger.debug(sql_err.with_traceback(None))
+                return None, 'An error occurred accessing the condition for {}.'.format(word['id']), 500
             except AttributeError:
-                return jsonify({"message": "Could not find any condition info for {}.".format(word['id'])}), 404
-            except:
-                # print('error')
+                return None, 'Could not find any condition info for {}.'.format(word['id']), 404
+            except Exception as err:
+                current_app.logger.debug(err.with_traceback(None))
                 cnd_info = 'Not Available'
                 restricted_words_conditions.append({'word_info': word, 'cnd_info': cnd_info})
         """------------------------------------------------------------------------------------"""
 
-        return {"restricted_words_conditions": restricted_words_conditions}, 200
+        return {"restricted_words_conditions": restricted_words_conditions}, None, None

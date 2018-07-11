@@ -69,37 +69,24 @@ class DocumentAnalysis(Resource):
         if analysis.lower() not in VALID_ANALYSIS:
             current_app.logger.info('requested analysis:{} is not valid'.format(analysis.lower()))
             return jsonify \
-                ({"message": "{analysis} is not a valid analysis".format(analysis=analysis)}), 404
+                (message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404
 
         json_input = request.get_json()
         if not json_input:
-            return jsonify({'message': 'No JSON data provided'}), 400
+            return jsonify(message='No JSON data provided'), 400
 
         err = DocumentSchema().validate(json_input)
         if err:
-            return jsonify(err)
+            return jsonify(err), 400
 
         content = escape(json_input['content'])
 
-        if analysis != RestrictedWords.RESTRICTED_WORDS:
-
-            try:
-                solr = SolrQueries.get_results(analysis.lower(), content, start=start, rows=rows)
-            except Exception as err:
-                current_app.logger.error('SOLR - content:{}, analysis:{}, err:{}'.format(content, analysis, err))
-                return jsonify({"message": "Internal server error"}) , 500
-
-            analyzed = {"response": {"numFound": solr['response']['numFound'],
-                                      "start": solr['response']['start'],
-                                      "rows": solr['responseHeader']['params']['rows'],
-                                      "maxScore": solr['response']['maxScore'],
-                                      "name": solr['responseHeader']['params']['q'][5:]
-                                      },
-                         'names' :solr['response']['docs'],
-                         'highlighting' :solr['highlighting']}
-
-            return jsonify(analyzed), 200
+        if analysis in RestrictedWords.RESTRICTED_WORDS:
+            results, msg, code = RestrictedWords.get_restricted_words_conditions(content)
 
         else:
-            restricted, code = RestrictedWords.get_restricted_words_conditions(content)
-            return jsonify(restricted), code
+            results, msg, code = SolrQueries.get_results(analysis.lower(), content, start=start, rows=rows)
+
+        if code:
+            return jsonify(message=msg), code
+        return jsonify(results), code
