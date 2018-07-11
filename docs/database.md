@@ -1,8 +1,11 @@
-<aside class="notice">
-Current settings in the api module are set to ignore tables that are not backed by a model.
-
-You have been warned.
-</aside>
+<table>
+    <tr>
+        <td bgcolor="#00FFFF">
+<p>Current settings in the api module are set to ignore tables that are not backed by a model.</p>
+<p>You have been warned.</p>
+		</td>
+    </tr>
+</table>
 
 ## Managing database fixtures
 
