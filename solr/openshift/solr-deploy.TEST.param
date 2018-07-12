@@ -3,10 +3,11 @@
 # Component: namex solr
 # JSON Template File: templates/solr-deploy.json
 #=========================================================
-NAME=solr-names
+NAME=solr
 IMAGE_NAMESPACE=servicebc-ne-tools
 IMAGE_NAME=solr
-TAG_NAME=dev
+TAG_NAME=test
+APPLICATTION_HOSTNAME=namex-solr-test
 APPLICATION_DOMAIN=pathfinder.gov.bc.ca
 CORES_PV_SIZE=1Gi
 CORES_MOUNT_PATH=/opt/solr/server/solr/mycores
