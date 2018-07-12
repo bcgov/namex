@@ -1,4 +1,4 @@
-from flask import jsonify, g
+from flask import jsonify, g, current_app
 from flask_restplus import Resource, cors
 from app import api, db, oidc, app
 from app.auth_services import required_scope
@@ -129,11 +129,16 @@ class RequestColin(Resource):
                     incorp_nob = incorp_nob[0][0]
                 else:
                     incorp_nob = 'Not Available'
-        except exc.SQLAlchemyError:
-            print(exc.SQLAlchemyError)
+        except exc.SQLAlchemyError as err:
+            print(err.with_traceback(None))
+            current_app.logger.debug(err.with_traceback(None))
             return jsonify({"message": "An error occurred getting the corporation details"}), 500
         except AttributeError:
             return jsonify({"message": "No corporate details available for {}".format(corp_num)}), 404
+        except Exception as err:
+            print(err.with_traceback(None))
+            current_app.logger.debug(err.with_traceback(None))
+            return jsonify({"message": "Unknown error occurred in colin-api"}), 500
 
         incorp_date = incorp_info_dict['recognition_dts']
         if incorp_date is not None:
