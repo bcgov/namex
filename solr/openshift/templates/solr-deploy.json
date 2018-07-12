@@ -48,7 +48,7 @@
       },
       "spec":
       {
-        "host": "namex-${NAME}.${APPLICATION_DOMAIN}",
+        "host": "namex-${NAME}-${TAG_NAME}.${APPLICATION_DOMAIN}",
         "path": "/solr",
         "tls":
         {
@@ -191,10 +191,17 @@
           {
             "volumes": [
               {
-                "name": "${NAME}-data",
+                "name": "${NAME}-cores",
                 "persistentVolumeClaim":
                 {
-                  "claimName": "${NAME}"
+                  "claimName": "${NAME}-cores"
+                }
+              },
+              {
+                "name": "${NAME}-trademarks",
+                "persistentVolumeClaim":
+                {
+                  "claimName": "${NAME}-trademarks"
                 }
               },
               {
@@ -244,7 +251,7 @@
                 ],
                 "volumeMounts": [
                   {
-                    "name": "${NAME}-data",
+                    "name": "${NAME}-cores",
                     "mountPath": "${CORES_MOUNT_PATH}"
                   },
                   {
@@ -267,6 +274,18 @@
                     "subPath": "solr-data-config.xml"
                   }
                 ],
+                "livenessProbe": {
+                    "httpGet": {
+                        "path": "/solr/names/admin/ping",
+                        "port": 8983,
+                        "scheme": "HTTP"
+                    },
+                    "initialDelaySeconds": 90,
+                    "timeoutSeconds": 10,
+                    "periodSeconds": 120,
+                    "successThreshold": 1,
+                    "failureThreshold": 3
+                },
                 "env": [
                   {
                     "name": "CORE_NAME",
@@ -313,7 +332,7 @@
     {
       "name": "TAG_NAME",
       "displayName": "Environment TAG name",
-      "description": "The TAG name for this environment, e.g., dev, test, prod",
+      "description": "The TAG name for this environment, e.g., dev,test or prod",
       "value": "dev",
       "required": true
     },
@@ -357,6 +376,13 @@
       "description": "The name of the Solr core configuration to load.",
       "required": true,
       "value": ""
+    },
+    {
+      "name": "APPLICATTION_HOSTNAME",
+      "displayName": "Application Host Name",
+      "description": "The hostname part of the full path to the solr service.",
+      "required": true,
+      "value": "namex-solr-dev"
     }
   ]
 }

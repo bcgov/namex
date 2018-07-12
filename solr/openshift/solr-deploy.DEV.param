@@ -1,0 +1,16 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: namex solr
+# JSON Template File: templates/solr-deploy.json
+#=========================================================
+NAME=solr
+IMAGE_NAMESPACE=servicebc-ne-tools
+IMAGE_NAME=solr
+TAG_NAME=dev
+APPLICATTION_HOSTNAME=namex-solr-dev
+APPLICATION_DOMAIN=pathfinder.gov.bc.ca
+CORES_PV_SIZE=1Gi
+CORES_MOUNT_PATH=/opt/solr/server/solr/mycores
+TRADEMARKS_PV_SIZE=1Gi
+TRADEMARKS_MOUNT_PATH=/opt/solr/trademarks_data
+CORE_NAME=names,possible.conflicts,trademarks
