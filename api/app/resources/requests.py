@@ -12,7 +12,7 @@ from sqlalchemy.inspection import inspect
 from app import oidc
 from app.auth_services import required_scope, AuthError
 from app.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, ApplicantSchema
-from app.models import db, User, State, NameSchema, Name, Comment, PartnerNameSystemSchema
+from app.models import db, User, State, NameSchema, Name, Comment, PartnerNameSystemSchema, ValidationError
 from app.models import DecisionReason
 
 from app.utils.util import cors_preflight
@@ -380,6 +380,10 @@ class Request(Resource):
             if applicants_d:
                 appl = json_input.get('applicants', None)
                 if appl:
+                    errm = applicant_schema.validate(appl, partial=False)
+                    if errm:
+                        return jsonify(errm)
+
                     applicant_schema.load(appl, instance=applicants_d, partial=False)
                 else:
                     applicants_d.delete_from_db()
@@ -433,9 +437,13 @@ class Request(Resource):
             ### Finally save the entire graph
             nr_d.save_to_db()
 
+        except ValidationError as ve:
+            return jsonify(ve.messages)
+
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return jsonify(message='Request:{} not found'.format(nr)), 404
+
         except Exception as err:
             current_app.logger.error("Error when replacing NR:{0} Err:{1}".format(nr, err))
             return jsonify(message='NR had an internal error'), 500
