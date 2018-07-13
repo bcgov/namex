@@ -30,8 +30,10 @@ class NRORequest(Resource):
             return {"message": "No input data provided"}, 400
 
         nr_num = json_input['nameRequest']
+        current_app.logger.debug('attempting to load: {}'.format(nr_num))
         if not validNRFormat(nr_num):
             return {"message": "Valid NR format required - 'NR 9999999'"}, 400
+
 
         if Request.find_by_nr(nr_num):
             return {"message": "{nr} already exists in namex, unable to create a duplicate".format(nr=nr_num)}, 409

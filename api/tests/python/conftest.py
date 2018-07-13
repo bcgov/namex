@@ -3,7 +3,6 @@ import pytest
 from app import create_app
 from flask import current_app
 from app.models import db as _db
-from config import TestConfig
 from sqlalchemy import event, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, DropConstraint
@@ -16,7 +15,7 @@ def app(request):
     """
     Returns session-wide application.
     """
-    app = create_app(TestConfig)
+    app = create_app('testing')
 
     return app
 
@@ -43,6 +42,7 @@ def db(app, request):
             for fk in table.foreign_keys:
                 _db.engine.execute(DropConstraint(fk.constraint))
         metadata.drop_all()
+        _db.drop_all()
 
         # ############################################
         # There are 2 approaches, an empty database, or the same one that the app will use

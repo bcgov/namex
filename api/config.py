@@ -4,6 +4,14 @@ from dotenv import load_dotenv, find_dotenv
 #this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
+configuration = {
+    "development": "config.DevConfig",
+    "testing": "config.TestConfig",
+    "production": "config.Config",
+    "default": "config.Config"
+}
+
+
 class Config(object):
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -33,11 +41,18 @@ class Config(object):
     OIDC_CLIENT_SECRETS = os.getenv('OIDC_SECRETS_FILE','client_secrets/client_secrets.json')
     OIDC_USER_INFO_ENABLED = True
     OIDC_SCOPES = ['openid', 'email', 'profile']
-    TESTING = True,
+    TESTING = False,
+    DEBUG = False
+
+
+class DevConfig(Config):
+    TESTING = False,
     DEBUG = True
 
 
 class TestConfig(Config):
+    DEBUG = True
+    TESTING = True
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
     DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD','')

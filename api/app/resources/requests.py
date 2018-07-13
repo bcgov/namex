@@ -12,7 +12,7 @@ from sqlalchemy.inspection import inspect
 from app import oidc
 from app.auth_services import required_scope, AuthError
 from app.models import db, User, State, NameSchema
-from app.models import Request as RequestDAO, RequestsSchema
+from app.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, ApplicantSchema
 from app.models import DecisionReason
 
 from app.utils.util import cors_preflight
@@ -25,8 +25,12 @@ api = Namespace('nameRequests', description='Name Request System - Core API for 
 # Marshmallow schemas
 request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
+request_header_schema = RequestsHeaderSchema(many=False)
+
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
+
+applicant_schema = ApplicantSchema(many=False)
 
 
 @api.errorhandler(AuthError)
@@ -304,75 +308,90 @@ class Request(Resource):
     @oidc.accept_token(require_token=True)
     def put(nr, *args, **kwargs):
 
-         # Stubbed out for the UX folks to test and send anything from the UI.
-        pass
-        return jsonify({'message': '{} successfully replaced'.format(nr)}), 202
-
         # do the cheap check first before the more expensive ones
         json_input = request.get_json()
         if not json_input:
-            return jsonify({'message': 'No input data provided'}), 400
+            return jsonify(message='No input data provided'), 400
+        current_app.logger.debug(json_input)
 
-        res = RequestsSchema().load(json_input, partial=True)
-        in_nr = res.data
+        nr_num = json_input.get('nrNum', None)
+        if nr_num and nr_num != nr:
+            return jsonify(message='Data contains a different NR# than this resource'), 400
 
-        nrd = RequestDAO.find_by_nr(nr)
-        if not nrd:
-            return jsonify({'message': 'Request: {} does not exit'.format(nr)}), 404
+        state = json_input.get('state', None)
+        if not state:
+            return jsonify({"message": "state not set"}), 406
 
-        user = User.find_by_jwtToken(g.oidc_token_info)
+        if state not in State.VALID_STATES:
+            return jsonify({"message": "not a valid state"}), 406
 
+        #check user scopes
+        if not (required_scope(User.EDITOR) or required_scope(User.APPROVER)):
+            raise AuthError({
+                "code": "Unauthorized",
+                "description": "You don't have access to this resource."
+            }, 403)
 
+        if (state in (State.APPROVED,
+                     State.REJECTED,
+                     State.CONDITIONAL))\
+                and not required_scope(User.APPROVER):
+            return jsonify(message='Only Names Examiners can set state: {}'.format(state)), 428
 
-        if not user or nrd.stateCd != State.INPROGRESS or nrd.userId != user.id:
-            return jsonify({"message": "The Request must be INPROGRESS and assigned to you before you can change it."}), 401
+        try:
+            nr_d = RequestDAO.find_by_nr(nr)
+            if not nr_d:
+                return jsonify(message='NR not found'), 404
 
+            user = User.find_by_jwtToken(g.oidc_token_info)
+            if not user:
+                user = User.create_from_jwtToken(g.oidc_token_info)
 
-        nrd.stateCd = in_nr['state']
-        nrd.adminComment = in_nr['adminComment']
-        nrd.applicant = in_nr['applicant']
-        nrd.phoneNumber = in_nr['phoneNumber']
-        nrd.contact = in_nr['contact']
-        nrd.abPartner = in_nr['abPartner']
-        nrd.skPartner = in_nr['skPartner']
-        nrd.consentFlag = in_nr['consentFlag']
-        nrd.examComment = in_nr['examComment']
-        nrd.expiryDate = in_nr['expiryDate']
-        nrd.requestTypeCd = in_nr['requestTypeCd']
-        nrd.priorityCd = in_nr['priorityCd']
-        nrd.tilmaInd = in_nr['tilmaInd']
-        nrd.tilmaTransactionId = in_nr['tilmaTransactionId']
-        nrd.xproJurisdiction = in_nr['xproJurisdiction']
-        nrd.additionalInfo = in_nr['additionalInfo']
-        nrd.natureBusinessInfo = in_nr['natureBusinessInfo']
-        nrd.userNote = in_nr['userNote']
-        nrd.nuansNum = in_nr['nuansNum']
-        nrd.nuansExpirationDate = in_nr['nuansExpirationDate']
-        nrd.assumedNuansNum = in_nr['assumedNuansNum']
-        nrd.assumedNuansName = in_nr['assumedNuansName']
-        nrd.assumedNuansExpirationDate = in_nr['assumedNuansExpirationDate']
-        nrd.lastNuansUpdateRole = in_nr['lastNuansUpdateRole']
+            #NR is in a final state, but maybe the user wants to pull it back for corrections
+            if nr_d.stateCd in State.COMPLETED_STATE:
+                if not required_scope(User.APPROVER):
+                    return jsonify(message='Only Names Examiners can alter completed Requests'), 401
 
-        #update the name info
-        for name in nrd.names.all():
-            choice = name.choice
-            for nm in res.data['names']:
-                if nm.choice == choice:
-                    name.name = nm.name
-                    name.state= nm.state
-                    name.conflict1 = nm.conflict1
-                    name.conflict2 = nm.conflict2
-                    name.conflict3 = nm.conflict3
-                    name.conflict1_num = nm.conflict1_num
-                    name.conflict2_num = nm.conflict2_num
-                    name.conflict3_num = nm.conflict3_num
-                    name.decision_text = nm.decision_text
+                if nr_d.furnished == RequestDAO.REQUEST_FURNISHED:
+                    return jsonify(message='Request has already been furnished and cannot be altered'), 409
 
-        nrd.save_to_db()
+                if state != State.INPROGRESS:
+                    return jsonify(message='Completed unfurnished Requests can only be set to an INPROGRESS state'), 400
 
-        current_app.logger.info("nrd: {}".format(nrd.state))
+            elif state in State.RELEASE_STATES:
+                if nr_d.userId != user.id or nr_d.stateCd != State.INPROGRESS:
+                    return jsonify(
+                        message='The Request must be INPROGRESS and assigned to you before you can change it.'
+                    ), 401
+            elif nr_d.userId != user.id or nr_d.stateCd != State.INPROGRESS:
+                return jsonify(
+                    message='The Request must be INPROGRESS and assigned to you before you can change it.'
+                ), 401
 
-        return jsonify({'message': '{} successfully replaced'.format(nr)}), 202
+            request_header_schema.load(json_input, instance=nr_d, partial=True)
+            nr_d.stateCd = state
+            nr_d.userId = user.id
+
+            applicants_d = nr_d.applicants.one_or_none()
+            if applicants_d:
+                appl = json_input.get('applicants', None)
+                if appl:
+                    applicant_schema.load(appl, instance=applicants_d, partial=False)
+                else:
+                    applicants_d.delete_from_db()
+
+            nr_d.save_to_db()
+
+        except NoResultFound as nrf:
+            # not an error we need to track in the log
+            return jsonify(message='Request:{} not found'.format(nr)), 404
+        except Exception as err:
+            current_app.logger.error("Error when replacing NR:{0} Err:{1}".format(nr, err))
+            return jsonify(message='NR had an internal error'), 500
+
+        current_app.logger.debug(nr_d.json())
+        current_app.logger.debug(json_input.get('applicants'))
+        return jsonify(nr_d.json()), 200
 
 
 @cors_preflight("GET")
