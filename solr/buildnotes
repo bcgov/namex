@@ -32,7 +32,7 @@ Tag solr:dev set to servicebc-ne-tools/solr@sha256:184122663e61dbc27003242d9493a
 
 
 * Deploy
-** Make sure you're in the servicebc-ne-dev namespace
+** Make sure you're in the servicebc-ne-dev namespace (or ne-test or ne-prod)
 (venv) NDM050057:openshift vboettch$ oc project servicebc-ne-dev (or test or prod)
 Now using project "servicebc-ne-dev" on server "https://console.pathfinder.gov.bc.ca:8443".
 
