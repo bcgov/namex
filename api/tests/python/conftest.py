@@ -42,6 +42,7 @@ def db(app, request):
             for fk in table.foreign_keys:
                 _db.engine.execute(DropConstraint(fk.constraint))
         metadata.drop_all()
+        _db.drop_all()
 
         # ############################################
         # There are 2 approaches, an empty database, or the same one that the app will use

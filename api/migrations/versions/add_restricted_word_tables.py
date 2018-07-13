@@ -28,14 +28,14 @@ def upgrade():
         "COMMENT ON TABLE public.restricted_condition IS 'The conditions against a restricted word.  The conditions can apply to one or more rows.'; "
     )
 
-    # try:
-    #   op.execute(
-    #       """
-    #       DROP SEQUENCE public.restricted_condition_id
-    #       """
-    #   )
-    # except:
-    #     pass
+    try:
+      op.execute(
+          """
+          DROP SEQUENCE public.restricted_condition_id
+          """
+      )
+    except:
+        pass
 
     op.execute(
         """
