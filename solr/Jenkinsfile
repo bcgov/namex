@@ -93,7 +93,7 @@ node {
 
     stage('deploy-test') {
         timeout(time: 1, unit: 'DAYS') {
-	        input message: "Deploy to test?", submitter: 'varekboettcher-admin'
+	        input message: "Deploy to test?", submitter: 'VarekBoettcher'
         }
         node('master') {
           echo ">>> Tag ${TST_TAG_NAME} with ${TST_BCK_TAG_NAME}"
