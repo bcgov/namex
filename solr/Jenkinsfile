@@ -8,16 +8,16 @@
 // define constants
 def BUILDCFG_NAME ='solr'
 def IMAGE_NAME = 'solr'
-def DEV_DEPLOYMENT_NAME = 'solr-names'
+def DEV_DEPLOYMENT_NAME = 'solr'
 def DEV_TAG_NAME = 'dev'
 def DEV_NS = 'servicebc-ne-dev'
 
-def TST_DEPLOYMENT_NAME = 'solr-names'
+def TST_DEPLOYMENT_NAME = 'solr'
 def TST_TAG_NAME = 'test'
 def TST_BCK_TAG_NAME = 'test-previous'
 def TST_NS = 'servicebc-ne-test'
 
-def PROD_DEPLOYMENT_NAME = 'solr-names'
+def PROD_DEPLOYMENT_NAME = 'solr'
 def PROD_TAG_NAME = 'prod'
 def PROD_BCK_TAG_NAME = 'prod-previous'
 def PROD_NS = 'servicebc-ne-prod'

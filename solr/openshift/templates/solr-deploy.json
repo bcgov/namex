@@ -48,7 +48,7 @@
       },
       "spec":
       {
-        "host": "namex-${NAME}-${TAG_NAME}.${APPLICATION_DOMAIN}",
+        "host": "${APPLICATTION_HOSTNAME}.${APPLICATION_DOMAIN}",
         "path": "/solr",
         "tls":
         {
