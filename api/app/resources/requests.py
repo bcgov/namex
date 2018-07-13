@@ -11,12 +11,13 @@ from sqlalchemy.inspection import inspect
 
 from app import oidc
 from app.auth_services import required_scope, AuthError
-from app.models import db, User, State, NameSchema
 from app.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, ApplicantSchema
+from app.models import db, User, State, NameSchema, Name, Comment, PartnerNameSystemSchema
 from app.models import DecisionReason
 
 from app.utils.util import cors_preflight
 from app.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
+
 
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
@@ -29,6 +30,7 @@ request_header_schema = RequestsHeaderSchema(many=False)
 
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
+nwpta_schema = PartnerNameSystemSchema(many=False)
 
 applicant_schema = ApplicantSchema(many=False)
 
@@ -368,10 +370,12 @@ class Request(Resource):
                     message='The Request must be INPROGRESS and assigned to you before you can change it.'
                 ), 401
 
+            # update request header
             request_header_schema.load(json_input, instance=nr_d, partial=True)
             nr_d.stateCd = state
             nr_d.userId = user.id
 
+            # update applicants
             applicants_d = nr_d.applicants.one_or_none()
             if applicants_d:
                 appl = json_input.get('applicants', None)
@@ -380,6 +384,53 @@ class Request(Resource):
                 else:
                     applicants_d.delete_from_db()
 
+            ### NAMES ###
+            for nrd_name in nr_d.names.all():
+                for in_name in json_input['names']:
+                    if nrd_name.choice == in_name['choice']:
+
+                        errors = names_schema.validate(in_name, partial=False)
+                        if errors:
+                            return jsonify(errors), 400
+
+                        names_schema.load(in_name, instance=nrd_name, partial=False)
+            ### END names ###
+
+            ### COMMENTS ###
+
+            # we only add new comments, we do not change existing comments
+            # - we can find new comments in json as those with no ID
+
+            for in_comment in json_input['comments']:
+                is_new_comment = False
+                try:
+                    if in_comment['id'] is None or in_comment['id'] == 0:
+                        is_new_comment = True
+                except KeyError:
+                    is_new_comment = True
+
+                if is_new_comment and in_comment['comment'] is not None:
+                    new_comment = Comment()
+                    new_comment.comment = in_comment['comment']
+                    new_comment.examiner = user
+                    new_comment.nrId = nr_d.id
+
+            ### END comments ###
+
+            ### NWPTA ###
+
+            for nrd_nwpta in nr_d.partnerNS.all():
+                for in_nwpta in json_input['nwpta']:
+                    if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
+
+                        errors = nwpta_schema.validate(in_nwpta, partial=False)
+                        if errors:
+                            return jsonify(errors), 400
+
+                        nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
+            ### END nwpta ###
+
+            ### Finally save the entire graph
             nr_d.save_to_db()
 
         except NoResultFound as nrf:
@@ -390,7 +441,6 @@ class Request(Resource):
             return jsonify(message='NR had an internal error'), 500
 
         current_app.logger.debug(nr_d.json())
-        current_app.logger.debug(json_input.get('applicants'))
         return jsonify(nr_d.json()), 200
 
 
