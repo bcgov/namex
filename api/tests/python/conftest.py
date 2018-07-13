@@ -3,7 +3,6 @@ import pytest
 from app import create_app
 from flask import current_app
 from app.models import db as _db
-from config import TestConfig
 from sqlalchemy import event, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, DropConstraint
@@ -16,7 +15,7 @@ def app(request):
     """
     Returns session-wide application.
     """
-    app = create_app(TestConfig)
+    app = create_app('testing')
 
     return app
 

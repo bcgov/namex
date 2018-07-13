@@ -57,15 +57,32 @@ class Applicant(db.Model):
     # def find_by_name(cls, name):
     #     return cls.query.filter_by(name=name).first()
     #
-    # def save_to_db(self):
-    #     db.session.add(self)
-    #     db.session.commit()
-    #
-    # def delete_from_db(self):
-    #     db.session.delete(self)
-    #     db.session.commit()
+    def save_to_db(self):
+        db.session.add(self)
+        # db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        # db.session.commit()
 #
-# class NameSchema(ma.ModelSchema):
-#     class Meta:
-#         model = Name
-#         fields = ('choice', 'name', 'state')
+class ApplicantSchema(ma.ModelSchema):
+    class Meta:
+        model = Applicant
+        fields = ('lastName'
+                 ,'firstName'
+                 ,'middleName'
+                 ,'phoneNumber'
+                 ,'faxNumber'
+                 ,'emailAddress'
+                 ,'contact'
+                 ,'clientFirstName'
+                 ,'clientLastName'
+                 ,'declineNotificationInd'
+                 ,'addrLine1'
+                 ,'addrLine2'
+                 ,'addrLine3'
+                 ,'city'
+                 ,'postalCd'
+                 ,'stateProvinceCd'
+                 ,'countryTypeCd'
+                 )

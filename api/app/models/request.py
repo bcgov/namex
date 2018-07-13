@@ -47,6 +47,7 @@ class Request(db.Model):
     requestId = db.Column('request_id', db.Integer)
     previousRequestId = db.Column('previous_request_id', db.Integer)
     submitCount = db.Column('submit_count', db.Integer)
+    nroLastUpdate = db.Column('nro_last_update', db.DateTime)
 
     # Relationship State
     stateCd = db.Column('state_cd', db.String(40), db.ForeignKey('states.cd'))
@@ -177,3 +178,20 @@ class RequestsSchema(ma.ModelSchema):
         for key in filter(lambda key: data[key] is None, data):
             del ret[key]
         return ret
+
+
+class RequestsHeaderSchema(ma.ModelSchema):
+    class Meta:
+        model = Request
+        # sqla_session = db.scoped_session
+        # additional = ['stateCd']
+        fields = ('requestTypeCd'
+                 ,'priorityCd'
+                 ,'expirationDate'
+                 ,'consentFlag'
+                 ,'additionalInfo'
+                 ,'natureBusinessInfo'
+                 ,'xproJurisdiction'
+                 ,'furnished'
+                 ,'nroLastUpdate'
+                 )

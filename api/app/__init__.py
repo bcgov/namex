@@ -8,8 +8,10 @@ TODO: Fill in a larger description once the API is defined for V1
 from app.utils.logging import setup_logging
 setup_logging() ## important to do this first
 
+import os
+
 from flask import Flask
-from config import Config
+from config import Config, configuration
 from app.patches.flask_oidc_patched import OpenIDConnect
 oidc = OpenIDConnect()
 
@@ -18,9 +20,10 @@ from app.resources import api
 from app import models
 
 
-def create_app(config=Config):
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_object(config)
+def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
+
+    app = Flask(__name__)
+    app.config.from_object(configuration[run_mode])
 
     db.init_app(app)
     ma.init_app(app)
