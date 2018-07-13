@@ -11,7 +11,7 @@ from sqlalchemy.inspection import inspect
 
 from app import oidc
 from app.auth_services import required_scope, AuthError
-from app.models import db, User, State, NameSchema
+from app.models import db, User, State, NameSchema, Name, Comment, PartnerNameSystemSchema
 from app.models import Request as RequestDAO, RequestsSchema
 from app.models import DecisionReason
 
@@ -27,6 +27,7 @@ request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
+nwpta_schema = PartnerNameSystemSchema(many=False)
 
 
 @api.errorhandler(AuthError)
@@ -304,73 +305,76 @@ class Request(Resource):
     @oidc.accept_token(require_token=True)
     def put(nr, *args, **kwargs):
 
-         # Stubbed out for the UX folks to test and send anything from the UI.
-        pass
-        return jsonify({'message': '{} successfully replaced'.format(nr)}), 202
-
         # do the cheap check first before the more expensive ones
         json_input = request.get_json()
         if not json_input:
             return jsonify({'message': 'No input data provided'}), 400
 
-        res = RequestsSchema().load(json_input, partial=True)
-        in_nr = res.data
-
+        # get NR from database
         nrd = RequestDAO.find_by_nr(nr)
-        if not nrd:
-            return jsonify({'message': 'Request: {} does not exit'.format(nr)}), 404
 
+        # get current user and check that they own this NR
         user = User.find_by_jwtToken(g.oidc_token_info)
+        if not check_ownership(nrd, user):
+            return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
+
+        ### NAMES ###
+
+        for nrd_name in nrd.names.all():
+            for in_name in json_input['names']:
+                if nrd_name.choice == in_name['choice']:
+
+                    errors = names_schema.validate(in_name, partial=False)
+                    if errors:
+                        return jsonify(errors), 400
+
+                    names_schema.load(in_name, instance=nrd_name, partial=False)
+                    nrd_name.save_to_db()
+
+        ### END names ###
+
+        ### COMMENTS ###
+
+        # we only add new comments, we do not change existing comments
+        # - we can find new comments in json as those with no ID
+
+        for in_comment in json_input['comments']:
+            is_new_comment = False
+            try:
+                if in_comment['id'] is None or in_comment['id'] == 0:
+                    is_new_comment = True
+            except KeyError:
+                is_new_comment = True
+
+            if is_new_comment and in_comment['comment'] is not None:
+                new_comment = Comment()
+                new_comment.comment = in_comment['comment']
+                new_comment.examiner = user
+                new_comment.nrId = nrd.id
+                new_comment.save_to_db()
+
+        ### END comments ###
+
+        ### NWPTA ###
+
+        for nrd_nwpta in nrd.partnerNS.all():
+            for in_nwpta in json_input['nwpta']:
+                if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
+                    print(in_nwpta)
+
+                    errors = nwpta_schema.validate(in_nwpta, partial=False)
+                    if errors:
+                        return jsonify(errors), 400
+
+                    nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
+                    nrd_nwpta.save_to_db()
+
+        ### END nwpta ###
 
 
+        # TODO request
 
-        if not user or nrd.stateCd != State.INPROGRESS or nrd.userId != user.id:
-            return jsonify({"message": "The Request must be INPROGRESS and assigned to you before you can change it."}), 401
-
-
-        nrd.stateCd = in_nr['state']
-        nrd.adminComment = in_nr['adminComment']
-        nrd.applicant = in_nr['applicant']
-        nrd.phoneNumber = in_nr['phoneNumber']
-        nrd.contact = in_nr['contact']
-        nrd.abPartner = in_nr['abPartner']
-        nrd.skPartner = in_nr['skPartner']
-        nrd.consentFlag = in_nr['consentFlag']
-        nrd.examComment = in_nr['examComment']
-        nrd.expiryDate = in_nr['expiryDate']
-        nrd.requestTypeCd = in_nr['requestTypeCd']
-        nrd.priorityCd = in_nr['priorityCd']
-        nrd.tilmaInd = in_nr['tilmaInd']
-        nrd.tilmaTransactionId = in_nr['tilmaTransactionId']
-        nrd.xproJurisdiction = in_nr['xproJurisdiction']
-        nrd.additionalInfo = in_nr['additionalInfo']
-        nrd.natureBusinessInfo = in_nr['natureBusinessInfo']
-        nrd.userNote = in_nr['userNote']
-        nrd.nuansNum = in_nr['nuansNum']
-        nrd.nuansExpirationDate = in_nr['nuansExpirationDate']
-        nrd.assumedNuansNum = in_nr['assumedNuansNum']
-        nrd.assumedNuansName = in_nr['assumedNuansName']
-        nrd.assumedNuansExpirationDate = in_nr['assumedNuansExpirationDate']
-        nrd.lastNuansUpdateRole = in_nr['lastNuansUpdateRole']
-
-        #update the name info
-        for name in nrd.names.all():
-            choice = name.choice
-            for nm in res.data['names']:
-                if nm.choice == choice:
-                    name.name = nm.name
-                    name.state= nm.state
-                    name.conflict1 = nm.conflict1
-                    name.conflict2 = nm.conflict2
-                    name.conflict3 = nm.conflict3
-                    name.conflict1_num = nm.conflict1_num
-                    name.conflict2_num = nm.conflict2_num
-                    name.conflict3_num = nm.conflict3_num
-                    name.decision_text = nm.decision_text
-
-        nrd.save_to_db()
-
-        current_app.logger.info("nrd: {}".format(nrd.state))
+        # TODO applicant info
 
         return jsonify({'message': '{} successfully replaced'.format(nr)}), 202
 

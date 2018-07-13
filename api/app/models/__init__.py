@@ -8,9 +8,9 @@ ma = Marshmallow()
 
 
 from .applicant import Applicant
-from .comment import Comment
+from .comment import Comment, CommentSchema
 from .event import Event
-from .nwpta import PartnerNameSystem
+from .nwpta import PartnerNameSystem, PartnerNameSystemSchema
 from .name import Name, NameSchema
 from .request import Request, RequestsSchema
 from .user import User, UserSchema
