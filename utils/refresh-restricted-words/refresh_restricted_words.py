@@ -27,26 +27,30 @@ pg_cur = pg_conn.cursor()
 
 
 # delete all records in cross-reference table, then words and conditions tables
+print('deleting all existing Restricted Words data...')
 pg_cur.execute("TRUNCATE restricted_word_condition")
 pg_cur.execute("TRUNCATE restricted_word")
 pg_cur.execute("TRUNCATE restricted_condition")
-
+print('done')
 
 # add new words
 with open('restricted_word.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
+    print('inserting words...')
     for row in reader:
         pg_cur.execute("insert into restricted_word values ({}, '{}')".format(row['word_id'], row['word_phrase']))
         pg_conn.commit()
+    print('done')
 
 # add new conditions and cross-reference records
 with open('restricted_condition.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
+    print('inserting conditions and word-condition cross-references...')
     for row in reader:
         try:
             pg_cur.execute("insert into restricted_condition values ({}, '{}', '{}', '{}', '{}', '{}')".format(
                 row['cnd_id'],
-                row['Examiner Information (cnd_text)'].replace("'", "''"),
+                row['Examiner Information'].replace("'", "''"),
                 row['allow_use'],
                 row['consent_required'],
                 row['consenting_body'].replace("'", "''"),
@@ -72,10 +76,11 @@ with open('restricted_condition.csv', 'r') as csvfile:
         except psycopg2.IntegrityError as e:
             # duplicate ID
             pg_conn.rollback()
+    print('done')
 
 # commit all changes
 pg_conn.commit()
-print("done")
+print("ALL DONE")
 
 
 
