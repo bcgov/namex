@@ -34,7 +34,7 @@ class RequestColin(Resource):
         logging.info('logging works')
         # who has access?
         if not (required_scope("names_viewer")):  # User.VIEWONLY
-            return {"message": "Error: You do not have access to corporate details."}, 403
+            return jsonify({"message": "Authentication error: You do not have the required user roles to view corp details."}), 403
 
         corp_num_sql = '\'' + corp_num + '\''
 

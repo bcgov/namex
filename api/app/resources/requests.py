@@ -70,7 +70,7 @@ class RequestsQueue(Resource):
     @oidc.accept_token(require_token=True)
     def get():
         if not (required_scope(User.EDITOR) or required_scope(User.APPROVER)):
-            return {"message": "Error: You do not have access to the Name Request queue."}, 403
+            return jsonify({"message": "Error: You do not have access to the Name Request queue."}), 403
 
         try:
             user = User.find_by_jwtToken(g.oidc_token_info)
