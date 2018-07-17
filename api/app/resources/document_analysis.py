@@ -1,4 +1,4 @@
-from flask import request, jsonify, current_app, escape
+from flask import request, jsonify, current_app
 from flask_restplus import Namespace, Resource, cors, fields as rp_fields
 from marshmallow import Schema, validates, ValidationError, fields as ma_fields
 from app import oidc
@@ -79,7 +79,7 @@ class DocumentAnalysis(Resource):
         if err:
             return jsonify(err), 400
 
-        content = escape(json_input['content'])
+        content = json_input['content']
 
         if analysis in RestrictedWords.RESTRICTED_WORDS:
             results, msg, code = RestrictedWords.get_restricted_words_conditions(content)
