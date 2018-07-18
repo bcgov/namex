@@ -132,8 +132,10 @@ class RequestColin(Resource):
         except exc.SQLAlchemyError as err:
             print(err.with_traceback(None))
             current_app.logger.debug(err.with_traceback(None))
-            return jsonify({"message": "An error occurred getting the corporation details"}), 500
+            return jsonify({"message": "{} occurred getting the corporation details".format(err.with_traceback(None))}), 500
         except AttributeError:
+            return jsonify({"message": "Attribute error"}), 500
+        except IndexError:
             return jsonify({"message": "No corporate details available for {}".format(corp_num)}), 404
         except Exception as err:
             print(err.with_traceback(None))
