@@ -13,7 +13,7 @@ select  r.request_id,
     ri.nature_business_info,
     ri.xpro_jurisdiction
 from request r
-left outer join request_instance ri ON ri.request_instance_id = r.request_id
+left outer join request_instance ri ON ri.request_id = r.request_id
 /
 
 create or replace view namex_submitter_vw as
@@ -27,7 +27,7 @@ select t.request_id,
     END submitter
 from transaction t
 left outer join event submit_event on submit_event.event_id = t.event_id
-where t.transaction_type_cd = 'NRREQ'
+where t.transaction_type_cd in ('NRREQ', 'RESUBMIT')
 /
 
 
@@ -75,8 +75,8 @@ from name_instance ni
 left outer join name nm on nm.name_id=ni.name_id
 /
 
-create or replace view namex_corp_nob_vw as 
-select ri.NATURE_BUSINESS_INFO, 
+create or replace view namex_corp_nob_vw as
+select ri.NATURE_BUSINESS_INFO,
     r.nr_num
 from request_instance ri
 inner join request r ON r.request_id = ri.request_id
