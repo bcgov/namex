@@ -20,7 +20,8 @@ class SolrQueries:
                    'hl.simple.pre=%3Cb%3E&hl=on&indent=on&mm=75%25&q=name:{name}&qf=name&wt=json&start={start}&'
                    'rows={rows}&fl=source,id,name,score',
         HISTORY: '/solr/names/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&'
-                 'indent=on&mm=75%25&q=name:{name}&qf=name&wt=json&start={start}&rows={rows}&fl=nr_num,name,score',
+                 'indent=on&mm=75%25&q=name:{name}&qf=name&wt=json&start={start}&rows={rows}&'
+                 'fl=nr_num,name,score,submit_count,name_state_type_cd',
         TRADEMARKS: '/solr/trademarks/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
                     'hl=on&indent=on&mm=75%25&q=name:{name}&qf=name&wt=json&start={start}&rows={rows}&'
                     'fl=application_number,name,status,description,score&bq=status:REGISTERED^5.0'
