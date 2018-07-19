@@ -34,7 +34,7 @@ class RequestColin(Resource):
         logging.info('logging works')
         # who has access?
         if not (required_scope("names_viewer")):  # User.VIEWONLY
-            return {"message": "Error: You do not have access to corporate details."}, 403
+            return jsonify({"message": "Authentication error: You do not have the required user roles to view corp details."}), 403
 
         corp_num_sql = '\'' + corp_num + '\''
 
@@ -132,9 +132,12 @@ class RequestColin(Resource):
         except exc.SQLAlchemyError as err:
             print(err.with_traceback(None))
             current_app.logger.debug(err.with_traceback(None))
-            return jsonify({"message": "An error occurred getting the corporation details"}), 500
+            return jsonify({"message": "Error occurred getting the corporation details"}), 500
         except AttributeError:
-            return jsonify({"message": "No corporate details available for {}".format(corp_num)}), 404
+            return jsonify({"message": "Attribute error"}), 500
+        except IndexError as err:
+            current_app.logger.debug(err.with_traceback(None))
+            return jsonify({"message": "Error: Could not find corporation details"}), 404
         except Exception as err:
             print(err.with_traceback(None))
             current_app.logger.debug(err.with_traceback(None))
