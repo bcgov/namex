@@ -25,6 +25,7 @@ class DecisionReason(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+
 class DecisionReasonSchema(ma.ModelSchema):
     class Meta:
         model = DecisionReason

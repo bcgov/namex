@@ -1,13 +1,12 @@
 from flask import request, jsonify, current_app
 from flask_restplus import Namespace, Resource, cors, fields as rp_fields
 from marshmallow import Schema, validates, ValidationError, fields as ma_fields
-from app import oidc
+from app import jwt
 
 import enum
 
 from app.utils.util import cors_preflight
 from app.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS
-
 
 api = Namespace('documents', description='Name Request System - OPS checks')
 
@@ -60,7 +59,7 @@ class DocumentAnalysis(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     @api.expect(a_document)
     def post(analysis=None, *args, **kwargs):
         start = request.args.get('start', DocumentAnalysis.START)

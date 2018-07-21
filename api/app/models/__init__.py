@@ -8,7 +8,6 @@ ma = Marshmallow()
 
 from marshmallow.exceptions import ValidationError
 
-
 from .applicant import Applicant, ApplicantSchema
 from .comment import Comment, CommentSchema
 from .event import Event

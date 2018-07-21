@@ -1,7 +1,6 @@
 from . import db, ma
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
-import logging
 
 
 class User(db.Model):
@@ -41,9 +40,9 @@ class User(db.Model):
             # s = KeycloakUserSchema()
             # u = s.load(data=token, partial=True)
             user = User(
-                username = token['username'],
-                firstname = token['given_name'],
-                lastname = token['family_name'],
+                username = token.get('username', None),
+                firstname = token.get('given_name', None),
+                lastname = token.get('family_name', None),
                 iss = token['iss'],
                 sub = token['sub']
             )

@@ -1,13 +1,12 @@
 from flask import jsonify
 from flask_restplus import Resource, Namespace
 from sqlalchemy import text, exc
-# from app import api
 from app.models import db
 
 api = Namespace('nameRequestOPS', description='Name Request System - OPS checks')
 
-
 sql = text('select 1')
+
 
 @api.route("/healthz")
 class Healthz(Resource):
@@ -29,4 +28,4 @@ class Readyz(Resource):
     @staticmethod
     def get():
         # TODO: add a poll to the DB when called
-        return {"message": "api is ready"}, 200
+        return {"message": "api is healthy"}, 200
