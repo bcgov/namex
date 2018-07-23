@@ -101,7 +101,7 @@ class Requests(Resource):
                                       })
 
     START=0
-    ROWS=50
+    ROWS=100
 
     search_request_schemas = RequestsSchema(many=True
         ,exclude=['id'
@@ -115,6 +115,7 @@ class Requests(Resource):
     @jwt.requires_auth
     def get(*args, **kwargs):
 
+        print(request.args)
         # validate row & start params
         start = request.args.get('start', Requests.START)
         rows = request.args.get('rows',Requests.ROWS)
@@ -127,6 +128,7 @@ class Requests(Resource):
 
         # queue must be a list of states
         queue = request.args.get('queue', None)
+        print('queue: ', queue)
         if queue:
             queue = queue.upper().split(',')
             for q in queue:
@@ -154,8 +156,10 @@ class Requests(Resource):
 
         # Assemble the query
         q = RequestDAO.query.filter()
+        print(q)
         if queue: q = q.filter(RequestDAO.stateCd.in_(queue))
         q = q.order_by(text(sort_by))
+        print(q)
 
         # get a count of the full set size, this ignore the offset & limit settings
         count_q = q.statement.with_only_columns([func.count()]).order_by(None)
@@ -169,12 +173,18 @@ class Requests(Resource):
         rep = {'response':{'start':start,
                            'rows': rows,
                            'numFound': count,
+                           'numPriorities': 0,
+                           'numUpdatedToday': 0,
                            'queue': queue,
                            'order': order_list
                            },
                'nameRequests': Requests.search_request_schemas.dump(q.all()).data
                }
 
+        # SORT REP HERE -- ask thor about how he builds the query -> might be able to add in all needed sorts to sql
+        # will be easier for me to have fn for sort here (can just use js code)
+        ####### add in counts for updated today and priorities in returned json
+        print('DONE')
         return jsonify(rep), 200
 
     # @api.errorhandler(AuthError)
