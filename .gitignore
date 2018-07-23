@@ -67,8 +67,8 @@ venv
 
 # Convenience Files
 # ######################
-.env
-.envrc
+/**/.env*
+/**/.envrc
 
 # Security
 #########################

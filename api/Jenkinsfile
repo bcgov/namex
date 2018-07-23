@@ -19,7 +19,6 @@
 //   -> user.timezone : set the local timezone so logfiles report correxct time
 //   -> hudson.model.DirectoryBrowserSupport.CSP : removes restrictions on CSS file load, thus html pages of test reports are displayed pretty
 //   See: https://docs.openshift.com/container-platform/3.9/using_images/other_images/jenkins.html for a complete list of JENKINS env vars
-// - SLACK_TOKEN
 
 // define constants
 def BUILDCFG_NAME ='namex-api'
@@ -103,6 +102,12 @@ containerTemplate(
 ])
 {
     node('jenkins-python3nodejs') {
+
+        SLACK_TOKEN = sh (
+            script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+            returnStdout: true).trim()
+        }
+
         stage('checkout') {
             echo "checking out source"
             echo "Build: ${BUILD_ID}"
@@ -126,14 +131,14 @@ containerTemplate(
 				sleep 10
 			openshiftVerifyDeployment depCfg: DEV_DEPLOYMENT_NAME, namespace: DEV_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
 			echo ">>>> Deployment Complete"
-			// slack subscription is full, can't send and this func is broken
+
 			// send msg to slack
-			//def attachment = [:]
-			//	attachment.fallback = 'See build log for more details'
-			//	attachment.title = "Build ${BUILD_ID} OK! :heart: :tada:"
-			//	attachment.color = '#00FF00' // Lime Green
-			//	attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-			//notifySlack("Dev Deploy", "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
+			def attachment = [:]
+				attachment.fallback = 'See build log for more details'
+				attachment.title = "NameX API Build ${BUILD_ID} OK! :heart: :tada:"
+				attachment.color = '#00FF00' // Lime Green
+				attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+			notifySlack("Dev Deploy", "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
 		}
 	}
 }
