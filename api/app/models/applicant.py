@@ -2,6 +2,7 @@
 """
 from . import db, ma
 from sqlalchemy.orm import backref
+from marshmallow import fields
 
 
 class Applicant(db.Model):
@@ -64,7 +65,8 @@ class Applicant(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         # db.session.commit()
-#
+
+
 class ApplicantSchema(ma.ModelSchema):
     class Meta:
         model = Applicant
@@ -86,3 +88,13 @@ class ApplicantSchema(ma.ModelSchema):
                  ,'stateProvinceCd'
                  ,'countryTypeCd'
                  )
+
+    firstName = fields.String(
+        required=True,
+        error_messages={'required': {'message': 'firstName is a required field'}}
+    )
+    lastName = fields.String(
+        required=True,
+        error_messages={'required': {'message': 'lastName is a required field'}}
+    )
+

@@ -1,6 +1,7 @@
 import pytest
+from pytest_mock import mocker
 
-from app import create_app
+from app import create_app, jwt as _jwt
 from flask import current_app
 from app.models import db as _db
 from sqlalchemy import event, text
@@ -26,6 +27,22 @@ def client(app):
     Returns session-wide Flask test client.
     """
     return app.test_client()
+
+@pytest.fixture(scope="session")
+def jwt(app):
+    """
+    Returns session-wide jwt manager
+    """
+    return _jwt
+
+
+@pytest.fixture(scope="session")
+def client_ctx(app):
+    """
+    Returns session-wide Flask test client.
+    """
+    with app.test_client() as c:
+        yield c
 
 
 @pytest.fixture(scope="session")
