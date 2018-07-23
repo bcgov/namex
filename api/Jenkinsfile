@@ -111,7 +111,6 @@ containerTemplate(
             SLACK_TOKEN = sh (
                 script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
                 returnStdout: true).trim()
-            )
         }
 		 stage('build') {
 				echo "Building..."
