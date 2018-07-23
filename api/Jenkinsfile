@@ -103,15 +103,15 @@ containerTemplate(
 {
     node('jenkins-python3nodejs') {
 
-        SLACK_TOKEN = sh (
-            script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
-            returnStdout: true).trim()
-        }
 
         stage('checkout') {
             echo "checking out source"
             echo "Build: ${BUILD_ID}"
             checkout scm
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                returnStdout: true).trim()
+            )
         }
 		 stage('build') {
 				echo "Building..."
