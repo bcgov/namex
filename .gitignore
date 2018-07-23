@@ -67,8 +67,8 @@ venv
 
 # Convenience Files
 # ######################
-.env
-.envrc
+/**/.env*
+/**/.envrc
 
 # Security
 #########################
@@ -89,6 +89,6 @@ solr/cores/.DS_Store
 #######################
 .tox
 .cache
-.pytest_cache
+*/.pytest_cache
 .coverage
 .hypothesis

@@ -4,24 +4,26 @@ TODO: Fill in a larger description once the API is defined for V1
 """
 from flask import request, jsonify, g, current_app
 from flask_restplus import Namespace, Resource, fields, cors
+from flask_jwt_oidc import AuthError
+
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func, text, exc
 from sqlalchemy.inspection import inspect
 
-from app import oidc
-from app.auth_services import required_scope, AuthError
-from app.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, ApplicantSchema
-from app.models import db, User, State, NameSchema, Name, Comment, PartnerNameSystemSchema
+from app import jwt
+from app.models import db, ValidationError
+from app.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema
+from app.models import Name, NameSchema, PartnerNameSystemSchema
+from app.models import User, State, Comment
+from app.models import ApplicantSchema
 from app.models import DecisionReason
 
 from app.utils.util import cors_preflight
 from app.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
-
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
-
 
 # Marshmallow schemas
 request_schema = RequestsSchema(many=False)
@@ -50,10 +52,10 @@ class Echo(Resource):
     """
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def get(*args, **kwargs):
         try:
-            return jsonify(g.oidc_token_info), 200
+            return jsonify(g.jwt_oidc_token_info), 200
         except Exception as err:
             return {"error": "{}".format(err)}, 500
 
@@ -67,26 +69,27 @@ class RequestsQueue(Resource):
     """
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def get():
-        if not (required_scope(User.EDITOR) or required_scope(User.APPROVER)):
+        if not (jwt.requires_roles(User.EDITOR) or jwt.requires_roles(User.APPROVER)):
             return jsonify({"message": "Error: You do not have access to the Name Request queue."}), 403
 
         try:
-            user = User.find_by_jwtToken(g.oidc_token_info)
+            user = User.find_by_jwtToken(g.jwt_oidc_token_info)
+            current_app.logger.debug('find user')
             if not user:
-                user = User.create_from_jwtToken(g.oidc_token_info)
-
+                user = User.create_from_jwtToken(g.jwt_oidc_token_info)
             nr = RequestDAO.get_queued_oldest(user)
 
         except SQLAlchemyError as err:
             # TODO should put some span trace on the error message
+            current_app.logger.error(err.with_traceback(None))
             return jsonify({'message': 'An error occurred getting the next Name Request.'}), 500
         except AttributeError as err:
             current_app.logger.error(err)
             return jsonify({'message': 'There are no Name Requests to work on.'}), 404
 
-        return '{{"nameRequest": "{0}" }}'.format(nr), 200
+        return jsonify(nameRequest='{}'.format(nr)), 200
 
 
 @cors_preflight('GET, POST')
@@ -109,7 +112,7 @@ class Requests(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def get(*args, **kwargs):
 
         # validate row & start params
@@ -174,17 +177,17 @@ class Requests(Resource):
 
         return jsonify(rep), 200
 
-    @api.errorhandler(AuthError)
-    def handle_auth_error(ex):
-        # response = jsonify(ex.error)
-        # response.status_code = ex.status_code
+    # @api.errorhandler(AuthError)
+    # def handle_auth_error(ex):
+    #     response = jsonify(ex.error)
+    #     response.status_code = ex.status_code
         # return response, 401
-        return {}, 401
+        # return {}, 401
 
     # noinspection PyUnusedLocal,PyUnusedLocal
     @api.expect(a_request)
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def post(self, *args, **kwargs):
 
         current_app.logger.info('Someone is trying to post a new request')
@@ -198,14 +201,14 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def get(nr):
         # return jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
         return jsonify(RequestDAO.query.filter_by(nrNum =nr.upper()).first_or_404().json())
 
     @staticmethod
     # @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def delete(nr):
         nrd = RequestDAO.find_by_nr(nr)
         # even if not found we still return a 204, which is expected spec behaviour
@@ -217,7 +220,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def patch(nr, *args, **kwargs):
         """  Patches the NR, only STATE can be changed with some business rules around roles/scopes
 
@@ -250,7 +253,7 @@ class Request(Resource):
             return jsonify({"message": "not a valid state"}), 406
 
         #check user scopes
-        if not (required_scope(User.EDITOR) or required_scope(User.APPROVER)):
+        if not (jwt.requires_roles(User.EDITOR) or jwt.requires_roles(User.APPROVER)):
             raise AuthError({
                 "code": "Unauthorized",
                 "description": "You don't have access to this resource."
@@ -259,7 +262,7 @@ class Request(Resource):
         if (state in (State.APPROVED,
                      State.REJECTED,
                      State.CONDITIONAL))\
-                and not required_scope(User.APPROVER):
+                and not jwt.requires_roles(User.APPROVER):
             return jsonify({"message": "Only Names Examiners can set state: {}".format(state)}), 428
 
         try:
@@ -267,13 +270,13 @@ class Request(Resource):
             if not nrd:
                 return jsonify({"message": "NR not found"}), 404
 
-            user = User.find_by_jwtToken(g.oidc_token_info)
+            user = User.find_by_jwtToken(g.jwt_oidc_token_info)
             if not user:
-                user = User.create_from_jwtToken(g.oidc_token_info)
+                user = User.create_from_jwtToken(g.jwt_oidc_token_info)
 
             #NR is in a final state, but maybe the user wants to pull it back for corrections
             if nrd.stateCd in State.COMPLETED_STATE:
-                if not required_scope(User.APPROVER):
+                if not jwt.requires_roles(User.APPROVER):
                     return jsonify({"message": "Only Names Examiners can alter completed Requests"}), 401
 
                 if nrd.furnished == RequestDAO.REQUEST_FURNISHED:
@@ -307,7 +310,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def put(nr, *args, **kwargs):
 
         # do the cheap check first before the more expensive ones
@@ -328,7 +331,7 @@ class Request(Resource):
             return jsonify({"message": "not a valid state"}), 406
 
         #check user scopes
-        if not (required_scope(User.EDITOR) or required_scope(User.APPROVER)):
+        if not (jwt.requires_roles(User.EDITOR) or jwt.requires_roles(User.APPROVER)):
             raise AuthError({
                 "code": "Unauthorized",
                 "description": "You don't have access to this resource."
@@ -337,7 +340,7 @@ class Request(Resource):
         if (state in (State.APPROVED,
                      State.REJECTED,
                      State.CONDITIONAL))\
-                and not required_scope(User.APPROVER):
+                and not jwt.requires_roles(User.APPROVER):
             return jsonify(message='Only Names Examiners can set state: {}'.format(state)), 428
 
         try:
@@ -345,13 +348,13 @@ class Request(Resource):
             if not nr_d:
                 return jsonify(message='NR not found'), 404
 
-            user = User.find_by_jwtToken(g.oidc_token_info)
+            user = User.find_by_jwtToken(g.jwt_oidc_token_info)
             if not user:
-                user = User.create_from_jwtToken(g.oidc_token_info)
+                user = User.create_from_jwtToken(g.jwt_oidc_token_info)
 
             #NR is in a final state, but maybe the user wants to pull it back for corrections
             if nr_d.stateCd in State.COMPLETED_STATE:
-                if not required_scope(User.APPROVER):
+                if not jwt.requires_roles(User.APPROVER):
                     return jsonify(message='Only Names Examiners can alter completed Requests'), 401
 
                 if nr_d.furnished == RequestDAO.REQUEST_FURNISHED:
@@ -380,6 +383,10 @@ class Request(Resource):
             if applicants_d:
                 appl = json_input.get('applicants', None)
                 if appl:
+                    errm = applicant_schema.validate(appl, partial=False)
+                    if errm:
+                        return jsonify(errm)
+
                     applicant_schema.load(appl, instance=applicants_d, partial=False)
                 else:
                     applicants_d.delete_from_db()
@@ -433,9 +440,13 @@ class Request(Resource):
             ### Finally save the entire graph
             nr_d.save_to_db()
 
+        except ValidationError as ve:
+            return jsonify(ve.messages)
+
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return jsonify(message='Request:{} not found'.format(nr)), 404
+
         except Exception as err:
             current_app.logger.error("Error when replacing NR:{0} Err:{1}".format(nr, err))
             return jsonify(message='NR had an internal error'), 500
@@ -445,7 +456,7 @@ class Request(Resource):
 
 
 @cors_preflight("GET")
-@api.route('/<string:nr>/analysis/<int:choice>/<string:types>', methods=['GET','OPTIONS'])
+@api.route('/<string:nr>/analysis/<int:choice>/<string:analysis_type>', methods=['GET','OPTIONS'])
 class RequestsAnalysis(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
     and assigns it to your auth id
@@ -464,13 +475,14 @@ class RequestsAnalysis(Resource):
     # noinspection PyUnusedLocal,PyUnusedLocal
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
-    def get(nr, choice, types, *args, **kwargs):
+    @jwt.requires_auth
+    def get(nr, choice, analysis_type, *args, **kwargs):
         start = request.args.get('start', RequestsAnalysis.START)
         rows = request.args.get('rows',RequestsAnalysis.ROWS)
 
-        if types not in ANALYTICS_VALID_ANALYSIS:
-            return jsonify(message='{type} is not a valid analysis type for that name choice'.format(type=type)), 404
+        if analysis_type not in ANALYTICS_VALID_ANALYSIS:
+            return jsonify(message='{analysis_type} is not a valid analysis type for that name choice'
+                           .format(analysis_type=analysis_type)), 404
 
         nrd = RequestDAO.find_by_nr(nr)
 
@@ -482,11 +494,11 @@ class RequestsAnalysis(Resource):
         if not nrd_name:
             return jsonify(message='Name choice:{choice} not found for {nr}'.format(nr=nr, choice=choice)), 404
 
-        if types in RestrictedWords.RESTRICTED_WORDS:
+        if analysis_type in RestrictedWords.RESTRICTED_WORDS:
             results, msg, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
 
         else:
-            results, msg, code  = SolrQueries.get_results(types, nrd_name.name, start=start, rows=rows)
+            results, msg, code  = SolrQueries.get_results(analysis_type, nrd_name.name, start=start, rows=rows)
 
         if code:
             return jsonify(message=msg), code
@@ -501,7 +513,7 @@ class NRNames(Resource):
     def common(nr, choice):
         """:returns: object, code, msg
         """
-        if not validNRFormat(nr):
+        if not RequestDAO.validNRFormat(nr):
             return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
 
         nrd = RequestDAO.find_by_nr(nr)
@@ -517,7 +529,7 @@ class NRNames(Resource):
     # noinspection PyUnusedLocal,PyUnusedLocal
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def get(nr, choice, *args, **kwargs):
 
         nrd, nrd_name, msg, code = NRNames.common(nr, choice)
@@ -528,7 +540,7 @@ class NRNames(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def put(nr, choice, *args, **kwargs):
         json_data = request.get_json()
         if not json_data:
@@ -542,7 +554,7 @@ class NRNames(Resource):
         if not nrd:
             return msg, code
 
-        user = User.find_by_jwtToken(g.oidc_token_info)
+        user = User.find_by_jwtToken(g.jwt_oidc_token_info)
         if not check_ownership(nrd, user):
             return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
 
@@ -553,7 +565,7 @@ class NRNames(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def patch(nr, choice, *args, **kwargs):
 
         json_data = request.get_json()
@@ -568,7 +580,7 @@ class NRNames(Resource):
         if not nrd:
             return msg, code
 
-        user = User.find_by_jwtToken(g.oidc_token_info)
+        user = User.find_by_jwtToken(g.jwt_oidc_token_info)
         if not check_ownership(nrd, user):
             return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
 
@@ -589,7 +601,6 @@ def check_ownership(nrd, user):
 class DecisionReasons(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    #@oidc.accept_token(require_token=True)
     def get():
         response = []
         for reason in DecisionReason.query.order_by(DecisionReason.name).all():
@@ -611,17 +622,3 @@ def mergedicts(dict1, dict2):
             yield (k, dict1[k])
         else:
             yield (k, dict2[k])
-
-
-def validNRFormat(nr):
-    '''NR should be of the format "NR 1234567"
-    '''
-    if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':
-        return False
-
-    try:
-        num = int(nr[3:])
-    except:
-        return False
-
-    return True

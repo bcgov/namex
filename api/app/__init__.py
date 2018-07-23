@@ -12,12 +12,13 @@ import os
 
 from flask import Flask
 from config import Config, configuration
-from app.patches.flask_oidc_patched import OpenIDConnect
-oidc = OpenIDConnect()
+from flask_jwt_oidc import JwtManager
+jwt = JwtManager()
 
 from app.models import db, ma
 from app.resources import api
 from app import models
+
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
@@ -29,11 +30,22 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     ma.init_app(app)
 
     api.init_app(app)
-    oidc.init_app(app)
+    # oidc.init_app(app)
+    setup_jwt_manager(app, jwt)
 
     register_shellcontext(app)
 
     return app
+
+
+def setup_jwt_manager(app, jwt):
+    def get_roles(a_dict):
+        return a_dict['realm_access']['roles']
+    app.config['JWT_ROLE_CALLBACK'] = get_roles
+
+    jwt.init_app(app)
+
+    return
 
 
 def register_shellcontext(app):
@@ -42,6 +54,7 @@ def register_shellcontext(app):
         """Shell context objects."""
         return {
             'app': app,
+            'jwt': jwt,
             'db': db,
             'models': models}
 

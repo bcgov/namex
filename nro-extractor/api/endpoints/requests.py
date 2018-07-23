@@ -3,12 +3,8 @@ from flask import request, jsonify, current_app
 from sqlalchemy import text
 from api import db
 from api.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name
-import logging
 
 api = Namespace('nroRequests', description='Name Request System - extracts legacy NRs and puts them into the new system')
-
-log = logging.getLogger(__name__)
-
 
 @api.route('/nro-requests', methods=['POST', 'OPTIONS'])
 @api.response(404, 'NR not found')
@@ -42,10 +38,9 @@ class NRORequest(Resource):
         conn = db.get_engine(bind='nro')
 
         nr_header = get_nr_header(conn, nr_num)
-        log.log(logging.DEBUG, 'nr_header: {}'.format(nr_header))
+        current_app.logger.debug('nr_header: {}'.format(nr_header))
         if not nr_header:
             return {"message": "{nr} not found, unable to complete extraction to new system".format(nr=nr_num)}, 404
-
 
         nr_submitter = get_nr_submitter(conn, nr_header['request_id'])
         nr_applicant = get_nr_requester(conn, nr_header['request_id'])
@@ -88,7 +83,8 @@ def validNRFormat(nr):
 ######### save stuff
 def add_nr_header(new_nr, nr_header, nr_submitter, user):
 
-    submitter = User.find_by_username(nr_submitter['submitter'])
+    if nr_submitter:
+        submitter = User.find_by_username(nr_submitter['submitter'])
 
     new_nr.userId = user.id
     new_nr.stateCd = State.DRAFT
@@ -202,8 +198,8 @@ def get_nr_submitter(conn, request_id):
     )
     result = conn.execute(sql.params(req_id=request_id), multi=True)
     row = result.fetchone()
-    log.log(logging.DEBUG, row_to_dict(row))
     if row:
+        current_app.logger.debug(row_to_dict(row))
         return row_to_dict(row)
     return None
 
@@ -236,8 +232,8 @@ def get_nr_requester(conn, request_id):
     )
     result = conn.execute(sql.params(req_id=request_id), multi=True)
     row = result.fetchone()
-    log.log(logging.DEBUG, row_to_dict(row))
     if row:
+        current_app.logger.debug(row_to_dict(row))
         return row_to_dict(row)
     return None
 
@@ -257,7 +253,7 @@ def get_exam_comments(conn, request_id):
     ex_comments = []
     for row in result:
         if row['examiner_comment'] or row['state_comment']:
-            log.log(logging.DEBUG, row_to_dict(row))
+            current_app.logger.debug(row_to_dict(row))
             ex_comments.append(row_to_dict(row))
     if len(ex_comments) < 1:
         return None
@@ -281,7 +277,7 @@ def get_nwpta(conn, request_id):
     result = conn.execute(sql.params(req_id=request_id), multi=True)
     nwpta = []
     for row in result:
-        log.log(logging.DEBUG, row_to_dict(row))
+        current_app.logger.debug(row_to_dict(row))
         nwpta.append(row_to_dict(row))
     if len(nwpta) < 1:
         return None
@@ -301,7 +297,7 @@ def get_names(conn, request_id):
     result = conn.execute(sql.params(req_id=request_id), multi=True)
     names = []
     for row in result:
-        log.log(logging.DEBUG, row_to_dict(row))
+        current_app.logger.debug(row_to_dict(row))
         names.append(row_to_dict(row))
     if len(names) < 1:
         return None

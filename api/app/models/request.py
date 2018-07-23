@@ -161,6 +161,20 @@ class Request(db.Model):
     def find_name(cls, nr, choice):
         return cls.query.filter_by(nrNum=nr).names.filter_by(choice=choice).one_or_none()
 
+    @classmethod
+    def validNRFormat(nr):
+        '''NR should be of the format "NR 1234567"
+        '''
+        if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':
+            return False
+
+        try:
+            num = int(nr[3:])
+        except:
+            return False
+
+        return True
+
 
 class RequestsSchema(ma.ModelSchema):
     class Meta:
