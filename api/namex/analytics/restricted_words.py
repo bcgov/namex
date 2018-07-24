@@ -1,6 +1,6 @@
 from flask import jsonify, current_app
 from sqlalchemy import text, exc
-from app.models import db
+from namex.models import db
 
 
 class RestrictedWords(object):

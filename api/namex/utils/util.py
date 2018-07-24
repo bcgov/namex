@@ -3,6 +3,7 @@
 """
 from functools import wraps
 
+
 def cors_preflight(methods):
     def wrapper(f):
 

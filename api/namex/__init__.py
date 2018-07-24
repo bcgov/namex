@@ -5,26 +5,26 @@ This module is the API for the Names Examination system
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from app.utils.logging import setup_logging
+from namex.utils.logging import setup_logging
 setup_logging() ## important to do this first
 
 import os
 
 from flask import Flask
-from config import Config, configuration
+import config
 from flask_jwt_oidc import JwtManager
 jwt = JwtManager()
 
-from app.models import db, ma
-from app.resources import api
-from app import models
+from namex.models import db, ma
+from namex.resources import api
+from namex import models
 
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     app = Flask(__name__)
-    app.config.from_object(configuration[run_mode])
+    app.config.from_object(config.CONFIGURATION[run_mode])
 
     db.init_app(app)
     ma.init_app(app)

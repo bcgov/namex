@@ -2,7 +2,7 @@
 """
 from . import db, ma
 from flask import current_app
-from app.exceptions import BusinessException
+from namex.exceptions import BusinessException
 from sqlalchemy import Sequence
 from sqlalchemy.orm import backref
 from marshmallow import Schema, fields, post_load, post_dump
