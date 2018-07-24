@@ -2,9 +2,10 @@ from flask_restplus import Namespace, Resource, fields
 from flask import request, jsonify, current_app
 from sqlalchemy import text
 from api import db
-from api.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name
+from namex.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name
 
 api = Namespace('nroRequests', description='Name Request System - extracts legacy NRs and puts them into the new system')
+
 
 @api.route('/nro-requests', methods=['POST', 'OPTIONS'])
 @api.response(404, 'NR not found')
@@ -79,6 +80,7 @@ def validNRFormat(nr):
         return False
 
     return True
+
 
 ######### save stuff
 def add_nr_header(new_nr, nr_header, nr_submitter, user):
@@ -290,7 +292,8 @@ def get_names(conn, request_id):
         'set search_path to bc_registries_names;'
         'select choice_number,'
         ' name,'
-        ' designation'
+        ' designation,'
+        ' name_state_type_cd'
         ' from namex_names_vw'
         ' where request_id = :req_id'
     )
