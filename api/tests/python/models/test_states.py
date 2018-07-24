@@ -1,4 +1,4 @@
-from app.models import State, StateSchema
+from namex.models import State, StateSchema
 
 
 def test_state_draft(session):

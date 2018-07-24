@@ -1,4 +1,4 @@
-from app.models import Name, NameSchema
+from namex.models import Name, NameSchema
 import sys
 
 
