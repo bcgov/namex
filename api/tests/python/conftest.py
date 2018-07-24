@@ -1,9 +1,9 @@
 import pytest
 from pytest_mock import mocker
 
-from app import create_app, jwt as _jwt
+from namex import create_app, jwt as _jwt
 from flask import current_app
-from app.models import db as _db
+from namex.models import db as _db
 from sqlalchemy import event, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, DropConstraint

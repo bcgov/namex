@@ -1,4 +1,4 @@
-from app.models import User
+from namex.models import User
 
 
 def test_user(session, client):

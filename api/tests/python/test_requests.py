@@ -34,7 +34,7 @@ def test_requests_post(client):
 def test_get_next(client, jwt, app):
 
     # add NR to database
-    from app.models import Request as RequestDAO, State
+    from namex.models import Request as RequestDAO, State
     nr = RequestDAO()
     nr.nrNum='NR 0000001'
     nr.stateCd = State.DRAFT

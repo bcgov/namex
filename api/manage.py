@@ -2,9 +2,9 @@
 """
 from flask_script import Manager # class for handling a set of commands
 from flask_migrate import Migrate, MigrateCommand
-from app import create_app
-from app.models import db
-from app import models
+from namex import create_app
+from namex.models import db
+from namex import models
 import logging
 
 app = create_app()

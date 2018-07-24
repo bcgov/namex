@@ -11,16 +11,16 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func, text, exc
 from sqlalchemy.inspection import inspect
 
-from app import jwt
-from app.models import db, ValidationError
-from app.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema
-from app.models import Name, NameSchema, PartnerNameSystemSchema
-from app.models import User, State, Comment
-from app.models import ApplicantSchema
-from app.models import DecisionReason
+from namex import jwt
+from namex.models import db, ValidationError
+from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema
+from namex.models import Name, NameSchema, PartnerNameSystemSchema
+from namex.models import User, State, Comment
+from namex.models import ApplicantSchema
+from namex.models import DecisionReason
 
-from app.utils.util import cors_preflight
-from app.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
+from namex.utils.util import cors_preflight
+from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
