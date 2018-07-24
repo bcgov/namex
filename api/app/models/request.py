@@ -36,6 +36,7 @@ class Request(db.Model):
     additionalInfo = db.Column('additional_info', db.String(150))
     natureBusinessInfo = db.Column('nature_business_info', db.String(1000))
     xproJurisdiction = db.Column('xpro_jurisdiction', db.String(40))
+    corpNum = db.Column('corp_num', db.Integer, default=None);
     submitter_userid = db.Column('submitter_userid', db.Integer, db.ForeignKey('users.id'))
     #legacy sync tracking
     furnished = db.Column('furnished', db.String(1), default='N')
@@ -73,6 +74,17 @@ class Request(db.Model):
 
     def json(self):
 
+        # get previous NR number from legacy requestId and previousRequestId fields
+        previousNr = None
+        if self.previousRequestId:
+            previousNr = self.query.filter_by(requestId=self.previousRequestId).first()
+        try:
+            # we just want the NR number, or null if it doesn't exist
+            previousNr = previousNr.nrNum
+        except:
+            previousNr = None
+
+
         return {'id' : self.id,
                 'submittedDate' : self.submittedDate,
                 'lastUpdate' : self.lastUpdate,
@@ -88,7 +100,9 @@ class Request(db.Model):
                 'additionalInfo' : self.additionalInfo,
                 'natureBusinessInfo' : self.natureBusinessInfo,
                 'furnished': self.furnished if (self.furnished is not None) else 'N',
+                'previousNr': previousNr,
                 'submitCount': self.submitCount,
+                'corpNum': self.corpNum,
                 'names': [name.as_dict() for name in self.names.all()],
                 'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
                 'comments': [comment.as_dict() for comment in self.comments.all()],
@@ -208,4 +222,5 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'xproJurisdiction'
                  ,'furnished'
                  ,'nroLastUpdate'
+                 ,'corpNum'
                  )
