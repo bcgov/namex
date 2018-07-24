@@ -137,7 +137,7 @@ containerTemplate(
 				attachment.title = "NameX API Build ${BUILD_ID} OK! :heart: :tada:"
 				attachment.color = '#00FF00' // Lime Green
 				attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-			notifySlack("Dev Deploy", "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
+			notifySlack("Dev Deploy", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
 		}
 	}
 }
