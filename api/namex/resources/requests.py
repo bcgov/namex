@@ -22,6 +22,8 @@ from namex.models import DecisionReason
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
+import datetime
+
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
 
@@ -101,7 +103,7 @@ class Requests(Resource):
                                       })
 
     START=0
-    ROWS=50
+    ROWS=10
 
     search_request_schemas = RequestsSchema(many=True
         ,exclude=['id'
@@ -115,6 +117,7 @@ class Requests(Resource):
     @jwt.requires_auth
     def get(*args, **kwargs):
 
+        print(request.args)
         # validate row & start params
         start = request.args.get('start', Requests.START)
         rows = request.args.get('rows',Requests.ROWS)
@@ -127,6 +130,7 @@ class Requests(Resource):
 
         # queue must be a list of states
         queue = request.args.get('queue', None)
+        print('queue: ', queue)
         if queue:
             queue = queue.upper().split(',')
             for q in queue:
@@ -149,12 +153,38 @@ class Requests(Resource):
                 if len(sort_by) > 0:
                     sort_by = sort_by + ', '
                     order_list = order_list + ', '
-                sort_by = sort_by + '{columns} {direction}'.format(columns=cols[k], direction=vl)
-                order_list = order_list + '{attribute} {direction}'.format(attribute=k, direction=vl)
+                sort_by = sort_by + '{columns} {direction} NULLS LAST'.format(columns=cols[k], direction=vl)
+                order_list = order_list + '{attribute} {direction} NULLS LAST'.format(attribute=k, direction=vl)
 
         # Assemble the query
+        nrNum = request.args.get('nrNum', None)
+        activeUser = request.args.get('activeUser', None)
+        compName = request.args.get('compName', None)
+        # priorityCd = request.args.get('priorityCd', None)
+        furnished = request.args.get('furnished', None)
+        unfurnished = request.args.get('unfurnished', None)
+
         q = RequestDAO.query.filter()
         if queue: q = q.filter(RequestDAO.stateCd.in_(queue))
+
+        if nrNum:
+            nrNum = nrNum.replace('NR', '').strip()
+            nrNum = '%'+nrNum+'%'
+            q = q.filter(RequestDAO.nrNum.like(nrNum))
+        if activeUser:
+            q = q.join(RequestDAO.activeUser).filter(User.username.like('%'+activeUser+'%'))
+
+        #TODO: fix count on search by compName -- returns count of all names that match -- want it to be all NRs (nrs can have multiple names that match)
+        # ---- right now count is adjusted on the frontend in method 'populateTable'
+        if compName:
+            q = q.join(RequestDAO.names).filter(Name.name.like('%' + compName + '%'))
+
+        if furnished == 'false':
+            q = q.filter(RequestDAO.furnished != 'Y')
+
+        if unfurnished == 'false':
+            q = q.filter(RequestDAO.furnished != 'N')
+
         q = q.order_by(text(sort_by))
 
         # get a count of the full set size, this ignore the offset & limit settings
@@ -162,18 +192,37 @@ class Requests(Resource):
         count = db.session.execute(count_q).scalar()
 
         # Add the paging
-        q = q.offset(start * rows)
+        q = q.offset(start)
         q = q.limit(rows)
 
         # create the response
         rep = {'response':{'start':start,
                            'rows': rows,
                            'numFound': count,
+                           'numPriorities': 0,
+                           'numUpdatedToday': 0,
                            'queue': queue,
                            'order': order_list
                            },
                'nameRequests': Requests.search_request_schemas.dump(q.all()).data
                }
+
+        ## counts for updatedToday and priorities
+        data = rep['nameRequests']
+        for row in data:
+            try:
+                if row['priorityCd'] == 'Y':
+                    rep['response']['numPriorities'] += 1
+            except KeyError or AttributeError:
+                pass
+
+        today = str(datetime.datetime.now)[0:10]
+        for row in data:
+            try:
+                if row['lastUpdate'][0:10] == today:
+                    rep['response']['numUpdatedToday'] += 1
+            except KeyError or AttributeError:
+                pass
 
         return jsonify(rep), 200
 
