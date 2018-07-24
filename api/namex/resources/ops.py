@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_restplus import Resource, Namespace
 from sqlalchemy import text, exc
-from app.models import db
+from namex.models import db
 
 api = Namespace('nameRequestOPS', description='Name Request System - OPS checks')
 
