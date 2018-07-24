@@ -26,6 +26,10 @@ class Name(db.Model):
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
     # nameRequest = db.relationship('Request')
 
+    NOT_EXAMINED = 'NE'
+    APPROVED = 'APPROVED'
+    REJECTED = 'REJECTED'
+
     def as_dict(self):
         return {
             "name": self.name,
