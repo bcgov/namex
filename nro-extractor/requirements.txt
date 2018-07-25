@@ -1,13 +1,2 @@
-Flask
-Flask-SQLAlchemy
-Flask-Restplus
-Flask-Marshmallow
-
-psycopg2-binary
-python-dotenv
-marshmallow-sqlalchemy
-pytest
-gunicorn
-gunicorn[eventlet]
-greenlet
-eventlet
+# Just installs the production requirements.
+-r requirements/prod.txt
