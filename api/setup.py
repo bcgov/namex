@@ -35,7 +35,7 @@ setup(
         'flask-sqlalchemy',
         'flask-marshmallow',
         'flask-migrate',
-        'flask-oidc',
+        'flask-jwt-oidc',
         'marshmallow',
         'marshmallow-sqlalchemy',
         'psycopg2-binary',

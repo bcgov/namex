@@ -20,7 +20,8 @@ def test_all_valid_states_in_db(session):
     state_cnt=0
     for state in states:
         state_cnt += 1
-        if state.cd not in State.VALID_STATES:
+        if state.cd not in State.ALL_STATES:
+            print('{} not found in {}'.format(state.cd, State.ALL_STATES))
             assert False
 
     assert len(states) == state_cnt
