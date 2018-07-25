@@ -59,7 +59,14 @@ class NRORequest(Resource):
         add_nwpta(new_nr, nr_nwpat)
         add_names(new_nr, nr_names)
 
-        new_nr.save_to_db()
+        try:
+            db.session.add(new_nr)
+            db.session.commit()
+
+        except Exception as err:
+            current_app.logger.error(err.with_traceback(None))
+            db.session.rollback()
+            return {"message": "Internal server error"}, 500
 
         return {"message": "{nr} has been successfully copied".format(nr=nr_num)}, 200
 
@@ -91,7 +98,7 @@ def add_nr_header(new_nr, nr_header, nr_submitter, user):
         'COMPLETED': 'COMPLETED',
         'D': 'DRAFT',
         'C': 'CANCELLED',
-        'E': 'CONDITIONAL'
+        'E': 'EXPIRED'
     }
 
     if nr_submitter:
