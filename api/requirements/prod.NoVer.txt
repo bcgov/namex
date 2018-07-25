@@ -7,7 +7,7 @@ Flask-Moment
 Flask-SQLAlchemy
 Flask-RESTplus
 Flask-Marshmallow
-git+https://github.com/thorwolpert/flask-jwt-oidc.git
+flask-jwt-oidc
 
 python-dotenv
 psycopg2-binary
