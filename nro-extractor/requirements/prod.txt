@@ -3,6 +3,9 @@ Flask-SQLAlchemy
 Flask-Restplus
 Flask-Marshmallow
 
+git+https://github.com/thorwolpert/flask-jwt-oidc.git
+git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
+
 psycopg2-binary
 python-dotenv
 marshmallow-sqlalchemy
