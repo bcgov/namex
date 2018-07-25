@@ -20,7 +20,6 @@ from namex.resources import api
 from namex import models
 
 
-
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     app = Flask(__name__)

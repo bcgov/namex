@@ -85,11 +85,20 @@ def validNRFormat(nr):
 ######### save stuff
 def add_nr_header(new_nr, nr_header, nr_submitter, user):
 
+    NR_STATE={
+        'HISTORICAL': 'HISTORICAL',
+        'H': 'HOLD',
+        'COMPLETED': 'COMPLETED',
+        'D': 'DRAFT',
+        'C': 'CANCELLED',
+        'E': 'CONDITIONAL'
+    }
+
     if nr_submitter:
         submitter = User.find_by_username(nr_submitter['submitter'])
 
     new_nr.userId = user.id
-    new_nr.stateCd = State.DRAFT
+    new_nr.stateCd = State.DRAFT if nr_header['state_type_cd'] is None else NR_STATE[nr_header['state_type_cd']]
     new_nr.nrNum = nr_header['nr_num']
     new_nr.requestId = nr_header['request_id']
     new_nr.previousRequestId = nr_header['previous_request_id']
@@ -101,6 +110,7 @@ def add_nr_header(new_nr, nr_header, nr_submitter, user):
     new_nr.xproJurisdiction = nr_header['xpro_jurisdiction']
     new_nr.submittedDate = nr_submitter['submitted_date']
     new_nr.submitter_userid = None if (submitter is None) else submitter.id
+    new_nr.nroLastUpdate = nr_header['last_update']
     if nr_header['priority_cd'] is 'PQ':
         new_nr.priorityCd = 'Y'
     else:
@@ -128,15 +138,26 @@ def add_nwpta(new_nr, nr_nwpat):
 
             new_nr.partnerNS.append(pns)
 
-def add_names(new_nr, nr_names):
-    for n in nr_names:
-        name = Name()
-        name.state = Name.NOT_EXAMINED
-        name.choice = n['choice_number']
-        name.name = n['name']
-        name.designation = n['designation']
 
-        new_nr.names.append(name)
+def add_names(new_nr, nr_names):
+    NAME_STATE={
+        'NE': Name.NOT_EXAMINED,
+        'A': Name.APPROVED,
+        'R': Name.REJECTED,
+        'C': Name.CANCELED
+    }
+    last_choice=0
+    for n in nr_names:
+        if last_choice != n['choice_number']: # TODO remove this when the view is fixed
+            last_choice = n['choice_number']
+            name = Name()
+            name.state = Name.NOT_EXAMINED if n['name_state_type_cd'] is None else NAME_STATE[n['name_state_type_cd']]
+            name.choice = n['choice_number']
+            name.name = n['name']
+            name.designation = n['designation']
+
+            new_nr.names.append(name)
+
 
 def add_applicant(new_nr, nr_applicant):
     applicant = Applicant()
@@ -166,7 +187,7 @@ def add_applicant(new_nr, nr_applicant):
 def get_nr_header(conn, nr_num):
     # get the NR Header
     #############################
-    sql = text(
+    sql_nr = text(
         'set search_path to bc_registries_names;'
         'select  request_id,'
         'nr_num,'
@@ -181,10 +202,40 @@ def get_nr_header(conn, nr_num):
         ' from namex_request_vw'
         ' where nr_num = :nr'
     )
-    result = conn.execute(sql.params(nr=nr_num), multi=True)
+    sql_lu = text(
+        'set search_path to bc_registries_names;'
+        'select last_update'
+        ' from namex_req_instance_max_event'
+        ' where request_id = :id'
+    )
+    sql_state = text(
+        'set search_path to bc_registries_names;'
+        'select rs.state_type_cd'
+        ' from request_state rs'
+        ' where rs.request_id = :req_id'
+        ' and rs.end_event_id IS NULL'
+    )
+    result = conn.execute(sql_nr.params(nr=nr_num), multi=True)
     row = result.fetchone()
+
+    #get main row
     if row:
-        return row_to_dict(row)
+        nr = row_to_dict(row)
+
+        # get last_updated
+        result = conn.execute(sql_lu.params(id=nr['request_id']), multi=True)
+        row = result.fetchone()
+        if row:
+            nr = {**nr, **(row_to_dict(row))}
+
+        # get state
+        result = conn.execute(sql_state.params(req_id=nr['request_id']), multi=True)
+        row = result.fetchone()
+        if row:
+            nr = {**nr, **(row_to_dict(row))}
+
+        return nr
+
     return None
 
 def get_nr_submitter(conn, request_id):
