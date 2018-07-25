@@ -61,7 +61,20 @@ def db(app, request):
         metadata.drop_all()
         _db.drop_all()
 
-        # ############################################
+        sequence_sql = '''SELECT sequence_name FROM information_schema.sequences
+                          WHERE sequence_schema='public'  
+                       '''
+
+        sess = _db.session()
+        for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
+            try:
+                sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
+                print ('DROP SEQUENCE public.%s ' % seq)
+            except Exception as e:
+                print ('Error: {}'.format(e))
+        sess.commit()
+
+            # ############################################
         # There are 2 approaches, an empty database, or the same one that the app will use
         #     create the tables
         #     _db.create_all()
@@ -73,6 +86,8 @@ def db(app, request):
         migrate = Migrate(app, _db)
         upgrade()
 
+        return _db
+
 
 @pytest.fixture(scope="function", autouse=True)
 def session(app, db, request):
@@ -80,11 +95,11 @@ def session(app, db, request):
     Returns function-scoped session.
     """
     with app.app_context():
-        conn = _db.engine.connect()
+        conn = db.engine.connect()
         txn = conn.begin()
 
         options = dict(bind=conn, binds={})
-        sess = _db.create_scoped_session(options=options)
+        sess = db.create_scoped_session(options=options)
 
         # establish  a SAVEPOINT just before beginning the test
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
@@ -98,7 +113,7 @@ def session(app, db, request):
                 sess2.expire_all()
                 sess.begin_nested()
 
-        _db.session = sess
+        db.session = sess
 
         sql = text('select 1')
         sess.execute(sql)
