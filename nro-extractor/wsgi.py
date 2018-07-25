@@ -4,6 +4,7 @@ from werkzeug.contrib.fixers import ProxyFix
 
 application = create_app()
 
+
 @application.shell_context_processor
 def make_shell_context():
     return {'app': application,
