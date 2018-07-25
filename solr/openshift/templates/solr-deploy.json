@@ -48,7 +48,7 @@
       },
       "spec":
       {
-        "host": "namex-${NAME}.${APPLICATION_DOMAIN}",
+        "host": "${APPLICATTION_HOSTNAME}.${APPLICATION_DOMAIN}",
         "path": "/solr",
         "tls":
         {
@@ -73,7 +73,7 @@
       "apiVersion": "v1",
       "metadata":
       {
-        "name": "${NAME}",
+        "name": "${NAME}-cores",
         "annotations": {
           "volume.beta.kubernetes.io/storage-class": "gluster-block"
         },
@@ -92,7 +92,33 @@
         {
           "requests":
           {
-            "storage": "${PERSISTENT_VOLUME_SIZE}"
+            "storage": "${CORES_PV_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}-trademarks",
+        "labels":
+        {
+          "app": "${NAME}",
+          "template": "${NAME}-deployment-template"
+        }
+      },
+      "spec":
+      {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources":
+        {
+          "requests":
+          {
+            "storage": "${TRADEMARKS_PV_SIZE}"
           }
         }
       }
@@ -165,10 +191,17 @@
           {
             "volumes": [
               {
-                "name": "${NAME}-data",
+                "name": "${NAME}-cores",
                 "persistentVolumeClaim":
                 {
-                  "claimName": "${NAME}"
+                  "claimName": "${NAME}-cores"
+                }
+              },
+              {
+                "name": "${NAME}-trademarks",
+                "persistentVolumeClaim":
+                {
+                  "claimName": "${NAME}-trademarks"
                 }
               },
               {
@@ -218,8 +251,12 @@
                 ],
                 "volumeMounts": [
                   {
-                    "name": "${NAME}-data",
-                    "mountPath": "${MOUNT_PATH}"
+                    "name": "${NAME}-cores",
+                    "mountPath": "${CORES_MOUNT_PATH}"
+                  },
+                  {
+                    "name": "${NAME}-trademarks",
+                    "mountPath": "${TRADEMARKS_MOUNT_PATH}"
                   },
                   {
                     "name": "solr-data-config-names-gxmla",
@@ -237,6 +274,18 @@
                     "subPath": "solr-data-config.xml"
                   }
                 ],
+                "livenessProbe": {
+                    "httpGet": {
+                        "path": "/solr/names/admin/ping",
+                        "port": 8983,
+                        "scheme": "HTTP"
+                    },
+                    "initialDelaySeconds": 90,
+                    "timeoutSeconds": 10,
+                    "periodSeconds": 120,
+                    "successThreshold": 1,
+                    "failureThreshold": 3
+                },
                 "env": [
                   {
                     "name": "CORE_NAME",
@@ -283,7 +332,7 @@
     {
       "name": "TAG_NAME",
       "displayName": "Environment TAG name",
-      "description": "The TAG name for this environment, e.g., dev, test, prod",
+      "description": "The TAG name for this environment, e.g., dev,test or prod",
       "value": "dev",
       "required": true
     },
@@ -294,18 +343,32 @@
       "value": ""
     },
     {
-      "name": "PERSISTENT_VOLUME_SIZE",
-      "displayName": "Persistent Volume Size",
-      "description": "The size of the persistent volume , e.g. 512Mi, 1Gi, 2Gi.",
+      "name": "CORES_PV_SIZE",
+      "displayName": "Cores Persistent Volume Size",
+      "description": "The size of the persistent volume housing the cores , e.g. 512Mi, 1Gi, 2Gi.",
       "required": true,
       "value": "1Gi"
     },
     {
-      "name": "MOUNT_PATH",
-      "displayName": "Mount Path",
-      "description": "The path to mount the persistent volume.",
+      "name": "TRADEMARKS_PV_SIZE",
+      "displayName": "Trademarks Persistent Volume Size",
+      "description": "The size of the persistent volume housing the trademarks files , e.g. 512Mi, 1Gi, 2Gi.",
+      "required": true,
+      "value": "1Gi"
+    },
+    {
+      "name": "CORES_MOUNT_PATH",
+      "displayName": "Cores Mount Path",
+      "description": "The path to mount the cores persistent volume.",
       "required": true,
       "value": "/opt/solr/server/solr/mycores"
+    },
+    {
+      "name": "TRADEMARKS_MOUNT_PATH",
+      "displayName": "Trademarks Mount Path",
+      "description": "The path to mount the trademarks persistent volume.",
+      "required": true,
+      "value": "/opt/solr/trademarks_data"
     },
     {
       "name": "CORE_NAME",
@@ -313,6 +376,13 @@
       "description": "The name of the Solr core configuration to load.",
       "required": true,
       "value": ""
+    },
+    {
+      "name": "APPLICATTION_HOSTNAME",
+      "displayName": "Application Host Name",
+      "description": "The hostname part of the full path to the solr service.",
+      "required": true,
+      "value": "namex-solr-dev"
     }
   ]
 }

@@ -32,11 +32,11 @@ Tag solr:dev set to servicebc-ne-tools/solr@sha256:184122663e61dbc27003242d9493a
 
 
 * Deploy
-** Make sure you're in the servicebc-ne-dev namespace
-(venv) NDM050057:openshift vboettch$ oc project servicebc-ne-dev
+** Make sure you're in the servicebc-ne-dev namespace (or ne-test or ne-prod)
+(venv) NDM050057:openshift vboettch$ oc project servicebc-ne-dev (or test or prod)
 Now using project "servicebc-ne-dev" on server "https://console.pathfinder.gov.bc.ca:8443".
 
-(venv) NDM050057:openshift vboettch$ oc process -f templates/solr-deploy.json --param-file=solr-deploy.dev.namescore.param | oc create -f -
+(venv) NDM050057:openshift vboettch$ oc process -f templates/solr-deploy.json --param-file=solr-deploy.{ENV}.param | oc create -f -
 service "solr" created
 route "solr" created
 persistentvolumeclaim "solr" created
@@ -51,6 +51,14 @@ As per the project documentation but build will only work for local OpenShift
 * Adapted from https://github.com/BCDevOps/openshift-tools/blob/master/provisioning/pipeline/create-pipeline.sh
 oc process -f solr-pipeline-build.json --param-file=solr-pipeline.param | oc create -f -
 
+* Extracting a template from OpenShift
+EXAMPLE: extracting a deployment config
+
+oc export --as-template=solr-deploy dc solr-names -o json
+--as-template=solr-deploy   is the name of the root object
+dc                          is deployment config
+solr-names                  is the name of the deployment config
+-o json                     specifies json as the output format
 
 
 
