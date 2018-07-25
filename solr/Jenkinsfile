@@ -8,16 +8,16 @@
 // define constants
 def BUILDCFG_NAME ='solr'
 def IMAGE_NAME = 'solr'
-def DEV_DEPLOYMENT_NAME = 'solr-names'
+def DEV_DEPLOYMENT_NAME = 'solr'
 def DEV_TAG_NAME = 'dev'
 def DEV_NS = 'servicebc-ne-dev'
 
-def TST_DEPLOYMENT_NAME = 'solr-names'
+def TST_DEPLOYMENT_NAME = 'solr'
 def TST_TAG_NAME = 'test'
 def TST_BCK_TAG_NAME = 'test-previous'
 def TST_NS = 'servicebc-ne-test'
 
-def PROD_DEPLOYMENT_NAME = 'solr-names'
+def PROD_DEPLOYMENT_NAME = 'solr'
 def PROD_TAG_NAME = 'prod'
 def PROD_BCK_TAG_NAME = 'prod-previous'
 def PROD_NS = 'servicebc-ne-prod'
@@ -93,7 +93,7 @@ node {
 
     stage('deploy-test') {
         timeout(time: 1, unit: 'DAYS') {
-	        input message: "Deploy to test?", submitter: 'admin,user-view,user1-admin'
+	        input message: "Deploy to test?"
         }
         node('master') {
           echo ">>> Tag ${TST_TAG_NAME} with ${TST_BCK_TAG_NAME}"
@@ -103,7 +103,7 @@ node {
               sleep 5
           openshiftVerifyDeployment depCfg: TST_DEPLOYMENT_NAME, namespace: TST_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
           echo ">>>> Deployment Complete"
-          notifySlack("Test Deploy, changes:\n" + getChangeString(), "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", [])
+          //notifySlack("Test Deploy, changes:\n" + getChangeString(), "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", [])
         }
      }
   }
