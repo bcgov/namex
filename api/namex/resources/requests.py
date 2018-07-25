@@ -422,12 +422,26 @@ class Request(Resource):
                     message='The Request must be INPROGRESS and assigned to you before you can change it.'
                 ), 401
 
+            ### REQUEST HEADER ###
+
             # update request header
             request_header_schema.load(json_input, instance=nr_d, partial=True)
             nr_d.stateCd = state
             nr_d.userId = user.id
 
-            # update applicants
+            # get previous request ID from previous NR number
+            try:
+                previousNr = json_input['previousNr']
+                nr_d.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
+            except AttributeError:
+                nr_d.previousRequestId = None
+            except KeyError:
+                nr_d.previousRequestId = None
+
+            ### END request header ###
+
+            ### APPLICANTS ###
+
             applicants_d = nr_d.applicants.one_or_none()
             if applicants_d:
                 appl = json_input.get('applicants', None)
@@ -439,6 +453,8 @@ class Request(Resource):
                     applicant_schema.load(appl, instance=applicants_d, partial=False)
                 else:
                     applicants_d.delete_from_db()
+
+            ### END applicants ###
 
             ### NAMES ###
             for nrd_name in nr_d.names.all():
