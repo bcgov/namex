@@ -425,6 +425,9 @@ class Request(Resource):
             ### REQUEST HEADER ###
 
             # update request header
+            errors = request_header_schema.validate(json_input, partial=True)
+            if errors:
+                return jsonify(errors), 400
             request_header_schema.load(json_input, instance=nr_d, partial=True)
             nr_d.stateCd = state
             nr_d.userId = user.id
