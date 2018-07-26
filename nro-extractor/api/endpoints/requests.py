@@ -31,10 +31,8 @@ class NRORequest(Resource):
         if not validNRFormat(nr_num):
             return {"message": "Valid NR format required - 'NR 9999999'"}, 400
 
-
         if Request.find_by_nr(nr_num):
             return {"message": "{nr} already exists in namex, unable to create a duplicate".format(nr=nr_num)}, 409
-
 
         conn = db.get_engine(bind='nro')
 
