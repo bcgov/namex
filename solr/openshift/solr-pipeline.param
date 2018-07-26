@@ -5,7 +5,7 @@
 #=========================================================
 NAME=solr
 # GITHUB_WEBHOOK_SECRET=[a-zA-Z0-9]{40}
-SOURCE_REPOSITORY_URL=https://github.com/VarekBoettcher/namex.git
+SOURCE_REPOSITORY_URL=https://github.com/bcgov/namex.git
 SOURCE_REPOSITORY_REF=master
 CONTEXT_DIR=solr
 JENKINSFILE_PATH=Jenkinsfile
