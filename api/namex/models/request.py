@@ -36,7 +36,7 @@ class Request(db.Model):
     additionalInfo = db.Column('additional_info', db.String(150))
     natureBusinessInfo = db.Column('nature_business_info', db.String(1000))
     xproJurisdiction = db.Column('xpro_jurisdiction', db.String(40))
-    corpNum = db.Column('corp_num', db.Integer, default=None);
+    corpNum = db.Column('corp_num', db.String(20), default=None)
     submitter_userid = db.Column('submitter_userid', db.Integer, db.ForeignKey('users.id'))
     #legacy sync tracking
     furnished = db.Column('furnished', db.String(1), default='N')
