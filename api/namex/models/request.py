@@ -176,7 +176,7 @@ class Request(db.Model):
         return cls.query.filter_by(nrNum=nr).names.filter_by(choice=choice).one_or_none()
 
     @classmethod
-    def validNRFormat(nr):
+    def validNRFormat(cls, nr):
         '''NR should be of the format "NR 1234567"
         '''
         if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':
