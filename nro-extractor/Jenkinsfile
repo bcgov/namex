@@ -169,14 +169,14 @@ containerTemplate(
         attachment.title = "API Build ${BUILD_ID} OK! :heart: :tada:"
         attachment.fallback = 'See build log for more details'
         attachment.color = '#00FF00' // Lime Green
-        if( "master" != GIT_BRANCH_NAME.toLowerCase() ) {
-          def action = [:]
-          message = message + "\nThis image can be promoted to the *test* environment"
-          action.type = "button"
-          action.text = "Promote Image? :rocket:"
-          action.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/devex-mpf-secure-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/input"
-          attachment.actions = [action]
-        }
+//         if( "master" != GIT_BRANCH_NAME.toLowerCase() ) {
+//           def action = [:]
+//           message = message + "\nThis image can be promoted to the *test* environment"
+//           action.type = "button"
+//           action.text = "Promote Image? :rocket:"
+//           action.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/devex-mpf-secure-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/input"
+//           attachment.actions = [action]
+//         }
         attachment.text = message
 
         notifySlack("${env.JOB_NAME}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment], JENKINS_ICO)
