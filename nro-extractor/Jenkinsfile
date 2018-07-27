@@ -22,20 +22,21 @@
 // - SLACK_TOKEN
 
 // define constants
-def BUILDCFG_NAME ='namex-api'
-def IMAGE_NAME = 'namex-api'
-def DEV_DEPLOYMENT_NAME = 'namex-api-dev'
+def BUILDCFG_NAME ='nro-extractor'
+def IMAGE_NAME = 'nro-extractor'
+def DEV_DEPLOYMENT_NAME = 'nro-extractor-runtime'
 def DEV_TAG_NAME = 'dev'
 def DEV_NS = 'servicebc-ne-dev'
-def TST_DEPLOYMENT_NAME = 'namex-api-test'
+def TST_DEPLOYMENT_NAME = 'nro-extractor-runtime'
 def TST_TAG_NAME = 'test'
 def TST_BCK_TAG_NAME = 'test-previous'
 def TST_NS = 'servicebc-ne-test'
-def PROD_DEPLOYMENT_NAME = 'namex-api'
+def PROD_DEPLOYMENT_NAME = 'nro-extractor-runtime'
 def PROD_TAG_NAME = 'prod'
 def PROD_BCK_TAG_NAME = 'prod-previous'
-def PROD_NS = 'ocp-myapp-prod'
-def SLACK_TOKEN = 'sRLVVwvJg3mOsfbNk0tXSgrn'
+def PROD_NS = 'servicebc-ne-prod'
+
+def GIT_BRANCH_NAME = ("${env.JOB_BASE_NAME}".contains("master")) ? "master" : "develop"
 
 
 // define groovy functions
@@ -164,24 +165,22 @@ containerTemplate(
 			}
 
         def attachment = [:]
-        def message = "Another build is being deployed and will be available shortly."
+        def message = "Another huge sucess; A freshly minted build is being deployed and will be available shortly."
         message = message + "\ncommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
         attachment.title = "API Build ${BUILD_ID} OK! :heart: :tada:"
         attachment.fallback = 'See build log for more details'
         attachment.color = '#00FF00' // Lime Green
-//         if( "master" != GIT_BRANCH_NAME.toLowerCase() ) {
-//           def action = [:]
-//           message = message + "\nThis image can be promoted to the *test* environment"
-//           action.type = "button"
-//           action.text = "Promote Image? :rocket:"
-//           action.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/devex-mpf-secure-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/input"
-//           attachment.actions = [action]
-//         }
+        if( "master" != GIT_BRANCH_NAME.toLowerCase() ) {
+          def action = [:]
+          message = message + "\nThis image can be promoted to the *test* environment"
+          action.type = "button"
+          action.text = "Promote Image? :rocket:"
+          action.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/devex-mpf-secure-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/input"
+          attachment.actions = [action]
+        }
         attachment.text = message
 
         notifySlack("${env.JOB_NAME}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment], JENKINS_ICO)
-
-
         
     }
 }
