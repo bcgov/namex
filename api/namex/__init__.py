@@ -10,14 +10,19 @@ setup_logging() ## important to do this first
 
 import os
 
+from .VERSION import __version__
 from flask import Flask
 import config
+from namex.utils.run_version import get_run_version
 from flask_jwt_oidc import JwtManager
+
 jwt = JwtManager()
 
 from namex.models import db, ma
 from namex.resources import api
 from namex import models
+
+run_version = get_run_version()
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
@@ -29,8 +34,13 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     ma.init_app(app)
 
     api.init_app(app)
-    # oidc.init_app(app)
     setup_jwt_manager(app, jwt)
+
+    @app.after_request
+    def add_version(response):
+        os.getenv('OPENSHIFT_BUILD_COMMIT', '')
+        response.headers["API"] = 'NameX/{ver}'.format(ver=run_version)
+        return response
 
     register_shellcontext(app)
 

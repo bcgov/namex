@@ -1,6 +1,7 @@
 from setuptools import setup
 
 import os
+from namex import __version__
 
 def is_package(path):
     return (
@@ -26,6 +27,7 @@ packages = find_packages(".")
 
 setup(
     name='namex',
+    version=__version__,
     packages=packages.keys(),
     package_dir=packages,
     include_package_data=True,
@@ -51,7 +53,7 @@ setup(
         'pytest',
     ],
     classifiers=[
-          'Development Status :: 8 - Beta',
+          'Development Status :: Beta',
           'Environment :: Console',
           'Environment :: Web API',
           'Intended Audience :: API Service Users',
