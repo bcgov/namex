@@ -3,11 +3,13 @@ from setuptools import setup
 import os
 from namex import __version__
 
+
 def is_package(path):
     return (
         os.path.isdir(path) and
         os.path.isfile(os.path.join(path, '__init__.py'))
         )
+
 
 def find_packages(path, base="" ):
     """ Find all packages in path """
@@ -23,7 +25,35 @@ def find_packages(path, base="" ):
             packages.update(find_packages(dir, module_name))
     return packages
 
+
+def read_requirements(filename):
+    """
+    Get application requirements from
+    the requirements.txt file.
+    :return: Python requirements
+    :rtype: list
+    """
+    with open(filename, 'r') as req:
+        requirements = req.readlines()
+    install_requires = [r.strip() for r in requirements if r.find('git+') != 0]
+    return install_requires
+
+
+def read(filepath):
+    """
+    Read the contents from a file.
+    :param str filepath: path to the file to be read
+    :return: file contents
+    :rtype: str
+    """
+    with open(filepath, 'r') as f:
+        content = f.read()
+    return content
+
+
 packages = find_packages(".")
+requirements = read_requirements('requirements/prod.txt')
+
 
 setup(
     name='namex',
@@ -31,21 +61,9 @@ setup(
     packages=packages.keys(),
     package_dir=packages,
     include_package_data=True,
-    install_requires=[
-        'flask',
-        'flask-restplus',
-        'flask-sqlalchemy',
-        'flask-marshmallow',
-        'flask-migrate',
-        'flask-jwt-oidc',
-        'marshmallow',
-        'marshmallow-sqlalchemy',
-        'psycopg2-binary',
-        'gunicorn',
-        'python-dotenv',
-        'python-jose',
-        'six',
-    ],
+    license=read('LICENSE'),
+    long_description =read('README.md'),
+    install_requires=requirements,
     setup_requires=[
         'pytest-runner',
     ],
