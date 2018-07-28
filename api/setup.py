@@ -61,8 +61,8 @@ setup(
     packages=packages.keys(),
     package_dir=packages,
     include_package_data=True,
-    license=read('LICENSE'),
-    long_description =read('README.md'),
+    license=read('../LICENSE'),
+    long_description =read('../README.md'),
     install_requires=requirements,
     setup_requires=[
         'pytest-runner',
