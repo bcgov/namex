@@ -42,9 +42,9 @@ def OPENSHIFT_ICO = 'https://commons.wikimedia.org/wiki/File:OpenShift-LogoType.
 
 
 // define groovy functions
+import groovy.json.JsonOutput
 
 // send a msg to slack channel that deploy occured
-import groovy.json.JsonOutput
 def notifySlack(text, channel, url, attachments) {
     def slackURL = url
     def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
