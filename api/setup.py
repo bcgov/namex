@@ -1,15 +1,12 @@
 from setuptools import setup
 
 import os
-from namex import __version__
-
 
 def is_package(path):
     return (
         os.path.isdir(path) and
         os.path.isfile(os.path.join(path, '__init__.py'))
         )
-
 
 def find_packages(path, base="" ):
     """ Find all packages in path """
@@ -25,45 +22,28 @@ def find_packages(path, base="" ):
             packages.update(find_packages(dir, module_name))
     return packages
 
-
-def read_requirements(filename):
-    """
-    Get application requirements from
-    the requirements.txt file.
-    :return: Python requirements
-    :rtype: list
-    """
-    with open(filename, 'r') as req:
-        requirements = req.readlines()
-    install_requires = [r.strip() for r in requirements if r.find('git+') != 0]
-    return install_requires
-
-
-def read(filepath):
-    """
-    Read the contents from a file.
-    :param str filepath: path to the file to be read
-    :return: file contents
-    :rtype: str
-    """
-    with open(filepath, 'r') as f:
-        content = f.read()
-    return content
-
-
 packages = find_packages(".")
-requirements = read_requirements('requirements/prod.txt')
-
 
 setup(
     name='namex',
-    version=__version__,
     packages=packages.keys(),
     package_dir=packages,
     include_package_data=True,
-    license=read('../LICENSE'),
-    long_description =read('../README.md'),
-    install_requires=requirements,
+    install_requires=[
+        'gunicorn',
+        'Flask',
+        'Flask-Migrate',
+        'Flask-Script',
+        'Flask-Moment',
+        'Flask-SQLAlchemy',
+        'Flask-RESTplus',
+        'Flask-Marshmallow',
+        'flask-jwt-oidc',
+        'python-dotenv',
+        'psycopg2-binary',
+        'marshmallow',
+        'marshmallow-sqlalchemy',
+    ],
     setup_requires=[
         'pytest-runner',
     ],
@@ -71,7 +51,7 @@ setup(
         'pytest',
     ],
     classifiers=[
-          'Development Status :: Beta',
+          'Development Status :: 8 - Beta',
           'Environment :: Console',
           'Environment :: Web API',
           'Intended Audience :: API Service Users',
