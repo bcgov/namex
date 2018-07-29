@@ -34,16 +34,18 @@ def PROD_DEPLOYMENT_NAME = 'namex-api'
 def PROD_TAG_NAME = 'prod'
 def PROD_BCK_TAG_NAME = 'prod-previous'
 def PROD_NS = 'namex-api-prod'
-def SLACK_TOKEN = 'sRLVVwvJg3mOsfbNk0tXSgrn'
 
+def GIT_BRANCH_NAME = ("${env.JOB_BASE_NAME}".contains("master")) ? "master" : "develop"
+def JENKINS_ICO = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
+def OPENSHIFT_ICO = 'https://commons.wikimedia.org/wiki/File:OpenShift-LogoType.svg'
 
 // define groovy functions
+import groovy.json.JsonOutput
 
 // send a msg to slack channel that deploy occured
-import groovy.json.JsonOutput
 def notifySlack(text, channel, url, attachments) {
     def slackURL = url
-    def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
+    def jenkinsIcon = JENKINS_ICO
     def payload = JsonOutput.toJson([text: text,
         channel: channel,
         username: "Jenkins",
@@ -111,6 +113,13 @@ containerTemplate(
             SLACK_TOKEN = sh (
                 script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
                 returnStdout: true).trim()
+            GIT_COMMIT_SHORT_HASH = sh (
+				script: """git describe --always""", returnStdout: true
+				).trim()
+			GIT_COMMIT_AUTHOR = sh (
+				script: """git show -s --pretty=%an""", returnStdout: true
+				).trim()
+
         }
 		 stage('build') {
 				echo "Building..."
@@ -133,10 +142,11 @@ containerTemplate(
 
 			// send msg to slack
 			def attachment = [:]
-				attachment.fallback = 'See build log for more details'
-				attachment.title = "NameX API Build ${BUILD_ID} OK! :heart: :tada:"
-				attachment.color = '#00FF00' // Lime Green
-				attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+			attachment.fallback = 'See build log for more details'
+			attachment.title = "NameX API Build ${BUILD_ID} OK! :heart: :tada:"
+			attachment.color = '#00FF00' // Lime Green
+			attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+			echo attachment
 			notifySlack("Dev Deploy", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
 		}
 	}
