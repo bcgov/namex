@@ -37,6 +37,8 @@ def PROD_BCK_TAG_NAME = 'prod-previous'
 def PROD_NS = 'servicebc-ne-prod'
 
 def GIT_BRANCH_NAME = ("${env.JOB_BASE_NAME}".contains("master")) ? "master" : "develop"
+def JENKINS_ICO = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
+def OPENSHIFT_ICO = 'https://commons.wikimedia.org/wiki/File:OpenShift-LogoType.svg'
 
 
 // define groovy functions
