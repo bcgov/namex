@@ -45,7 +45,7 @@ import groovy.json.JsonOutput
 // send a msg to slack channel that deploy occured
 def notifySlack(text, channel, url, attachments) {
     def slackURL = url
-    def jenkinsIcon = JENKINS_ICO
+    def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
     def payload = JsonOutput.toJson([text: text,
         channel: channel,
         username: "Jenkins",
