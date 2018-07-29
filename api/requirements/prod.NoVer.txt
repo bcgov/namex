@@ -1,5 +1,4 @@
 gunicorn
-
 Flask
 Flask-Migrate
 Flask-Script
@@ -8,7 +7,6 @@ Flask-SQLAlchemy
 Flask-RESTplus
 Flask-Marshmallow
 flask-jwt-oidc
-
 python-dotenv
 psycopg2-binary
 marshmallow
