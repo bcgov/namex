@@ -34,13 +34,13 @@ class Config(object):
          port=int(DB_PORT),
          name=DB_NAME,
     )
-
-    # OIDC
-    SECRET_KEY = os.getenv('SECRET_KEY','')
-    # OIDC_OPENID_REALM = os.getenv('OIDC_OPENID_REALM','')
-    # OIDC_CLIENT_SECRETS = os.getenv('OIDC_SECRETS_FILE','client_secrets/client_secrets.json')
-    # OIDC_USER_INFO_ENABLED = True
-    # OIDC_SCOPES = ['openid', 'email', 'profile']
+    ## ORACLE - LEGACY NRO NAMESDB
+    NRO_USER = os.getenv('NRO_USER', '')
+    NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
+    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
+    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
+    NRO_HOST = os.getenv('NRO_HOST', '')
+    NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')

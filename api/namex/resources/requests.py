@@ -73,7 +73,7 @@ class RequestsQueue(Resource):
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get():
-        if not (jwt.requires_roles(User.EDITOR) or jwt.requires_roles(User.APPROVER)):
+        if not jwt.validate_roles([User.APPROVER]):
             return jsonify({"message": "Error: You do not have access to the Name Request queue."}), 403
 
         try:
@@ -302,7 +302,7 @@ class Request(Resource):
             return jsonify({"message": "not a valid state"}), 406
 
         #check user scopes
-        if not (jwt.requires_roles(User.EDITOR) or jwt.requires_roles(User.APPROVER)):
+        if not jwt.validate_roles([User.APPROVER]):
             raise AuthError({
                 "code": "Unauthorized",
                 "description": "You don't have access to this resource."
@@ -311,7 +311,7 @@ class Request(Resource):
         if (state in (State.APPROVED,
                      State.REJECTED,
                      State.CONDITIONAL))\
-                and not jwt.requires_roles(User.APPROVER):
+                and not jwt.validate_roles([User.APPROVER]):
             return jsonify({"message": "Only Names Examiners can set state: {}".format(state)}), 428
 
         try:
@@ -325,7 +325,7 @@ class Request(Resource):
 
             #NR is in a final state, but maybe the user wants to pull it back for corrections
             if nrd.stateCd in State.COMPLETED_STATE:
-                if not jwt.requires_roles(User.APPROVER):
+                if not jwt.validate_roles([User.APPROVER]):
                     return jsonify({"message": "Only Names Examiners can alter completed Requests"}), 401
 
                 if nrd.furnished == RequestDAO.REQUEST_FURNISHED:
@@ -380,7 +380,7 @@ class Request(Resource):
             return jsonify({"message": "not a valid state"}), 406
 
         #check user scopes
-        if not (jwt.requires_roles(User.EDITOR) or jwt.requires_roles(User.APPROVER)):
+        if not jwt.validate_roles([User.APPROVER]):
             raise AuthError({
                 "code": "Unauthorized",
                 "description": "You don't have access to this resource."
@@ -389,7 +389,7 @@ class Request(Resource):
         if (state in (State.APPROVED,
                      State.REJECTED,
                      State.CONDITIONAL))\
-                and not jwt.requires_roles(User.APPROVER):
+                and not jwt.validate_roles([User.APPROVER]):
             return jsonify(message='Only Names Examiners can set state: {}'.format(state)), 428
 
         try:
@@ -403,7 +403,7 @@ class Request(Resource):
 
             #NR is in a final state, but maybe the user wants to pull it back for corrections
             if nr_d.stateCd in State.COMPLETED_STATE:
-                if not jwt.requires_roles(User.APPROVER):
+                if not jwt.validate_roles([User.APPROVER]):
                     return jsonify(message='Only Names Examiners can alter completed Requests'), 401
 
                 if nr_d.furnished == RequestDAO.REQUEST_FURNISHED:
