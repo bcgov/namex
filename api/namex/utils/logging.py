@@ -4,7 +4,7 @@ from os import path
 import sys
 
 
-def setup_logging(conf='../../logging.conf'):
+def setup_logging(conf='../../log_config/logging.conf'):
     log_file_path = path.join(path.dirname(path.abspath(__file__)), conf)
 
     if path.isfile(log_file_path):
