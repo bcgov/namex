@@ -2,7 +2,7 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "namex-api-template",
+        "name": "namex-api-runtime-dc-template",
         "creationTimestamp": null
     },
     "objects": [
@@ -10,11 +10,11 @@
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
-                "name": "namex-api",
+                "name": "namex-api-runtime",
                 "generation": 1,
                 "creationTimestamp": null,
                 "labels": {
-                    "app": "namex-api"
+                    "app": "namex-api-runtime"
                 },
                 "annotations": {
                     "openshift.io/generated-by": "OpenShiftWebConsole"
@@ -35,7 +35,7 @@
                                 "command": [
                                     "/opt/app-root/src/setup.sh"
                                 ],
-                                "containerName": "namex-api"
+                                "containerName": "namex-api-runtime"
                             }
                         }
                     },
@@ -48,12 +48,12 @@
                         "imageChangeParams": {
                             "automatic": true,
                             "containerNames": [
-                                "namex-api"
+                                "namex-api-runtime"
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "servicebc-ne-tools",
-                                "name": "namex-api:latest"
+                                "name": "namex-api-runtime:dev"
                             }
                         }
                     },
@@ -64,15 +64,15 @@
                 "replicas": 1,
                 "test": false,
                 "selector": {
-                    "app": "namex-api",
-                    "deploymentconfig": "namex-api"
+                    "app": "namex-api-runtime",
+                    "deploymentconfig": "namex-api-runtime"
                 },
                 "template": {
                     "metadata": {
                         "creationTimestamp": null,
                         "labels": {
-                            "app": "namex-api",
-                            "deploymentconfig": "namex-api"
+                            "app": "namex-api-runtime",
+                            "deploymentconfig": "namex-api-runtime"
                         },
                         "annotations": {
                             "openshift.io/generated-by": "OpenShiftWebConsole"
@@ -90,8 +90,8 @@
                         ],
                         "containers": [
                             {
-                                "name": "namex-api",
-                                "image": "172.50.0.2:5000/servicebc-ne-tools/namex-api@sha256:5c23d340a17e900a5e43c705969ec6af448cf2153d5500038ad25813ba5155aa",
+                                "name": "namex-api-runtime",
+                                "image": "docker-registry.default.svc:5000/servicebc-ne-tools/namex-api-runtime@sha256:8786bce62b",
                                 "ports": [
                                     {
                                         "containerPort": 8080,
@@ -150,6 +150,64 @@
                                                 "key": "DB_PORT"
                                             }
                                         }
+                                    },
+                                    {
+                                        "name": "SECRET_KEY",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-api-config",
+                                                "key": "SECRET_KEY"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "OIDC_OPENID_REALM",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-api-config",
+                                                "key": "OIDC_OPENID_REALM"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "SOLR_BASE_URL",
+                                        "value": "https://namex-solr-dev.pathfinder.gov.bc.ca"
+                                    },
+                                    {
+                                        "name": "JWT_OIDC_WELL_KNOWN_CONFIG",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-keycloak",
+                                                "key": "JWT_OIDC_WELL_KNOWN_CONFIG"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "JWT_OIDC_AUDIENCE",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-keycloak",
+                                                "key": "JWT_OIDC_AUDIENCE"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "JWT_OIDC_CLIENT_SECRET",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-keycloak",
+                                                "key": "JWT_OIDC_CLIENT_SECRET"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "JWT_OIDC_ALGORITHMS",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "name": "namex-keycloak",
+                                                "key": "JWT_OIDC_ALGORITHMS"
+                                            }
+                                        }
                                     }
                                 ],
                                 "resources": {},
@@ -159,28 +217,6 @@
                                         "mountPath": "/opt/app-root/src/client_secrets"
                                     }
                                 ],
-                                "livenessProbe": {
-                                    "httpGet": {
-                                        "path": "/api/v1/healthz",
-                                        "port": 8080,
-                                        "scheme": "HTTP"
-                                    },
-                                    "timeoutSeconds": 2,
-                                    "periodSeconds": 10,
-                                    "successThreshold": 1,
-                                    "failureThreshold": 3
-                                },
-                                "readinessProbe": {
-                                    "httpGet": {
-                                        "path": "/api/v1/readyz",
-                                        "port": 8080,
-                                        "scheme": "HTTP"
-                                    },
-                                    "timeoutSeconds": 2,
-                                    "periodSeconds": 10,
-                                    "successThreshold": 1,
-                                    "failureThreshold": 3
-                                },
                                 "terminationMessagePath": "/dev/termination-log",
                                 "terminationMessagePolicy": "File",
                                 "imagePullPolicy": "Always"
