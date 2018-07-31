@@ -20,9 +20,12 @@ jwt = JwtManager()
 
 from namex.models import db, ma
 from namex.resources import api
+from namex.nro_services import NROServices
 from namex import models
 
 run_version = get_run_version()
+
+nro = NROServices()
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
@@ -35,6 +38,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     api.init_app(app)
     setup_jwt_manager(app, jwt)
+
+    nro.init_app(app)
 
     @app.after_request
     def add_version(response):
