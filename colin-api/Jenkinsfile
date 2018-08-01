@@ -145,7 +145,7 @@ containerTemplate(
 // Part 2 - Integration Testing API
 
 stage('API Test') {
-	podTemplate(label: 'nodejs-"${env.JOB_BASE_NAME}-${env.BUILD_NUMBER}-${env.CHANGE_ID}"', name: 'nodejs-"${env.JOB_BASE_NAME}-${env.BUILD_NUMBER}-${env.CHANGE_ID}"', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+	podTemplate(label: 'nodejs-python3nodejs', name: 'nodejs-python3nodejs', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
 		name: 'jnlp',
 		image: '172.50.0.2:5000/openshift/jenkins-slave-python3nodejs',
@@ -175,7 +175,7 @@ stage('API Test') {
 	])
 	{
 		//node("nodejs-${context.uuid}") {
-        node('nodejs-"${env.JOB_BASE_NAME}-${env.BUILD_NUMBER}-${env.CHANGE_ID}"') {
+        node('nodejs-python3nodejs') {
         //node('nodejs') {
             //the checkout is mandatory, otherwise functional test would fail
                 echo "checking out source"
