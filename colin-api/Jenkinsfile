@@ -145,7 +145,7 @@ containerTemplate(
 // Part 2 - Integration Testing API
 
 stage('API Test') {
-	podTemplate(label: 'nodejs', name: 'nodejs', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+	podTemplate(label: 'nodejs', name: 'nodejs', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
 		name: 'jnlp',
 		image: '172.50.0.2:5000/openshift/jenkins-slave-nodejs',
@@ -174,15 +174,16 @@ stage('API Test') {
                 sh '''#!/bin/bash
                     echo BASEURL=$BASEURL
                 '''
-
+                sh 'ls -la'
                 //input(message: "Verify Environment variables. Continue?")
                 checkout scm
+                sh 'ls -la'
                 sh 'npm install -g newman'
                 dir('colin-api/tests/postman') {
                     //sh 'npm install -g newman'
+                    sh 'ls -la'
                     try {
-                        sh 'newman run ./colin-pipeline.postman_collection.json  -e ./colin-api-pipeline.postman_environment.json -r cli,junit,html'
-                        //sh 'newman run ./colin-pipeline.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html'
+                        sh 'newman run ./colin-pipeline.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html'
     					//sh 'newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
                         //sh 'newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="https://namex-dev.pathfinder.gov.bc.ca" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
                     } finally {
