@@ -148,7 +148,7 @@ stage('API Test') {
 	podTemplate(label: 'nodejs', name: 'nodejs', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
 		name: 'jnlp',
-		image: '172.50.0.2:5000/openshift/jenkins-slave-nodejs',
+		image: '172.50.0.2:5000/openshift/jenkins-slave-python3nodejs',
 		resourceRequestCpu: '500m',
 		resourceLimitCpu: '1000m',
 		resourceRequestMemory: '1Gi',
