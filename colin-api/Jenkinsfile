@@ -177,8 +177,10 @@ stage('API Test') {
                 sh '''#!/bin/bash
                     echo BASEURL=$BASEURL
                     echo DEV_API_TEST_USER = $DEV_API_TEST_USER
+                    chmod 775 /opt/rh/rh-nodejs6/root/usr/lib/node_modules
                     ls -la /opt/rh/rh-nodejs6/root/usr/lib
                     whoami
+                    ls -la /opt/rh/rh-nodejs6/root/usr/lib/node_modules
                 '''
                 //input(message: "Verify Environment variables. Continue?")
                 checkout scm
