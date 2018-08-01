@@ -74,6 +74,7 @@ setup(
         'flask-jwt-oidc',
         'python-dotenv',
         'psycopg2-binary',
+        'cx_Oracle',
         'marshmallow',
         'marshmallow-sqlalchemy',
     ],
