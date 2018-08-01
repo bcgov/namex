@@ -155,7 +155,15 @@ stage('API Test') {
 		resourceLimitMemory: '2Gi',
 		workingDir: '/tmp',
 		command: '',
-		args: '${computer.jnlpmac} ${computer.name}'
+		args: '${computer.jnlpmac} ${computer.name}',
+		envVars: [
+            envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca/api/v1/corporations"),
+            secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets', secretKey: 'username'),
+            secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets', secretKey: 'password'),
+            secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets', secretKey: 'authurl'),
+            secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets', secretKey: 'clientid'),
+            secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
+        ]
 	  )
 	],envVars: [
 		envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca/api/v1/corporations"),
@@ -167,6 +175,7 @@ stage('API Test') {
 	])
 	{
 		//node("nodejs-${context.uuid}") {
+        //node('nodejs-"${env.JOB_BASE_NAME}-${env.BUILD_NUMBER}-${env.CHANGE_ID}"') {
         node('nodejs') {
             //the checkout is mandatory, otherwise functional test would fail
                 echo "checking out source"
@@ -174,14 +183,10 @@ stage('API Test') {
                 sh '''#!/bin/bash
                     echo BASEURL=$BASEURL
                 '''
-                sh 'ls -la'
                 //input(message: "Verify Environment variables. Continue?")
                 checkout scm
-                sh 'ls -la'
                 dir('colin-api/tests/postman') {
-                    sh 'ls -la'
                     sh 'npm install -g newman'
-                    sh 'ls -la ../../../..'
                     try {
                         sh 'newman run ./colin-pipeline.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html'
     					//sh 'newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
