@@ -168,6 +168,14 @@ stage('API Test') {
 	{
 		//node("nodejs-${context.uuid}") {
         node('nodejs') {
+            envVars: [
+                envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca/api/v1/corporations"),
+                secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets', secretKey: 'username'),
+                secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets', secretKey: 'password'),
+                secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets', secretKey: 'authurl'),
+                secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets', secretKey: 'clientid'),
+                secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
+            ]
             //the checkout is mandatory, otherwise functional test would fail
                 echo "checking out source"
                 echo "Build: ${BUILD_ID}"
