@@ -1,7 +1,7 @@
 from setuptools import setup
 
 import os
-from namex import __version__
+# from namex.VERSION import __version__
 
 
 def is_package(path):
@@ -57,7 +57,7 @@ requirements = read_requirements('requirements/prod.txt')
 
 setup(
     name='namex',
-    version=__version__,
+    version='0.1.0b',
     packages=packages.keys(),
     package_dir=packages,
     include_package_data=True,
