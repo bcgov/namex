@@ -145,7 +145,8 @@ containerTemplate(
 // Part 2 - Integration Testing API
 
 stage('API Test') {
-	podTemplate(label: 'nodejs-python3nodejs', name: 'nodejs-python3nodejs', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+    //every time a change is made in pod template the name must be changed too
+	podTemplate(label: 'nodejs-python3nodejs1', name: 'nodejs-python3nodejs1', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
 		name: 'jnlp',
 		image: '172.50.0.2:5000/openshift/jenkins-slave-python3nodejs',
@@ -165,17 +166,10 @@ stage('API Test') {
             secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
         ]
 	  )
-	],envVars: [
-		envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca/api/v1/corporations"),
-		secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets', secretKey: 'username'),
-		secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets', secretKey: 'password'),
-		secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets', secretKey: 'authurl'),
-		secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets', secretKey: 'clientid'),
-		secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
-	])
+	]
 	{
 		//node("nodejs-${context.uuid}") {
-        node('nodejs-python3nodejs') {
+        node('nodejs-python3nodejs1') {
         //node('nodejs') {
             //the checkout is mandatory, otherwise functional test would fail
                 echo "checking out source"
