@@ -166,7 +166,7 @@ stage('API Test') {
             secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
         ]
 	  )
-	]
+	])
 	{
 		//node("nodejs-${context.uuid}") {
         node('nodejs-python3nodejs1') {
