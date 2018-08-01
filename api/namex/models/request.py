@@ -141,7 +141,7 @@ class Request(db.Model):
 
         if existing_nr:
             current_app.logger.info('Existing NR found, returning: {}'.format(existing_nr.nrNum))
-            return existing_nr.nrNum
+            return existing_nr, False
 
         # this will error if there's nothing in the queue - likelihood ~ 0
         r = db.session.query(Request).\
@@ -156,7 +156,7 @@ class Request(db.Model):
 
         db.session.add(r)
         db.session.commit()
-        return r.nrNum
+        return r, True
 
     @classmethod
     def get_inprogress(cls, userObj):

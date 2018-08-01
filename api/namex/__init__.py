@@ -18,14 +18,14 @@ from flask_jwt_oidc import JwtManager
 
 jwt = JwtManager()
 
+from namex.nro_services import NROServices
+nro = NROServices()
+
 from namex.models import db, ma
 from namex.resources import api
-from namex.nro_services import NROServices
 from namex import models
 
 run_version = get_run_version()
-
-nro = NROServices()
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
