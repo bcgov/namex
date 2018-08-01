@@ -178,7 +178,6 @@ stage('API Test') {
                     echo BASEURL=$BASEURL
                     echo DEV_API_TEST_USER = $DEV_API_TEST_USER
                 '''
-                sh 'npm install -g newman'
                 //input(message: "Verify Environment variables. Continue?")
                 checkout scm
                 dir('colin-api/tests/postman') {
