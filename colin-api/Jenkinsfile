@@ -190,7 +190,7 @@ stage('API Test') {
                     sh 'ls -la node_modules/newman'
                     sh 'ls -la node_modules/newman/bin'
                     try {
-                        sh './node_modules/newman newman run ./colin-pipeline.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html'
+                        sh './node_modules/newman/bin/newman run ./colin-pipeline.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html'
     					//sh './newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
                         //sh 'newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="https://namex-dev.pathfinder.gov.bc.ca" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
                     } finally {
