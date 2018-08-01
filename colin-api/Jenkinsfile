@@ -177,12 +177,15 @@ stage('API Test') {
                 sh '''#!/bin/bash
                     echo BASEURL=$BASEURL
                     echo DEV_API_TEST_USER = $DEV_API_TEST_USER
+                    ls -la /opt/rh/rh-nodejs6/root/usr/lib/node_modules
+                    ls -la ~/opt/rh/rh-nodejs6/root/usr/lib/node_modules
+                    
                 '''
                 //input(message: "Verify Environment variables. Continue?")
                 checkout scm
                 dir('colin-api/tests/postman') {
 
-                    sh 'npm install newman'
+                    sh 'npm install -g newman'
                     try {
                         sh 'newman run ./colin-pipeline.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html'
     					//sh 'newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
