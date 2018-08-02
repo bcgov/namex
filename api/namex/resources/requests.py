@@ -11,7 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func, text, exc
 from sqlalchemy.inspection import inspect
 
-from namex import jwt
+from namex import jwt, nro
 from namex.models import db, ValidationError
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema
 from namex.models import Name, NameSchema, PartnerNameSystemSchema
@@ -23,6 +23,8 @@ from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
 import datetime
+import json
+import urllib
 
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
@@ -80,8 +82,37 @@ class RequestsQueue(Resource):
             user = User.find_by_jwtToken(g.jwt_oidc_token_info)
             current_app.logger.debug('find user')
             if not user:
+                current_app.logger.debug('didnt find user, attempting to create new user from the JWT info')
                 user = User.create_from_jwtToken(g.jwt_oidc_token_info)
-            nr = RequestDAO.get_queued_oldest(user)
+            nr, new_assignment = RequestDAO.get_queued_oldest(user)
+
+            if new_assignment:
+
+                nro_last_ts = nro.get_last_update_timestamp(nr.requestId)
+                nro.set_request_status_to_h(nr.nrNum, user.username)
+                if 'H' is not nro.get_current_request_state(nr.nrNum):
+                    current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
+                    # TODO find out from business what the heck todo - bcgov/name-examination#702
+
+                if nro_last_ts != nr.nroLastUpdate:
+                    current_app.logger.debug('nro updated since namex was last updated')
+                    # TODO call nro-extractor
+
+                    try:
+                        data = {
+                            'nameRequest': nr.nrNum
+                        }
+                        url = 'https://namex-dev.pathfinder.gov.bc.ca/api/v1/nro-extract/nro-requests'
+
+                        nro_req = urllib.request.Request(url,
+                                                         data=json.dumps(data).encode('utf8'),
+                                                         headers={'content-type': 'application/json'})
+                        nro_req.get_method = lambda: 'POST'
+                        nro_response = urllib.request.urlopen(nro_req).read()
+                        current_app.logger.debug('response from extractor: {}'.format(nro_response))
+
+                    except Exception as err:
+                        current_app.logger.error(err.with_traceback(None))
 
         except SQLAlchemyError as err:
             # TODO should put some span trace on the error message
@@ -91,7 +122,7 @@ class RequestsQueue(Resource):
             current_app.logger.error(err)
             return jsonify({'message': 'There are no Name Requests to work on.'}), 404
 
-        return jsonify(nameRequest='{}'.format(nr)), 200
+        return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
 
 
 @cors_preflight('GET, POST')

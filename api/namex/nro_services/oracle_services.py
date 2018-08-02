@@ -102,6 +102,39 @@ class NROServices(object):
             raise NROServicesError({"code": "unable_to_get_timestamp",
                                     "description": "Unable to get the last timestamp for the NR in NRO"}, 500)
 
+    def get_current_request_state(self, nro_nr_num):
+        """Gets a datetime object that holds the last time and part of the NRO Request was modified
+
+        :param nro_request_id: NRO request.request_id for the request we want to enquire about \
+                               it DOES NOT use the nr_num, as that requires yet another %^&$# join and runs a \
+                               couple of orders of magnitude slower. (really nice db design - NOT)
+        :return: (datetime) the last time that any part of the request was altered
+        :raise: (NROServicesError) with the error information set
+        """
+
+        try:
+            cursor = self.connection.cursor()
+
+            cursor.execute("""
+                          select rs.STATE_TYPE_CD
+                            from request_state rs
+                            join request r on rs.request_id=r.request_id
+                           where r.nr_num=:req_num
+                             and rs.end_event_id is NULL"""
+                    ,req_num=nro_nr_num)
+
+            row = cursor.fetchone()
+
+            if row:
+                return row[0]
+
+            return None
+
+        except Exception as err:
+            current_app.logger.error(err.with_traceback(None))
+            raise NROServicesError({"code": "unable_to_get_request_state",
+                                    "description": "Unable to get the current state of the NRO Request"}, 500)
+
     def set_request_status_to_h(self, nr_num, examiner_username ):
         """Sets the status of the Request in NRO to "H"
 

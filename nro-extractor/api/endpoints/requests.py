@@ -31,40 +31,55 @@ class NRORequest(Resource):
         if not validNRFormat(nr_num):
             return {"message": "Valid NR format required - 'NR 9999999'"}, 400
 
-        if Request.find_by_nr(nr_num):
-            return {"message": "{nr} already exists in namex, unable to create a duplicate".format(nr=nr_num)}, 409
-
-        conn = db.get_engine(bind='nro')
-
-        nr_header = get_nr_header(conn, nr_num)
-        current_app.logger.debug('nr_header: {}'.format(nr_header))
-        if not nr_header:
-            return {"message": "{nr} not found, unable to complete extraction to new system".format(nr=nr_num)}, 404
-
-        nr_submitter = get_nr_submitter(conn, nr_header['request_id'])
-        nr_applicant = get_nr_requester(conn, nr_header['request_id'])
-        nr_ex_comments = get_exam_comments(conn, nr_header['request_id'])
-        nr_nwpat = get_nwpta(conn, nr_header['request_id'])
-        nr_names = get_names(conn, nr_header['request_id'])
-
-        user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
-
-        #Create NR
-        new_nr = Request()
-        add_nr_header(new_nr, nr_header, nr_submitter, user)
-        add_applicant(new_nr, nr_applicant)
-        add_comments(new_nr, nr_ex_comments)
-        add_nwpta(new_nr, nr_nwpat)
-        add_names(new_nr, nr_names)
-
         try:
-            db.session.add(new_nr)
-            db.session.commit()
+
+            sess = db.create_scoped_session()
+            engine = db.get_engine(bind='nro').contextual_connect()
+
+            existing_nr = sess.query(Request).filter_by(nrNum=nr_num).one_or_none()
+
+            if existing_nr:
+                return {"message": "{nr} already exists in namex, unable to create a duplicate".format(nr=nr_num)}, 409
+
+            nr_header = get_nr_header(engine, nr_num)
+            current_app.logger.debug('nr_header: {}'.format(nr_header))
+            if not nr_header:
+                return {"message": "{nr} not found, unable to complete extraction to new system".format(nr=nr_num)}, 404
+
+            nr_submitter = get_nr_submitter(engine, nr_header['request_id'])
+            nr_applicant = get_nr_requester(engine, nr_header['request_id'])
+            nr_ex_comments = get_exam_comments(engine, nr_header['request_id'])
+            nr_nwpat = get_nwpta(engine, nr_header['request_id'])
+            nr_names = get_names(engine, nr_header['request_id'])
+
+            user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
+
+            #Create NR
+            new_nr = Request()
+            add_nr_header(new_nr, nr_header, nr_submitter, user)
+            add_applicant(new_nr, nr_applicant)
+            add_comments(new_nr, nr_ex_comments)
+            add_nwpta(new_nr, nr_nwpat)
+            add_names(new_nr, nr_names)
+
+            current_app.logger.debug('saving the {} graph to the database'.format(new_nr.nrNum))
+            sess.add(new_nr)
+            sess.commit()
+            current_app.logger.debug('saved {}'.format(new_nr.nrNum))
 
         except Exception as err:
             current_app.logger.error(err.with_traceback(None))
-            db.session.rollback()
+            sess.rollback()
             return {"message": "Internal server error"}, 500
+
+        finally:
+            current_app.logger.debug('finally called')
+            if sess:
+                current_app.logger.debug('close session')
+                sess.close()
+            if engine:
+                current_app.logger.debug('close engine')
+                engine.close()
 
         return {"message": "{nr} has been successfully copied".format(nr=nr_num)}, 200
 
@@ -189,7 +204,7 @@ def add_applicant(new_nr, nr_applicant):
 
 ######### get stuff
 
-def get_nr_header(conn, nr_num):
+def get_nr_header(engine, nr_num):
     # get the NR Header
     #############################
     sql_nr = text(
@@ -220,7 +235,7 @@ def get_nr_header(conn, nr_num):
         ' where rs.request_id = :req_id'
         ' and rs.end_event_id IS NULL'
     )
-    result = conn.execute(sql_nr.params(nr=nr_num), multi=True)
+    result = engine.execute(sql_nr.params(nr=nr_num), multi=True)
     row = result.fetchone()
 
     #get main row
@@ -228,13 +243,13 @@ def get_nr_header(conn, nr_num):
         nr = row_to_dict(row)
 
         # get last_updated
-        result = conn.execute(sql_lu.params(id=nr['request_id']), multi=True)
+        result = engine.execute(sql_lu.params(id=nr['request_id']), multi=True)
         row = result.fetchone()
         if row:
             nr = {**nr, **(row_to_dict(row))}
 
         # get state
-        result = conn.execute(sql_state.params(req_id=nr['request_id']), multi=True)
+        result = engine.execute(sql_state.params(req_id=nr['request_id']), multi=True)
         row = result.fetchone()
         if row:
             nr = {**nr, **(row_to_dict(row))}
@@ -243,7 +258,7 @@ def get_nr_header(conn, nr_num):
 
     return None
 
-def get_nr_submitter(conn, request_id):
+def get_nr_submitter(engine, request_id):
 
     # get the NR Submitter
     #############################
@@ -254,14 +269,14 @@ def get_nr_submitter(conn, request_id):
         ' from namex_submitter_vw'
         ' where request_id = :req_id'
     )
-    result = conn.execute(sql.params(req_id=request_id), multi=True)
+    result = engine.execute(sql.params(req_id=request_id), multi=True)
     row = result.fetchone()
     if row:
         current_app.logger.debug(row_to_dict(row))
         return row_to_dict(row)
     return None
 
-def get_nr_requester(conn, request_id):
+def get_nr_requester(engine, request_id):
 
     # get the NR Requester
     #############################
@@ -288,14 +303,14 @@ def get_nr_requester(conn, request_id):
         ' from namex_request_party_vw'
         ' where request_id = :req_id'
     )
-    result = conn.execute(sql.params(req_id=request_id), multi=True)
+    result = engine.execute(sql.params(req_id=request_id), multi=True)
     row = result.fetchone()
     if row:
         current_app.logger.debug(row_to_dict(row))
         return row_to_dict(row)
     return None
 
-def get_exam_comments(conn, request_id):
+def get_exam_comments(engine, request_id):
     # get the NR Requester
     #############################
     sql = text(
@@ -307,7 +322,7 @@ def get_exam_comments(conn, request_id):
         ' from namex_examiner_comments_vw'
         ' where request_id= :req_id'
     )
-    result = conn.execute(sql.params(req_id=request_id), multi=True)
+    result = engine.execute(sql.params(req_id=request_id), multi=True)
     ex_comments = []
     for row in result:
         if row['examiner_comment'] or row['state_comment']:
@@ -317,7 +332,7 @@ def get_exam_comments(conn, request_id):
         return None
     return ex_comments
 
-def get_nwpta(conn, request_id):
+def get_nwpta(engine, request_id):
     # get the NR NWPTA Partner information
     #############################
     sql = text(
@@ -332,7 +347,7 @@ def get_nwpta(conn, request_id):
         ' where end_event_id IS NULL'
         ' and pns.request_id= :req_id'
     )
-    result = conn.execute(sql.params(req_id=request_id), multi=True)
+    result = engine.execute(sql.params(req_id=request_id), multi=True)
     nwpta = []
     for row in result:
         current_app.logger.debug(row_to_dict(row))
@@ -341,7 +356,7 @@ def get_nwpta(conn, request_id):
         return None
     return nwpta
 
-def get_names(conn, request_id):
+def get_names(engine, request_id):
     # get the NR Names
     #############################
     sql = text(
@@ -353,7 +368,7 @@ def get_names(conn, request_id):
         ' from namex_names_vw'
         ' where request_id = :req_id'
     )
-    result = conn.execute(sql.params(req_id=request_id), multi=True)
+    result = engine.execute(sql.params(req_id=request_id), multi=True)
     names = []
     for row in result:
         current_app.logger.debug(row_to_dict(row))
