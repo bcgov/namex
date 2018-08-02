@@ -80,11 +80,12 @@ class RequestsQueue(Resource):
 
         try:
             user = User.find_by_jwtToken(g.jwt_oidc_token_info)
-            current_app.logger.debug('find user')
+            current_app.logger.debug('finding user: {}'.format(g.jwt_oidc_token_info))
             if not user:
                 current_app.logger.debug('didnt find user, attempting to create new user from the JWT info')
                 user = User.create_from_jwtToken(g.jwt_oidc_token_info)
             nr, new_assignment = RequestDAO.get_queued_oldest(user)
+            current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
 
             if new_assignment:
 
