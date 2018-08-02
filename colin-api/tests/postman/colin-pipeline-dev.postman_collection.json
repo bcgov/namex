@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "36ffe902-3746-4bdd-9fe9-c1cffd86779a",
-		"name": "colin-pipeline",
+		"name": "colin-pipeline-dev",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [

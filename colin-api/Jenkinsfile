@@ -41,20 +41,20 @@ def SLACK_TOKEN = 'sRLVVwvJg3mOsfbNk0tXSgrn'
 // define groovy functions
 
 // send a msg to slack channel that deploy occured
-//import groovy.json.JsonOutput
-//def notifySlack(text, channel, url, attachments) {
-//    def slackURL = url
-//    def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
-//    def payload = JsonOutput.toJson([text: text,
-//        channel: channel,
-//        username: "Jenkins",
-//        icon_url: jenkinsIcon,
-//        attachments: attachments
-//    ])
-//    def encodedReq = URLEncoder.encode(payload, "UTF-8")
-//    sh("curl -s -S -X POST " +
-//            "--data \'payload=${encodedReq}\' ${slackURL}")
-//}
+import groovy.json.JsonOutput
+def notifySlack(text, channel, url, attachments) {
+    def slackURL = url
+    def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
+    def payload = JsonOutput.toJson([text: text,
+        channel: channel,
+        username: "Jenkins",
+        icon_url: jenkinsIcon,
+        attachments: attachments
+    ])
+    def encodedReq = URLEncoder.encode(payload, "UTF-8")
+    sh("curl -s -S -X POST " +
+            "--data \'payload=${encodedReq}\' ${slackURL}")
+}
 
 // create a string listing commit msgs occured since last build
 @NonCPS
@@ -138,13 +138,13 @@ containerTemplate(
 				attachment.title = "NameX API Build ${BUILD_ID} OK! :heart: :tada:"
 				attachment.color = '#00FF00' // Lime Green
 				attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-			//notifySlack("Dev Deploy", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
+			notifySlack("Dev Deploy colin-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
 		}
 	}
 }
 // Part 2 - Integration Testing API
 
-stage('API Test') {
+stage('API Test DEV') {
     //every time a change is made in pod template the name must be changed too
 	podTemplate(label: 'nodejs-python3nodejs1', name: 'nodejs-python3nodejs1', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
@@ -168,31 +168,26 @@ stage('API Test') {
 	  )
 	])
 	{
-		//node("nodejs-${context.uuid}") {
         node('nodejs-python3nodejs1') {
-        //node('nodejs') {
             //the checkout is mandatory, otherwise functional test would fail
                 echo "checking out source"
                 echo "Build: ${BUILD_ID}"
                 sh '''#!/bin/bash
                     echo BASEURL=$BASEURL
                     echo DEV_API_TEST_USER = $DEV_API_TEST_USER
-                    ls -la /opt/rh/rh-nodejs6/root/usr/lib
-                    whoami
-                    ls -la /opt/rh/rh-nodejs6/root/usr/lib/node_modules
+                    echo DEV_API_TEST_PASSWORD = $DEV_API_TEST_PASSWORD
+                    echo DEV_API_TEST_AUTH_SERVER = $DEV_API_TEST_AUTH_SERVER
+                    echo DEV_API_TEST_CLIENT_ID = $DEV_API_TEST_CLIENT_ID
+                    echo DEV_API_TEST_CLIENT_SECRET = $DEV_API_TEST_CLIENT_SECRET
                 '''
                 //input(message: "Verify Environment variables. Continue?")
                 checkout scm
                 dir('colin-api/tests/postman') {
 
                     sh 'npm install newman'
-                    sh 'ls -la node_modules'
-                    sh 'ls -la node_modules/newman'
-                    sh 'ls -la node_modules/newman/bin'
+
                     try {
                         sh './node_modules/newman/bin/newman.js run ./colin-pipeline.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET --global-var realm=nest -r cli,junit,html'
-    					//sh './newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
-                        //sh 'newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="https://namex-dev.pathfinder.gov.bc.ca" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
                     } finally {
                             junit 'newman/*.xml'
                             publishHTML (target: [
@@ -236,3 +231,19 @@ podTemplate(label: zappodlabel, name: zappodlabel, serviceAccount: 'jenkins', cl
         }
      }
   }
+
+stage('deploy-test') {
+  timeout(time: 1, unit: 'DAYS') {
+      input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin'
+  }
+  node('master') {
+	  echo ">>> Tag ${TST_TAG_NAME} with ${TST_BCK_TAG_NAME}"
+	  openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_BCK_TAG_NAME, srcStream: IMAGE_NAME, srcTag: TST_TAG_NAME
+          echo ">>> Tag ${IMAGE_HASH} with ${TST_TAG_NAME}"
+	  openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_TAG_NAME, srcStream: IMAGE_NAME, srcTag: "${IMAGE_HASH}"
+          sleep 5
+	  openshiftVerifyDeployment depCfg: TST_DEPLOYMENT_NAME, namespace: TST_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
+	  echo ">>>> Deployment Complete"
+	  notifySlack("Test Deploy colin-api, changes:\n" + getChangeString(), "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", [])
+  }
+}
