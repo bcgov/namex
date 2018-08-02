@@ -168,8 +168,9 @@ containerTemplate(
 }
 // Part 2 - Integration Testing API
 
-stage('API Test') {
-	podTemplate(label: 'jenkins-python3nodejs', name: 'jenkins-python3nodejs', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+stage('API Test DEV') {
+    //every time a change is made in pod template the name must be changed too
+	podTemplate(label: 'nodejs-python3nodejs2', name: 'nodejs-python3nodejs2', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
 		name: 'jnlp',
 		image: '172.50.0.2:5000/openshift/jenkins-slave-python3nodejs',
@@ -179,50 +180,54 @@ stage('API Test') {
 		resourceLimitMemory: '2Gi',
 		workingDir: '/tmp',
 		command: '',
-		args: '${computer.jnlpmac} ${computer.name}'
+		args: '${computer.jnlpmac} ${computer.name}',
+		envVars: [
+            envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca"),
+            secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets', secretKey: 'username'),
+            secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets', secretKey: 'password'),
+            secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets', secretKey: 'authurl'),
+            secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets', secretKey: 'clientid'),
+            secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
+        ]
 	  )
-	],envVars: [
-		envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca"),
-		secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets', secretKey: 'username'),
-		secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets', secretKey: 'password'),
-		secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets', secretKey: 'authurl'),
-		secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets', secretKey: 'clientid'),
-		secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
 	])
 	{
-//		node("nodejs-${context.uuid}") {
-		node('nodejs') {
-		//the checkout is mandatory, otherwise functional test would fail
-			echo "checking out source"
-			echo "Build: ${BUILD_ID}"
-			sh '''#!/bin/bash
-				echo BASEURL=$BASEURL
-			'''
+        node('nodejs-python3nodejs2') {
+            //the checkout is mandatory, otherwise functional test would fail
+                echo "checking out source"
+                echo "Build: ${BUILD_ID}"
+                sh '''#!/bin/bash
+                    echo BASEURL=$BASEURL
+                    echo DEV_API_TEST_USER = $DEV_API_TEST_USER
+                    echo DEV_API_TEST_PASSWORD = $DEV_API_TEST_PASSWORD
+                    echo DEV_API_TEST_AUTH_SERVER = $DEV_API_TEST_AUTH_SERVER
+                    echo DEV_API_TEST_CLIENT_ID = $DEV_API_TEST_CLIENT_ID
+                    echo DEV_API_TEST_CLIENT_SECRET = $DEV_API_TEST_CLIENT_SECRET
+                '''
+                //input(message: "Verify Environment variables. Continue?")
+                checkout scm
+                dir('api/tests/postman') {
 
-			//input(message: "Verify Environment variables. Continue?")
-			checkout scm
-			dir('tests/postman') {
-				sh 'npm install -g newman'
+                    sh 'npm install newman'
 
-				try {
-//					sh 'newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
-					sh 'newman run ./namex-common.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var base_url="https://namex-dev.pathfinder.gov.bc.ca" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET -r cli,junit,html;'
-				} finally {
-						junit 'newman/*.xml'
-						publishHTML (target: [
-									allowMissing: false,
-									alwaysLinkToLastBuild: false,
-									keepAll: true,
-									reportDir: 'newman',
-									reportFiles: 'newman*.html',
-									reportName: "API Test Report"
-								])
-						stash includes: 'newman/*.xml', name: 'api-tests'
-				}
-			} // end dir
-		} //end node
-	} //end podTemplate
-} //end stage
+                    try {
+                        sh './node_modules/newman/bin/newman.js run ./namex-pipeline-dev.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET --global-var realm=nest -r cli,junit,html'
+                    } finally {
+                            junit 'newman/*.xml'
+                            publishHTML (target: [
+                                        allowMissing: false,
+                                        alwaysLinkToLastBuild: false,
+                                        keepAll: true,
+                                        reportDir: 'newman',
+                                        reportFiles: 'newman*.html',
+                                        reportName: "API Test Report"
+                                    ])
+                            stash includes: 'newman/*.xml', name: 'api-tests'
+                    }
+                } // end dir
+		    } //end node
+	    } //end podTemplate
+    } //end stage
 
 // Part 3 - Security scan of deployed app in dev
 
@@ -250,3 +255,20 @@ podTemplate(label: zappodlabel, name: zappodlabel, serviceAccount: 'jenkins', cl
         }
      }
   }
+
+// Part 4 - deploy to test
+stage('deploy-test') {
+  timeout(time: 1, unit: 'DAYS') {
+      input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin'
+  }
+  node('master') {
+	  echo ">>> Tag ${TST_TAG_NAME} with ${TST_BCK_TAG_NAME}"
+	  openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_BCK_TAG_NAME, srcStream: IMAGE_NAME, srcTag: TST_TAG_NAME
+          echo ">>> Tag ${IMAGE_HASH} with ${TST_TAG_NAME}"
+	  openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_TAG_NAME, srcStream: IMAGE_NAME, srcTag: "${IMAGE_HASH}"
+          sleep 5
+	  openshiftVerifyDeployment depCfg: TST_DEPLOYMENT_NAME, namespace: TST_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
+	  echo ">>>> Deployment Complete"
+	  notifySlack("Test Deploy, changes:\n" + getChangeString(), "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", [])
+  }
+}
