@@ -148,8 +148,6 @@ class Requests(Resource):
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(*args, **kwargs):
-
-        print(request.args)
         # validate row & start params
         start = request.args.get('start', Requests.START)
         rows = request.args.get('rows',Requests.ROWS)
@@ -162,7 +160,6 @@ class Requests(Resource):
 
         # queue must be a list of states
         queue = request.args.get('queue', None)
-        print('queue: ', queue)
         if queue:
             queue = queue.upper().split(',')
             for q in queue:
