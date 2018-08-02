@@ -158,7 +158,7 @@ stage('API Test') {
 		command: '',
 		args: '${computer.jnlpmac} ${computer.name}',
 		envVars: [
-            envVar(key:'BASEURL', value: "namex-dev.pathfinder.gov.bc.ca/api/v1/corporations"),
+            envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca/api/v1/corporations"),
             secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets', secretKey: 'username'),
             secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets', secretKey: 'password'),
             secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets', secretKey: 'authurl'),
