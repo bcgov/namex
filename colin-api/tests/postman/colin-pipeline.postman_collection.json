@@ -6,6 +6,85 @@
 	},
 	"item": [
 		{
+			"name": "setup",
+			"description": null,
+			"item": [
+				{
+					"name": "Install Postman BDD",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// If the \"postman_bdd_path\" environment variable is set, then we'll use it.",
+									"// Otherwise, we'll default to the published version",
+									"if (!environment.postman_bdd_path) {",
+									"    postman.setGlobalVariable('postman_bdd_path', 'http://bigstickcarpet.com/postman-bdd/dist/postman-bdd.min.js');",
+									"}",
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// \"install\" Postman BDD",
+									"postman.setGlobalVariable('postmanBDD', responseBody);",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{postman_bdd_path}}",
+							"host": [
+								"{{postman_bdd_path}}"
+							]
+						},
+						"description": "This request downloads [Postman BDD](https://github.com/BigstickCarpet/postman-bdd) and then \"installs\" it by setting a global variable\n"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2b5cb058-1cd3-467a-9032-e943bbee50a9",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "2c5955ab-9722-4fed-b70c-259c9afefe1c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
 			"name": "authenticate",
 			"description": null,
 			"item": [
@@ -59,51 +138,6 @@
 									"key": "Content-Type",
 									"value": "application/x-www-form-urlencoded"
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "authentication-refresh",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3ef30827-b3d6-4518-8dc5-afdc26a7681e",
-								"type": "text/javascript",
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"token\", jsonData.access_token);",
-									"pm.environment.set(\"refresh_token\", jsonData.refresh_token);"
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "grant_type=refresh_token&client_id={{clientid}}&refresh_token={{refresh_token}}&client_secret={{client_secret}}"
-						},
-						"url": {
-							"raw": "{{authurl}}/auth/realms/{{realm}}/protocol/openid-connect/token",
-							"host": [
-								"{{authurl}}"
-							],
-							"path": [
-								"auth",
-								"realms",
-								"{{realm}}",
-								"protocol",
-								"openid-connect",
-								"token"
 							]
 						}
 					},
