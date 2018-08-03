@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "e23a8b51-68e4-45eb-ad6b-68edc3ab357d",
-		"name": "namex-pipeline-dev",
+		"_postman_id": "1f35615a-9e59-4c8e-837f-59ae3b81f8b8",
+		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -365,7 +365,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965/analysis/1/conflicts?start=3&rows=35",
+							"raw": "{{url}}/api/v1/requests/NR 8765456/analysis/1/conflicts?start=3&rows=35",
 							"host": [
 								"{{url}}"
 							],
@@ -373,7 +373,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965",
+								"NR 8765456",
 								"analysis",
 								"1",
 								"conflicts"
@@ -463,7 +463,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965/analysis/1/histories?start=1&rows=32",
+							"raw": "{{url}}/api/v1/requests/NR 8765456/analysis/1/histories?start=1&rows=32",
 							"host": [
 								"{{url}}"
 							],
@@ -471,7 +471,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965",
+								"NR 8765456",
 								"analysis",
 								"1",
 								"histories"
@@ -559,7 +559,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965/analysis/1/trademarks?start=1&rows=32",
+							"raw": "{{url}}/api/v1/requests/NR 8765456/analysis/1/trademarks?start=1&rows=32",
 							"host": [
 								"{{url}}"
 							],
@@ -567,7 +567,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965",
+								"NR 8765456",
 								"analysis",
 								"1",
 								"trademarks"
@@ -716,7 +716,7 @@
 					"response": []
 				},
 				{
-					"name": "requests/NR 9222965-test",
+					"name": "requests/NR 8765456-test",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -779,7 +779,7 @@
 							"raw": "{\"state\": \"INPROGRESS\"}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965",
+							"raw": "{{url}}/api/v1/requests/NR 8765456",
 							"host": [
 								"{{url}}"
 							],
@@ -787,14 +787,14 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965"
+								"NR 8765456"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "requests/NR 9222965/names/1",
+					"name": "requests/NR 8765456/names/1",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -859,7 +859,7 @@
 							"raw": "{\"state\": \"A\"}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965/names/1",
+							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -867,7 +867,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965",
+								"NR 8765456",
 								"names",
 								"1"
 							]
@@ -876,7 +876,7 @@
 					"response": []
 				},
 				{
-					"name": "/requests/NR 9222965/names/1",
+					"name": "/requests/NR 8765456/names/1",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -947,7 +947,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965/names/1",
+							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -955,7 +955,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965",
+								"NR 8765456",
 								"names",
 								"1"
 							]
@@ -964,7 +964,7 @@
 					"response": []
 				},
 				{
-					"name": "requests/NR 9222965/names/1-test",
+					"name": "requests/NR 8765456/names/1-test",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1034,7 +1034,7 @@
 							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"R\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"PUT success\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965/names/1",
+							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -1042,7 +1042,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965",
+								"NR 8765456",
 								"names",
 								"1"
 							]
@@ -1051,7 +1051,7 @@
 					"response": []
 				},
 				{
-					"name": "/requests/NR 9222965/names/1 - test update",
+					"name": "/requests/NR 8765456/names/1 - test update",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1123,7 +1123,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965/names/1",
+							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -1131,7 +1131,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965",
+								"NR 8765456",
 								"names",
 								"1"
 							]
@@ -1140,7 +1140,7 @@
 					"response": []
 				},
 				{
-					"name": "requests/NR 9222965/names/1-reset",
+					"name": "requests/NR 8765456/names/1-reset",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1210,7 +1210,7 @@
 							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"NE\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"META GROWTH ENTERPRISES INC.\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965/names/1",
+							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -1218,7 +1218,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965",
+								"NR 8765456",
 								"names",
 								"1"
 							]
@@ -1227,12 +1227,12 @@
 					"response": []
 				},
 				{
-					"name": "/requests - put NR 9222965-test",
+					"name": "/requests - put NR 8765456-test",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "6a0f49da-3be0-4052-a31e-b0ee583c31a8",
+								"id": "6027683f-94a9-4675-8674-6b59c3e94135",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1266,7 +1266,11 @@
 									"",
 									"it(\"Should return updated changes in the body\", () => {",
 									"   response.body.additionalInfo.should.include(\"Name was previously put in for incorporation but it is actually for an extra-provincial registration\");",
-									"   response.body.names[0].name.should.include(\"BOOKED BY US Inc.\");",
+									"   for (var i=0; i<response.body.names.length;i++) {",
+									"       if (response.body.names[i].choice == 1) {",
+									"           response.body.names[i].name.should.include(\"BOOKED BY US Inc.\");",
+									"       }",
+									"   }",
 									"   response.body.natureBusinessInfo.should.include(\"fencing equipment supply\");",
 									"});"
 								]
@@ -1287,10 +1291,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"additionalInfo\": \"Name was previously put in for incorporation but it is actually for an extra-provincial registration\",\n    \"applicants\": \"\",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 16,\n    \"lastUpdate\": \"Thu, 02 Aug 2018 23:14:11 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"BOOKED BY US Inc.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"fencing equipment supply\",\n    \"nrNum\": \"NR 9222965\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 2,\n    \"submittedDate\": \"Mon, 09 Jul 2018 12:47:56 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": null,\n    \"xproJurisdiction\": \"ALBERTA\"\n}\n"
+							"raw": "{\n    \"additionalInfo\": \"Name was previously put in for incorporation but it is actually for an extra-provincial registration\",\n    \"applicants\": \"\",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 16,\n    \"lastUpdate\": \"Thu, 02 Aug 2018 23:14:11 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"BOOKED BY US Inc.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"fencing equipment supply\",\n    \"nrNum\": \"NR 8765456\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 2,\n    \"submittedDate\": \"Mon, 09 Jul 2018 12:47:56 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": null,\n    \"xproJurisdiction\": \"ALBERTA\"\n}\n"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965",
+							"raw": "{{url}}/api/v1/requests/NR 8765456",
 							"host": [
 								"{{url}}"
 							],
@@ -1298,14 +1302,14 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965"
+								"NR 8765456"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "requests/NR 9222965",
+					"name": "requests/NR 8765456",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1320,7 +1324,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6aa4d634-a1a9-4e4d-8f7b-d787ed145aea",
+								"id": "597a5cdc-2fc7-40f8-a48b-ba42d842a138",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1354,7 +1358,11 @@
 									"",
 									"it(\"Should return updated changes by previous PUT\", () => {",
 									"   response.body.additionalInfo.should.include(\"Name was previously put in for incorporation but it is actually for an extra-provincial registration\");",
-									"   response.body.names[0].name.should.include(\"BOOKED BY US Inc.\");",
+									"   for (var i=0; i<response.body.names.length;i++) {",
+									"       if (response.body.names[i].choice == 1) {",
+									"           response.body.names[i].name.should.include(\"BOOKED BY US Inc.\");",
+									"       }",
+									"   }",
 									"   response.body.natureBusinessInfo.should.include(\"fencing equipment supply\");",
 									"});"
 								]
@@ -1374,7 +1382,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965",
+							"raw": "{{url}}/api/v1/requests/NR 8765456",
 							"host": [
 								"{{url}}"
 							],
@@ -1382,19 +1390,19 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965"
+								"NR 8765456"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "/requests - put NR 9222965-reset",
+					"name": "/requests - put NR 8765456-reset",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "e6fe617b-152f-48b4-8ac1-46c095e0f3b8",
+								"id": "af3e9221-1787-4f83-a9c9-bd3f1458542b",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1427,12 +1435,10 @@
 									"});",
 									"",
 									"it(\"Should return old values for this NR\", () => {",
-									"   response.body.additionalInfo.should.include(\"**Resubmit (NR 2997198)**\");",
-									"   response.body.id.should.equal(16);",
-									"   response.body.names[0].choice.should.equal(1);",
-									"   response.body.names[0].name.should.include(\"META GROWTH ENTERPRISES INC.\");",
-									"   response.body.natureBusinessInfo.should.include(\"Operating medical cannabis clinics, offering educational materials relating to medical cannabis\");",
-									"   response.body.submitCount.should.equal(2);",
+									"   response.body.additionalInfo.should.include(\"NATURE OF BUS: ELECTRICAL/COMPUTER ENG CONSULTING INCORPORATED IN OREGON AS WAVE DYNAMICS, INC.\");",
+									"   response.body.id.should.equal(28163);",
+									"   response.body.submitCount.should.equal(1);",
+									"   response.body.state.should.include(\"HOLD\");",
 									"});"
 								]
 							}
@@ -1452,10 +1458,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"additionalInfo\": \"**Resubmit (NR 2997198)** \",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 16,\n    \"lastUpdate\": \"Wed, 01 Aug 2018 20:43:15 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"conflict1\": \"\",\n            \"conflict1_num\": \"\",\n            \"conflict2\": \"\",\n            \"conflict2_num\": \"\",\n            \"conflict3\": \"\",\n            \"conflict3_num\": \"\",\n            \"consumptionDate\": null,\n            \"decision_text\": \"\",\n            \"name\": \"META GROWTH ENTERPRISES INC.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"Operating medical cannabis clinics, offering educational materials relating to medical cannabis\",\n    \"nrNum\": \"NR 9222965\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"DRAFT\",\n    \"submitCount\": 2,\n    \"submittedDate\": \"Mon, 09 Jul 2018 13:31:48 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"nro_service_account\",\n    \"xproJurisdiction\": \"ALBERTA\"\n}"
+							"raw": "{\n    \"additionalInfo\": \"NATURE OF BUS: ELECTRICAL/COMPUTER ENG CONSULTING INCORPORATED IN OREGON AS WAVE DYNAMICS, INC.\",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"furnished\": \"N\",\n    \"id\": 28163,\n    \"lastUpdate\": \"Fri, 03 Aug 2018 17:12:35 GMT\",\n    \"names\": [\n        {\n            \"choice\": 2,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"WAVE DYNAMICS CONSULTING, INC.\",\n            \"state\": \"NE\"\n        },\n        {\n            \"choice\": 1,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"WAVE DYNAMICS, INC.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": null,\n    \"nrNum\": \"NR 8765456\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"HOLD\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Apr 2006 11:56:22 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"kial-ex\",\n    \"xproJurisdiction\": \"OREGON, USA\"\n}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 9222965",
+							"raw": "{{url}}/api/v1/requests/NR 8765456",
 							"host": [
 								"{{url}}"
 							],
@@ -1463,7 +1469,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 9222965"
+								"NR 8765456"
 							]
 						}
 					},
@@ -1491,7 +1497,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bb3728d4-038f-4235-94c5-ff0d1b6dd7dc",
+								"id": "83a689aa-9098-48ca-8733-a77146226507",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1537,7 +1543,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['activeUser','comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); "
@@ -1587,7 +1593,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "739f2467-058f-495d-bb7b-fff09130b617",
+								"id": "ee559bf9-ad8f-4218-b350-42f7608185e0",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1627,27 +1633,16 @@
 									"    });",
 									"});",
 									"",
-									"// isn't checking schema",
-									"//TODO fix the schema checking",
-									"const searchSchema = {",
-									"    \"title\": \"nameRequest\",",
-									"    \"type\": \"object\",",
-									"    \"properties\": {",
-									"        \"activeUser\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"furnished\": {",
-									"            \"type\": \"string\"",
-									"        }",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests;",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
+									"        });",
 									"    }",
-									" //   \"required\": [\"firstName\", \"lastName\"]",
-									"}",
-									"",
-									"// Test whether the response matches the schema",
-									"it('should match the search schema', () => {",
-									"//    var customerSchema = JSON.parse(environment.customerSchema));",
-									"    response.body.should.have.schema(searchSchema);",
-									"  });",
+									"}); ",
 									"",
 									"pm.test(\"Response echoes rows == 10\", () => {",
 									"    var jsonData = pm.response.json();",
@@ -1713,7 +1708,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d948f79d-f877-4637-9267-b7cec3f3fa81",
+								"id": "5c5c76c1-284d-43e5-9d67-46aec14082f4",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1759,7 +1754,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
@@ -1830,7 +1825,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "e42bbe4e-2f06-4c54-8c43-895c9989828a",
+								"id": "c7462150-862a-4c9e-aaa4-3cc64d9f8915",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1876,7 +1871,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
@@ -1946,7 +1941,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "464db94d-e3a7-48c7-b18e-689e6037c56d",
+								"id": "a5fca8a3-0b89-4939-aa01-594cf44f231f",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1992,7 +1987,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
@@ -2062,7 +2057,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "9c0e66aa-9023-4e33-bea0-ddb2ecbffad4",
+								"id": "04e97292-d13e-46c5-b5ca-54a454b89b32",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2108,7 +2103,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
@@ -2178,7 +2173,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "197e4342-e75b-428e-b55f-1b6938f1a88c",
+								"id": "90ceb1a5-da04-4713-9800-e2145ad10f88",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2224,7 +2219,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
@@ -2294,7 +2289,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3135b78d-a0ea-444b-afa0-85031a75fb17",
+								"id": "91b53957-dade-4174-913a-4121d3f2afd4",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2340,7 +2335,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
@@ -2410,7 +2405,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "00394b8e-be97-41fb-b809-4ea444762bf6",
+								"id": "ac5fa7b4-5247-440a-b6c5-e08e108f893c",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2456,7 +2451,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
@@ -2527,7 +2522,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ada2b41d-8f86-4b3f-af62-e84a661fcb60",
+								"id": "79ebb8fa-c1b7-46f4-90f5-83693a31f15d",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2573,7 +2568,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
@@ -2644,7 +2639,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "27b5f770-fb50-41e6-8c0a-5f67c37e9e51",
+								"id": "e5ebae99-b6b7-4ca5-9f37-3f2454c417d5",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2690,7 +2685,7 @@
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate']",
 									"        });",
 									"    }",
 									"}); ",
