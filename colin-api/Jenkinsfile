@@ -175,10 +175,8 @@ stage('API Test DEV') {
                 sh '''#!/bin/bash
                     echo BASEURL=$BASEURL
                     echo DEV_API_TEST_USER = $DEV_API_TEST_USER
-                    echo DEV_API_TEST_PASSWORD = $DEV_API_TEST_PASSWORD
                     echo DEV_API_TEST_AUTH_SERVER = $DEV_API_TEST_AUTH_SERVER
                     echo DEV_API_TEST_CLIENT_ID = $DEV_API_TEST_CLIENT_ID
-                    echo DEV_API_TEST_CLIENT_SECRET = $DEV_API_TEST_CLIENT_SECRET
                 '''
                 //input(message: "Verify Environment variables. Continue?")
                 checkout scm
