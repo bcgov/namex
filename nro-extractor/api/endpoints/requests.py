@@ -76,9 +76,7 @@ class NRORequest(Resource):
             return {"message": "Internal server error"}, 500
 
         finally:
-            current_app.logger.debug('finally called')
             if nro_session:
-                current_app.logger.debug('close engine')
                 nro_session.close()
 
         return {"message": "{nr} has been successfully copied".format(nr=nr_num)}, 200
