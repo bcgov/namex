@@ -27,8 +27,6 @@ def create_app(config=Config):
          Ref: http://flask.pocoo.org/docs/patterns/sqlalchemy/
         '''
         if hasattr(g, 'db_nro_session'):
-            current_app.logger.debug('removing db_nro_session')
             g.db_nro_session.close()
-            current_app.logger.debug('removed db_nro_session')
 
     return app
