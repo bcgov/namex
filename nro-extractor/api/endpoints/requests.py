@@ -1,6 +1,8 @@
 from flask_restplus import Namespace, Resource, fields
-from flask import request, jsonify, current_app
+from flask import request, jsonify, current_app, g
 from sqlalchemy import text
+from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.orm.scoping import scoped_session
 from api import db
 from namex.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name
 
@@ -31,27 +33,29 @@ class NRORequest(Resource):
         if not validNRFormat(nr_num):
             return {"message": "Valid NR format required - 'NR 9999999'"}, 400
 
+        nro_session = db.get_engine(bind='nro').connect()
+        g.db_nro_session = nro_session
+
         try:
 
-            sess = db.create_scoped_session()
-            engine = db.get_engine(bind='nro').contextual_connect()
-
-            existing_nr = sess.query(Request).filter_by(nrNum=nr_num).one_or_none()
-
+            existing_nr = Request.find_by_nr(nr_num)
             if existing_nr:
                 return {"message": "{nr} already exists in namex, unable to create a duplicate".format(nr=nr_num)}, 409
 
-            nr_header = get_nr_header(engine, nr_num)
-            current_app.logger.debug('nr_header: {}'.format(nr_header))
+            # get the header from NRO, if it's not there, bail
+            nr_header = get_nr_header(nro_session, nr_num)
             if not nr_header:
                 return {"message": "{nr} not found, unable to complete extraction to new system".format(nr=nr_num)}, 404
+            current_app.logger.debug('nr_header: {}'.format(nr_header))
 
-            nr_submitter = get_nr_submitter(engine, nr_header['request_id'])
-            nr_applicant = get_nr_requester(engine, nr_header['request_id'])
-            nr_ex_comments = get_exam_comments(engine, nr_header['request_id'])
-            nr_nwpat = get_nwpta(engine, nr_header['request_id'])
-            nr_names = get_names(engine, nr_header['request_id'])
+            # get all the request segments from NRO
+            nr_submitter = get_nr_submitter(nro_session, nr_header['request_id'])
+            nr_applicant = get_nr_requester(nro_session, nr_header['request_id'])
+            nr_ex_comments = get_exam_comments(nro_session, nr_header['request_id'])
+            nr_nwpat = get_nwpta(nro_session, nr_header['request_id'])
+            nr_names = get_names(nro_session, nr_header['request_id'])
 
+            # get the service account user to save BRO Requests
             user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
 
             #Create NR
@@ -63,25 +67,22 @@ class NRORequest(Resource):
             add_names(new_nr, nr_names)
 
             current_app.logger.debug('saving the {} graph to the database'.format(new_nr.nrNum))
-            sess.add(new_nr)
-            sess.commit()
-            current_app.logger.debug('saved {}'.format(new_nr.nrNum))
+            db.session.add(new_nr)
+            db.session.commit()
 
         except Exception as err:
             current_app.logger.error(err.with_traceback(None))
-            sess.rollback()
+            db.session.rollback()
             return {"message": "Internal server error"}, 500
 
         finally:
             current_app.logger.debug('finally called')
-            if sess:
-                current_app.logger.debug('close session')
-                sess.close()
-            if engine:
+            if nro_session:
                 current_app.logger.debug('close engine')
-                engine.close()
+                nro_session.close()
 
         return {"message": "{nr} has been successfully copied".format(nr=nr_num)}, 200
+
 
 def row_to_dict(row):
     return {key: value for (key, value) in row.items()}
@@ -102,7 +103,7 @@ def validNRFormat(nr):
     return True
 
 
-######### save stuff
+# ######## save stuff
 def add_nr_header(new_nr, nr_header, nr_submitter, user):
 
     NR_STATE={
@@ -237,6 +238,7 @@ def get_nr_header(engine, nr_num):
     )
     result = engine.execute(sql_nr.params(nr=nr_num), multi=True)
     row = result.fetchone()
+    result.close()
 
     #get main row
     if row:

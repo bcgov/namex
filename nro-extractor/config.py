@@ -13,7 +13,7 @@ class BaseConfig(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SQLALCHEMY_MAX_OVERFLOW = 40
+    SQLALCHEMY_MAX_OVERFLOW = 10
 
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_USERNAME', '')

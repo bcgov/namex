@@ -2,7 +2,7 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from flask import request, jsonify, g, current_app
+from flask import request, jsonify, g, current_app, flash, get_flashed_messages
 from flask_restplus import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
@@ -19,6 +19,7 @@ from namex.models import User, State, Comment
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
+from namex.nro_services import NROServicesError
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
@@ -75,42 +76,75 @@ class RequestsQueue(Resource):
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get():
+        """ Gets the oldest nr num, that is in DRAFT status
+        It then marks the NR as INPROGRESS, and assigns it to the
+
+        :Authorization: (JWT): valid JWT with the User.APPROVER role
+
+        :return: (str) (dict) (https status): 500, 404, or NR NUM, or NR NUM and a system alert in the dict
+        """
         if not jwt.validate_roles([User.APPROVER]):
             return jsonify({"message": "Error: You do not have access to the Name Request queue."}), 403
 
         try:
+            # GET existing or CREATE new user based on the JWT info
             user = User.find_by_jwtToken(g.jwt_oidc_token_info)
             current_app.logger.debug('finding user: {}'.format(g.jwt_oidc_token_info))
             if not user:
                 current_app.logger.debug('didnt find user, attempting to create new user from the JWT info')
                 user = User.create_from_jwtToken(g.jwt_oidc_token_info)
+
+            # get the next NR assigned to the User
             nr, new_assignment = RequestDAO.get_queued_oldest(user)
             current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
 
+            flash('{"code": "unable_to_get_request_state",'
+                  '"description": "Unable to get the current state of the NRO Request"}'
+                  , 'error')
+            # if it's a new assignment, then LOGICALLY lock the record in NRO
             if new_assignment:
 
-                nro_last_ts = nro.get_last_update_timestamp(nr.requestId)
-                nro.set_request_status_to_h(nr.nrNum, user.username)
-                if 'H' is not nro.get_current_request_state(nr.nrNum):
+                # get the last modification timestamp before we alter the record
+                # try:
+                #     nro_last_ts = nro.get_last_update_timestamp(nr.requestId)
+                # except NROServicesError as err:
+                #     nro_last_ts = None
+                #     flash(err.error, 'error')
+
+                current_app.logger.debug('set state to h')
+                try:
+                    nro.set_request_status_to_h(nr.nrNum, user.username)
+                except NROServicesError as err:
+                    flash(err.error, 'error')
+
+                current_app.logger.debug('get state')
+                try:
+                    nro_req_state = nro.get_current_request_state(nr.nrNum)
+                except NROServicesError as err:
+                    nro_req_state = None
+                    flash(err.error, 'error')
+                if 'H' is not nro_req_state:
+                    flash('{"code": "unable_to_get_nro_request_state",'
+                          '"description": "Unable to get the current state of the NRO Request"}'
+                          , 'error')
                     current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
-                    # TODO find out from business what the heck todo - bcgov/name-examination#702
 
-                if nro_last_ts != nr.nroLastUpdate:
+                nro_last_ts=None
+                current_app.logger.debug('update records')
+                if True or 'nro_last_ts' in locals() and nro_last_ts != nr.nroLastUpdate:
                     current_app.logger.debug('nro updated since namex was last updated')
-                    # TODO call nro-extractor
-
                     try:
                         data = {
                             'nameRequest': nr.nrNum
                         }
-                        url = 'https://namex-dev.pathfinder.gov.bc.ca/api/v1/nro-extract/nro-requests'
+                        url = current_app.config.get('NRO_EXTRACTOR_URI')
 
                         nro_req = urllib.request.Request(url,
                                                          data=json.dumps(data).encode('utf8'),
                                                          headers={'content-type': 'application/json'})
                         nro_req.get_method = lambda: 'POST'
                         nro_response = urllib.request.urlopen(nro_req).read()
-                        current_app.logger.debug('response from extractor: {}'.format(nro_response))
+                        current_app.logger.debug('response from extractor: {},{}'.format(nro_response, nro_response.state_code))
 
                     except Exception as err:
                         current_app.logger.error(err.with_traceback(None))
@@ -123,7 +157,7 @@ class RequestsQueue(Resource):
             current_app.logger.error(err)
             return jsonify({'message': 'There are no Name Requests to work on.'}), 404
 
-        return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
+        return jsonify(nameRequest='{}'.format(nr.nrNum), flash=get_flashed_messages(with_categories=True)), 200
 
 
 @cors_preflight('GET, POST')

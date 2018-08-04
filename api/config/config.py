@@ -15,9 +15,12 @@ CONFIGURATION = {
 class Config(object):
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+    SECRET_KEY = 'a secret'
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SOLR_BASE_URL=os.getenv('SOLR_BASE_URL', None)
+    SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
+    NRO_EXTRACTOR_URI = os.getenv('NRO_EXTRACTOR_URI', None)
 
     ALEMBIC_INI='migrations/alembic.ini'
 
