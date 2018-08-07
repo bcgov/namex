@@ -29,7 +29,7 @@ class Name(db.Model):
     NOT_EXAMINED = 'NE'
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'
-    CANCELED = 'CANCELED'
+    CONDITION = 'CONDITION'
 
     def as_dict(self):
         return {
