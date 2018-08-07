@@ -29,7 +29,7 @@ class NRORequest(Resource):
         :returns: (json): the NR of the request if 200
         :returns: 200, 403, 409, 500
         """
-        return self.transfer_NRO_records_to_NameX(update=False, *args, **kwargs)
+        return self.transfer_nro_records_to_namex(update=False, *args, **kwargs)
 
     @api.expect(a_request)
     def put(self, *args, **kwargs):
