@@ -38,6 +38,7 @@ class SolrQueries:
         if query_type not in SolrQueries.VALID_QUERIES:
             return None, 'Not a valid analysis type', 400
 
+        current_app.logger.debug('Solr Query - type:{qtype} - name:{name}'.format(qtype=query_type, name=parse.quote(name)))
         query = solr_base_url + SolrQueries.queries[query_type].format(
             start=start,
             rows=rows,
