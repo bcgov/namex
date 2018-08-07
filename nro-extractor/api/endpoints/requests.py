@@ -6,10 +6,12 @@ from sqlalchemy.orm.scoping import scoped_session
 from api import db
 from namex.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name
 
+import sys
+
 api = Namespace('nroRequests', description='Name Request System - extracts legacy NRs and puts them into the new system')
 
 
-@api.route('/nro-requests', methods=['POST', 'OPTIONS'])
+@api.route('/nro-requests', methods=['POST', 'PUT', 'OPTIONS'])
 @api.response(404, 'NR not found')
 class NRORequest(Resource):
     '''Expects a JSON:{"nameRequest": "NR 1234567"}
