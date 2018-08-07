@@ -84,6 +84,7 @@ class DocumentAnalysis(Resource):
             results, msg, code = RestrictedWords.get_restricted_words_conditions(content)
 
         else:
+            current_app.logger.debug('Solr Search: {}'.format(content))
             results, msg, code = SolrQueries.get_results(analysis.lower(), content, start=start, rows=rows)
 
         if code:
