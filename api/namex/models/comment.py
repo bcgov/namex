@@ -22,7 +22,7 @@ class Comment(db.Model):
     def as_dict(self):
         return {
             'id': self.id,
-            'examiner': self.examiner.username,
+            'examiner': 'unknown' if (self.examiner is None) else self.examiner.username,
             'comment': self.comment,
             'timestamp': self.timestamp
         }
