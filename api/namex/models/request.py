@@ -215,7 +215,6 @@ class RequestsHeaderSchema(ma.ModelSchema):
         # additional = ['stateCd']
         fields = ('requestTypeCd'
                  ,'priorityCd'
-                 ,'expirationDate'
                  ,'consentFlag'
                  ,'additionalInfo'
                  ,'natureBusinessInfo'
