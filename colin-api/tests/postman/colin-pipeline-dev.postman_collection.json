@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "36ffe902-3746-4bdd-9fe9-c1cffd86779a",
+		"_postman_id": "24360c57-5d61-4b7a-8fb1-85e3ccdecd66",
 		"name": "colin-pipeline-dev",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -263,7 +263,7 @@
 		},
 		{
 			"name": "corpDetails",
-			"description": "",
+			"description": null,
 			"item": [
 				{
 					"name": "corporations/A0003650 -xpro",
@@ -281,7 +281,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d5ba0437-d303-4298-91bc-708cb833eb0a",
+								"id": "f91c9a6f-fdfa-4707-a926-374e81a3d71c",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -326,7 +326,10 @@
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/A0003650",
 							"host": [
@@ -400,7 +403,10 @@
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/0022258",
 							"host": [
