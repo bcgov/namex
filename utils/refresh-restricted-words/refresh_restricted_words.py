@@ -47,6 +47,12 @@ with open('restricted_condition.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
     print('inserting conditions and word-condition cross-references...')
     for row in reader:
+        print(row['cnd_id'])
+
+        # if the word is not allowed but there are no client instructions in the spreadsheet, add default text
+        if row['allow_use'] == 'N' and row['Formatted Client Instructions (instructions)'] == "":
+            row['Formatted Client Instructions (instructions)'] = "Use of this term in a name is not permitted.";
+
         try:
             pg_cur.execute("insert into restricted_condition values ({}, '{}', '{}', '{}', '{}', '{}')".format(
                 row['cnd_id'],
@@ -61,7 +67,7 @@ with open('restricted_condition.csv', 'r') as csvfile:
             pg_conn.commit()
 
         except psycopg2.IntegrityError as e:
-            # duplicate ID
+            # duplicate ID - expected often due to format of spreadsheet from business
             pg_conn.rollback()
 
 
