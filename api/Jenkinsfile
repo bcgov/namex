@@ -158,11 +158,17 @@ containerTemplate(
 
 			// send msg to slack
 			def attachment = [:]
-			attachment.fallback = 'See build log for more details'
-			attachment.title = "NameX API Build ${BUILD_ID} OK! :heart: :tada:"
-			attachment.color = '#00FF00' // Lime Green
-			attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-			notifySlack("Dev Deploy", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", attachment)
+            attachment.fallback = "See build log for more details"
+            attachment.title = "NAMEX-API Build ${BUILD_ID} OK! :heart: :tada:"
+            attachment.color = "#00FF00" // Lime Green
+            attachment.text = "Changes applied:\n" + getChangeString() //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+            def details = [:]
+            details.type = "button"
+            details.text = "Details"
+            details.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-namex-api-pipeline/${BUILD_ID}"
+            details.short = false
+            attachment.actions = [details]
+			notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
 		}
 	}
 }
@@ -170,7 +176,7 @@ containerTemplate(
 
 stage('API Test DEV') {
     //every time a change is made in pod template the name must be changed too
-	podTemplate(label: 'nodejs-python3nodejs2', name: 'nodejs-python3nodejs2', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+	podTemplate(label: 'nodejs-python3nodejs3', name: 'nodejs-python3nodejs3', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
 		name: 'jnlp',
 		image: '172.50.0.2:5000/openshift/jenkins-slave-python3nodejs',
@@ -183,16 +189,16 @@ stage('API Test DEV') {
 		args: '${computer.jnlpmac} ${computer.name}',
 		envVars: [
             envVar(key:'BASEURL', value: "https://namex-dev.pathfinder.gov.bc.ca"),
-            secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets', secretKey: 'username'),
-            secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets', secretKey: 'password'),
-            secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets', secretKey: 'authurl'),
-            secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets', secretKey: 'clientid'),
-            secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'client_secret')
+            secretEnvVar(key: 'DEV_API_TEST_USER', secretName: 'apitest-secrets-dev', secretKey: 'username'),
+            secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets-dev', secretKey: 'password'),
+            secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets-dev', secretKey: 'authurl'),
+            secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets-dev', secretKey: 'clientid'),
+            secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-dev', secretKey: 'client_secret')
         ]
 	  )
 	])
 	{
-        node('nodejs-python3nodejs2') {
+        node('nodejs-python3nodejs3') {
             //the checkout is mandatory, otherwise functional test would fail
                 echo "checking out source"
                 echo "Build: ${BUILD_ID}"
@@ -210,17 +216,29 @@ stage('API Test DEV') {
 
                     try {
                         sh './node_modules/newman/bin/newman.js run ./namex-pipeline-dev.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET --global-var realm=nest -r cli,junit,html'
+                        def attachment = [:]
+                        attachment.fallback = "See build log for more details"
+                        attachment.title = "NAMEX-API-DEV newman tests PASSED! :white_check_mark:"
+                        attachment.color = "#00FF00" // lime green
+                        notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                    } catch (Exception e) {
+                        def attachment = [:]
+                        attachment.fallback = "See build log for more details"
+                        attachment.title = "NAMEX-API-DEV newman tests FAILED! :nauseated_face:"
+                        attachment.color = "danger" // red
+				        attachment.text = "- click _Details_ in build message above for more info" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+                        notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
                     } finally {
-                            junit 'newman/*.xml'
-                            publishHTML (target: [
-                                        allowMissing: false,
-                                        alwaysLinkToLastBuild: false,
-                                        keepAll: true,
-                                        reportDir: 'newman',
-                                        reportFiles: 'newman*.html',
-                                        reportName: "API Test Report"
-                                    ])
-                            stash includes: 'newman/*.xml', name: 'api-tests'
+                        junit 'newman/*.xml'
+                        publishHTML (target: [
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: false,
+                                    keepAll: true,
+                                    reportDir: 'newman',
+                                    reportFiles: 'newman*.html',
+                                    reportName: "API Test Report"
+                                ])
+                        stash includes: 'newman/*.xml', name: 'api-tests'
                     }
                 } // end dir
 		    } //end node
@@ -270,3 +288,78 @@ stage('deploy-test') {
 	  notifySlack("Test Deploy, changes:\n" + getChangeString(), "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", [])
   }
 }
+
+//Part 5 - Integration Testing API on test
+stage('API Test TEST') {
+    //every time a change is made in pod template the name must be changed too
+	podTemplate(label: 'nodejs-python3nodejs5', name: 'nodejs-python3nodejs5', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+	containerTemplate(
+		name: 'jnlp',
+		image: '172.50.0.2:5000/openshift/jenkins-slave-python3nodejs',
+		resourceRequestCpu: '500m',
+		resourceLimitCpu: '1000m',
+		resourceRequestMemory: '1Gi',
+		resourceLimitMemory: '2Gi',
+		workingDir: '/tmp',
+		command: '',
+		args: '${computer.jnlpmac} ${computer.name}',
+		envVars: [
+            envVar(key:'BASEURL', value: "https://namex-test.pathfinder.gov.bc.ca/api/v1/corporations"),
+            secretEnvVar(key: 'TEST_API_TEST_USER', secretName: 'apitest-secrets-test', secretKey: 'username'),
+            secretEnvVar(key: 'TEST_API_TEST_PASSWORD', secretName: 'apitest-secrets-test', secretKey: 'password'),
+            secretEnvVar(key: 'TEST_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets-test', secretKey: 'authurl'),
+            secretEnvVar(key: 'TEST_API_TEST_CLIENT_ID', secretName: 'apitest-secrets-test', secretKey: 'clientid'),
+            secretEnvVar(key: 'TEST_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-test', secretKey: 'client_secret')
+        ]
+	  )
+	])
+	{
+        node('nodejs-python3nodejs5') {
+        //the checkout is mandatory, otherwise functional test would fail
+            echo "checking out source"
+            echo "Build: ${BUILD_ID}"
+            sh '''#!/bin/bash
+                echo BASEURL=$BASEURL
+                echo TEST_API_TEST_USER = $TEST_API_TEST_USER
+                echo TEST_API_TEST_AUTH_SERVER = $TEST_API_TEST_AUTH_SERVER
+                echo TEST_API_TEST_CLIENT_ID = $TEST_API_TEST_CLIENT_ID
+            '''
+            //input(message: "Verify Environment variables. Continue?")
+            checkout scm
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                returnStdout: true).trim()
+            dir('api/tests/postman') {
+
+                sh 'npm install newman'
+
+                try {
+                    sh './node_modules/newman/bin/newman.js run ./namex-pipeline-test.postman_collection.json --global-var userid=$TEST_API_TEST_USER --global-var password=$TEST_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$TEST_API_TEST_AUTH_SERVER --global-var clientid=$TEST_API_TEST_CLIENT_ID --global-var client_secret=$TEST_API_TEST_CLIENT_SECRET --global-var realm=nest -r cli,junit,html'
+                    def attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NAMEX-API-TEST newman tests PASSED! :white_check_mark: :white_check_mark:"
+                    attachment.color = "#00FF00" // lime green
+                    notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                } catch (Exception e) {
+                    def attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NAMEX-API-TEST newman tests FAILED! :nauseated_face: :nauseated_face:"
+                    attachment.color = "danger" // red
+                    attachment.text = "- click _Details_ in build message above for more info" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+                    notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                } finally {
+                        junit 'newman/*.xml'
+                        publishHTML (target: [
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: false,
+                                    keepAll: true,
+                                    reportDir: 'newman',
+                                    reportFiles: 'newman*.html',
+                                    reportName: "API Test Report"
+                                ])
+                        stash includes: 'newman/*.xml', name: 'api-tests'
+                }
+            } // end dir
+        } //end node
+    } //end podTemplate
+} //end stage
