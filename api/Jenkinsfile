@@ -318,6 +318,7 @@ def abort = false;
         attachment.title = "NAMEX-API-TEST DEPLOYED :rocket:"
         attachment.color = "#00FF00" // Lime Green
         notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+      }
   }
 }
 
