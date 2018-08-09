@@ -290,7 +290,7 @@ podTemplate(label: zappodlabel, name: zappodlabel, serviceAccount: 'jenkins', cl
 stage('deploy-test') {
 def abort = false;
   timeout(time: 1, unit: 'DAYS') {
-      input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin'
+      input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit'
   }
   node('master') {
       SLACK_TOKEN = sh (
@@ -337,7 +337,7 @@ stage('API Test TEST') {
 		command: '',
 		args: '${computer.jnlpmac} ${computer.name}',
 		envVars: [
-            envVar(key:'BASEURL', value: "https://namex-test.pathfinder.gov.bc.ca/api/v1/corporations"),
+            envVar(key:'BASEURL', value: "https://namex-test.pathfinder.gov.bc.ca"),
             secretEnvVar(key: 'TEST_API_TEST_USER', secretName: 'apitest-secrets-test', secretKey: 'username'),
             secretEnvVar(key: 'TEST_API_TEST_PASSWORD', secretName: 'apitest-secrets-test', secretKey: 'password'),
             secretEnvVar(key: 'TEST_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets-test', secretKey: 'authurl'),
