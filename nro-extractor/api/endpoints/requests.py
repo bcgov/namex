@@ -93,6 +93,8 @@ class NRORequest(Resource):
             nr_nwpat = get_nwpta(nro_session, nr_header['request_id'])
             nr_names = get_names(nro_session, nr_header['request_id'])
 
+            current_app.logger.debug('completed all gets')
+
             # get the service account user to save BRO Requests
             user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
 
@@ -103,9 +105,12 @@ class NRORequest(Resource):
                 nr = Request()
 
             add_nr_header(nr, nr_header, nr_submitter, user, update)
-            add_applicant(nr, nr_applicant, update)
-            add_comments(nr, nr_ex_comments, update)
-            add_nwpta(nr, nr_nwpat, update)
+            if nr_applicant:
+                add_applicant(nr, nr_applicant, update)
+            if nr_ex_comments:
+                add_comments(nr, nr_ex_comments, update)
+            if nr_nwpat:
+                add_nwpta(nr, nr_nwpat, update)
             add_names(nr, nr_names, update)
 
             current_app.logger.debug('saving the {} graph to the database, updating?:{}'.format(nr.nrNum, update))
@@ -113,7 +118,7 @@ class NRORequest(Resource):
             db.session.commit()
 
         except Exception as err:
-            current_app.logger.error(err.with_traceback(None))
+            current_app.logger.error(err.with_traceback(err.__traceback__))
             db.session.rollback()
             return {"message": "Internal server error"}, 500
 
