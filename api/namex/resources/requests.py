@@ -134,6 +134,9 @@ class RequestsQueue(Resource):
                 if True or 'nro_last_ts' in locals() and nro_last_ts != nr.nroLastUpdate:
                     current_app.logger.debug('nro updated since namex was last updated')
                     try:
+                        # mark the NR as being updated
+                        nr.stateCd = State.NRO_UPDATING
+                        nr.save_to_db()
                         data = {
                             'nameRequest': nr.nrNum
                         }
@@ -142,12 +145,16 @@ class RequestsQueue(Resource):
                         nro_req = urllib.request.Request(url,
                                                          data=json.dumps(data).encode('utf8'),
                                                          headers={'content-type': 'application/json'})
-                        nro_req.get_method = lambda: 'POST'
+                        nro_req.get_method = lambda: 'PUT'
                         nro_response = urllib.request.urlopen(nro_req).read()
                         current_app.logger.debug('response from extractor: {},{}'.format(nro_response, nro_response.state_code))
 
                     except Exception as err:
                         current_app.logger.error(err.with_traceback(None))
+                    finally:
+                        # set the NR back to INPROGRESS
+                        nr.stateCd = State.INPROGRESS
+                        nr.save_to_db()
 
         except SQLAlchemyError as err:
             # TODO should put some span trace on the error message

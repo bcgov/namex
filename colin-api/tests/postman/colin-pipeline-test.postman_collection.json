@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "48014dd7-08d9-411b-8d0c-61373f2c57f8",
+		"_postman_id": "8c5146cb-035e-4383-8307-4df016d50710",
 		"name": "colin-pipeline-test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -263,7 +263,7 @@
 		},
 		{
 			"name": "corpDetails",
-			"description": "",
+			"description": null,
 			"item": [
 				{
 					"name": "corporations/A0003650 -xpro",
@@ -326,7 +326,10 @@
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/A0003650",
 							"host": [
@@ -400,7 +403,10 @@
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/0022258",
 							"host": [

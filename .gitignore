@@ -55,7 +55,8 @@ selenium-debug.log
 # Python
 # ####################
 __pycache__
-venv
+/**/venv
+/**/build
 
 # Editor directories and files
 .idea

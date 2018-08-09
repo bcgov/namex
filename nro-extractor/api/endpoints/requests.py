@@ -69,10 +69,21 @@ class NRORequest(Resource):
             if existing_nr and not update:
                 return {"message": "{nr} already exists in namex, unable to create a duplicate".format(nr=nr_num)}, 409
 
+            if update and not existing_nr:
+                return {"message": "{nr} doesn't exist in namex, unable to update it.".format(nr=nr_num)}, 409
+
             # get the header from NRO, if it's not there, bail
             nr_header = get_nr_header(nro_session, nr_num)
             if not nr_header:
                 return {"message": "{nr} not found in NRO, unable to complete extraction to new system".format(nr=nr_num)}, 404
+
+            # if this is an UPDATE
+            #              and the NR in NRO is set to H status
+            #              and the NR in Namex is NOT set to NRO_UPDATING
+            # then bail and do nothing
+            if update and nr_header['state_type_cd'] is 'H' and existing_nr.stateCd is not State.NRO_UPDATING:
+                return {"message": "Unable to update {nr}".format(nr=nr_num)}, 404
+
             current_app.logger.debug('nr_header: {}'.format(nr_header))
 
             # get all the request segments from NRO
