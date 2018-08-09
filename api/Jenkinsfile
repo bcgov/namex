@@ -268,24 +268,56 @@ podTemplate(label: zappodlabel, name: zappodlabel, serviceAccount: 'jenkins', cl
           def retVal = sh returnStatus: true, script: '/zap/zap-baseline.py -r baseline.html -t http://namex-api-dev.pathfinder.gov.bc.ca/'
           // publishHTML([allowMissing: false`, alwaysLinkToLastBuild: false, keepAll: true, reportDir: '/zap/wrk', reportFiles: 'baseline.html', reportName: 'ZAP Baseline Scan', reportTitles: 'ZAP Baseline Scan'])
           echo "Return value is: ${retVal}"
+          SLACK_TOKEN = sh (
+                    script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+          def attachment = [:]
+          attachment.title = "NAMEX-API ready for DEPLOY to TEST"
+          attachment.color = "#ffff00" // yellow
+          def input = [:]
+          input.type = "button"
+          input.text = "Proceed/Abort?"
+          input.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-namex-api-pipeline/${BUILD_ID}/input"
+          input.short = false
+
+          attachment.actions = [input]
+          notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
         }
      }
   }
 
 // Part 4 - deploy to test
 stage('deploy-test') {
+def abort = false;
   timeout(time: 1, unit: 'DAYS') {
       input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin'
   }
   node('master') {
-	  echo ">>> Tag ${TST_TAG_NAME} with ${TST_BCK_TAG_NAME}"
-	  openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_BCK_TAG_NAME, srcStream: IMAGE_NAME, srcTag: TST_TAG_NAME
-          echo ">>> Tag ${IMAGE_HASH} with ${TST_TAG_NAME}"
-	  openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_TAG_NAME, srcStream: IMAGE_NAME, srcTag: "${IMAGE_HASH}"
-          sleep 5
-	  openshiftVerifyDeployment depCfg: TST_DEPLOYMENT_NAME, namespace: TST_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
-	  echo ">>>> Deployment Complete"
-	  notifySlack("Test Deploy, changes:\n" + getChangeString(), "#builds", "https://hooks.slack.com/services/${SLACK_TOKEN}", [])
+      SLACK_TOKEN = sh (
+                    script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+      if (abort) {
+        def attachment = [:]
+        attachment.fallback = "See build log for more details"
+        attachment.title = "NAMEX-API-TEST ABORTED :boom:"
+        attachment.color = "danger" // red
+        notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+        echo ">>>> Deployment Aborted"
+        currentBuild.result = 'ABORTED'
+        error('Aborted')
+      } else {
+        echo ">>> Tag ${TST_TAG_NAME} with ${TST_BCK_TAG_NAME}"
+        openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_BCK_TAG_NAME, srcStream: IMAGE_NAME, srcTag: TST_TAG_NAME
+        echo ">>> Tag ${IMAGE_HASH} with ${TST_TAG_NAME}"
+        openshiftTag destStream: IMAGE_NAME, verbose: 'false', destTag: TST_TAG_NAME, srcStream: IMAGE_NAME, srcTag: "${IMAGE_HASH}"
+        sleep 5
+        openshiftVerifyDeployment depCfg: TST_DEPLOYMENT_NAME, namespace: TST_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
+        echo ">>>> Deployment Complete"
+        def attachment = [:]
+        attachment.fallback = "See build log for more details"
+        attachment.title = "NAMEX-API-TEST DEPLOYED :rocket:"
+        attachment.color = "#00FF00" // Lime Green
+        notifySlack("namex-api", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
   }
 }
 
