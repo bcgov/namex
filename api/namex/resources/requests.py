@@ -510,16 +510,7 @@ class Request(Resource):
             request_header_schema.load(json_input, instance=nr_d, partial=True)
             nr_d.stateCd = state
             nr_d.userId = user.id
-            nr_d.additionalInfo = json_input.get('additionalInfo', None)
-            nr_d.consentFlag = json_input.get('consentFlag', None)
-            nr_d.expirationDate = json_input.get('expirationDate', None)
-            nr_d.furnished = json_input.get('furnished', 'N')
-            nr_d.natureBusinessInfo = json_input.get('natureBusinessInfo', None)
-            nr_d.priorityCd = json_input.get('priorityCd', 'N')
-            nr_d.submitCount = json_input.get('submitCount', 1)
-            nr_d.submittedDate = json_input.get('submittedDate', None)
-            nr_d.xproJurisdiction = json_input.get('xproJurisdiction', None)
-            # get previous request ID from previous NR number
+
             try:
                 previousNr = json_input['previousNr']
                 nr_d.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
