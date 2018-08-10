@@ -23,7 +23,7 @@ from namex.nro_services import NROServicesError
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
-from datetime import datetime
+import datetime
 import json
 import urllib
 
@@ -478,9 +478,9 @@ class Request(Resource):
 
             # TODO: add in error checking/handling for dates
             if json_input['expirationDate']:
-                json_input['expirationDate'] = datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
+                json_input['expirationDate'] = datetime.datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
             if json_input['submittedDate']:
-                json_input['submittedDate'] = datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
+                json_input['submittedDate'] = datetime.datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
             if not nr_d:
                 return jsonify(message='NR not found'), 404
