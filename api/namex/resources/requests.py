@@ -23,7 +23,7 @@ from namex.nro_services import NROServicesError
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
-import datetime
+from datetime import datetime
 import json
 import urllib
 
@@ -464,6 +464,13 @@ class Request(Resource):
 
         try:
             nr_d = RequestDAO.find_by_nr(nr)
+
+            # TODO: add in error checking/handling for dates
+            if json_input['expirationDate']:
+                json_input['expirationDate'] = datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
+            if json_input['submittedDate']:
+                json_input['submittedDate'] = datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
+
             if not nr_d:
                 return jsonify(message='NR not found'), 404
 
@@ -473,36 +480,37 @@ class Request(Resource):
 
             #NR is in a final state, but maybe the user wants to pull it back for corrections
             if nr_d.stateCd in State.COMPLETED_STATE:
-                if not jwt.validate_roles([User.APPROVER]):
-                    return jsonify(message='Only Names Examiners can alter completed Requests'), 401
-
-                if nr_d.furnished == RequestDAO.REQUEST_FURNISHED:
-                    return jsonify(message='Request has already been furnished and cannot be altered'), 409
-
-                if state != State.INPROGRESS:
-                    return jsonify(message='Completed unfurnished Requests can only be set to an INPROGRESS state'), 400
-
-            elif state in State.RELEASE_STATES:
-                if nr_d.userId != user.id or nr_d.stateCd != State.INPROGRESS:
+                if not jwt.validate_roles([User.EDITOR]):
                     return jsonify(
-                        message='The Request must be INPROGRESS and assigned to you before you can change it.'
+                        message='Only Names Examiners can alter completed Requests'
                     ), 401
-            elif nr_d.userId != user.id or nr_d.stateCd != State.INPROGRESS:
-                return jsonify(
-                    message='The Request must be INPROGRESS and assigned to you before you can change it.'
-                ), 401
+                if state != State.INPROGRESS:
+                    return jsonify(
+                        message='Completed unfurnished Requests can only be set to an INPROGRESS state'
+                    ), 400
+            # elif state in State.RELEASE_STATES:
+            #     if nr_d.userId != user.id or nr_d.stateCd != State.INPROGRESS:
+            #         return jsonify(
+            #               message='The Request must be INPROGRESS and assigned to you before you can change it.'
+            #         ), 401
+            # elif nr_d.userId != user.id or nr_d.stateCd != State.INPROGRESS:
+            #     return jsonify(
+            #         message='The Request must be INPROGRESS and assigned to you before you can change it.'
+            #     ), 401
 
             ### REQUEST HEADER ###
 
             # update request header
             errors = request_header_schema.validate(json_input, partial=True)
+            errors.pop('submittedDate', None)
+            errors.pop('expirationDate', None)
+            errors.pop('previousNr', None)
             if errors:
                 return jsonify(errors), 400
             request_header_schema.load(json_input, instance=nr_d, partial=True)
             nr_d.stateCd = state
             nr_d.userId = user.id
 
-            # get previous request ID from previous NR number
             try:
                 previousNr = json_input['previousNr']
                 nr_d.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
@@ -514,31 +522,34 @@ class Request(Resource):
             ### END request header ###
 
             ### APPLICANTS ###
-
+            # TODO: applicants not updating properly -- needs fix
             applicants_d = nr_d.applicants.one_or_none()
             if applicants_d:
                 appl = json_input.get('applicants', None)
                 if appl:
-                    errm = applicant_schema.validate(appl, partial=False)
+                    errm = applicant_schema.validate(appl, partial=True)
+                    errm.pop('firstName', None)
                     if errm:
                         return jsonify(errm)
 
-                    applicant_schema.load(appl, instance=applicants_d, partial=False)
+                    applicant_schema.load(appl, instance=applicants_d, partial=True)
                 else:
                     applicants_d.delete_from_db()
 
             ### END applicants ###
 
             ### NAMES ###
+            # TODO: set consumptionDate not working -- breaks changing name values
             for nrd_name in nr_d.names.all():
                 for in_name in json_input['names']:
-                    if nrd_name.choice == in_name['choice']:
 
+                    if nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
                             return jsonify(errors), 400
 
                         names_schema.load(in_name, instance=nrd_name, partial=False)
+
             ### END names ###
 
             ### COMMENTS ###

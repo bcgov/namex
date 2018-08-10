@@ -213,13 +213,20 @@ class RequestsHeaderSchema(ma.ModelSchema):
         model = Request
         # sqla_session = db.scoped_session
         # additional = ['stateCd']
-        fields = ('requestTypeCd'
-                 ,'priorityCd'
+        fields = ('additionalInfo'
                  ,'consentFlag'
-                 ,'additionalInfo'
-                 ,'natureBusinessInfo'
-                 ,'xproJurisdiction'
-                 ,'furnished'
-                 ,'nroLastUpdate'
                  ,'corpNum'
+                 ,'expirationDate'
+                 ,'furnished'
+                 ,'id'
+                 ,'natureBusinessInfo'
+                 ,'nrNum'
+                 ,'nroLastUpdate'
+                 ,'previousNr'
+                 ,'priorityCd'
+                 ,'requestTypeCd'
+                 ,'stateCd'
+                 ,'submitCount'
+                 ,'submittedDate'
+                 ,'xproJurisdiction'
                  )
