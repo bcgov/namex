@@ -1,0 +1,387 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata":
+  {
+    "name": "${NAME}-deployment-template"
+  },
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}",
+        "labels":
+        {
+          "app": "${NAME}"
+        }
+      },
+      "spec":
+      {
+        "ports": [
+          {
+            "name": "8983-tcp",
+            "protocol": "TCP",
+            "port": 8983,
+            "targetPort": 8983
+          }
+        ],
+        "selector":
+        {
+          "app": "${NAME}",
+          "deploymentconfig": "${NAME}"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}",
+        "annotations": {
+          "haproxy.router.openshift.io/ip_whitelist": "142.22.0.0/16 142.23.0.0/16 142.24.0.0/16 142.25.0.0/16 142.26.0.0/16 142.27.0.0/16 142.28.0.0/16 142.29.0.0/16 142.30.0.0/16 142.31.0.0/16 142.32.0.0/16 142.33.0.0/16 142.34.0.0/16 142.35.0.0/16 142.36.0.0/16"
+        }
+      },
+      "spec":
+      {
+        "host": "${APPLICATION_HOSTNAME}.${APPLICATION_DOMAIN}",
+        "path": "/solr",
+        "tls":
+        {
+          "insecureEdgeTerminationPolicy": "Redirect",
+          "termination": "edge"
+        },
+        "to":
+        {
+          "kind": "Service",
+          "name": "${NAME}",
+          "weight": 100
+        },
+        "port":
+        {
+          "targetPort": "8983-tcp"
+        },
+        "wildcardPolicy": "None"
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}-cores",
+        "annotations": {
+        },
+        "labels":
+        {
+          "app": "${NAME}",
+          "template": "${NAME}-deployment-template"
+        }
+      },
+      "spec":
+      {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources":
+        {
+          "requests":
+          {
+            "storage": "${CORES_PV_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}-trademarks",
+        "labels":
+        {
+          "app": "${NAME}",
+          "template": "${NAME}-deployment-template"
+        }
+      },
+      "spec":
+      {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources":
+        {
+          "requests":
+          {
+            "storage": "${TRADEMARKS_PV_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${NAME}",
+        "labels":
+        {
+          "app": "${NAME}"
+        }
+      },
+      "spec":
+      {
+        "strategy":
+        {
+          "type": "Recreate",
+          "rollingParams":
+          {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 600,
+            "maxUnavailable": "25%",
+            "maxSurge": "25%"
+          },
+          "activeDeadlineSeconds": 21600
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "ImageChange",
+            "imageChangeParams":
+            {
+              "automatic": true,
+              "containerNames": [
+                "${NAME}"
+              ],
+              "from":
+              {
+                "kind": "ImageStreamTag",
+                "namespace": "${IMAGE_NAMESPACE}",
+                "name": "${IMAGE_NAME}:${TAG_NAME}"
+              }
+            }
+          }
+        ],
+        "replicas": 1,
+        "test": false,
+        "selector":
+        {
+          "app": "${NAME}",
+          "deploymentconfig": "${NAME}"
+        },
+        "template":
+        {
+          "metadata":
+          {
+            "labels":
+            {
+              "app": "${NAME}",
+              "deploymentconfig": "${NAME}"
+            }
+          },
+          "spec":
+          {
+            "volumes": [
+              {
+                "name": "${NAME}-cores",
+                "persistentVolumeClaim":
+                {
+                  "claimName": "${NAME}-cores"
+                }
+              },
+              {
+                "name": "${NAME}-trademarks",
+                "persistentVolumeClaim":
+                {
+                  "claimName": "${NAME}-trademarks"
+                }
+              },
+              {
+                "name": "solr-data-config-names-gxmla",
+                "configMap": {
+                  "name": "solr-data-config-names",
+                  "items": [
+                    {"key": "solr-data-config.xml",
+                     "path": "solr-data-config.xml"}
+
+                  ],
+                  "defaultMode": 420
+                }
+              },
+                {
+                  "name": "solr-data-config-possible-conflicts-m4sdc",
+                  "configMap": {
+                    "name": "solr-data-config-possible-conflicts",
+                    "items": [
+                      {"key": "solr-data-config.xml",
+                      "path": "solr-data-config.xml"}
+                    ],
+                    "defaultMode": 420
+                  }
+                },
+                {
+                  "name": "solr-data-config-trademarks-kzj9j",
+                  "configMap": {
+                    "name": "solr-data-config-trademarks",
+                    "items": [
+                      {"key": "solr-data-config.xml",
+                      "path": "solr-data-config.xml"}
+                    ],
+                    "defaultMode": 420
+                  }
+              }
+            ],
+            "containers": [
+              {
+                "name": "${NAME}",
+                "image": "",
+                "ports": [
+                  {
+                    "containerPort": 8983,
+                    "protocol": "TCP"
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "${NAME}-cores",
+                    "mountPath": "${CORES_MOUNT_PATH}"
+                  },
+                  {
+                    "name": "${NAME}-trademarks",
+                    "mountPath": "${TRADEMARKS_MOUNT_PATH}"
+                  },
+                  {
+                    "name": "solr-data-config-names-gxmla",
+                    "mountPath": "/opt/solr/server/solr/configsets/names/conf/solr-data-config.xml",
+                    "subPath": "solr-data-config.xml"
+                  },
+                  {
+                    "name": "solr-data-config-possible-conflicts-m4sdc",
+                    "mountPath": "/opt/solr/server/solr/configsets/possible.conflicts/conf/solr-data-config.xml",
+                    "subPath": "solr-data-config.xml"
+                  },
+                  {
+                    "name": "solr-data-config-trademarks-kzj9j",
+                    "mountPath": "/opt/solr/server/solr/configsets/trademarks/conf/solr-data-config.xml",
+                    "subPath": "solr-data-config.xml"
+                  }
+                ],
+                "livenessProbe": {
+                    "httpGet": {
+                        "path": "/solr/names/admin/ping",
+                        "port": 8983,
+                        "scheme": "HTTP"
+                    },
+                    "initialDelaySeconds": 90,
+                    "timeoutSeconds": 10,
+                    "periodSeconds": 120,
+                    "successThreshold": 1,
+                    "failureThreshold": 3
+                },
+                "env": [
+                  {
+                    "name": "CORE_NAME",
+                    "value": "${CORE_NAME}"
+                  }
+                ],
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "imagePullPolicy": "Always"
+              }
+            ],
+            "restartPolicy": "Always",
+            "terminationGracePeriodSeconds": 30,
+            "dnsPolicy": "ClusterFirst",
+            "securityContext": {},
+            "schedulerName": "default-scheduler"
+          }
+        }
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the resources defined in this template.",
+      "required": true,
+      "value": "solr"
+    },
+    {
+      "name": "IMAGE_NAMESPACE",
+      "displayName": "Image Namespace",
+      "required": true,
+      "description": "The namespace of the OpenShift project containing the imagestream for the application.",
+      "value": "solr"
+    },
+    {
+      "name": "IMAGE_NAME",
+      "displayName": "Image Name",
+      "required": true,
+      "description": "The name of the source imagestream for the application.",
+      "value": "solr"
+    },
+    {
+      "name": "TAG_NAME",
+      "displayName": "Environment TAG name",
+      "description": "The TAG name for this environment, e.g., dev,test or prod",
+      "value": "dev",
+      "required": true
+    },
+    {
+      "name": "APPLICATION_DOMAIN",
+      "displayName": "Application Hostname",
+      "description": "The exposed hostname that will route to the application service, if left blank a value will be defaulted.",
+      "value": ""
+    },
+    {
+      "name": "CORES_PV_SIZE",
+      "displayName": "Cores Persistent Volume Size",
+      "description": "The size of the persistent volume housing the cores , e.g. 512Mi, 1Gi, 2Gi.",
+      "required": true,
+      "value": "1Gi"
+    },
+    {
+      "name": "TRADEMARKS_PV_SIZE",
+      "displayName": "Trademarks Persistent Volume Size",
+      "description": "The size of the persistent volume housing the trademarks files , e.g. 512Mi, 1Gi, 2Gi.",
+      "required": true,
+      "value": "1Gi"
+    },
+    {
+      "name": "CORES_MOUNT_PATH",
+      "displayName": "Cores Mount Path",
+      "description": "The path to mount the cores persistent volume.",
+      "required": true,
+      "value": "/opt/solr/server/solr/mycores"
+    },
+    {
+      "name": "TRADEMARKS_MOUNT_PATH",
+      "displayName": "Trademarks Mount Path",
+      "description": "The path to mount the trademarks persistent volume.",
+      "required": true,
+      "value": "/opt/solr/trademarks_data"
+    },
+    {
+      "name": "CORE_NAME",
+      "displayName": "Core Name",
+      "description": "The name of the Solr core configuration to load.",
+      "required": true,
+      "value": ""
+    },
+    {
+      "name": "APPLICATION_HOSTNAME",
+      "displayName": "Application Host Name",
+      "description": "The hostname part of the full path to the solr service.",
+      "required": true,
+      "value": "namex-solr-dev"
+    }
+  ]
+}

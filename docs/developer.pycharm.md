@@ -1,0 +1,135 @@
+## Workflow
+
+![Git workflow](img/namex-gitflow.png)
+
+### 1 Fork in the GitHub
+
+1. Visit https://github.com/bcgov/namex
+2. Click `Fork` button (top right)
+
+### 2 Clone Fork to your Workstation
+
+Create your clone in PyCharm (these notes were written for PyCharm 2018.2 on Windows 7):
+
+1. If a project is open, go to `VCS` >  `Check out from Version Control` > `Git`.
+2. If all projects are closed, click the `Check out from Version Control` item under the logo, then choose `Git`.
+
+Enter `https://github.com/<username>/namex` as the URL, and then click the `Clone` button.
+
+Go to `VCS` > `Git` > `Remotes...`, then click the + to add the upstream with Name of `upstream` and URL of
+`https://github.com/bcgov/namex`.
+
+We never want to push to upstream master, so open a command shell and run:
+ 
+```
+C:\<path>\namex> git remote set-url --push upstream no_push
+C:\<path>\namex> git remote -v
+origin  https://github.com/<username>/namex (fetch)
+origin  https://github.com/<username>/namex (push)
+upstream        https://github.com/bcgov/namex (fetch)
+upstream        no_push (push)
+```
+
+### 3 Branch
+
+To get your local master up to date go to `VCS` > `Update Project`, select `Rebase` and `Using Stash`.
+
+
+```sh
+cd $working_dir/namex 
+git fetch upstream
+git checkout master
+git rebase upstream/master go
+```
+
+Branch from it:
+```sh
+git checkout -b myfeature
+```
+
+#### Test
+Make sure to add tests for your feature and that they all pass.
+ 
+### 4 Keep your branch in sync
+
+```sh
+# While on your myfeature branch
+git fetch upstream
+git rebase upstream/master
+```
+
+Please don't use `git pull` instead of the above `fetch` / `rebase`. `git pull`
+does a merge, which leaves merge commits. These make the commit history messy
+and violate the principle that commits ought to be individually understandable
+and useful (see below). You can also consider changing your `.git/config` file via
+`git config branch.autoSetupRebase always` to change the behavior of `git pull`.
+
+### 5 Commit
+
+Commit your changes.
+
+```sh
+git commit -m "a useful comment including the issue #"
+```
+Likely you go back and edit/build/test some more then `commit --amend`
+in a few cycles.
+
+### 6 Push
+
+When ready to review (or just to establish an offsite backup or your work), push your branch to your fork on
+`github.com` by going to `VCS` > `Git` > `Push...`, then clicking the `Push` button.
+
+### 7 Create a Pull Request
+
+1. Visit your fork at `https://github.com/<username>/namex` and ensure that you are ahead of the master.
+2. Click the `New Pull Request` button.
+3. Ensure that the changed files are correct.
+4. Click the `Create pull request` button.
+
+
+#### Get a code review
+
+Once your pull request has been opened it will be assigned to one or more
+reviewers.  Those reviewers will do a thorough code review, looking for
+correctness, bugs, opportunities for improvement, documentation and comments,
+and style.
+
+Commit changes made in response to review comments to the same branch on your
+fork.
+
+Very small PRs are easy to review.  Very large PRs are very difficult to review.
+At the assigned reviewer's discretion, a PR may be switched to use
+[Reviewable](https://reviewable.k8s.io) instead.  Once a PR is switched to
+Reviewable, please ONLY send or reply to comments through Reviewable.  Mixing
+code review tools can be very confusing.
+
+#### Squash and Merge
+
+Upon merge (by either you or your reviewer), all commits left on the review
+branch should represent meaningful milestones or units of work.  Use commits to
+add clarity to the development and review process.
+
+Before merging a PR, squash any _fix review feedback_, _typo_, _merged_, and
+_rebased_ sorts of commits.
+
+It is not imperative that every commit in a PR compile and pass tests
+independently, but it is worth striving for.
+
+In particular, if you happened to have used `git merge` and have merge
+commits, please squash those away: they do not meet the above test.
+
+A nifty way to manage the commits in your PR is to do an [interactive
+rebase](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History),
+which will let you tell git what to do with every commit:
+
+```sh
+git fetch upstream
+git rebase -i upstream/master
+```
+
+For mass automated fixups (e.g. automated doc formatting), use one or more
+commits for the changes to tooling and a final commit to apply the fixup en
+masse. This makes reviews easier.
+
+## attribution
+this page heavily borrowed from the kubernetes.io project - thx from our Registries team!!

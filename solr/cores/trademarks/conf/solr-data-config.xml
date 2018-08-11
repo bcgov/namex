@@ -1,0 +1,14 @@
+<dataConfig>
+    <dataSource name="trademarks" type="FileDataSource"/>
+
+    <document>
+        <entity name="f" processor="FileListEntityProcessor" baseDir="/app/solr-6.6.3/server/solr/trademarks/data" fileName=".*xml" recursive="true" rootEntity="true" dataSource="trademarks">
+            <entity name="trademark-import" processor="XPathEntityProcessor" forEach="/TrademarkApplication" url="${f.fileAbsolutePath}">
+                <field column="application_number" xpath="/TrademarkApplication/TrademarkBag/Trademark/ApplicationNumber/ST13ApplicationNumber"/>
+                <field column="name" xpath="/TrademarkApplication/TrademarkBag/Trademark/MarkFeatureDescription"/>
+                <field column="description" xpath="/TrademarkApplication/TrademarkBag/Trademark/GoodsServicesBag/GoodsServices/ClassDescriptionBag/ClassDescription/GoodsServicesDescriptionText"/>
+                <field column="status" xpath="/TrademarkApplication/TrademarkBag/Trademark/MarkCurrentStatusCode"/>
+            </entity>
+        </entity>
+    </document>
+</dataConfig>
