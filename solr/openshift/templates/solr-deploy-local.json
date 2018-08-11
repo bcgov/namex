@@ -75,7 +75,6 @@
       {
         "name": "${NAME}-cores",
         "annotations": {
-          "volume.beta.kubernetes.io/storage-class": "gluster-block"
         },
         "labels":
         {
