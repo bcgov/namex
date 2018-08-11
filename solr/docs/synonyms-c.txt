@@ -1226,6 +1226,6 @@ technology, compute,computer =>technology,compute,computer
 4 th, fourth=>4th, fourth
 5 th, fifth=>5th, fifth
 6 th, sixth=>6th, sixth
-7 th, seventh, 7th, seventh
-8 th, eighth, 8th, eighth
-9 th, nineth, 9th, nineth
+7 th, seventh=>7th, seventh
+8 th, eighth=>8th, eighth
+9 th, nineth=>9th, nineth

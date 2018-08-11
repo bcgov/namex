@@ -6,13 +6,13 @@ This documentation describes the process used when recreating the `solr` build a
 OpenShift project. Before creating these Solr artifacts, the `namex-solr-base` image must exist in the OpenShift
 project `servicebc-ne-tools`. See the `bcgov/namex-solr` on GitHub for details if this image does not exist.
 
-This documentation assumes that `oc.exe` from OpenShift Origin Client Tools has been installed and that the user has
-an account on the Pathfinder OpenShift cluster.
+This documentation assumes that `oc.exe` from OpenShift Origin Client Tools has been installed and that the user is
+either running Minishift locally or has an account on the Pathfinder OpenShift cluster.
 
 ## Log in to OpenShift
 
-Log into the [OpenShift Web Console](https://console.pathfinder.gov.bc.ca:8443/console). Click the drop-down for your
-username in the upper-right corner, and select `Copy Login Command`. Paste the command into your shell:
+Log into the `OpenShift Web Console`. Click the drop-down for your username in the upper-right corner, and select
+`Copy Login Command`. Paste the command into your shell:
 
 ```
 C:\> oc login https://console.pathfinder.gov.bc.ca:8443 --token=<blahblahblah>
@@ -29,18 +29,12 @@ Using project "servicebc-ne-tools".
 
 (Note that you could also run `oc login` and enter the same credentials).
 
-## Creating Solr
+## Creating and Replacing the `solr` Build
 
-Creating Solr in a new environment is a fairly rare occurrence. It only needs to happen once, and subsequent changes
-are picked up by *replacing*, below. As the creation process is nearly identical to the replacement process, just
-follow the replacement instructions except using `create` rather than `replace` for the final `oc` call.
+Creating the `solr` build should only need to be once. Replacing the build should only need to be done when changing
+the Github repository location.
 
-## Replacing Solr
-
-*This step is used when the `solr` build already exists in the OpenShift project `servicebc-ne-tools`, but it needs
-to be updated.*
-
-### Replacing the Build
+### Creating the Build
 
 Ensure that your current project is `servicebc-ne-tools`:
 
@@ -55,13 +49,23 @@ C:\> cd \<path>\namex\solr\openshift
 C:\<path>\namex\solr\openshift>
 ```
 
-Generate the configuration file from the template and the parameters, and pipe the output back into `oc` to replace
-the build:
+See below for building from a fork of the `bcgov/namex` repository. If you want to use `bcgov/namex` itself then
+generate the configuration file from the template, and pipe the output back into `oc` to replace the build:
 
 ```
-C:\<path>\namex\solr\openshift> oc process -f templates\solr-build.json --param-file=solr-build.param | oc replace -f -
-imagestream "solr" replaced
-buildconfig "solr" replaced
+C:\<path>\namex\solr\openshift> oc process -f templates\solr-build.json --param-file=solr-build.param | oc create -f -
+imagestream "solr" created
+buildconfig "solr" created
+```
+
+If you want to create from a fork of the `bcgov/namex-solr` repository, generate the configuration file from the
+template and pipe the output back into `oc` to replace the build:
+
+```
+C:\<path>\namex-solr\openshift> oc process -f templates\solr-build.json -p GIT_REPO_URL=https://github.com/<USERNAME>/namex-solr.git | oc create -f -
+warning: Template parameter "GIT_REPO_URL" already defined, ignoring value from file "solr-build.param"
+imagestream "solr" created
+buildconfig "solr" created
 ```
 
 In the OpenShift Web Console go to the `names examination (tools)` project, and then `Builds` > `Builds`. Wait for the
@@ -69,21 +73,21 @@ In the OpenShift Web Console go to the `names examination (tools)` project, and 
 it is recent. 
 
 In the OpenShift Web Console go to the `names examination (tools)` project, and then `Builds` > `Images`. Click the
-`solr` image and the tag `Latest` should now have been updated. The image needs to be pushed in order to get it into a
+`solr` image and the tag `Latest` should now have been updated. The image needs to be tagged in order to get it into a
 specific environment.
 
-## Tagging an Image
+### Replacing the `solr` Build
 
-A new Solr image must be tagged before it is deployed for a given *ENV* (`dev`, `test`, or `prod`):
+*This step is only needed when you want to change the Github repository used for the build. If want to alter the build
+process, do so and commit your changes to the repository. Then click the `Start Build` button in the `OpenShift Web
+Console` to start a new build.*
 
-```
-C:\> oc tag servicebc-ne-tools/solr:latest servicebc-ne-tools/solr:ENV
-Tag solr:ENV set to servicebc-ne-tools/solr@sha256:1d39a55e77076835a67e38ff01cc188cdc713839c96a19c4a14d92e124c269d2.
-```
+The replacement process is nearly identical to the creation process, just follow the creation instructions above except
+using `replace` rather than `create` for the final `oc` call.
 
 ## Deploy
 
-When deploying to *<ENV>* (dev / test / prod) ensure that your current project is `servicebc-ne-<ENV>`. For example, to
+When deploying to `<ENV>` (dev / test / prod) ensure that your current project is `servicebc-ne-<ENV>`. For example, to
 deploy to dev:
 
 ```
@@ -97,8 +101,9 @@ C:\> cd \<path>\namex\solr\openshift
 C:\<path>\namex\solr\openshift>
 ```
 
-Generate the configuration file from the template and the parameters for your specific environment (dev / test / prod),
-and pipe the output back into `oc` to replace the build. For example, to deploy to dev:
+See instructions for Minishift below, but when deploying to the Pathfinder Openshift cluster: generate the
+configuration file from the template and the parameters for your specific environment (dev / test / prod), and pipe the
+output back into `oc` to replace the build. For example, to deploy to dev:
 
 ```
 C:\<path>\namex\solr\openshift> oc process -f templates/solr-deploy.json --param-file=solr-deploy.dev.param | oc create -f -
@@ -108,7 +113,49 @@ persistentvolumeclaim "solr" created
 deploymentconfig "solr" created
 ```
 
+For Minishift we don't have Gluster for a filesystem, so we need a different deployment file:
 
+```
+C:\<path>\namex\solr\openshift> oc process -f templates/solr-deploy-local.json --param-file=solr-deploy.dev.param -p APPLICATION_DOMAIN=192.168.99.100.nip.io | oc create -f -
+warning: Template parameter "APPLICATION_DOMAIN" already defined, ignoring value from file "solr-deploy.dev.param"
+service "solr" created
+route "solr" created
+persistentvolumeclaim "solr-cores" created
+persistentvolumeclaim "solr-trademarks" created
+deploymentconfig "solr" created
+```
+
+## Tagging an Image
+
+When a new Solr image is tagged for `dev` or `test`, it will be automatically deployed:
+
+```
+C:\> oc tag servicebc-ne-tools/solr:latest servicebc-ne-tools/solr:dev
+Tag solr:ENV set to servicebc-ne-tools/solr@sha256:1d39a55e77076835a67e38ff01cc188cdc713839c96a19c4a14d92e124c269d2.
+```
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+TODO: create a new route name solr2, hostname 192.168.99.100.nip.io, Secure route, Insecure: redirect. Visit
+https://192.168.99.100.nip.io
 
 .
 

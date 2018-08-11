@@ -1220,7 +1220,7 @@ technology, compute,computer =>technology,compute,computer
 #**********NUMBER substitutions  ****************
 #----------------------------------------------------
 # Synonym mappings for indexed number variations
-1 st, first=>1st,first
+1st,1 st, first=>1st,first
 2 nd, second=>2nd, second
 3 rd,third=>3rd,third
 4 th, fourth=>4th, fourth
@@ -1228,4 +1228,4 @@ technology, compute,computer =>technology,compute,computer
 6 th, sixth=>6th, sixth
 7 th, seventh, 7th, seventh
 8 th, eighth, 8th, eighth
-9 th, nineth, 9th, nineth
+9 th, ninth, 9th, nineth

@@ -48,7 +48,7 @@
       },
       "spec":
       {
-        "host": "${APPLICATTION_HOSTNAME}.${APPLICATION_DOMAIN}",
+        "host": "${APPLICATION_HOSTNAME}.${APPLICATION_DOMAIN}",
         "path": "/solr",
         "tls":
         {
@@ -378,7 +378,7 @@
       "value": ""
     },
     {
-      "name": "APPLICATTION_HOSTNAME",
+      "name": "APPLICATION_HOSTNAME",
       "displayName": "Application Host Name",
       "description": "The hostname part of the full path to the solr service.",
       "required": true,
