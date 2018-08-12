@@ -97,72 +97,83 @@ class RequestsQueue(Resource):
             # get the next NR assigned to the User
             nr, new_assignment = RequestDAO.get_queued_oldest(user)
             current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
+        except:
+            pass
+        finally:
+            pass
 
-            flash('{"code": "unable_to_get_request_state",'
-                  '"description": "Unable to get the current state of the NRO Request"}'
-                  , 'error')
-            # if it's a new assignment, then LOGICALLY lock the record in NRO
-            if new_assignment:
+        if not nr:
+            return jsonify(message='No more NRs in Queue to process'), 200
 
-                # get the last modification timestamp before we alter the record
-                # try:
-                #     nro_last_ts = nro.get_last_update_timestamp(nr.requestId)
-                # except NROServicesError as err:
-                #     nro_last_ts = None
-                #     flash(err.error, 'error')
+        if nr and not new_assignment:
+            return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
 
-                current_app.logger.debug('set state to h')
+        # if it's a new assignment, then LOGICALLY lock the record in NRO
+        # if we fail to do that, send back the NR and the errors for user-intervention
+        if new_assignment:
+
+            # get the last modification timestamp before we alter the record
+            try:
+                nro_last_ts = nro.get_last_update_timestamp(nr.requestId)
+            except NROServicesError as err:
+                nro_last_ts = None
+                flash(err.error, 'error')
+            except Exception as missed_error:
+                nro_last_ts = None
+                flash(err.error, 'error')
+                pass # do something here
+
+            current_app.logger.debug('set state to h')
+            try:
+                nro.set_request_status_to_h(nr.nrNum, user.username)
+            except NROServicesError as err:
+                flash(err.error, 'error')
+            except Exception as missed_error:
+                flash(err.error, 'error')
+                pass # do something here
+
+            current_app.logger.debug('get state')
+            try:
+                nro_req_state = nro.get_current_request_state(nr.nrNum)
+            except NROServicesError as err:
+                nro_req_state = None
+                flash(err.error, 'error')
+            except Exception as missed_error:
+                nro_req_state = None
+                flash(err.error, 'error')
+                pass # do something here
+
+            if 'H' is not nro_req_state:
+                flash('{"code": "unable_to_get_nro_request_state",'
+                      '"description": "Unable to get the current state of the NRO Request"}'
+                      , 'error')
+                current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
+
+            current_app.logger.debug('update records')
+            if 'nro_last_ts' in locals() and nro_last_ts != nr.nroLastUpdate:
+                current_app.logger.debug('nro updated since namex was last updated')
                 try:
-                    nro.set_request_status_to_h(nr.nrNum, user.username)
-                except NROServicesError as err:
-                    flash(err.error, 'error')
+                    # mark the NR as being updated
+                    nr.stateCd = State.NRO_UPDATING
+                    nr.save_to_db()
+                    data = {
+                        'nameRequest': nr.nrNum
+                    }
+                    url = current_app.config.get('NRO_EXTRACTOR_URI')
 
-                current_app.logger.debug('get state')
-                try:
-                    nro_req_state = nro.get_current_request_state(nr.nrNum)
-                except NROServicesError as err:
-                    nro_req_state = None
-                    flash(err.error, 'error')
-                if 'H' is not nro_req_state:
-                    flash('{"code": "unable_to_get_nro_request_state",'
-                          '"description": "Unable to get the current state of the NRO Request"}'
-                          , 'error')
-                    current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
+                    nro_req = urllib.request.Request(url,
+                                                     data=json.dumps(data).encode('utf8'),
+                                                     headers={'content-type': 'application/json'})
+                    nro_req.get_method = lambda: 'PUT'
+                    nro_response = urllib.request.urlopen(nro_req).read()
+                    current_app.logger.debug('response from extractor: {},{}'.format(nro_response, nro_response.state_code))
 
-                nro_last_ts=None
-                current_app.logger.debug('update records')
-                if True or 'nro_last_ts' in locals() and nro_last_ts != nr.nroLastUpdate:
-                    current_app.logger.debug('nro updated since namex was last updated')
-                    try:
-                        # mark the NR as being updated
-                        nr.stateCd = State.NRO_UPDATING
-                        nr.save_to_db()
-                        data = {
-                            'nameRequest': nr.nrNum
-                        }
-                        url = current_app.config.get('NRO_EXTRACTOR_URI')
-
-                        nro_req = urllib.request.Request(url,
-                                                         data=json.dumps(data).encode('utf8'),
-                                                         headers={'content-type': 'application/json'})
-                        nro_req.get_method = lambda: 'PUT'
-                        nro_response = urllib.request.urlopen(nro_req).read()
-                        current_app.logger.debug('response from extractor: {},{}'.format(nro_response, nro_response.state_code))
-
-                    except Exception as err:
-                        current_app.logger.error(err.with_traceback(None))
-                    finally:
-                        # set the NR back to INPROGRESS
-                        nr.stateCd = State.INPROGRESS
-                        nr.save_to_db()
-
-        except SQLAlchemyError as err:
-            # TODO should put some span trace on the error message
-            current_app.logger.error(err.with_traceback(None))
-            return jsonify({'message': 'An error occurred getting the next Name Request.'}), 500
-        except AttributeError as err:
-            current_app.logger.error(err)
-            return jsonify({'message': 'There are no Name Requests to work on.'}), 404
+                except Exception as err:
+                    current_app.logger.error(err.with_traceback(None))
+                finally:
+                    # set the NR back to INPROGRESS
+                    nr.stateCd = State.INPROGRESS
+                    nr.save_to_db()
 
         return jsonify(nameRequest='{}'.format(nr.nrNum), flash=get_flashed_messages(with_categories=True)), 200
 
