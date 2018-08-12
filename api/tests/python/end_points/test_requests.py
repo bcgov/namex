@@ -1,5 +1,7 @@
 from flask import jsonify
 from unittest import mock
+import sys
+from namex.models import User
 
 token_header = {
                 "alg": "RS256",
@@ -10,15 +12,15 @@ claims = {
             "iss": "https://dev-sso.pathfinder.gov.bc.ca/auth/realms/nest",
             "sub": "43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc",
             "aud": "namex-DEV",
-            "exp": 21531718745,
+            "exp": 31531718745,
             "iat": 1531718745,
             "jti": "flask-jwt-oidc-test-support",
             "typ": "Bearer",
             "username": "test-user",
             "realm_access": {
                 "roles": [
-                    "names_editor",
-                    "names_approver",
+                    "{}".format(User.EDITOR),
+                    "{}".format(User.APPROVER),
                     "viewer",
                     "user"
                 ]
@@ -45,7 +47,8 @@ def test_get_next(client, jwt, app):
     # get the resource (this is the test)
     rv = client.get('/api/v1/requests/queues/@me/oldest', headers=headers)
 
-    assert rv.data == json_msg.data
+    assert json_msg.data == rv.data
+
 
 def test_get_next_oldest(client, jwt, app):
 
@@ -72,7 +75,9 @@ def test_get_next_oldest(client, jwt, app):
     # get the resource (this is the test)
     rv = client.get('/api/v1/requests/queues/@me/oldest', headers=headers)
 
-    assert rv.data == json_msg.data
+    print('the client returned:', rv.data)
+
+    assert  json_msg.data == rv.data
 
 
 claims_editor_only = {
