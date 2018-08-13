@@ -478,10 +478,10 @@ class Request(Resource):
 
             # TODO: add in error checking/handling for dates
 
-            if json_input['expirationDate']:
+            if json_input.get('expirationDate', None) is not None:
                 json_input['expirationDate'] = datetime.datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
-            if json_input['submittedDate']:
+            if json_input.get('submittedDate', None) is not None:
                 json_input['submittedDate'] = datetime.datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
             if not nr_d:
@@ -524,6 +524,7 @@ class Request(Resource):
 
             request_header_schema.load(json_input, instance=nr_d, partial=True)
             nr_d.furnished = json_input.get('furnished', 'N')
+            nr_d.natureBusinessInfo = json_input.get('natureBusinessInfo', None)
             nr_d.stateCd = state
             nr_d.userId = user.id
 
