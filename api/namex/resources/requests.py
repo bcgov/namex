@@ -477,8 +477,10 @@ class Request(Resource):
             nr_d = RequestDAO.find_by_nr(nr)
 
             # TODO: add in error checking/handling for dates
+
             if json_input['expirationDate']:
                 json_input['expirationDate'] = datetime.datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
+
             if json_input['submittedDate']:
                 json_input['submittedDate'] = datetime.datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
@@ -512,13 +514,16 @@ class Request(Resource):
             ### REQUEST HEADER ###
 
             # update request header
+
             errors = request_header_schema.validate(json_input, partial=True)
             errors.pop('submittedDate', None)
             errors.pop('expirationDate', None)
             errors.pop('previousNr', None)
             if errors:
                 return jsonify(errors), 400
+
             request_header_schema.load(json_input, instance=nr_d, partial=True)
+            nr_d.furnished = json_input.get('furnished', 'N')
             nr_d.stateCd = state
             nr_d.userId = user.id
 
@@ -573,12 +578,11 @@ class Request(Resource):
                 try:
                     if in_comment['id'] is None or in_comment['id'] == 0:
                         is_new_comment = True
-                except KeyError:
+                except TypeError:
                     is_new_comment = True
-
-                if is_new_comment and in_comment['comment'] is not None:
+                if is_new_comment and in_comment is not None:
                     new_comment = Comment()
-                    new_comment.comment = in_comment['comment']
+                    new_comment.comment = in_comment
                     new_comment.examiner = user
                     new_comment.nrId = nr_d.id
 
