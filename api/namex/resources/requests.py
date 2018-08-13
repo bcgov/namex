@@ -478,10 +478,10 @@ class Request(Resource):
 
             # TODO: add in error checking/handling for dates
 
-            if json_input.get('expirationDate', None) is not None:
+            if json_input.get('expirationDate', None):
                 json_input['expirationDate'] = datetime.datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
-            if json_input.get('submittedDate', None) is not None:
+            if json_input.get('submittedDate', None):
                 json_input['submittedDate'] = datetime.datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
             if not nr_d:
@@ -523,6 +523,7 @@ class Request(Resource):
                 return jsonify(errors), 400
 
             request_header_schema.load(json_input, instance=nr_d, partial=True)
+            nr_d.additionalInfo = json_input.get('additionalInfo', None)
             nr_d.furnished = json_input.get('furnished', 'N')
             nr_d.natureBusinessInfo = json_input.get('natureBusinessInfo', None)
             nr_d.stateCd = state
@@ -558,7 +559,31 @@ class Request(Resource):
             ### NAMES ###
             # TODO: set consumptionDate not working -- breaks changing name values
             for nrd_name in nr_d.names.all():
-                for in_name in json_input['names']:
+                for in_name in json_input.get('names', []):
+
+                    if len(nr_d.names.all()) < in_name['choice']:
+
+                        errors = names_schema.validate(in_name, partial=False)
+                        if errors:
+                            return jsonify(errors), 400
+
+                        new_name_choice = Name()
+                        new_name_choice.nrId = nr_d.id
+                        new_name_choice.name = in_name.get('name', None)
+                        new_name_choice.state = in_name.get('state', None)
+                        new_name_choice.choice = in_name.get('choice', None)
+                        new_name_choice.designation = in_name.get('designation', None)
+                        new_name_choice.consumptionDate = in_name.get('consumptionDate', None)
+                        new_name_choice.conflict1 = in_name.get('conflict1', None)
+                        new_name_choice.conflict2 = in_name.get('conflict2', None)
+                        new_name_choice.conflict3 = in_name.get('conflict3', None)
+                        new_name_choice.conflict1_num = in_name.get('conflict1_num', None)
+                        new_name_choice.conflict2_num = in_name.get('conflict2_num', None)
+                        new_name_choice.conflict3_num = in_name.get('conflict3_num', None)
+                        new_name_choice.decision_text = in_name.get('decision_text', None)
+
+                        db.session.add(new_name_choice)
+                        db.session.commit()
 
                     if nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)

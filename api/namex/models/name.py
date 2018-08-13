@@ -8,7 +8,7 @@ class Name(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1024))
-    state = db.Column(db.String(15), default='DRAFT') # NE=Not Examined; R=Rejected; A=Accepted; C=Cond. Accepted
+    state = db.Column(db.String(15), default='NE') # NE=Not Examined; R=Rejected; A=Accepted; C=Cond. Accepted
     choice = db.Column(db.Integer)
     designation = db.Column(db.String(50), default='DRAFT')
     consumptionDate = db.Column('consumption_date', db.DateTime)
@@ -27,9 +27,9 @@ class Name(db.Model):
     # nameRequest = db.relationship('Request')
 
     NOT_EXAMINED = 'NE'
-    APPROVED = 'APPROVED'
-    REJECTED = 'REJECTED'
-    CONDITION = 'CONDITION'
+    APPROVED = 'A'
+    REJECTED = 'R'
+    CONDITION = 'C'
 
     def as_dict(self):
         return {
