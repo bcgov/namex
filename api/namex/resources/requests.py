@@ -546,7 +546,7 @@ class Request(Resource):
                     errm = applicant_schema.validate(appl, partial=True)
                     errm.pop('firstName', None)
                     if errm:
-                        return jsonify(errm)
+                        return jsonify(errm), 400
 
                     applicant_schema.load(appl, instance=applicants_d, partial=True)
                 else:
@@ -605,7 +605,7 @@ class Request(Resource):
             nr_d.save_to_db()
 
         except ValidationError as ve:
-            return jsonify(ve.messages)
+            return jsonify(ve.messages), 400
 
         except NoResultFound as nrf:
             # not an error we need to track in the log
