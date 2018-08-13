@@ -12,7 +12,7 @@ class User(db.Model):
     lastname = db.Column(db.String(1000))
     sub = db.Column(db.String(36), unique=True)
     iss = db.Column(db.String(1024))
-    creationDate = db.Column(db.DateTime, default=datetime.utcnow)
+    creationDate = db.Column(db.DateTime, default=datetime.now)
 
     APPROVER='names_approver'
     EDITOR='names_editor'
