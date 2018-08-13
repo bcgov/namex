@@ -113,13 +113,13 @@ try:
                 # format conflicts as <conflict number>****<conflict name>
 
                 if name['conflict1'] in (None, ''): name['conflict1'] = ''
-                else: name['conflict1'] = '{}****{}'.format(name['conflict1_num'], name['conflict1'][:150])
+                else: name['conflict1'] = '{}****{}'.format(name['conflict1_num'][:10], name['conflict1'][:150])
 
                 if name['conflict2'] in (None, ''): name['conflict2'] = ''
-                else: name['conflict2'] = '{}****{}'.format(name['conflict2_num'], name['conflict2'][:150])
+                else: name['conflict2'] = '{}****{}'.format(name['conflict2_num'][:10], name['conflict2'][:150])
 
                 if name['conflict3'] in (None, ''): name['conflict3'] = ''
-                else: name['conflict3'] = '{}****{}'.format(name['conflict3_num'], name['conflict3'][:150])
+                else: name['conflict3'] = '{}****{}'.format(name['conflict3_num'][:10], name['conflict3'][:150])
 
 
                 # save off data for use in proc call below
@@ -133,33 +133,39 @@ try:
                     p_choice3 = decision_text
                     names[2] = name
 
+            # set NR status to single character status A or R
+            if pg_row['state_cd'] in ['APPROVED', 'CONDITIONAL']: pg_row['state_cd'] = 'A'
+            if pg_row['state_cd'] in ['REJECTED']: pg_row['state_cd'] = 'R'
+
+            # convert expiry date to YYYYMMDD format
+            pg_row['expiry_date'] = pg_row['expiry_date'].strftime('%Y%m%d')
 
             ### Call the name_examination procedure to save complete decision data for a single NR
-            ora_cursor.callproc("NRO_DATA_PUMP_PKG.name_examination",
+            ora_cursor.callproc("NRO_DATAPUMP_PKG.name_examination",
                                     [pg_row['nr_num'],        #p_nr_number
                                      pg_row['state_cd'],      #p_status
                                      pg_row['expiry_date'],   #p_expiry_date
                                      pg_row['consent_flag'],  #p_consent_flag
-                                     pg_row['username'],      #p_examiner_id
+                                     pg_row['username'][:7],  # p_examiner_id
                                      p_choice1,               #p_choice1
                                      p_choice2,               #p_choice2
                                      p_choice3,               #p_choice3
-                                     '',                      #p_exam_comment ???
-                                     '',                      #p_add_info ???
-                                     names[0]['conflict1'],
-                                     names[0]['conflict2'],
-                                     names[0]['conflict3'],
-                                     names[1]['conflict1'],
-                                     names[1]['conflict2'],
-                                     names[1]['conflict3'],
-                                     names[2]['conflict1'],
-                                     names[2]['conflict2'],
-                                     names[2]['conflict3'],
+                                     '',                      #p_exam_comment TODO
+                                     '',                      #p_add_info - not used in proc anymore
+                                     names[0]['conflict1'],  # p_confname1A
+                                     names[0]['conflict2'],  # p_confname1B
+                                     names[0]['conflict3'],  # p_confname1C
+                                     names[1]['conflict1'],  # p_confname2A
+                                     names[1]['conflict2'],  # p_confname2B
+                                     names[1]['conflict3'],  # p_confname2C
+                                     names[2]['conflict1'],  # p_confname3A
+                                     names[2]['conflict2'],  # p_confname3B
+                                     names[2]['conflict3'],  # p_confname3C
                                      ]
                                 )
 
-            pg_upd_cursor.execute("""UPDATE requests SET furnished = %s WHERE id = %s""",
-                                  ['Y', pg_row['id']])
+            pg_upd_cursor.execute("""UPDATE requests SET furnished = %s, expiration_date = %s WHERE id = %s""",
+                                  ['Y', pg_row['expiry_date'], pg_row['id']])
 
             pg_cur_track.execute(
                 """insert into nro_names_sync_job_detail (job_id, nr_num, time) values (%s, %s, %s);""",
@@ -195,5 +201,11 @@ finally:
 
     if pg_conn is not None:
         pg_conn.close()
+
+# if we get here and end_time hasn't been set (ie: nothing has succeeded) set the value for logging
+try:
+    end_time = end_time
+except NameError:
+    end_time = datetime.utcnow()
 
 print("job - requests processed: {0} completed in:{1}".format(row_count, end_time-start_time))
