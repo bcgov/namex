@@ -25,8 +25,8 @@ class Request(db.Model):
 
     # core fields
     id = db.Column(db.Integer, primary_key=True)
-    submittedDate = db.Column('submitted_date', db.DateTime, default=datetime.utcnow)
-    lastUpdate = db.Column('last_update', db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    submittedDate = db.Column('submitted_date', db.DateTime, default=datetime.now)
+    lastUpdate = db.Column('last_update', db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     nrNum = db.Column('nr_num', db.String(10), unique=True)
     requestTypeCd = db.Column('request_type_cd', db.String(10))
