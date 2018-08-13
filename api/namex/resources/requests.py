@@ -558,6 +558,12 @@ class Request(Resource):
 
             ### NAMES ###
             # TODO: set consumptionDate not working -- breaks changing name values
+            if len(nr_d.names.all()) == 0:
+                new_name_choice = Name()
+                new_name_choice.nrId = nr_d.id
+                db.session.add(new_name_choice)
+                db.session.commit()
+
             for nrd_name in nr_d.names.all():
                 for in_name in json_input.get('names', []):
 
@@ -569,23 +575,12 @@ class Request(Resource):
 
                         new_name_choice = Name()
                         new_name_choice.nrId = nr_d.id
-                        new_name_choice.name = in_name.get('name', None)
-                        new_name_choice.state = in_name.get('state', None)
-                        new_name_choice.choice = in_name.get('choice', None)
-                        new_name_choice.designation = in_name.get('designation', None)
-                        new_name_choice.consumptionDate = in_name.get('consumptionDate', None)
-                        new_name_choice.conflict1 = in_name.get('conflict1', None)
-                        new_name_choice.conflict2 = in_name.get('conflict2', None)
-                        new_name_choice.conflict3 = in_name.get('conflict3', None)
-                        new_name_choice.conflict1_num = in_name.get('conflict1_num', None)
-                        new_name_choice.conflict2_num = in_name.get('conflict2_num', None)
-                        new_name_choice.conflict3_num = in_name.get('conflict3_num', None)
-                        new_name_choice.decision_text = in_name.get('decision_text', None)
+                        names_schema.load(in_name, instance=new_name_choice, partial=False)
 
                         db.session.add(new_name_choice)
                         db.session.commit()
 
-                    if nrd_name.choice == in_name['choice']:
+                    elif nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
                             return jsonify(errors), 400
