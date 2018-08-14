@@ -1,4 +1,5 @@
 from . import db, ma
+from flask import current_app
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
 
@@ -46,6 +47,7 @@ class User(db.Model):
                 iss = token['iss'],
                 sub = token['sub']
             )
+            current_app.logger.debug('Creating user from JWT:{}; User:{}'.format(token, user))
             db.session.add(user)
             db.session.commit()
             return user
