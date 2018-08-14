@@ -257,6 +257,60 @@
                   {
                     "name": "CORE_NAME",
                     "value": "${CORE_NAME}"
+                  },
+                  {
+                    "name": "SOLR_DB_USER",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "postgresql-solr",
+                        "key": "database-user"
+                      }
+                    }
+                  },
+                  {
+                    "name": "SOLR_DB_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "postgresql-solr",
+                        "key": "database-password"
+                      }
+                    }
+                  },
+                  {
+                    "name": "BCRS_CORPS_DB_USER",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "postgres-oracle-fdw-registry",
+                        "key": "database-user"
+                      }
+                    }
+                  },
+                  {
+                    "name": "BCRS_CORPS_DB_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "postgres-oracle-fdw-registry",
+                        "key": "database-password"
+                      }
+                    }
+                  },
+                  {
+                    "name": "BCRS_NAMES_DB_USER",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "postgresql-oracle-fdw-names",
+                        "key": "database-user"
+                      }
+                    }
+                  },
+                  {
+                    "name": "BCRS_NAMES_DB_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "postgresql-oracle-fdw-names",
+                        "key": "database-password"
+                      }
+                    }
                   }
                 ],
                 "terminationMessagePath": "/dev/termination-log",

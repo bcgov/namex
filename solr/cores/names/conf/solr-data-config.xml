@@ -6,18 +6,6 @@
                 query="SELECT nr_num || '-' || choice_number AS id, name_instance_id, choice_number, corp_num, name,
                        nr_num, request_id, submit_count, request_type_cd, name_id, start_event_id, name_state_type_cd
                        FROM bc_registries_names.completed_nro_vw WHERE request_id IS NOT NULL">
-            <field column="ID" name="id" />
-            <field column="NAME_INSTANCE_ID" name="name_instance_id" />
-            <field column="CHOICE_NUMBER" name="choice_number" />
-            <field column="CORP_NUM" name="corp_num" />
-            <field column="NAME" name="name" />
-            <field column="NR_NUM" name="nr_num" />
-            <field column="REQUEST_ID" name="request_id" />
-            <field column="SUBMIT_COUNT" name="submit_count" />
-            <field column="REQUEST_TYPE_CD" name="request_type_cd" />
-            <field column="NAME_ID" name="name_id" />
-            <field column="START_EVENT_ID" name="start_event_id" />
-            <field column="NAME_STATE_TYPE_CD" name="name_state_type_cd" />
         </entity>
     </document>
 </dataConfig>
