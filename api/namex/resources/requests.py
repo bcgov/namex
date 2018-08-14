@@ -522,6 +522,11 @@ class Request(Resource):
             if errors:
                 return jsonify(errors), 400
 
+            # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
+            reset = False
+            if nr_d.furnished == 'Y' and json_input.get('furnished', 'N') == 'N':
+                reset = True
+
             request_header_schema.load(json_input, instance=nr_d, partial=True)
             nr_d.additionalInfo = json_input.get('additionalInfo', None)
             nr_d.furnished = json_input.get('furnished', 'N')
@@ -624,6 +629,17 @@ class Request(Resource):
 
             ### Finally save the entire graph
             nr_d.save_to_db()
+
+            # update oracle if this nr was reset
+            if reset:
+                current_app.logger.debug('set state to h')
+                try:
+                    nro.set_request_status_to_h(nr, user.id)
+                except NROServicesError as err:
+                    flash(err.error, 'error')
+                except Exception as missed_error:
+                    flash(err.error, 'error')
+                    pass  # do something here
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400
