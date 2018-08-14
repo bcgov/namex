@@ -16,7 +16,7 @@ def get_or_create_user_by_jwt(jwt_oidc_token):
         user = User.find_by_jwtToken(jwt_oidc_token)
         current_app.logger.debug('finding user: {}'.format(jwt_oidc_token))
         if not user:
-            current_app.logger.debug('didnt find user, attempting to create new user from the JWT info')
+            current_app.logger.debug('didnt find user, attempting to create new user from the JWT info:{}'.format(jwt_oidc_token))
             user = User.create_from_jwtToken(jwt_oidc_token)
 
         return user
