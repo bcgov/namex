@@ -469,7 +469,7 @@ class Request(Resource):
 
             # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
             reset = False
-            if nr_d.furnished == 'Y' and json_input.get('furnished', 'N') == 'N':
+            if nr_d.furnished == 'Y' and json_input.get('furnished', None) == 'N':
                 reset = True
 
             request_header_schema.load(json_input, instance=nr_d, partial=True)
@@ -572,19 +572,20 @@ class Request(Resource):
                         nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
             ### END nwpta ###
 
-            ### Finally save the entire graph
-            nr_d.save_to_db()
-
             # update oracle if this nr was reset
             if reset:
+                nr_d.expirationDate = None
                 current_app.logger.debug('set state to h')
                 try:
-                    nro.set_request_status_to_h(nr, user.id)
+                    nro.set_request_status_to_h(nr, user.username)
                 except NROServicesError as err:
                     flash(err.error, 'error')
                 except Exception as missed_error:
                     flash(err.error, 'error')
                     pass  # do something here
+
+            ### Finally save the entire graph
+            nr_d.save_to_db()
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400
