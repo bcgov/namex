@@ -10,7 +10,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
 
-from namex import jwt, nro
+from namex import jwt, nro, services
 from namex.models import db, ValidationError
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema
 from namex.models import Name, NameSchema, PartnerNameSystemSchema
@@ -20,7 +20,7 @@ from namex.models import DecisionReason
 
 from namex.services import ServicesError
 
-from namex.services.request_services import check_ownership, get_or_create_user_by_jwt
+from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
@@ -116,7 +116,7 @@ class RequestsQueue(Resource):
         if new_assignment:
             warnings = nro.move_control_of_request_from_nro(nr, user)
 
-        if warnings:
+        if 'warnings' in locals() and warnings:
             return jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 200
 
         return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
@@ -295,7 +295,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_auth
+    @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def patch(nr, *args, **kwargs):
         """  Patches the NR, only STATE can be changed with some business rules around roles/scopes
 
@@ -305,11 +305,10 @@ class Request(Resource):
         :return: 200 - success; 40X for errors
 
         :HEADER: Valid JWT Bearer Token for a valid REALM
-        :JWT Scopes: - USER.APPROVER, USER.EDITOR, USER.VIEWONLY
+        :JWT Scopes: - USER.APPROVER, USER.EDITOR
 
         APPROVERS: Can change from almost any state, other than CANCELLED, EXPIRED and ( COMPLETED not yet furnished )
         EDITOR: Can't change to a COMPLETED state (ACCEPTED, REJECTED, CONDITION)
-        VIEWONLY: Can't change anything, so that are bounced
         """
 
         # do the cheap check first before the more expensive ones
@@ -327,53 +326,9 @@ class Request(Resource):
         if state not in State.VALID_STATES:
             return jsonify({"message": "not a valid state"}), 406
 
-        #check user scopes
-        if not jwt.validate_roles([User.APPROVER]):
-            raise AuthError({
-                "code": "Unauthorized",
-                "description": "You don't have access to this resource."
-            }, 403)
-
-        if (state in (State.APPROVED,
-                     State.REJECTED,
-                     State.CONDITIONAL))\
-                and not jwt.validate_roles([User.APPROVER]):
-            return jsonify({"message": "Only Names Examiners can set state: {}".format(state)}), 428
-
         try:
+            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
-            if not nrd:
-                return jsonify({"message": "NR not found"}), 404
-
-            user = User.find_by_jwtToken(g.jwt_oidc_token_info)
-            if not user:
-                user = User.create_from_jwtToken(g.jwt_oidc_token_info)
-
-            #NR is in a final state, but maybe the user wants to pull it back for corrections
-            if nrd.stateCd in State.COMPLETED_STATE:
-                if not jwt.validate_roles([User.APPROVER]):
-                    return jsonify({"message": "Only Names Examiners can alter completed Requests"}), 401
-
-                if nrd.furnished == RequestDAO.REQUEST_FURNISHED:
-                    return jsonify({"message": "Request has already been furnished and cannot be altered"}), 409
-
-                if state != State.INPROGRESS:
-                    return jsonify({"message": "Completed unfurnished Requests can only be set to an INPROGRESS state"
-                                    }), 400
-
-            elif state in State.RELEASE_STATES:
-                if nrd.userId != user.id or nrd.stateCd != State.INPROGRESS:
-                    return jsonify({"message": "The Request must be INPROGRESS and assigned to you before you can change it."}), 401
-
-            existing_nr = RequestDAO.get_inprogress(user)
-            if existing_nr:
-                existing_nr.stateCd = State.HOLD
-                existing_nr.save_to_db()
-
-            nrd.stateCd = state
-            nrd.userId = user.id
-            nrd.save_to_db()
-
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
@@ -381,7 +336,32 @@ class Request(Resource):
             current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return jsonify({"message": "NR had an internal error"}), 404
 
-        return jsonify({'message': 'Request:{} - patched'.format(nr)}), 200
+        if not nrd:
+            return jsonify({"message": "Request:{} not found".format(nr)}), 404
+
+        if not services.name_request.valid_state_transition(user, nrd, state):
+            return jsonify(message='you are not authorized to make these changes'), 401
+
+        try:
+            existing_nr = RequestDAO.get_inprogress(user)
+            if existing_nr:
+                existing_nr.stateCd = State.HOLD
+                existing_nr.save_to_db()
+
+            # if the NR is in DRAFT then LOGICALLY lock the record in NRO
+            # if we fail to do that, send back the NR and the errors for user-intervention
+            if nrd.stateCd == State.DRAFT:
+                warnings = nro.move_control_of_request_from_nro(nrd, user)
+
+            nrd.stateCd = state
+            nrd.userId = user.id
+            nrd.save_to_db()
+        except (Exception) as err:
+            return jsonify(message='Internal server error'), 500
+
+        if 'warnings' in locals() and warnings:
+            return jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 200
+        return jsonify(message='Request:{} - patched'.format(nr)), 200
 
     @staticmethod
     @cors.crossdomain(origin='*')

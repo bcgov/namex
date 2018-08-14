@@ -47,7 +47,7 @@ def test_get_next(client, jwt, app):
     # get the resource (this is the test)
     rv = client.get('/api/v1/requests/queues/@me/oldest', headers=headers)
 
-    assert json_msg.data == rv.data
+    assert b'"nameRequest": "NR 0000001"' in rv.data
 
 
 def test_get_next_oldest(client, jwt, app):
@@ -75,9 +75,7 @@ def test_get_next_oldest(client, jwt, app):
     # get the resource (this is the test)
     rv = client.get('/api/v1/requests/queues/@me/oldest', headers=headers)
 
-    print('the client returned:', rv.data)
-
-    assert  json_msg.data == rv.data
+    assert b'"nameRequest": "NR 0000001"' in rv.data
 
 
 claims_editor_only = {
@@ -110,10 +108,8 @@ def test_get_next_not_approver(client, jwt, app):
     token = jwt.create_jwt(claims_editor_only, token_header)
     headers = {'Authorization': 'Bearer ' + token}
 
-    # The message expected to be returned
-    json_msg = jsonify(message='Error: You do not have access to the Name Request queue.')
-
+    expected_response = b'{\n  "code": "missing_required_roles", \n  "description": "Missing the role(s) required to access this endpoint"\n}\n'
     # get the resource (this is the test)
     rv = client.get('/api/v1/requests/queues/@me/oldest', headers=headers)
 
-    assert rv.data == json_msg.data
+    assert rv.data == expected_response
