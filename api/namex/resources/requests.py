@@ -98,10 +98,10 @@ class RequestsQueue(Resource):
         # get the next NR assigned to the User
         try:
             nr, new_assignment = RequestDAO.get_queued_oldest(user)
-            current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
         except Exception as unmanaged_error:
             current_app.logger.error(unmanaged_error.with_traceback(None))
             return jsonify(message='internal server error'), 500
+        current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
 
         # if no NR returned
         if 'nr' not in locals() or not nr:
@@ -116,7 +116,10 @@ class RequestsQueue(Resource):
         if new_assignment:
             warnings = nro.move_control_of_request_from_nro(nr, user)
 
-        return jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 200
+        if warnings:
+            return jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 200
+
+        return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
 
 
 @cors_preflight('GET, POST')
