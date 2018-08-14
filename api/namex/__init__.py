@@ -18,7 +18,7 @@ from flask_jwt_oidc import JwtManager
 
 jwt = JwtManager()
 
-from namex.nro_services import NROServices
+from namex.services.nro import NROServices
 nro = NROServices()
 
 from namex.models import db, ma

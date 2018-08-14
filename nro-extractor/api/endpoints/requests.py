@@ -178,6 +178,7 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
     nr.submittedDate = nr_submitter['submitted_date']
     nr.submitter_userid = None if (submitter is None) else submitter.id
     nr.nroLastUpdate = nr_header['last_update']
+    nr.lastUpdate = nr.nroLastUpdate # this needs to be set to the same Point In Time as NRO until NameX owns it
 
     if nr_header['priority_cd'] is 'PQ':
         nr.priorityCd = 'Y'

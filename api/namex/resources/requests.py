@@ -2,13 +2,12 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from flask import request, jsonify, g, current_app, flash, get_flashed_messages
+from flask import request, jsonify, g, current_app, get_flashed_messages
 from flask_restplus import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func, text, exc
+from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
 
 from namex import jwt, nro
@@ -19,7 +18,9 @@ from namex.models import User, State, Comment
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
-from namex.nro_services import NROServicesError
+from namex.services import ServicesError
+
+from namex.services.request_services import check_ownership, get_or_create_user_by_jwt
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 
@@ -74,108 +75,51 @@ class RequestsQueue(Resource):
     """
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_auth
+    @jwt.requires_roles([User.APPROVER])
     def get():
         """ Gets the oldest nr num, that is in DRAFT status
-        It then marks the NR as INPROGRESS, and assigns it to the
+        It then marks the NR as INPROGRESS, and assigns it to the User as found in the JWT
+        It also moves control of the Request from NRO so that NameX fully owns it
 
         :Authorization: (JWT): valid JWT with the User.APPROVER role
 
         :return: (str) (dict) (https status): 500, 404, or NR NUM, or NR NUM and a system alert in the dict
         """
-        if not jwt.validate_roles([User.APPROVER]):
-            return jsonify({"message": "Error: You do not have access to the Name Request queue."}), 403
 
+        # GET existing or CREATE new user based on the JWT info
         try:
-            # GET existing or CREATE new user based on the JWT info
-            user = User.find_by_jwtToken(g.jwt_oidc_token_info)
-            current_app.logger.debug('finding user: {}'.format(g.jwt_oidc_token_info))
-            if not user:
-                current_app.logger.debug('didnt find user, attempting to create new user from the JWT info')
-                user = User.create_from_jwtToken(g.jwt_oidc_token_info)
+            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+        except ServicesError as se:
+            return jsonify(message='unable to get ot create user, aborting operation'), 500
+        except Exception as unmanaged_error:
+            current_app.logger.error(unmanaged_error.with_traceback(None))
+            return jsonify(message='internal server error'), 500
 
-            # get the next NR assigned to the User
+        # get the next NR assigned to the User
+        try:
             nr, new_assignment = RequestDAO.get_queued_oldest(user)
-            current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
-        except:
-            pass
-        finally:
-            pass
+        except Exception as unmanaged_error:
+            current_app.logger.error(unmanaged_error.with_traceback(None))
+            return jsonify(message='internal server error'), 500
+        current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
 
-        if not nr:
+        # if no NR returned
+        if 'nr' not in locals() or not nr:
             return jsonify(message='No more NRs in Queue to process'), 200
 
+        # if it's an NR already INPROGRESS and assigned to the user
         if nr and not new_assignment:
             return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
 
         # if it's a new assignment, then LOGICALLY lock the record in NRO
         # if we fail to do that, send back the NR and the errors for user-intervention
         if new_assignment:
+            warnings = nro.move_control_of_request_from_nro(nr, user)
 
-            # get the last modification timestamp before we alter the record
-            try:
-                nro_last_ts = nro.get_last_update_timestamp(nr.requestId)
-            except NROServicesError as err:
-                nro_last_ts = None
-                flash(err.error, 'error')
-            except Exception as missed_error:
-                nro_last_ts = None
-                flash(err.error, 'error')
-                pass # do something here
+        if warnings:
+            return jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 200
 
-            current_app.logger.debug('set state to h')
-            try:
-                nro.set_request_status_to_h(nr.nrNum, user.username)
-            except NROServicesError as err:
-                flash(err.error, 'error')
-            except Exception as missed_error:
-                flash(err.error, 'error')
-                pass # do something here
-
-            current_app.logger.debug('get state')
-            try:
-                nro_req_state = nro.get_current_request_state(nr.nrNum)
-            except NROServicesError as err:
-                nro_req_state = None
-                flash(err.error, 'error')
-            except Exception as missed_error:
-                nro_req_state = None
-                flash(err.error, 'error')
-                pass # do something here
-
-            if 'H' is not nro_req_state:
-                flash('{"code": "unable_to_get_nro_request_state",'
-                      '"description": "Unable to get the current state of the NRO Request"}'
-                      , 'error')
-                current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
-
-            current_app.logger.debug('update records')
-            if 'nro_last_ts' in locals() and nro_last_ts != nr.nroLastUpdate:
-                current_app.logger.debug('nro updated since namex was last updated')
-                try:
-                    # mark the NR as being updated
-                    nr.stateCd = State.NRO_UPDATING
-                    nr.save_to_db()
-                    data = {
-                        'nameRequest': nr.nrNum
-                    }
-                    url = current_app.config.get('NRO_EXTRACTOR_URI')
-
-                    nro_req = urllib.request.Request(url,
-                                                     data=json.dumps(data).encode('utf8'),
-                                                     headers={'content-type': 'application/json'})
-                    nro_req.get_method = lambda: 'PUT'
-                    nro_response = urllib.request.urlopen(nro_req).read()
-                    current_app.logger.debug('response from extractor: {},{}'.format(nro_response, nro_response.state_code))
-
-                except Exception as err:
-                    current_app.logger.error(err.with_traceback(None))
-                finally:
-                    # set the NR back to INPROGRESS
-                    nr.stateCd = State.INPROGRESS
-                    nr.save_to_db()
-
-        return jsonify(nameRequest='{}'.format(nr.nrNum), flash=get_flashed_messages(with_categories=True)), 200
+        return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
 
 
 @cors_preflight('GET, POST')
@@ -255,7 +199,8 @@ class Requests(Resource):
         if activeUser:
             q = q.join(RequestDAO.activeUser).filter(User.username.like('%'+activeUser+'%'))
 
-        #TODO: fix count on search by compName -- returns count of all names that match -- want it to be all NRs (nrs can have multiple names that match)
+        #TODO: fix count on search by compName -- returns count of all names that match
+        # -- want it to be all NRs (nrs can have multiple names that match)
         # ---- right now count is adjusted on the frontend in method 'populateTable'
         if compName:
             q = q.join(RequestDAO.names).filter(Name.name.like('%' + compName + '%'))
@@ -754,11 +699,6 @@ class NRNames(Resource):
         return jsonify({"message": "Patched {nr} - {json}".format(nr=nr, json=json_data)}), 200
 
 
-def check_ownership(nrd, user):
-    if nrd.stateCd == State.INPROGRESS and nrd.userId == user.id:
-        return True
-    return False
-
 # TODO: This should be in it's own file, not in the requests
 @cors_preflight("GET")
 @api.route('/decisionreasons', methods=['GET', 'OPTIONS'])
@@ -770,19 +710,3 @@ class DecisionReasons(Resource):
         for reason in DecisionReason.query.order_by(DecisionReason.name).all():
             response.append(reason.json())
         return jsonify(response), 200
-
-
-def mergedicts(dict1, dict2):
-    for k in set(dict1.keys()).union(dict2.keys()):
-        if k in dict1 and k in dict2:
-            if isinstance(dict1[k], dict) and isinstance(dict2[k], dict):
-                yield (k, dict(mergedicts(dict1[k], dict2[k])))
-            else:
-                # If one of the values is not a dict, you can't continue merging it.
-                # Value from second dict overrides one in first and we move on.
-                yield (k, dict2[k])
-                # Alternatively, replace this with exception raiser to alert you of value conflicts
-        elif k in dict1:
-            yield (k, dict1[k])
-        else:
-            yield (k, dict2[k])

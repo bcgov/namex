@@ -1,6 +1,4 @@
-from flask import jsonify
-from unittest import mock
-from namex.nro_services import NROServicesError
+from namex.services.nro import NROServicesError
 import pytest
 
 
