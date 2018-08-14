@@ -549,11 +549,11 @@ class Request(Resource):
                 try:
                     if in_comment['id'] is None or in_comment['id'] == 0:
                         is_new_comment = True
-                except TypeError:
+                except KeyError:
                     is_new_comment = True
-                if is_new_comment and in_comment is not None:
+                if is_new_comment and in_comment['comment'] is not None:
                     new_comment = Comment()
-                    new_comment.comment = in_comment
+                    new_comment.comment = in_comment['comment']
                     new_comment.examiner = user
                     new_comment.nrId = nr_d.id
 
