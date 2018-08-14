@@ -423,10 +423,10 @@ class Request(Resource):
 
             # TODO: add in error checking/handling for dates
 
-            if json_input['expirationDate']:
+            if json_input.get('expirationDate', None):
                 json_input['expirationDate'] = datetime.datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
-            if json_input['submittedDate']:
+            if json_input.get('submittedDate', None):
                 json_input['submittedDate'] = datetime.datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
             if not nr_d:
@@ -467,8 +467,15 @@ class Request(Resource):
             if errors:
                 return jsonify(errors), 400
 
+            # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
+            reset = False
+            if nr_d.furnished == 'Y' and json_input.get('furnished', 'N') == 'N':
+                reset = True
+
             request_header_schema.load(json_input, instance=nr_d, partial=True)
+            nr_d.additionalInfo = json_input.get('additionalInfo', None)
             nr_d.furnished = json_input.get('furnished', 'N')
+            nr_d.natureBusinessInfo = json_input.get('natureBusinessInfo', None)
             nr_d.stateCd = state
             nr_d.userId = user.id
 
@@ -501,10 +508,29 @@ class Request(Resource):
 
             ### NAMES ###
             # TODO: set consumptionDate not working -- breaks changing name values
-            for nrd_name in nr_d.names.all():
-                for in_name in json_input['names']:
+            if len(nr_d.names.all()) == 0:
+                new_name_choice = Name()
+                new_name_choice.nrId = nr_d.id
+                db.session.add(new_name_choice)
+                db.session.commit()
 
-                    if nrd_name.choice == in_name['choice']:
+            for nrd_name in nr_d.names.all():
+                for in_name in json_input.get('names', []):
+
+                    if len(nr_d.names.all()) < in_name['choice']:
+
+                        errors = names_schema.validate(in_name, partial=False)
+                        if errors:
+                            return jsonify(errors), 400
+
+                        new_name_choice = Name()
+                        new_name_choice.nrId = nr_d.id
+                        names_schema.load(in_name, instance=new_name_choice, partial=False)
+
+                        db.session.add(new_name_choice)
+                        db.session.commit()
+
+                    elif nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
                             return jsonify(errors), 400
@@ -548,6 +574,17 @@ class Request(Resource):
 
             ### Finally save the entire graph
             nr_d.save_to_db()
+
+            # update oracle if this nr was reset
+            if reset:
+                current_app.logger.debug('set state to h')
+                try:
+                    nro.set_request_status_to_h(nr, user.id)
+                except NROServicesError as err:
+                    flash(err.error, 'error')
+                except Exception as missed_error:
+                    flash(err.error, 'error')
+                    pass  # do something here
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400
