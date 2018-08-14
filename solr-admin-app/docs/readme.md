@@ -3,11 +3,9 @@ In PyCharm choos enew prject and selected flask (but then mo).
 Copied in flask-admin sample, but complained about SQL Alchemy.
 
 File > Settings; Project: [projectname] > Project Interpreter. Clicked + and installed Flask Admin
-
 File > Settings; Project: [projectname] > Project Interpreter. Clicked + and installed Flask-SQLAlchemy
-
-Also:
-psycopg2
+Also: psycopg2
+(The above all done in openshift via the requirements.txt file)
 
 Deploy:
 * Catalog: Python.
@@ -21,9 +19,6 @@ Deploy:
     * set context-dir to `solr-admin-app`
     * Routing/Security: Secure route; insecure traffic: Redirect
     * Create
-
-Please set either APP_MODULE, APP_FILE or APP_SCRIPT environment variables, or create a file 'app.py' to launch your
-application.
 
 #### DONE:
 * SQLAlchemy secret key
