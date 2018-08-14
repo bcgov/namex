@@ -9,6 +9,22 @@ File > Settings; Project: [projectname] > Project Interpreter. Clicked + and ins
 Also:
 psycopg2
 
+Deploy:
+* Catalog: Python.
+* Screen 1
+  * Click `Next`.
+* Screen 2
+  * Add to Project: `names examination (dev)`.
+  * Application Name: `solr-admin`.
+  * Git Repository: repo.
+  * Advanced options
+    * set context-dir to `solr-admin-app`
+    * Routing/Security: Secure route; insecure traffic: Redirect
+    * Create
+
+Please set either APP_MODULE, APP_FILE or APP_SCRIPT environment variables, or create a file 'app.py' to launch your
+application.
+
 #### DONE:
 * SQLAlchemy secret key
 * Better duplicate error message
@@ -27,7 +43,10 @@ psycopg2
 * Stop words?
 * Performance
 * NAMEX-API build on commit
-* Dev DB reconfiguration and reload
 * Move templates to better place / do jinja properly
 * Where to deploy? Test and push to dev/prod?
+* Dev DB reconfiguration and reload
 * Documentation on data loading, project, DB schemas
+* Alembic for migrating database changes
+* gunicorn, or something else
+* auditing
