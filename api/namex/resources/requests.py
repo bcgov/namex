@@ -469,7 +469,7 @@ class Request(Resource):
 
             # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
             reset = False
-            if nr_d.furnished == 'Y' and json_input.get('furnished', 'N') == 'N':
+            if nr_d.furnished == 'Y' and json_input.get('furnished', None) == 'N':
                 reset = True
 
             request_header_schema.load(json_input, instance=nr_d, partial=True)
