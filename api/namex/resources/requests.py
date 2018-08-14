@@ -491,8 +491,7 @@ class Request(Resource):
             if len(nr_d.names.all()) == 0:
                 new_name_choice = Name()
                 new_name_choice.nrId = nr_d.id
-                db.session.add(new_name_choice)
-                db.session.commit()
+                nr_d.names.append(new_name_choice)
 
             for nrd_name in nr_d.names.all():
                 for in_name in json_input.get('names', []):
@@ -507,8 +506,7 @@ class Request(Resource):
                         new_name_choice.nrId = nr_d.id
                         names_schema.load(in_name, instance=new_name_choice, partial=False)
 
-                        db.session.add(new_name_choice)
-                        db.session.commit()
+                        nr_d.names.append(new_name_choice)
 
                     elif nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
