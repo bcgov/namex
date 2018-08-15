@@ -361,7 +361,7 @@ class Request(Resource):
             return jsonify(message='Internal server error'), 500
 
         if 'warnings' in locals() and warnings:
-            return jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 200
+            return jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206
         return jsonify(message='Request:{} - patched'.format(nr)), 200
 
     @staticmethod
@@ -575,10 +575,11 @@ class Request(Resource):
             current_app.logger.error("Error when replacing NR:{0} Err:{1}".format(nr, err))
             return jsonify(message='NR had an internal error'), 500
 
+        # if we're here, messaging only contains warnings
         warning_and_errors = MessageServices.get_all_messages()
         if warning_and_errors:
             current_app.logger.debug(nrd.json(), warning_and_errors)
-            return jsonify(nameRequest=nrd.json(), warnings=warning_and_errors), 200
+            return jsonify(nameRequest=nrd.json(), warnings=warning_and_errors), 206
 
         current_app.logger.debug(nrd.json())
         return jsonify(nrd.json()), 200
