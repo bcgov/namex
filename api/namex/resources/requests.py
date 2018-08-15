@@ -19,6 +19,7 @@ from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
 from namex.services import ServicesError
+from namex.services import MessageServices
 
 from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 from namex.utils.util import cors_preflight
@@ -276,14 +277,14 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_auth
+    @jwt.requires_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
     def get(nr):
         # return jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
         return jsonify(RequestDAO.query.filter_by(nrNum =nr.upper()).first_or_404().json())
 
     @staticmethod
     # @cors.crossdomain(origin='*')
-    @jwt.requires_auth
+    @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def delete(nr):
         nrd = RequestDAO.find_by_nr(nr)
         # even if not found we still return a 204, which is expected spec behaviour
@@ -365,7 +366,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_auth
+    @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def put(nr, *args, **kwargs):
 
         # do the cheap check first before the more expensive ones
@@ -385,23 +386,27 @@ class Request(Resource):
         if state not in State.VALID_STATES:
             return jsonify({"message": "not a valid state"}), 406
 
-        #check user scopes
-        if not jwt.validate_roles([User.APPROVER]):
-            raise AuthError({
-                "code": "Unauthorized",
-                "description": "You don't have access to this resource."
-            }, 403)
+        try:
+            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+            nrd = RequestDAO.find_by_nr(nr)
+        except NoResultFound as nrf:
+            # not an error we need to track in the log
+            return jsonify({"message": "Request:{} not found".format(nr)}), 404
+        except Exception as err:
+            current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
+            return jsonify({"message": "NR had an internal error"}), 404
 
-        if (state in (State.APPROVED,
-                     State.REJECTED,
-                     State.CONDITIONAL))\
-                and not jwt.validate_roles([User.APPROVER]):
-            return jsonify(message='Only Names Examiners can set state: {}'.format(state)), 428
+        if 'nrd' not in locals() or not nrd:
+            return jsonify({"message": "Request:{} not found".format(nr)}), 404
+
+        if not services.name_request.valid_state_transition(user, nrd, state):
+            return jsonify(message='you are not authorized to make these changes'), 401
 
         try:
-            nr_d = RequestDAO.find_by_nr(nr)
-
-            # TODO: add in error checking/handling for dates
+            existing_nr = RequestDAO.get_inprogress(user)
+            if existing_nr:
+                existing_nr.stateCd = State.HOLD
+                existing_nr.save_to_db()
 
             if json_input.get('expirationDate', None):
                 json_input['expirationDate'] = datetime.datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
@@ -409,32 +414,13 @@ class Request(Resource):
             if json_input.get('submittedDate', None):
                 json_input['submittedDate'] = datetime.datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
 
-            if not nr_d:
-                return jsonify(message='NR not found'), 404
-
-            user = User.find_by_jwtToken(g.jwt_oidc_token_info)
-            if not user:
-                user = User.create_from_jwtToken(g.jwt_oidc_token_info)
-
-            #NR is in a final state, but maybe the user wants to pull it back for corrections
-            if nr_d.stateCd in State.COMPLETED_STATE:
-                if not jwt.validate_roles([User.EDITOR]):
-                    return jsonify(
-                        message='Only Names Examiners can alter completed Requests'
-                    ), 401
-                if state != State.INPROGRESS:
-                    return jsonify(
-                        message='Completed unfurnished Requests can only be set to an INPROGRESS state'
-                    ), 400
-            # elif state in State.RELEASE_STATES:
-            #     if nr_d.userId != user.id or nr_d.stateCd != State.INPROGRESS:
-            #         return jsonify(
-            #               message='The Request must be INPROGRESS and assigned to you before you can change it.'
-            #         ), 401
-            # elif nr_d.userId != user.id or nr_d.stateCd != State.INPROGRESS:
-            #     return jsonify(
-            #         message='The Request must be INPROGRESS and assigned to you before you can change it.'
-            #     ), 401
+            # ## If the current state is DRAFT, the transfer control from NRO to NAMEX
+            # if the NR is in DRAFT then LOGICALLY lock the record in NRO
+            # if we fail to do that, send back the NR and the errors for user-intervention
+            if nrd.stateCd == State.DRAFT:
+                warnings = nro.move_control_of_request_from_nro(nrd, user)
+                if warnings:
+                    MessageServices.add_message(MessageServices.WARN, 'nro_lock', warnings)
 
             ### REQUEST HEADER ###
 
@@ -445,40 +431,44 @@ class Request(Resource):
             errors.pop('expirationDate', None)
             errors.pop('previousNr', None)
             if errors:
-                return jsonify(errors), 400
+                # return jsonify(errors), 400
+                MessageServices.add_message(MessageServices.ERROR, 'request_validation', errors)
+
 
             # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
             reset = False
-            if nr_d.furnished == 'Y' and json_input.get('furnished', None) == 'N':
+            if nrd.furnished == RequestDAO.REQUEST_FURNISHED and json_input.get('furnished', None) == 'N':
                 reset = True
 
-            request_header_schema.load(json_input, instance=nr_d, partial=True)
-            nr_d.additionalInfo = json_input.get('additionalInfo', None)
-            nr_d.furnished = json_input.get('furnished', 'N')
-            nr_d.natureBusinessInfo = json_input.get('natureBusinessInfo', None)
-            nr_d.stateCd = state
-            nr_d.userId = user.id
+            request_header_schema.load(json_input, instance=nrd, partial=True)
+            nrd.additionalInfo = json_input.get('additionalInfo', None)
+            nrd.furnished = json_input.get('furnished', 'N')
+            nrd.natureBusinessInfo = json_input.get('natureBusinessInfo', None)
+            nrd.stateCd = state
+            nrd.userId = user.id
 
             try:
                 previousNr = json_input['previousNr']
-                nr_d.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
+                nrd.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
             except AttributeError:
-                nr_d.previousRequestId = None
+                nrd.previousRequestId = None
             except KeyError:
-                nr_d.previousRequestId = None
+                nrd.previousRequestId = None
 
             ### END request header ###
 
             ### APPLICANTS ###
             # TODO: applicants not updating properly -- needs fix
-            applicants_d = nr_d.applicants.one_or_none()
+            applicants_d = nrd.applicants.one_or_none()
             if applicants_d:
                 appl = json_input.get('applicants', None)
                 if appl:
                     errm = applicant_schema.validate(appl, partial=True)
                     errm.pop('firstName', None)
                     if errm:
-                        return jsonify(errm), 400
+                        # return jsonify(errm), 400
+                        MessageServices.add_message(MessageServices.ERROR, 'applicants_validation', errm)
+
 
                     applicant_schema.load(appl, instance=applicants_d, partial=True)
                 else:
@@ -488,30 +478,32 @@ class Request(Resource):
 
             ### NAMES ###
             # TODO: set consumptionDate not working -- breaks changing name values
-            if len(nr_d.names.all()) == 0:
+            if len(nrd.names.all()) == 0:
                 new_name_choice = Name()
-                new_name_choice.nrId = nr_d.id
-                nr_d.names.append(new_name_choice)
+                new_name_choice.nrId = nrd.id
+                nrd.names.append(new_name_choice)
 
-            for nrd_name in nr_d.names.all():
+            for nrd_name in nrd.names.all():
                 for in_name in json_input.get('names', []):
 
-                    if len(nr_d.names.all()) < in_name['choice']:
+                    if len(nrd.names.all()) < in_name['choice']:
 
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
-                            return jsonify(errors), 400
+                            MessageServices.add_message(MessageServices.ERROR, 'names_validation', errors)
+                            # return jsonify(errors), 400
 
                         new_name_choice = Name()
-                        new_name_choice.nrId = nr_d.id
+                        new_name_choice.nrId = nrd.id
                         names_schema.load(in_name, instance=new_name_choice, partial=False)
 
-                        nr_d.names.append(new_name_choice)
+                        nrd.names.append(new_name_choice)
 
                     elif nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
-                            return jsonify(errors), 400
+                            MessageServices.add_message(MessageServices.ERROR, 'names_validation', errors)
+                            # return jsonify(errors), 400
 
                         names_schema.load(in_name, instance=nrd_name, partial=False)
 
@@ -533,37 +525,44 @@ class Request(Resource):
                     new_comment = Comment()
                     new_comment.comment = in_comment['comment']
                     new_comment.examiner = user
-                    new_comment.nrId = nr_d.id
+                    new_comment.nrId = nrd.id
 
             ### END comments ###
 
             ### NWPTA ###
 
-            for nrd_nwpta in nr_d.partnerNS.all():
+            for nrd_nwpta in nrd.partnerNS.all():
                 for in_nwpta in json_input['nwpta']:
                     if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
 
                         errors = nwpta_schema.validate(in_nwpta, partial=False)
                         if errors:
-                            return jsonify(errors), 400
+                            MessageServices.add_message(MessageServices.ERROR, 'nwpta_validation', errors)
+                            # return jsonify(errors), 400
 
                         nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
             ### END nwpta ###
 
+            # if there were errors, abandon changes and return the set of errors
+            warning_and_errors = MessageServices.get_all_messages()
+            if warning_and_errors:
+                for we in warning_and_errors:
+                    if we['type'] == MessageServices.ERROR:
+                        return jsonify(errors=warning_and_errors), 400
+
+
             # update oracle if this nr was reset
             if reset:
-                nr_d.expirationDate = None
+                nrd.expirationDate = None
                 current_app.logger.debug('set state to h')
                 try:
                     nro.set_request_status_to_h(nr, user.username)
-                except NROServicesError as err:
-                    flash(err.error, 'error')
-                except Exception as missed_error:
-                    flash(err.error, 'error')
-                    pass  # do something here
+                except (NROServicesError, Exception) as err:
+                    MessageServices.add_message('error', 'reset_request_in_NRO', err)
+                    # flash(err.error, 'error')
 
             ### Finally save the entire graph
-            nr_d.save_to_db()
+            nrd.save_to_db()
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400
@@ -576,8 +575,13 @@ class Request(Resource):
             current_app.logger.error("Error when replacing NR:{0} Err:{1}".format(nr, err))
             return jsonify(message='NR had an internal error'), 500
 
-        current_app.logger.debug(nr_d.json())
-        return jsonify(nr_d.json()), 200
+        warning_and_errors = MessageServices.get_all_messages()
+        if warning_and_errors:
+            current_app.logger.debug(nrd.json(), warning_and_errors)
+            return jsonify(nameRequest=nrd.json(), warnings=warning_and_errors), 200
+
+        current_app.logger.debug(nrd.json())
+        return jsonify(nrd.json()), 200
 
 
 @cors_preflight("GET")

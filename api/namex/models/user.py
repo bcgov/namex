@@ -41,7 +41,8 @@ class User(db.Model):
             # s = KeycloakUserSchema()
             # u = s.load(data=token, partial=True)
             user = User(
-                username = token.get('username', None),
+                # username = token.get('username', None),
+                username = token.get('preferred_username', None),
                 firstname = token.get('given_name', None),
                 lastname = token.get('family_name', None),
                 iss = token['iss'],
