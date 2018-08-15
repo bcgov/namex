@@ -118,7 +118,7 @@ class RequestsQueue(Resource):
             warnings = nro.move_control_of_request_from_nro(nr, user)
 
         if 'warnings' in locals() and warnings:
-            return jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 200
+            return jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 206
 
         return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
 
