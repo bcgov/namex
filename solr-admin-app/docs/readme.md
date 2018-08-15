@@ -11,7 +11,13 @@ In PyCharm choose new project and selected flask (but then mo).
   * Git Repository: repo.
   * Advanced options
     * set context-dir to `solr-admin-app`
+    * Routing: path to /admin
     * Routing/Security: Secure route; insecure traffic: Redirect
+    * Build Configuration / environment variables
+      * SOLR_ADMIN_DATABASE_HOST: postgresql-solr.servicebc-ne-dev.svc
+      * (Secret) SOLR_ADMIN_DATABASE_USERNAME: postgresql-solr database-user
+      * (Secret) SOLR_ADMIN_DATABASE_PASSWORD: postgresql-solr database-password
+      * (Secret) SOLR_ADMIN_DATABASE_NAME: postgresql-solr database-name
     * Create
 
 
