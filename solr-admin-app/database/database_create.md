@@ -42,8 +42,9 @@ C:\> oc port-forward postgresql-solr-<pod-id> 54321:5432
 
 ## Run the Script
 
-Next connect to the database and run the script:
+Next connect to the database and run the scripts:
 
 ```
 C:\> "C:\Program Files\PostgreSQL\10\bin\psql" -h localhost -p 54321 -f C:\<path>\database_create.sql solr <username>
+C:\> "C:\Program Files\PostgreSQL\10\bin\psql" -h localhost -p 54321 -f C:\<path>\synonyms_data.sql solr <username>
 ```

@@ -1,13 +1,7 @@
-In PyCharm choos enew prject and selected flask (but then mo).
+In PyCharm choose new project and selected flask (but then mo).
 
-Copied in flask-admin sample, but complained about SQL Alchemy.
 
-File > Settings; Project: [projectname] > Project Interpreter. Clicked + and installed Flask Admin
-File > Settings; Project: [projectname] > Project Interpreter. Clicked + and installed Flask-SQLAlchemy
-Also: psycopg2
-(The above all done in openshift via the requirements.txt file)
-
-Deploy:
+#### Deploy:
 * Catalog: Python.
 * Screen 1
   * Click `Next`.
@@ -20,6 +14,22 @@ Deploy:
     * Routing/Security: Secure route; insecure traffic: Redirect
     * Create
 
+
+#### TODO:
+* SSO
+* Reload cores: auto or button
+* Stop words?
+* Performance
+* NAMEX-API build on commit
+* Move templates to better place / do jinja properly
+* Where to deploy? Test and push to dev/prod?
+* Dev DB reconfiguration and reload
+* Documentation on data loading, project, DB schemas
+* Alembic for migrating database changes?
+* gunicorn, or something else
+* auditing
+
+
 #### DONE:
 * SQLAlchemy secret key
 * Better duplicate error message
@@ -30,18 +40,4 @@ Deploy:
 * Put into NAMEX
 * Redeploy Solr with new config files ("enabled")
 * What container? Python
-
-#### TODO:
 * Config for different environments
-* SSO
-* Reload cores: auto or button
-* Stop words?
-* Performance
-* NAMEX-API build on commit
-* Move templates to better place / do jinja properly
-* Where to deploy? Test and push to dev/prod?
-* Dev DB reconfiguration and reload
-* Documentation on data loading, project, DB schemas
-* Alembic for migrating database changes
-* gunicorn, or something else
-* auditing
