@@ -222,6 +222,14 @@ class Requests(Resource):
         q = q.offset(start)
         q = q.limit(rows)
 
+        results = q.all()
+        result_set = Requests.search_request_schemas.dump(results)
+        current_app.logger.debug(result_set)
+        if not result_set:
+            resp = None
+        else:
+            resp= result_set.data
+
         # create the response
         rep = {'response':{'start':start,
                            'rows': rows,
@@ -231,7 +239,7 @@ class Requests(Resource):
                            'queue': queue,
                            'order': order_list
                            },
-               'nameRequests': Requests.search_request_schemas.dump(q.all()).data
+               'nameRequests': resp
                }
 
         ## counts for updatedToday and priorities
