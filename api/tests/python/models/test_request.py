@@ -1,5 +1,6 @@
 from flask import jsonify
 from unittest import mock
+import pytest
 
 
 def test_get_queued_oldest(client, app):
@@ -19,6 +20,7 @@ def test_get_queued_oldest(client, app):
 
     # Tests ####
     assert nr.nrNum == nr_oldest.nrNum
+
 
 def test_get_queued_oldest_multirow(client, app):
 
@@ -42,3 +44,17 @@ def test_get_queued_oldest_multirow(client, app):
 
     # Tests ####
     assert nr_first.nrNum == nr_oldest.nrNum
+
+
+def test_get_queued_empty_queue(client, app):
+
+    # SETUP #####
+    # add NR to database
+    from namex.models import Request as RequestDAO, User
+    from namex.exceptions import BusinessException
+
+    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak')
+    user.save_to_db()
+
+    with pytest.raises(BusinessException) as e_info:
+        nr_oldest, new_req = RequestDAO.get_queued_oldest(user)
