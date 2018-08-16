@@ -148,6 +148,9 @@ class Request(db.Model):
                 with_for_update().first()
         # this row is now locked
 
+        if not r:
+            raise BusinessException(None, 404)
+
         # mark this as assigned to the user, masking it from others.
         r.stateCd= State.INPROGRESS
         r.userId = userObj.id

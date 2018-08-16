@@ -11,6 +11,7 @@ from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
 
 from namex import jwt, nro, services
+from namex.exceptions import BusinessException
 from namex.models import db, ValidationError
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
 from namex.models import Name, NameSchema, PartnerNameSystemSchema
@@ -101,6 +102,8 @@ class RequestsQueue(Resource):
         # get the next NR assigned to the User
         try:
             nr, new_assignment = RequestDAO.get_queued_oldest(user)
+        except BusinessException as be:
+            return jsonify(message='There are no more requests in the {} Queue'.format(State.DRAFT)), 404
         except Exception as unmanaged_error:
             current_app.logger.error(unmanaged_error.with_traceback(None))
             return jsonify(message='internal server error'), 500
