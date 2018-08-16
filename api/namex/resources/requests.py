@@ -411,10 +411,18 @@ class Request(Resource):
                 existing_nr.save_to_db()
 
             if json_input.get('expirationDate', None):
-                json_input['expirationDate'] = datetime.datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
+                try:
+                    json_input['expirationDate'] = str(datetime.datetime.strptime(
+                        str(json_input['expirationDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
+                except ValueError:
+                    pass
 
             if json_input.get('submittedDate', None):
-                json_input['submittedDate'] = datetime.datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
+                try:
+                    json_input['submittedDate'] = str(datetime.datetime.strptime(
+                        str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
+                except ValueError:
+                    pass
 
             # ## If the current state is DRAFT, the transfer control from NRO to NAMEX
             # if the NR is in DRAFT then LOGICALLY lock the record in NRO
@@ -429,9 +437,6 @@ class Request(Resource):
             # update request header
 
             errors = request_header_schema.validate(json_input, partial=True)
-            errors.pop('submittedDate', None)
-            errors.pop('expirationDate', None)
-            errors.pop('previousNr', None)
             if errors:
                 # return jsonify(errors), 400
                 MessageServices.add_message(MessageServices.ERROR, 'request_validation', errors)
@@ -466,7 +471,6 @@ class Request(Resource):
                 appl = json_input.get('applicants', None)
                 if appl:
                     errm = applicant_schema.validate(appl, partial=True)
-                    errm.pop('firstName', None)
                     if errm:
                         # return jsonify(errm), 400
                         MessageServices.add_message(MessageServices.ERROR, 'applicants_validation', errm)

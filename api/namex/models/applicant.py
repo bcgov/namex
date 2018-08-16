@@ -89,12 +89,3 @@ class ApplicantSchema(ma.ModelSchema):
                  ,'countryTypeCd'
                  )
 
-    firstName = fields.String(
-        required=True,
-        error_messages={'required': {'message': 'firstName is a required field'}}
-    )
-    lastName = fields.String(
-        required=True,
-        error_messages={'required': {'message': 'lastName is a required field'}}
-    )
-

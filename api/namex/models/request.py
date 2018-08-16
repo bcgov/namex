@@ -220,7 +220,6 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'natureBusinessInfo'
                  ,'nrNum'
                  ,'nroLastUpdate'
-                 ,'previousNr'
                  ,'priorityCd'
                  ,'requestTypeCd'
                  ,'stateCd'
