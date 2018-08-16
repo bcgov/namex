@@ -12,7 +12,7 @@ from sqlalchemy.inspection import inspect
 
 from namex import jwt, nro, services
 from namex.models import db, ValidationError
-from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema
+from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
 from namex.models import Name, NameSchema, PartnerNameSystemSchema
 from namex.models import User, State, Comment
 from namex.models import ApplicantSchema
@@ -28,6 +28,7 @@ from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANAL
 import datetime
 import json
 import urllib
+import sys
 
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
@@ -36,6 +37,7 @@ api = Namespace('nameRequests', description='Name Request System - Core API for 
 request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
 request_header_schema = RequestsHeaderSchema(many=False)
+request_search_schemas = RequestsSearchSchema(many=True)
 
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
@@ -134,12 +136,12 @@ class Requests(Resource):
     START=0
     ROWS=10
 
-    search_request_schemas = RequestsSchema(many=True
-        ,exclude=['id'
-            ,'applicants'
-            ,'partnerNS'
-            ,'requestId'
-            ,'previousRequestId'])
+    # search_request_schemas = RequestsSchema(many=True)
+        # ,exclude=['id'
+        #     ,'applicants'
+        #     ,'partnerNS'
+        #     ,'requestId'
+        #     ,'previousRequestId'])
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -223,7 +225,12 @@ class Requests(Resource):
         q = q.limit(rows)
 
         results = q.all()
-        result_set = Requests.search_request_schemas.dump(results)
+
+        for r in results:
+            print(r.__dict__, file=sys.stderr)
+
+        # result_set = Requests.search_request_schemas.dump(results)
+        result_set = request_search_schemas.dump(results)
         current_app.logger.debug(result_set)
         if not result_set:
             resp = None

@@ -13,7 +13,7 @@ from .comment import Comment, CommentSchema
 from .event import Event
 from .nwpta import PartnerNameSystem, PartnerNameSystemSchema
 from .name import Name, NameSchema
-from .request import Request, RequestsSchema, RequestsHeaderSchema
+from .request import Request, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
 from .user import User, UserSchema
 from .state import State, StateSchema
 from .decision_reason import DecisionReason

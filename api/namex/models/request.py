@@ -230,3 +230,29 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'submittedDate'
                  ,'xproJurisdiction'
                  )
+
+
+class RequestsSearchSchema(ma.ModelSchema):
+    class Meta:
+        model = Request
+        # sqla_session = db.scoped_session
+        # additional = ['stateCd']
+        fields = ('additionalInfo'
+                 ,'consentFlag'
+                 ,'corpNum'
+                 ,'expirationDate'
+                 ,'furnished'
+                 ,'natureBusinessInfo'
+                 ,'nrNum'
+                 ,'nroLastUpdate'
+                 ,'priorityCd'
+                 ,'requestTypeCd'
+                 ,'stateCd'
+                 ,'submitCount'
+                 ,'submittedDate'
+                 ,'xproJurisdiction'
+                 ,'names'
+                 ,'activeUser'
+                 )
+    names = ma.Nested(NameSchema, many=True)
+    activeUser = ma.Nested(UserSchema, many=False,  only='username')
