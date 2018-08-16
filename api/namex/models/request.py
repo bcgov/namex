@@ -67,8 +67,6 @@ class Request(db.Model):
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
 
-
-
     def __init__(self, *args, **kwargs):
         pass
 

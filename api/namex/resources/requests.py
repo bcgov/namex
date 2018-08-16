@@ -224,19 +224,6 @@ class Requests(Resource):
         q = q.offset(start)
         q = q.limit(rows)
 
-        results = q.all()
-
-        for r in results:
-            print(r.__dict__, file=sys.stderr)
-
-        # result_set = Requests.search_request_schemas.dump(results)
-        result_set = request_search_schemas.dump(results)
-        current_app.logger.debug(result_set)
-        if not result_set:
-            resp = None
-        else:
-            resp= result_set.data
-
         # create the response
         rep = {'response':{'start':start,
                            'rows': rows,
@@ -246,25 +233,25 @@ class Requests(Resource):
                            'queue': queue,
                            'order': order_list
                            },
-               'nameRequests': resp
+               'nameRequests': request_search_schemas.dump(q.all())
                }
 
         ## counts for updatedToday and priorities
-        data = rep['nameRequests']
-        for row in data:
-            try:
-                if row['priorityCd'] == 'Y':
-                    rep['response']['numPriorities'] += 1
-            except KeyError or AttributeError:
-                pass
-
-        today = str(datetime.datetime.now)[0:10]
-        for row in data:
-            try:
-                if row['lastUpdate'][0:10] == today:
-                    rep['response']['numUpdatedToday'] += 1
-            except KeyError or AttributeError:
-                pass
+        # data = rep['nameRequests']
+        # for row in data:
+        #     try:
+        #         if row['priorityCd'] == 'Y':
+        #             rep['response']['numPriorities'] += 1
+        #     except KeyError or AttributeError:
+        #         pass
+        #
+        # today = str(datetime.datetime.now)[0:10]
+        # for row in data:
+        #     try:
+        #         if row['lastUpdate'][0:10] == today:
+        #             rep['response']['numUpdatedToday'] += 1
+        #     except KeyError or AttributeError:
+        #         pass
 
         return jsonify(rep), 200
 
