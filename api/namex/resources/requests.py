@@ -15,12 +15,11 @@ from namex.exceptions import BusinessException
 from namex.models import db, ValidationError
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
 from namex.models import Name, NameSchema, PartnerNameSystemSchema
-from namex.models import User, State, Comment
+from namex.models import User, State, Comment, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
-from namex.services import ServicesError
-from namex.services import MessageServices
+from namex.services import ServicesError, MessageServices, EventRecorder
 
 from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 from namex.utils.util import cors_preflight
@@ -124,6 +123,8 @@ class RequestsQueue(Resource):
 
         if 'warnings' in locals() and warnings:
             return jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 206
+
+        EventRecorder.record(user, Event.GET, nr, {})
 
         return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
 
@@ -291,13 +292,15 @@ class Request(Resource):
     # @cors.crossdomain(origin='*')
     @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def delete(nr):
-        nrd = RequestDAO.find_by_nr(nr)
-        # even if not found we still return a 204, which is expected spec behaviour
-        if nrd:
-            nrd.stateCd = State.CANCELLED
-            nrd.save_to_db()
 
-        return '', 204
+        return '', 501 # not implemented
+        # nrd = RequestDAO.find_by_nr(nr)
+        # even if not found we still return a 204, which is expected spec behaviour
+        # if nrd:
+        #     nrd.stateCd = State.CANCELLED
+        #     nrd.save_to_db()
+        #
+        # return '', 204
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -362,6 +365,8 @@ class Request(Resource):
             nrd.stateCd = state
             nrd.userId = user.id
             nrd.save_to_db()
+            EventRecorder.record(user, Event.PATCH, nrd, json_input)
+
         except (Exception) as err:
             return jsonify(message='Internal server error'), 500
 
@@ -573,6 +578,8 @@ class Request(Resource):
             ### Finally save the entire graph
             nrd.save_to_db()
 
+            EventRecorder.record(user, Event.PUT, nrd, json_input)
+
         except ValidationError as ve:
             return jsonify(ve.messages), 400
 
@@ -700,6 +707,8 @@ class NRNames(Resource):
         names_schema.load(json_data, instance=nrd_name, partial=False)
         nrd_name.save_to_db()
 
+        EventRecorder.record(user, Event.PUT, nrd, json_data)
+
         return jsonify({"message": "Replace {nr} choice:{choice} with {json}".format(nr=nr, choice=choice, json=json_data)}), 200
 
     @staticmethod
@@ -725,6 +734,8 @@ class NRNames(Resource):
 
         names_schema.load(json_data, instance=nrd_name, partial=True)
         nrd_name.save_to_db()
+
+        EventRecorder.record(user, Event.PATCH, nrd, json_data)
 
         return jsonify({"message": "Patched {nr} - {json}".format(nr=nr, json=json_data)}), 200
 
