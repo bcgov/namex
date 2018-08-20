@@ -10,7 +10,7 @@ class EventRecorder(object):
     def record(user, action, nr, json):
 
         event = models.Event(
-            eventDate = datetime.utcnow,
+            eventDate = datetime.datetime.utcnow,
             action = action,
             jsonZip = bz2.compress(json),
             nrId = nr.id,
