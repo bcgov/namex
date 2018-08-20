@@ -26,9 +26,16 @@ class Event(db.Model):
     userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('User', backref=backref('user_events', uselist=False), foreign_keys=[userId])
 
-    def __init__(self, action, jsonData):
-        self.action = action
-        self.jsonZip = bz2.compress(jsonData)
+    GET = 'get'
+    PUT='put'
+    PATCH='patch'
+    POST='post'
+    DELETE='DELETE'
+
+    VALID_ACTIONS=[GET, PUT, PATCH, POST, DELETE]
+
+    def __init__(self):
+        pass # use the fields listed to set the values
 
     def json(self):
         return {"eventDate": self.eventDate, "action": self.action, "jsonData": bz2.decompress(self.jsonZip),
