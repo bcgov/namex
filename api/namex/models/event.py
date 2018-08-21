@@ -34,15 +34,13 @@ class Event(db.Model):
 
     VALID_ACTIONS=[GET, PUT, PATCH, POST, DELETE]
 
-    def __init__(self):
-        pass # use the fields listed to set the values
-
     def json(self):
         return {"eventDate": self.eventDate, "action": self.action, "jsonData": bz2.decompress(self.jsonZip),
                 "requestId": self.nrId, "userId": self.userId }
 
     def save_to_db(self):
         db.session.add(self)
+        db.session.commit()
 
     def delete_from_db(self):
         raise BusinessException()
