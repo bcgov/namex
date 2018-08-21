@@ -368,6 +368,7 @@ class Request(Resource):
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
 
         except (Exception) as err:
+            current_app.logger.debug(err.with_traceback(None))
             return jsonify(message='Internal server error'), 500
 
         if 'warnings' in locals() and warnings:
