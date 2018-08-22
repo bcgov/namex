@@ -238,6 +238,7 @@ class RequestsSearchSchema(ma.ModelSchema):
         # sqla_session = db.scoped_session
         # additional = ['stateCd']
         fields = ('additionalInfo'
+                 ,'comments'
                  ,'consentFlag'
                  ,'corpNum'
                  ,'expirationDate'
@@ -256,3 +257,4 @@ class RequestsSearchSchema(ma.ModelSchema):
                  )
     names = ma.Nested(NameSchema, many=True)
     activeUser = ma.Nested(UserSchema, many=False,  only='username')
+    comments = ma.Nested(CommentSchema, many=True, only=['comment', 'examiner', 'timestamp'])
