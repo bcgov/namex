@@ -419,19 +419,28 @@ class Request(Resource):
                 existing_nr.stateCd = State.HOLD
                 existing_nr.save_to_db()
 
+            # convert Expiration Date to correct format
             if json_input.get('expirationDate', None):
-                try:
-                    json_input['expirationDate'] = str(datetime.datetime.strptime(
-                        str(json_input['expirationDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
-                except ValueError:
-                    pass
+                json_input['expirationDate'] = str(datetime.datetime.strptime(
+                    str(json_input['expirationDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
+            # convert Submitted Date to correct format
             if json_input.get('submittedDate', None):
-                try:
-                    json_input['submittedDate'] = str(datetime.datetime.strptime(
-                        str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
-                except ValueError:
-                    pass
+                json_input['submittedDate'] = str(datetime.datetime.strptime(
+                    str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
+
+            # convert NWPTA dates to correct format
+            if json_input.get('nwpta', None):
+                for region in json_input['nwpta']:
+                    try:
+                        if region['partnerNameDate'] == '':
+                            region['partnerNameDate'] = None
+                        if region['partnerNameDate']:
+                            region['partnerNameDate'] = str(datetime.datetime.strptime(
+                                str(region['partnerNameDate']), '%d-%m-%Y'))
+                    except ValueError:
+                        pass
+                        # pass on this error and catch it when trying to add to record, to be returned
 
             # ## If the current state is DRAFT, the transfer control from NRO to NAMEX
             # if the NR is in DRAFT then LOGICALLY lock the record in NRO
