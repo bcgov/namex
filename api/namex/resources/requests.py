@@ -438,8 +438,6 @@ class Request(Resource):
                         if region['partnerNameDate']:
                             region['partnerNameDate'] = str(datetime.datetime.strptime(
                                 str(region['partnerNameDate']), '%d-%m-%Y'))
-                        print('NWPTA REGION')
-                        print(region)
                     except ValueError:
                         pass
                         # pass on this error and catch it when trying to add to record, to be returned
