@@ -393,7 +393,7 @@
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" />
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonyms where enabled = true" ignoreMissingDatabase="true"
+            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
@@ -429,7 +429,7 @@
       <analyzer type="query">
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonyms where enabled = true" ignoreMissingDatabase="true"
+            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
         <filter class="solr.StopFilterFactory"
                 ignoreCase="true"
@@ -471,7 +471,7 @@
       <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="0" generateWordParts="1" catenateAll="0" catenateWords="0"/>
       <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonyms where enabled = true" ignoreMissingDatabase="true"
+            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
       <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
       <filter class="solr.FlattenGraphFilterFactory"/>
@@ -500,7 +500,7 @@
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonyms where enabled = true" ignoreMissingDatabase="true"
+            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt"/>
         <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="1" catenateNumbers="1" catenateAll="0"/>
@@ -515,7 +515,7 @@
       <analyzer type="query">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonyms where enabled = true" ignoreMissingDatabase="true"
+            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt"/>
         <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="1" catenateNumbers="1" catenateAll="0"/>
@@ -543,7 +543,7 @@
       <analyzer type="query">
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonyms where enabled = true" ignoreMissingDatabase="true"
+            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" />
         <filter class="solr.LowerCaseFilterFactory"/>

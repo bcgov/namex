@@ -19,7 +19,7 @@ Enter `https://github.com/<username>/namex` as the URL, and then click the `Clon
 Go to `VCS` > `Git` > `Remotes...`, then click the + to add the upstream with Name of `upstream` and URL of
 `https://github.com/bcgov/namex`.
 
-We never want to push to upstream master, so open a command shell and run:
+We never want to push to upstream master, so go to `View` > `Tool Windows` > `Terminal` and run:
  
 ```
 C:\<path>\namex> git remote set-url --push upstream no_push
@@ -32,8 +32,12 @@ upstream        no_push (push)
 
 ### 3 Branch
 
-To get your local master up to date go to `VCS` > `Update Project`, select `Rebase` and `Using Stash`.
+To get your local master up to date go to `VCS` > `Update Project`, select `Rebase` and `Using Stash`. (doesn't work?)
 
+To create a new branch, go to `VCS` > `Git` > `Branches...` and then select `New Branch`. Enter a branch name and make
+sure `Checkout branch` is selected.
+
+Commandline:
 
 ```sh
 cd $working_dir/namex 
