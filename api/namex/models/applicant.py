@@ -9,7 +9,7 @@ class Applicant(db.Model):
     __tablename__ = 'applicants'
 
     partyId = db.Column('party_id', db.Integer, primary_key=True)
-    lastName = db.Column('last_name', db.String(50), nullable=False)
+    lastName = db.Column('last_name', db.String(50))
     firstName = db.Column('first_name', db.String(50))
     middleName = db.Column('middle_name', db.String(50))
     phoneNumber = db.Column('phone_number', db.String(30))
@@ -88,13 +88,4 @@ class ApplicantSchema(ma.ModelSchema):
                  ,'stateProvinceCd'
                  ,'countryTypeCd'
                  )
-
-    firstName = fields.String(
-        required=True,
-        error_messages={'required': {'message': 'firstName is a required field'}}
-    )
-    lastName = fields.String(
-        required=True,
-        error_messages={'required': {'message': 'lastName is a required field'}}
-    )
 

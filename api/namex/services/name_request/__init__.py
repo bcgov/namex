@@ -36,7 +36,6 @@ def valid_state_transition(user, nr, new_state):
     :param new_state:
     :return: (bool)
     """
-
     if (new_state in (State.APPROVED,
                       State.REJECTED,
                       State.CONDITIONAL)) \

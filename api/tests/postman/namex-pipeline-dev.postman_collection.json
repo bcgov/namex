@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e23a8b51-68e4-45eb-ad6b-68edc3ab357d",
+		"_postman_id": "07db505c-2d2b-47b7-8bb2-fb2321e225cb",
 		"name": "namex-pipeline-dev",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -8,7 +8,6 @@
 	"item": [
 		{
 			"name": "setup",
-			"description": null,
 			"item": [
 				{
 					"name": "Install Postman BDD Copy",
@@ -65,7 +64,6 @@
 		},
 		{
 			"name": "authenticate",
-			"description": null,
 			"item": [
 				{
 					"name": "authenticate",
@@ -120,7 +118,6 @@
 		},
 		{
 			"name": "ops",
-			"description": null,
 			"item": [
 				{
 					"name": "healthz",
@@ -292,7 +289,6 @@
 		},
 		{
 			"name": "analysis",
-			"description": null,
 			"item": [
 				{
 					"name": "conflicts",
@@ -590,7 +586,6 @@
 		},
 		{
 			"name": "requests+names",
-			"description": null,
 			"item": [
 				{
 					"name": "requests/queues/@me/oldest",
@@ -598,15 +593,19 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d7d78724-bb77-4a41-839b-c294e579216a",
+								"id": "8115be7b-5067-4273-8df3-ddff8c9941c0",
 								"type": "text/javascript",
 								"exec": [
-									"pm.test(\"Response time is less than 8000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(8000);",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.statusType.should.equal(2);",
 									"});",
 									"",
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"pm.test(\"Response time is less than 8000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(8000);",
 									"});",
 									"",
 									"var jsonData = pm.response.json();",
@@ -1232,13 +1231,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6a0f49da-3be0-4052-a31e-b0ee583c31a8",
+								"id": "eca8d667-6621-461b-827b-b99da6a5b0ef",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
-									"pm.test(\"Response time is less than 500ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"pm.test(\"Response time is less than 3000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(3000);",
 									"});",
 									"",
 									"it('should be an success response', () => {",
@@ -1320,13 +1319,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6aa4d634-a1a9-4e4d-8f7b-d787ed145aea",
+								"id": "1de03e24-96f8-4965-ac94-07a24f5e78cd",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
-									"pm.test(\"Response time is less than 500ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
 									"});",
 									"",
 									"it('should be an success response', () => {",
@@ -1394,13 +1393,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "e6fe617b-152f-48b4-8ac1-46c095e0f3b8",
+								"id": "355f131d-2d59-4bd9-ac58-e14387a0699d",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
-									"pm.test(\"Response time is less than 500ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"pm.test(\"Response time is less than 3000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(3000);",
 									"});",
 									"",
 									"it('should be an success response', () => {",
@@ -1473,7 +1472,6 @@
 		},
 		{
 			"name": "request-search",
-			"description": null,
 			"item": [
 				{
 					"name": "/requests - no params",
@@ -1491,7 +1489,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bb3728d4-038f-4235-94c5-ff0d1b6dd7dc",
+								"id": "c3b20ffb-bd96-454a-8332-b20139f1d2f2",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1533,7 +1531,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -1587,7 +1585,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "739f2467-058f-495d-bb7b-fff09130b617",
+								"id": "dd5dc319-9fa0-4819-8163-18054bff2f25",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1655,7 +1653,7 @@
 									"});",
 									"",
 									"it('should get an array of 10 nameRequests', () => {",
-									"    response.body.nameRequests.length.should.eq(10);",
+									"    response.body.nameRequests[0].length.should.eq(10);",
 									"});"
 								]
 							}
@@ -1713,7 +1711,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d948f79d-f877-4637-9267-b7cec3f3fa81",
+								"id": "95e35078-04fe-476b-b360-ba4bf658257e",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1755,7 +1753,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -1766,10 +1764,9 @@
 									"",
 									"describe('All NameRequests should be in \\'HOLD\\'', () => {",
 									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          response.body.nameRequests[i].should.have.property('stateCd')",
-									"          response.body.nameRequests[i].stateCd.should.equal('HOLD')",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('HOLD')",
 									"      }",
 									"  })",
 									"})",
@@ -1830,7 +1827,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "e42bbe4e-2f06-4c54-8c43-895c9989828a",
+								"id": "016e6990-f48a-4668-a3ae-63a56b4d94d0",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1872,7 +1869,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -1883,10 +1880,9 @@
 									"",
 									"describe('All NameRequests should be in \\'INPROGRESS\\'', () => {",
 									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          response.body.nameRequests[i].should.have.property('stateCd')",
-									"          response.body.nameRequests[i].stateCd.should.equal('INPROGRESS')",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('INPROGRESS')",
 									"      }",
 									"  })",
 									"});"
@@ -1946,7 +1942,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "464db94d-e3a7-48c7-b18e-689e6037c56d",
+								"id": "1ddd411d-6b91-40ec-9ba4-61298d954fd4",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1988,7 +1984,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -1999,10 +1995,9 @@
 									"",
 									"describe('All NameRequests should be in \\'DRAFT\\'', () => {",
 									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          response.body.nameRequests[i].should.have.property('stateCd')",
-									"          response.body.nameRequests[i].stateCd.should.equal('DRAFT')",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('DRAFT')",
 									"      }",
 									"  })",
 									"});"
@@ -2062,7 +2057,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "9c0e66aa-9023-4e33-bea0-ddb2ecbffad4",
+								"id": "9ecd37a6-cd7d-4064-9c76-144e8eb65413",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2104,7 +2099,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -2115,10 +2110,9 @@
 									"",
 									"describe('All NameRequests should be in \\'CONDITIONAL\\'', () => {",
 									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          response.body.nameRequests[i].should.have.property('stateCd')",
-									"          response.body.nameRequests[i].stateCd.should.equal('CONDITIONAL')",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('CONDITIONAL')",
 									"      }",
 									"  })",
 									"});"
@@ -2178,7 +2172,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "197e4342-e75b-428e-b55f-1b6938f1a88c",
+								"id": "b06ada10-d9a3-403e-83c4-32db3bd7953a",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2220,7 +2214,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -2231,10 +2225,9 @@
 									"",
 									"describe('All NameRequests should be in \\'APPROVED\\'', () => {",
 									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          response.body.nameRequests[i].should.have.property('stateCd')",
-									"          response.body.nameRequests[i].stateCd.should.equal('APPROVED')",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('APPROVED')",
 									"      }",
 									"  })",
 									"});"
@@ -2294,7 +2287,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3135b78d-a0ea-444b-afa0-85031a75fb17",
+								"id": "228245f6-48c9-4820-b30d-6c15813aed40",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2336,7 +2329,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -2347,10 +2340,9 @@
 									"",
 									"describe('All NameRequests should be in \\'REJECTED\\'', () => {",
 									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          response.body.nameRequests[i].should.have.property('stateCd')",
-									"          response.body.nameRequests[i].stateCd.should.equal('REJECTED')",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('REJECTED')",
 									"      }",
 									"  })",
 									"});"
@@ -2410,7 +2402,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "00394b8e-be97-41fb-b809-4ea444762bf6",
+								"id": "2355404c-83ce-4397-a442-0cecb2f85f58",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2452,7 +2444,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -2463,10 +2455,9 @@
 									"",
 									"describe('No NameRequests should be \\'unfurnished\\'', () => {",
 									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          response.body.nameRequests[i].should.have.property('furnished')",
-									"          response.body.nameRequests[i].furnished.should.equal('N')",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('furnished')",
+									"          response.body.nameRequests[0][i].furnished.should.equal('N')",
 									"      }",
 									"  })",
 									"})",
@@ -2527,7 +2518,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ada2b41d-8f86-4b3f-af62-e84a661fcb60",
+								"id": "46a38d4c-2d18-4347-b5a3-4963752b6142",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2569,7 +2560,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -2580,10 +2571,9 @@
 									"",
 									"describe('No NameRequests should be \\'unfurnished\\'', () => {",
 									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          response.body.nameRequests[i].should.have.property('furnished')",
-									"          response.body.nameRequests[i].furnished.should.equal('Y')",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('furnished')",
+									"          response.body.nameRequests[0][i].furnished.should.equal('Y')",
 									"      }",
 									"  })",
 									"})",
@@ -2644,7 +2634,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "27b5f770-fb50-41e6-8c0a-5f67c37e9e51",
+								"id": "23939174-235b-474c-a80f-f03aecbac9f3",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -2686,7 +2676,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests;",
+									"    var nameRequests = jsonData.nameRequests[0];",
 									"    for (var i=0;i<nameRequests.length;i++) {",
 									"        nameRequests[i].should.have.schema({",
 									"            type: 'object',",
@@ -2698,15 +2688,14 @@
 									"describe('NameRequests should have PriorityCD=Y first', () => {",
 									"  var seenIt='Y'",
 									"  it('should check that all Priority codes are first', () => {",
-									"      for(i=0; i < response.body.nameRequests.length; i++) {",
-									"          console.log(response.body.nameRequests[i])",
-									"          if (response.body.nameRequests[i].priorityCd != 'Y'){",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          if (response.body.nameRequests[0][i].priorityCd != 'Y'){",
 									"              if (seenIt == 'Y'){ seenIt = 'N' }",
 									"          }",
 									"          if (seenIt == 'Y'){",
-									"              response.body.nameRequests[i].priorityCd.should.equal('Y')",
+									"              response.body.nameRequests[0][i].priorityCd.should.equal('Y')",
 									"          } else {",
-									"              response.body.nameRequests[i].priorityCd.should.equal('N')",
+									"              response.body.nameRequests[0][i].priorityCd.should.equal('N')",
 									"          }",
 									"      }",
 									"  })",

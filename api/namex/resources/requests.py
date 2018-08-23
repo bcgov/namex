@@ -11,15 +11,15 @@ from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
 
 from namex import jwt, nro, services
+from namex.exceptions import BusinessException
 from namex.models import db, ValidationError
-from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema
+from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
 from namex.models import Name, NameSchema, PartnerNameSystemSchema
-from namex.models import User, State, Comment
+from namex.models import User, State, Comment, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
-from namex.services import ServicesError
-from namex.services import MessageServices
+from namex.services import ServicesError, MessageServices, EventRecorder
 
 from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 from namex.utils.util import cors_preflight
@@ -28,6 +28,7 @@ from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANAL
 import datetime
 import json
 import urllib
+import sys
 
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
@@ -36,6 +37,7 @@ api = Namespace('nameRequests', description='Name Request System - Core API for 
 request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
 request_header_schema = RequestsHeaderSchema(many=False)
+request_search_schemas = RequestsSearchSchema(many=True)
 
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
@@ -99,6 +101,8 @@ class RequestsQueue(Resource):
         # get the next NR assigned to the User
         try:
             nr, new_assignment = RequestDAO.get_queued_oldest(user)
+        except BusinessException as be:
+            return jsonify(message='There are no more requests in the {} Queue'.format(State.DRAFT)), 404
         except Exception as unmanaged_error:
             current_app.logger.error(unmanaged_error.with_traceback(None))
             return jsonify(message='internal server error'), 500
@@ -120,6 +124,8 @@ class RequestsQueue(Resource):
         if 'warnings' in locals() and warnings:
             return jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 206
 
+        EventRecorder.record(user, Event.GET, nr, {})
+
         return jsonify(nameRequest='{}'.format(nr.nrNum)), 200
 
 
@@ -134,12 +140,12 @@ class Requests(Resource):
     START=0
     ROWS=10
 
-    search_request_schemas = RequestsSchema(many=True
-        ,exclude=['id'
-            ,'applicants'
-            ,'partnerNS'
-            ,'requestId'
-            ,'previousRequestId'])
+    # search_request_schemas = RequestsSchema(many=True)
+        # ,exclude=['id'
+        #     ,'applicants'
+        #     ,'partnerNS'
+        #     ,'requestId'
+        #     ,'previousRequestId'])
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -231,25 +237,25 @@ class Requests(Resource):
                            'queue': queue,
                            'order': order_list
                            },
-               'nameRequests': Requests.search_request_schemas.dump(q.all()).data
+               'nameRequests': request_search_schemas.dump(q.all())
                }
 
         ## counts for updatedToday and priorities
-        data = rep['nameRequests']
-        for row in data:
-            try:
-                if row['priorityCd'] == 'Y':
-                    rep['response']['numPriorities'] += 1
-            except KeyError or AttributeError:
-                pass
-
-        today = str(datetime.datetime.now)[0:10]
-        for row in data:
-            try:
-                if row['lastUpdate'][0:10] == today:
-                    rep['response']['numUpdatedToday'] += 1
-            except KeyError or AttributeError:
-                pass
+        # data = rep['nameRequests']
+        # for row in data:
+        #     try:
+        #         if row['priorityCd'] == 'Y':
+        #             rep['response']['numPriorities'] += 1
+        #     except KeyError or AttributeError:
+        #         pass
+        #
+        # today = str(datetime.datetime.now)[0:10]
+        # for row in data:
+        #     try:
+        #         if row['lastUpdate'][0:10] == today:
+        #             rep['response']['numUpdatedToday'] += 1
+        #     except KeyError or AttributeError:
+        #         pass
 
         return jsonify(rep), 200
 
@@ -286,13 +292,15 @@ class Request(Resource):
     # @cors.crossdomain(origin='*')
     @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def delete(nr):
-        nrd = RequestDAO.find_by_nr(nr)
-        # even if not found we still return a 204, which is expected spec behaviour
-        if nrd:
-            nrd.stateCd = State.CANCELLED
-            nrd.save_to_db()
 
-        return '', 204
+        return '', 501 # not implemented
+        # nrd = RequestDAO.find_by_nr(nr)
+        # even if not found we still return a 204, which is expected spec behaviour
+        # if nrd:
+        #     nrd.stateCd = State.CANCELLED
+        #     nrd.save_to_db()
+        #
+        # return '', 204
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -357,7 +365,10 @@ class Request(Resource):
             nrd.stateCd = state
             nrd.userId = user.id
             nrd.save_to_db()
+            EventRecorder.record(user, Event.PATCH, nrd, json_input)
+
         except (Exception) as err:
+            current_app.logger.debug(err.with_traceback(None))
             return jsonify(message='Internal server error'), 500
 
         if 'warnings' in locals() and warnings:
@@ -408,11 +419,28 @@ class Request(Resource):
                 existing_nr.stateCd = State.HOLD
                 existing_nr.save_to_db()
 
+            # convert Expiration Date to correct format
             if json_input.get('expirationDate', None):
-                json_input['expirationDate'] = datetime.datetime.strptime(json_input['expirationDate'][5:], '%d %b %Y %H:%M:%S %Z')
+                json_input['expirationDate'] = str(datetime.datetime.strptime(
+                    str(json_input['expirationDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
+            # convert Submitted Date to correct format
             if json_input.get('submittedDate', None):
-                json_input['submittedDate'] = datetime.datetime.strptime(json_input['submittedDate'][5:], '%d %b %Y %H:%M:%S %Z')
+                json_input['submittedDate'] = str(datetime.datetime.strptime(
+                    str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
+
+            # convert NWPTA dates to correct format
+            if json_input.get('nwpta', None):
+                for region in json_input['nwpta']:
+                    try:
+                        if region['partnerNameDate'] == '':
+                            region['partnerNameDate'] = None
+                        if region['partnerNameDate']:
+                            region['partnerNameDate'] = str(datetime.datetime.strptime(
+                                str(region['partnerNameDate']), '%d-%m-%Y'))
+                    except ValueError:
+                        pass
+                        # pass on this error and catch it when trying to add to record, to be returned
 
             # ## If the current state is DRAFT, the transfer control from NRO to NAMEX
             # if the NR is in DRAFT then LOGICALLY lock the record in NRO
@@ -427,9 +455,6 @@ class Request(Resource):
             # update request header
 
             errors = request_header_schema.validate(json_input, partial=True)
-            errors.pop('submittedDate', None)
-            errors.pop('expirationDate', None)
-            errors.pop('previousNr', None)
             if errors:
                 # return jsonify(errors), 400
                 MessageServices.add_message(MessageServices.ERROR, 'request_validation', errors)
@@ -464,7 +489,6 @@ class Request(Resource):
                 appl = json_input.get('applicants', None)
                 if appl:
                     errm = applicant_schema.validate(appl, partial=True)
-                    errm.pop('firstName', None)
                     if errm:
                         # return jsonify(errm), 400
                         MessageServices.add_message(MessageServices.ERROR, 'applicants_validation', errm)
@@ -563,6 +587,8 @@ class Request(Resource):
 
             ### Finally save the entire graph
             nrd.save_to_db()
+
+            EventRecorder.record(user, Event.PUT, nrd, json_input)
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400
@@ -691,6 +717,8 @@ class NRNames(Resource):
         names_schema.load(json_data, instance=nrd_name, partial=False)
         nrd_name.save_to_db()
 
+        EventRecorder.record(user, Event.PUT, nrd, json_data)
+
         return jsonify({"message": "Replace {nr} choice:{choice} with {json}".format(nr=nr, choice=choice, json=json_data)}), 200
 
     @staticmethod
@@ -716,6 +744,8 @@ class NRNames(Resource):
 
         names_schema.load(json_data, instance=nrd_name, partial=True)
         nrd_name.save_to_db()
+
+        EventRecorder.record(user, Event.PATCH, nrd, json_data)
 
         return jsonify({"message": "Patched {nr} - {json}".format(nr=nr, json=json_data)}), 200
 

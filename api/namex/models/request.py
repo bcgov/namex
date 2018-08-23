@@ -67,8 +67,6 @@ class Request(db.Model):
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
 
-
-
     def __init__(self, *args, **kwargs):
         pass
 
@@ -150,6 +148,9 @@ class Request(db.Model):
                 with_for_update().first()
         # this row is now locked
 
+        if not r:
+            raise BusinessException(None, 404)
+
         # mark this as assigned to the user, masking it from others.
         r.stateCd= State.INPROGRESS
         r.userId = userObj.id
@@ -222,7 +223,6 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'natureBusinessInfo'
                  ,'nrNum'
                  ,'nroLastUpdate'
-                 ,'previousNr'
                  ,'priorityCd'
                  ,'requestTypeCd'
                  ,'stateCd'
@@ -230,3 +230,31 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'submittedDate'
                  ,'xproJurisdiction'
                  )
+
+
+class RequestsSearchSchema(ma.ModelSchema):
+    class Meta:
+        model = Request
+        # sqla_session = db.scoped_session
+        # additional = ['stateCd']
+        fields = ('additionalInfo'
+                 ,'comments'
+                 ,'consentFlag'
+                 ,'corpNum'
+                 ,'expirationDate'
+                 ,'furnished'
+                 ,'natureBusinessInfo'
+                 ,'nrNum'
+                 ,'nroLastUpdate'
+                 ,'priorityCd'
+                 ,'requestTypeCd'
+                 ,'stateCd'
+                 ,'submitCount'
+                 ,'submittedDate'
+                 ,'xproJurisdiction'
+                 ,'names'
+                 ,'activeUser'
+                 )
+    names = ma.Nested(NameSchema, many=True)
+    activeUser = ma.Nested(UserSchema, many=False,  only='username')
+    comments = ma.Nested(CommentSchema, many=True, only=['comment', 'examiner', 'timestamp'])
