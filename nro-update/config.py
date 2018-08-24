@@ -6,9 +6,12 @@ load_dotenv(find_dotenv())
 
 
 class Config(object):
+    PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    MAX_ROW_LIMIT = os.getenv('MAX_ROWS','1000')
-    MIN_DELAY_MINUTES = os.getenv('MIN_DELAY_MINUTES','10')
+    MAX_ROW_LIMIT = os.getenv('MAX_ROWS','100')
+    MIN_DELAY_SECONDS = os.getenv('MIN_DELAY_SECONDS','600')
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # POSTGRESQL
     PG_USER = os.getenv('PG_USER', '')
