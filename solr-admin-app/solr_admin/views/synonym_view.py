@@ -1,5 +1,8 @@
 
+from flask import request
 from flask_admin.contrib.sqla import ModelView
+
+from solr_admin.keycloak import Keycloak
 
 
 # The customized ModelView that is used for working with the synonyms.
@@ -27,6 +30,14 @@ class SynonymView(ModelView):
 
     # Use a custom list.html that provides a page size drop down with extra choices.
     list_template = "synonyms_list.html"
+
+    # Flask-OIDC function that states whether or not the user is logged in and has permissions.
+    def is_accessible(self):
+        return Keycloak(None).has_access()
+
+    # Flask-OIDC function that is called if the user is not logged in or does not have permissions.
+    def inaccessible_callback(self, name, **kwargs):
+        return Keycloak(None).get_redirect_url(request.url)
 
     # When the user goes to save the data, trim whitespace and put the list back into alphabetical order.
     def on_model_change(self, form, model, is_created):

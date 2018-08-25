@@ -16,36 +16,39 @@ CONFIGURATION = {
 
 
 class Config(object):
-    # Create secret key so we can use sessions.
-    SECRET_KEY = os.urandom(24)
+    SECRET_KEY = "My Secret"
 
-    # Turn this off to get rid of warning messages. In future versions of SQLAlchemy, false will be the default and
+    # Normal Keycloak parameters.
+    OIDC_CLIENT_SECRETS = os.getenv("SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS", "")
+    OIDC_SCOPES = ["openid", "email", "profile"]
+    OIDC_VALID_ISSUERS = [os.getenv("SOLR_ADMIN_APP_OIDC_VALID_ISSUERS", "")]
+
+    # Undocumented Keycloak parameter: allows sending cookies without the secure flag, which we need for the local
+    # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere elses.
+    OIDC_ID_TOKEN_COOKIE_SECURE = os.getenv("SOLR_ADMIN_APP_OIDC_ID_TOKEN_COOKIE_SECURE", "True") == "True"
+
+    # Turn this off to get rid of warning messages. In future versions of SQLAlchemy, False will be the default and
     # this can be removed.
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # PostgreSQL Connection information.
-    DB_USER = os.getenv("SOLR_ADMIN_DATABASE_USERNAME", "")
-    DB_PASSWORD = os.getenv("SOLR_ADMIN_DATABASE_PASSWORD", "")
-    DB_HOST = os.getenv("SOLR_ADMIN_DATABASE_HOST", "")
-    DB_PORT = os.getenv("SOLR_ADMIN_DATABASE_PORT", "5432")
-    DB_NAME = os.getenv("SOLR_ADMIN_DATABASE_NAME", "solr")
+    DATABASE_USER = os.getenv("SOLR_ADMIN_APP_DATABASE_USERNAME", "")
+    DATABASE_PASSWORD = os.getenv("SOLR_ADMIN_APP_DATABASE_PASSWORD", "")
+    DATABASE_HOST = os.getenv("SOLR_ADMIN_APP_DATABASE_HOST", "")
+    DATABASE_PORT = os.getenv("SOLR_ADMIN_APP_DATABASE_PORT", "5432")
+    DATABASE_NAME = os.getenv("SOLR_ADMIN_APP_DATABASE_NAME", "solr")
 
     SQLALCHEMY_DATABASE_URI = "postgresql://{user}:{password}@{host}:{port}/{name}".format(
-         user=DB_USER,
-         password=DB_PASSWORD,
-         host=DB_HOST,
-         port=int(DB_PORT),
-         name=DB_NAME,
-    )
+        user=DATABASE_USER, password=DATABASE_PASSWORD, host=DATABASE_HOST, port=int(DATABASE_PORT), name=DATABASE_NAME)
 
-    TESTING = False
     DEBUG = False
+    TESTING = False
 
 
 class DevConfig(Config):
-    SQLALCHEMY_ECHO = True
-    TESTING = False
     DEBUG = True
+    TESTING = True
+    SQLALCHEMY_ECHO = True
 
 
 class TestConfig(Config):
