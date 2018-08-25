@@ -45,7 +45,7 @@ git checkout -b myfeature
 ```
 
 #### Test
-Make sure to add test for your feature and thatthey all pass.
+Make sure to add tests for your feature and that they all pass.
  
 ### 4 Keep your branch in sync
 
@@ -82,7 +82,7 @@ git push origin myfeature
 
 ### 7 Create a pull request
 
-1. Visit your fork at https://github.com/<username>/namex
+1. Visit your fork at `https://github.com/<username>/namex`
 2. Click the `Compare & Pull Request` button next to your `myfeature` branch.
 
 
