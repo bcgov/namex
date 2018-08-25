@@ -19,8 +19,14 @@ class SynonymView(ModelView):
     # Keep everything sorted, although realistically also we need to sort the values within a row before it is saved.
     column_default_sort = "synonyms_text"
 
+    # Make all columns editable. [temporarily except the Boolean field "enabled" - see Flask-Admin problem 1604]
+    column_editable_list = ["category", "comment", "synonyms_text"]
+
+    # Allow the user to filter on the category column.
+    column_filters = ["category"]
+
     # Search within the synonyms_text.
-    column_searchable_list = ["synonyms_text"]
+    column_searchable_list = ["category", "synonyms_text"]
 
     # Use a custom create.html that warns the user about sorting what they enter.
     create_template = "synonyms_create.html"
