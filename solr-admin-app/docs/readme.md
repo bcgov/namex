@@ -33,7 +33,6 @@ redirect URI "http://localhost:8080/oidc_callback"
 * NICE TO HAVE: Inline editing of synonyms alphabetizes but is not displayed properly
 * NICE TO HAVE: Determine if there is a way to highlight search matches
 * NICE TO HAVE: Inline edit box for synonyms needs to be wider
-* Figure out why OIDC redirect is not working for HTTPS
 * SSO authorization based on group
 * Display username and add logout button
 * Magic stuff for PostgreSQL volumes
@@ -57,7 +56,7 @@ redirect URI "http://localhost:8080/oidc_callback"
 * Determine why menu items are sometimes missing on first load
 * Remove root URL from Keycloak client
 * Can't inline edit booleans (github.com/flask-admin/flask-admin/issues/1604)
-* Make route not visible from internet, much like solr is done 
+* Make route not visible from internet, much like solr is done
 * Make the audit action an enum in the model
 * Implement test suite
 * Export of synonym_audit loses date and time information
@@ -84,3 +83,4 @@ redirect URI "http://localhost:8080/oidc_callback"
 * Add "category" column to the database, plus searching or filtering
 * Auditing
 * Insert commas after spaces in the view (data too wide for page)
+* Figure out why OIDC redirect is not working for HTTPS
