@@ -27,12 +27,12 @@ Create client "namex-solr-admin" with client protocol openid-connect and Access 
 redirect URI "http://localhost:8080/oidc_callback"
 
 #### TODO:
-* auditing
-* Reload cores: auto or button
-
-* insert commas after spaces in the view (data too wide for page)
-* Determine if there is a way to highlight search matches
-
+* SHOULD HAVE: Reload cores: auto or button
+* SHOULD HAVE: Ensure that synonyms do not have embedded spaces
+* SHOULD HAVE: Ensure that duplicate values in synonyms are disallowed
+* NICE TO HAVE: Inline editing of synonyms alphabetizes but is not displayed properly
+* NICE TO HAVE: Determine if there is a way to highlight search matches
+* NICE TO HAVE: Inline edit box for synonyms needs to be wider
 * Figure out why OIDC redirect is not working for HTTPS
 * SSO authorization based on group
 * Display username and add logout button
@@ -48,15 +48,19 @@ redirect URI "http://localhost:8080/oidc_callback"
 * Handle changes to postgres credentials
 * Fix desktop to run on port 8080, not 5000
 * Sort out what the Flask SECRET_KEY is used for
-* Fix the warning for the dotenv import in config.py
+* Fix the warning for the dotenv import in config.py (and others)
 * Determine if the Keycloak singleton is pythony enough
 * Document the local development setup.
 * Learn and embrace PEP 8 and 257
 * Determine if bootstrap files, etc, should be in repo
 * Add version numbers to requirements.txt
-* Why is the Synonyms menu item sometimes missing on first load?
+* Determine why menu items are sometimes missing on first load
 * Remove root URL from Keycloak client
-* Can't edit booleans (github.com/flask-admin/flask-admin/issues/1604)
+* Can't inline edit booleans (github.com/flask-admin/flask-admin/issues/1604)
+* Make route not visible from internet, much like solr is done 
+* Make the audit action an enum in the model
+* Implement test suite
+* Export of synonym_audit loses date and time information
 
 #### DONE:
 * Better duplicate error message
@@ -78,3 +82,5 @@ redirect URI "http://localhost:8080/oidc_callback"
 * SSO authentication
 * Monkeypatch the Verisign G2 root certificate
 * Add "category" column to the database, plus searching or filtering
+* Auditing
+* Insert commas after spaces in the view (data too wide for page)

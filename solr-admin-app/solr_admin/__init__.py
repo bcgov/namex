@@ -9,7 +9,9 @@ import config
 import solr_admin.models
 from solr_admin.keycloak import Keycloak
 from solr_admin.models.synonym import Synonym
+from solr_admin.models.synonym_audit import SynonymAudit
 from solr_admin.views.synonym_view import SynonymView
+from solr_admin.views.synonym_audit_view import SynonymAuditView
 
 
 # Create admin
@@ -31,5 +33,6 @@ def create_application(run_mode=os.getenv("FLASK_ENV", "production")):
 
     flask_admin = Admin(application, name="Solr Configuration", template_mode="bootstrap3")
     flask_admin.add_view(SynonymView(Synonym, models.db.session))
+    flask_admin.add_view(SynonymAuditView(SynonymAudit, models.db.session))
 
     return application
