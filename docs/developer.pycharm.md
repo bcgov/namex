@@ -1,3 +1,8 @@
+# (In Progress)
+
+Trying to make a Pycharmish version of the document, but there's a lot where you need to do things from a Pycharm
+Terminal.
+
 ## Workflow
 
 ![Git workflow](img/namex-gitflow.png)
