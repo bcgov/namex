@@ -58,7 +58,7 @@ def patch_ca_certs():
 
     # Use an indicator file so that we don't repeatedly patch.
     if os.path.isfile(ca_certs_already_monkeyed):
-        logging.info("Monkeypatching previously done for httplib2 CA certificates file in \"%s\"", ca_certs_filename)
+        logging.info("monkeypatch: previously done for httplib2 CA certificates file in \"%s\"", ca_certs_filename)
     else:
         try:
             # Read and prepend the certificate.
@@ -73,6 +73,7 @@ def patch_ca_certs():
             # Touch our indicator so we don't add the certificate again.
             Path(ca_certs_already_monkeyed).touch()
         except FileNotFoundError:
-            logging.warning("httplib2 CA certificates file expected in \"%s\" but not found", ca_certs_filename)
+            logging.warning("monkeypatch: httplib2 CA certificates file expected in \"%s\" but not found",
+                            ca_certs_filename)
         else:
-            logging.info("Monkeypatched httplib2 CA certificates file in \"%s\"", ca_certs_filename)
+            logging.info("monkeypatch: httplib2 CA certificates file in \"%s\"", ca_certs_filename)
