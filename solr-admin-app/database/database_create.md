@@ -1,9 +1,9 @@
 
 # Scripts for creating databases.
 
-The SQL in database_create.sql is used to create the database objects needed for Solr configuration. These are a "least
-effort" way of creating the seldom-changing objects. This process would be much easier if there was a way to run the
-script from pgadmin, but that does not seem to work.
+The SQL in `database_create.sql` is used to create the database objects needed for Solr configuration. These are a
+"least effort" way of creating the seldom-changing objects. This process would be much easier if there was a way to run
+the script from pgadmin, but that does not seem to work.
 
 This documentation assumes that `oc.exe` from OpenShift Origin Client Tools has been installed and that the user is
 either running Minishift locally or has an account on the Pathfinder OpenShift cluster.
