@@ -22,7 +22,7 @@ class Config(object):
     OIDC_CLIENT_SECRETS = os.getenv("SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS", "")
     OIDC_SCOPES = ["openid", "email", "profile"]
     OIDC_VALID_ISSUERS = [os.getenv("SOLR_ADMIN_APP_OIDC_VALID_ISSUERS", "")]
-    OVERWRITE_REDIRECT_URI = [os.getenv("SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI", "")]
+    OVERWRITE_REDIRECT_URI = os.getenv("SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI", "")
 
     # Undocumented Keycloak parameter: allows sending cookies without the secure flag, which we need for the local
     # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere elses.
