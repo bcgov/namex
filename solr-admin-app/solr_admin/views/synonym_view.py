@@ -1,6 +1,7 @@
 
 from flask import request
 from flask_admin.contrib.sqla import ModelView
+from wtforms.validators import ValidationError
 
 from solr_admin.models import db
 from solr_admin.keycloak import Keycloak
@@ -50,17 +51,8 @@ class SynonymView(ModelView):
 
     # When the user goes to save the data, trim whitespace and put the list back into alphabetical order.
     def on_model_change(self, form, model, is_created):
-        if model.synonyms_text is not None:
-            # Split into comma-separated words.
-            synonyms = model.synonyms_text.split(",")
-
-            # Strip leading and trailing spaces.
-            synonyms = list(map(str.strip, synonyms))
-
-            # Sort alphabetically within the synonyms.
-            synonyms.sort()
-
-            model.synonyms_text = ", ".join(synonyms)
+        model.synonyms_text = self._clean_csv(model.synonyms_text)
+        self._validate_synonyms_text(model.synonyms_text)
 
     # After saving the data create the audit log (we need to wait for a synonym.id value when creating)
     def after_model_change(self, form, model, is_created):
@@ -75,6 +67,63 @@ class SynonymView(ModelView):
     def after_model_delete(self, model):
         self._create_audit_log(model, "DELETE")
         self._reload_solr_cores()
+
+    # Put a CSV string into alphabetical order, and format nicely.
+    @staticmethod
+    def _clean_csv(string):
+        # Split into comma-separated words.
+        values = string.split(",")
+
+        # Strip leading and trailing spaces.
+        values = list(map(str.strip, values))
+
+        # Remove empty strings.
+        values = list(filter(None, values))
+
+        # Sort alphabetically.
+        values.sort()
+
+        return ", ".join(values)
+
+    # Validate the Synonyms Text and ensure it meets our standards.
+    @staticmethod
+    def _validate_synonyms_text(synonyms_text):
+        # Split into comma-separated words.
+        values = synonyms_text.split(",")
+
+        # Strip leading and trailing spaces.
+        values = list(map(str.strip, values))
+
+        # Embedded spaces are not allowed.
+        embedded_spaces = []
+        for value in values:
+            if " " in value:
+                embedded_spaces.append(value)
+
+        if len(embedded_spaces) != 0:
+            raise ValidationError("Synonyms Text does not allow embedded spaces ({})"
+                                  .format(", ".join(embedded_spaces)))
+
+        # Duplicate values are not allowed.
+        duplicate_values = []
+        previous_value = ""
+        for value in values:
+            if value == previous_value:
+                duplicate_values.append(value)
+
+            previous_value = value
+
+        if len(duplicate_values) != 0:
+            # Remove duplicates, in the weird case of have triples or more.
+            duplicate_values = list(set(duplicate_values))
+            duplicate_values.sort()
+
+            raise ValidationError("Synonyms Text does not allow duplicate values ({})"
+                                  .format(", ".join(duplicate_values)))
+
+        # Ensure that there is more than one value.
+        if len(values) == 1:
+            raise ValidationError("Synonyms Text must contain more than one value")
 
     # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
     @staticmethod
