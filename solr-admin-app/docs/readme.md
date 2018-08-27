@@ -1,37 +1,17 @@
 
-In PyCharm choose new project and selected flask (but then mo).
-
-#### Deploy:
-* Catalog: Python
-* Screen 1
-  * Click `Next`
-* Screen 2
-  * Add to Project: `names examination (dev)`
-  * Application Name: `solr-admin`
-  * Git Repository: repo
-  * Advanced options
-    * set context-dir to `solr-admin-app`
-    * Routing/Security: Secure route; insecure traffic: Redirect
-    * Build Configuration / environment variables
-      * SOLR_ADMIN_APP_DATABASE_HOST: postgresql-solr.servicebc-ne-dev.svc
-      * (Secret) SOLR_ADMIN_APP_DATABASE_USERNAME: postgresql-solr database-user
-      * (Secret) SOLR_ADMIN_APP_DATABASE_PASSWORD: postgresql-solr database-password
-      * (Secret) SOLR_ADMIN_APP_DATABASE_NAME: postgresql-solr database-name
-      * Also the Keycloak params
-    * Create
-
-Set up configmap and reconfigure build (?) to use it.
-
 #### SSO Admin Setup:
+
 Create client "namex-solr-admin" with client protocol openid-connect and Access Type confidential. Add valid
-redirect URI "http://localhost:8080/oidc_callback"
+redirect URI "http://localhost:8080/oidc_callback" for desktop development.
 
 #### TODO:
 * SHOULD HAVE: Ensure that synonyms do not have embedded spaces
+* SHOULD HAVE: Ensure that singleton values in synonums are disallowed
 * SHOULD HAVE: Ensure that duplicate values in synonyms are disallowed
 * NICE TO HAVE: Inline editing of synonyms alphabetizes but is not displayed properly
 * NICE TO HAVE: Determine if there is a way to highlight search matches
 * NICE TO HAVE: Inline edit box for synonyms needs to be wider
+* Automate build of image for latest
 * SSO authorization based on group
 * Display username and add logout button
 * Magic stuff for PostgreSQL volumes

@@ -194,6 +194,10 @@
                     {
                         "name": "SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI",
                         "value": "${SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI}"
+                    },
+                    {
+                        "name": "SOLR_ADMIN_APP_SOLR_INSTANCE",
+                        "value": "${SOLR_ADMIN_APP_SOLR_INSTANCE}"
                     }
                 ],
                 "ports": [
@@ -286,6 +290,13 @@
       "description": "The URI that overrides the redirect (temporary, to handle http/https issues).",
       "required": true,
       "value": "https://namex-solr-dev.pathfinder.gov.bc.ca/oidc_callback"
+    },
+    {
+      "name": "SOLR_ADMIN_APP_SOLR_INSTANCE",
+      "displayName": "Solr Instance",
+      "description": "The URI of the Solr instance that is to have cores reloaded.",
+      "required": true,
+      "value": "https://namex-solr-dev.pathfinder.gov.bc.ca/solr"
     }
   ]
 }
