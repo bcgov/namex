@@ -25,7 +25,7 @@ class Config(object):
     OVERWRITE_REDIRECT_URI = os.getenv("SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI", "")
 
     # Undocumented Keycloak parameter: allows sending cookies without the secure flag, which we need for the local
-    # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere elses.
+    # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere else.
     OIDC_ID_TOKEN_COOKIE_SECURE = os.getenv("SOLR_ADMIN_APP_OIDC_ID_TOKEN_COOKIE_SECURE", "True") == "True"
 
     # Turn this off to get rid of warning messages. In future versions of SQLAlchemy, False will be the default and
@@ -49,7 +49,7 @@ class Config(object):
 class DevConfig(Config):
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_ECHO = True
+    # SQLALCHEMY_ECHO = True
 
 
 class TestConfig(Config):

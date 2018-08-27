@@ -27,7 +27,6 @@ Create client "namex-solr-admin" with client protocol openid-connect and Access 
 redirect URI "http://localhost:8080/oidc_callback"
 
 #### TODO:
-* SHOULD HAVE: Reload cores: auto or button
 * SHOULD HAVE: Ensure that synonyms do not have embedded spaces
 * SHOULD HAVE: Ensure that duplicate values in synonyms are disallowed
 * NICE TO HAVE: Inline editing of synonyms alphabetizes but is not displayed properly
@@ -60,6 +59,7 @@ redirect URI "http://localhost:8080/oidc_callback"
 * Make the audit action an enum in the model
 * Implement test suite
 * Export of synonym_audit loses date and time information
+* Move the solr core names to somewhere easily configurable
 
 #### DONE:
 * Better duplicate error message
@@ -84,3 +84,4 @@ redirect URI "http://localhost:8080/oidc_callback"
 * Auditing
 * Insert commas after spaces in the view (data too wide for page)
 * Figure out why OIDC redirect is not working for HTTPS
+* Reload cores automatically

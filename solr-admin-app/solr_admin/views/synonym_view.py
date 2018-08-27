@@ -5,6 +5,7 @@ from flask_admin.contrib.sqla import ModelView
 from solr_admin.models import db
 from solr_admin.keycloak import Keycloak
 from solr_admin.models.synonym_audit import SynonymAudit
+import solr_admin.solr
 
 
 # The customized ModelView that is used for working with the synonyms.
@@ -68,9 +69,12 @@ class SynonymView(ModelView):
         else:
             self._create_audit_log(model, "UPDATE")
 
+        self._reload_solr_cores()
+
     # After deleting the data create the audit log.
     def after_model_delete(self, model):
         self._create_audit_log(model, "DELETE")
+        self._reload_solr_cores()
 
     # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
     @staticmethod
@@ -79,3 +83,8 @@ class SynonymView(ModelView):
                              model.comment, model.enabled)
         db.session.add(audit)
         db.session.commit()
+
+    # Reload the solr cores after a change. This will be very chatty when there are a lot of edits happening.
+    @staticmethod
+    def _reload_solr_cores():
+        solr_admin.solr.reload_solr_cores()
