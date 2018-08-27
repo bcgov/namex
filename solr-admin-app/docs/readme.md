@@ -5,9 +5,6 @@ Create client "namex-solr-admin" with client protocol openid-connect and Access 
 redirect URI "http://localhost:8080/oidc_callback" for desktop development.
 
 #### TODO:
-* SHOULD HAVE: Ensure that synonyms do not have embedded spaces
-* SHOULD HAVE: Ensure that singleton values in synonums are disallowed
-* SHOULD HAVE: Ensure that duplicate values in synonyms are disallowed
 * NICE TO HAVE: Inline editing of synonyms alphabetizes but is not displayed properly
 * NICE TO HAVE: Determine if there is a way to highlight search matches
 * NICE TO HAVE: Inline edit box for synonyms needs to be wider
@@ -40,6 +37,7 @@ redirect URI "http://localhost:8080/oidc_callback" for desktop development.
 * Implement test suite
 * Export of synonym_audit loses date and time information
 * Move the solr core names to somewhere easily configurable
+* Add error reporting for Solr core reloading
 
 #### DONE:
 * Better duplicate error message
@@ -65,3 +63,6 @@ redirect URI "http://localhost:8080/oidc_callback" for desktop development.
 * Insert commas after spaces in the view (data too wide for page)
 * Figure out why OIDC redirect is not working for HTTPS
 * Reload cores automatically
+* Ensure that singleton values in synonyms are disallowed
+* Ensure that synonyms do not have embedded spaces
+* Ensure that duplicate values in synonyms are disallowed
