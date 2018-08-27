@@ -39,3 +39,8 @@ class CommentSchema(ma.ModelSchema):
         model = Comment
         fields = ('comment', 'timestamp', 'examiner', 'id')
     examiner = ma.Nested(UserSchema, many=False,  only='username')
+
+class NameCommentSchema(ma.ModelSchema):
+    class Meta:
+        model = Comment
+        fields = ('comment', )

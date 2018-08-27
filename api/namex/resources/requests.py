@@ -15,7 +15,7 @@ from namex.exceptions import BusinessException
 from namex.models import db, ValidationError
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
 from namex.models import Name, NameSchema, PartnerNameSystemSchema
-from namex.models import User, State, Comment, Event
+from namex.models import User, State, Comment, NameCommentSchema, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
@@ -42,6 +42,7 @@ request_search_schemas = RequestsSearchSchema(many=True)
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
 nwpta_schema = PartnerNameSystemSchema(many=False)
+name_comment_schema = NameCommentSchema(many=False)
 
 applicant_schema = ApplicantSchema(many=False)
 
@@ -706,6 +707,10 @@ class NRNames(Resource):
         if errors:
             return jsonify(errors), 400
 
+        errors = name_comment_schema.validate(json_data['comment'], partial=True)
+        if errors:
+            return jsonify(errors), 400
+
         nrd, nrd_name, msg, code = NRNames.common(nr, choice)
         if not nrd:
             return msg, code
@@ -715,6 +720,18 @@ class NRNames(Resource):
             return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
 
         names_schema.load(json_data, instance=nrd_name, partial=False)
+
+        if json_data['comment'] is not None and json_data['comment']['comment'] is not None:
+            comment_instance = Comment()
+            name_comment_schema.load(json_data['comment'], instance=comment_instance, partial=True)
+            comment_instance.examinerId = user.id
+            comment_instance.nrId = nrd_name.nrId
+
+            comment_instance.save_to_db()
+            nrd_name.commentId = comment_instance.id
+        else:
+            nrd_name.comment = None
+
         nrd_name.save_to_db()
 
         EventRecorder.record(user, Event.PUT, nrd, json_data)

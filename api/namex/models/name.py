@@ -2,6 +2,7 @@
 """
 from . import db, ma
 from marshmallow import fields
+from sqlalchemy.orm import backref
 
 class Name(db.Model):
     __tablename__ = 'names'
@@ -24,7 +25,11 @@ class Name(db.Model):
     decision_text = db.Column(db.String(1000), default='')
 
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
+    commentId = db.Column('comment_id', db.Integer, db.ForeignKey('comments.id'))
     # nameRequest = db.relationship('Request')
+
+    # if a comment is added during decision, link it to the name record to be sent back to NRO
+    comment = db.relationship("Comment", backref=backref("related_name", uselist=False), foreign_keys=[commentId])
 
     NOT_EXAMINED = 'NE'
     APPROVED = 'A'
@@ -44,6 +49,7 @@ class Name(db.Model):
             "conflict2_num": self.conflict2_num,
             "conflict3_num": self.conflict3_num,
             "decision_text": self.decision_text,
+            "comment": None if self.comment is None else self.comment.as_dict(),
         }
 
     @classmethod
@@ -68,4 +74,4 @@ class NameSchema(ma.ModelSchema):
         required=True,
         error_messages={'required': {'message': 'name is a required field'}}
     )
-    # additional = ("name", "email", "created_at")
+

@@ -9,7 +9,7 @@ ma = Marshmallow()
 from marshmallow.exceptions import ValidationError
 
 from .applicant import Applicant, ApplicantSchema
-from .comment import Comment, CommentSchema
+from .comment import Comment, CommentSchema, NameCommentSchema
 from .event import Event
 from .nwpta import PartnerNameSystem, PartnerNameSystemSchema
 from .name import Name, NameSchema
