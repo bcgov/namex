@@ -5,3 +5,5 @@ Flask-SQLAlchemy
 httplib2
 psycopg2-binary
 python-dotenv
+requests
+requests-futures
