@@ -204,7 +204,7 @@ class Requests(Resource):
             nrNum = nrNum.replace('NR', '').strip()
             nrNum = nrNum.replace('nr', '').strip()
             nrNum = '%'+nrNum+'%'
-            q = q.filter(RequestDAO.nrNum.ilike(nrNum))
+            q = q.filter(RequestDAO.nrNum.like(nrNum))
         if activeUser:
             q = q.join(RequestDAO.activeUser).filter(User.username.ilike('%'+activeUser+'%'))
 
