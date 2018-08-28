@@ -202,16 +202,17 @@ class Requests(Resource):
 
         if nrNum:
             nrNum = nrNum.replace('NR', '').strip()
+            nrNum = nrNum.replace('nr', '').strip()
             nrNum = '%'+nrNum+'%'
-            q = q.filter(RequestDAO.nrNum.like(nrNum))
+            q = q.filter(RequestDAO.nrNum.ilike(nrNum))
         if activeUser:
-            q = q.join(RequestDAO.activeUser).filter(User.username.like('%'+activeUser+'%'))
+            q = q.join(RequestDAO.activeUser).filter(User.username.ilike('%'+activeUser+'%'))
 
         #TODO: fix count on search by compName -- returns count of all names that match
         # -- want it to be all NRs (nrs can have multiple names that match)
         # ---- right now count is adjusted on the frontend in method 'populateTable'
         if compName:
-            q = q.join(RequestDAO.names).filter(Name.name.like('%' + compName + '%'))
+            q = q.join(RequestDAO.names).filter(Name.name.ilike('%' + compName + '%'))
 
         if furnished == 'false':
             q = q.filter(RequestDAO.furnished != 'Y')
