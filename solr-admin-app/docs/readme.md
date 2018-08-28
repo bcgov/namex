@@ -38,6 +38,10 @@ redirect URI "http://localhost:8080/oidc_callback" for desktop development.
 * Export of synonym_audit loses date and time information
 * Move the solr core names to somewhere easily configurable
 * Add error reporting for Solr core reloading
+* Don't reload solr cores if only the category or comment change
+* Edit page should use a text area for large varchar strings
+* If you're on page 2 when less than 100 items, switch to 1000 per page fails
+* SynonymView has commented out code for embedded spaces - remove if not needed
 
 #### DONE:
 * Better duplicate error message
