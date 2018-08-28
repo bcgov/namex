@@ -94,16 +94,16 @@ class SynonymView(ModelView):
         # Strip leading and trailing spaces.
         values = list(map(str.strip, values))
 
-        # Embedded spaces are not allowed.
-        embedded_spaces = []
-        for value in values:
-            if " " in value:
-                embedded_spaces.append(value)
-
-        if len(embedded_spaces) != 0:
-            raise ValidationError("Synonyms Text does not allow embedded spaces ({})"
-                                  .format(", ".join(embedded_spaces)))
-
+#        # Embedded spaces are not allowed.
+#        embedded_spaces = []
+#        for value in values:
+#            if " " in value:
+#                embedded_spaces.append(value)
+#
+#        if len(embedded_spaces) != 0:
+#            raise ValidationError("Synonyms Text does not allow embedded spaces ({})"
+#                                  .format(", ".join(embedded_spaces)))
+#
         # Duplicate values are not allowed.
         duplicate_values = []
         previous_value = ""
