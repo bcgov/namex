@@ -70,8 +70,8 @@ try:
     ora_cursor = ora_con.cursor()
 
     reqs = db.session.query(Request).\
-                filter(Request.stateCd.in_([State.APPROVED, State.REJECTED])).\
-                filter(Request.furnished is not 'Y'). \
+                filter(Request.stateCd.in_([State.APPROVED, State.REJECTED, State.CONDITIONAL])).\
+                filter(Request.furnished != 'Y'). \
         filter(Request.lastUpdate < datetime.utcnow()-timedelta(seconds=delay)). \
         order_by(Request.lastUpdate.asc()). \
         limit(max_rows). \

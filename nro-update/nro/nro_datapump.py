@@ -23,8 +23,8 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
             names[choice]['state'] = 'NE'
 
         decision_text = ''
-        if name.state in [Name.APPROVED, name.CONDITION]:
-            names[choice]['decision'] = '{}****{}'.format(name.state, name.decision_text[:1000])
+        if name.state in [Name.APPROVED, Name.CONDITION, Name.REJECTED]:
+            names[choice]['decision'] = '{}****{}'.format(names[choice]['state'], name.decision_text[:1000])
 
         if name.conflict1:
             names[choice]['conflict1'] = '{}****{}'.format(name.conflict1_num[:10], name.conflict1[:150])

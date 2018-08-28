@@ -167,7 +167,7 @@ class NROServices(object):
                             'H',               # p_status
                             '',               # p_expiry_date - mandatory, but ignored by the proc
                             '',               # p_consent_flag- mandatory, but ignored by the proc
-                            examiner_username, # p_examiner_id
+                            examiner_username[:7], # p_examiner_id
                             ]
 
                 # Call the name_examination procedure to save complete decision data for a single NR
