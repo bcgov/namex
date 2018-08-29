@@ -117,12 +117,11 @@
          WARNING: The _text_ catch-all field will significantly increase your index size.
          If you don't need it, consider removing it and the corresponding copyField directive.
     -->
-   
     <!-- doc values are enabled by default for primitive types such as long so we don't index the version field  -->
     <field name="_version_" type="long" indexed="false" stored="false"/>
     <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
     <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
-
+	
     <field name="id" type="string" stored="true" required="true" indexed="true" multiValued="false" />
     <field name="name" type="text_en_splitting" multiValued="false" indexed="true" required="true" stored="true" termVectors="true"/>
     <field name="state_type_cd" type="string" multiValued="false" indexed="true" required="false" stored="true" termVectors="true"/>
@@ -455,42 +454,52 @@
          document "WiFi" or "wi-fi".
     -->
     <dynamicField name="*_txt_en_split" type="text_en_splitting"  indexed="true"  stored="true"/>
-    <fieldType name="text_en_splitting" class="solr.TextField" autoGeneratePhraseQueries="true" positionIncrementGap="100">
-    <analyzer type="index">
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
-      <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="0" generateWordParts="1" catenateAll="0" catenateWords="0"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-      <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
-      <filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="indexed_synonyms.txt"/>
-      <filter class="solr.FlattenGraphFilterFactory"/>
-    </analyzer>
-    <analyzer type="query">
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
-      <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="0" generateWordParts="1" catenateAll="0" catenateWords="0"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
+    <fieldType name="text_en_splitting" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="true">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <!-- Case insensitive stop word removal.
+        -->
+        <filter class="solr.StopFilterFactory"
+                ignoreCase="true"
+                words="lang/stopwords_en.txt"
+        />
+        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
+        <filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="indexed_synonyms.txt"/>
+        <filter class="solr.FlattenGraphFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory"
+                ignoreCase="true"
+                words="lang/stopwords_en.txt"
+        />
+        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
             sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
-      <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
-      <filter class="solr.FlattenGraphFilterFactory"/>
-    </analyzer>
+        <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
+        <filter class="solr.FlattenGraphFilterFactory"/>
+      </analyzer>
     </fieldType>
-	
-	 <fieldType name="text_name_copy" class="solr.TextField" positionIncrementGap="100" multiValued="true">
+
+   <fieldType name="text_name_copy" class="solr.TextField" positionIncrementGap="100" multiValued="true">
     <analyzer type="index">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
      <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="1" generateWordParts="1" catenateAll="0" catenateWords="0"/>
       <filter class="solr.LowerCaseFilterFactory"/>
+     <!--<filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="restricted_synonyms.txt"/>-->
     </analyzer>
     <analyzer type="query">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
       <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="1" generateWordParts="1" catenateAll="0" catenateWords="0"/>
       <filter class="solr.LowerCaseFilterFactory"/>
-     </analyzer>
+      <!--<filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="restricted_synonyms.txt"/>-->
+    </analyzer>
   </fieldType>
 
     <!-- Less flexible matching, but less false matches.  Probably not ideal for product names,
@@ -1063,6 +1072,6 @@
        <str name="paramkey">param value</str>
      </similarity>
     -->
-	 <copyField source="name" dest="name_copy"/>
 
+    <copyField source="name" dest="name_copy"/>
 </schema>

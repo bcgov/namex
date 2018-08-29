@@ -117,7 +117,6 @@
          WARNING: The _text_ catch-all field will significantly increase your index size.
          If you don't need it, consider removing it and the corresponding copyField directive.
     -->
-   
     <!-- doc values are enabled by default for primitive types such as long so we don't index the version field  -->
     <field name="_version_" type="long" indexed="false" stored="false"/>
     <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
@@ -143,11 +142,11 @@
     <!-- <copyField source="*" dest="_text_"/> -->
 
     <!-- Dynamic field definitions allow using convention over configuration
-       for fields via the specification of patterns to match field names.
+       for fields via the specification of patterns to match field names. 
        EXAMPLE:  name="*_i" will match any field ending in _i (like myid_i, z_i)
        RESTRICTION: the glob-like pattern in the name attribute must have
        a "*" only at the start or the end.  -->
-
+   
     <dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
     <dynamicField name="*_is" type="ints"    indexed="true"  stored="true"/>
     <dynamicField name="*_s"  type="string"  indexed="true"  stored="true" />
@@ -167,7 +166,7 @@
     <dynamicField name="*_dts" type="date"    indexed="true"  stored="true" multiValued="true"/>
     <dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
     <dynamicField name="*_srpt"  type="location_rpt" indexed="true" stored="true"/>
-
+    
     <!-- KD-tree (point) numerics -->
     <dynamicField name="*_pi" type="pint"    indexed="true"  stored="true"/>
     <dynamicField name="*_pis" type="pints"    indexed="true"  stored="true"/>
@@ -199,13 +198,13 @@
 
     <dynamicField name="random_*" type="random" />
 
-    <!-- uncomment the following to ignore any fields that don't already match an existing
-        field name or dynamic field, rather than reporting them as an error.
-        alternately, change the type="ignored" to some other type e.g. "text" if you want
-        unknown fields indexed and/or stored by default
-
+    <!-- uncomment the following to ignore any fields that don't already match an existing 
+        field name or dynamic field, rather than reporting them as an error. 
+        alternately, change the type="ignored" to some other type e.g. "text" if you want 
+        unknown fields indexed and/or stored by default 
+        
         NB: use of "*" dynamic fields will disable field type guessing and adding
-        unknown fields to the schema. -->
+        unknown fields to the schema. --> 
     <!--dynamicField name="*" type="ignored" multiValued="true" /-->
 
     <!-- Field to use to determine and enforce document uniqueness.
@@ -255,7 +254,7 @@
          then default lucene sorting will be used which places docs without the
          field first in an ascending sort and last in a descending sort.
     -->
-
+    
     <!--
       Numeric field types that index values using KD-trees. *Point fields are faster and more efficient than Trie* fields both, at
       search time and at index time, but some features are still not supported.
@@ -265,14 +264,14 @@
     <fieldType name="pfloat" class="solr.FloatPointField" docValues="true"/>
     <fieldType name="plong" class="solr.LongPointField" docValues="true"/>
     <fieldType name="pdouble" class="solr.DoublePointField" docValues="true"/>
-
+    
     <fieldType name="pints" class="solr.IntPointField" docValues="true" multiValued="true"/>
     <fieldType name="pfloats" class="solr.FloatPointField" docValues="true" multiValued="true"/>
     <fieldType name="plongs" class="solr.LongPointField" docValues="true" multiValued="true"/>
     <fieldType name="pdoubles" class="solr.DoublePointField" docValues="true" multiValued="true"/>
 
     <!--
-      Default numeric field types. For faster range queries, consider *PointFields (pint/pfloat/plong/pdouble), or the
+      Default numeric field types. For faster range queries, consider *PointFields (pint/pfloat/plong/pdouble), or the 
       tint/tfloat/tlong/tdouble types.
     -->
     <fieldType name="int" class="solr.TrieIntField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
@@ -294,14 +293,14 @@
      Smaller precisionStep values (specified in bits) will lead to more tokens
      indexed per value, slightly larger index size, and faster range queries.
      A precisionStep of 0 disables indexing at different precision levels.
-
+     
      Consider using pint/pfloat/plong/pdouble instead of Trie* fields if possible
     -->
     <fieldType name="tint" class="solr.TrieIntField" docValues="true" precisionStep="8" positionIncrementGap="0"/>
     <fieldType name="tfloat" class="solr.TrieFloatField" docValues="true" precisionStep="8" positionIncrementGap="0"/>
     <fieldType name="tlong" class="solr.TrieLongField" docValues="true" precisionStep="8" positionIncrementGap="0"/>
     <fieldType name="tdouble" class="solr.TrieDoubleField" docValues="true" precisionStep="8" positionIncrementGap="0"/>
-
+    
     <fieldType name="tints" class="solr.TrieIntField" docValues="true" precisionStep="8" positionIncrementGap="0" multiValued="true"/>
     <fieldType name="tfloats" class="solr.TrieFloatField" docValues="true" precisionStep="8" positionIncrementGap="0" multiValued="true"/>
     <fieldType name="tlongs" class="solr.TrieLongField" docValues="true" precisionStep="8" positionIncrementGap="0" multiValued="true"/>
@@ -309,7 +308,7 @@
 
     <!-- The format for this date field is of the form 1995-12-31T23:59:59Z, and
          is a more restricted form of the canonical representation of dateTime
-         http://www.w3.org/TR/xmlschema-2/#dateTime
+         http://www.w3.org/TR/xmlschema-2/#dateTime    
          The trailing "Z" designates UTC time and is mandatory.
          Optional fractional seconds are allowed: 1995-12-31T23:59:59.999Z
          All other components are mandatory.
@@ -324,13 +323,13 @@
                NOW/DAY+6MONTHS+3DAYS
                   ... 6 months and 3 days in the future from the start of
                       the current day
-
+                      
          Consult the TrieDateField javadocs for more information.
       -->
     <!-- KD-tree versions of date fields -->
     <fieldType name="pdate" class="solr.DatePointField" docValues="true"/>
     <fieldType name="pdates" class="solr.DatePointField" docValues="true" multiValued="true"/>
-
+    
     <fieldType name="date" class="solr.TrieDateField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
     <fieldType name="dates" class="solr.TrieDateField" docValues="true" precisionStep="0" positionIncrementGap="0" multiValued="true"/>
 
@@ -343,11 +342,11 @@
 
     <!-- The "RandomSortField" is not used to store or search any
          data.  You can declare fields of this type it in your schema
-         to generate pseudo-random orderings of your docs for sorting
+         to generate pseudo-random orderings of your docs for sorting 
          or function purposes.  The ordering is generated based on the field
          name and the version of the index. As long as the index version
          remains unchanged, and the same field name is reused,
-         the ordering of the docs will be consistent.
+         the ordering of the docs will be consistent.  
          If you want different psuedo-random orderings of documents,
          for the same version of the index, use a dynamicField and
          change the field name in the request.
@@ -400,7 +399,7 @@
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" />
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
             sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
@@ -464,30 +463,37 @@
          document "WiFi" or "wi-fi".
     -->
     <dynamicField name="*_txt_en_split" type="text_en_splitting"  indexed="true"  stored="true"/>
-
-   <fieldType name="text_en_splitting" class="solr.TextField" autoGeneratePhraseQueries="true" positionIncrementGap="100">
-    <analyzer type="index">
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
-      <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="0" generateWordParts="1" catenateAll="0" catenateWords="0"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-      <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
-      <filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="indexed_synonyms.txt"/>
-      <filter class="solr.FlattenGraphFilterFactory"/>
-    </analyzer>
-    <analyzer type="query">
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
-      <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="0" generateWordParts="1" catenateAll="0" catenateWords="0"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
+    <fieldType name="text_en_splitting" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="true">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <!-- Case insensitive stop word removal.
+        -->
+        <filter class="solr.StopFilterFactory"
+                ignoreCase="true"
+                words="lang/stopwords_en.txt"
+        />
+        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
+        <filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="indexed_synonyms.txt"/>
+        <filter class="solr.FlattenGraphFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory"
+                ignoreCase="true"
+                words="lang/stopwords_en.txt"
+        />
+        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
             sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
-      <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
-      <filter class="solr.FlattenGraphFilterFactory"/>
-    </analyzer>
-   </fieldType>
-  
+        <filter class="solr.SnowballPorterFilterFactory" language="English" protected="protwords.txt"/>
+        <filter class="solr.FlattenGraphFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
    <fieldType name="text_name_copy" class="solr.TextField" positionIncrementGap="100" multiValued="true">
     <analyzer type="index">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
@@ -1075,7 +1081,6 @@
        <str name="paramkey">param value</str>
      </similarity>
     -->
-	
-	 <copyField source="name" dest="name_copy"/>
 
+    <copyField source="name" dest="name_copy"/>
 </schema>
