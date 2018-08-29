@@ -290,7 +290,7 @@ podTemplate(label: zappodlabel, name: zappodlabel, serviceAccount: 'jenkins', cl
 stage('deploy-test') {
 def abort = false;
   timeout(time: 1, unit: 'DAYS') {
-      input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit'
+      input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit'
   }
   node('master') {
       SLACK_TOKEN = sh (
