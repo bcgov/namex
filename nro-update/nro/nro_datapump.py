@@ -7,6 +7,12 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
 
     expiry_date = nr.lastUpdate + timedelta(days=expires_days)
 
+    # init dict for examiner comment data, populated below in loop through names
+    examiner_comment = {
+        'choice': 0,
+        'comment': None,
+    }
+
     # initialize array of derived values to use in the stored proc
     names = [
         {'state': None, 'decision': None, 'conflict1': None, 'conflict2': None, 'conflict3': None},
@@ -35,6 +41,12 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
         if name.conflict3:
             names[choice]['conflict3'] = '{}****{}'.format(name.conflict3_num[:10], name.conflict3[:150])
 
+        if name.comment:
+            # use the last name comment as the examiner comment, wether that was a rejection or approval
+            if name.choice > examiner_comment['choice']:
+                examiner_comment['choice'] = name.choice
+                examiner_comment['comment'] = name.comment.comment
+
     ### Call the name_examination procedure to save complete decision data for a single NR
     ora_cursor.callproc("NRO_DATAPUMP_PKG.name_examination",
                         [nr.nrNum,  # p_nr_number
@@ -45,7 +57,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
                          names[0]['decision'],  # p_choice1
                          names[1]['decision'],  # p_choice2
                          names[2]['decision'],  # p_choice3
-                         '',  # p_exam_comment TODO
+                         examiner_comment['comment'],  # p_exam_comment
                          '',  # p_add_info - not used in proc anymore
                          names[0]['conflict1'],  # p_confname1A
                          names[0]['conflict2'],  # p_confname1B

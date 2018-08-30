@@ -533,6 +533,21 @@ class Request(Resource):
 
                         names_schema.load(in_name, instance=nrd_name, partial=False)
 
+                        # set comments (existing or cleared)
+                        if in_name['comment'] is not None:
+
+                            # if there is a comment ID in data, just set it
+                            if in_name['comment'].get('id', None) is not None:
+                                nrd_name.commentId = in_name['comment'].get('id')
+
+                            # if no comment id, it's a new comment, so add it
+                            else:
+                                # no business case for this at this point - this code will never run
+                                pass
+
+                        else:
+                            nrd_name.comment = None
+
             ### END names ###
 
             ### COMMENTS ###
