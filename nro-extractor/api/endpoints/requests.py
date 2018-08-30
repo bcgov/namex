@@ -294,7 +294,7 @@ def get_nr_header(session, nr_num):
         'additional_info,'
         'nature_business_info,'
         'xpro_jurisdiction'
-        ' from namex_request_vw'
+        ' from request_vw'
         ' where nr_num = :nr'
     )
     sql_lu = text(
@@ -342,7 +342,7 @@ def get_nr_submitter(session, request_id):
         'set search_path to bc_registries_names;'
         'select submitted_date,'
         ' submitter'
-        ' from namex_submitter_vw'
+        ' from submitter_vw'
         ' where request_id = :req_id'
     )
     result = session.execute(sql.params(req_id=request_id), multi=True)
@@ -376,7 +376,7 @@ def get_nr_requester(session, request_id):
         ' postal_cd,'
         ' state_province_cd,'
         ' country_type_cd'
-        ' from namex_request_party_vw'
+        ' from request_party_vw'
         ' where request_id = :req_id'
     )
     result = session.execute(sql.params(req_id=request_id), multi=True)
@@ -395,7 +395,7 @@ def get_exam_comments(session, request_id):
         ' examiner_comment,'
         ' state_comment,'
         ' event_timestamp'
-        ' from namex_examiner_comments_vw'
+        ' from examiner_comments_vw'
         ' where request_id= :req_id'
     )
     result = session.execute(sql.params(req_id=request_id), multi=True)
@@ -441,7 +441,7 @@ def get_names(session, request_id):
         ' name,'
         ' designation,'
         ' name_state_type_cd'
-        ' from namex_names_vw'
+        ' from names_vw'
         ' where request_id = :req_id'
     )
     result = session.execute(sql.params(req_id=request_id), multi=True)

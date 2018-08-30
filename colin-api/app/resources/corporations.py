@@ -39,7 +39,7 @@ class RequestColin(Resource):
         corp_num_sql = '\'' + corp_num + '\''
 
         incorp_info_sql = text("select * "
-                               "from bc_registries.namex_corp_num_dts_class_vw "
+                               "from bc_registries.corp_num_dts_class_vw "
                                "where corp_num = {}".format(corp_num_sql))
 
         incorp_directors_sql = text("select "
@@ -57,7 +57,7 @@ class RequestColin(Resource):
                                      "where corp_num={} and end_event_id IS NULL;".format(corp_num_sql))
 
         incorp_jurisdiction_sql = text("select home_jurisdiction "
-                                       "from bc_registries.namex_corp_jurs_vw "
+                                       "from bc_registries.corp_jurs_vw "
                                        "where corp_num = {}".format(corp_num_sql))
 
         incorp_attorneys_sql = text("select "
@@ -71,7 +71,7 @@ class RequestColin(Resource):
                                     "where cp.corp_num = {} and cp.end_event_id IS NULL and cp.party_typ_cd = 'ATT'".format(corp_num_sql))
 
         incorp_nr_sql = text("select * "
-                              "from bc_registries.namex_corp_nr_num_vw "
+                              "from bc_registries.corp_nr_num_vw "
                               "where corp_num = {};".format(corp_num_sql))
         try:
             incorp_info_obj = db.engine.execute(incorp_info_sql)
@@ -121,7 +121,7 @@ class RequestColin(Resource):
                 incorp_nr_sql = '\'NR ' + incorp_nr[1:] + '\''
 
                 incorp_nob_sql = text("select NATURE_BUSINESS_INFO "
-                                      "from bc_registries_names.namex_corp_nob_vw "
+                                      "from bc_registries_names.corp_nob_vw "
                                       "where nr_num = {}".format(incorp_nr_sql))
                 incorp_nob_obj = db.get_engine(app, 'db2').execute(incorp_nob_sql)
                 incorp_nob = incorp_nob_obj.fetchall()
