@@ -2,6 +2,7 @@
 from flask import request
 from flask_admin.contrib.sqla import ModelView
 from wtforms.validators import ValidationError
+import re
 
 from solr_admin.models import db
 from solr_admin.keycloak import Keycloak
@@ -104,6 +105,16 @@ class SynonymView(ModelView):
 #            raise ValidationError("Synonyms Text does not allow embedded spaces ({})"
 #                                  .format(", ".join(embedded_spaces)))
 #
+        # Only a-z, 0-9, and space are allowed in the synonyms.
+        disallowed_values = []
+        for value in values:
+            if re.search("[^a-z0-9 ]", value):
+                disallowed_values.append(value)
+
+        if len(disallowed_values) != 0:
+            raise ValidationError("Synonyms Text only allows lower case letters, digits, and space characters ({})"
+                                  .format(", ".join(disallowed_values)))
+
         # Duplicate values are not allowed.
         duplicate_values = []
         previous_value = ""
