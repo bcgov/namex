@@ -40,33 +40,5 @@ redirect URI "http://localhost:8080/oidc_callback" for desktop development.
 * Add error reporting for Solr core reloading
 * Don't reload solr cores if only the category or comment change
 * Edit page should use a text area for large varchar strings
-* If you're on page 2 when less than 100 items, switch to 1000 per page fails
+* If you're on page 2 when less than 1000 items, switching to 1000 per page fails
 * SynonymView has commented out code for embedded spaces - remove if not needed
-
-#### DONE:
-* Better duplicate error message
-* DB Configuration
-* Singularize table name
-* Sorting warning on create box
-* Notice of version for template files plus documentation
-* Put into NAMEX
-* Redeploy Solr with new config files ("enabled")
-* What container? Python
-* Config for different environments
-* Dev DB reconfiguration and reload
-* Documentation on data loading, project, DB schemas
-* Where to deploy? Test and push to dev/prod
-* SSO authentication
-* Dev DB reconfiguration and reload
-* Documentation on data loading, project, DB schemas
-* Where to deploy? Test and push to dev/prod
-* SSO authentication
-* Monkeypatch the Verisign G2 root certificate
-* Add "category" column to the database, plus searching or filtering
-* Auditing
-* Insert commas after spaces in the view (data too wide for page)
-* Figure out why OIDC redirect is not working for HTTPS
-* Reload cores automatically
-* Ensure that singleton values in synonyms are disallowed
-* Ensure that synonyms do not have embedded spaces
-* Ensure that duplicate values in synonyms are disallowed
