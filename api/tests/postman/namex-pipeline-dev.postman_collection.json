@@ -593,7 +593,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8115be7b-5067-4273-8df3-ddff8c9941c0",
+								"id": "5b877b8c-5f47-4a16-b3b4-90136741c3a7",
 								"type": "text/javascript",
 								"exec": [
 									"it('should be an success response', () => {",
@@ -604,8 +604,8 @@
 									"    response.statusType.should.equal(2);",
 									"});",
 									"",
-									"pm.test(\"Response time is less than 8000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(8000);",
+									"pm.test(\"Response time is less than 3000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(3000);",
 									"});",
 									"",
 									"var jsonData = pm.response.json();",
@@ -664,7 +664,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "10fb8743-f67b-4540-a06a-391055527a04",
+								"id": "30cc0247-9e4d-4ac1-9843-4cad6087f443",
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"Same value as previous get from queue\", function () {",
@@ -679,7 +679,7 @@
 									"});",
 									"",
 									"pm.test(\"Response time is less than 200ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"    pm.expect(pm.response.responseTime).to.be.below(3000);",
 									"});"
 								]
 							}
@@ -1030,7 +1030,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"R\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"PUT success\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null}"
+							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"R\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"PUT success\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": \"test\", \"conflict2_num\": null, \"comment\": null}"
 						},
 						"url": {
 							"raw": "{{url}}/api/v1/requests/NR 9222965/names/1",
@@ -1206,7 +1206,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"NE\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"META GROWTH ENTERPRISES INC.\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null}"
+							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"NE\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"META GROWTH ENTERPRISES INC.\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null, \"comment\": null}"
 						},
 						"url": {
 							"raw": "{{url}}/api/v1/requests/NR 9222965/names/1",
@@ -1286,7 +1286,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"additionalInfo\": \"Name was previously put in for incorporation but it is actually for an extra-provincial registration\",\n    \"applicants\": \"\",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 16,\n    \"lastUpdate\": \"Thu, 02 Aug 2018 23:14:11 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"BOOKED BY US Inc.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"fencing equipment supply\",\n    \"nrNum\": \"NR 9222965\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 2,\n    \"submittedDate\": \"Mon, 09 Jul 2018 12:47:56 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": null,\n    \"xproJurisdiction\": \"ALBERTA\"\n}\n"
+							"raw": "{\n    \"additionalInfo\": \"Name was previously put in for incorporation but it is actually for an extra-provincial registration\",\n    \"applicants\": \"\",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 16,\n    \"lastUpdate\": \"Thu, 02 Aug 2018 23:14:11 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"BOOKED BY US Inc.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"fencing equipment supply\",\n    \"nrNum\": \"NR 9222965\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 2,\n    \"submittedDate\": \"Mon, 09 Jul 2018 12:47:56 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": null,\n    \"xproJurisdiction\": \"ALBERTA\"\n}\n"
 						},
 						"url": {
 							"raw": "{{url}}/api/v1/requests/NR 9222965",
@@ -1451,7 +1451,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"additionalInfo\": \"**Resubmit (NR 2997198)** \",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 16,\n    \"lastUpdate\": \"Wed, 01 Aug 2018 20:43:15 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"conflict1\": \"\",\n            \"conflict1_num\": \"\",\n            \"conflict2\": \"\",\n            \"conflict2_num\": \"\",\n            \"conflict3\": \"\",\n            \"conflict3_num\": \"\",\n            \"consumptionDate\": null,\n            \"decision_text\": \"\",\n            \"name\": \"META GROWTH ENTERPRISES INC.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"Operating medical cannabis clinics, offering educational materials relating to medical cannabis\",\n    \"nrNum\": \"NR 9222965\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"DRAFT\",\n    \"submitCount\": 2,\n    \"submittedDate\": \"Mon, 09 Jul 2018 13:31:48 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"nro_service_account\",\n    \"xproJurisdiction\": \"ALBERTA\"\n}"
+							"raw": "{\n    \"additionalInfo\": \"**Resubmit (NR 2997198)** \",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 16,\n    \"lastUpdate\": \"Wed, 01 Aug 2018 20:43:15 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": \"\",\n            \"conflict1_num\": \"\",\n            \"conflict2\": \"\",\n            \"conflict2_num\": \"\",\n            \"conflict3\": \"\",\n            \"conflict3_num\": \"\",\n            \"consumptionDate\": null,\n            \"decision_text\": \"\",\n            \"name\": \"META GROWTH ENTERPRISES INC.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"Operating medical cannabis clinics, offering educational materials relating to medical cannabis\",\n    \"nrNum\": \"NR 9222965\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"DRAFT\",\n    \"submitCount\": 2,\n    \"submittedDate\": \"Mon, 09 Jul 2018 13:31:48 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"nro_service_account\",\n    \"xproJurisdiction\": \"ALBERTA\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/api/v1/requests/NR 9222965",
