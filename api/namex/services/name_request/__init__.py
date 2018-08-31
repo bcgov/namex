@@ -52,8 +52,9 @@ def valid_state_transition(user, nr, new_state):
         # if nr.furnished == Request.REQUEST_FURNISHED:
             # return jsonify({"message": "Request has already been furnished and cannot be altered"}), 409
 
-        # A completed Request can only be moved to editable (INPROGRESS)
-        if new_state != State.INPROGRESS:
+        # A completed Request can only be moved to editable (INPROGRESS) 
+        # OR remain in its current state (editing a closed request)
+        if new_state != State.INPROGRESS and new_state != nr.stateCd:
             return False
 
     elif new_state in State.RELEASE_STATES:

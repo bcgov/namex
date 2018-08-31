@@ -412,9 +412,8 @@ class Request(Resource):
         if 'nrd' not in locals() or not nrd:
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
 
-        # commented out because editing a closed request breaks all these rules
-        # if not services.name_request.valid_state_transition(user, nrd, state):
-        #     return jsonify(message='you are not authorized to make these changes'), 401
+        if not services.name_request.valid_state_transition(user, nrd, state):
+            return jsonify(message='you are not authorized to make these changes'), 401
 
         try:
             existing_nr = RequestDAO.get_inprogress(user)
