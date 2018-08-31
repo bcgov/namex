@@ -243,6 +243,7 @@ class RequestsSearchSchema(ma.ModelSchema):
                  ,'corpNum'
                  ,'expirationDate'
                  ,'furnished'
+                 ,'lastUpdate'
                  ,'natureBusinessInfo'
                  ,'nrNum'
                  ,'nroLastUpdate'
