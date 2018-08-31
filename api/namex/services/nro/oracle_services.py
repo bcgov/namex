@@ -197,7 +197,7 @@ class NROServices(object):
 
         return None
 
-    def move_control_of_request_from_nro(self, nr, user):
+    def move_control_of_request_from_nro(self, nr, user, closed_nr=False):
         """ HIGHLY DESTRUCTIVE CALL
 
         This will move the loci of control of a request from NRO to NameX
@@ -212,6 +212,7 @@ class NROServices(object):
 
         :param nr:
         :param user:
+        :param closed_nr: boolean
         :return:
         """
         warnings = []
@@ -228,29 +229,30 @@ class NROServices(object):
                              'message': 'Unable to get last time the NR was updated in NRO'
             })
 
-        current_app.logger.debug('set state to h')
-        try:
-            self.set_request_status_to_h(nr.nrNum, user.username)
-        except (NROServicesError, Exception) as err:
-            warnings.append({'type': 'warn',
-                             'code': 'unable_to_set_NR_status_in_NRO_to_H',
-                             'message': 'Unable to set the NR in NRO to HOLD. '
-                                        'Please contact support to alert them of this issue'
-                                        ' and provide the Request #.'
-                             })
+        if not closed_nr:
+            current_app.logger.debug('set state to h')
+            try:
+                self.set_request_status_to_h(nr.nrNum, user.username)
+            except (NROServicesError, Exception) as err:
+                warnings.append({'type': 'warn',
+                                 'code': 'unable_to_set_NR_status_in_NRO_to_H',
+                                 'message': 'Unable to set the NR in NRO to HOLD. '
+                                            'Please contact support to alert them of this issue'
+                                            ' and provide the Request #.'
+                                 })
 
-        current_app.logger.debug('get state')
-        try:
-            nro_req_state = self.get_current_request_state(nr.nrNum)
-        except (NROServicesError, Exception) as err:
-            nro_req_state = None
+            current_app.logger.debug('get state')
+            try:
+                nro_req_state = self.get_current_request_state(nr.nrNum)
+            except (NROServicesError, Exception) as err:
+                nro_req_state = None
 
-        if nro_req_state is not 'H':
-            warnings.append({'type': 'warn',
-                             'code': 'unable_to_verify_NR_state_of_H',
-                             'message': 'Unable to get the current state of the NRO Request'
-                             })
-            current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
+            if nro_req_state is not 'H':
+                warnings.append({'type': 'warn',
+                                 'code': 'unable_to_verify_NR_state_of_H',
+                                 'message': 'Unable to get the current state of the NRO Request'
+                                 })
+                current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
 
         current_app.logger.debug('update records')
         if 'nro_last_ts' in locals() and nro_last_ts != nr.nroLastUpdate:

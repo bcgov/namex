@@ -412,8 +412,9 @@ class Request(Resource):
         if 'nrd' not in locals() or not nrd:
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
 
-        if not services.name_request.valid_state_transition(user, nrd, state):
-            return jsonify(message='you are not authorized to make these changes'), 401
+        # commented out because editing a closed request breaks all these rules
+        # if not services.name_request.valid_state_transition(user, nrd, state):
+        #     return jsonify(message='you are not authorized to make these changes'), 401
 
         try:
             existing_nr = RequestDAO.get_inprogress(user)
@@ -794,3 +795,32 @@ class DecisionReasons(Resource):
         for reason in DecisionReason.query.order_by(DecisionReason.name).all():
             response.append(reason.json())
         return jsonify(response), 200
+
+@cors_preflight("GET")
+@api.route('/<string:nr>/syncnr', methods=['GET', 'OPTIONS'])
+class SyncNR(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.requires_roles([User.APPROVER, User.EDITOR])
+    def get(nr):
+        try:
+            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+            nrd = RequestDAO.find_by_nr(nr)
+        except NoResultFound as nrf:
+            # not an error we need to track in the log
+            return jsonify({"message": "Request:{} not found".format(nr)}), 404
+        except Exception as err:
+            current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
+            return jsonify({"message": "NR had an internal error"}), 404
+
+        if not nrd:
+            return jsonify({"message": "Request:{} not found".format(nr)}), 404
+
+        warnings = nro.move_control_of_request_from_nro(nrd, user, True)
+
+        if warnings:
+            resp = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json()
+            resp['warnings'] = warnings
+            return jsonify(resp), 206
+
+        return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
