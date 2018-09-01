@@ -1,11 +1,19 @@
 
+import datetime
+
 from . import db
-from datetime import datetime
+
+
+def _to_string(string):
+    if string is None:
+        return ''
+
+    return string
 
 
 # The class that corresponds to the database table for synonym audits.
 class SynonymAudit(db.Model):
-    __tablename__ = "synonym_audit"
+    __tablename__ = 'synonym_audit'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     timestamp = db.Column(db.DateTime)
@@ -17,19 +25,14 @@ class SynonymAudit(db.Model):
     comment = db.Column(db.String(1000))
     enabled = db.Column(db.Boolean())
 
-    def __init__(self, synonym_id, username, action, category, synonyms_text, comment, enabled):
-        self.timestamp = datetime.now()
+    def __init__(
+            self, synonym_id: int, username: str, action: str, category: str, synonyms_text: str, comment: str,
+            enabled: bool) -> None:
+        self.timestamp = datetime.datetime.now()
         self.synonym_id = synonym_id
         self.username = username
         self.action = action
-        self.category = self._to_string(category)
+        self.category = _to_string(category)
         self.synonyms_text = synonyms_text
-        self.comment = self._to_string(comment)
+        self.comment = _to_string(comment)
         self.enabled = enabled
-
-    @staticmethod
-    def _to_string(string):
-        if string is None:
-            return ""
-
-        return string

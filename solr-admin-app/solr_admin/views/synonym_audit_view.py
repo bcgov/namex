@@ -1,12 +1,12 @@
 
 from flask import request
-from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib import sqla
 
-from solr_admin.keycloak import Keycloak
+from solr_admin import keycloak
 
 
 # The customized ModelView that is used for working with the synonym audits.
-class SynonymAuditView(ModelView):
+class SynonymAuditView(sqla.ModelView):
     # Disallow the creation of audit events.
     can_create = False
 
@@ -23,21 +23,21 @@ class SynonymAuditView(ModelView):
     can_edit = False
 
     # Display by timestamp.
-    column_default_sort = ("timestamp", True)
+    column_default_sort = ('timestamp', True)
 
     # Allow the user to filter on the synonym_id and category columns.
-    column_filters = ["synonym_id", "category"]
+    column_filters = ['synonym_id', 'category']
 
     # Search within the synonyms_text.
-    column_searchable_list = ["category", "synonym_id", "synonyms_text"]
+    column_searchable_list = ['category', 'synonym_id', 'synonyms_text']
 
     # Use a custom list.html that provides a page size drop down with extra choices.
-    list_template = "synonyms_list.html"
+    list_template = 'synonyms_list.html'
 
     # Flask-OIDC function that states whether or not the user is logged in and has permissions.
     def is_accessible(self):
-        return Keycloak(None).has_access()
+        return keycloak.Keycloak(None).has_access()
 
     # Flask-OIDC function that is called if the user is not logged in or does not have permissions.
     def inaccessible_callback(self, name, **kwargs):
-        return Keycloak(None).get_redirect_url(request.url)
+        return keycloak.Keycloak(None).get_redirect_url(request.url)

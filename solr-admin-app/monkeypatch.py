@@ -6,15 +6,16 @@
 #
 # This is fragile and not pretty.
 
-import httplib2
 import logging
-import os
-from pathlib import Path
+from os import path
+
+import httplib2
+import pathlib
 
 
-CA_CERTS_FILE = "cacerts.txt"
+_CA_CERTS_FILE = 'cacerts.txt'
 
-CERTIFICATE = """
+_CERTIFICATE = '''
 # Issuer: CN=Entrust Root Certification Authority - G2 O=Entrust.net OU=(c) 2009 Entrust, Inc. - for authorized use \
 only/See www.entrust.net/legal-terms
 # Subject: CN=Entrust Root Certification Authority - G2 O=Entrust.net OU=(c) 2009 Entrust, Inc. - for authorized use \
@@ -48,32 +49,32 @@ nAuknZoh8/CbCzB428Hch0P+vGOaysXCHMnHjf87ElgI5rY97HosTvuDls4MPGmH
 VHOkc8KT/1EQrBVUAdj8BbGJoX90g5pJ19xOe4pIb4tF9g==
 -----END CERTIFICATE-----
 
-"""
+'''
 
 
-def patch_ca_certs():
-    ca_certs_directory = os.path.dirname(httplib2.__file__)
-    ca_certs_already_monkeyed = os.path.join(ca_certs_directory, CA_CERTS_FILE + ".monkeyed")
-    ca_certs_filename = os.path.join(ca_certs_directory, CA_CERTS_FILE)
+def patch_ca_certs() -> None:
+    ca_certs_directory = path.dirname(httplib2.__file__)
+    ca_certs_already_monkeyed = path.join(ca_certs_directory, _CA_CERTS_FILE + '.monkeyed')
+    ca_certs_filename = path.join(ca_certs_directory, _CA_CERTS_FILE)
 
     # Use an indicator file so that we don't repeatedly patch.
-    if os.path.isfile(ca_certs_already_monkeyed):
-        logging.info("monkeypatch: previously done for httplib2 CA certificates file in \"%s\"", ca_certs_filename)
+    if path.isfile(ca_certs_already_monkeyed):
+        logging.info('monkeypatch: previously done for httplib2 CA certificates file in "%s"', ca_certs_filename)
     else:
         try:
             # Read and prepend the certificate.
-            with open(ca_certs_filename, "rb") as file:
+            with open(ca_certs_filename, 'rb') as file:
                 text = file.read()
-                text = CERTIFICATE.replace("\n", "\r\n").encode("utf-8") + text
+                text = _CERTIFICATE.replace('\n', '\r\n').encode('utf-8') + text
 
             # Write the new file.
-            with open(ca_certs_filename, "wb") as file:
+            with open(ca_certs_filename, 'wb') as file:
                 file.write(text)
 
             # Touch our indicator so we don't add the certificate again.
-            Path(ca_certs_already_monkeyed).touch()
+            pathlib.Path(ca_certs_already_monkeyed).touch()
         except FileNotFoundError:
-            logging.warning("monkeypatch: httplib2 CA certificates file expected in \"%s\" but not found",
-                            ca_certs_filename)
+            logging.warning(
+                'monkeypatch: httplib2 CA certificates file expected in "%s" but not found', ca_certs_filename)
         else:
-            logging.info("monkeypatch: httplib2 CA certificates file in \"%s\"", ca_certs_filename)
+            logging.info('monkeypatch: httplib2 CA certificates file in "%s"', ca_certs_filename)
