@@ -1,6 +1,6 @@
 
-from flask_sqlalchemy import SQLAlchemy
+import flask_sqlalchemy
 
 
 # Provides the database connection to anything in the package that needs it.
-db = SQLAlchemy()
+db = flask_sqlalchemy.SQLAlchemy()

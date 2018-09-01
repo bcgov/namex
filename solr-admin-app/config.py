@@ -1,45 +1,45 @@
 
 import os
 
-from dotenv import load_dotenv, find_dotenv
+import dotenv
 
 
 # Load all the environment variables from a .env file located in the project root.
-load_dotenv(find_dotenv())
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 CONFIGURATION = {
-    "development": "config.DevConfig",
-    "testing": "config.TestConfig",
-    "production": "config.Config",
-    "default": "config.Config"
+    'development': 'config.DevConfig',
+    'testing': 'config.TestConfig',
+    'production': 'config.Config',
+    'default': 'config.Config'
 }
 
 
 class Config(object):
-    SECRET_KEY = "My Secret"
+    SECRET_KEY = 'My Secret'
 
     # Normal Keycloak parameters.
-    OIDC_CLIENT_SECRETS = os.getenv("SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS", "")
-    OIDC_SCOPES = ["openid", "email", "profile"]
-    OIDC_VALID_ISSUERS = [os.getenv("SOLR_ADMIN_APP_OIDC_VALID_ISSUERS", "")]
-    OVERWRITE_REDIRECT_URI = os.getenv("SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI", "")
+    OIDC_CLIENT_SECRETS = os.getenv('SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS', '')
+    OIDC_SCOPES = ['openid', 'email', 'profile']
+    OIDC_VALID_ISSUERS = [os.getenv('SOLR_ADMIN_APP_OIDC_VALID_ISSUERS', '')]
+    OVERWRITE_REDIRECT_URI = os.getenv('SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI', '')
 
     # Undocumented Keycloak parameter: allows sending cookies without the secure flag, which we need for the local
     # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere else.
-    OIDC_ID_TOKEN_COOKIE_SECURE = os.getenv("SOLR_ADMIN_APP_OIDC_ID_TOKEN_COOKIE_SECURE", "True") == "True"
+    OIDC_ID_TOKEN_COOKIE_SECURE = os.getenv('SOLR_ADMIN_APP_OIDC_ID_TOKEN_COOKIE_SECURE', 'True') == 'True'
 
     # Turn this off to get rid of warning messages. In future versions of SQLAlchemy, False will be the default and
     # this can be removed.
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # PostgreSQL Connection information.
-    DATABASE_USER = os.getenv("SOLR_ADMIN_APP_DATABASE_USERNAME", "")
-    DATABASE_PASSWORD = os.getenv("SOLR_ADMIN_APP_DATABASE_PASSWORD", "")
-    DATABASE_HOST = os.getenv("SOLR_ADMIN_APP_DATABASE_HOST", "")
-    DATABASE_PORT = os.getenv("SOLR_ADMIN_APP_DATABASE_PORT", "5432")
-    DATABASE_NAME = os.getenv("SOLR_ADMIN_APP_DATABASE_NAME", "solr")
+    DATABASE_USER = os.getenv('SOLR_ADMIN_APP_DATABASE_USERNAME', '')
+    DATABASE_PASSWORD = os.getenv('SOLR_ADMIN_APP_DATABASE_PASSWORD', '')
+    DATABASE_HOST = os.getenv('SOLR_ADMIN_APP_DATABASE_HOST', '')
+    DATABASE_PORT = os.getenv('SOLR_ADMIN_APP_DATABASE_PORT', '5432')
+    DATABASE_NAME = os.getenv('SOLR_ADMIN_APP_DATABASE_NAME', 'solr')
 
-    SQLALCHEMY_DATABASE_URI = "postgresql://{user}:{password}@{host}:{port}/{name}".format(
+    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
         user=DATABASE_USER, password=DATABASE_PASSWORD, host=DATABASE_HOST, port=int(DATABASE_PORT), name=DATABASE_NAME)
 
     DEBUG = False
