@@ -5,12 +5,12 @@
                 dataSource="jdbc/bcrs_names" />
 
     <document>
-        <entity name="corp-conflicts" dataSource="corp-conflicts" pk="ID" query="SELECT id, name, state_type_cd,
+        <entity name="corp-conflicts" dataSource="corp-conflicts" pk="id" query="SELECT id, name, state_type_cd,
                 'CORP' AS source FROM bc_registries.active_registry_vw">
         </entity>
 
         <entity name="name-conflicts" dataSource="name-conflicts" pk="id" query="SELECT nr_num AS id, name,
-                name_state_type_cd AS state_type_cd, 'NR' AS source FROM bc_registries_names.completed_nr_vw WHERE
+                name_state_type_cd AS state_type_cd, 'NR' AS source FROM bc_registries_names.completed_nro_vw WHERE
                 name_state_type_cd IN ('A', 'C') AND consumption_date IS NULL AND request_type_cd NOT IN ('CEM', 'CFR',
                 'CLL', 'CLP', 'FR', 'LIB', 'LL', 'LP', 'NON', 'PAR', 'RLY', 'TMY', 'XCLL', 'XCLP', 'XLL', 'XLP') AND
                 expiration_date >= NOW()">

@@ -1,0 +1,1 @@
+# This file is no longer used. The synonyms are now in a postgres table. See managed-schema for details.
