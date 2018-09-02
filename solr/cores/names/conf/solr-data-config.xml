@@ -2,10 +2,10 @@
     <dataSource type="com.s24.search.solr.analysis.jdbc.DataImportJdbcDataSource" dataSource="jdbc/bcrs_names" />
 
     <document>
-        <entity name="name_instance" pk="NAME_INSTANCE_ID"
+        <entity name="name_instance" pk="name_instance_id"
                 query="SELECT nr_num || '-' || choice_number AS id, name_instance_id, choice_number, corp_num, name,
                        nr_num, request_id, submit_count, request_type_cd, name_id, start_event_id, name_state_type_cd
-                       FROM bc_registries_names.completed_nr_vw WHERE request_id IS NOT NULL">
+                       FROM bc_registries_names.completed_nro_vw WHERE request_id IS NOT NULL">
         </entity>
     </document>
 </dataConfig>
