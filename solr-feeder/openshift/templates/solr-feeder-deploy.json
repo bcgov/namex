@@ -138,6 +138,15 @@
                 "name": "${NAME}",
                 "env": [
                     {
+                        "name": "SOLR_FEEDER_FLASK_SECRET_KEY",
+                        "valueFrom": {
+                            "secretKeyRef": {
+                                "name": "solr-feeder",
+                                "key": "flask-secret-key"
+                            }
+                        }
+                    },
+                    {
                         "name": "SOLR_FEEDER_NAMES_DATABASE_HOST",
                         "value": "${SOLR_FEEDER_NAMES_DATABASE_HOST}"
                     },
