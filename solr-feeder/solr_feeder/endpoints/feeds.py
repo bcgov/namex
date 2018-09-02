@@ -3,7 +3,6 @@ import logging
 
 import flask
 import flask_restplus
-import requests
 
 from solr_feeder.models import completed_nr
 from solr_feeder import solr
@@ -31,6 +30,7 @@ class _Names(flask_restplus.Resource):
 
     @api.expect(name_request_number_model)
     def post(self):
+        logging.debug('request raw data: {}'.format(flask.request.data))
         request_json = flask.request.get_json()
         if not request_json or 'nameRequestNumber' not in request_json:
             return {'message': 'Required parameter "nameRequestNumber" not defined'}, 400
