@@ -29,8 +29,6 @@ Valid Redirect URI `http://localhost:8080/oidc_callback` for doing desktop devel
 1. Configure logging
 
 ##### Deficiencies - Code
-1. Refactor the solr_admin.solr package as a module
-1. solr_admin.solr.core_reload_callback should have an underscore prefix
 1. Add version numbers to requirements.txt
 1. Globals: explore use of `__all__`
 1. Determine if bootstrap files, etc, should be in repo

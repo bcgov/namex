@@ -1,7 +1,7 @@
 #=========================================================
 # OpenShift template parameters for:
-# Component: namex solr
-# JSON Template File: templates/solr-deploy.json
+# Component: namex solr-admin-app
+# JSON Template File: templates/solr-admin-app-deploy.json
 #=========================================================
 NAME=solr-admin-app
 IMAGE_NAMESPACE=servicebc-ne-tools
