@@ -23,7 +23,7 @@ def _core_reload_callback(session, response) -> None:
     del session
 
     # Try to display just the core name, but if it fails then use the URL.
-    match = re.search('&core=(.+?)', response.url)
+    match = re.search('&core=(.*)', response.url)
     if match:
         core_name = match.group(1)
     else:
