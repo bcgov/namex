@@ -1,7 +1,7 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
 
-create or replace view namex_request_vw as
+create or replace view request_vw as
 select  r.request_id,
     r.nr_num,
     r.previous_request_id,
@@ -16,7 +16,7 @@ from request r
 left outer join request_instance ri ON ri.request_id = r.request_id
 /
 
-create or replace view namex_submitter_vw as
+create or replace view submitter_vw as
 select t.request_id,
     submit_event.event_timestamp submitted_date,
     CASE
@@ -31,7 +31,7 @@ where t.transaction_type_cd in ('NRREQ', 'RESUBMIT')
 /
 
 
-create or replace view namex_request_party_vw as
+create or replace view request_party_vw as
 select  rp.request_id,
     rp.last_name,
     rp.first_name,
@@ -56,7 +56,7 @@ left outer join request r on r.request_id = rp.request_id
 where rp.party_type_cd = 'APP'
 /
 
-create or replace view namex_examiner_comments_vw as
+create or replace view examiner_comments_vw as
 select rs.request_id,
     rs.examiner_IDIR,
     rs.examiner_comment,
@@ -66,7 +66,7 @@ from request_state rs
 left outer join event e on e.event_id=rs.start_event_id
 /
 
-create or replace view namex_names_vw as
+create or replace view names_vw as
 select nm.request_id,
     ni.choice_number,
     ni.name,
@@ -79,14 +79,14 @@ where ns.end_event_id is null
  and ni.end_event_id is null
 /
 
-create or replace view namex_corp_nob_vw as
+create or replace view corp_nob_vw as
 select ri.NATURE_BUSINESS_INFO,
     r.nr_num
 from request_instance ri
 inner join request r ON r.request_id = ri.request_id
 /
 
-CREATE or REPLACE VIEW namex_req_instance_max_event
+CREATE or REPLACE VIEW req_instance_max_event
 AS
 SELECT request_id, MAX (event_timestamp) as last_update
 FROM (

@@ -92,7 +92,7 @@ class NROServices(object):
 
             cursor.execute("""
                 SELECT last_update
-                FROM namex_req_instance_max_event
+                FROM req_instance_max_event
                 WHERE request_id = :req_id"""
                 ,req_id=nro_request_id)
 
