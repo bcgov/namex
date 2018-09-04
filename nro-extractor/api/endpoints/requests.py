@@ -300,7 +300,7 @@ def get_nr_header(session, nr_num):
     sql_lu = text(
         'set search_path to bc_registries_names;'
         'select last_update'
-        ' from namex_req_instance_max_event'
+        ' from req_instance_max_event'
         ' where request_id = :id'
     )
     sql_state = text(
