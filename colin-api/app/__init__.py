@@ -40,3 +40,14 @@ def setup_jwt_manager(app, jwt):
     jwt.init_app(app)
 
     return
+
+def register_shellcontext(app):
+    """Register shell context objects."""
+    def shell_context():
+        """Shell context objects."""
+        return {
+            'app': app,
+            'jwt': jwt,
+            'db': db,}
+
+    app.shell_context_processor(shell_context)

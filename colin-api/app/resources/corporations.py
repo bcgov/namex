@@ -9,6 +9,12 @@ from sqlalchemy import text, exc
 import logging
 
 
+@api.errorhandler(AuthError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
+
 @cors_preflight("GET")
 @api.route('/echo', methods=['GET', 'OPTIONS'])
 class Echo(Resource):
