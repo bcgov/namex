@@ -1,6 +1,8 @@
 from flask import jsonify, g, current_app
 from flask_restplus import Resource, cors
-from app import api, db, oidc, app
+from flask_jwt_oidc import AuthError
+
+from app import api, db, app, jwt
 from app.auth_services import required_scope
 from app.utils.util import cors_preflight
 from sqlalchemy import text, exc
@@ -12,10 +14,10 @@ import logging
 class Echo(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def get (*args, **kwargs):
         try:
-            return jsonify(g.oidc_token_info), 200
+            return jsonify(g.jwt_oidc_token_info), 200
         except Exception as err:
             return jsonify({"error": "{}".format(err)}), 500
 
@@ -28,7 +30,7 @@ class RequestColin(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @oidc.accept_token(require_token=True)
+    @jwt.requires_auth
     def get(corp_num):
         logging.basicConfig(filename='info.log', level=logging.INFO)
         logging.info('logging works')
@@ -49,11 +51,11 @@ class RequestColin(Resource):
                                     "       ELSE "
                                     "           cp.first_nme || ' ' || cp.last_nme "
                                     "       END director_name "
-                                    "from bc_registries.corp_party cp "
+                                    "from bc_registries.corp_party_vw cp "
                                     "where cp.corp_num = {} and cp.end_event_id IS NULL and cp.party_typ_cd = 'DIR'".format(corp_num_sql))
 
         incorp_addr_id_sql = text("select delivery_addr_id "
-                                     "from bc_registries.office "
+                                     "from bc_registries.office_vw "
                                      "where corp_num={} and end_event_id IS NULL;".format(corp_num_sql))
 
         incorp_jurisdiction_sql = text("select home_jurisdiction "
@@ -67,7 +69,7 @@ class RequestColin(Resource):
                                     "       ELSE "
                                     "           cp.first_nme || ' ' || cp.last_nme "
                                     "       END attorney_name "
-                                    "from bc_registries.corp_party cp "
+                                    "from bc_registries.corp_party_vw cp "
                                     "where cp.corp_num = {} and cp.end_event_id IS NULL and cp.party_typ_cd = 'ATT'".format(corp_num_sql))
 
         incorp_nr_sql = text("select * "
@@ -85,7 +87,7 @@ class RequestColin(Resource):
                 incorp_ho_addr_id = incorp_ho_addr_id_obj.fetchall()[0][0]
                 incorp_ho_addr_id_sql = '\'' + str(incorp_ho_addr_id) + '\''
                 incorp_ho_addr_sql = text("select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
-                                     "from bc_registries.address "
+                                     "from bc_registries.address_vw "
                                      "where addr_id= {};".format(incorp_ho_addr_id_sql))
                 incorp_head_office_obj = db.engine.execute(incorp_ho_addr_sql)
 
@@ -98,7 +100,7 @@ class RequestColin(Resource):
                 incorp_reg_addr_id_sql = '\'' + str(incorp_reg_addr_id) + '\''
                 incorp_reg_addr_sql = text(
                     "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
-                    "from bc_registries.address "
+                    "from bc_registries.address_vw "
                     "where addr_id= {};".format(incorp_reg_addr_id_sql))
                 incorp_registered_addr_obj = db.engine.execute(incorp_reg_addr_sql)
                 try:
@@ -109,7 +111,7 @@ class RequestColin(Resource):
                     incorp_rec_addr_id_sql = '\'' + str(incorp_rec_addr_id) + '\''
                     incorp_rec_addr_sql = text(
                         "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
-                        "from bc_registries.address "
+                        "from bc_registries.address_vw "
                         "where addr_id= {};".format(incorp_rec_addr_id_sql))
                     incorp_records_addr_obj = db.engine.execute(incorp_rec_addr_sql)
             incorp_nr_obj = db.engine.execute(incorp_nr_sql)

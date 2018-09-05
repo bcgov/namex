@@ -351,7 +351,7 @@ stage('API Test TEST') {
                     sh 'npm install newman'
 
                     try {
-                        sh './node_modules/newman/bin/newman.js run ./colin-pipeline-test.postman_collection.json --global-var userid=$TEST_API_TEST_USER --global-var password=$TEST_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$TEST_API_TEST_AUTH_SERVER --global-var clientid=$TEST_API_TEST_CLIENT_ID --global-var client_secret=$TEST_API_TEST_CLIENT_SECRET --global-var realm=nest -r cli,junit,html'
+                        sh './node_modules/newman/bin/newman.js run ./colin-pipeline-test.postman_collection.json --global-var userid=$TEST_API_TEST_USER --global-var password=$TEST_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$TEST_API_TEST_AUTH_SERVER --global-var clientid=$TEST_API_TEST_CLIENT_ID --global-var client_secret=$TEST_API_TEST_CLIENT_SECRET --global-var realm=sbc -r cli,junit,html'
                         def attachment = [:]
                         attachment.fallback = "See build log for more details"
                         attachment.title = "COLIN-API-TEST newman tests PASSED! :white_check_mark: :white_check_mark:"
