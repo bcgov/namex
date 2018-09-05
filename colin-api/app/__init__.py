@@ -6,7 +6,7 @@ from flask_restplus import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from config import Config
-from app.patches.flask_oidc_patched import OpenIDConnect
+from flask_jwt_oidc import JwtManager
 
 
 db = SQLAlchemy()
@@ -14,7 +14,7 @@ db = SQLAlchemy()
 api = Api(prefix='/api/v1')  # figure out prefix
 # db.init_app(application)
 ma = Marshmallow()
-oidc = OpenIDConnect()
+jwt = JwtManager()
 app = None
 
 from app.resources.corporations import RequestColin
@@ -27,6 +27,16 @@ def create_app(config=Config):
 
     db.init_app(app)
     ma.init_app(app)
-    oidc.init_app(app)
+    setup_jwt_manager(app,jwt)
 
     return app
+
+def setup_jwt_manager(app, jwt):
+    def get_roles(a_dict):
+        return a_dict['realm_access']['roles']
+
+    app.config['JWT_ROLE_CALLBACK'] = get_roles
+
+    jwt.init_app(app)
+
+    return
