@@ -36,55 +36,57 @@ class _Names(flask_restplus.Resource):
             return {'message': 'Required parameter "nameRequestNumber" not defined'}, 400
 
         name_request_number = request_json['nameRequestNumber']
-        name_request = completed_nr.CompletedNr.find(name_request_number)
-        if not name_request:
+        results = completed_nr.CompletedNr.find(name_request_number)
+        if not results:
             logging.info('Names lookup of "{}" failed'.format(name_request_number))
 
             return {'message': 'Unknown "nameRequestNumber" of "{}"'.format(name_request_number)}, 404
 
-        logging.info('Names lookup of "{}" succeeded'.format(name_request_number))
+        for name_instance in results:
+            json = completed_nr.CompletedNrSchema().dump(name_instance).data
+            logging.info('Names lookup of "{}-{}" succeeded'.format(name_request_number, json['choice_number']))
 
-        json = completed_nr.CompletedNrSchema().dump(name_request).data
+            # Alter the data to conform to what the names core is expecting.
+            #
+            # names: SELECT nr_num || '-' || choice_number AS id, name_instance_id, choice_number, corp_num, name,
+            # nr_num, request_id, submit_count, request_type_cd, name_id, start_event_id, name_state_type_cd
+            names_json = _convert_json_none_to_empty_string({
+                'id': json['nr_num'] + '-' + str(json['choice_number']),
+                'name_instance_id': json['name_instance_id'],
+                'choice_number': json['choice_number'],
+                'corp_num': json['corp_num'],
+                'name': json['name'],
+                'nr_num': json['nr_num'],
+                'request_id': json['request_id'],
+                'request_type_cd': json['request_type_cd'],
+                'name_id': json['name_id'],
+                'start_event_id': json['start_event_id'],
+                'name_state_type_cd': json['name_state_type_cd']
+            })
 
-        # Alter the data to conform to what the Solr core is expecting.
-        #
-        # names: SELECT nr_num || '-' || choice_number AS id, name_instance_id, choice_number, corp_num, name, nr_num,
-        # request_id, submit_count, request_type_cd, name_id, start_event_id, name_state_type_cd
-        names_json = _convert_json_none_to_empty_string({
-            'id': json['nr_num'] + '-' + str(json['choice_number']),
-            'name_instance_id': json['name_instance_id'],
-            'choice_number': json['choice_number'],
-            'corp_num': json['corp_num'],
-            'name': json['name'],
-            'nr_num': json['nr_num'],
-            'request_id': json['request_id'],
-            'request_type_cd': json['request_type_cd'],
-            'name_id': json['name_id'],
-            'start_event_id': json['start_event_id'],
-            'name_state_type_cd': json['name_state_type_cd']
-        })
+            # Update the names core. In the case that one update succeeds and subsequent updates fail, the cores will be
+            # inconsistent. However, the caller will receive a non-200 response, and will retry all updates at a later
+            # time. The core data will eventually be consistent.
+            error_response = solr.update_core('names', names_json)
+            if error_response:
+                return {'message': error_response['message']}, error_response['status_code']
 
-        # Alter the data to conform to what the Solr core is expecting. We should create new views that only return the
-        # data that is needed.
-        #
-        # possible.conflicts: SELECT nr_num AS id, name, name_state_type_cd AS state_type_cd, 'NR' AS source
-        possible_conflicts_json = _convert_json_none_to_empty_string({
-            'id': json['nr_num'],
-            'name': json['name'],
-            'state_type_cd': json['name_state_type_cd'],
-            'source': 'NR'
-        })
+            # The possible.conflicts core only wants the states of 'A' and 'C'.
+            if json['name_state_type_cd'] is 'A' or json['name_state_type_cd'] is 'C':
+                # Alter the data to conform to what the Solr core is expecting. We should create new views that only
+                # return the data that is needed.
+                #
+                # possible.conflicts: SELECT nr_num AS id, name, name_state_type_cd AS state_type_cd, 'NR' AS source
+                possible_conflicts_json = _convert_json_none_to_empty_string({
+                    'id': json['nr_num'],
+                    'name': json['name'],
+                    'state_type_cd': json['name_state_type_cd'],
+                    'source': 'NR'
+                })
 
-        # Update the cores. In the case that the first update succeeds and the second fails, the two Solr cores will
-        # be inconsistent. However, the caller will receive a non-200 response, and will retry both updates at a later
-        # time. The core data will eventually be consistent.
-        response = solr.update_core('names', names_json)
-        if response:
-            return {'message': response['message']}, response['status_code']
-
-        response = solr.update_core('possible.conflicts', possible_conflicts_json)
-        if response:
-            return {'message': response['message']}, response['status_code']
+                error_response = solr.update_core('possible.conflicts', possible_conflicts_json)
+                if error_response:
+                    return {'message': error_response['message']}, error_response['status_code']
 
         return {'message': 'Solr cores updated'}, 200
 

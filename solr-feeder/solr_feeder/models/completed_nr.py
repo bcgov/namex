@@ -10,13 +10,13 @@ class CompletedNr(db.Model):
     __table_args__ = {'schema': 'bc_registries_names'}
     __tablename__ = 'completed_nro_vw'
 
-    request_id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.Integer)
     nr_num = db.Column(db.String)
     submit_count = db.Column(db.Integer)
     request_instance_id = db.Column(db.Integer)
     request_type_cd = db.Column(db.String)
     name_id = db.Column(db.Integer)
-    name_instance_id = db.Column(db.Integer)
+    name_instance_id = db.Column(db.Integer, primary_key=True)
     choice_number = db.Column(db.Integer)
     name = db.Column(db.String)
     start_event_id = db.Column(db.Integer)
@@ -26,8 +26,8 @@ class CompletedNr(db.Model):
     consumption_date = db.Column(db.Date)
 
     @classmethod
-    def find(cls, nr_num):
-        return cls.query.filter_by(nr_num=nr_num).one_or_none()
+    def find(cls, nr_num) -> list:
+        return cls.query.filter_by(nr_num=nr_num).all()
 
 
 # The corresponding marshmallow-based schema used for serialization to JSON.
