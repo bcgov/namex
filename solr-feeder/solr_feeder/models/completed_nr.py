@@ -8,7 +8,7 @@ from . import db
 class CompletedNr(db.Model):
     __bind_key__ = 'bc_registries_names_fdw'
     __table_args__ = {'schema': 'bc_registries_names'}
-    __tablename__ = 'completed_nro_vw'
+    __tablename__ = 'completed_nr_vw'
 
     request_id = db.Column(db.Integer)
     nr_num = db.Column(db.String)
