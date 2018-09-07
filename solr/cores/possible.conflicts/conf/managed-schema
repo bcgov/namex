@@ -122,7 +122,7 @@
     <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
     <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
 	
-    <field name="id" type="string" stored="true" required="true" indexed="true" multiValued="false" />
+    <field name="id" type="string" stored="true" required="true" indexed="true" multiValued="false"/>
     <field name="name" type="text_en_splitting" multiValued="false" indexed="true" required="true" stored="true" termVectors="true"/>
     <field name="state_type_cd" type="string" multiValued="false" indexed="true" required="false" stored="true" termVectors="true"/>
     <field name="source" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
