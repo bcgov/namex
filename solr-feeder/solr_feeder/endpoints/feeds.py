@@ -4,7 +4,7 @@ import logging
 import flask
 import flask_restplus
 
-from solr_feeder.models import completed_nr
+from solr_feeder.models import solr_dataimport_conflicts, solr_dataimport_names
 from solr_feeder import solr
 
 
@@ -26,69 +26,80 @@ class _Corporations(flask_restplus.Resource):
 @api.route('/names')
 class _Names(flask_restplus.Resource):
     name_request_number_model = api.model(
-        'Name Request Number', {'nameRequestNumber': flask_restplus.fields.String('Name Request Number')})
+        'Name Request Number', {
+            'nameRequestNumber': flask_restplus.fields.String(),
+            'action': flask_restplus.fields.String()
+        }
+    )
 
     @api.expect(name_request_number_model)
     def post(self):
         logging.debug('request raw data: {}'.format(flask.request.data))
-        request_json = flask.request.get_json()
-        if not request_json or 'nameRequestNumber' not in request_json:
+        json = flask.request.get_json()
+
+        # Validate the request.
+        if not json or 'nameRequestNumber' not in json:
             return {'message': 'Required parameter "nameRequestNumber" not defined'}, 400
 
-        name_request_number = request_json['nameRequestNumber']
-        results = completed_nr.CompletedNr.find(name_request_number)
+        name_request_number = json['nameRequestNumber']
+
+        if 'action' not in json:
+            return {'message': 'Required parameter "action" not defined'}, 400
+
+        action = json['action']
+        if action not in ('delete', 'update'):
+            return {'message': 'Parameter "action" has valid values "delete" or "update"'}, 400
+
+        response = self._dataimport_names(name_request_number, action)
+        if response[1] != 200:
+            return response
+
+        response = self._dataimport_conflicts(name_request_number, action)
+        if response[1] != 200:
+            return response
+
+        return {'message': 'Solr cores updated'}, 200
+
+    @staticmethod
+    def _dataimport_conflicts(name_request_number: str, action: str):
+        result = solr_dataimport_conflicts.SolrDataimportConflicts.find(name_request_number)
+        if not result:
+            logging.info('Conflicts lookup of "{}" failed'.format(name_request_number))
+
+            return {'message': 'Unknown "id" of "{}" in SOLR_DATAIMPORT_CONFLICTS_VW'.format(name_request_number)}, 404
+
+        json = solr_dataimport_conflicts.SolrDataimportConflictsSchema().dump(result).data
+        _convert_json_none_to_empty_string(json)
+        logging.info('Conflicts lookup of "{}" succeeded'.format(json['id']))
+
+        # Update the core. If any update fails we quit and leave the state inconsistent. A retry by the caller will sync
+        # everything.
+        error_response = solr.update_core('possible.conflicts', action, json)
+        if error_response:
+            return {'message': error_response['message']}, error_response['status_code']
+
+        return {'message': 'Solr core updated'}, 200
+
+    @staticmethod
+    def _dataimport_names(name_request_number: str, action: str):
+        results = solr_dataimport_names.SolrDataimportNames.find(name_request_number)
         if not results:
             logging.info('Names lookup of "{}" failed'.format(name_request_number))
 
-            return {'message': 'Unknown "nameRequestNumber" of "{}"'.format(name_request_number)}, 404
+            return {'message': 'Unknown "nr_num" of "{}" in SOLR_DATAIMPORT_NAMES_VW'.format(name_request_number)}, 404
 
-        for name_instance in results:
-            json = completed_nr.CompletedNrSchema().dump(name_instance).data
-            logging.info('Names lookup of "{}-{}" succeeded'.format(name_request_number, json['choice_number']))
+        for result in results:
+            json = solr_dataimport_names.SolrDataimportNamesSchema().dump(result).data
+            _convert_json_none_to_empty_string(json)
+            logging.info('Names lookup of "{}" succeeded'.format(json['id']))
 
-            # Alter the data to conform to what the names core is expecting.
-            #
-            # names: SELECT nr_num || '-' || choice_number AS id, name_instance_id, choice_number, corp_num, name,
-            # nr_num, request_id, submit_count, request_type_cd, name_id, start_event_id, name_state_type_cd
-            names_json = _convert_json_none_to_empty_string({
-                'id': json['nr_num'] + '-' + str(json['choice_number']),
-                'name_instance_id': json['name_instance_id'],
-                'choice_number': json['choice_number'],
-                'corp_num': json['corp_num'],
-                'name': json['name'],
-                'nr_num': json['nr_num'],
-                'request_id': json['request_id'],
-                'request_type_cd': json['request_type_cd'],
-                'name_id': json['name_id'],
-                'start_event_id': json['start_event_id'],
-                'name_state_type_cd': json['name_state_type_cd']
-            })
-
-            # Update the names core. In the case that one update succeeds and subsequent updates fail, the cores will be
-            # inconsistent. However, the caller will receive a non-200 response, and will retry all updates at a later
-            # time. The core data will eventually be consistent.
-            error_response = solr.update_core('names', names_json)
+            # Update the core. If any update fails we quit and leave the state inconsistent. A retry by the caller will
+            # sync everything.
+            error_response = solr.update_core('names', action, json)
             if error_response:
                 return {'message': error_response['message']}, error_response['status_code']
 
-            # The possible.conflicts core only wants the states of 'A' and 'C'.
-            if json['name_state_type_cd'] is 'A' or json['name_state_type_cd'] is 'C':
-                # Alter the data to conform to what the Solr core is expecting. We should create new views that only
-                # return the data that is needed.
-                #
-                # possible.conflicts: SELECT nr_num AS id, name, name_state_type_cd AS state_type_cd, 'NR' AS source
-                possible_conflicts_json = _convert_json_none_to_empty_string({
-                    'id': json['nr_num'],
-                    'name': json['name'],
-                    'state_type_cd': json['name_state_type_cd'],
-                    'source': 'NR'
-                })
-
-                error_response = solr.update_core('possible.conflicts', possible_conflicts_json)
-                if error_response:
-                    return {'message': error_response['message']}, error_response['status_code']
-
-        return {'message': 'Solr cores updated'}, 200
+        return {'message': 'Solr core updated'}, 200
 
 
 # If we get null values from the database, convert them from None to ''.

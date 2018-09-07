@@ -13,7 +13,10 @@ _SOLR_RELOAD_URL = _SOLR_INSTANCE + '/{}/update/json/docs'
 
 
 # Update the core with the given data.
-def update_core(core_name, json):
+def update_core(core_name, action, json):
+    # Temporary.
+    del action
+
     logging.debug('json for {}: {}'.format(core_name, json))
 
     response = requests.post(
