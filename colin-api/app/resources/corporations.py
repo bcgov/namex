@@ -16,7 +16,7 @@ def handle_auth_error(ex):
     return response
 
 @cors_preflight("GET")
-@api.route('/echo', methods=['GET', 'OPTIONS'])
+@api.route('/corporations/echo', methods=['GET', 'OPTIONS'])
 class Echo(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
