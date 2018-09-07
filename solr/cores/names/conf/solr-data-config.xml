@@ -3,9 +3,6 @@
 
     <document>
         <entity name="name_instance" pk="name_instance_id"
-                query="SELECT nr_num || '-' || choice_number AS id, name_instance_id, choice_number, corp_num, name,
-                       nr_num, request_id, submit_count, request_type_cd, name_id, start_event_id, name_state_type_cd
-                       FROM bc_registries_names.completed_nr_vw WHERE request_id IS NOT NULL">
-        </entity>
+                query="SELECT * FROM bc_registries_names.solr_dataimport_names_vw" />
     </document>
 </dataConfig>
