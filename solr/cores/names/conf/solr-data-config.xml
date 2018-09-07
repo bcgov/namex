@@ -2,7 +2,6 @@
     <dataSource type="com.s24.search.solr.analysis.jdbc.DataImportJdbcDataSource" dataSource="jdbc/bcrs_names" />
 
     <document>
-        <entity name="name_instance" pk="name_instance_id"
-                query="SELECT * FROM bc_registries_names.solr_dataimport_names_vw" />
+        <entity name="name_instance" pk="id" query="SELECT * FROM bc_registries_names.solr_dataimport_names_vw" />
     </document>
 </dataConfig>
