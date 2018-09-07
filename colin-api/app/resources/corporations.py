@@ -36,7 +36,7 @@ class RequestColin(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @jwt.requires_roles(['names_viewer'])
+    @jwt.requires_roles(['names_viewer'])
     def get(corp_num):
         logging.basicConfig(filename='info.log', level=logging.INFO)
         logging.info('logging works')
