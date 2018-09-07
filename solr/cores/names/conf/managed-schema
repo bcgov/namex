@@ -122,7 +122,7 @@
     <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
     <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
 	
-    <field name="id" type="string" stored="true" required="true" indexed="true" multiValued="false" />
+    <field name="id" type="string" stored="true" required="true" indexed="true" multiValued="false"/>
     <field name="name_instance_id" type="string" multiValued="false" indexed="true" stored="true"/>
     <field name="choice_number" type="pint" multiValued="false" indexed="false" required="false" stored="true"/>
     <field name="corp_num" type="string" docValues="true" multiValued="false" indexed="false" required="false" stored="true"/>
@@ -209,7 +209,7 @@
     <!-- Field to use to determine and enforce document uniqueness.
       Unless this field is marked with required="false", it will be a required field
     -->
-    <uniqueKey>name_instance_id</uniqueKey>
+    <uniqueKey>id</uniqueKey>
 
     <!-- copyField commands copy one field to another at the time a document
        is added to the index.  It's used either to index the same field differently,
