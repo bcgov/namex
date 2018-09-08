@@ -28,6 +28,7 @@ class _Names(flask_restplus.Resource):
     name_request_number_model = api.model(
         'Name Request Number', {
             'nameRequestNumber': flask_restplus.fields.String(),
+            'solr_core': flask_restplus.fields.String(),
             'action': flask_restplus.fields.String()
         }
     )
@@ -43,6 +44,13 @@ class _Names(flask_restplus.Resource):
 
         name_request_number = json['nameRequestNumber']
 
+        if 'solr_core' not in json:
+            return {'message': 'Required parameter "solr_core" not defined'}, 400
+
+        solr_core = json['solr_core']
+        if solr_core not in ('names', 'possible.conflicts'):
+            return {'message': 'Parameter "solr_core" has valid values "names" or "possible.conflicts"'}, 400
+
         if 'action' not in json:
             return {'message': 'Required parameter "action" not defined'}, 400
 
@@ -50,13 +58,15 @@ class _Names(flask_restplus.Resource):
         if action not in ('delete', 'update'):
             return {'message': 'Parameter "action" has valid values "delete" or "update"'}, 400
 
-        response = self._dataimport_names(name_request_number, action)
-        if response[1] != 200:
-            return response
-
-        response = self._dataimport_conflicts(name_request_number, action)
-        if response[1] != 200:
-            return response
+        # Do the changes to the cores.
+        if solr_core == 'names':
+            response = self._dataimport_names(name_request_number, action)
+            if response[1] != 200:
+                return response
+        else:
+            response = self._dataimport_conflicts(name_request_number, action)
+            if response[1] != 200:
+                return response
 
         return {'message': 'Solr cores updated'}, 200
 
