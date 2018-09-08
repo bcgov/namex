@@ -99,7 +99,7 @@ class SolrQueries:
                 # Only allow the indicator outside of quotes.
                 if not quotes_on:
                     indicator_on = True
-    
+
                 continue
 
             if letter == '"':
@@ -124,15 +124,6 @@ class SolrQueries:
             unsynonymed_words.append(word)
 
         if len(unsynonymed_words) != 0:
-            clause = NO_SYNONYMS_PREFIX + ' '.join(unsynonymed_words)
+            clause = NO_SYNONYMS_PREFIX + parse.quote(' '.join(unsynonymed_words))
 
         return clause
-
-
-'''
-https://namex-solr-test.pathfinder.gov.bc.ca/solr/names/select?defType=edismax&fq=name_copy:RED&indent=on&mm=75%&q=RED
-CLEANING SERVICES LTD.&qf=name&wt=json
-
-this is the one that will get passed from the front-end with the *RED CLEANING SERVICES LTD so that Red will not be
-substituted with the synonyms. the clause &fq=name_copy:RED is what says only give me back he ones with RED.
-'''
