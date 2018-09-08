@@ -7,7 +7,7 @@
 
     <document>
         <entity name="corp-conflicts" dataSource="corp-conflicts-ds" pk="id"
-                query="SELECT * FROM bc_registries_names.solr_dataimport_conflicts_vw" />
+                query="SELECT * FROM bc_registries.solr_dataimport_conflicts_vw" />
 
         <entity name="name-conflicts" dataSource="name-conflicts-ds" pk="id"
                 query="SELECT * FROM bc_registries_names.solr_dataimport_conflicts_vw" />
