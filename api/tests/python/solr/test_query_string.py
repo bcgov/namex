@@ -45,14 +45,14 @@ def test_quoted_ignore_embedded_indicator():
 def test_indicatored_quoted():
     response = SolrQueries()._get_name_copy_clause('my ' + NO_SYNONYMS_INDICATOR + '"happy waffle"')
 
-    assert response == NO_SYNONYMS_PREFIX + '"happy waffle"'
+    assert response == NO_SYNONYMS_PREFIX + '%22happy%20waffle%22'
 
 
 def test_quoted_ignore_embedded_indicator2():
     response = SolrQueries()._get_name_copy_clause('my ' + NO_SYNONYMS_INDICATOR + '"happy ' + NO_SYNONYMS_INDICATOR +
                                                    'waffle"')
 
-    assert response == NO_SYNONYMS_PREFIX + '"happy waffle"'
+    assert response == NO_SYNONYMS_PREFIX + '%22happy%20waffle%22'
 
 
 # No idea how to get the tests running, so do it manually for now.
