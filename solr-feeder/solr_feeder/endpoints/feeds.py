@@ -72,7 +72,7 @@ class _Names(flask_restplus.Resource):
 
     @staticmethod
     def _dataimport_conflicts(name_request_number: str, action: str):
-        result = solr_dataimport_conflicts.SolrDataimportConflicts.find(name_request_number)
+        result = solr_dataimport_conflicts.SolrDataimportConflicts().find(name_request_number)
         if not result:
             logging.info('Conflicts lookup of "{}" failed'.format(name_request_number))
 
@@ -92,7 +92,7 @@ class _Names(flask_restplus.Resource):
 
     @staticmethod
     def _dataimport_names(name_request_number: str, action: str):
-        results = solr_dataimport_names.SolrDataimportNames.find(name_request_number)
+        results = solr_dataimport_names.SolrDataimportNames().find(name_request_number)
         if not results:
             logging.info('Names lookup of "{}" failed'.format(name_request_number))
 
