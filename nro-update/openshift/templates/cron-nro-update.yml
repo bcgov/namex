@@ -19,7 +19,7 @@ objects:
           spec:
             containers:
             - name: "nro-update"
-              image: "docker-registry.default.svc:5000/servicebc-ne-tools/nro-update-runtime:dev"
+              image: "docker-registry.default.svc:5000/servicebc-ne-tools/nro-update-runtime:${ENV_TAG}"
               args:
               - /bin/sh
               - -c
@@ -44,6 +44,10 @@ objects:
                     value: 'postgresql'
                   - name: PG_PORT
                     value: '5432'
+                  - name: MAX_ROWS
+                    value: "${MAX_ROWS}"
+                  - name: MIN_DELAY_SECONDS
+                    value: "${MIN_DELAY_SECONDS}"
                   - name: ORA_PORT
                     valueFrom:
                       secretKeyRef:
@@ -71,3 +75,26 @@ objects:
                         name: ora-names-secrets
             restartPolicy: "Never"
             concurrencyPolicy: "Forbid"
+parameters: [
+        {
+          "name": "ENV_TAG",
+          "displayName": "ENV_TAG",
+          "description": "the tag for the environment that the job image runs from.",
+          "required": true,
+          "value": "test"
+        },
+        {
+          "name": "MAX_ROWS",
+          "displayName": "MAX_ROWS",
+          "description": "The maximum number of Name Requests to process per job run",
+          "required": true,
+          "value": "100"
+        },
+        {
+          "name": "MIN_DELAY_SECONDS",
+          "displayName": "MIN_DELAY_SECONDS",
+          "description": "The minimum amount of time between when the job started and the approve/rejected timestamp of the Name Request",
+          "required": true,
+          "value": "600"
+        },
+]
