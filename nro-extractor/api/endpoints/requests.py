@@ -306,7 +306,7 @@ def get_nr_header(session, nr_num):
     sql_state = text(
         'set search_path to bc_registries_names;'
         'select rs.state_type_cd'
-        ' from request_state rs'
+        ' from request_state_vw rs'
         ' where rs.request_id = :req_id'
         ' and rs.end_event_id IS NULL'
     )
@@ -419,7 +419,7 @@ def get_nwpta(session, request_id):
         ' partner_name_date,'
         ' partner_name,'
         ' last_update_id'
-        ' from partner_name_system pns'
+        ' from partner_name_system_vw pns'
         ' where end_event_id IS NULL'
         ' and pns.request_id= :req_id'
     )
