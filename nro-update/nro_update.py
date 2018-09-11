@@ -2,6 +2,7 @@ from namex.utils.logging import setup_logging
 setup_logging() ## important to do this first
 
 from sqlalchemy.dialects import postgresql
+from sqlalchemy import text
 from nro.nro_datapump import nro_data_pump_update
 from datetime import datetime, timedelta
 import cx_Oracle
@@ -70,28 +71,24 @@ try:
     ora_con.begin()
     ora_cursor = ora_con.cursor()
 
+    # q = q.filter(Request.lastUpdate < datetime.utcnow()-timedelta(seconds=delay)). \
     q = db.session.query(Request).\
                 filter(Request.stateCd.in_([State.APPROVED, State.REJECTED, State.CONDITIONAL])).\
-                filter(Request.furnished != 'Y')
+                filter(Request.furnished != 'Y').\
+                filter(Request.lastUpdate <= text('NOW() - INTERVAL \'{delay} SECONDS\''.format(delay=delay))).\
+                order_by(Request.lastUpdate.asc()). \
+                limit(max_rows). \
+                with_for_update()
 
-    current_app.logger.debug(str(q.statement.compile(
-                              dialect=postgresql.dialect(),
-                              compile_kwargs={"literal_binds": True}))
-                            )
-
-    q = q.filter(Request.lastUpdate < datetime.utcnow()-timedelta(seconds=delay)). \
-        order_by(Request.lastUpdate.asc()). \
-        limit(max_rows). \
-        with_for_update()\
-
+    # leaving this debug statement here as there were some translation and image caching issues
+    # that are easier to see from the raw SQL in the log
+    #
     current_app.logger.debug(str(q.statement.compile(
         dialect=postgresql.dialect(),
         compile_kwargs={"literal_binds": True}))
     )
 
-    reqs = q.all()
-
-    for r in reqs:
+    for r in q.all():
         row_count += 1
         JobTracker.job_detail(db, job_id, r.nrNum)
 

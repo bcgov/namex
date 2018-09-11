@@ -13,6 +13,7 @@ objects:
     name: "nro-update"
   spec:
     schedule: "*/10 7-19 * * *"
+    suspend: true
     jobTemplate:
       spec:
         template:
@@ -20,6 +21,7 @@ objects:
             containers:
             - name: "nro-update"
               image: "docker-registry.default.svc:5000/servicebc-ne-tools/nro-update-runtime:${ENV_TAG}"
+              imagePullPolicy: Always
               args:
               - /bin/sh
               - -c
