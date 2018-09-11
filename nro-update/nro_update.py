@@ -1,6 +1,7 @@
 from namex.utils.logging import setup_logging
 setup_logging() ## important to do this first
 
+from sqlalchemy.dialects import postgresql
 from nro.nro_datapump import nro_data_pump_update
 from datetime import datetime, timedelta
 import cx_Oracle
@@ -69,13 +70,26 @@ try:
     ora_con.begin()
     ora_cursor = ora_con.cursor()
 
-    reqs = db.session.query(Request).\
+    q = db.session.query(Request).\
                 filter(Request.stateCd.in_([State.APPROVED, State.REJECTED, State.CONDITIONAL])).\
-                filter(Request.furnished != 'Y'). \
-        filter(Request.lastUpdate < datetime.utcnow()-timedelta(seconds=delay)). \
+                filter(Request.furnished != 'Y')
+
+    current_app.logger.debug(str(query.statement.compile(
+                              dialect=postgresql.dialect(),
+                              compile_kwargs={"literal_binds": True}))
+                            )
+
+    q = q.filter(Request.lastUpdate < datetime.utcnow()-timedelta(seconds=delay)). \
         order_by(Request.lastUpdate.asc()). \
         limit(max_rows). \
-        with_for_update().all()
+        with_for_update()\
+
+    current_app.logger.debug(str(query.statement.compile(
+        dialect=postgresql.dialect(),
+        compile_kwargs={"literal_binds": True}))
+    )
+    
+    reqs = q.all()
 
     for r in reqs:
         row_count += 1
