@@ -74,7 +74,7 @@ try:
                 filter(Request.stateCd.in_([State.APPROVED, State.REJECTED, State.CONDITIONAL])).\
                 filter(Request.furnished != 'Y')
 
-    current_app.logger.debug(str(query.statement.compile(
+    current_app.logger.debug(str(q.statement.compile(
                               dialect=postgresql.dialect(),
                               compile_kwargs={"literal_binds": True}))
                             )
@@ -84,11 +84,11 @@ try:
         limit(max_rows). \
         with_for_update()\
 
-    current_app.logger.debug(str(query.statement.compile(
+    current_app.logger.debug(str(q.statement.compile(
         dialect=postgresql.dialect(),
         compile_kwargs={"literal_binds": True}))
     )
-    
+
     reqs = q.all()
 
     for r in reqs:
