@@ -122,12 +122,12 @@
     <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
     <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
 	
-    <field name="application_number" type="string" stored="true" required="true" indexed="true" multiValued="false" />
-    <field name="name" type="text_en_splitting" multiValued="false" indexed="true" required="false" stored="true" termVectors="true"/>
-    <field name="name_copy" type="text_name_copy" multiValued="false" indexed="true" stored="true"/>
-    <field name="description" type="text_general" multiValued="false" indexed="false" required="false" stored="true"/>
-    <field name="status" type="string" multiValued="false" indexed="false" required="false" stored="true"/>
+    <field name="application_number" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
     <field name="category" type="string" multiValued="false" indexed="false" required="false" stored="true"/>
+    <field name="status" type="string" multiValued="false" indexed="false" required="false" stored="true"/>
+    <field name="name" type="text_en_splitting" multiValued="false" indexed="true" required="false" stored="true" termVectors="true"/>
+    <field name="description" type="text_general" multiValued="false" indexed="false" required="false" stored="true"/>
+    <field name="name_copy" type="text_name_copy" multiValued="false" indexed="true" stored="true"/>
 
     <!-- Only enabled in the "schemaless" data-driven example (assuming the client
          does not know what fields may be searched) because it's very expensive to index everything twice. -->
