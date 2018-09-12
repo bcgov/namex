@@ -7,6 +7,7 @@ from flask import Flask, g, current_app
 from config import Config
 from namex import db
 from namex.models import Request, State
+from sqlalchemy import text
 
 
 def create_app(config=Config):
@@ -55,9 +56,9 @@ row_count = 0
 
 try:
     reqs = db.session.query(Request).\
-                filter(Request.stateCd == State.INPROGRESS).\
-                filter(Request.lastUpdate < datetime.utcnow()-timedelta(seconds=delay)).\
-                order_by(Request.lastUpdate.asc()).\
+                filter(Request.stateCd == State.INPROGRESS). \
+                filter(Request.lastUpdate <= text('NOW() - INTERVAL \'{delay} SECONDS\''.format(delay=delay))). \
+            order_by(Request.lastUpdate.asc()).\
                 limit(max_rows).\
                 with_for_update().all()
 
