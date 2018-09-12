@@ -4,13 +4,6 @@ from dotenv import load_dotenv, find_dotenv
 #this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
-CONFIGURATION = {
-    "development": "config.DevConfig",
-    "testing": "config.TestConfig",
-    "production": "config.Config",
-    "default": "config.Config"
-}
-
 
 class Config(object):
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
