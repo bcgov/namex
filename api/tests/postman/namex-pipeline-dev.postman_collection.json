@@ -125,11 +125,11 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7e1752de-06d7-45f9-9443-363572747b13",
+								"id": "df32db93-cf13-4d61-a431-c1885098d5fc",
 								"type": "text/javascript",
 								"exec": [
-									"pm.test(\"Response time is less than 500ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 									"});",
 									"",
 									"pm.test(\"Status code is 200\", function () {",
@@ -172,11 +172,11 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b9da565e-e782-443b-9257-f7a3dfafcc58",
+								"id": "8d543ba4-a0ab-47ef-a981-9eb31fed5b0e",
 								"type": "text/javascript",
 								"exec": [
-									"pm.test(\"Response time is less than 500ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 									"});",
 									"",
 									"pm.test(\"Status code is 200\", function () {",
@@ -502,10 +502,12 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "cf6fa36e-812c-4b39-a907-0dd59d99d5cf",
+								"id": "837330d0-b434-4449-bd3a-301b6e9ef58c",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
 									"",
 									"it('should be an success response', () => {",
 									"    response.ok.should.be.true;            // 2XX",
@@ -581,6 +583,80 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "restricted_words",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0337a293-ee86-4afb-be86-fe207f53c9d9",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['restricted_words_conditions']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['restricted_words_conditions']",
+									"    });",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/NR 9222965/analysis/1/restricted_words",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"NR 9222965",
+								"analysis",
+								"1",
+								"restricted_words"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -593,9 +669,11 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5b877b8c-5f47-4a16-b3b4-90136741c3a7",
+								"id": "4e7b8f3b-4429-44e0-8e2b-f86dee41b6d2",
 								"type": "text/javascript",
 								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
 									"it('should be an success response', () => {",
 									"    response.ok.should.be.true;            // 2XX",
 									"    response.error.should.be.false;          // 4XX or 5XX",
@@ -604,8 +682,8 @@
 									"    response.statusType.should.equal(2);",
 									"});",
 									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 									"});",
 									"",
 									"var jsonData = pm.response.json();",
@@ -664,9 +742,11 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "30cc0247-9e4d-4ac1-9843-4cad6087f443",
+								"id": "665b5918-735b-4247-ba50-0643de8344e5",
 								"type": "text/javascript",
 								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
 									"pm.test(\"Same value as previous get from queue\", function () {",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData.nameRequest).to.eql( pm.environment.get(\"queued_nr\"));",
@@ -678,8 +758,8 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"pm.test(\"Response time is less than 200ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 									"});"
 								]
 							}
@@ -1231,13 +1311,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "eca8d667-6621-461b-827b-b99da6a5b0ef",
+								"id": "2a03af56-5bbb-4b24-b203-c3f57c73545d",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 									"});",
 									"",
 									"it('should be an success response', () => {",
@@ -1319,13 +1399,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "1de03e24-96f8-4965-ac94-07a24f5e78cd",
+								"id": "e16645d3-1cca-4f69-a246-3ac0d6bdf11a",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
-									"pm.test(\"Response time is less than 1000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 									"});",
 									"",
 									"it('should be an success response', () => {",
@@ -1393,13 +1473,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "355f131d-2d59-4bd9-ac58-e14387a0699d",
+								"id": "48073982-95d2-4884-ab71-41cadb1395fd",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 									"});",
 									"",
 									"it('should be an success response', () => {",
