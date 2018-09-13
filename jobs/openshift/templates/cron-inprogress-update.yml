@@ -13,18 +13,20 @@ objects:
     name: "inprogress-update"
   spec:
     schedule: "*/30 * * * *"
+    suspend: false
     jobTemplate:
       spec:
         template:
           spec:
             containers:
-            - name: inprogress-update
-              image: "docker-registry.default.svc:5000/servicebc-ne-tools/inprogress-update-runtime:${ENV_TAG}"
+            - name: "inprogress-update"
+              image: "docker-registry.default.svc:5000/servicebc-ne-tools/inprogress-update:${ENV_TAG}"
+              imagePullPolicy: Always
               args:
               - /bin/sh
               - -c
               - cd /opt/app-root/src; ./run.sh
-              - env:
+              env:
                   - name: DATABASE_USERNAME
                     valueFrom:
                       secretKeyRef:
@@ -48,7 +50,8 @@ objects:
                     value: "${MAX_ROWS}"
                   - name: MIN_DELAY_SECONDS
                     value: "${MIN_DELAY_SECONDS}"
-            restartPolicy: OnFailure
+            restartPolicy: "Never"
+            concurrencyPolicy: "Forbid"
 parameters: [
         {
           "name": "ENV_TAG",
