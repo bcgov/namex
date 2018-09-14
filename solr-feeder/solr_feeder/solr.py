@@ -13,14 +13,7 @@ _SOLR_URL = _SOLR_INSTANCE + '/{}/update/json'
 
 
 # Update the core with the given data.
-def update_core(core_name, action, json):
-    logging.debug('json to {} in {}: {}'.format(action, core_name, json))
-
-    # Set up the Solr commands, then add a commit command so that the document change is visible.
-    if action == 'delete':
-        json = {'delete': json['id']}
-    else:
-        json = {'add': {'doc': json}}
+def update_core( core_name, json ):
 
     json['commit'] = {}
 
