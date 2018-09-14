@@ -12,8 +12,9 @@ objects:
   metadata:
     name: "nro-update"
   spec:
+    concurrencyPolicy: "Forbid"
     schedule: "*/10 7-19 * * *"
-    suspend: true
+    suspend: false
     jobTemplate:
       spec:
         template:
@@ -50,6 +51,8 @@ objects:
                     value: "${MAX_ROWS}"
                   - name: MIN_DELAY_SECONDS
                     value: "${MIN_DELAY_SECONDS}"
+                  - name: EXPIRES_DAYS
+                    value: "${EXPIRES_DAYS}"
                   - name: ORA_PORT
                     valueFrom:
                       secretKeyRef:
@@ -98,5 +101,11 @@ parameters: [
           "description": "The minimum amount of time between when the job started and the approve/rejected timestamp of the Name Request",
           "required": true,
           "value": "600"
+        },{
+          "name": "EXPIRES_DAYS",
+          "displayName": "EXPIRES_DAYS",
+          "description": "The number of days, from today, that an APPROVED Name Request is valid for.",
+          "required": true,
+          "value": "60"
         },
 ]
