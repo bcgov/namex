@@ -2,37 +2,30 @@
 
 _September 2018_
 
-This document describes the python script that is used to load the trademarks data into the Solr cores. At the time of
-writing, the data arrived on seven DVDs containing 26 GB of zip files.
+This document describes the python scripts that are used to load the trademarks data into the Solr _trademarks_ core. At
+the time of writing, the data arrived from the Canadian Intellectual Property Office (CIPO) on seven DVDs, and contain
+26 GB of zip files.
 
-The python script has two variables that may be configured:
+The python script `trademarks_parser.py` has one variable that can be configured:
 
- - `SOURCE_DIRECTORY` (default `C:\TEMP\Trademarks`) defines the location of the zip files. All zip files in all
-   subdirectories will be extracted, so it is important that only the trademarks files are under this directory.
- - `DESTINATION_DIRECTORY` (default `C:\TEMP\Trademarks.output`) the directory where the XML files are written to.
+ - `SOURCE_DIRECTORY` (default `C:\TEMP\Trademarks`) defines the location of the CIPO zip files. All zip files in all
+   subdirectories will be extracted, so it is important that only the CIPO files are under this directory.
 
-Check the log file for ERROR items and handle as needed.
+When running the script, a log will be written to the console as well as to the `.log` file in the same directory. After
+processing, search the log file for:
+1. `ERROR`: to indicate errors that happened during processing.
+1. `DESCRIPTION`: to indicate trademarks that are missing their description element. These should be investigated as
+   we may want to exclude them from the core data.
 
-Once the XML files have been generated, they must be copied to the servers (rsync will use tar if you don't have rsync
-in your path):
+The primary output of the script is the `.json` file in the same directory. This file is loaded by running
+`trademarks_loader.py`. The loader needs to be configured for a particular environment by setting `SOLR_BASE_URL`.
 
-```
-C:\TEMP> oc rsync CA-TMK-GLOBAL_2018-06-16 solr-<POD_ID>:/opt/solr/trademarks_data
-WARNING: rsync command not found in path. Download cwRsync for Windows and add it to your PATH.
-```
-
-In the pod terminal for Solr swap the link to point to the new data. Note that two sets of data may not fit on the
-volume.
-
-```
-$ cd /opt/solr/trademarks_data
-$ rm latest
-$ ln -s latest CA-TMK-GLOBAL_2018-06-16
-```
+Until a better place can be found, the `.log` and `.json` outputs should be archived in
+`N:\BCAP2\6450 Projects\20-Mainframe Migration\Names Examination\trademarks`.
 
 #### Room for improvement
-1. If you used a built-in library rather than untangle, there would be no required packages
 1. Proper logging would be nice
 1. Perhaps its better to read from the zip than unzip them all
 1. The hokey JUMP functionality would be nice if it has min and max application (filename) values
 1. The matches.sort() call is a NOP, it needs to sort numerically
+1. If solr_loader is converting string to JSON and then back to string, then prevent that

@@ -1,10 +1,10 @@
 
 import datetime
 import fnmatch
+import json
 import os
 from os import path
 import pathlib
-from xml.sax import saxutils
 import zipfile
 
 import untangle
@@ -12,7 +12,6 @@ import untangle
 
 # This is the directory under which the XML files reside. If they are in ZIP files, they will be unzipped first.
 SOURCE_DIRECTORY = 'C:\\TEMP\\Trademarks'
-DESTINATION_DIRECTORY = 'C:\\TEMP\\Trademarks.output'
 
 
 # We do not want to include trademarks that are inactive. The possible status values from the schema are:
@@ -40,44 +39,36 @@ INACTIVE_STATUSES = [
 
 
 # This is hokey but faster than figuring out the logging. Log our actions so that we can look back if we ever need to.
-logfile = open('trademarks-' + datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '.log', 'w')
+timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+logfile = open('trademarks-' + timestamp + '.log', 'w')
+jsonfile = open('trademarks-' + timestamp + '.json', 'w')
 
 
 def log(line, file, message):
     output = '{} {} : {}'.format(line, file, message)
     print(output)
     logfile.write(output + '\n')
-    logfile.flush()
+
+    if count % 100 == 0:
+        logfile.flush()
 
 
-def clean(data_dict: dict, key: str) -> str:
-    if key in data_dict:
-        return saxutils.escape(data_dict[key].strip())
+def dump_json(data_dict):
+    json.dump(data_dict, jsonfile)
+    jsonfile.write('\n')
 
-    return ''
+    if count % 100 == 0:
+        jsonfile.flush()
 
 
-# Dump the dictionary of values to its own XML file.
-def write_xml_file(xml_data):
-    with open(path.join(DESTINATION_DIRECTORY, xml_data['application_number'] + '.xml'), 'w', encoding='utf-8') as file:
-        file.write(
-            '<trademark>\n'
-            '    <application_number>{}</application_number>\n'
-            '    <category>{}</category>\n'
-            '    <status>{}</status>\n'
-            '    <name>{}</name>\n'
-            '    <description>{}</description>\n'
-            '</trademark>\n'.format(
-                clean(xml_data, 'application_number'),
-                clean(xml_data, 'category'),
-                clean(xml_data, 'status'),
-                clean(xml_data, 'name'),
-                clean(xml_data, 'description')))
+def strip_values(data_dict: dict):
+    for key in data_dict.keys():
+        data_dict[key] = data_dict[key].strip()
 
 
 # The first thing we do is unzip the zip files. Since this only needs to be done once and takes a long time, an
 # indicator file with the extension .done_unzip is used so that we can skip these steps on subsequent runs.
-SKIP_UNZIP = True  # It's time consuming just to iterate through all the xml files.
+SKIP_UNZIP = True  # It's time consuming just to iterate through all the xml files. Maybe find .zips instead of walk.
 if not SKIP_UNZIP:
     for root, dirs, files in os.walk(SOURCE_DIRECTORY):
         for filename in fnmatch.filter(files, '*.zip'):
@@ -101,7 +92,7 @@ JUMP = 0
 count = 0
 for root, dirs, files in os.walk(SOURCE_DIRECTORY):
     matches = fnmatch.filter(files, '*.xml')
-    matches.sort()  # This needs to sort numerically. TBD.
+    #  matches.sort()  # This needs to sort numerically.
 
     for filename in matches:
         count = count + 1
@@ -158,15 +149,18 @@ for root, dirs, files in os.walk(SOURCE_DIRECTORY):
         except AttributeError:
             pass
 
+        # Get rid of leading and trailing spaces.
+        strip_values(data)
+
         if len(data) == 5:
             # We have complete data - write it to the file.
-            write_xml_file(data)
-            log(count, fq_filename, 'written to XML file')
+            dump_json(data)
+            log(count, fq_filename, 'written to JSON file')
         elif len(data) == 4 and 'description' not in data:
             # We have most of the data we need - write it to the file. These will need to be analyzed to see what could
             # be done differently.
-            write_xml_file(data)
-            log(count, fq_filename, 'written to XML file; missing DESCRIPTION')
+            dump_json(data)
+            log(count, fq_filename, 'written to JSON file; missing DESCRIPTION')
         else:
             # Print a nice error message explaining what fields are missing. These will need to be analyzed to see what
             # could be done differently.

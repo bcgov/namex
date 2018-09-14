@@ -1,2 +1,3 @@
-# For trademarks.py
+# For trademarks/*.py
+requests
 untangle
