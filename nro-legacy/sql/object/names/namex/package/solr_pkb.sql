@@ -105,15 +105,25 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     -- problem, log it to the application_log table and return the error message received from the web service.
     --
     FUNCTION send_to_solr(nr_number IN VARCHAR2, solr_core IN VARCHAR2, action IN VARCHAR2) RETURN VARCHAR2 IS
+        oracle_wallet configuration.value%TYPE;
+        destination_url configuration.value%TYPE;
+
         request utl_http.req;
         response utl_http.resp;
 
-        content VARCHAR2(100);
+        content VARCHAR2(4000);
         buffer VARCHAR2(4000);
 
         error_code INTEGER;
         error_message VARCHAR2(4000);
     BEGIN
+        -- configuration table lifted from globaldb. We should have a function for fetching these, and we should only
+        -- call it with "SOLR_FEEDER", the function should grab the GLOBAL value if the name doesn't exist for the
+        -- application. 
+        SELECT value INTO oracle_wallet FROM configuration WHERE application = 'GLOBAL' AND name = 'oracle_wallet';
+        SELECT value INTO destination_url FROM configuration WHERE application = 'SOLR_FEEDER' AND name =
+                'destination_url';
+
         IF solr_core = SOLR_CORE_CONFLICTS THEN
             content := generate_json_conflicts(nr_number, action);
         ELSIF solr_core = SOLR_CORE_NAMES THEN
@@ -121,9 +131,8 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         END IF;
 
         -- At some point it would make sense to move the ReST stuff out of here and into somewhere re-usable.
-        utl_http.set_wallet('file:/dsk01/app/oracle/product/rdbms/11.2.0.4/wallet');
-        request := utl_http.begin_request('https://namex-dev.pathfinder.gov.bc.ca/api/v1/feeds/names', 'POST',
-                'HTTP/1.1');
+        utl_http.set_wallet(oracle_wallet);
+        request := utl_http.begin_request(destination_url, 'POST', 'HTTP/1.1');
         utl_http.set_header(request, 'Content-Type', 'application/json');
         utl_http.set_header(request, 'Content-Length', LENGTH(content));
         utl_http.write_text(request, content);
@@ -241,39 +250,23 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     -- Called from a job to send queued changes to Solr.
     --
     PROCEDURE feed_solr IS
-        row_id solr_feeder.id%type;
-        nr_num request.nr_num%type;
-        solr_core_code solr_feeder.solr_core%type;
-        solr_core VARCHAR2(18);
-        action_code solr_feeder.action%type;
-        action VARCHAR2(6);
-        update_status VARCHAR2(1);
-
-        CURSOR nr_nums IS SELECT id, nr_num, solr_core, action FROM solr_feeder WHERE status <> STATUS_COMPLETE ORDER BY
-                id;
+        CURSOR solr_feeder IS SELECT * FROM solr_feeder WHERE status <> STATUS_COMPLETE ORDER BY id;
+        solr_feeder_row solr_feeder%ROWTYPE;
 
         error_response VARCHAR2(4000);
+        update_status VARCHAR2(1);
     BEGIN
         -- Load any data needed for the rows inserted by the trigger.
         load_data();
 
-        OPEN nr_nums;
+        OPEN solr_feeder;
         LOOP
-            FETCH nr_nums INTO row_id, nr_num, solr_core_code, action_code;
-            EXIT WHEN nr_nums%NOTFOUND;
+            FETCH solr_feeder INTO solr_feeder_row;
+            EXIT WHEN solr_feeder%NOTFOUND;
 
-            solr_core := CASE solr_core_code
-                WHEN SOLR_CORE_CONFLICTS THEN 'possible.conflicts'
-                WHEN SOLR_CORE_NAMES THEN 'names'
-            END;
-
-            action := CASE action_code
-                WHEN ACTION_DELETE THEN 'delete'
-                WHEN ACTION_UPDATE THEN 'update'
-            END;
-
-            dbms_output.put_line(row_id || ': ' || nr_num || ', ' || solr_core_code || ', ' || action_code);
-            error_response := send_to_solr(nr_num, solr_core, action);
+            dbms_output.put_line(solr_feeder_row.id || ': ' || solr_feeder_row.nr_num || ', ' ||
+                    solr_feeder_row.solr_core || ', ' || solr_feeder_row.action);
+            error_response := send_to_solr(solr_feeder_row.nr_num, solr_feeder_row.solr_core, solr_feeder_row.action);
             dbms_output.put_line('   -> ' || error_response);
 
             IF error_response IS NULL THEN
@@ -284,9 +277,9 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
 
             -- This will clear error messages once it finally sends through.
             UPDATE solr_feeder SET status = update_status, send_time = SYSDATE(), send_count = send_count + 1,
-                    error_msg = error_response WHERE id = row_id;
+                    error_msg = error_response WHERE id = solr_feeder_row.id;
         END LOOP;
-        CLOSE nr_nums;
+        CLOSE solr_feeder;
     EXCEPTION
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);

@@ -7,3 +7,7 @@
 @ ../../../../object/registry/namex/view/corp_party_vw.sql
 @ ../../../../object/registry/namex/view/office_vw.sql
 @ ../../../../object/registry/namex/view/solr_dataimport_conflicts_vw.sql
+
+
+
+CREATE PUBLIC SYNONYM namex_trigger_handler FOR namex.trigger_handler
