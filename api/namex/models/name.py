@@ -32,9 +32,9 @@ class Name(db.Model):
     comment = db.relationship("Comment", backref=backref("related_name", uselist=False), foreign_keys=[commentId])
 
     NOT_EXAMINED = 'NE'
-    APPROVED = 'A'
-    REJECTED = 'R'
-    CONDITION = 'C'
+    APPROVED = 'APPROVED'
+    REJECTED = 'REJECTED'
+    CONDITION = 'CONDITION'
 
     def as_dict(self):
         return {
