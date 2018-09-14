@@ -71,7 +71,11 @@ try:
     ora_con.begin()
     ora_cursor = ora_con.cursor()
 
+    # A more generic way of setting time
+    # but it doens't print / log well from the Postgres Dialect
+    # so just leaving it here for future reference
     # q = q.filter(Request.lastUpdate < datetime.utcnow()-timedelta(seconds=delay)). \
+    #
     q = db.session.query(Request).\
                 filter(Request.stateCd.in_([State.APPROVED, State.REJECTED, State.CONDITIONAL])).\
                 filter(Request.furnished != 'Y').\
