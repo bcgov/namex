@@ -4,7 +4,6 @@ import logging
 import flask
 import flask_restplus
 
-from solr_feeder.models import solr_dataimport_conflicts, solr_dataimport_names
 from solr_feeder import solr
 
 
@@ -28,40 +27,27 @@ class _Names(flask_restplus.Resource):
     name_request_number_model = api.model(
         'Name Request Number', {
             'solr_core': flask_restplus.fields.String(),
-            'request': flask_restplus.fields.Raw
+            'request': flask_restplus.fields.String()
         }
     )
 
     @api.expect(name_request_number_model)
     def post(self):
         logging.debug('request raw data: {}'.format(flask.request.data))
-        jsonData = flask.request.get_json()
+        json_data = flask.request.get_json()
 
-        if 'solr_core' not in jsonData:
+        if 'solr_core' not in json_data:
             return {'message': 'Required parameter "solr_core" not defined'}, 400
 
-        solr_core = jsonData['solr_core']
+        solr_core = json_data['solr_core']
         if solr_core not in ('names', 'possible.conflicts'):
             return {'message': 'Parameter "solr_core" only has valid values of "names" or "possible.conflicts"'}, 400
 
-        if 'request' not in jsonData:
+        if 'request' not in json_data:
             return {'message': 'Required parameter "request" not defined'}, 400
 
-        response = self._dataImport_json(jsonData)
-
-        return {'message': response}, 200
-
-
-    @staticmethod
-    def _dataImport_json( jsonData ):
-
-        # Update the core. If any update fails we quit and leave the state inconsistent. A retry by the caller will sync
-        # everything.
-        core_name = jsonData['solr_core']
-        requestData = jsonData['request']
-        error_response = solr.update_core(core_name, requestData)
+        error_response = solr.update_core(solr_core, json_data['request'])
         if error_response:
             return {'message': error_response['message']}, error_response['status_code']
 
         return {'message': 'Solr core updated'}, 200
-

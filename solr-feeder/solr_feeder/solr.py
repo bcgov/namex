@@ -13,10 +13,7 @@ _SOLR_URL = _SOLR_INSTANCE + '/{}/update/json'
 
 
 # Update the core with the given data.
-def update_core( core_name, json ):
-
-    json['commit'] = {}
-
+def update_core(core_name, json):
     logging.debug('json Solr command: {}'.format(json))
 
     response = requests.post(_SOLR_URL.format(core_name), json=json)
