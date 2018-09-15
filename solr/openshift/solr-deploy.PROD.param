@@ -11,6 +11,4 @@ APPLICATION_HOSTNAME=namex-solr
 APPLICATION_DOMAIN=pathfinder.gov.bc.ca
 CORES_PV_SIZE=1Gi
 CORES_MOUNT_PATH=/opt/solr/server/solr/mycores
-TRADEMARKS_PV_SIZE=1Gi
-TRADEMARKS_MOUNT_PATH=/opt/solr/trademarks_data
 CORE_NAME=names,possible.conflicts,trademarks

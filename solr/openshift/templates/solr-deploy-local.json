@@ -97,32 +97,6 @@
       }
     },
     {
-      "kind": "PersistentVolumeClaim",
-      "apiVersion": "v1",
-      "metadata":
-      {
-        "name": "${NAME}-trademarks",
-        "labels":
-        {
-          "app": "${NAME}",
-          "template": "${NAME}-deployment-template"
-        }
-      },
-      "spec":
-      {
-        "accessModes": [
-          "ReadWriteOnce"
-        ],
-        "resources":
-        {
-          "requests":
-          {
-            "storage": "${TRADEMARKS_PV_SIZE}"
-          }
-        }
-      }
-    },
-    {
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata":
@@ -197,13 +171,6 @@
                 }
               },
               {
-                "name": "${NAME}-trademarks",
-                "persistentVolumeClaim":
-                {
-                  "claimName": "${NAME}-trademarks"
-                }
-              },
-              {
                 "name": "solr-datasources",
                 "configMap": {
                   "name": "solr-datasources",
@@ -229,10 +196,6 @@
                   {
                     "name": "${NAME}-cores",
                     "mountPath": "${CORES_MOUNT_PATH}"
-                  },
-                  {
-                    "name": "${NAME}-trademarks",
-                    "mountPath": "${TRADEMARKS_MOUNT_PATH}"
                   },
                   {
                     "name": "solr-datasources",
@@ -370,25 +333,11 @@
       "value": "1Gi"
     },
     {
-      "name": "TRADEMARKS_PV_SIZE",
-      "displayName": "Trademarks Persistent Volume Size",
-      "description": "The size of the persistent volume housing the trademarks files , e.g. 512Mi, 1Gi, 2Gi.",
-      "required": true,
-      "value": "1Gi"
-    },
-    {
       "name": "CORES_MOUNT_PATH",
       "displayName": "Cores Mount Path",
       "description": "The path to mount the cores persistent volume.",
       "required": true,
       "value": "/opt/solr/server/solr/mycores"
-    },
-    {
-      "name": "TRADEMARKS_MOUNT_PATH",
-      "displayName": "Trademarks Mount Path",
-      "description": "The path to mount the trademarks persistent volume.",
-      "required": true,
-      "value": "/opt/solr/trademarks_data"
     },
     {
       "name": "CORE_NAME",
