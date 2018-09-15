@@ -29,6 +29,9 @@ Using project "servicebc-ne-tools".
 
 (Note that you could also run `oc login` and enter the same credentials).
 
+
+## TODO: configmap
+
 ## Creating and Replacing the `solr` Build
 
 Creating the `solr` build should only need to be once. Replacing the build should only need to be done when changing

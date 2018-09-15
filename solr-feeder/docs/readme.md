@@ -24,7 +24,6 @@ C:\> oc create secret generic solr-feeder --from-literal=flask-secret-key=[big_l
 ##### Deficiencies - Code
 
 1. Now that we have deletes there needs to be some authorization set up
-1. models.base_schema method needs to be completed; it does not work
 1. Set the host in app.py to 0.0.0.0 but link in PyCharm doesn't work (use localhost)
 1. Add version numbers to requirements.txt
 1. Fix the warning for the dotenv import in config.py
