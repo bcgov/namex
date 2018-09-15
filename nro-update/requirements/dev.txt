@@ -3,6 +3,7 @@
 
 # Testing
 pytest
+pytest-mock
 
 # Lint and code style
 flake8
