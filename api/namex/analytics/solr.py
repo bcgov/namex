@@ -11,7 +11,6 @@ NO_SYNONYMS_PREFIX = '&fq=name_copy:'
 
 
 class SolrQueries:
-
     CONFLICTS = 'conflicts'
     HISTORY = 'histories'
     TRADEMARKS = 'trademarks'
@@ -31,15 +30,16 @@ class SolrQueries:
                  'fl=nr_num,name,score,submit_count,name_state_type_cd{name_copy_clause}',
         TRADEMARKS: '/solr/trademarks/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
                     'hl=on&indent=on&mm=75%25&q={name}&qf=name&wt=json&start={start}&rows={rows}&'
-                    'fl=application_number,name,status,description,score&bq=status:REGISTERED^5.0{name_copy_clause}'
+                    'fl=application_number,name,status,description,score&bq=status:%22Registration%20published%22^5.0'
+                    '{name_copy_clause}'
     }
 
     @classmethod
     def get_results(cls, query_type, name, start=0, rows=10):
-
         solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
         if not solr_base_url:
             current_app.logger.error('SOLR: SOLR_BASE_URL is not set')
+
             return None, 'Internal server error', 500
 
         if query_type not in SolrQueries.VALID_QUERIES:
