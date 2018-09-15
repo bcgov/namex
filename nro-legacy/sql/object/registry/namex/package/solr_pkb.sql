@@ -17,23 +17,23 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         content VARCHAR2(4000);
         view_row solr_dataimport_conflicts_vw%ROWTYPE;
     BEGIN
-        content := '{ "solr_core": "possible.conflicts", request: ';
+        content := '{ "solr_core": "possible.conflicts", "request": "{';
 
         IF action = ACTION_DELETE THEN
-            content := content || '{"delete": "' || corp_num || '"}';
+            content := content || '\"delete\": \"' || corp_num || '\", ';
         ELSE
             SELECT * INTO view_row FROM solr_dataimport_conflicts_vw WHERE id = corp_num;
 
             -- Quick and dirty: do this by hand in 11. 12 has JSON stuff.
-            content := content || '{"add": {"doc": {' ||
-                    '"id": "' || view_row.id || '", ' ||
-                    '"name": "' || view_row.name || '", ' ||
-                    '"state_type_cd": "' || view_row.state_type_cd || '", ' ||
-                    '"source": "' || view_row.source || '" ' ||
-                    '} } }';
+            content := content || '\"add\": {\"doc\": {' ||
+                    '\"id\": \"' || view_row.id || '\", ' ||
+                    '\"name\": \"' || view_row.name || '\", ' ||
+                    '\"state_type_cd\": \"' || view_row.state_type_cd || '\", ' ||
+                    '\"source\": \"' || view_row.source || '\" ' ||
+                    '} }, ';
         END IF;
 
-        content := content || ' }';
+        content := content || '\"commit\": {} }" }';
 
         RETURN content;
     EXCEPTION
@@ -54,7 +54,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         request utl_http.req;
         response utl_http.resp;
 
-        content VARCHAR2(100);
+        content VARCHAR2(4000);
         buffer VARCHAR2(4000);
 
         error_code INTEGER;
@@ -152,7 +152,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
 
 
     --
-    -- Called from a trigger to queue name data that needs to be sent to Solr.
+    -- Called from a trigger to queue state data that needs to be sent to Solr.
     --
     PROCEDURE load_state_data IS
         CURSOR pending_rows IS SELECT * FROM triggered_corp_state WHERE status_solr = STATUS_PENDING ORDER BY id;
@@ -198,14 +198,6 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     -- Called from a job to send queued changes to Solr.
     --
     PROCEDURE feed_solr IS
-    BEGIN
-        RETURN;
-    END;
-
-    --
-    -- Called from a job to send queued changes to Solr.
-    --
-    PROCEDURE feed_solr2 IS
         CURSOR solr_feeder IS SELECT * FROM solr_feeder WHERE status <> STATUS_COMPLETE ORDER BY id;
         solr_feeder_row solr_feeder%ROWTYPE;
 
@@ -235,6 +227,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
             -- This will clear error messages once it finally sends through.
             UPDATE solr_feeder SET status = update_status, send_time = SYSDATE(), send_count = send_count + 1,
                     error_msg = error_response WHERE id = solr_feeder_row.id;
+            COMMIT;
         END LOOP;
         CLOSE solr_feeder;
     EXCEPTION
