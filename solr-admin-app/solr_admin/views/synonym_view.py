@@ -1,10 +1,12 @@
 
+import os
 import re
 
-from flask import request
+from flask import current_app, request
 from flask_admin.contrib import sqla
 from wtforms import validators
 
+from solr_admin import config
 from solr_admin import keycloak
 from solr_admin import models
 from solr_admin import solr
@@ -15,6 +17,9 @@ from solr_admin.models import synonym_audit
 class SynonymView(sqla.ModelView):
     # We're unlikely to do multiple deletes, so just get rid of the checkboxes and the drop down for delete.
     action_disallowed_list = ['delete']
+
+    # Disallow editing unless in the 'testing' environment.
+    can_edit = False  # TODO
 
     # Allow export as a CSV file.
     can_export = True

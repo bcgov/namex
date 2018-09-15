@@ -32,7 +32,8 @@ with open('trademarks.json') as file:
 
         # Reload the index every thousand documents.
         if count % 1000 == 0:
-            print(count)
             requests.post(SOLR_BASE_URL, json=json.loads('{ "commit": {} }'))
+            print(count)
 
 requests.post(SOLR_BASE_URL, json=json.loads('{ "commit": {} }'))
+print(count)
