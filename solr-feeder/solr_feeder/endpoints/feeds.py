@@ -13,25 +13,17 @@ __all__ = ['api']
 api = flask_restplus.Namespace('Feeds', description='Feed updates from legacy databases')
 
 
-# Feed the cores with the data corresponding to the posted corporation number.
-@api.route('/corporations')
-class _Corporations(flask_restplus.Resource):
-    @staticmethod
-    def post():
-        return {'message': 'Okie dokie'}, 200
-
-
-# Feed the cores with the data corresponding to the posted name request number.
-@api.route('/names')
+# Feed the specified core with the given data.
+@api.route('')
 class _Names(flask_restplus.Resource):
-    name_request_number_model = api.model(
-        'Name Request Number', {
+    solr_request_model = api.model(
+        'Solr Request', {
             'solr_core': flask_restplus.fields.String(),
             'request': flask_restplus.fields.String()
         }
     )
 
-    @api.expect(name_request_number_model)
+    @api.expect(solr_request_model)
     def post(self):
         logging.debug('request raw data: {}'.format(flask.request.data))
         json_data = flask.request.get_json()
