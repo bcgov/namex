@@ -21,23 +21,23 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         content VARCHAR2(4000);
         view_row solr_dataimport_conflicts_vw%ROWTYPE;
     BEGIN
-        content := '{ "solr_core": "possible.conflicts", request: ';
+        content := '{ "solr_core": "possible.conflicts", "request": "{';
 
         IF action = ACTION_DELETE THEN
-            content := content || '{"delete": "' || nr_number || '"}';
+            content := content || '\"delete\": \"' || nr_number || '\", ';
         ELSE
             SELECT * INTO view_row FROM solr_dataimport_conflicts_vw WHERE id = nr_number;
 
             -- Quick and dirty: do this by hand in 11. 12 has JSON stuff.
-            content := content || '{"add": {"doc": {' ||
-                    '"id": "' || view_row.id || '", ' ||
-                    '"name": "' || view_row.name || '", ' ||
-                    '"state_type_cd": "' || view_row.state_type_cd || '", ' ||
-                    '"source": "' || view_row.source || '" ' ||
-                    '} } }';
+            content := content || '\"add\": {\"doc\": {' ||
+                    '\"id\": \"' || view_row.id || '\", ' ||
+                    '\"name\": \"' || view_row.name || '\", ' ||
+                    '\"state_type_cd\": \"' || view_row.state_type_cd || '\", ' ||
+                    '\"source\": \"' || view_row.source || '\" ' ||
+                    '} }, ';
         END IF;
 
-        content := content || ' }';
+        content := content || '\"commit\": {} }" }';
 
         RETURN content;
     EXCEPTION
@@ -55,14 +55,14 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         view_row solr_dataimport_names_vw%ROWTYPE;
         CURSOR view_rows IS SELECT * FROM solr_dataimport_names_vw WHERE nr_num = nr_number ORDER BY id;
     BEGIN
-        content := '{ "solr_core": "names", request: ';
+        content := '{ "solr_core": "names", "request": "';
 
         IF action = ACTION_DELETE THEN
             -- Relies on Solr ignoring a delete for something that doesn't exist, as we may have fewer than three names.
-            content := content || '{"delete": ["' || nr_number || '-1", "' || nr_number || '-2", "' || nr_number ||
-                    '-3"]}';
+            content := content || '{\"delete\": [\"' || nr_number || '-1\", \"' || nr_number || '-2\", \"' ||
+                    nr_number || '-3\"], ';
         ELSE
-            content := content || '{"add": {"doc": ';
+            content := content || '{';
 
             OPEN view_rows;
             LOOP
@@ -70,27 +70,25 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                 EXIT WHEN view_rows%NOTFOUND;
 
                 -- Quick and dirty: do this by hand in 11. 12 has JSON stuff.
-                content := content || '{' ||
-                        '"id": "' || view_row.id || '", ' ||
-                        '"name_instance_id": "' || view_row.name_instance_id || '", ' ||
-                        '"choice_number": "' || view_row.choice_number || '", ' ||
-                        '"corp_num": "' || view_row.corp_num || '", ' ||
-                        '"name": "' || view_row.name || '", ' ||
-                        '"nr_num": "' || view_row.nr_num || '", ' ||
-                        '"request_id": "' || view_row.request_id || '", ' ||
-                        '"submit_count": "' || view_row.submit_count || '", ' ||
-                        '"request_type_cd": "' || view_row.request_type_cd || '", ' ||
-                        '"name_id": "' || view_row.name_id || '", ' ||
-                        '"start_event_id": "' || view_row.start_event_id || '", ' ||
-                        '"name_state_type_cd": "' || view_row.name_state_type_cd || '" ' ||
-                        '}, ';
+                content := content || '\"add\": {\"doc\": {' ||
+                        '\"id\": \"' || view_row.id || '\", ' ||
+                        '\"name_instance_id\": \"' || view_row.name_instance_id || '\", ' ||
+                        '\"choice_number\": \"' || view_row.choice_number || '\", ' ||
+                        '\"corp_num\": \"' || view_row.corp_num || '\", ' ||
+                        '\"name\": \"' || view_row.name || '\", ' ||
+                        '\"nr_num\": \"' || view_row.nr_num || '\", ' ||
+                        '\"request_id\": \"' || view_row.request_id || '\", ' ||
+                        '\"submit_count\": \"' || view_row.submit_count || '\", ' ||
+                        '\"request_type_cd\": \"' || view_row.request_type_cd || '\", ' ||
+                        '\"name_id\": \"' || view_row.name_id || '\", ' ||
+                        '\"start_event_id\": \"' || view_row.start_event_id || '\", ' ||
+                        '\"name_state_type_cd\": \"' || view_row.name_state_type_cd || '\" ' ||
+                        '} }, ';
             END LOOP;
             CLOSE view_rows;
-
-            content := content || '} }';
         END IF;
 
-        content := content || ' }';
+        content := content || '\"commit\": {} }" }';
 
         RETURN content;
     EXCEPTION
@@ -188,8 +186,10 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         row_nr_num solr_feeder.nr_num%type;
         row_state_type_cd request_state.state_type_cd%type;
         approved_count NUMBER;
+        status CHAR(1);
 
-        CURSOR pending_rows IS SELECT transaction_id FROM name_transaction WHERE status_solr = STATUS_PENDING;
+        CURSOR pending_rows IS SELECT transaction_id FROM name_transaction WHERE status_solr = STATUS_PENDING ORDER BY
+                transaction_id;
     BEGIN
         OPEN pending_rows;
         LOOP
@@ -200,12 +200,21 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                     transaction_id = row_transaction_id;
 
             -- If we don't care about it, mark it as ignored.
-            IF row_transaction_type_cd NOT IN ('CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM') THEN
-                UPDATE name_transaction SET status_solr = STATUS_IGNORED WHERE transaction_id = row_transaction_id;
-            ELSE
+            status := STATUS_IGNORED;
+
+            IF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM') THEN
                 SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
                         row_transaction_id;
-                SELECT state_type_cd INTO row_state_type_cd FROM request_state WHERE start_event_id = row_event_id;
+                
+                -- We can get multiple rows, with states C and COMPLETED for the same start_event_id. Limit it to the
+                -- one we want but realize that we may get nothing.
+                BEGIN
+                    SELECT state_type_cd INTO row_state_type_cd FROM request_state WHERE start_event_id = row_event_id
+                            AND state_type_cd = 'COMPLETED';
+                EXCEPTION
+                    WHEN NO_DATA_FOUND THEN
+                        row_state_type_cd := NULL;
+                END;
 
                 dbms_output.put_line('transaction_id: ' || row_transaction_id || '; nr_num: ' || row_nr_num ||
                         '; state_type_cd: ' || row_state_type_cd);
@@ -219,6 +228,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                         INSERT INTO solr_feeder (id, transaction_id, nr_num, solr_core, action) VALUES
                                 (solr_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, SOLR_CORE_CONFLICTS,
                                 ACTION_UPDATE);
+                        status := STATUS_COMPLETE;
                     END IF;
 
                     SELECT COUNT(*) INTO approved_count FROM solr_dataimport_names_vw WHERE nr_num = row_nr_num;
@@ -228,15 +238,17 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                         INSERT INTO solr_feeder (id, transaction_id, nr_num, solr_core, action) VALUES
                                 (solr_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, SOLR_CORE_NAMES,
                                 ACTION_UPDATE);
+                        status := STATUS_COMPLETE;
                     END IF;
                 ELSIF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL') THEN
                     INSERT INTO solr_feeder (id, transaction_id, nr_num, solr_core, action) VALUES
                             (solr_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, SOLR_CORE_CONFLICTS,
                             ACTION_DELETE);
+                    status := STATUS_COMPLETE;
                 END IF;
-
-                UPDATE name_transaction SET status_solr = STATUS_COMPLETE WHERE transaction_id = row_transaction_id;
             END IF;
+
+            UPDATE name_transaction SET status_solr = status WHERE transaction_id = row_transaction_id;
         END LOOP;
         CLOSE pending_rows;
     EXCEPTION
@@ -278,6 +290,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
             -- This will clear error messages once it finally sends through.
             UPDATE solr_feeder SET status = update_status, send_time = SYSDATE(), send_count = send_count + 1,
                     error_msg = error_response WHERE id = solr_feeder_row.id;
+            COMMIT;
         END LOOP;
         CLOSE solr_feeder;
     EXCEPTION
