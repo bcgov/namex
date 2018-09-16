@@ -1,12 +1,10 @@
 
-import os
 import re
 
 from flask import current_app, request
 from flask_admin.contrib import sqla
 from wtforms import validators
 
-from solr_admin import config
 from solr_admin import keycloak
 from solr_admin import models
 from solr_admin import solr
@@ -18,9 +16,6 @@ class SynonymView(sqla.ModelView):
     # We're unlikely to do multiple deletes, so just get rid of the checkboxes and the drop down for delete.
     action_disallowed_list = ['delete']
 
-    # Disallow editing unless in the 'testing' environment.
-    can_edit = False  # TODO
-
     # Allow export as a CSV file.
     can_export = True
 
@@ -30,7 +25,7 @@ class SynonymView(sqla.ModelView):
     # Keep everything sorted, although realistically also we need to sort the values within a row before it is saved.
     column_default_sort = 'synonyms_text'
 
-    # Make all columns editable. [temporarily except the Boolean field "enabled" - see Flask-Admin problem 1604]
+    # For some reason this needs to be initialized, but we will override it in is_accessible.
     column_editable_list = ['category', 'comment', 'synonyms_text']
 
     # Allow the user to filter on the category column.
@@ -48,12 +43,27 @@ class SynonymView(sqla.ModelView):
     # Use a custom list.html that provides a page size drop down with extra choices.
     list_template = 'synonyms_list.html'
 
-    # Flask-OIDC function that states whether or not the user is logged in and has permissions.
+    # At runtime determine whether or not the user has access to functionality of the view. The rule is that data is
+    # only editable in the test environment.
     def is_accessible(self):
+        # Disallow editing unless in the 'testing' environment.
+        editable = current_app.env == 'testing'
+        self.can_create = editable
+        self.can_delete = editable
+        self.can_edit = editable
+
+        if editable:
+            # Make all columns editable. [temporarily except the Boolean field "enabled" - see Flask-Admin problem 1604]
+            self.column_editable_list = ['category', 'comment', 'synonyms_text']
+        else:
+            self.column_editable_list = []
+
+        # Flask-OIDC function that states whether or not the user is logged in and has permissions.
         return keycloak.Keycloak(None).has_access()
 
-    # Flask-OIDC function that is called if the user is not logged in or does not have permissions.
+    # At runtime determine what to do if the view is not accessible.
     def inaccessible_callback(self, name, **kwargs):
+        # Flask-OIDC function that is called if the user is not logged in or does not have permissions.
         return keycloak.Keycloak(None).get_redirect_url(request.url)
 
     # When the user goes to save the data, trim whitespace and put the list back into alphabetical order.

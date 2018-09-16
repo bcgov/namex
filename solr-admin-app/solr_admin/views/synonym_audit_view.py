@@ -25,8 +25,8 @@ class SynonymAuditView(sqla.ModelView):
     # Display by timestamp.
     column_default_sort = ('timestamp', True)
 
-    # Allow the user to filter on the synonym_id and category columns.
-    column_filters = ['synonym_id', 'category']
+    # Allow the user to filter on the synonym_id and category columns. Order is significant here.
+    column_filters = ['synonym_id', 'category', 'action']
 
     # Search within the synonyms_text.
     column_searchable_list = ['category', 'synonym_id', 'synonyms_text']

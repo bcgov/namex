@@ -5,8 +5,9 @@ This Flask-Admin application allows viewing and editing the Solr synonyms that a
 
 ##### SSO Admin Setup:
 
-Create client "namex-solr-admin-app" with a Client Protocol of `openid-connect` and Access Type `confidential`. Add
-Valid Redirect URI `http://localhost:8080/oidc_callback` for doing desktop development.
+Create client "namex-solr-admin-app" with a Client Protocol of `openid-connect` and Access Type `confidential`. For the
+development environment only, add Valid Redirect URI `http://localhost:8080/oidc_callback` for doing desktop
+development.
 
 ##### User Interface Defects
 1. Export of synonym_audit loses date and time information
@@ -18,9 +19,7 @@ Valid Redirect URI `http://localhost:8080/oidc_callback` for doing desktop devel
 1. If you're on page 2 when less than 1000 items, switching to 1000 per page fails
 
 ##### Deficiencies - Application
-1. Make the audit tables filterable on Action column
 1. Push data from test to dev and prod
-1. Flag to make data readonly in dev and prod
 1. Make the Category column non-null after all rows have values defined 
 1. SSO authorization based on group
 1. Display username and add logout button
@@ -37,7 +36,6 @@ Valid Redirect URI `http://localhost:8080/oidc_callback` for doing desktop devel
 1. Fix the warning for the dotenv import in config.py
 1. Move templates to better place / do jinja properly
 1. Fix desktop to run on port 8080, not 5000
-1. Determine if Alembic should be used for migrating database changes
 1. Use gunicorn or something else to get rid of WSGI warning
 1. Make the audit action an enum in the model
 1. Implement test suite
