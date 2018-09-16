@@ -1,12 +1,6 @@
 
 import os
 
-import dotenv
-
-
-# Load all the environment variables from a .env file located in the nearest directory above.
-dotenv.load_dotenv(dotenv.find_dotenv())
-
 CONFIGURATION = {
     'development': 'config.DevConfig',
     'testing': 'config.TestConfig',
