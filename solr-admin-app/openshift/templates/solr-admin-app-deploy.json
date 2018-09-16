@@ -153,6 +153,10 @@
                 "name": "${NAME}",
                 "env": [
                     {
+                        "name": "FLASK_ENV",
+                        "value": "${FLASK_ENV}"
+                    },
+                    {
                         "name": "SOLR_ADMIN_APP_DATABASE_HOST",
                         "value": "${SOLR_ADMIN_APP_DATABASE_HOST}"
                     },
@@ -269,6 +273,13 @@
       "description": "The hostname part of the full path to the solr-admin-app service.",
       "required": true,
       "value": "solr-admin-app"
+    },
+    {
+      "name": "FLASK_ENV",
+      "displayName": "Flask Environment",
+      "description": "The environment that the application run in. Only 'testing' is able to edit data.",
+      "required": true,
+      "value": "production"
     },
     {
       "name": "SOLR_ADMIN_APP_DATABASE_HOST",

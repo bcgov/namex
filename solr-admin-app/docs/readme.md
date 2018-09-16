@@ -1,7 +1,9 @@
 
 # Solr Admin App
 
-This Flask-Admin application allows viewing and editing the Solr synonyms that are stored in a PostgreSQL table.
+This Flask-Admin application allows viewing and editing the Solr synonyms that are stored in a PostgreSQL table. In the
+'testing' environment the synonyms are editable, but in all other environments they are read-only. The synonyms audit
+data is read-only in all environments. 
 
 ##### SSO Admin Setup:
 
