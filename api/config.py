@@ -84,7 +84,7 @@ class TestConfig(Config):
     JWT_OIDC_TEST_MODE = True
     JWT_OIDC_TEST_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
     JWT_OIDC_TEST_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
-    JWT_OIDC_TEST_ISSUER = 'https://dev-sso.pathfinder.gov.bc.ca/auth/realms/nest'
+    JWT_OIDC_TEST_ISSUER = 'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc'
     JWT_OIDC_TEST_KEYS = {
         "keys": [
             {

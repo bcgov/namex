@@ -12,7 +12,7 @@ objects:
   metadata:
     name: "inprogress-update"
   spec:
-    schedule: "*/30 * * * *"
+    schedule: "*/2 * * * *"
     suspend: false
     jobTemplate:
       spec:
