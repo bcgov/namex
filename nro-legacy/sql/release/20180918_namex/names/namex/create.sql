@@ -34,6 +34,9 @@
 @ ../../../../object/names/namex/package/trigger_handler_pks.sql
 @ ../../../../object/names/namex/package/trigger_handler_pkb.sql
 
+@ ../../../../object/names/namex/job/namex_outbound.sql
+@ ../../../../object/names/namex/job/solr_outbound.sql
+
 INSERT INTO CONFIGURATION (application, name, value) VALUES
    ('GLOBAL', 'oracle_wallet', 'file:/dsk01/app/oracle/product/rdbms/11.2.0.4/wallet', NULL);
 
