@@ -1,6 +1,6 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
-CREATE OR REPLACE PACKAGE NAMEX.solr AS
+CREATE OR REPLACE PACKAGE solr AS
     --
     -- Called from a job to send queued changes to Solr.
     --

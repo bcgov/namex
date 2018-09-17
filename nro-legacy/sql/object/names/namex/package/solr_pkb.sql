@@ -1,4 +1,6 @@
-CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
+-- noinspection SqlNoDataSourceInspectionForFile
+
+CREATE OR REPLACE PACKAGE BODY solr AS
     -- Action Types
     ACTION_UPDATE CONSTANT VARCHAR2(1) := 'U';
     ACTION_DELETE CONSTANT VARCHAR2(1) := 'D';
