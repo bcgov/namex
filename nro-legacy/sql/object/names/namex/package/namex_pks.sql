@@ -1,6 +1,6 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
-CREATE OR REPLACE PACKAGE NAMEX.namex_feeder AS
+CREATE OR REPLACE PACKAGE NAMEX.namex AS
     --
     -- Called from a job to send NRs that have been queued due to being created or changed to NameX.
     --
@@ -9,6 +9,6 @@ CREATE OR REPLACE PACKAGE NAMEX.namex_feeder AS
     -- Errors will appear in application_log, and also in the namex_feeder.error_msg.
     -- Errored NRs will be retried the next time the job runs, so we need a way to 
     -- make sure something isn't stuck in limbo forever.
-    PROCEDURE send_nr_to_namex;
-END namex_feeder;
+    PROCEDURE feed_namex;
+END namex;
 /

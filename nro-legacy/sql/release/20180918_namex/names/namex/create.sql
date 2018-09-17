@@ -1,10 +1,12 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
+@ ../../../../object/names/namex/sequence/namex_feeder_id_seq.sql
 @ ../../../../object/names/namex/sequence/solr_feeder_id_seq.sql
 
 @ ../../../../object/names/namex/table/application_log.sql
 @ ../../../../object/names/namex/table/configuration.sql
 @ ../../../../object/names/namex/table/name_transaction.sql
+@ ../../../../object/names/namex/table/namex_feeder.sql
 @ ../../../../object/names/namex/table/solr_feeder.sql
 
 @ ../../../../object/names/namex/view/corp_jurs_vw.sql
@@ -25,6 +27,8 @@
 
 @ ../../../../object/names/namex/procedure/application_log_insert.sql
 
+@ ../../../../object/names/namex/package/names_pks.sql
+@ ../../../../object/names/namex/package/namex_pkb.sql
 @ ../../../../object/names/namex/package/solr_pks.sql
 @ ../../../../object/names/namex/package/solr_pkb.sql
 @ ../../../../object/names/namex/package/trigger_handler_pks.sql
