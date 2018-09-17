@@ -6,7 +6,7 @@ begin
       start_date => sysdate,
       repeat_interval => 'freq=MINUTELY; INTERVAL=1',
       end_date => NULL,
-      enabled => TRUE,
+      enabled => FALSE,
       comments => 'Send a NR to NameX');
 end;
 /
