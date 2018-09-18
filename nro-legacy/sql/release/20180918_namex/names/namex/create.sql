@@ -27,7 +27,7 @@
 
 @ ../../../../object/names/namex/procedure/application_log_insert.sql
 
-@ ../../../../object/names/namex/package/names_pks.sql
+@ ../../../../object/names/namex/package/namex_pks.sql
 @ ../../../../object/names/namex/package/namex_pkb.sql
 @ ../../../../object/names/namex/package/solr_pks.sql
 @ ../../../../object/names/namex/package/solr_pkb.sql
@@ -37,7 +37,7 @@
 @ ../../../../object/names/namex/job/namex_outbound.sql
 @ ../../../../object/names/namex/job/solr_outbound.sql
 
-INSERT INTO CONFIGURATION (application, name, value) VALUES
+INSERT INTO CONFIGURATION (application, name, value, description) VALUES
    ('GLOBAL', 'oracle_wallet', 'file:/dsk01/app/oracle/product/rdbms/11.2.0.4/wallet', NULL);
 
 GRANT EXECUTE ON application_log_insert TO namesdb 
