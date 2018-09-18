@@ -1,6 +1,6 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
-CREATE OR REPLACE PROCEDURE NAMEX."APPLICATION_LOG_INSERT"
+CREATE OR REPLACE PROCEDURE APPLICATION_LOG_INSERT
   --
   -- This was lifted in whole from NAMESDB.
   --

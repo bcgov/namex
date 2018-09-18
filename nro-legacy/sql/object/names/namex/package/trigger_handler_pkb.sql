@@ -1,6 +1,6 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
-CREATE OR REPLACE PACKAGE BODY NAMEX.trigger_handler AS
+CREATE OR REPLACE PACKAGE BODY trigger_handler AS
     --
     -- Add the given transaction id to the queue.
     --

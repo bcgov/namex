@@ -8,8 +8,8 @@ data is read-only in all environments.
 ##### SSO Admin Setup:
 
 Create client "namex-solr-admin-app" with a Client Protocol of `openid-connect` and Access Type `confidential`. For the
-development environment only, add Valid Redirect URI `http://localhost:8080/oidc_callback` for doing desktop
-development.
+development environment only, add an additional Valid Redirect URI of `http://localhost:8080/oidc_callback` for doing
+desktop development.
 
 ##### User Interface Defects
 1. Export of synonym_audit loses date and time information

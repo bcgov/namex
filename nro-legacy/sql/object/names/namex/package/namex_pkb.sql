@@ -1,4 +1,6 @@
-CREATE OR REPLACE PACKAGE BODY NAMEX.namex_feeder AS
+-- noinspection SqlNoDataSourceInspectionForFile
+
+CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
     -- Action Types
     ACTION_UPDATE CONSTANT VARCHAR2(1) := 'U';
     ACTION_CREATE CONSTANT VARCHAR2(1) := 'C';
@@ -37,13 +39,13 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex_feeder AS
 
         -- determine if this is a POST or PUT
         IF action = ACTION_CREATE THEN
-            http_verb = 'POST';
+            http_verb := 'POST';
         ELSE
-            http_verb = 'PUT';
+            http_verb := 'PUT';
         END IF;
 
         -- create the very small json
-        content = '{\"nameRequest\": \"' || nr_number || '\"}'
+        content := '{"nameRequest": "' || nr_number || '"}';
 
         -- At some point it would make sense to move the ReST stuff out of here and into somewhere re-usable.
         utl_http.set_wallet(oracle_wallet);
@@ -122,13 +124,14 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex_feeder AS
 
             -- get the current state, if it's not 'D' we're done
             BEGIN
-                SELECT state_type_cd INTO row_state_type_cd FROM request_state WHERE start_event_id = row_event_id;
+                SELECT state_type_cd INTO row_state_type_cd FROM request_state WHERE start_event_id = row_event_id AND
+                        state_type_cd = 'D';
             EXCEPTION
                 WHEN NO_DATA_FOUND THEN
                     row_state_type_cd := NULL;
             END;
 
-            IF state_type_cd = 'D' THEN
+            IF row_state_type_cd = 'D' THEN
 
                 IF row_transaction_type_cd IN ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL') THEN
                     SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
@@ -140,9 +143,9 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex_feeder AS
                             '; row_transaction_type_cd: '|| row_transaction_type_cd);
                     
                     IF row_transaction_type_cd > 'NRREQ' THEN
-                        row_action = ACTION_CREATE;
+                        row_action := ACTION_CREATE;
                     ELSE
-                        row_action = ACTION_UPDATE;
+                        row_action := ACTION_UPDATE;
                     END IF;
 
                     INSERT INTO namex_feeder (id, transaction_id, nr_num, action)
@@ -205,5 +208,5 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex_feeder AS
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
             application_log_insert('namex.feed_namex', SYSDATE(), -1, SQLERRM);
     END;
-END solr;
+END namex;
 /

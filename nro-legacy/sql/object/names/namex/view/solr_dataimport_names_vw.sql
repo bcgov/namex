@@ -31,8 +31,3 @@ AS
        AND ns.end_event_id IS NULL
        AND ns.name_state_type_cd IN ('A', 'R', 'C')
        AND e.event_type_cd = 'EXAM';
-
-
-DROP PUBLIC SYNONYM SOLR_DATAIMPORT_NAMES_VW;
-
-CREATE PUBLIC SYNONYM SOLR_DATAIMPORT_NAMES_VW FOR NAMEX.SOLR_DATAIMPORT_NAMES_VW;
