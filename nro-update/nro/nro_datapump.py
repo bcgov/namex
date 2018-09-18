@@ -1,8 +1,7 @@
 from datetime import timedelta
 
 from namex.models import Name, State
-
-from .utils import nro_examiner_name
+from namex.services.nro.utils import nro_examiner_name
 
 
 def nro_data_pump_update(nr, ora_cursor, expires_days=60):
@@ -57,7 +56,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
                         [nr.nrNum,  # p_nr_number
                          'A' if (nr.stateCd in [State.APPROVED, State.CONDITIONAL]) else 'R',  # p_status
                          expiry_date.strftime('%Y%m%d'),  # p_expiry_date
-                         'Y' if (nr.consentFlag in ['Y', State.CONDITIONAL]) else 'N',  # p_consent_flag
+                         'Y' if (nr.consentFlag == 'Y' or nr.stateCd == State.CONDITIONAL) else 'N',  # p_consent_flag
                          nro_examiner_name(nr.activeUser.username),  # p_examiner_id
                          nro_names[0]['decision'],  # p_choice1
                          nro_names[1]['decision'],  # p_choice2
