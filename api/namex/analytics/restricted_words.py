@@ -50,7 +50,7 @@ class RestrictedWords(object):
         restricted_words_dict = []
         for row in restricted_words_obj:
             for word in word_list:
-                if row[1] == word:
+                if row[1].upper() == word:
                     restricted_words_dict.append({'id' :row[0] ,'phrase' :row[1]})
         """-----------------------------------------------------------------"""
 
