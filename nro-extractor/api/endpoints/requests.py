@@ -4,7 +4,8 @@ from sqlalchemy import text
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
 from api import db
-from namex.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name
+from namex.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name, Event
+from namex.services import EventRecorder
 
 import sys
 
@@ -76,46 +77,36 @@ class NRORequest(Resource):
             nr_header = get_nr_header(nro_session, nr_num)
             if not nr_header:
                 return {"message": "{nr} not found in NRO, unable to complete extraction to new system".format(nr=nr_num)}, 404
-
-            # if this is an UPDATE
-            #              and the NR in NRO is set to H status
-            #              and the NR in Namex is NOT set to NRO_UPDATING
-            # then bail and do nothing
-            if update and nr_header['state_type_cd'] is 'H' and existing_nr.stateCd is not State.NRO_UPDATING:
-                return {"message": "Unable to update {nr}".format(nr=nr_num)}, 404
-
             current_app.logger.debug('nr_header: {}'.format(nr_header))
-
-            # get all the request segments from NRO
-            nr_submitter = get_nr_submitter(nro_session, nr_header['request_id'])
-            nr_applicant = get_nr_requester(nro_session, nr_header['request_id'])
-            nr_ex_comments = get_exam_comments(nro_session, nr_header['request_id'])
-            nr_nwpat = get_nwpta(nro_session, nr_header['request_id'])
-            nr_names = get_names(nro_session, nr_header['request_id'])
-
-            current_app.logger.debug('completed all gets')
 
             # get the service account user to save BRO Requests
             user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
 
-            # Create or Update the NR
-            if existing_nr and update:
-                nr = existing_nr
+            # process a POST (aka create)
+            if not update:
+                nrd = self._copy_nr(user, nro_session, nr_header, existing_nr, update)
+                EventRecorder.record(user, Event.POST, nrd, json_input)
+                return {"message": "{nr_num} has been successfully copied".format(nr_num=nr_num)}, 200
+
+            # cancel the NR
+            if update and nr_header['state_type_cd'] == 'C':
+                existing_nr.stateCd = State.CANCELLED
+                db.session.add(existing_nr)
+                db.session.commit()
+                EventRecorder.record(user, Event.PUT, existing_nr, json_input)
+                return {"message": "{nr} is cancelled".format(nr=nr_num)}, 200
+
+            # update the NR if NameX allows
+            if update and (
+                    (existing_nr.stateCd == State.DRAFT)
+                    or (nr_header['state_type_cd'] == 'H' and existing_nr.stateCd == State.NRO_UPDATING)
+            ):
+                self._copy_nr(user, nro_session, nr_header, existing_nr, update)
+                EventRecorder.record(user, Event.PUT, existing_nr, json_input)
+                return {"message": "{nr_num} has been successfully updated".format(nr_num=nr_num)}, 200
+
             else:
-                nr = Request()
-
-            add_nr_header(nr, nr_header, nr_submitter, user, update)
-            if nr_applicant:
-                add_applicant(nr, nr_applicant, update)
-            if nr_ex_comments:
-                add_comments(nr, nr_ex_comments, update)
-            if nr_nwpat:
-                add_nwpta(nr, nr_nwpat, update)
-            add_names(nr, nr_names, update)
-
-            current_app.logger.debug('saving the {} graph to the database, updating?:{}'.format(nr.nrNum, update))
-            db.session.add(nr)
-            db.session.commit()
+                return {"message": "Unable to update {nr}".format(nr=nr_num)}, 404
 
         except Exception as err:
             current_app.logger.error(err.with_traceback(err.__traceback__))
@@ -126,7 +117,37 @@ class NRORequest(Resource):
             if nro_session:
                 nro_session.close()
 
-        return {"message": "{nr_num} has been successfully copied".format(nr_num=nr_num)}, 200
+    def _copy_nr(self, user, nro_session, nr_header, existing_nr, update):
+        """Utility function to gather up and copy across the Name Request data segments
+        """
+        # get all the request segments from NRO
+        nr_submitter = get_nr_submitter(nro_session, nr_header['request_id'])
+        nr_applicant = get_nr_requester(nro_session, nr_header['request_id'])
+        nr_ex_comments = get_exam_comments(nro_session, nr_header['request_id'])
+        nr_nwpat = get_nwpta(nro_session, nr_header['request_id'])
+        nr_names = get_names(nro_session, nr_header['request_id'])
+
+        current_app.logger.debug('completed all gets')
+
+        # Create or Update the NR
+        if existing_nr and update:
+            nr = existing_nr
+        else:
+            nr = Request()
+
+        add_nr_header(nr, nr_header, nr_submitter, user, update)
+        if nr_applicant:
+            add_applicant(nr, nr_applicant, update)
+        if nr_ex_comments:
+            add_comments(nr, nr_ex_comments, update)
+        if nr_nwpat:
+            add_nwpta(nr, nr_nwpat, update)
+        add_names(nr, nr_names, update)
+
+        current_app.logger.debug('saving the {} graph to the database, updating?:{}'.format(nr.nrNum, update))
+        db.session.add(nr)
+        db.session.commit()
+        return nr
 
 # ### UTILITY FUNCTIONS #########################################
 
