@@ -142,7 +142,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
                             '; state_type_cd: ' || row_state_type_cd ||
                             '; row_transaction_type_cd: '|| row_transaction_type_cd);
                     
-                    IF row_transaction_type_cd > 'NRREQ' THEN
+                    IF row_transaction_type_cd = 'NRREQ' THEN
                         row_action := ACTION_CREATE;
                     ELSE
                         row_action := ACTION_UPDATE;
