@@ -119,7 +119,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
     BEGIN
         -- configuration table lifted from globaldb. We should have a function for fetching these, and we should only
         -- call it with "SOLR_FEEDER", the function should grab the GLOBAL value if the name doesn't exist for the
-        -- application. 
+        -- application.
         SELECT value INTO oracle_wallet FROM configuration WHERE application = 'GLOBAL' AND name = 'oracle_wallet';
         SELECT value INTO destination_url FROM configuration WHERE application = 'SOLR_FEEDER' AND name =
                 'destination_url';
@@ -207,7 +207,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
             IF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM') THEN
                 SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
                         row_transaction_id;
-                
+
                 -- We can get multiple rows, with states C and COMPLETED for the same start_event_id. Limit it to the
                 -- one we want but realize that we may get nothing.
                 BEGIN
