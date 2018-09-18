@@ -27,7 +27,7 @@
 
 @ ../../../../object/registry/namex/job/solr_outbound.sql
 
-INSERT INTO CONFIGURATION (application, name, value) VALUES
+INSERT INTO CONFIGURATION (application, name, value, description) VALUES
    ('GLOBAL', 'oracle_wallet', 'file:/dsk01/app/oracle/product/rdbms/11.2.0.4/wallet', NULL);
 
 CREATE PUBLIC SYNONYM namex_trigger_handler FOR namex.trigger_handler
