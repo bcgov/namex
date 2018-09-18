@@ -9,6 +9,7 @@ from namex.models import State
 from namex.services.nro import NROServicesError
 
 from .exceptions import NROServicesError
+from .utils import nro_examiner_name
 
 
 class NROServices(object):
@@ -167,7 +168,7 @@ class NROServices(object):
                             'H',               # p_status
                             '',               # p_expiry_date - mandatory, but ignored by the proc
                             '',               # p_consent_flag- mandatory, but ignored by the proc
-                            examiner_username[:7], # p_examiner_id
+                            nro_examiner_name(examiner_username), # p_examiner_id
                             ]
 
                 # Call the name_examination procedure to save complete decision data for a single NR
