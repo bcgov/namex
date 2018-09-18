@@ -40,6 +40,6 @@
 INSERT INTO CONFIGURATION (application, name, value, description) VALUES
    ('GLOBAL', 'oracle_wallet', 'file:/dsk01/app/oracle/product/rdbms/11.2.0.4/wallet', NULL);
 
-GRANT EXECUTE ON application_log_insert TO namesdb 
-GRANT EXECUTE ON trigger_handler TO namesdb
-CREATE PUBLIC SYNONYM namex_trigger_handler FOR namex.trigger_handler
+GRANT EXECUTE ON application_log_insert TO namesdb;
+GRANT EXECUTE ON trigger_handler TO namesdb;
+CREATE PUBLIC SYNONYM namex_trigger_handler FOR namex.trigger_handler;

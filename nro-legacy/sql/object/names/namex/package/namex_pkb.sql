@@ -31,10 +31,10 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
     BEGIN
         -- configuration table lifted from globaldb. We should have a function for fetching these, and we should only
         -- call it with "NAMEX_FEEDER", the function should grab the GLOBAL value if the name doesn't exist for the
-        -- application. 
-        SELECT value INTO oracle_wallet FROM configuration 
+        -- application.
+        SELECT value INTO oracle_wallet FROM configuration
         WHERE application = 'GLOBAL' AND name = 'oracle_wallet';
-        SELECT value INTO destination_url FROM configuration 
+        SELECT value INTO destination_url FROM configuration
         WHERE application = 'NAMEX_FEEDER' AND name = 'destination_url';
 
         -- determine if this is a POST or PUT
@@ -136,12 +136,12 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
                 IF row_transaction_type_cd IN ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL') THEN
                     SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
                             row_transaction_id;
-                    
+
                     dbms_output.put_line('transaction_id: ' || row_transaction_id ||
                             '; nr_num: ' || row_nr_num ||
                             '; state_type_cd: ' || row_state_type_cd ||
                             '; row_transaction_type_cd: '|| row_transaction_type_cd);
-                    
+
                     IF row_transaction_type_cd = 'NRREQ' THEN
                         row_action := ACTION_CREATE;
                     ELSE
@@ -151,7 +151,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
                     INSERT INTO namex_feeder (id, transaction_id, nr_num, action)
                     VALUES (namex_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, row_action);
                     status := STATUS_COMPLETE;
-                
+
                 END IF;
             END IF;
 

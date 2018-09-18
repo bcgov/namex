@@ -7,7 +7,7 @@ CREATE OR REPLACE PACKAGE NAMEX.namex AS
     -- NRs that are no longer in (where state = DRAFT) will not send changes to NameX
     --
     -- Errors will appear in application_log, and also in the namex_feeder.error_msg.
-    -- Errored NRs will be retried the next time the job runs, so we need a way to 
+    -- Errored NRs will be retried the next time the job runs, so we need a way to
     -- make sure something isn't stuck in limbo forever.
     PROCEDURE feed_namex;
 END namex;
