@@ -57,7 +57,7 @@ class NRORequest(Resource):
             return {"message": "No input data provided"}, 400
 
         nr_num = json_input['nameRequest']
-        current_app.logger.debug('attempting to load: {}'.format(nr_num))
+        current_app.logger.debug('attempting to load: {}, update:{}'.format(nr_num, update))
         if not validNRFormat(nr_num):
             return {"message": "Valid NR format required - 'NR 9999999'"}, 400
 
@@ -138,11 +138,16 @@ class NRORequest(Resource):
         add_nr_header(nr, nr_header, nr_submitter, user, update)
         if nr_applicant:
             add_applicant(nr, nr_applicant, update)
+            current_app.logger.debug('completed applicants for {}'.format(nr.nrNum))
         if nr_ex_comments:
             add_comments(nr, nr_ex_comments, update)
+            current_app.logger.debug('completed comments for {}'.format(nr.nrNum))
         if nr_nwpat:
             add_nwpta(nr, nr_nwpat, update)
-        add_names(nr, nr_names, update)
+            current_app.logger.debug('completed nwpta for {}'.format(nr.nrNum))
+        if nr_names:
+            add_names(nr, nr_names, update)
+            current_app.logger.debug('completed names for {}'.format(nr.nrNum))
 
         current_app.logger.debug('saving the {} graph to the database, updating?:{}'.format(nr.nrNum, update))
         db.session.add(nr)
