@@ -1,10 +1,11 @@
+from app.resources.corporations import Methods
 from unittest import mock
 import sys
-from namex.models import User
 
+xpro_corp_nums = ['A0003650']
+bc_corp_nums = ['0022258']
 
 def test_readyz(client):
-    print('got to readyz')
     url = 'api/v1/corporations/readyz'
     response = client.get(url)
     assert response.status_code == 200
@@ -23,41 +24,105 @@ def test_not_authenticated(client):
     assert response.status_code == 401
 
 
-token_header = {
-                "alg": "RS256",
-                "typ": "JWT",
-                "kid": "flask-jwt-oidc-test-client"
-               }
-claims = {
-            "iss": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc",
-            "sub": "43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc",
-            "aud": "NameX-Dev",
-            "exp": 99999999999,
-            "iat": 1531718745,
-            "jti": "flask-jwt-oidc-test-support",
-            "typ": "Bearer",
-            "username": "test-user",
-            "realm_access": {
-                "roles": [
-                    "{}".format(User.EDITOR),
-                    "{}".format(User.APPROVER),
-                    "viewer",
-                    "user"
-                ]
-            }
-         }
+def test_xpro_init_info(client):
+
+    for corp_num in xpro_corp_nums:
+
+        corp_num_sql = '\'' + corp_num + '\''
+
+        info_sql = Methods.build_info_sql(corp_num_sql)
+        directors_sql = Methods.build_directors_sql(corp_num_sql)
+
+        assert info_sql is not None
+        assert directors_sql is not None
+
+        info_dict, directors_obj = Methods.init_info(info_sql, directors_sql)
+
+        assert info_dict is not None
+        assert info_dict['corp_class'] == 'XPRO'
+        assert info_dict['corp_num'] == corp_num
+        assert info_dict['recognition_dts'] is not None
+        assert directors_obj is not None
 
 
-def test_get_corpinfo(client, jwt, app):
+def test_bc_init_info(client):
 
-    # try:
-        token = jwt.create_jwt(claims, token_header)
-        headers = {'Authorization': 'Bearer ' + token}
-        url = 'api/v1/corporations/A0003650'
+    for corp_num in bc_corp_nums:
+        corp_num_sql = '\'' + corp_num + '\''
 
-        response = client.get(url, headers=headers)
-        print(response)
+        info_sql = Methods.build_info_sql(corp_num_sql)
+        directors_sql = Methods.build_directors_sql(corp_num_sql)
 
-        assert response.status_code == 200
-    # except Exception as err:
-    #     print(err)
+        assert info_sql is not None
+        assert directors_sql is not None
+
+        info_dict, directors_obj = Methods.init_info(info_sql, directors_sql)
+
+        assert info_dict is not None
+        assert info_dict['corp_class'] == 'BC'
+        assert info_dict['corp_num'] == corp_num
+        assert info_dict['recognition_dts'] is not None
+        assert directors_obj is not None
+
+
+def test_xpro_corp(client):
+
+    for corp_num in xpro_corp_nums:
+        corp_num_sql = '\'' + corp_num + '\''
+
+        addr_id_sql = Methods.build_addr_id_sql(corp_num_sql)
+        attorneys_sql = Methods.build_attorneys_sql(corp_num_sql)
+        jurisdiction_sql = Methods.build_jurisdiction_sql(corp_num_sql)
+
+        assert addr_id_sql is not None
+        assert attorneys_sql is not None
+        assert jurisdiction_sql is not None
+
+        head_office_obj, attorneys_obj, jurisdiction_obj = Methods.xpro_get_objs(addr_id_sql, attorneys_sql, jurisdiction_sql)
+
+        assert head_office_obj is not None
+        assert attorneys_obj is not None
+        assert jurisdiction_obj is not None
+
+        ho_addr_list, attorneys_list, jurisdiction = \
+            Methods.xpro_get_vals(head_office_obj, attorneys_obj, jurisdiction_obj)
+
+        assert ho_addr_list is not None
+        assert attorneys_list is not None
+        assert jurisdiction != 'BC' and jurisdiction is not None
+
+
+def test_bc_corp(client):
+
+    for corp_num in bc_corp_nums:
+        corp_num_sql = '\'' + corp_num + '\''
+
+        addr_id_sql = Methods.build_addr_id_sql(corp_num_sql)
+
+        assert addr_id_sql is not None
+
+        registered_addr_obj, records_addr_obj = Methods.bc_get_objs(addr_id_sql)
+
+        assert registered_addr_obj is not None
+        assert records_addr_obj is not None
+
+        registered_addr_list, records_addr_list = \
+            Methods.bc_get_vals(registered_addr_obj, records_addr_obj)
+
+        assert registered_addr_list is not None
+        assert records_addr_list is not None
+
+
+def test_get_nob(client):
+
+    for corp_num in bc_corp_nums + xpro_corp_nums:
+
+        corp_num_sql = '\'' + corp_num + '\''
+
+        nr_sql = Methods.build_nr_sql(corp_num_sql)
+
+        assert nr_sql is not None
+
+        nob = Methods.find_nob(nr_sql)
+
+        assert nob is not None

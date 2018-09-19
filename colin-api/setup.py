@@ -51,7 +51,7 @@ def read(filepath):
 
 
 packages = find_packages(".")
-requirements = read_requirements('requirements.tx')
+requirements = read_requirements('requirements.txt')
 
 
 setup(
@@ -60,20 +60,12 @@ setup(
     packages=packages.keys(),
     package_dir=packages,
     include_package_data=True,
-    license=read('LICENSE'),
-    long_description =read('README.md'),
     install_requires=[
         'Flask',
-        'Flask-Migrate',
-        'Flask-Script',
-        'Flask-Moment',
         'Flask-SQLAlchemy',
         'Flask-RESTplus',
-        'Flask-Marshmallow',
         'flask-jwt-oidc',
         'python-dotenv',
-        'psycopg2-binary',
-        'cx_Oracle',
         'marshmallow',
         'marshmallow-sqlalchemy',
     ],

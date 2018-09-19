@@ -24,13 +24,6 @@ def client(app):
 
 
 @pytest.fixture(scope="session")
-def jwt(app):
-    """
-    Returns session-wide jwt manager
-    """
-    return _jwt
-
-@pytest.fixture(scope="session")
 def client_ctx(app):
     """
     Returns session-wide Flask test client.
