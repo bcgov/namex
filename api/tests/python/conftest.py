@@ -1,5 +1,5 @@
 import pytest
-# from pytest_mock import mocker
+from pytest_mock import mocker
 
 from namex import create_app, jwt as _jwt
 from flask import current_app
