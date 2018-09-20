@@ -189,6 +189,8 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
 
     if nr_submitter:
         submitter = User.find_by_username(nr_submitter['submitter'])
+    else:
+        submitter = None
 
     nr.userId = user.id
     nr.stateCd = State.DRAFT if nr_header['state_type_cd'] is None else NR_STATE[nr_header['state_type_cd']]
@@ -201,12 +203,12 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
     nr.additionalInfo = nr_header['additional_info']
     nr.natureBusinessInfo = nr_header['nature_business_info']
     nr.xproJurisdiction = nr_header['xpro_jurisdiction']
-    nr.submittedDate = nr_submitter['submitted_date']
-    nr.submitter_userid = None if (submitter is None) else submitter.id
+    nr.submittedDate = None if not nr_submitter else nr_submitter['submitted_date']
+    nr.submitter_userid = None if not submitter else submitter.id
     nr.nroLastUpdate = nr_header['last_update']
     nr.lastUpdate = nr.nroLastUpdate # this needs to be set to the same Point In Time as NRO until NameX owns it
 
-    if nr_header['priority_cd'] is 'PQ':
+    if nr_header['priority_cd'] == 'PQ':
         nr.priorityCd = 'Y'
     else:
         nr.priorityCd = 'N'
