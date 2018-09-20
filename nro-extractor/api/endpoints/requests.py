@@ -272,6 +272,13 @@ def add_names(nr, nr_names, update=False):
         name.name = n['name']
         name.designation = n['designation']
 
+        if nr.stateCd in ['COMPLETED', State.REJECTED] and name.state == Name.APPROVED:
+            nr.stateCd = State.APPROVED
+        elif nr.stateCd in ['COMPLETED', State.REJECTED, State.APPROVED] and name.state == Name.CONDITION:
+            nr.stateCd = State.CONDITIONAL
+        elif nr.stateCd == 'COMPLETED' and name.state == Name.REJECTED:
+            nr.stateCd = State.REJECTED
+
         nr.names.append(name)
 
 
@@ -480,4 +487,5 @@ def get_names(session, request_id):
     if len(names) < 1:
         return None
     return names
+
 
