@@ -9,9 +9,9 @@ token_header = {
                 "kid": "flask-jwt-oidc-test-client"
                }
 claims = {
-            "iss": "https://dev-sso.pathfinder.gov.bc.ca/auth/realms/nest",
+            "iss": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc",
             "sub": "43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc",
-            "aud": "namex-DEV",
+            "aud": "NameX-Dev",
             "exp": 31531718745,
             "iat": 1531718745,
             "jti": "flask-jwt-oidc-test-support",
@@ -79,9 +79,9 @@ def test_get_next_oldest(client, jwt, app):
 
 
 claims_editor_only = {
-            "iss": "https://dev-sso.pathfinder.gov.bc.ca/auth/realms/nest",
+            "iss": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc",
             "sub": "43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc",
-            "aud": "namex-DEV",
+            "aud": "NameX-Dev",
             "exp": 21531718745,
             "iat": 1531718745,
             "jti": "flask-jwt-oidc-test-support",
