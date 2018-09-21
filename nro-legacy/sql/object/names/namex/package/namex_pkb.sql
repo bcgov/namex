@@ -131,7 +131,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
                     row_state_type_cd := NULL;
             END;
 
-            IF row_state_type_cd = ('C', 'D') THEN
+            IF row_state_type_cd in ('C', 'D') THEN
 
                 IF row_transaction_type_cd IN ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL') THEN
                     SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
