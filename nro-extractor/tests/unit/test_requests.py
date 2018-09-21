@@ -1,14 +1,9 @@
 from datetime import datetime
-<<<<<<< Updated upstream
-import pytest
-
-=======
 
 import pytest
 
 from namex.models import Request, Name, State, User
 
->>>>>>> Stashed changes
 
 priority_flag_testdata = [
     ('PQ', 'Y'),
@@ -22,10 +17,6 @@ priority_flag_testdata = [
 def test_add_nr_header_with_priority(priority_cd, expected):
 
     from api.endpoints.requests import add_nr_header
-<<<<<<< Updated upstream
-    from namex.models import Request, User
-=======
->>>>>>> Stashed changes
 
     nr = Request()
     user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
@@ -50,8 +41,6 @@ def test_add_nr_header_with_priority(priority_cd, expected):
     add_nr_header(nr, nr_header, nr_submitter, user, update=False)
 
     assert nr.priorityCd == expected
-<<<<<<< Updated upstream
-=======
 
 
 nr_state_testdata = [
@@ -183,4 +172,3 @@ def test_add_nr_header_set_state(state_type_cd, nr_names, expected):
     add_names(nr, nr_names, update=False)
 
     assert nr.stateCd == expected
->>>>>>> Stashed changes
