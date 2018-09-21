@@ -193,13 +193,13 @@ def _update_nro_address(oracle_cursor, nr, event_id):
                           party_id=rp_id)
 
     # get next address ID
-    oracle_cursor.execute("""select address_seq.NEXTVAL from dual""")
+    oracle_cursor.execute("""select address_seq@global_readonly.NEXTVAL from dual""")
     row = oracle_cursor.fetchone()
     address_id = int(row[0])
 
     # create new address record
     oracle_cursor.execute("""
-    INSERT INTO address(addr_id, application_cd, state_province_cd, postal_cd, addr_line_1, addr_line_2, addr_line_3, city, country_type_cd) 
+    INSERT INTO address@global_readonly(addr_id, application_cd, state_province_cd, postal_cd, addr_line_1, addr_line_2, addr_line_3, city, country_type_cd) 
     VALUES (:address_id, :application_cd, :state_province_cd, :postal_cd, :addr_line_1, :addr_line_2, :addr_line_3, :city, :country_type_cd)
     """,
                           address_id=address_id,
