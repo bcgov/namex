@@ -4,34 +4,15 @@ setup_logging() ## important to do this first
 from sqlalchemy.dialects import postgresql
 from sqlalchemy import text
 from nro.nro_datapump import nro_data_pump_update
+from nro.change_nr import update_nr
+from nro.app import create_app, db
 from datetime import datetime, timedelta
 import cx_Oracle
 import sys
 from flask import Flask, g, current_app
 from config import Config
-from namex import db
 from namex.models import Request, State
 from util.job_tracker import JobTracker
-
-
-def create_app(config=Config):
-    app = Flask(__name__)
-    app.config.from_object(config)
-    db.init_app(app)
-    app.app_context().push()
-    current_app.logger.debug('created the Flask App and pushed the App Context')
-
-    @app.teardown_appcontext
-    def shutdown_session(exception=None):
-        ''' Enable Flask to automatically remove database sessions at the
-         end of the request or when the application shuts down.
-         Ref: http://flask.pocoo.org/docs/patterns/sqlalchemy/
-        '''
-        current_app.logger.debug('Tearing down the Flask App and the App Context')
-        if hasattr(g, 'ora_conn'):
-            g.ora_conn.close()
-
-    return app
 
 
 def get_ops_params():
@@ -98,11 +79,21 @@ try:
 
         current_app.logger.debug('processing: {}'.format(r.nrNum))
 
-        nro_data_pump_update(r, ora_cursor, expires_days)
-        db.session.add(r)
+        try:
 
-    db.session.commit()
-    ora_con.commit()
+            update_nr(r, ora_cursor)
+            ora_con.commit()
+            nro_data_pump_update(r, ora_cursor, expires_days)
+            db.session.add(r)
+
+            db.session.commit()
+
+        except Exception as err:
+            current_app.logger.error(err)
+            current_app.logger.error('ERROR: {}'.format(r.nrNum))
+            db.session.rollback()
+            ora_con.rollback()
+
 
     JobTracker.end_job(db, job_id, datetime.utcnow(), 'success')
 
