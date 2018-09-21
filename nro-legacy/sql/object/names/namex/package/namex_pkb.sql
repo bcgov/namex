@@ -122,16 +122,16 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
             -- If we don't care about it, mark it as ignored.
             status := STATUS_IGNORED;
 
-            -- get the current state, if it's not 'D' we're done
+            -- get the current state, if it's not 'C' or 'D' we're done
             BEGIN
                 SELECT state_type_cd INTO row_state_type_cd FROM request_state WHERE start_event_id = row_event_id AND
-                        state_type_cd = 'D';
+                        state_type_cd in ('C', 'D');
             EXCEPTION
                 WHEN NO_DATA_FOUND THEN
                     row_state_type_cd := NULL;
             END;
 
-            IF row_state_type_cd = 'D' THEN
+            IF row_state_type_cd = ('C', 'D') THEN
 
                 IF row_transaction_type_cd IN ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL') THEN
                     SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
