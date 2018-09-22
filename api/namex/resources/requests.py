@@ -24,6 +24,7 @@ from namex.services import ServicesError, MessageServices, EventRecorder
 from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
+from namex.services.nro import NROServicesError
 
 import datetime
 import json
@@ -605,7 +606,24 @@ class Request(Resource):
             ### Finally save the entire graph
             nrd.save_to_db()
 
+            ### Update NR Details in NRO
+            try:
+                warnings = nro.change_nr(nrd)
+                if warnings:
+                    MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
+
+            except (NROServicesError, Exception) as err:
+                MessageServices.add_message('error', 'change_request_in_NRO', err)
+
             EventRecorder.record(user, Event.PUT, nrd, json_input)
+
+            # if there were errors, return the set of errors
+            warning_and_errors = MessageServices.get_all_messages()
+            if warning_and_errors:
+                for we in warning_and_errors:
+                    if we['type'] == MessageServices.ERROR:
+                        return jsonify(errors=warning_and_errors), 400
+
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400
