@@ -20,6 +20,7 @@ def update_nr (nr, ora_cursor):
     """
 
     eid = _get_event_id(ora_cursor)
+    current_app.logger.debug('got to update_nr() for NR:{}'.format(nr.nrNum))
     current_app.logger.debug('event ID for NR Details edit:{}'.format(eid))
     _create_nro_transaction(ora_cursor, nr, eid)
     _update_request(ora_cursor, nr, eid)
@@ -27,6 +28,7 @@ def update_nr (nr, ora_cursor):
     _update_nro_address(ora_cursor, nr, eid)
     _update_nro_partner_name_system(ora_cursor, nr, eid)
 
+    current_app.logger.debug('got to the end of update_nr()')
 
 def _get_event_id(oracle_cursor):  # -> (int)
     """gets the event_id to be used for updating the NR history
@@ -193,13 +195,14 @@ def _update_nro_address(oracle_cursor, nr, event_id):
                           party_id=rp_id)
 
     # get next address ID
-    oracle_cursor.execute("""select address_seq@global_readonly.NEXTVAL from dual""")
+    #oracle_cursor.execute("""select address_seq@global_readonly.NEXTVAL from dual""")
+    oracle_cursor.execute("""select address_seq.NEXTVAL from dual""")
     row = oracle_cursor.fetchone()
     address_id = int(row[0])
 
     # create new address record
     oracle_cursor.execute("""
-    INSERT INTO address@global_readonly(addr_id, application_cd, state_province_cd, postal_cd, addr_line_1, addr_line_2, addr_line_3, city, country_type_cd) 
+    INSERT INTO address(addr_id, application_cd, state_province_cd, postal_cd, addr_line_1, addr_line_2, addr_line_3, city, country_type_cd) 
     VALUES (:address_id, :application_cd, :state_province_cd, :postal_cd, :addr_line_1, :addr_line_2, :addr_line_3, :city, :country_type_cd)
     """,
                           address_id=address_id,

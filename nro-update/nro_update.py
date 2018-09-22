@@ -4,7 +4,6 @@ setup_logging() ## important to do this first
 from sqlalchemy.dialects import postgresql
 from sqlalchemy import text
 from nro.nro_datapump import nro_data_pump_update
-from nro.change_nr import update_nr
 from nro.app import create_app, db
 from datetime import datetime, timedelta
 import cx_Oracle
@@ -81,11 +80,10 @@ try:
 
         try:
 
-            update_nr(r, ora_cursor)
-            ora_con.commit()
             nro_data_pump_update(r, ora_cursor, expires_days)
             db.session.add(r)
 
+            ora_con.commit()
             db.session.commit()
 
         except Exception as err:

@@ -7,6 +7,7 @@ import cx_Oracle
 
 from namex.models import State
 from namex.services.nro import NROServicesError
+from namex.services.nro.change_nr import update_nr
 
 from .exceptions import NROServicesError
 from .utils import nro_examiner_name
@@ -287,5 +288,41 @@ class NROServices(object):
                 # nr.stateCd = State.INPROGRESS
                 nr.stateCd = nr_saved_state
                 nr.save_to_db()
+
+        return warnings if len(warnings)>0 else None
+
+    def change_nr(self, nr):
+
+        warnings = []
+
+        # save the current state, as we'll need to set it back to this before returning
+        nr_saved_state = nr.stateCd
+
+        try:
+
+            con = self.connection
+            con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
+
+            cursor = con.cursor()
+            update_nr(nr, cursor)
+
+            con.commit()
+
+            return None
+
+        except Exception as err:
+            warnings.append({'type': 'warn',
+                             'code': 'unable_to_update_request_changes_in_NRO',
+                             'message': 'Unable to update the Request details in NRO,'
+                                        ' please manually verify record is up to date in NRO before'
+                                        ' continuing.'
+                             })
+            current_app.logger.error(err.with_traceback(None))
+
+        finally:
+            # set the NR back to its initial state
+            # nr.stateCd = State.INPROGRESS
+            nr.stateCd = nr_saved_state
+            nr.save_to_db()
 
         return warnings if len(warnings)>0 else None
