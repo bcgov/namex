@@ -131,28 +131,32 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
                     row_state_type_cd := NULL;
             END;
 
-            IF row_state_type_cd in ('C', 'D') THEN
+			IF (row_state_type_cd IN ('C', 'D')
+			    AND 
+			    row_transaction_type_cd IN 
+			         ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL', 'MODIF', 'CORRT', 'UPDPR')
+			   )
+			  -- (row_state_type_cd = 'COMPLETED' and row_transaction_type_cd = 'EXTEND')
+			THEN
+				SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
+						row_transaction_id;
 
-                IF row_transaction_type_cd IN ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL') THEN
-                    SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
-                            row_transaction_id;
+				dbms_output.put_line('transaction_id: ' || row_transaction_id ||
+						'; nr_num: ' || row_nr_num ||
+						'; state_type_cd: ' || row_state_type_cd ||
+						'; row_transaction_type_cd: '|| row_transaction_type_cd);
 
-                    dbms_output.put_line('transaction_id: ' || row_transaction_id ||
-                            '; nr_num: ' || row_nr_num ||
-                            '; state_type_cd: ' || row_state_type_cd ||
-                            '; row_transaction_type_cd: '|| row_transaction_type_cd);
+				IF row_transaction_type_cd in ('NRREQ', 'RESUBMIT') THEN
+					row_action := ACTION_CREATE;
+				ELSE
+					row_action := ACTION_UPDATE;
+				END IF;
 
-                    IF row_transaction_type_cd = 'NRREQ' THEN
-                        row_action := ACTION_CREATE;
-                    ELSE
-                        row_action := ACTION_UPDATE;
-                    END IF;
+				INSERT INTO namex_feeder (id, transaction_id, nr_num, action)
+				VALUES (namex_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, row_action);
+				status := STATUS_COMPLETE;
 
-                    INSERT INTO namex_feeder (id, transaction_id, nr_num, action)
-                    VALUES (namex_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, row_action);
-                    status := STATUS_COMPLETE;
 
-                END IF;
             END IF;
 
             UPDATE name_transaction SET status_namex = status WHERE transaction_id = row_transaction_id;
