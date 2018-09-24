@@ -343,7 +343,7 @@ stage('API Test TEST') {
             secretEnvVar(key: 'TEST_API_TEST_PASSWORD', secretName: 'apitest-secrets-test', secretKey: 'password'),
             secretEnvVar(key: 'TEST_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets-test', secretKey: 'authurl'),
             secretEnvVar(key: 'TEST_API_TEST_CLIENT_ID', secretName: 'apitest-secrets-test', secretKey: 'clientid'),
-            secretEnvVar(key: 'TEST_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-test', secretKey: 'client_secret')
+            secretEnvVar(key: 'TEST_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-test', secretKey: 'client_secret'),
             secretEnvVar(key: 'TEST_API_TEST_NR', secretName: 'apitest-secrets-test', secretKey: 'test_nr')
         ]
 	  )
