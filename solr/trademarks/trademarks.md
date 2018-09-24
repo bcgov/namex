@@ -29,4 +29,5 @@ Until a better place can be found, the `.log` and `.json` outputs should be arch
 1. The hokey JUMP functionality would be nice if it had min and max application (filename) values
 1. The matches.sort() call is a NOP, it needs to sort numerically
 1. If solr_loader is converting string to JSON and then back to string, then prevent that
-1. The solr_loader should be multi-threaded to decrease the load time
+1. The solr_loader could batch documents to possibly decrease the load time
+1. The solr_loader could use asynchronous web service calls to possibly decrease the load time
