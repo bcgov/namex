@@ -242,9 +242,17 @@ CREATE OR REPLACE PACKAGE BODY solr AS
                                 ACTION_UPDATE);
                         status := STATUS_COMPLETE;
                     END IF;
-                ELSIF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL', 'RESET') THEN
+                ELSIF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL') THEN
                     INSERT INTO solr_feeder (id, transaction_id, nr_num, solr_core, action) VALUES
                             (solr_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, SOLR_CORE_CONFLICTS,
+                            ACTION_DELETE);
+                    status := STATUS_COMPLETE;
+                ELSIF row_transaction_type_cd IN ('RESET') THEN
+                    INSERT INTO solr_feeder (id, transaction_id, nr_num, solr_core, action) VALUES
+                            (solr_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, SOLR_CORE_CONFLICTS,
+                            ACTION_DELETE);
+                    INSERT INTO solr_feeder (id, transaction_id, nr_num, solr_core, action) VALUES
+                            (solr_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, SOLR_CORE_NAMES,
                             ACTION_DELETE);
                     status := STATUS_COMPLETE;
                 END IF;
