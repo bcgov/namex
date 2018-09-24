@@ -361,7 +361,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/analysis/1/conflicts?start=3&rows=35",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/conflicts?start=3&rows=35",
 							"host": [
 								"{{url}}"
 							],
@@ -369,7 +369,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"analysis",
 								"1",
 								"conflicts"
@@ -459,7 +459,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/analysis/1/histories?start=1&rows=32",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/histories?start=1&rows=32",
 							"host": [
 								"{{url}}"
 							],
@@ -467,7 +467,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"analysis",
 								"1",
 								"histories"
@@ -557,7 +557,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/analysis/1/trademarks?start=1&rows=32",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/trademarks?start=1&rows=32",
 							"host": [
 								"{{url}}"
 							],
@@ -565,7 +565,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"analysis",
 								"1",
 								"trademarks"
@@ -641,7 +641,7 @@
 						],
 						"body": {},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/analysis/1/restricted_words",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/restricted_words",
 							"host": [
 								"{{url}}"
 							],
@@ -649,7 +649,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"analysis",
 								"1",
 								"restricted_words"
@@ -795,7 +795,7 @@
 					"response": []
 				},
 				{
-					"name": "requests/NR 8765456-test",
+					"name": "requests/NR # - patch to inprogress",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -858,7 +858,7 @@
 							"raw": "{\"state\": \"INPROGRESS\"}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456",
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
 							"host": [
 								"{{url}}"
 							],
@@ -866,14 +866,14 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456"
+								"{{NR}}"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "requests/NR 8765456/names/1",
+					"name": "requests/NR #/names/1 - patch name state to APPROVED",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -935,10 +935,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"state\": \"A\"}"
+							"raw": "{\"state\": \"APPROVED\"}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -946,7 +946,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"names",
 								"1"
 							]
@@ -955,7 +955,7 @@
 					"response": []
 				},
 				{
-					"name": "/requests/NR 8765456/names/1",
+					"name": "/requests/NR #/names/1",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -971,7 +971,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "28a92954-ab7f-4711-a5a4-31b22f0b671c",
+								"id": "7703b49f-0606-4672-bc0a-d7c71ded236f",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1006,9 +1006,20 @@
 									"    response.text.should.include(\"conflict3_num\");",
 									"});",
 									"",
-									"it('Should include \\\"state\\\": \\\"A\\\" as a result of the previous patch', () => {",
-									"    response.text.should.include(\"\\\"state\\\": \\\"A\\\"\");",
-									"});"
+									"it('Should include \\\"state\\\": \\\"APPROVED\\\" as a result of the previous patch', () => {",
+									"    response.text.should.include(\"\\\"state\\\": \\\"APPROVED\\\"\");",
+									"});",
+									"",
+									"var bodyJSON = JSON.parse(response.body);",
+									"pm.environment.set(\"nrOrigName\",bodyJSON.name);",
+									"bodyJSON.state = 'REJECTED'",
+									"bodyJSON.name = 'PUT success'",
+									"bodyJSON.comment = null",
+									"",
+									"for (var i in bodyJSON) {",
+									"    if (bodyJSON[i]==\"\") bodyJSON[i]=null;",
+									"    pm.environment.set(i,bodyJSON[i]);",
+									"}"
 								]
 							}
 						}
@@ -1026,7 +1037,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -1034,7 +1045,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"names",
 								"1"
 							]
@@ -1043,7 +1054,7 @@
 					"response": []
 				},
 				{
-					"name": "requests/NR 8765456/names/1-test",
+					"name": "requests/NR #/names/1-test",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1058,7 +1069,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "012539ff-3a68-4fa6-aae8-26f7bcf096e5",
+								"id": "03860c9e-ebb0-40bd-8ea2-25cbb8cec086",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1089,7 +1100,7 @@
 									"});",
 									"",
 									"it('Should contain changes in the returned message', () => {",
-									"    response.body.message.should.include(\"'state': 'R'\");",
+									"    response.body.message.should.include(\"'state': 'REJECTED'\");",
 									"    response.body.message.should.include(\"'name': 'PUT success'\");",
 									"})"
 								]
@@ -1110,10 +1121,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"R\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"PUT success\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null, \"comment\": null}"
+							"raw": "{\"conflict1\": null, \"designation\": \"{{designation}}\", \"state\": \"{{state}}\", \"conflict3_num\": null, \"choice\": {{choice}}, \"conflict1_num\": null, \"name\": \"{{name}}\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null, \"comment\": null}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -1121,7 +1132,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"names",
 								"1"
 							]
@@ -1130,7 +1141,7 @@
 					"response": []
 				},
 				{
-					"name": "/requests/NR 8765456/names/1 - test update",
+					"name": "/requests/NR #/names/1 - test update",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1146,7 +1157,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "aba7f070-e907-4238-89ed-8bc85dab8b9a",
+								"id": "ede29a8f-a986-4e8a-a733-186962afa803",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1182,7 +1193,7 @@
 									"});",
 									"",
 									"it('Should return the new data updated by the previous PUT', () => {",
-									"    response.text.should.include(\"\\\"state\\\": \\\"R\\\"\");",
+									"    response.text.should.include(\"\\\"state\\\": \\\"REJECTED\\\"\");",
 									"    response.text.should.include(\"\\\"name\\\": \\\"PUT success\\\"\");",
 									"});"
 								]
@@ -1202,7 +1213,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -1210,7 +1221,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"names",
 								"1"
 							]
@@ -1219,7 +1230,7 @@
 					"response": []
 				},
 				{
-					"name": "requests/NR 8765456/names/1-reset",
+					"name": "requests/NR #/names/1-reset",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1234,7 +1245,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "0318ce1b-c65b-41a6-912b-2da49a915eb2",
+								"id": "eac03d92-8d09-4ebb-832c-2b8b81848c28",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1266,7 +1277,7 @@
 									"",
 									"it('Should contain changes in the returned message', () => {",
 									"    response.body.message.should.include(\"\\'state\\': \\'NE\\'\");",
-									"    response.body.message.should.include(\"\\'name\\': \\'META GROWTH ENTERPRISES INC.\\'\");",
+									"    response.body.message.should.include(`\\'name\\': \\'${pm.environment.get(\"nrOrigName\")}\\'`);",
 									"})"
 								]
 							}
@@ -1286,10 +1297,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"conflict1\": null, \"designation\": null, \"state\": \"NE\", \"conflict3_num\": null, \"choice\": 1, \"conflict1_num\": null, \"name\": \"META GROWTH ENTERPRISES INC.\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null, \"comment\": null}"
+							"raw": "{\"choice\": {{choice}}, \"conflict1\": null, \"name\": \"{{nrOrigName}}\", \"conflict2\": null, \"consumptionDate\": null, \"conflict1_num\": null, \"state\": \"NE\", \"conflict2_num\": null, \"decision_text\": null, \"designation\": \"{{designation}}\", \"conflict3\": null, \"conflict3_num\": null, \"comment\": null}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456/names/1",
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
 							"host": [
 								"{{url}}"
 							],
@@ -1297,7 +1308,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456",
+								"{{NR}}",
 								"names",
 								"1"
 							]
@@ -1306,12 +1317,95 @@
 					"response": []
 				},
 				{
-					"name": "/requests - put NR 8765456-test",
+					"name": "requests/NR # set bodyJSON",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "262230a7-feab-4c42-a075-bd3638472c07",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "56dac7a8-85f6-454e-8c11-a0bab327f161",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"var response = pm.response.json();",
+									"pm.environment.set(\"additionalInfo\",response.additionalInfo);",
+									"pm.environment.set(\"clientFirstName\",response.applicants.clientFirstName);",
+									"pm.environment.set(\"natureBusinessInfo\",response.natureBusinessInfo);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR #-test",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "b2c32509-4ed1-40d3-8d77-82a9c80c2408",
+								"id": "1c49c78c-4861-418c-ac7c-5ad5c538feb0",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1344,13 +1438,14 @@
 									"});",
 									"",
 									"it(\"Should return updated changes in the body\", () => {",
-									"   response.body.additionalInfo.should.include(\"Name was previously put in for incorporation but it is actually for an extra-provincial registration\");",
+									"   response.body.additionalInfo.should.include(\"TEST\");",
 									"   for (var i=0; i<response.body.names.length;i++) {",
 									"       if (response.body.names[i].choice == 1) {",
-									"           response.body.names[i].name.should.include(\"BOOKED BY US Inc.\");",
+									"           response.body.names[i].name.should.include(\"TEST\");",
 									"       }",
 									"   }",
-									"   response.body.natureBusinessInfo.should.include(\"fencing equipment supply\");",
+									"   response.body.natureBusinessInfo.should.include(\"TEST\");",
+									"   response.body.applicants.clientFirstName.should.include(\"TEST\");",
 									"});"
 								]
 							}
@@ -1360,7 +1455,7 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "content-type",
+								"key": "Content-Type",
 								"value": "application/json"
 							},
 							{
@@ -1370,10 +1465,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"additionalInfo\": \"Name was previously put in for incorporation but it is actually for an extra-provincial registration\",\n    \"applicants\": \"\",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 28163,\n    \"lastUpdate\": \"Fri, 17 Aug 2018 23:47:55 GMT\",\n    \"names\": [\n        {\n            \"choice\": 2,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"WAVE DYNAMICS CONSULTING, INC.\",\n            \"state\": \"NE\"\n        },\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"BOOKED BY US Inc.\",\n            \"state\": \"NE\"\n        },\n        {\n            \"choice\": 3,\n            \"comment\": null,\n            \"conflict1\": \"\",\n            \"conflict1_num\": \"\",\n            \"conflict2\": \"\",\n            \"conflict2_num\": \"\",\n            \"conflict3\": \"\",\n            \"conflict3_num\": \"\",\n            \"consumptionDate\": null,\n            \"decision_text\": \"\",\n            \"name\": \"test2\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"fencing equipment supply\",\n    \"nrNum\": \"NR 8765456\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Apr 2006 11:56:22 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"kial-ex\",\n    \"xproJurisdiction\": \"OREGON, USA\"\n}\n"
+							"raw": "{\n    \"additionalInfo\": \"TEST\",\n    \"applicants\": {\n        \"addrLine1\": \"zzz1571 ABBOTT ST\",\n        \"addrLine2\": null,\n        \"addrLine3\": null,\n        \"city\": \"zzzVictoria\",\n        \"clientFirstName\": \"TEST\",\n        \"clientLastName\": \"qqqSmith\",\n        \"contact\": \"zzzJeffrey Hall\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"lorna.trent@gov.bc.ca\",\n        \"faxNumber\": \"250-638-9694\",\n        \"firstName\": \"zzzLorna\",\n        \"lastName\": \"zzzTrent\",\n        \"middleName\": null,\n        \"partyId\": 1051,\n        \"phoneNumber\": \"250-635-7342\",\n        \"postalCd\": \"V9E 4S3\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 1051,\n    \"lastUpdate\": \"Mon, 24 Sep 2018 18:24:15 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"TEST\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"TEST\",\n    \"nrNum\": \"NR 2943527\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"Y\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 10:27:55 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"kial-ex\",\n    \"xproJurisdiction\": \"NEW BRUNSWICK\"\n}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456",
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
 							"host": [
 								"{{url}}"
 							],
@@ -1381,14 +1476,14 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456"
+								"{{NR}}"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "requests/NR 8765456",
+					"name": "requests/NR #",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1403,7 +1498,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "181f7560-1a0b-472c-9830-c49539851371",
+								"id": "8d68037d-df75-4cbe-801f-8e01a115b98d",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1436,13 +1531,14 @@
 									"});",
 									"",
 									"it(\"Should return updated changes by previous PUT\", () => {",
-									"   response.body.additionalInfo.should.include(\"Name was previously put in for incorporation but it is actually for an extra-provincial registration\");",
+									"   response.body.additionalInfo.should.include(\"TEST\");",
 									"   for (var i=0; i<response.body.names.length;i++) {",
 									"       if (response.body.names[i].choice == 1) {",
-									"           response.body.names[i].name.should.include(\"BOOKED BY US Inc.\");",
+									"           response.body.names[i].name.should.include(\"TEST\");",
 									"       }",
 									"   }",
-									"   response.body.natureBusinessInfo.should.include(\"fencing equipment supply\");",
+									"   response.body.natureBusinessInfo.should.include(\"TEST\");",
+									"   response.body.applicants.clientFirstName.should.include(\"TEST\");",
 									"});"
 								]
 							}
@@ -1461,7 +1557,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456",
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
 							"host": [
 								"{{url}}"
 							],
@@ -1469,19 +1565,140 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456"
+								"{{NR}}"
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "requests/NR 8765456",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/api/v1/requests/{{NR}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"requests",
+										"{{NR}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "API",
+									"value": "NameX/0.1.0c-52fce9d6a1",
+									"name": "API",
+									"description": "Custom header"
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "OPTIONS, GET, PATCH, DELETE, HEAD, PUT",
+									"name": "Access-Control-Allow-Methods",
+									"description": "Specifies the method or methods allowed when accessing the resource. This is used in response to a preflight request."
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*",
+									"name": "Access-Control-Allow-Origin",
+									"description": "Specifies a URI that may access the resource. For requests without credentials, the server may specify '*' as a wildcard, thereby allowing any origin to access the resource."
+								},
+								{
+									"key": "Access-Control-Max-Age",
+									"value": "21600",
+									"name": "Access-Control-Max-Age",
+									"description": "Indicates how long the results of a preflight request can be cached in seconds."
+								},
+								{
+									"key": "Content-Length",
+									"value": "1220",
+									"name": "Content-Length",
+									"description": "The length of the response body in octets (8-bit bytes)"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "The mime type of this content"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Sep 2018 18:52:58 GMT",
+									"name": "Date",
+									"description": "The date and time that the message was sent"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0",
+									"name": "Server",
+									"description": "A name for the server"
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Mon Jan 18 2038 19:14:07 GMT-0800 (PST)",
+									"httpOnly": true,
+									"domain": "namex-test.pathfinder.gov.bc.ca",
+									"path": "/",
+									"secure": true,
+									"value": "19b4bf0232e0f6e715f716edb00602f2",
+									"key": "ec365a05f3d85d3ec598426ef7b6cafd"
+								},
+								{
+									"expires": "Mon Jan 18 2038 19:14:07 GMT-0800 (PST)",
+									"httpOnly": true,
+									"domain": "namex-test.pathfinder.gov.bc.ca",
+									"path": "/",
+									"secure": true,
+									"value": "587fa0a2f9529358f8d403d42a87f609",
+									"key": "c165f6a7a26b80e301ee5dc918200995"
+								},
+								{
+									"expires": "Mon Jan 18 2038 19:14:07 GMT-0800 (PST)",
+									"httpOnly": true,
+									"domain": "namex-test.pathfinder.gov.bc.ca",
+									"path": "/",
+									"secure": true,
+									"value": "52d3e953733dbe28bf5d647e6cf826ff",
+									"key": "66b4122bf113aa071842836217a2ff25"
+								},
+								{
+									"expires": "Mon Jan 18 2038 19:14:07 GMT-0800 (PST)",
+									"httpOnly": true,
+									"domain": "namex-test.pathfinder.gov.bc.ca",
+									"path": "/",
+									"secure": false,
+									"value": "eyJvaWRjX2NzcmZfdG9rZW4iOiIzaWxvd0JlTTliYWJwQWRrM0w5N2J5U2ctcGdBNVp6TCJ9.DnB7Kg.-wrOO9KiH15AYCEVeLXSjiR2KNg",
+									"key": "session"
+								}
+							],
+							"body": "{\"additionalInfo\":\"NATURE OF BUS: ELECTRICAL/COMPUTER ENG CONSULTING INCORPORATED IN OREGON AS WAVE DYNAMICS, INC.\",\"applicants\":\"\",\"comments\":[],\"consentFlag\":null,\"corpNum\":null,\"expirationDate\":null,\"furnished\":\"N\",\"id\":28163,\"lastUpdate\":\"Wed, 12 Sep 2018 21:44:22 GMT\",\"names\":[{\"choice\":2,\"comment\":null,\"conflict1\":null,\"conflict1_num\":null,\"conflict2\":null,\"conflict2_num\":null,\"conflict3\":null,\"conflict3_num\":null,\"consumptionDate\":null,\"decision_text\":null,\"name\":\"WAVE DYNAMICS CONSULTING, INC.\",\"state\":\"NE\"},{\"choice\":3,\"comment\":null,\"conflict1\":\"\",\"conflict1_num\":\"\",\"conflict2\":\"\",\"conflict2_num\":\"\",\"conflict3\":\"\",\"conflict3_num\":\"\",\"consumptionDate\":null,\"decision_text\":\"\",\"name\":\"test2\",\"state\":\"NE\"},{\"choice\":1,\"comment\":null,\"conflict1\":null,\"conflict1_num\":null,\"conflict2\":null,\"conflict2_num\":null,\"conflict3\":null,\"conflict3_num\":null,\"consumptionDate\":null,\"decision_text\":null,\"name\":\"WAVE DYNAMICS, INC.\",\"state\":\"NE\"}],\"natureBusinessInfo\":null,\"nrNum\":\"NR 8765456\",\"nwpta\":[],\"previousNr\":null,\"priorityCd\":\"N\",\"requestTypeCd\":\"XCR\",\"state\":\"HOLD\",\"submitCount\":1,\"submittedDate\":\"Thu, 20 Apr 2006 11:56:22 GMT\",\"submitter_userid\":\"\",\"userId\":\"kial-ex\",\"xproJurisdiction\":\"OREGON, USA\"}\n"
+						}
+					]
 				},
 				{
-					"name": "/requests - put NR 8765456-reset",
+					"name": "/requests - put NR #-reset",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "94effa57-0a7b-4fa7-af2d-04138903ceb6",
+								"id": "b21caae4-819e-42ed-a90f-21ac05d89c7a",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1514,10 +1731,10 @@
 									"});",
 									"",
 									"it(\"Should return old values for this NR\", () => {",
-									"   response.body.additionalInfo.should.include(\"NATURE OF BUS: ELECTRICAL/COMPUTER ENG CONSULTING INCORPORATED IN OREGON AS WAVE DYNAMICS, INC.\");",
-									"   response.body.id.should.equal(28163);",
-									"   response.body.submitCount.should.equal(1);",
-									"   response.body.state.should.include(\"HOLD\");",
+									"   response.body.additionalInfo.should.equal(`${pm.environment.get(\"additionalInfo\")}`);",
+									"   response.body.applicants.clientFirstName.should.equal(`${pm.environment.get(\"clientFirstName\")}`);",
+									"   response.body.natureBusinessInfo.should.equal(`${pm.environment.get(\"natureBusinessInfo\")}`);",
+									"   response.body.state.should.equal(\"HOLD\");",
 									"});"
 								]
 							}
@@ -1537,10 +1754,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"additionalInfo\": \"NATURE OF BUS: ELECTRICAL/COMPUTER ENG CONSULTING INCORPORATED IN OREGON AS WAVE DYNAMICS, INC.\",\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"furnished\": \"N\",\n    \"id\": 28163,\n    \"lastUpdate\": \"Fri, 03 Aug 2018 17:12:35 GMT\",\n    \"names\": [\n        {\n            \"choice\": 2,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"WAVE DYNAMICS CONSULTING, INC.\",\n            \"state\": \"NE\"\n        },\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"WAVE DYNAMICS, INC.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": null,\n    \"nrNum\": \"NR 8765456\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"HOLD\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Apr 2006 11:56:22 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"kial-ex\",\n    \"xproJurisdiction\": \"OREGON, USA\"\n}"
+							"raw": "{\n    \"additionalInfo\": \"This is additional info entered by the applicant.\",\n    \"applicants\": {\n        \"addrLine1\": \"zzz1571 ABBOTT ST\",\n        \"addrLine2\": null,\n        \"addrLine3\": null,\n        \"city\": \"zzzVictoria\",\n        \"clientFirstName\": \"qqqGerald\",\n        \"clientLastName\": \"qqqSmith\",\n        \"contact\": \"zzzJeffrey Hall\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"lorna.trent@gov.bc.ca\",\n        \"faxNumber\": \"250-638-9694\",\n        \"firstName\": \"zzzLorna\",\n        \"lastName\": \"zzzTrent\",\n        \"middleName\": null,\n        \"partyId\": 1051,\n        \"phoneNumber\": \"250-635-7342\",\n        \"postalCd\": \"V9E 4S3\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 1051,\n    \"lastUpdate\": \"Thu, 20 Sep 2018 23:02:17 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"STRANGWAY & SONS ACCOUNTING SERVICES\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"Corporate Accounting Firm\",\n    \"nrNum\": \"NR 2943527\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"Y\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"HOLD\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 10:27:55 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"kial-ex\",\n    \"xproJurisdiction\": \"NEW BRUNSWICK\"\n}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests/NR 8765456",
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
 							"host": [
 								"{{url}}"
 							],
@@ -1548,7 +1765,7 @@
 								"api",
 								"v1",
 								"requests",
-								"NR 8765456"
+								"{{NR}}"
 							]
 						}
 					},
