@@ -204,7 +204,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
             -- If we don't care about it, mark it as ignored.
             status := STATUS_IGNORED;
 
-            IF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM') THEN
+            IF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM', 'RESET') THEN
                 SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
                         row_transaction_id;
 
