@@ -291,7 +291,7 @@ class NROServices(object):
 
         return warnings if len(warnings)>0 else None
 
-    def change_nr(self, nr):
+    def change_nr(self, nr, change_flags):
 
         warnings = []
 
@@ -304,7 +304,7 @@ class NROServices(object):
             con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
 
             cursor = con.cursor()
-            update_nr(nr, cursor)
+            update_nr(nr, cursor, change_flags)
 
             con.commit()
 
