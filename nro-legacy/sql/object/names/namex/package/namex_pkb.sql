@@ -101,6 +101,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
     PROCEDURE load_data IS
         row_transaction_id namex_feeder.transaction_id%type;
         row_transaction_type_cd transaction.transaction_type_cd%type;
+        row_request_id transaction.request_id%type;
         row_event_id transaction.event_id%type;
         row_nr_num namex_feeder.nr_num%type;
         row_state_type_cd request_state.state_type_cd%type;
@@ -108,24 +109,35 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
         status CHAR(1);
         row_action CHAR(1);
 
-        CURSOR pending_rows IS SELECT transaction_id FROM name_transaction WHERE status_namex = STATUS_PENDING ORDER BY
-                transaction_id;
+        CURSOR pending_rows IS 
+        SELECT transaction_id 
+        FROM name_transaction 
+        WHERE status_namex = STATUS_PENDING
+        ORDER BY transaction_id;
+        
     BEGIN
         OPEN pending_rows;
         LOOP
             FETCH pending_rows INTO row_transaction_id;
             EXIT WHEN pending_rows%NOTFOUND;
 
-            SELECT transaction_type_cd, event_id INTO row_transaction_type_cd, row_event_id FROM transaction WHERE
-                    transaction_id = row_transaction_id;
+            SELECT transaction_type_cd, request_id, event_id
+            INTO row_transaction_type_cd, row_request_id, row_event_id
+            FROM transaction 
+            WHERE transaction_id = row_transaction_id;
 
             -- If we don't care about it, mark it as ignored.
             status := STATUS_IGNORED;
 
             -- get the current state, if it's not 'C' or 'D' we're done
             BEGIN
-                SELECT state_type_cd INTO row_state_type_cd FROM request_state WHERE start_event_id = row_event_id AND
-                        state_type_cd in ('C', 'D');
+                SELECT state_type_cd 
+                INTO row_state_type_cd 
+                FROM request_state 
+                WHERE request_id = row_request_id
+                AND end_event_id is NULL
+                AND state_type_cd in ('C', 'D');
+                
             EXCEPTION
                 WHEN NO_DATA_FOUND THEN
                     row_state_type_cd := NULL;
