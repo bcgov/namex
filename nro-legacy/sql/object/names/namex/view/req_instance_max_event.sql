@@ -37,7 +37,8 @@ AS
                      ens.event_timestamp AS event_timestamp
                 FROM NAME n LEFT OUTER JOIN name_state ns ON ns.name_id = n.name_id
                      LEFT OUTER JOIN event ens ON ens.event_id = ns.start_event_id
-               WHERE ns.end_event_id IS NULL)
+               WHERE ns.end_event_id IS NULL
+        )
     GROUP BY request_id;
 
 

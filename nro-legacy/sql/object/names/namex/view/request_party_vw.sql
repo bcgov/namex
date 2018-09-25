@@ -29,7 +29,8 @@ AS
       FROM request_party rp LEFT OUTER JOIN address@global_readonly addr
            ON addr.addr_id = rp.address_id
            LEFT OUTER JOIN request r ON r.request_id = rp.request_id
-     WHERE rp.party_type_cd = 'APP';
+     WHERE rp.party_type_cd = 'APP'
+       AND rp.end_event_id IS NULL;
 
 
 DROP PUBLIC SYNONYM REQUEST_PARTY_VW;

@@ -18,6 +18,7 @@ AS
            ri.request_type_cd, ri.expiration_date, ri.additional_info, ri.nature_business_info,
            ri.xpro_jurisdiction
       FROM request r LEFT OUTER JOIN request_instance ri ON ri.request_id = r.request_id
+      WHERE ri.end_event_id IS NULL
            ;
 
 
