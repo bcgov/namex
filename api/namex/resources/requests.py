@@ -701,17 +701,17 @@ class Request(Resource):
                 except (NROServicesError, Exception) as err:
                     MessageServices.add_message('error', 'change_request_in_NRO', err)
 
-            ### Finally save the entire graph
-            nrd.save_to_db()
-
-            EventRecorder.record(user, Event.PUT, nrd, json_input)
-
             # if there were errors, return the set of errors
             warning_and_errors = MessageServices.get_all_messages()
             if warning_and_errors:
                 for we in warning_and_errors:
                     if we['type'] == MessageServices.ERROR:
                         return jsonify(errors=warning_and_errors), 400
+
+            ### Finally save the entire graph
+            nrd.save_to_db()
+
+            EventRecorder.record(user, Event.PUT, nrd, json_input)
 
 
         except ValidationError as ve:
