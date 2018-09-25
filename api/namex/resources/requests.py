@@ -403,6 +403,7 @@ class Request(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
+            orig_nrd = nrd.json()
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
@@ -483,12 +484,25 @@ class Request(Resource):
             except KeyError:
                 nrd.previousRequestId = None
 
+            # check if any of the Oracle db fields have changed, so we can send them back
+            is_changed__request = False
+            is_changed__previous_request = False
+            if nrd.requestTypeCd != orig_nrd['requestTypeCd']: is_changed__request = True
+            if nrd.expirationDate != orig_nrd['expirationDate']: is_changed__request = True
+            if nrd.xproJurisdiction != orig_nrd['xproJurisdiction']: is_changed__request = True
+            if nrd.additionalInfo != orig_nrd['additionalInfo']: is_changed__request = True
+            if nrd.natureBusinessInfo != orig_nrd['natureBusinessInfo']: is_changed__request = True
+            if nrd.previousRequestId != orig_nrd['previousRequestId']: is_changed__previous_request = True
+
             ### END request header ###
 
             ### APPLICANTS ###
-            # TODO: applicants not updating properly -- needs fix
+            is_changed__applicant = False
+            is_changed__address = False
+
             applicants_d = nrd.applicants.one_or_none()
             if applicants_d:
+                orig_applicant = applicants_d.as_dict()
                 appl = json_input.get('applicants', None)
                 if appl:
                     errm = applicant_schema.validate(appl, partial=True)
@@ -498,19 +512,51 @@ class Request(Resource):
 
 
                     applicant_schema.load(appl, instance=applicants_d, partial=True)
+
+                    # check if any of the Oracle db fields have changed, so we can send them back
+                    if applicants_d.lastName != orig_applicant['lastName']: is_changed__applicant = True
+                    if applicants_d.firstName != orig_applicant['firstName']: is_changed__applicant = True
+                    if applicants_d.middleName != orig_applicant['middleName']: is_changed__applicant = True
+                    if applicants_d.phoneNumber != orig_applicant['phoneNumber']: is_changed__applicant = True
+                    if applicants_d.faxNumber != orig_applicant['faxNumber']: is_changed__applicant = True
+                    if applicants_d.emailAddress != orig_applicant['emailAddress']: is_changed__applicant = True
+                    if applicants_d.contact != orig_applicant['contact']: is_changed__applicant = True
+                    if applicants_d.clientFirstName != orig_applicant['clientFirstName']: is_changed__applicant = True
+                    if applicants_d.clientLastName != orig_applicant['clientLastName']: is_changed__applicant = True
+                    if applicants_d.declineNotificationInd != orig_applicant['declineNotificationInd']: is_changed__applicant = True
+                    if applicants_d.addrLine1 != orig_applicant['addrLine1']: is_changed__address = True
+                    if applicants_d.addrLine2 != orig_applicant['addrLine2']: is_changed__address = True
+                    if applicants_d.addrLine3 != orig_applicant['addrLine3']: is_changed__address = True
+                    if applicants_d.city != orig_applicant['city']: is_changed__address = True
+                    if applicants_d.postalCd != orig_applicant['postalCd']: is_changed__address = True
+                    if applicants_d.stateProvinceCd != orig_applicant['stateProvinceCd']: is_changed__address = True
+                    if applicants_d.countryTypeCd != orig_applicant['countryTypeCd']: is_changed__address = True
+
                 else:
                     applicants_d.delete_from_db()
+                    is_changed__applicant = True
+                    is_changed__address = True
+
+
 
             ### END applicants ###
 
             ### NAMES ###
             # TODO: set consumptionDate not working -- breaks changing name values
+
+            is_changed__name1 = False
+            is_changed__name2 = False
+            is_changed__name3 = False
+
             if len(nrd.names.all()) == 0:
                 new_name_choice = Name()
                 new_name_choice.nrId = nrd.id
                 nrd.names.append(new_name_choice)
 
             for nrd_name in nrd.names.all():
+
+                orig_name = nrd_name.as_dict()
+
                 for in_name in json_input.get('names', []):
 
                     if len(nrd.names.all()) < in_name['choice']:
@@ -525,6 +571,9 @@ class Request(Resource):
                         names_schema.load(in_name, instance=new_name_choice, partial=False)
 
                         nrd.names.append(new_name_choice)
+
+                        if new_name_choice.choice == 2: is_changed__name2 = True
+                        if new_name_choice.choice == 3: is_changed__name3 = True
 
                     elif nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
@@ -548,6 +597,13 @@ class Request(Resource):
 
                         else:
                             nrd_name.comment = None
+
+                        # check if any of the Oracle db fields have changed, so we can send them back
+                        # - this is only for editing a name from the Edit NR section, NOT making a decision
+                        if nrd_name.name != orig_name['name']:
+                            if nrd_name.choice == 1: is_changed__name1 = True
+                            if nrd_name.choice == 2: is_changed__name2 = True
+                            if nrd_name.choice == 3: is_changed__name3 = True
 
             ### END names ###
 
@@ -573,7 +629,13 @@ class Request(Resource):
 
             ### NWPTA ###
 
+            is_changed__nwpta_ab = False
+            is_changed__nwpta_sk = False
+
             for nrd_nwpta in nrd.partnerNS.all():
+
+                orig_nwpta = nrd_nwpta.as_dict()
+
                 for in_nwpta in json_input['nwpta']:
                     if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
 
@@ -583,6 +645,18 @@ class Request(Resource):
                             # return jsonify(errors), 400
 
                         nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
+
+                        # check if any of the Oracle db fields have changed, so we can send them back
+                        tmp_is_changed = False
+                        if nrd_nwpta.partnerNameTypeCd != orig_nwpta['partnerNameTypeCd']: tmp_is_changed = True
+                        if nrd_nwpta.partnerNameNumber != orig_nwpta['partnerNameNumber']: tmp_is_changed = True
+                        if nrd_nwpta.partnerNameDate != orig_nwpta['partnerNameDate']: tmp_is_changed = True
+                        if nrd_nwpta.partnerName != orig_nwpta['partnerName']: tmp_is_changed = True
+                        if tmp_is_changed:
+                            if nrd_nwpta.partnerJurisdictionTypeCd == 'AB': is_changed__nwpta_ab = True
+                            if nrd_nwpta.partnerJurisdictionTypeCd == 'SK': is_changed__nwpta_sk = True
+
+
             ### END nwpta ###
 
             # if there were errors, abandon changes and return the set of errors
@@ -608,9 +682,23 @@ class Request(Resource):
 
             ### Update NR Details in NRO
             try:
-                warnings = nro.change_nr(nrd)
-                if warnings:
-                    MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
+                change_flags = {
+                    'is_changed__request': is_changed__request,
+                    'is_changed__previous_request': is_changed__previous_request,
+                    'is_changed__applicant': is_changed__applicant,
+                    'is_changed__address': is_changed__address,
+                    'is_changed__name1': is_changed__name1,
+                    'is_changed__name2': is_changed__name2,
+                    'is_changed__name3': is_changed__name3,
+                    'is_changed__nwpta_ab': is_changed__nwpta_ab,
+                    'is_changed__nwpta_sk': is_changed__nwpta_sk,
+                }
+
+                # if any data has changed from an NR Details edit, update it in Oracle
+                if any(value is True for value in change_flags.values()):
+                    warnings = nro.change_nr(nrd, change_flags)
+                    if warnings:
+                        MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
 
             except (NROServicesError, Exception) as err:
                 MessageServices.add_message('error', 'change_request_in_NRO', err)
