@@ -67,9 +67,21 @@ C:\> "C:\Program Files\PostgreSQL\10\bin\psql" -h localhost -p 54321 -f C:\<path
 C:\> "C:\Program Files\PostgreSQL\10\bin\psql" -h localhost -p 54321 -f C:\<path>\synonyms_data.sql solr <username>
 ```
 
+TEMP Synonym load: POrt-forward test, tehn:
 
-"C:\Program Files\PostgreSQL\10\bin\pg_dump" -h localhost -p 54321 -U userXXX -W --table=synonym --data-only
---column-inserts solr > syn.sql
+pg_dump -h localhost -p 54321 -U userXXX -W --table=synonym --data-only --column-inserts solr > syn.sql
 
-"C:\Program Files\PostgreSQL\10\bin\pg_dump" -h localhost -p 54321 -U userXXX -W --table=synonym_audit --data-only
---column-inserts solr > syn_a.sql
+pg_dump -h localhost -p 54321 -U userXXX -W --table=synonym_audit --data-only --column-inserts solr > syn_a.sql
+
+Port-forward first dev, then prod and:
+
+psql -h localhost -p 54321 solr userXXX
+> delete from synonym;
+> delete from synonym_audit;
+> \q
+
+psql -h localhost -p 54321 -f syn.sql solr userXXX
+
+psql -h localhost -p 54321 -f syn_a.sql solr userXXX
+
+reload cores -3

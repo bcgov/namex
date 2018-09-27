@@ -7,13 +7,13 @@ to run it locally as a standalone server - this allows for rapid reconfiguration
 GitHub and OpenShift.
 
 The documentation describes the process for installing the custom version of Apache Solr that was built using the steps
-described in `solr_custom_standalone.md`. This documentation assumes that you have a copy of the Github project
+described in `solr_standalone_customization.md`. This documentation assumes that you have a copy of the Github project
 `bcgov/namex` on your local computer in the directory `C:\Users\<username>\PycharmProjects\namex`.
 
 ## Solr Installation Steps
 
 Unzip the archive created in `solr_standalone_customization.md` to a local (C: Drive) directory, as it will be faster
-than running it off the home directory ()which is mapped to the networked H: drive).
+than running it off the home directory (which is mapped to the networked H: drive).
 
 ### Solr Jetty Datasource
 
