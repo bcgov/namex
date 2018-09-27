@@ -46,6 +46,8 @@ CREATE OR REPLACE PACKAGE BODY solr AS
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
             application_log_insert('solr:gen_conf', SYSDATE(), -1, SQLERRM);
+
+            RAISE;
     END;
 
 
@@ -97,6 +99,8 @@ CREATE OR REPLACE PACKAGE BODY solr AS
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
             application_log_insert('solr:gen_names', SYSDATE(), -1, SQLERRM);
+
+            RAISE;
     END;
 
 
@@ -127,7 +131,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
         IF solr_core = SOLR_CORE_CONFLICTS THEN
             content := generate_json_conflicts(nr_number, action);
         ELSIF solr_core = SOLR_CORE_NAMES THEN
-            content :=  generate_json_names(nr_number, action);
+            content := generate_json_names(nr_number, action);
         END IF;
 
         -- At some point it would make sense to move the ReST stuff out of here and into somewhere re-usable.
@@ -175,6 +179,8 @@ CREATE OR REPLACE PACKAGE BODY solr AS
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
             application_log_insert('solr.send_to_solr', SYSDATE(), -1, SQLERRM);
+
+            RETURN SQLERRM;
     END;
 
 

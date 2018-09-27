@@ -42,6 +42,8 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
             application_log_insert('solr:gen_conf', SYSDATE(), -1, SQLERRM);
+
+            RAISE;
     END;
 
 
@@ -64,7 +66,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     BEGIN
         -- configuration table lifted from globaldb. We should have a function for fetching these, and we should only
         -- call it with "SOLR_FEEDER", the function should grab the GLOBAL value if the name doesn't exist for the
-        -- application. 
+        -- application.
         SELECT value INTO oracle_wallet FROM configuration WHERE application = 'GLOBAL' AND name = 'oracle_wallet';
         SELECT value INTO destination_url FROM configuration WHERE application = 'SOLR_FEEDER' AND name =
                 'destination_url';
@@ -116,6 +118,8 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
             application_log_insert('solr.send_to_solr', SYSDATE(), -1, SQLERRM);
+
+            return SQLERRM;
     END;
 
 
