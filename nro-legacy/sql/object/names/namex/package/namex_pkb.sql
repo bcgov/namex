@@ -92,6 +92,8 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
             application_log_insert('namex.send_to_namex', SYSDATE(), -1, SQLERRM);
+
+            return SQLERRM;
     END;
 
 
