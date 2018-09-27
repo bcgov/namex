@@ -174,8 +174,11 @@ class Methods(Resource):
 
     @staticmethod
     def init_info(incorp_info_sql,incorp_directors_sql):
-        incorp_info_obj = db.engine.execute(incorp_info_sql)
-        incorp_info_dict = dict(incorp_info_obj.fetchall()[0])
+        try:
+            incorp_info_obj = db.engine.execute(incorp_info_sql)
+            incorp_info_dict = dict(incorp_info_obj.fetchall()[0])
+        except IndexError:
+            incorp_info_dict = {'corp_class': None,'recognition_dts': None}
 
         incorp_directors_obj = db.engine.execute(incorp_directors_sql)
 
