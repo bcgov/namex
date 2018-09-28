@@ -369,7 +369,8 @@ class Request(Resource):
             nrd.stateCd = state
             nrd.userId = user.id
 
-            nro.cancel_nr(nrd, user.username)
+            if state == State.CANCELLED:
+                nro.cancel_nr(nrd, user.username)
 
             ### COMMENTS ###
             # we only add new comments, we do not change existing comments
