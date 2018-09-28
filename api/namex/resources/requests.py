@@ -329,7 +329,8 @@ class Request(Resource):
         if not json_input:
             return jsonify({'message': 'No input data provided'}), 400
 
-        # Currently only state changes are supported by patching
+        ### STATE - required ###
+
         # all these checks to get removed to marshmallow
         state = json_input.get('state', None)
         if not state:
@@ -367,6 +368,30 @@ class Request(Resource):
 
             nrd.stateCd = state
             nrd.userId = user.id
+
+            nro.cancel_nr(nrd, user.username)
+
+            ### COMMENTS ###
+            # we only add new comments, we do not change existing comments
+            # - we can find new comments in json as those with no ID
+
+            if json_input.get('comments', None):
+
+                for in_comment in json_input['comments']:
+                    is_new_comment = False
+                    try:
+                        if in_comment['id'] is None or in_comment['id'] == 0:
+                            is_new_comment = True
+                    except KeyError:
+                        is_new_comment = True
+                    if is_new_comment and in_comment['comment'] is not None:
+                        new_comment = Comment()
+                        new_comment.comment = in_comment['comment']
+                        new_comment.examiner = user
+                        new_comment.nrId = nrd.id
+
+            ### END comments ###
+
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
 

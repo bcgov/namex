@@ -7,7 +7,7 @@ import cx_Oracle
 
 from namex.models import State
 from namex.services.nro import NROServicesError
-from namex.services.nro.change_nr import update_nr
+from namex.services.nro.change_nr import update_nr, _get_event_id, _create_nro_transaction
 
 from .exceptions import NROServicesError
 from .utils import nro_examiner_name
@@ -326,3 +326,84 @@ class NROServices(object):
             nr.save_to_db()
 
         return warnings if len(warnings)>0 else None
+
+    def cancel_nr(self, nr, examiner_username):
+        """Sets the status of the Request in NRO to "C" (Cancelled)
+
+        :param nr: (obj) NR Object
+        :param examiner_username: (str) any valid string will work, but it should be the username from Keycloak
+        :return: naked
+        :raise: (NROServicesError) with the error information set
+        """
+
+        try:
+            con = self.connection
+            con.begin() # explicit transaction in case we need to do other things than just call the stored proc
+            try:
+                cursor = con.cursor()
+
+                event_id = _get_event_id(cursor)
+                current_app.logger.debug('got to cancel_nr() for NR:{}'.format(nr.nrNum))
+                current_app.logger.debug('event ID for NR:{}'.format(event_id))
+                _create_nro_transaction(cursor, nr, event_id)
+
+                # get request_state record, with all fields
+                cursor.execute("""
+                SELECT *
+                FROM request_state
+                WHERE request_id = :request_id
+                AND end_event_id IS NULL
+                FOR UPDATE
+                """,
+                                      request_id=nr.requestId)
+                row = cursor.fetchone()
+                req_state_id = int(row[0])
+
+                # set the end event for the existing record
+                cursor.execute("""
+                UPDATE request_state
+                SET end_event_id = :event_id
+                WHERE request_state_id = :req_state_id
+                """,
+                                      event_id=event_id,
+                                      req_state_id=req_state_id)
+
+                # create new request_state record
+                cursor.execute("""
+                INSERT INTO request_state (request_state_id, request_id, state_type_cd, 
+                    start_event_id, end_event_id, examiner_idir, examiner_comment, state_comment, 
+                    batch_id)
+                VALUES (request_state_seq.nextval, :request_id, :state, :event_id, NULL, 
+                          :examiner_id, NULL, NULL, NULL)
+                """,
+                                      request_id=nr.requestId,
+                                      state='C',
+                                      event_id=event_id,
+                                      examiner_id=nro_examiner_name(examiner_username)
+                                      )
+
+                con.commit()
+
+            except cx_Oracle.DatabaseError as exc:
+                err, = exc.args
+                current_app.logger.error(err)
+                if con:
+                    con.rollback()
+                raise NROServicesError({"code": "unable_to_set_state",
+                        "description": "Unable to set the state of the NR in NRO"}, 500)
+            except Exception as err:
+                current_app.logger.error(err.with_traceback(None))
+                if con:
+                    con.rollback()
+                raise NROServicesError({"code": "unable_to_set_state",
+                        "description": "Unable to set the state of the NR in NRO"}, 500)
+
+        except Exception as err:
+            # something went wrong, roll it all back
+            current_app.logger.error(err.with_traceback(None))
+            if con:
+                con.rollback()
+            raise NROServicesError({"code": "unable_to_set_state",
+                        "description": "Unable to set the state of the NR in NRO"}, 500)
+
+        return None
