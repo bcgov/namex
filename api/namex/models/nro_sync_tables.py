@@ -45,3 +45,5 @@ class NRONamesSyncJobDetail(db.Model):
     jobId = db.Column('job_id', db.Integer, db.ForeignKey('nro_names_sync_job.id'))
     nrNum = db.Column('nr_num', db.String(10))
     time = db.Column('time', db.DateTime, default=None)
+    success = db.Column('success', db.Boolean, default=True)
+    errorMsg = db.Column('error_msg', db.String(1000), default=None)

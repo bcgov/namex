@@ -59,7 +59,6 @@ try:
     q = db.session.query(Request).\
                 filter(Request.stateCd.in_([State.APPROVED, State.REJECTED, State.CONDITIONAL])).\
                 filter(Request.furnished != 'Y').\
-                filter(Request.lastUpdate <= text('NOW() - INTERVAL \'{delay} SECONDS\''.format(delay=delay))).\
                 order_by(Request.lastUpdate.asc()). \
                 limit(max_rows). \
                 with_for_update()
@@ -74,7 +73,6 @@ try:
 
     for r in q.all():
         row_count += 1
-        JobTracker.job_detail(db, job_id, r.nrNum)
 
         current_app.logger.debug('processing: {}'.format(r.nrNum))
 
@@ -85,12 +83,14 @@ try:
 
             ora_con.commit()
             db.session.commit()
+            JobTracker.job_detail(db, job_id, r.nrNum)
 
         except Exception as err:
             current_app.logger.error(err)
             current_app.logger.error('ERROR: {}'.format(r.nrNum))
             db.session.rollback()
             ora_con.rollback()
+            JobTracker.job_detail_error(db, job_id, r.nrNum, str(err))
 
 
     JobTracker.end_job(db, job_id, datetime.utcnow(), 'success')
