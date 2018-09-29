@@ -22,9 +22,9 @@ just run:
 
 Runs for a few seconds.
 
-DEV / TEST
+DEV / TEST / PROD
 
-To run over dev or test database:
+To run over dev, test, or prod database:
 
 - set up port forwarding via openshift to point to dev postgres database:
 
