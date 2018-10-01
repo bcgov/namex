@@ -12,6 +12,10 @@ class PartnerNameSystem(db.Model):
     partnerNameDate = db.Column('partner_name_date', db.DateTime)
     partnerName = db.Column('partner_name', db.String(255))
 
+    # "do it for me" (ie: NWPTA requested) indicator, set when data comes from Oracle so we have a
+    # record of this, regardless of current state of data
+    requested = db.Column('requested', db.Boolean(), default=False)
+
     # parent keys
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
 
@@ -30,6 +34,22 @@ class PartnerNameSystem(db.Model):
 
     def delete_from_db(self):
         pass
+
+    # used by NRO extractor
+    def set_requested_flag(self):
+        try:
+            # NAS (Numbered Assumed) types have blank data but are not requested
+            if self.partnerNameTypeCd == 'NAS':
+                self.requested = False
+
+            # if all data is blank (except type and jurisdiction) then the customer has requested nwpta
+            elif self.partnerNameNumber in ['', None] and self.partnerName in ['', None] and self.partnerNameDate in ['', None]:
+                self.requested = True
+
+            else:
+                self.requested = False
+        except:
+            pass
 
 
 class PartnerNameSystemSchema(ma.ModelSchema):
