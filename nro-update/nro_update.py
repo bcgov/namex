@@ -59,6 +59,7 @@ try:
     q = db.session.query(Request).\
                 filter(Request.stateCd.in_([State.APPROVED, State.REJECTED, State.CONDITIONAL])).\
                 filter(Request.furnished != 'Y').\
+                filter(Request.lastUpdate <= text('NOW() - INTERVAL \'{delay} SECONDS\''.format(delay=delay))).\
                 order_by(Request.lastUpdate.asc()). \
                 limit(max_rows). \
                 with_for_update()
