@@ -21,7 +21,7 @@ from namex.models import DecisionReason
 
 from namex.services import ServicesError, MessageServices, EventRecorder
 
-from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition
+from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition, convert_to_ascii
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
@@ -387,7 +387,7 @@ class Request(Resource):
                         is_new_comment = True
                     if is_new_comment and in_comment['comment'] is not None:
                         new_comment = Comment()
-                        new_comment.comment = in_comment['comment']
+                        new_comment.comment = convert_to_ascii(in_comment['comment'])
                         new_comment.examiner = user
                         new_comment.nrId = nrd.id
 
@@ -496,9 +496,9 @@ class Request(Resource):
                 reset = True
 
             request_header_schema.load(json_input, instance=nrd, partial=True)
-            nrd.additionalInfo = json_input.get('additionalInfo', None)
+            nrd.additionalInfo = convert_to_ascii(json_input.get('additionalInfo', None))
             nrd.furnished = json_input.get('furnished', 'N')
-            nrd.natureBusinessInfo = json_input.get('natureBusinessInfo', None)
+            nrd.natureBusinessInfo = convert_to_ascii(json_input.get('natureBusinessInfo', None))
             nrd.stateCd = state
             nrd.userId = user.id
 
@@ -539,6 +539,24 @@ class Request(Resource):
 
                     applicant_schema.load(appl, instance=applicants_d, partial=True)
 
+                    # convert data to ascii, removing data that won't save to Oracle
+                    applicants_d.lastName = convert_to_ascii(applicants_d.lastName)
+                    applicants_d.firstName = convert_to_ascii(applicants_d.firstName)
+                    applicants_d.middleName = convert_to_ascii(applicants_d.middleName)
+                    applicants_d.phoneNumber = convert_to_ascii(applicants_d.phoneNumber)
+                    applicants_d.faxNumber = convert_to_ascii(applicants_d.faxNumber)
+                    applicants_d.emailAddress = convert_to_ascii(applicants_d.emailAddress)
+                    applicants_d.contact = convert_to_ascii(applicants_d.contact)
+                    applicants_d.clientFirstName = convert_to_ascii(applicants_d.clientFirstName)
+                    applicants_d.clientLastName = convert_to_ascii(applicants_d.clientLastName)
+                    applicants_d.addrLine1 = convert_to_ascii(applicants_d.addrLine1)
+                    applicants_d.addrLine2 = convert_to_ascii(applicants_d.addrLine2)
+                    applicants_d.addrLine3 = convert_to_ascii(applicants_d.addrLine3)
+                    applicants_d.city = convert_to_ascii(applicants_d.city)
+                    applicants_d.postalCd = convert_to_ascii(applicants_d.postalCd)
+                    applicants_d.stateProvinceCd = convert_to_ascii(applicants_d.stateProvinceCd)
+                    applicants_d.countryTypeCd = convert_to_ascii(applicants_d.countryTypeCd)
+
                     # check if any of the Oracle db fields have changed, so we can send them back
                     if applicants_d.lastName != orig_applicant['lastName']: is_changed__applicant = True
                     if applicants_d.firstName != orig_applicant['firstName']: is_changed__applicant = True
@@ -577,6 +595,10 @@ class Request(Resource):
             if len(nrd.names.all()) == 0:
                 new_name_choice = Name()
                 new_name_choice.nrId = nrd.id
+
+                # convert data to ascii, removing data that won't save to Oracle
+                new_name_choice.name = convert_to_ascii(new_name_choice.name)
+
                 nrd.names.append(new_name_choice)
 
             for nrd_name in nrd.names.all():
@@ -594,6 +616,10 @@ class Request(Resource):
 
                         new_name_choice = Name()
                         new_name_choice.nrId = nrd.id
+
+                        # convert data to ascii, removing data that won't save to Oracle
+                        new_name_choice.name = convert_to_ascii(new_name_choice.name)
+
                         names_schema.load(in_name, instance=new_name_choice, partial=False)
 
                         nrd.names.append(new_name_choice)
@@ -624,6 +650,10 @@ class Request(Resource):
                         else:
                             nrd_name.comment = None
 
+                        # convert data to ascii, removing data that won't save to Oracle
+                        nrd_name.name = convert_to_ascii(nrd_name.name)
+
+
                         # check if any of the Oracle db fields have changed, so we can send them back
                         # - this is only for editing a name from the Edit NR section, NOT making a decision
                         if nrd_name.name != orig_name['name']:
@@ -647,7 +677,7 @@ class Request(Resource):
                     is_new_comment = True
                 if is_new_comment and in_comment['comment'] is not None:
                     new_comment = Comment()
-                    new_comment.comment = in_comment['comment']
+                    new_comment.comment = convert_to_ascii(in_comment['comment'])
                     new_comment.examiner = user
                     new_comment.nrId = nrd.id
 
@@ -671,6 +701,11 @@ class Request(Resource):
                             # return jsonify(errors), 400
 
                         nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
+
+                        # convert data to ascii, removing data that won't save to Oracle
+                        nrd_nwpta.partnerName = convert_to_ascii(nrd_nwpta.partnerName)
+                        nrd_nwpta.partnerNameNumber = convert_to_ascii(nrd_nwpta.partnerNameNumber)
+
 
                         # check if any of the Oracle db fields have changed, so we can send them back
                         tmp_is_changed = False
