@@ -156,16 +156,41 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
                                   request_id=nr.requestId,
                                   choice=name.choice)
             row = oracle_cursor.fetchone()
-            ni_id = int(row[0])
-            n_id = int(row[1])
 
-            oracle_cursor.execute("""
-            UPDATE name_instance
-            SET end_event_id = :event_id
-            WHERE name_instance_id = :instance_id
-            """,
-                                  event_id=event_id,
-                                  instance_id=ni_id)
+            # if there was a result, this is an existing name record
+            if row:
+
+                ni_id = int(row[0])
+                n_id = int(row[1])
+
+                oracle_cursor.execute("""
+                UPDATE name_instance
+                SET end_event_id = :event_id
+                WHERE name_instance_id = :instance_id
+                """,
+                                      event_id=event_id,
+                                      instance_id=ni_id)
+
+            else:
+                # this is a new name, so create a new NAME and NAME_STATE record
+
+                oracle_cursor.execute("""select name_seq.NEXTVAL from dual""")
+                row = oracle_cursor.fetchone()
+                n_id = int(row[0])
+
+                oracle_cursor.execute("""
+                INSERT INTO name (NAME_ID, REQUEST_ID)
+                VALUES (:name_id, :request_id)
+                """,
+                                      name_id=n_id,
+                                      request_id=nr.requestId)
+
+                oracle_cursor.execute("""
+                INSERT INTO name_state (name_state_id, name_id, start_event_id, name_state_type_cd)
+                VALUES (name_state_seq.NEXTVAL, :name_id, :start_event, 'NE')
+                """,
+                                      name_id=n_id,
+                                      start_event=event_id)
 
             oracle_cursor.execute("""
             INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name)
@@ -176,8 +201,6 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
                                   name=name.name,
                                   event_id=event_id,
                                   search_name=name.name)
-
-    # TODO - handle brand new name
 
 def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
     """find the current address (request_party), set it's end_event_id to event_id
