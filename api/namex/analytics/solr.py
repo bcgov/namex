@@ -110,8 +110,10 @@ class SolrQueries:
 
             if letter == ' ' and not quotes_on:
                 if indicator_on:
-                    unsynonymed_words.append(word)
-                    word = ''
+                    if word != '':
+                        unsynonymed_words.append(word)
+                        word = ''
+
                     indicator_on = False
 
                 continue
@@ -120,7 +122,7 @@ class SolrQueries:
                 word += letter
 
         # Handle when the last word was prefixed with the indicator.
-        if indicator_on:
+        if indicator_on and word != '':
             unsynonymed_words.append(word)
 
         if len(unsynonymed_words) != 0:
