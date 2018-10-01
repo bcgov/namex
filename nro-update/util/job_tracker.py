@@ -17,9 +17,15 @@ class JobTracker(object):
 
     @staticmethod
     def job_detail(db, job_id, nr_num):
-        sql = text('insert into nro_names_sync_job_detail (job_id, nr_num, time) values (:job_id, :nr_num, :event_time)')
+        sql = text('insert into nro_names_sync_job_detail (job_id, nr_num, time, success) values (:job_id, :nr_num, :event_time, true)')
 
         db.engine.execute(sql.params(job_id=job_id, nr_num=nr_num, event_time=datetime.utcnow()))
+
+    @staticmethod
+    def job_detail_error(db, job_id, nr_num, errMsg):
+        sql = text('insert into nro_names_sync_job_detail (job_id, nr_num, time, success, error_msg) values (:job_id, :nr_num, :event_time, false, :errMsg)')
+
+        db.engine.execute(sql.params(job_id=job_id, nr_num=nr_num, event_time=datetime.utcnow(), errMsg=errMsg))
 
     @staticmethod
     def end_job(db, job_id, end_time, state):
