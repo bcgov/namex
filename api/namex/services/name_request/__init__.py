@@ -65,3 +65,10 @@ def valid_state_transition(user, nr, new_state):
         if nr.userId != user.id or nr.stateCd != State.INPROGRESS:
             return False
     return True
+
+
+def convert_to_ascii(value):
+    try:
+        return value.encode("ascii","ignore").decode('ascii')
+    except:
+        return value
