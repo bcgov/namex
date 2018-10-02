@@ -42,6 +42,10 @@ def valid_state_transition(user, nr, new_state):
             and not jwt.validate_roles([User.APPROVER]):
         return False
 
+    # allow any type of user to CANCEL an NR
+    if new_state == State.CANCELLED and nr.stateCd in State.CANCELLABLE_STATES:
+        return True
+
     # NR is in a final state, but maybe the user wants to pull it back for corrections
     if nr.stateCd in State.COMPLETED_STATE:
         if not jwt.validate_roles([User.APPROVER]):
@@ -61,3 +65,10 @@ def valid_state_transition(user, nr, new_state):
         if nr.userId != user.id or nr.stateCd != State.INPROGRESS:
             return False
     return True
+
+
+def convert_to_ascii(value):
+    try:
+        return value.encode("ascii","ignore").decode('ascii')
+    except:
+        return value

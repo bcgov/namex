@@ -98,6 +98,7 @@ class Request(db.Model):
                 'additionalInfo' : self.additionalInfo,
                 'natureBusinessInfo' : self.natureBusinessInfo,
                 'furnished': self.furnished if (self.furnished is not None) else 'N',
+                'previousRequestId': self.previousRequestId,
                 'previousNr': previousNr,
                 'submitCount': self.submitCount,
                 'corpNum': self.corpNum,

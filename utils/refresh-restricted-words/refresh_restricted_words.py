@@ -1,4 +1,5 @@
 import csv, os, psycopg2
+from dotenv import load_dotenv, find_dotenv
 
 """
 This is a utility to take a set of three CSV files off the server and replace existing Restricted Words data with contents.
@@ -8,6 +9,8 @@ Expects two spreadsheets in the same directory:
 restricted_word.csv - list of words
 restricted_condition.csv - list of conditions with cross-reference to words 
 """
+
+load_dotenv(find_dotenv())
 
 print('***')
 
@@ -38,7 +41,7 @@ with open('restricted_word.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
     print('inserting words...')
     for row in reader:
-        pg_cur.execute("insert into restricted_word values ({}, '{}')".format(row['word_id'], row['word_phrase']))
+        pg_cur.execute("insert into restricted_word values ({}, '{}')".format(row['word_id'], row['word_phrase'].replace("'", "''")))
         pg_conn.commit()
     print('done')
 

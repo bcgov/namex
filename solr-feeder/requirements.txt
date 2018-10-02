@@ -1,8 +1,4 @@
 Flask
 Flask-Restplus
-Flask-SQLAlchemy
-marshmallow-sqlalchemy
 python-dotenv
-psycopg2-binary
 requests
-requests-futures

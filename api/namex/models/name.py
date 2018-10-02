@@ -11,7 +11,7 @@ class Name(db.Model):
     name = db.Column(db.String(1024))
     state = db.Column(db.String(15), default='NE') # NE=Not Examined; R=Rejected; A=Accepted; C=Cond. Accepted
     choice = db.Column(db.Integer)
-    designation = db.Column(db.String(50), default='DRAFT')
+    designation = db.Column(db.String(50), default=None)
     consumptionDate = db.Column('consumption_date', db.DateTime)
     remoteNameId = db.Column('remote_name_id', db.BigInteger)
 

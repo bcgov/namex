@@ -2,17 +2,17 @@
 
 DROP VIEW NAMEX.NAMES_VW;
 
-create or replace view names_vw as
-select nm.request_id,
-    ni.choice_number,
-    ni.name,
-    ni.designation,
-    ns.name_state_type_cd
-from name_instance ni
-left outer join name nm on nm.name_id=ni.name_id
-left outer join name_state ns on ns.name_id=ni.name_id
-where ns.end_event_id is null
- and ni.end_event_id is null;
+CREATE OR REPLACE FORCE VIEW namex.names_vw (request_id,
+                                             choice_number,
+                                             NAME,
+                                             designation,
+                                             name_state_type_cd
+                                            )
+AS
+    SELECT nm.request_id, ni.choice_number, ni.NAME, ni.designation, ns.name_state_type_cd
+      FROM name_instance ni LEFT OUTER JOIN NAME nm ON nm.name_id = ni.name_id
+           LEFT OUTER JOIN name_state ns ON ns.name_id = ni.name_id
+     WHERE ns.end_event_id IS NULL AND ni.end_event_id IS NULL;
 
 
 DROP PUBLIC SYNONYM NAMES_VW;

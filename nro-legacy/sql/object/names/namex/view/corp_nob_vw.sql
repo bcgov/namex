@@ -2,11 +2,12 @@
 
 DROP VIEW NAMEX.CORP_NOB_VW;
 
-create or replace view corp_nob_vw as
-select ri.NATURE_BUSINESS_INFO,
-    r.nr_num
-from request_instance ri
-inner join request r ON r.request_id = ri.request_id;
+CREATE OR REPLACE FORCE VIEW namex.corp_nob_vw (nature_business_info, nr_num)
+AS
+    SELECT ri.nature_business_info, r.nr_num
+      FROM request_instance ri INNER JOIN request r ON r.request_id = ri.request_id
+     WHERE ri.end_event_id IS NULL
+           ;
 
 
 DROP PUBLIC SYNONYM CORP_NOB_VW;

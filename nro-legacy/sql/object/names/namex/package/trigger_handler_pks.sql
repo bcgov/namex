@@ -1,6 +1,6 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
-CREATE OR REPLACE PACKAGE NAMEX.trigger_handler AS
+CREATE OR REPLACE PACKAGE trigger_handler AS
     --
     -- Called from a trigger in NAMESDB to queue data that needs to be sent to the namex application.
     --

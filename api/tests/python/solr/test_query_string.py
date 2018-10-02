@@ -12,6 +12,30 @@ def test_plain_search():
     assert response == ''
 
 
+def test_empty_term():
+    response = SolrQueries()._get_name_copy_clause('waffle ' + NO_SYNONYMS_INDICATOR + ' corp')
+    print(response)
+    assert response == ''
+
+
+def test_empty_term_end():
+    response = SolrQueries()._get_name_copy_clause('waffle corp ' + NO_SYNONYMS_INDICATOR)
+    print(response)
+    assert response == ''
+
+
+def test_trailing_indicator():
+    response = SolrQueries()._get_name_copy_clause('waffle' + NO_SYNONYMS_INDICATOR + ' corp')
+    print(response)
+    assert response == ''
+
+
+def test_trailing_indicator_end():
+    response = SolrQueries()._get_name_copy_clause('waffle corp' + NO_SYNONYMS_INDICATOR)
+    print(response)
+    assert response == ''
+
+
 def test_one_term_first():
     response = SolrQueries()._get_name_copy_clause(NO_SYNONYMS_INDICATOR + 'waffle corp')
 
@@ -58,6 +82,10 @@ def test_quoted_ignore_embedded_indicator2():
 # No idea how to get the tests running, so do it manually for now.
 try:
     test_plain_search()
+    test_empty_term()
+    test_empty_term_end()
+    test_trailing_indicator()
+    test_trailing_indicator_end()
     test_one_term_first()
     test_one_term_middle()
     test_one_term_last()

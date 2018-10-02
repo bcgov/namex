@@ -21,9 +21,10 @@ from namex.models import DecisionReason
 
 from namex.services import ServicesError, MessageServices, EventRecorder
 
-from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition
+from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition, convert_to_ascii
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
+from namex.services.nro import NROServicesError
 
 import datetime
 import json
@@ -328,7 +329,8 @@ class Request(Resource):
         if not json_input:
             return jsonify({'message': 'No input data provided'}), 400
 
-        # Currently only state changes are supported by patching
+        ### STATE - required ###
+
         # all these checks to get removed to marshmallow
         state = json_input.get('state', None)
         if not state:
@@ -366,6 +368,31 @@ class Request(Resource):
 
             nrd.stateCd = state
             nrd.userId = user.id
+
+            if state == State.CANCELLED:
+                nro.cancel_nr(nrd, user.username)
+
+            ### COMMENTS ###
+            # we only add new comments, we do not change existing comments
+            # - we can find new comments in json as those with no ID
+
+            if json_input.get('comments', None):
+
+                for in_comment in json_input['comments']:
+                    is_new_comment = False
+                    try:
+                        if in_comment['id'] is None or in_comment['id'] == 0:
+                            is_new_comment = True
+                    except KeyError:
+                        is_new_comment = True
+                    if is_new_comment and in_comment['comment'] is not None:
+                        new_comment = Comment()
+                        new_comment.comment = convert_to_ascii(in_comment['comment'])
+                        new_comment.examiner = user
+                        new_comment.nrId = nrd.id
+
+            ### END comments ###
+
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
 
@@ -402,6 +429,7 @@ class Request(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
+            orig_nrd = nrd.json()
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
@@ -468,9 +496,9 @@ class Request(Resource):
                 reset = True
 
             request_header_schema.load(json_input, instance=nrd, partial=True)
-            nrd.additionalInfo = json_input.get('additionalInfo', None)
+            nrd.additionalInfo = convert_to_ascii(json_input.get('additionalInfo', None))
             nrd.furnished = json_input.get('furnished', 'N')
-            nrd.natureBusinessInfo = json_input.get('natureBusinessInfo', None)
+            nrd.natureBusinessInfo = convert_to_ascii(json_input.get('natureBusinessInfo', None))
             nrd.stateCd = state
             nrd.userId = user.id
 
@@ -482,12 +510,25 @@ class Request(Resource):
             except KeyError:
                 nrd.previousRequestId = None
 
+            # check if any of the Oracle db fields have changed, so we can send them back
+            is_changed__request = False
+            is_changed__previous_request = False
+            if nrd.requestTypeCd != orig_nrd['requestTypeCd']: is_changed__request = True
+            if nrd.expirationDate != orig_nrd['expirationDate']: is_changed__request = True
+            if nrd.xproJurisdiction != orig_nrd['xproJurisdiction']: is_changed__request = True
+            if nrd.additionalInfo != orig_nrd['additionalInfo']: is_changed__request = True
+            if nrd.natureBusinessInfo != orig_nrd['natureBusinessInfo']: is_changed__request = True
+            if nrd.previousRequestId != orig_nrd['previousRequestId']: is_changed__previous_request = True
+
             ### END request header ###
 
             ### APPLICANTS ###
-            # TODO: applicants not updating properly -- needs fix
+            is_changed__applicant = False
+            is_changed__address = False
+
             applicants_d = nrd.applicants.one_or_none()
             if applicants_d:
+                orig_applicant = applicants_d.as_dict()
                 appl = json_input.get('applicants', None)
                 if appl:
                     errm = applicant_schema.validate(appl, partial=True)
@@ -497,19 +538,73 @@ class Request(Resource):
 
 
                     applicant_schema.load(appl, instance=applicants_d, partial=True)
+
+                    # convert data to ascii, removing data that won't save to Oracle
+                    applicants_d.lastName = convert_to_ascii(applicants_d.lastName)
+                    applicants_d.firstName = convert_to_ascii(applicants_d.firstName)
+                    applicants_d.middleName = convert_to_ascii(applicants_d.middleName)
+                    applicants_d.phoneNumber = convert_to_ascii(applicants_d.phoneNumber)
+                    applicants_d.faxNumber = convert_to_ascii(applicants_d.faxNumber)
+                    applicants_d.emailAddress = convert_to_ascii(applicants_d.emailAddress)
+                    applicants_d.contact = convert_to_ascii(applicants_d.contact)
+                    applicants_d.clientFirstName = convert_to_ascii(applicants_d.clientFirstName)
+                    applicants_d.clientLastName = convert_to_ascii(applicants_d.clientLastName)
+                    applicants_d.addrLine1 = convert_to_ascii(applicants_d.addrLine1)
+                    applicants_d.addrLine2 = convert_to_ascii(applicants_d.addrLine2)
+                    applicants_d.addrLine3 = convert_to_ascii(applicants_d.addrLine3)
+                    applicants_d.city = convert_to_ascii(applicants_d.city)
+                    applicants_d.postalCd = convert_to_ascii(applicants_d.postalCd)
+                    applicants_d.stateProvinceCd = convert_to_ascii(applicants_d.stateProvinceCd)
+                    applicants_d.countryTypeCd = convert_to_ascii(applicants_d.countryTypeCd)
+
+                    # check if any of the Oracle db fields have changed, so we can send them back
+                    if applicants_d.lastName != orig_applicant['lastName']: is_changed__applicant = True
+                    if applicants_d.firstName != orig_applicant['firstName']: is_changed__applicant = True
+                    if applicants_d.middleName != orig_applicant['middleName']: is_changed__applicant = True
+                    if applicants_d.phoneNumber != orig_applicant['phoneNumber']: is_changed__applicant = True
+                    if applicants_d.faxNumber != orig_applicant['faxNumber']: is_changed__applicant = True
+                    if applicants_d.emailAddress != orig_applicant['emailAddress']: is_changed__applicant = True
+                    if applicants_d.contact != orig_applicant['contact']: is_changed__applicant = True
+                    if applicants_d.clientFirstName != orig_applicant['clientFirstName']: is_changed__applicant = True
+                    if applicants_d.clientLastName != orig_applicant['clientLastName']: is_changed__applicant = True
+                    if applicants_d.declineNotificationInd != orig_applicant['declineNotificationInd']: is_changed__applicant = True
+                    if applicants_d.addrLine1 != orig_applicant['addrLine1']: is_changed__address = True
+                    if applicants_d.addrLine2 != orig_applicant['addrLine2']: is_changed__address = True
+                    if applicants_d.addrLine3 != orig_applicant['addrLine3']: is_changed__address = True
+                    if applicants_d.city != orig_applicant['city']: is_changed__address = True
+                    if applicants_d.postalCd != orig_applicant['postalCd']: is_changed__address = True
+                    if applicants_d.stateProvinceCd != orig_applicant['stateProvinceCd']: is_changed__address = True
+                    if applicants_d.countryTypeCd != orig_applicant['countryTypeCd']: is_changed__address = True
+
                 else:
                     applicants_d.delete_from_db()
+                    is_changed__applicant = True
+                    is_changed__address = True
+
+
 
             ### END applicants ###
 
             ### NAMES ###
             # TODO: set consumptionDate not working -- breaks changing name values
+
+            is_changed__name1 = False
+            is_changed__name2 = False
+            is_changed__name3 = False
+
             if len(nrd.names.all()) == 0:
                 new_name_choice = Name()
                 new_name_choice.nrId = nrd.id
+
+                # convert data to ascii, removing data that won't save to Oracle
+                new_name_choice.name = convert_to_ascii(new_name_choice.name)
+
                 nrd.names.append(new_name_choice)
 
             for nrd_name in nrd.names.all():
+
+                orig_name = nrd_name.as_dict()
+
                 for in_name in json_input.get('names', []):
 
                     if len(nrd.names.all()) < in_name['choice']:
@@ -521,9 +616,16 @@ class Request(Resource):
 
                         new_name_choice = Name()
                         new_name_choice.nrId = nrd.id
+
+                        # convert data to ascii, removing data that won't save to Oracle
+                        new_name_choice.name = convert_to_ascii(new_name_choice.name)
+
                         names_schema.load(in_name, instance=new_name_choice, partial=False)
 
                         nrd.names.append(new_name_choice)
+
+                        if new_name_choice.choice == 2: is_changed__name2 = True
+                        if new_name_choice.choice == 3: is_changed__name3 = True
 
                     elif nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
@@ -548,6 +650,17 @@ class Request(Resource):
                         else:
                             nrd_name.comment = None
 
+                        # convert data to ascii, removing data that won't save to Oracle
+                        nrd_name.name = convert_to_ascii(nrd_name.name)
+
+
+                        # check if any of the Oracle db fields have changed, so we can send them back
+                        # - this is only for editing a name from the Edit NR section, NOT making a decision
+                        if nrd_name.name != orig_name['name']:
+                            if nrd_name.choice == 1: is_changed__name1 = True
+                            if nrd_name.choice == 2: is_changed__name2 = True
+                            if nrd_name.choice == 3: is_changed__name3 = True
+
             ### END names ###
 
             ### COMMENTS ###
@@ -564,7 +677,7 @@ class Request(Resource):
                     is_new_comment = True
                 if is_new_comment and in_comment['comment'] is not None:
                     new_comment = Comment()
-                    new_comment.comment = in_comment['comment']
+                    new_comment.comment = convert_to_ascii(in_comment['comment'])
                     new_comment.examiner = user
                     new_comment.nrId = nrd.id
 
@@ -572,7 +685,13 @@ class Request(Resource):
 
             ### NWPTA ###
 
+            is_changed__nwpta_ab = False
+            is_changed__nwpta_sk = False
+
             for nrd_nwpta in nrd.partnerNS.all():
+
+                orig_nwpta = nrd_nwpta.as_dict()
+
                 for in_nwpta in json_input['nwpta']:
                     if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
 
@@ -582,6 +701,23 @@ class Request(Resource):
                             # return jsonify(errors), 400
 
                         nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
+
+                        # convert data to ascii, removing data that won't save to Oracle
+                        nrd_nwpta.partnerName = convert_to_ascii(nrd_nwpta.partnerName)
+                        nrd_nwpta.partnerNameNumber = convert_to_ascii(nrd_nwpta.partnerNameNumber)
+
+
+                        # check if any of the Oracle db fields have changed, so we can send them back
+                        tmp_is_changed = False
+                        if nrd_nwpta.partnerNameTypeCd != orig_nwpta['partnerNameTypeCd']: tmp_is_changed = True
+                        if nrd_nwpta.partnerNameNumber != orig_nwpta['partnerNameNumber']: tmp_is_changed = True
+                        if nrd_nwpta.partnerNameDate != orig_nwpta['partnerNameDate']: tmp_is_changed = True
+                        if nrd_nwpta.partnerName != orig_nwpta['partnerName']: tmp_is_changed = True
+                        if tmp_is_changed:
+                            if nrd_nwpta.partnerJurisdictionTypeCd == 'AB': is_changed__nwpta_ab = True
+                            if nrd_nwpta.partnerJurisdictionTypeCd == 'SK': is_changed__nwpta_sk = True
+
+
             ### END nwpta ###
 
             # if there were errors, abandon changes and return the set of errors
@@ -602,10 +738,42 @@ class Request(Resource):
                     MessageServices.add_message('error', 'reset_request_in_NRO', err)
                     # flash(err.error, 'error')
 
+            ### Update NR Details in NRO (not for reset)
+            else:
+                try:
+                    change_flags = {
+                        'is_changed__request': is_changed__request,
+                        'is_changed__previous_request': is_changed__previous_request,
+                        'is_changed__applicant': is_changed__applicant,
+                        'is_changed__address': is_changed__address,
+                        'is_changed__name1': is_changed__name1,
+                        'is_changed__name2': is_changed__name2,
+                        'is_changed__name3': is_changed__name3,
+                        'is_changed__nwpta_ab': is_changed__nwpta_ab,
+                        'is_changed__nwpta_sk': is_changed__nwpta_sk,
+                    }
+
+                    # if any data has changed from an NR Details edit, update it in Oracle
+                    if any(value is True for value in change_flags.values()):
+                        warnings = nro.change_nr(nrd, change_flags)
+                        if warnings:
+                            MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
+
+                except (NROServicesError, Exception) as err:
+                    MessageServices.add_message('error', 'change_request_in_NRO', err)
+
+            # if there were errors, return the set of errors
+            warning_and_errors = MessageServices.get_all_messages()
+            if warning_and_errors:
+                for we in warning_and_errors:
+                    if we['type'] == MessageServices.ERROR:
+                        return jsonify(errors=warning_and_errors), 400
+
             ### Finally save the entire graph
             nrd.save_to_db()
 
             EventRecorder.record(user, Event.PUT, nrd, json_input)
+
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400

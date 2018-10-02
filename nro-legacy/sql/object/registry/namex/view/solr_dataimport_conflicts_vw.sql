@@ -11,11 +11,7 @@ AS
            LEFT OUTER JOIN corp_op_state op ON op.state_typ_cd = cs.state_typ_cd
            LEFT OUTER JOIN corp_type ct ON ct.corp_typ_cd = c.corp_typ_cd
      WHERE corp.end_event_id IS NULL
+       AND corp.corp_name_typ_cd IN ('CO', 'NB')
        AND cs.end_event_id IS NULL
        AND op.op_state_typ_cd = 'ACT'
        AND ct.corp_class IN ('BC', 'SOC', 'OT', 'XPRO');
-
-
-DROP PUBLIC SYNONYM SOLR_DATAIMPORT_CONFLICTS_VW;
-
-CREATE PUBLIC SYNONYM SOLR_DATAIMPORT_CONFLICTS_VW FOR NAMEX.SOLR_DATAIMPORT_CONFLICTS_VW;

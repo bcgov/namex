@@ -1,6 +1,8 @@
 from datetime import timedelta
+from flask import current_app
 
 from namex.models import Name, State
+from namex.services.nro.utils import nro_examiner_name
 
 
 def nro_data_pump_update(nr, ora_cursor, expires_days=60):
@@ -19,6 +21,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
         {'state': None, 'decision': None, 'conflict1': None, 'conflict2': None, 'conflict3': None},
         {'state': None, 'decision': None, 'conflict1': None, 'conflict2': None, 'conflict3': None}
     ]
+    current_app.logger.debug('processing names for :{}'.format(nr.nrNum))
     for name in nr.names.all():
         choice = name.choice - 1
         if name.state in [Name.APPROVED, name.CONDITION]:
@@ -34,7 +37,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
         if name.state in [Name.APPROVED, Name.CONDITION, Name.REJECTED]:
             nro_names[choice]['decision'] = '{}****{}'.format(
                 nro_names[choice]['state']
-                , '  ' if (name.decision_text is None) else name.decision_text[:1000]
+                , '  ' if (name.decision_text in [None, '']) else name.decision_text[:1000].encode("ascii","ignore").decode('ascii')
             )
 
         if name.conflict1:
@@ -48,15 +51,25 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
             # use the last name comment as the examiner comment, whether that was a rejection or approval
             if name.choice > examiner_comment['choice']:
                 examiner_comment['choice'] = name.choice
-                examiner_comment['comment'] = name.comment.comment
+                examiner_comment['comment'] = name.comment.comment.encode("ascii","ignore").decode('ascii')
+
+    current_app.logger.debug('sending {} to NRO'.format(nr.nrNum))
+    current_app.logger.debug('nr:{}; stateCd:{}; status: {}; expiry_dt:{}; consent:{}; examiner:{}'
+                             .format(nr.nrNum,
+                                     nr.stateCd,
+                                     'A' if (nr.stateCd in [State.APPROVED, State.CONDITIONAL]) else 'R',
+                                     expiry_date.strftime('%Y%m%d'),
+                                     'Y' if (nr.consentFlag == 'Y' or nr.stateCd == State.CONDITIONAL) else 'N',
+                                     nro_examiner_name(nr.activeUser.username)
+                                     ))
 
     # # Call the name_examination procedure to save complete decision data for a single NR
     ora_cursor.callproc("NRO_DATAPUMP_PKG.name_examination",
                         [nr.nrNum,  # p_nr_number
                          'A' if (nr.stateCd in [State.APPROVED, State.CONDITIONAL]) else 'R',  # p_status
                          expiry_date.strftime('%Y%m%d'),  # p_expiry_date
-                         'Y' if (nr.consentFlag in ['Y', State.CONDITIONAL]) else 'N',  # p_consent_flag
-                         nr.activeUser.username[:7],  # p_examiner_id
+                         'Y' if (nr.consentFlag == 'Y' or nr.stateCd == State.CONDITIONAL) else 'N',  # p_consent_flag
+                         nro_examiner_name(nr.activeUser.username),  # p_examiner_id
                          nro_names[0]['decision'],  # p_choice1
                          nro_names[1]['decision'],  # p_choice2
                          nro_names[2]['decision'],  # p_choice3
@@ -73,6 +86,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
                          nro_names[2]['conflict3'],  # p_confname3C
                          ]
                         )
+    current_app.logger.debug('finished sending {} to NRO'.format(nr.nrNum))
     # mark that we've set the record in NRO - which assumes we have legally furnished this to the client.
     # and record the expiry date we sent to NRO
     nr.furnished = 'Y'

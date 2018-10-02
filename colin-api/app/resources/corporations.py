@@ -46,97 +46,28 @@ class RequestColin(Resource):
 
         corp_num_sql = '\'' + corp_num + '\''
 
-        incorp_info_sql = text("select * "
-                               "from bc_registries.corp_num_dts_class_vw "
-                               "where corp_num = {}".format(corp_num_sql))
+        incorp_info_sql = Methods.build_info_sql(corp_num_sql)
+        incorp_addr_id_sql = Methods.build_addr_id_sql(corp_num_sql)
+        incorp_directors_sql = Methods.build_directors_sql(corp_num_sql)
 
-        incorp_directors_sql = text("select "
-                                    "   CASE "
-                                    "       WHEN cp.middle_nme IS NOT NULL "
-                                    "           THEN cp.first_nme || ' '||cp.middle_nme|| ' '||cp.last_nme "
-                                    "       ELSE "
-                                    "           cp.first_nme || ' ' || cp.last_nme "
-                                    "       END director_name "
-                                    "from bc_registries.corp_party_vw cp "
-                                    "where cp.corp_num = {} and cp.end_event_id IS NULL and cp.party_typ_cd = 'DIR'".format(corp_num_sql))
-
-        incorp_addr_id_sql = text("select delivery_addr_id "
-                                     "from bc_registries.office_vw "
-                                     "where corp_num={} and end_event_id IS NULL;".format(corp_num_sql))
-
-        incorp_jurisdiction_sql = text("select home_jurisdiction "
-                                       "from bc_registries.corp_jurs_vw "
-                                       "where corp_num = {}".format(corp_num_sql))
-
-        incorp_attorneys_sql = text("select "
-                                    "   CASE "
-                                    "       WHEN cp.middle_nme IS NOT NULL "
-                                    "           THEN cp.first_nme || ' '||cp.middle_nme|| ' '||cp.last_nme "
-                                    "       ELSE "
-                                    "           cp.first_nme || ' ' || cp.last_nme "
-                                    "       END attorney_name "
-                                    "from bc_registries.corp_party_vw cp "
-                                    "where cp.corp_num = {} and cp.end_event_id IS NULL and cp.party_typ_cd = 'ATT'".format(corp_num_sql))
-
-        incorp_nr_sql = text("select * "
-                              "from bc_registries.corp_nr_num_vw "
-                              "where corp_num = {};".format(corp_num_sql))
         try:
-            incorp_info_obj = db.engine.execute(incorp_info_sql)
-            incorp_info_dict = dict(incorp_info_obj.fetchall()[0])
+            incorp_nr_sql = Methods.build_nr_sql(corp_num_sql)
+            incorp_nob = Methods.find_nob(incorp_nr_sql)
+            incorp_info_dict,incorp_directors_obj = Methods.init_info(incorp_info_sql,incorp_directors_sql)
             incorp_class = incorp_info_dict['corp_class']
 
-            incorp_directors_obj = db.engine.execute(incorp_directors_sql)
-
             if incorp_class == 'XPRO':
-                incorp_ho_addr_id_obj = db.engine.execute(incorp_addr_id_sql)
-                incorp_ho_addr_id = incorp_ho_addr_id_obj.fetchall()[0][0]
-                incorp_ho_addr_id_sql = '\'' + str(incorp_ho_addr_id) + '\''
-                incorp_ho_addr_sql = text("select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
-                                     "from bc_registries.address_vw "
-                                     "where addr_id= {};".format(incorp_ho_addr_id_sql))
-                incorp_head_office_obj = db.engine.execute(incorp_ho_addr_sql)
 
-                incorp_attorneys_obj = db.engine.execute(incorp_attorneys_sql)
-                incorp_jurisdiction_obj = db.engine.execute(incorp_jurisdiction_sql)
-            else:
-                incorp_addr_id_obj = db.engine.execute(incorp_addr_id_sql)
-                incorp_addr_ids = incorp_addr_id_obj.fetchall()
-                incorp_reg_addr_id = incorp_addr_ids[0][0]
-                incorp_reg_addr_id_sql = '\'' + str(incorp_reg_addr_id) + '\''
-                incorp_reg_addr_sql = text(
-                    "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
-                    "from bc_registries.address_vw "
-                    "where addr_id= {};".format(incorp_reg_addr_id_sql))
-                incorp_registered_addr_obj = db.engine.execute(incorp_reg_addr_sql)
-                try:
-                    incorp_rec_addr_id = incorp_addr_ids[1][0]
-                except:
-                    incorp_records_addr_obj = None
-                else:
-                    incorp_rec_addr_id_sql = '\'' + str(incorp_rec_addr_id) + '\''
-                    incorp_rec_addr_sql = text(
-                        "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
-                        "from bc_registries.address_vw "
-                        "where addr_id= {};".format(incorp_rec_addr_id_sql))
-                    incorp_records_addr_obj = db.engine.execute(incorp_rec_addr_sql)
-            incorp_nr_obj = db.engine.execute(incorp_nr_sql)
-            try:
-                incorp_nr = incorp_nr_obj.fetchall()[0][1]
-            except:
-                incorp_nob = 'Not Available'
-            else:
-                incorp_nr_sql = '\'NR ' + incorp_nr[1:] + '\''
+                incorp_jurisdiction_sql = Methods.build_jurisdiction_sql(corp_num_sql)
+                incorp_attorneys_sql = Methods.build_attorneys_sql(corp_num_sql)
 
-                incorp_nob_sql = text("select NATURE_BUSINESS_INFO "
-                                      "from bc_registries_names.corp_nob_vw "
-                                      "where nr_num = {}".format(incorp_nr_sql))
-                incorp_nob_obj = db.get_engine(app, 'db2').execute(incorp_nob_sql)
-                incorp_nob = incorp_nob_obj.fetchall()
-                if any(incorp_nob):
-                    incorp_nob = incorp_nob[0][0]
-                else:
-                    incorp_nob = 'Not Available'
+                incorp_head_office_obj, incorp_attorneys_obj, incorp_jurisdiction_obj = \
+                    Methods.xpro_get_objs(incorp_addr_id_sql,incorp_attorneys_sql,incorp_jurisdiction_sql)
+
+            # BC corp
+            else:
+                incorp_registered_addr_obj, incorp_records_addr_obj = Methods.bc_get_objs(incorp_addr_id_sql)
+
         except exc.SQLAlchemyError as err:
             print(err.with_traceback(None))
             current_app.logger.debug(err.with_traceback(None))
@@ -166,32 +97,9 @@ class RequestColin(Resource):
             incorp_directors_list = 'Not Available'
 
         if incorp_class == 'XPRO':
-            try:
-                incorp_ho_addr = incorp_head_office_obj.fetchall()[0]
-                incorp_ho_addr_list = []
-                for item in incorp_ho_addr:
-                    if item is not None:
-                        incorp_ho_addr_list.append(item)
-                if any(incorp_ho_addr_list):
-                    pass
-                else:
-                    incorp_ho_addr_list = 'Not Available'
-            except:
-                incorp_ho_addr_list = 'Not Available'
 
-            incorp_attorneys_list = []
-            for row in incorp_attorneys_obj:
-                incorp_attorneys_list.append(row[0])
-            if any(incorp_attorneys_list):
-                pass
-            else:
-                incorp_attorneys_list = 'Not Available'
-
-            incorp_jurisdiction = incorp_jurisdiction_obj.fetchall()[0][0]
-            if any(incorp_jurisdiction):
-                pass
-            else:
-                incorp_jurisdiction = 'Not Available'
+            incorp_ho_addr_list, incorp_attorneys_list, incorp_jurisdiction = \
+                Methods.xpro_get_vals(incorp_head_office_obj,incorp_attorneys_obj,incorp_jurisdiction_obj)
 
             corp_details_dict = {'incorp #': corp_num,
                                  'incorporated': incorp_date_str,
@@ -201,41 +109,8 @@ class RequestColin(Resource):
                                  'jurisdiction': incorp_jurisdiction,
                                  'nature of business': incorp_nob}
         else:
-            try:
-                incorp_registered_addr_test = incorp_registered_addr_obj.fetchall()
-            except:
-                incorp_registered_addr_list = 'Not Available'
-            else:
-                if any(incorp_registered_addr_test):
-                    incorp_registered_addr = incorp_registered_addr_test[0]
-                    incorp_registered_addr_list = []
-                    for item in incorp_registered_addr:
-                        if item is not None:
-                            incorp_registered_addr_list.append(item)
-                    if any(incorp_registered_addr_list):
-                        pass
-                    else:
-                        incorp_registered_addr_list = 'Not Available'
-                else:
-                    incorp_registered_addr_list = 'Not Available'
-
-            try:
-                incorp_records_addr_test = incorp_records_addr_obj.fetchall()
-            except:
-                incorp_records_addr_list = 'Not Available'
-            else:
-                if any(incorp_records_addr_test):
-                    incorp_records_addr = incorp_records_addr_test[0]
-                    incorp_records_addr_list = []
-                    for item in incorp_records_addr:
-                        if item is not None:
-                            incorp_records_addr_list.append(item)
-                    if any(incorp_records_addr_list):
-                        pass
-                    else:
-                        incorp_records_addr_list = 'Not Available'
-                else:
-                    incorp_records_addr_list = 'Not Available'
+            incorp_registered_addr_list, incorp_records_addr_list = \
+                Methods.bc_get_vals(incorp_registered_addr_obj,incorp_records_addr_obj)
 
             corp_details_dict = {'incorp #': corp_num,
                                  'incorporated': incorp_date_str,
@@ -248,3 +123,196 @@ class RequestColin(Resource):
         return jsonify(corp_details_dict), 200
 
 
+class Methods(Resource):
+    @staticmethod
+    def build_info_sql(corp_num_sql):
+        return text("select * "
+                    "from bc_registries.corp_num_dts_class_vw "
+                    "where corp_num = {}".format(corp_num_sql))
+
+    @staticmethod
+    def build_directors_sql(corp_num_sql):
+        return text("select "
+                    "   CASE "
+                    "       WHEN cp.middle_nme IS NOT NULL "
+                    "           THEN cp.first_nme || ' '||cp.middle_nme|| ' '||cp.last_nme "
+                    "       ELSE "
+                    "           cp.first_nme || ' ' || cp.last_nme "
+                    "       END director_name "
+                    "from bc_registries.corp_party_vw cp "
+                    "where cp.corp_num = {} and cp.end_event_id IS NULL and cp.party_typ_cd = 'DIR'".format(corp_num_sql))
+
+    @staticmethod
+    def build_addr_id_sql(corp_num_sql):
+        return text("select delivery_addr_id "
+                    "from bc_registries.office_vw "
+                    "where corp_num={} and end_event_id IS NULL;".format(corp_num_sql))
+
+    @staticmethod
+    def build_jurisdiction_sql(corp_num_sql):
+        return text("select home_jurisdiction "
+                    "from bc_registries.corp_jurs_vw "
+                    "where corp_num = {}".format(corp_num_sql))
+
+    @staticmethod
+    def build_attorneys_sql(corp_num_sql):
+        return text("select "
+                    "   CASE "
+                    "       WHEN cp.middle_nme IS NOT NULL "
+                    "           THEN cp.first_nme || ' '||cp.middle_nme|| ' '||cp.last_nme "
+                    "       ELSE "
+                    "           cp.first_nme || ' ' || cp.last_nme "
+                    "       END attorney_name "
+                    "from bc_registries.corp_party_vw cp "
+                    "where cp.corp_num = {} and cp.end_event_id IS NULL and cp.party_typ_cd = 'ATT'".format(corp_num_sql))
+
+    @staticmethod
+    def build_nr_sql(corp_num_sql):
+        return text("select * "
+                    "from bc_registries.corp_nr_num_vw "
+                    "where corp_num = {};".format(corp_num_sql))
+
+    @staticmethod
+    def init_info(incorp_info_sql,incorp_directors_sql):
+        try:
+            incorp_info_obj = db.engine.execute(incorp_info_sql)
+            incorp_info_dict = dict(incorp_info_obj.fetchall()[0])
+        except IndexError:
+            incorp_info_dict = {'corp_class': None,'recognition_dts': None}
+
+        incorp_directors_obj = db.engine.execute(incorp_directors_sql)
+
+        return incorp_info_dict,incorp_directors_obj
+
+    @staticmethod
+    def xpro_get_objs(incorp_addr_id_sql, incorp_attorneys_sql, incorp_jurisdiction_sql):
+        incorp_ho_addr_id_obj = db.engine.execute(incorp_addr_id_sql)
+        incorp_ho_addr_id = incorp_ho_addr_id_obj.fetchall()[0][0]
+        incorp_ho_addr_id_sql = '\'' + str(incorp_ho_addr_id) + '\''
+        incorp_ho_addr_sql = text("select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
+                                  "from bc_registries.address_vw "
+                                  "where addr_id= {};".format(incorp_ho_addr_id_sql))
+        incorp_head_office_obj = db.engine.execute(incorp_ho_addr_sql)
+
+        incorp_attorneys_obj = db.engine.execute(incorp_attorneys_sql)
+        incorp_jurisdiction_obj = db.engine.execute(incorp_jurisdiction_sql)
+
+        return incorp_head_office_obj,incorp_attorneys_obj,incorp_jurisdiction_obj
+
+    @staticmethod
+    def bc_get_objs(incorp_addr_id_sql):
+        incorp_addr_id_obj = db.engine.execute(incorp_addr_id_sql)
+        incorp_addr_ids = incorp_addr_id_obj.fetchall()
+        incorp_reg_addr_id = incorp_addr_ids[0][0]
+        incorp_reg_addr_id_sql = '\'' + str(incorp_reg_addr_id) + '\''
+        incorp_reg_addr_sql = text(
+            "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
+            "from bc_registries.address_vw "
+            "where addr_id= {};".format(incorp_reg_addr_id_sql))
+        incorp_registered_addr_obj = db.engine.execute(incorp_reg_addr_sql)
+        try:
+            incorp_rec_addr_id = incorp_addr_ids[1][0]
+        except:
+            incorp_records_addr_obj = None
+        else:
+            incorp_rec_addr_id_sql = '\'' + str(incorp_rec_addr_id) + '\''
+            incorp_rec_addr_sql = text(
+                "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
+                "from bc_registries.address_vw "
+                "where addr_id= {};".format(incorp_rec_addr_id_sql))
+            incorp_records_addr_obj = db.engine.execute(incorp_rec_addr_sql)
+
+        return incorp_registered_addr_obj,incorp_records_addr_obj
+
+    @staticmethod
+    def xpro_get_vals(incorp_head_office_obj,incorp_attorneys_obj,incorp_jurisdiction_obj):
+        try:
+            incorp_ho_addr = incorp_head_office_obj.fetchall()[0]
+            incorp_ho_addr_list = []
+            for item in incorp_ho_addr:
+                if item is not None:
+                    incorp_ho_addr_list.append(item)
+            if any(incorp_ho_addr_list):
+                pass
+            else:
+                incorp_ho_addr_list = 'Not Available'
+        except:
+            incorp_ho_addr_list = 'Not Available'
+
+        incorp_attorneys_list = []
+        for row in incorp_attorneys_obj:
+            incorp_attorneys_list.append(row[0])
+        if any(incorp_attorneys_list):
+            pass
+        else:
+            incorp_attorneys_list = 'Not Available'
+
+        incorp_jurisdiction = incorp_jurisdiction_obj.fetchall()[0][0]
+        if any(incorp_jurisdiction):
+            pass
+        else:
+            incorp_jurisdiction = 'Not Available'
+
+        return incorp_ho_addr_list,incorp_attorneys_list,incorp_jurisdiction
+
+    @staticmethod
+    def bc_get_vals(incorp_registered_addr_obj,incorp_records_addr_obj):
+        try:
+            incorp_registered_addr_test = incorp_registered_addr_obj.fetchall()
+        except:
+            incorp_registered_addr_list = 'Not Available'
+        else:
+            if any(incorp_registered_addr_test):
+                incorp_registered_addr = incorp_registered_addr_test[0]
+                incorp_registered_addr_list = []
+                for item in incorp_registered_addr:
+                    if item is not None:
+                        incorp_registered_addr_list.append(item)
+                if any(incorp_registered_addr_list):
+                    pass
+                else:
+                    incorp_registered_addr_list = 'Not Available'
+            else:
+                incorp_registered_addr_list = 'Not Available'
+
+        try:
+            incorp_records_addr_test = incorp_records_addr_obj.fetchall()
+        except:
+            incorp_records_addr_list = 'Not Available'
+        else:
+            if any(incorp_records_addr_test):
+                incorp_records_addr = incorp_records_addr_test[0]
+                incorp_records_addr_list = []
+                for item in incorp_records_addr:
+                    if item is not None:
+                        incorp_records_addr_list.append(item)
+                if any(incorp_records_addr_list):
+                    pass
+                else:
+                    incorp_records_addr_list = 'Not Available'
+            else:
+                incorp_records_addr_list = 'Not Available'
+
+        return incorp_registered_addr_list,incorp_records_addr_list
+
+    @staticmethod
+    def find_nob(incorp_nr_sql):
+        incorp_nr_obj = db.engine.execute(incorp_nr_sql)
+        try:
+            incorp_nr = incorp_nr_obj.fetchall()[0][1]
+        except:
+            incorp_nob = 'Not Available'
+        else:
+            incorp_nr_sql = '\'NR ' + incorp_nr[1:] + '\''
+
+            incorp_nob_sql = text("select NATURE_BUSINESS_INFO "
+                                  "from bc_registries_names.corp_nob_vw "
+                                  "where nr_num = {}".format(incorp_nr_sql))
+            incorp_nob_obj = db.get_engine(app, 'db2').execute(incorp_nob_sql)
+            incorp_nob = incorp_nob_obj.fetchall()
+            if any(incorp_nob):
+                incorp_nob = incorp_nob[0][0]
+            else:
+                incorp_nob = 'Not Available'
+
+        return incorp_nob

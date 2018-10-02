@@ -176,7 +176,7 @@ containerTemplate(
 
 stage('API Test DEV') {
     //every time a change is made in pod template the name must be changed too
-	podTemplate(label: 'nodejs-python3nodejs3', name: 'nodejs-python3nodejs3', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+	podTemplate(label: 'nodejs-python3nodejs3.1', name: 'nodejs-python3nodejs3.1', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
 		name: 'jnlp',
 		image: '172.50.0.2:5000/openshift/jenkins-slave-python3nodejs',
@@ -193,7 +193,8 @@ stage('API Test DEV') {
             secretEnvVar(key: 'DEV_API_TEST_PASSWORD', secretName: 'apitest-secrets-dev', secretKey: 'password'),
             secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets-dev', secretKey: 'authurl'),
             secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets-dev', secretKey: 'clientid'),
-            secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-dev', secretKey: 'client_secret')
+            secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-dev', secretKey: 'client_secret'),
+            secretEnvVar(key: 'DEV_API_TEST_NR', secretName: 'apitest-secrets-dev', secretKey: 'test_nr')
         ]
 	  )
 	])
@@ -215,7 +216,7 @@ stage('API Test DEV') {
                     sh 'npm install newman'
 
                     try {
-                        sh './node_modules/newman/bin/newman.js run ./namex-pipeline-dev.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET --global-var realm=sbc -r cli,junit,html'
+                        sh './node_modules/newman/bin/newman.js run ./namex-pipeline-dev.postman_collection.json --global-var userid=$DEV_API_TEST_USER --global-var password=$DEV_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$DEV_API_TEST_AUTH_SERVER --global-var clientid=$DEV_API_TEST_CLIENT_ID --global-var client_secret=$DEV_API_TEST_CLIENT_SECRET --global-var realm=sbc --global-var NR=$DEV_API_TEST_NR -r cli,junit,html'
                         def attachment = [:]
                         attachment.fallback = "See build log for more details"
                         attachment.title = "NAMEX-API-DEV newman tests PASSED! :white_check_mark:"
@@ -325,7 +326,7 @@ def abort = false;
 //Part 5 - Integration Testing API on test
 stage('API Test TEST') {
     //every time a change is made in pod template the name must be changed too
-	podTemplate(label: 'nodejs-python3nodejs5', name: 'nodejs-python3nodejs5', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+	podTemplate(label: 'nodejs-python3nodejs5.1', name: 'nodejs-python3nodejs5.1', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
 	containerTemplate(
 		name: 'jnlp',
 		image: '172.50.0.2:5000/openshift/jenkins-slave-python3nodejs',
@@ -342,7 +343,8 @@ stage('API Test TEST') {
             secretEnvVar(key: 'TEST_API_TEST_PASSWORD', secretName: 'apitest-secrets-test', secretKey: 'password'),
             secretEnvVar(key: 'TEST_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets-test', secretKey: 'authurl'),
             secretEnvVar(key: 'TEST_API_TEST_CLIENT_ID', secretName: 'apitest-secrets-test', secretKey: 'clientid'),
-            secretEnvVar(key: 'TEST_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-test', secretKey: 'client_secret')
+            secretEnvVar(key: 'TEST_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-test', secretKey: 'client_secret'),
+            secretEnvVar(key: 'TEST_API_TEST_NR', secretName: 'apitest-secrets-test', secretKey: 'test_nr')
         ]
 	  )
 	])
@@ -367,7 +369,7 @@ stage('API Test TEST') {
                 sh 'npm install newman'
 
                 try {
-                    sh './node_modules/newman/bin/newman.js run ./namex-pipeline-test.postman_collection.json --global-var userid=$TEST_API_TEST_USER --global-var password=$TEST_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$TEST_API_TEST_AUTH_SERVER --global-var clientid=$TEST_API_TEST_CLIENT_ID --global-var client_secret=$TEST_API_TEST_CLIENT_SECRET --global-var realm=sbc -r cli,junit,html'
+                    sh './node_modules/newman/bin/newman.js run ./namex-pipeline-test.postman_collection.json --global-var userid=$TEST_API_TEST_USER --global-var password=$TEST_API_TEST_PASSWORD --global-var url="${BASEURL}" --global-var authurl=$TEST_API_TEST_AUTH_SERVER --global-var clientid=$TEST_API_TEST_CLIENT_ID --global-var client_secret=$TEST_API_TEST_CLIENT_SECRET --global-var realm=sbc --global-var NR=$TEST_API_TEST_NR -r cli,junit,html'
                     def attachment = [:]
                     attachment.fallback = "See build log for more details"
                     attachment.title = "NAMEX-API-TEST newman tests PASSED! :white_check_mark: :white_check_mark:"
