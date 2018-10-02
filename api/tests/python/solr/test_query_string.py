@@ -1,6 +1,5 @@
 #
-# I desperately needed tests but had no time to figure out pytest in Pycharm. It's hacked together for now, but the
-# tests at least are written.
+# Pytests for checking the code that produces the "name_copy" portion of the Solr query string.
 #
 
 from namex.analytics.solr import NO_SYNONYMS_INDICATOR, NO_SYNONYMS_PREFIX, SolrQueries
@@ -95,25 +94,3 @@ def test_quoted_ignore_embedded_indicator2():
                                                    'waffle"')
 
     assert response == NO_SYNONYMS_PREFIX + '(%22happy%20waffle%22)'
-
-
-# No idea how to get the tests running, so do it manually for now.
-try:
-    test_plain_search()
-    test_empty_term()
-    test_empty_term_end()
-    test_trailing_indicator()
-    test_trailing_indicator_end()
-    test_embedded_indicator()
-    test_embedded_indicator_end()
-    test_special_character()
-    test_one_term_first()
-    test_one_term_middle()
-    test_one_term_last()
-    test_quoted()
-    test_quoted_ignore_embedded_indicator()
-    test_indicatored_quoted()
-    test_quoted_ignore_embedded_indicator2()
-except AssertionError as exception:
-    pass  # (for a breakpoint)
-    raise exception
