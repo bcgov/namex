@@ -126,6 +126,6 @@ class SolrQueries:
             unsynonymed_words.append(word)
 
         if len(unsynonymed_words) != 0:
-            clause = NO_SYNONYMS_PREFIX + parse.quote(' '.join(unsynonymed_words))
+            clause = NO_SYNONYMS_PREFIX + '(' + parse.quote(' '.join(unsynonymed_words)) + ')'
 
         return clause
