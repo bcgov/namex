@@ -286,11 +286,13 @@ def add_names(nr, nr_names, update=False):
 
 def add_applicant(nr, nr_applicant, update=False):
 
+    applicant = None
     if update:
-        applicant = nr.applicants
-        # TODO: can an existing NR ever not have applicants?
-    else:
+        applicant = nr.applicants.one_or_none()
+
+    if not applicant:
         applicant = Applicant()
+        nr.applicants.append(applicant)
 
     applicant.lastName = nr_applicant['last_name']
     applicant.firstName = nr_applicant['first_name']
@@ -309,9 +311,6 @@ def add_applicant(nr, nr_applicant, update=False):
     applicant.postalCd = nr_applicant['postal_cd']
     applicant.stateProvinceCd = nr_applicant['state_province_cd']
     applicant.countryTypeCd = nr_applicant['country_type_cd']
-
-    if not update:
-        nr.applicants.append(applicant)
 
 
 # ######## Fetch Current NRO Information ##########################################
