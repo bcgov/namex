@@ -25,7 +25,8 @@ class PartnerNameSystem(db.Model):
             'partnerNameNumber': self.partnerNameNumber,
             'partnerJurisdictionTypeCd': self.partnerJurisdictionTypeCd,
             'partnerNameDate': self.partnerNameDate,
-            'partnerName': self.partnerName
+            'partnerName': self.partnerName,
+            'requested': True if self.requested else False,
         }
 
     def save_to_db(self):
