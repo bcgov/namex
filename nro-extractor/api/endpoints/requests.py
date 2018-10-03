@@ -287,7 +287,7 @@ def add_names(nr, nr_names, update=False):
 def add_applicant(nr, nr_applicant, update=False):
 
     if update:
-        applicant = nr.applicants
+        applicant = nr.applicants.one_or_none()
         # TODO: can an existing NR ever not have applicants?
     else:
         applicant = Applicant()
