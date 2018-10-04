@@ -257,6 +257,8 @@ class NROServices(object):
                 current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
 
         current_app.logger.debug('update records')
+        current_app.logger.debug('nro_last_ts: {}'.format(nro_last_ts))
+        current_app.logger.debug('nr.nroLastUpdate: {}'.format(nr.nroLastUpdate))
         if 'nro_last_ts' in locals() and nro_last_ts != nr.nroLastUpdate:
             current_app.logger.debug('nro updated since namex was last updated')
             try:
