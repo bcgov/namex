@@ -1,12 +1,12 @@
 # Installing Solr
 
-*September 2018 – Windows 7 government workstation*
+*October 2018 – Windows 7 government workstation*
 
 Apache Solr is the search index database used by the name examination system. To do development with Solr, you may want
 to run it locally as a standalone server - this allows for rapid reconfiguration without the overheads associated with
 GitHub and OpenShift.
 
-The documentation describes the process for reconfiguring Apache Solr so that it can use JDBC connections to read from
+This documentation describes the process for reconfiguring Apache Solr so that it can use JDBC connections to read from
 databases. These connections are used for both loading the core data as well as the synonyms used for queries. This
 process should not need to be repeated often - once it has been done for a new version of Solr, it can be zipped up and
 made available to the team.
@@ -15,7 +15,7 @@ made available to the team.
 
 Download the version of Solr that matches what is being run in OpenShift. At the time of writing, this is
 [v6.6.3](http://archive.apache.org/dist/lucene/solr/6.6.3/solr-6.6.3.zip).
-Unzip it to a local (C: Drive) directory, as it will be faster than running it off the home directory ()which is mapped
+Unzip it to a local (C: drive) directory, as it will be faster than running it off the home directory (which is mapped
 to the networked H: drive).
 
 ### Reconfigure Jetty

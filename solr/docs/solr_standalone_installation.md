@@ -1,21 +1,21 @@
 # Installing Solr
 
-*September 2018 – Windows 7 government workstation*
+*October 2018 – Windows 7 government workstation*
 
 Apache Solr is the search index database used by the name examination system. To do development with Solr, you may want
 to run it locally as a standalone server - this allows for rapid reconfiguration without the overheads associated with
 GitHub and OpenShift.
 
-The documentation describes the process for installing the custom version of Apache Solr that was built using the steps
+This documentation describes the process for installing the custom version of Apache Solr that was built using the steps
 described in `solr_standalone_customization.md`. This documentation assumes that you have a copy of the Github project
 `bcgov/namex` on your local computer in the directory `C:\Users\<username>\PycharmProjects\namex`.
 
 ## Solr Installation Steps
 
-Unzip the archive created in `solr_standalone_customization.md` to a local (C: Drive) directory, as it will be faster
+Unzip the archive created in `solr_standalone_customization.md` to a local (C: drive) directory, as it will be faster
 than running it off the home directory (which is mapped to the networked H: drive).
 
-### Solr Jetty Datasource
+### Solr Jetty Datasources
 
 The first step is to configure the datasources used by the application. Create a new file
 `server\solr-webapp\webapp\WEB-INF\jetty-env.xml`.
@@ -145,4 +145,3 @@ The `trademarks` core is loaded using a custom Python script and a custom extrac
 [https://github.com/bcgov/namex/blob/master/solr/trademarks](trademarks) portion of the namex project for details on
 running the loader script (the parser script should already have been run, with the extract stored in
 `N:\BCAP2\6450 Projects\20-Mainframe Migration\Names Examination\trademarks`).
-s
