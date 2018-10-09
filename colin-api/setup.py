@@ -64,10 +64,9 @@ setup(
         'Flask',
         'Flask-SQLAlchemy',
         'Flask-RESTplus',
+        'Flask-Marshmallow',
         'flask-jwt-oidc',
         'python-dotenv',
-        'marshmallow',
-        'marshmallow-sqlalchemy',
     ],
     setup_requires=[
         'pytest-runner',

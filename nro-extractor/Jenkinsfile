@@ -1,4 +1,4 @@
-//
+#!/usr/bin/env groovy
 // Copyright © 2018 Province of British Columbia
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,17 +24,25 @@
 // define constants
 def BUILDCFG_NAME ='nro-extractor'
 def IMAGE_NAME = 'nro-extractor'
+
+def BUILDCFG_RUNTIME ='nro-extractor-runtime'
+def IMAGE_RUNTIME_NAME = 'nro-extractor-runtime'
+
 def DEV_DEPLOYMENT_NAME = 'nro-extractor-runtime'
 def DEV_TAG_NAME = 'dev'
 def DEV_NS = 'servicebc-ne-dev'
+
 def TST_DEPLOYMENT_NAME = 'nro-extractor-runtime'
 def TST_TAG_NAME = 'test'
 def TST_BCK_TAG_NAME = 'test-previous'
 def TST_NS = 'servicebc-ne-test'
-def PROD_DEPLOYMENT_NAME = 'nro-extractor-runtime'
+
+def PROD_DEPLOYMENT_NAME = 'nro-extractor'
 def PROD_TAG_NAME = 'prod'
 def PROD_BCK_TAG_NAME = 'prod-previous'
 def PROD_NS = 'servicebc-ne-prod'
+
+def CONTEXT_DIRECTORY = 'nro-extractor'
 
 def GIT_BRANCH_NAME = ("${env.JOB_BASE_NAME}".contains("master")) ? "master" : "develop"
 def JENKINS_ICO = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
@@ -59,24 +67,41 @@ def notifySlack(text, channel, url, attachments) {
             "--data \'payload=${encodedReq}\' ${slackURL}")    
 }
 
-// create a string listing commit msgs occured since last build
+// Determine whether there were any changes the files within the project's context directory.
+// returns a string containing info on the commits that changed this api -- empty if no changes were made
 @NonCPS
-def getChangeString() {
-  MAX_MSG_LEN = 512
-  def changeString = ""
-  def changeLogSets = currentBuild.changeSets
-  for (int i = 0; i < changeLogSets.size(); i++) {
-     def entries = changeLogSets[i].items
-     for (int j = 0; j < entries.length; j++) {
-         def entry = entries[j]
-         truncated_msg = entry.msg.take(MAX_MSG_LEN)
-         changeString += " - ${truncated_msg} [${entry.author}]\n"
-     }
-  }
-  if (!changeString) {
-     changeString = "No changes"
-  }
-  return changeString
+String triggerBuild(String contextDirectory) {
+    def changeLogSets = currentBuild.changeSets
+    def filesChangeCnt = 0
+    MAX_MSG_LEN = 512
+    def changeString = ""
+    for (int i = 0; i < changeLogSets.size(); i++) {
+        def entries = changeLogSets[i].items
+        for (int j = 0; j < entries.length; j++) {
+            def entry = entries[j]
+            //echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+            def files = new ArrayList(entry.affectedFiles)
+            for (int k = 0; k < files.size(); k++) {
+                def file = files[k]
+                def filePath = file.path
+                //echo ">> ${file.path}"
+                if (filePath.contains(contextDirectory)) {
+                    filesChangeCnt = 1
+                    truncated_msg = entry.msg.take(MAX_MSG_LEN)
+                    changeString += " - ${truncated_msg} [${entry.author}]\n"
+                    k = files.size()
+                    j = entries.length
+                }
+            }
+        }
+    }
+    if ( filesChangeCnt < 1 ) {
+        echo('The changes do not require a build.')
+        return ""
+    } else {
+        echo('The changes require a build.')
+        return changeString
+    }
 }
 
 // pipeline
@@ -89,100 +114,473 @@ def getChangeString() {
 // define job properties - keep 10 builds only
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]])
 
-// Part 1 - CI - Source code scanning, build, dev deploy
 
-podTemplate(label: 'py3nodejs', name: 'py3nodejs', serviceAccount: 'jenkins', cloud: 'openshift', containers: [
-containerTemplate(
-    name: 'jnlp',
-    image: '172.50.0.2:5000/openshift/jenkins-slave-py3nodejs',
-    resourceRequestCpu: '500m',
-    resourceLimitCpu: '1000m',
-    resourceRequestMemory: '1Gi',
-    resourceLimitMemory: '2Gi',
-    workingDir: '/tmp',
-    command: '',
-    args: '${computer.jnlpmac} ${computer.name}'
-    )
-])
-{
-    node('py3nodejs') {
-    
-    SLACK_TOKEN = sh (
+if ( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
+
+    node {
+        SLACK_TOKEN = sh (
                 script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
-                returnStdout: true).trim()
-            
-        stage('checkout') {
-            echo "checking out source"
-            echo "Build: ${BUILD_ID}"
-            checkout scm
-			GIT_COMMIT_SHORT_HASH = sh (
-				script: """git describe --always""", returnStdout: true
-				).trim()
-			GIT_COMMIT_AUTHOR = sh (
-				script: """git show -s --pretty=%an""", returnStdout: true
-				).trim()
-        }
-        
+                    returnStdout: true).trim()
 
-//         stage('dependency check') {
-//           dir('owasp') {
-//             // content of 
-//             // http://dl.bintray.com/jeremy-long/owasp/dependency-check-3.1.2-release.zip'
-//             // expected in git repo in owasp/
-//             sh './dependency-check/bin/dependency-check.sh --project "MyApp" --scan ../package.json --enableExperimental --enableRetired'
-//             sh 'rm -rf ./dependency-check/data/'
-//             publishHTML (target: [
-//                                 allowMissing: false,
-//                                 alwaysLinkToLastBuild: false,
-//                                 keepAll: true,
-//                                 reportDir: './',
-//                                 reportFiles: 'dependency-check-report.html',
-//                                 reportName: "OWASP Dependency Check Report"
-//                           ])
-//           }
-//         }
-        
-//         stage('code quality check') {
-//            SONARQUBE_URL = sh (
-//                script: 'oc get routes -o wide --no-headers | awk \'/sonarqube/{ print match($0,/edge/) ?  "https://"$2 : "http://"$2 }\'',
-//                returnStdout: true
-//                   ).trim()
-//            echo "SONARQUBE_URL: ${SONARQUBE_URL}"
-//            dir('sonar-runner') {
-//             sh returnStdout: true, script: "./gradlew sonarqube -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.verbose=true --stacktrace --info -Dsonar.projectName=Devex.Dev -Dsonar.branch=develop -Dsonar.projectKey=org.sonarqube:bcgov-devex-dev -Dsonar.sources=.."
-//            }
-//         }
-
-		 stage('build') {
-				echo "Building..."
-				openshiftBuild bldCfg: BUILDCFG_NAME, verbose: 'false', showBuildLogs: 'true'
-					sleep 5
-				// openshiftVerifyBuild bldCfg: BUILDCFG_NAME
-					echo ">>> Get Image Hash"
-					IMAGE_HASH = sh (
-					  script: """oc get istag ${IMAGE_NAME}:latest -o template --template=\"{{.image.dockerImageReference}}\"|awk -F \":\" \'{print \$3}\'""",
-						returnStdout: true).trim()
-					echo ">> IMAGE_HASH: ${IMAGE_HASH}"
-				echo ">>>> Build Complete"
-			}
-
+        // send msg to slack
         def attachment = [:]
-        def message = "Another huge sucess; A freshly minted build is being deployed and will be available shortly."
-        message = message + "\ncommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-        attachment.title = "API Build ${BUILD_ID} OK! :heart: :tada:"
-        attachment.fallback = 'See build log for more details'
-        attachment.color = '#00FF00' // Lime Green
-        if( "master" != GIT_BRANCH_NAME.toLowerCase() ) {
-          def action = [:]
-          message = message + "\nThis image can be promoted to the *test* environment"
-          action.type = "button"
-          action.text = "Promote Image? :rocket:"
-          action.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/devex-mpf-secure-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/input"
-          attachment.actions = [action]
-        }
-        attachment.text = message
+        attachment.fallback = "See build log for more details"
+        attachment.title = "NRO-EXTRACTOR pipeline executing..."
+        attachment.color = "#00FF00" // Lime Green
+        notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
 
-        notifySlack("${env.JOB_NAME}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment], JENKINS_ICO)
-        
+
+        // Part 1 - CI - Source code scanning, build, dev deploy
+
+        stage('checkout') {
+            try {
+                echo "checking out source"
+                echo "Build: ${BUILD_ID}"
+                checkout scm
+                GIT_COMMIT_SHORT_HASH = sh (
+                        script: """git describe --always""", returnStdout: true
+                    ).trim()
+                GIT_COMMIT_AUTHOR = sh (
+                        script: """git show -s --pretty=%an""", returnStdout: true
+                    ).trim()
+
+            } catch (Exception e) {
+                echo "error during checkout: ${e}"
+                // send msg to slack
+                attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR failed to CHECKOUT :fire:"
+                attachment.color = "danger" // red
+                def logs = [:]
+                logs.type = "button"
+                logs.text = "Build Log"
+                logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                logs.short = false
+                attachment.actions = [logs]
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                error('Aborted')
+            }
+        }
+
+        stage('build') {
+            try {
+                echo "Building..."
+                openshiftBuild bldCfg: BUILDCFG_NAME, verbose: 'false', showBuildLogs: 'true'
+
+                sleep 5
+
+                // openshiftVerifyBuild bldCfg: BUILDCFG_NAME
+                echo ">>> Get Image Hash"
+                IMAGE_HASH = sh (
+                script: """oc get istag ${IMAGE_NAME}:latest -o template --template=\"{{.image.dockerImageReference}}\"|awk -F \":\" \'{print \$3}\'""",
+                    returnStdout: true).trim()
+                echo ">> IMAGE_HASH: ${IMAGE_HASH}"
+                echo ">>>> Build Complete"
+
+            } catch (Exception e) {
+                echo "error during build: ${e}"
+                // send msg to slack
+                attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR failed to BUILD :fire:"
+                attachment.color = "danger" // red
+                def logs = [:]
+                logs.type = "button"
+                logs.text = "Build Log"
+                logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                logs.short = false
+                attachment.actions = [logs]
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                error('Aborted')
+            }
+        }
+
+        stage('assemble runtime') {
+            try {
+                echo "Building..."
+                openshiftBuild bldCfg: BUILDCFG_RUNTIME, verbose: 'false', showBuildLogs: 'true'
+
+                sleep 5
+
+                // openshiftVerifyBuild bldCfg: BUILDCFG_NAME
+                echo ">>> Get Image Hash"
+                    IMAGE_HASH = sh (
+                        script: """oc get istag ${IMAGE_RUNTIME_NAME}:latest -o template --template=\"{{.image.dockerImageReference}}\"|awk -F \":\" \'{print \$3}\'""",
+                            returnStdout: true).trim()
+                echo ">> IMAGE_HASH: ${IMAGE_HASH}"
+                echo ">>>> Build Complete"
+
+            } catch (Exception e) {
+                echo "error during assemble runtime: ${e}"
+                // send msg to slack
+                attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR failed to ASSEMBLE RUNTIME :fire:"
+                attachment.color = "danger" // red
+                def logs = [:]
+                logs.type = "button"
+                logs.text = "Build Log"
+                logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                logs.short = false
+                attachment.actions = [logs]
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                error('Aborted')
+            }
+
+            // send msg to slack
+            attachment = [:]
+            attachment.fallback = "See build log for more details"
+            attachment.title = "NRO-EXTRACTOR Build ${BUILD_ID} OK! :heart: :tada:"
+            attachment.color = "#00FF00" // Lime Green
+            attachment.text = "Changes applied:\n" + triggerBuild(CONTEXT_DIRECTORY) //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+            def details = [:]
+            details.type = "button"
+            details.text = "Details"
+            details.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}"
+            details.short = false
+            attachment.actions = [details]
+            notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+        }
+
+        stage('Dev deploy') {
+            try {
+                echo ">>> Tag ${IMAGE_HASH} with ${DEV_TAG_NAME}"
+                openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: DEV_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: "${IMAGE_HASH}"
+
+                sleep 10
+
+                openshiftVerifyDeployment depCfg: DEV_DEPLOYMENT_NAME, namespace: DEV_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
+                echo ">>>> Deployment Complete"
+
+            } catch (Exception e) {
+                echo "error during dev deploy: ${e}"
+                // send msg to slack
+                attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR failed to DEPLOY to DEV :fire:"
+                attachment.color = "danger" // red
+                def logs = [:]
+                logs.type = "button"
+                logs.text = "Build Log"
+                logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                logs.short = false
+                attachment.actions = [logs]
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                error('Aborted')
+            }
+
+            // send msg to slack
+            attachment = [:]
+            attachment.fallback = "See build log for more details"
+            attachment.title = "NRO-EXTRACTOR successfully deployed to DEV :rocket:"
+            attachment.color = "#00FF00" // Lime Green
+            notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+        }
+
+    }
+    // Part 2 - Security scan of deployed app in dev
+
+    //node/pod needs environment setup for zap scan
+    def zappodlabel1 = "myapp-zap-${UUID.randomUUID().toString()}"
+    podTemplate(label: zappodlabel1, name: zappodlabel1, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+            containerTemplate(
+            name: 'jnlp',
+            image: '172.50.0.2:5000/openshift/jenkins-slave-zap',
+            resourceRequestCpu: '500m',
+            resourceLimitCpu: '1000m',
+            resourceRequestMemory: '3Gi',
+            resourceLimitMemory: '4Gi',
+            workingDir: '/home/jenkins',
+            command: '',
+            args: '${computer.jnlpmac} ${computer.name}'
+        )
+    ])
+    {
+        node(zappodlabel1) {
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+
+            stage('ZAP Security Scan DEV') {
+
+                sleep 60
+
+                try {
+                    def retVal = sh returnStatus: true, script: '/zap/zap-baseline.py -r baseline.html -t http://nro-extractor-runtime-dev.pathfinder.gov.bc.ca/'
+                    // publishHTML([allowMissing: false`, alwaysLinkToLastBuild: false, keepAll: true, reportDir: '/zap/wrk', reportFiles: 'baseline.html', reportName: 'ZAP Baseline Scan', reportTitles: 'ZAP Baseline Scan'])
+                    echo "Return value is: ${retVal}"
+
+                } catch (Exception e) {
+                    echo "error during dev zap scan: ${e}"
+                    // send msg to slack
+                    def attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NRO-EXTRACTOR-DEV failed ZAP-SCAN :x:"
+                    attachment.color = "danger" // red
+                    attachment.text = "check build log for more details"
+                    def logs = [:]
+                    logs.type = "button"
+                    logs.text = "Build Log"
+                    logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                    logs.short = false
+                    attachment.actions = [logs]
+                    notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                }
+                // send msg to slack
+                def attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR-DEV passed ZAP-SCAN :white_check_mark:"
+                attachment.color = "#00FF00" // Lime Green
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+            }// end stage
+        }//end node
+    }//end pod template
+
+    // Part 3 - deploy to test
+
+    stage('deploy-test') {
+
+        node {
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+
+            // send msg to slack
+            def attachment = [:]
+            attachment.title = "NRO-EXTRACTOR ready to deploy to TEST"
+            attachment.color = "#ffff00" // yellow
+            def decision = [:]
+            decision.type = "button"
+            decision.text = "Proceed/Abort?"
+            decision.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/input"
+            decision.short = false
+            attachment.actions = [decision]
+            notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+        }//end node
+
+        def abort = false;
+        try {
+            timeout(time: 1, unit: 'DAYS') {
+                input message: "Deploy nro-extractor to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit'
+            }
+        } catch (Exception e) {
+            abort = true;
+        }
+        node {
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+
+            if (abort) {
+                //send msg to slack
+                def attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR-TEST ABORTED :boom:"
+                attachment.color = "danger" // red
+                def logs = [:]
+                logs.type = "button"
+                logs.text = "Build Log"
+                logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                logs.short = false
+                attachment.actions = [logs]
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+
+                echo ">>>> Deployment Aborted"
+                error('Aborted')
+            } else {
+                try {
+                    echo ">>> Tag ${TST_TAG_NAME} with ${TST_BCK_TAG_NAME}"
+                    openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: TST_BCK_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: TST_TAG_NAME
+                    echo ">>> Tag ${IMAGE_HASH} with ${TST_TAG_NAME}"
+                    openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: TST_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: "${IMAGE_HASH}"
+
+                    sleep 5
+
+                    openshiftVerifyDeployment depCfg: TST_DEPLOYMENT_NAME, namespace: TST_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
+                    echo ">>>> Deployment Complete"
+
+                } catch (Exception e) {
+                    echo "error during test deploy: ${e}"
+                    // send msg to slack
+                    attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NRO-EXTRACTOR failed to DEPLOY to TEST :fire:"
+                    attachment.color = "danger" // red
+                    def logs = [:]
+                    logs.type = "button"
+                    logs.text = "Build Log"
+                    logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                    logs.short = false
+                    attachment.actions = [logs]
+                    notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                    error('Aborted')
+                }
+
+                //send msg to slack
+                def attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR successfully DEPLOYED to TEST :rocket: :rocket:"
+                attachment.color = "#00FF00" // Lime Green
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+            }
+        }//end node
+    }//end stage
+
+    // Part 4 - Security scan of deployed app in dev
+
+    //node/pod needs environment setup for zap scan
+    def zappodlabel2 = "myapp-zap-${UUID.randomUUID().toString()}"
+    podTemplate(label: zappodlabel2, name: zappodlabel2, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+            containerTemplate(
+            name: 'jnlp',
+            image: '172.50.0.2:5000/openshift/jenkins-slave-zap',
+            resourceRequestCpu: '500m',
+            resourceLimitCpu: '1000m',
+            resourceRequestMemory: '3Gi',
+            resourceLimitMemory: '4Gi',
+            workingDir: '/home/jenkins',
+            command: '',
+            args: '${computer.jnlpmac} ${computer.name}'
+        )
+    ])
+    {
+        node(zappodlabel2) {
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+
+            stage('ZAP Security Scan TEST') {
+
+                sleep 60
+
+                try {
+                    def retVal = sh returnStatus: true, script: '/zap/zap-baseline.py -r baseline.html -t http://nro-extractor-runtime-test.pathfinder.gov.bc.ca/'
+                    // publishHTML([allowMissing: false`, alwaysLinkToLastBuild: false, keepAll: true, reportDir: '/zap/wrk', reportFiles: 'baseline.html', reportName: 'ZAP Baseline Scan', reportTitles: 'ZAP Baseline Scan'])
+                    echo "Return value is: ${retVal}"
+                } catch (Exception e) {
+                    echo "error during dev zap scan: ${e}"
+                    // send msg to slack
+                    def attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NRO-EXTRACTOR-TEST failed ZAP-SCAN :x::x:"
+                    attachment.color = "danger" // red
+                    def logs = [:]
+                    logs.type = "button"
+                    logs.text = "Build Log"
+                    logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                    logs.short = false
+                    attachment.actions = [logs]
+                    notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                }
+                // send msg to slack
+                def attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR-TEST passed ZAP-SCAN :white_check_mark::white_check_mark:"
+                attachment.color = "#00FF00" // Lime Green
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+            }//end stage
+        }//end node
+    }//end pod template
+
+    // Part 5 - deploy to prod
+
+    stage('deploy-prod') {
+
+        node {
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+
+            // send msg to slack
+            def attachment = [:]
+            attachment.title = "NRO-EXTRACTOR ready to deploy to PROD (No tests run)"
+            attachment.color = "#ffff00" // yellow
+            def decision = [:]
+            decision.type = "button"
+            decision.text = "Proceed/Abort?"
+            decision.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/input"
+            decision.short = false
+            attachment.actions = [decision]
+            notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+        }//end node
+
+        def abort = false;
+        try {
+            timeout(time: 1, unit: 'DAYS') {
+                input message: "Deploy nro-extractor to prod?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit'
+            }
+        } catch (Exception e) {
+            abort = true;
+        }
+
+        node {
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+
+            if (abort) {
+                //send msg to slack
+                def attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR-PROD ABORTED :boom::boom:"
+                attachment.color = "danger" // red
+                notifySlack("nro-extactor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+
+                echo ">>>> Deployment Aborted"
+                error('Aborted')
+            } else {
+                try {
+                    echo ">>> Tag ${TST_TAG_NAME} with ${PROD_BCK_TAG_NAME}"
+                    openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: PROD_BCK_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: PROD_TAG_NAME
+                    echo ">>> Tag ${IMAGE_HASH} with ${PROD_TAG_NAME}"
+                    openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: PROD_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: "${IMAGE_HASH}"
+
+                    sleep 5
+
+                    openshiftVerifyDeployment depCfg: PROD_DEPLOYMENT_NAME, namespace: PROD_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
+                    echo ">>>> Deployment Complete"
+
+                } catch (Exception e) {
+                    echo "error during prod deploy: ${e}"
+                    // send msg to slack
+                    attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NRO-EXTRACTOR failed to DEPLOY to PROD :fire:"
+                    attachment.color = "danger" // red
+                    def logs = [:]
+                    logs.type = "button"
+                    logs.text = "Build Log"
+                    logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-nro-extractor-pipeline/${BUILD_ID}/console"
+                    logs.short = false
+                    attachment.actions = [logs]
+                    notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                    error('Aborted')
+                }
+
+                def attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NRO-EXTRACTOR-PROD DEPLOYED :tada::rocket::tada:"
+                attachment.color = "#00FF00" // Lime Green
+                notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+            }
+        }//end node
+    }//end stage
+} else {
+    // The changeSets did not contain any changes within the project's context directory.
+    // Clearly indicate there were no changes.
+    stage('No Changes') {
+        node {
+            SLACK_TOKEN = sh (
+                script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                    returnStdout: true).trim()
+            // send msg to slack
+            def attachment = [:]
+            attachment.fallback = "See build log for more details"
+            attachment.title = "NRO-EXTRACTOR Build ${BUILD_ID} prevented because there were no changes"
+            attachment.color = "#00FF00" // Lime Green
+            attachment.text = "No changes applied to nro-extractor" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+            notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+        }
+        currentBuild.result = 'SUCCESS'
     }
 }
