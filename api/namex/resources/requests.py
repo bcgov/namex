@@ -617,10 +617,11 @@ class Request(Resource):
                         new_name_choice = Name()
                         new_name_choice.nrId = nrd.id
 
-                        # convert data to ascii, removing data that won't save to Oracle
-                        new_name_choice.name = convert_to_ascii(new_name_choice.name)
-
                         names_schema.load(in_name, instance=new_name_choice, partial=False)
+
+                        # convert data to ascii, removing data that won't save to Oracle
+                        # - also force uppercase
+                        new_name_choice.name = convert_to_ascii(new_name_choice.name.upper())
 
                         nrd.names.append(new_name_choice)
 
@@ -651,7 +652,9 @@ class Request(Resource):
                             nrd_name.comment = None
 
                         # convert data to ascii, removing data that won't save to Oracle
+                        # - also force uppercase
                         nrd_name.name = convert_to_ascii(nrd_name.name)
+                        if (nrd_name.name is not None): nrd_name.name = nrd_name.name.upper()
 
 
                         # check if any of the Oracle db fields have changed, so we can send them back
