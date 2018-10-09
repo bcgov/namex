@@ -87,6 +87,7 @@ solr/cores/.DS_Store
 
 # Testing
 #######################
+.eggs/
 .tox
 .cache
 */.pytest_cache
