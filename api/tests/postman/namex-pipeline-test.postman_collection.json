@@ -1405,7 +1405,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "1c49c78c-4861-418c-ac7c-5ad5c538feb0",
+								"id": "8e962016-31ad-44e1-83d2-f87eb08b986e",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1434,7 +1434,7 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
 									"});",
 									"",
 									"it(\"Should return updated changes in the body\", () => {",
@@ -1698,7 +1698,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b21caae4-819e-42ed-a90f-21ac05d89c7a",
+								"id": "a6e789d9-f171-4a1a-9aaf-da98837d6105",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1727,7 +1727,7 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
 									"});",
 									"",
 									"it(\"Should return old values for this NR\", () => {",
