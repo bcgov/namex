@@ -77,7 +77,7 @@ String triggerBuild(String contextDirectory) {
             for (int k = 0; k < files.size(); k++) {
                 def file = files[k]
                 def filePath = file.path
-                //echo ">> ${file.path}"
+                echo ">> ${filePath}"
                 if (filePath.contains(contextDirectory)) {
                     filesChangeCnt = 1
                     truncated_msg = entry.msg.take(MAX_MSG_LEN)
