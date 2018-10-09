@@ -1,6 +1,6 @@
 import pytest
 
-from app import create_app, db as _db, jwt as _jwt
+from app import create_app
 from config import TestConfig
 import sys, os
 
