@@ -132,7 +132,7 @@ if ( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
 
         // Part 1 - CI - Source code scanning, build, dev deploy
 
-        stage('checkout') {
+        stage('Checkout') {
             try {
                 echo "checking out source"
                 echo "Build: ${BUILD_ID}"
@@ -162,7 +162,7 @@ if ( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
             }
         }
 
-        stage('build') {
+        stage('Build') {
             try {
                 echo "Building..."
                 openshiftBuild bldCfg: BUILDCFG_NAME, verbose: 'false', showBuildLogs: 'true'
@@ -195,7 +195,7 @@ if ( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
             }
         }
 
-        stage('assemble runtime') {
+        stage('Assemble Runtime') {
             try {
                 echo "Building..."
                 openshiftBuild bldCfg: BUILDCFG_RUNTIME, verbose: 'false', showBuildLogs: 'true'
@@ -242,7 +242,7 @@ if ( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
             notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
         }
 
-        stage('Dev deploy') {
+        stage('Deploy DEV') {
             try {
                 echo ">>> Tag ${IMAGE_HASH} with ${DEV_TAG_NAME}"
                 openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: DEV_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: "${IMAGE_HASH}"
@@ -338,7 +338,7 @@ if ( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
 
     // Part 3 - deploy to test
 
-    stage('deploy-test') {
+    stage('Deploy TEST') {
 
         node {
             SLACK_TOKEN = sh (
@@ -484,7 +484,7 @@ if ( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
 
     // Part 5 - deploy to prod
 
-    stage('deploy-prod') {
+    stage('Deploy PROD') {
 
         node {
             SLACK_TOKEN = sh (

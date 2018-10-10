@@ -265,7 +265,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
                 sleep 60
 
                 try {
-                    def retVal = sh returnStatus: true, script: '/zap/zap-baseline.py -r baseline.html -t https://namex-solr-dev.pathfinder.gov.bc.ca'
+                    def retVal = sh returnStatus: true, script: '/zap/zap-baseline.py -r baseline.html -t https://solr-admin-app-dev.pathfinder.gov.bc.ca'
                     // publishHTML([allowMissing: false`, alwaysLinkToLastBuild: false, keepAll: true, reportDir: '/zap/wrk', reportFiles: 'baseline.html', reportName: 'ZAP Baseline Scan', reportTitles: 'ZAP Baseline Scan'])
                     echo "Return value is: ${retVal}"
 
@@ -405,7 +405,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
                 sleep 60
 
                 try {
-                    def retVal = sh returnStatus: true, script: '/zap/zap-baseline.py -r baseline.html -t https://namex-solr-test.pathfinder.gov.bc.ca'
+                    def retVal = sh returnStatus: true, script: '/zap/zap-baseline.py -r baseline.html -t https://solr-admin-app-test.pathfinder.gov.bc.ca'
                     // publishHTML([allowMissing: false`, alwaysLinkToLastBuild: false, keepAll: true, reportDir: '/zap/wrk', reportFiles: 'baseline.html', reportName: 'ZAP Baseline Scan', reportTitles: 'ZAP Baseline Scan'])
                     echo "Return value is: ${retVal}"
 
