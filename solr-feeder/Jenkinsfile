@@ -237,7 +237,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
         }//end stage
     }//end node
 
-    // Part 2 - Integration Testing API
+    // Part 2 - Integration Testing
 
     //insert tests here
 
@@ -377,7 +377,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
         }
     }
 
-    // Part 5 - Integration Testing API on test
+    // Part 5 - Integration Testing
 
     //insert tests here
 
