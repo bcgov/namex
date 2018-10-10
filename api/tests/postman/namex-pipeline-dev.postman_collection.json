@@ -1147,18 +1147,17 @@
 							"listen": "prerequest",
 							"script": {
 								"id": "5e5e7102-694d-4200-a50b-5401e06d4ad1",
-								"type": "text/javascript",
 								"exec": [
 									"",
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "test",
 							"script": {
 								"id": "ca95fc6d-d25e-4528-9022-c4ee670bbf66",
-								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1194,9 +1193,10 @@
 									"",
 									"it('Should return the new data updated by the previous PUT', () => {",
 									"    response.text.should.include(\"\\\"state\\\": \\\"REJECTED\\\"\");",
-									"    response.text.should.include(\"\\\"name\\\": \\\"PUT success\\\"\");",
+									"    response.text.should.include(\"\\\"name\\\": \\\"PUT SUCCESS\\\"\");",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -1403,7 +1403,6 @@
 							"listen": "test",
 							"script": {
 								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
-								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1436,20 +1435,21 @@
 									"",
 									"it(\"Should return updated changes in the body\", () => {",
 									"   response.body.additionalInfo.should.include(\"Name was previously put in for incorporation but it is actually for an extra-provincial registration\");",
-									"   response.body.names[0].name.should.include(\"BOOKED BY US Inc.\");",
+									"   response.body.names[0].name.should.include(\"BOOKED BY US INC.\");",
 									"   response.body.natureBusinessInfo.should.include(\"fencing equipment supply\");",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "prerequest",
 							"script": {
 								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
-								"type": "text/javascript",
 								"exec": [
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -1491,17 +1491,16 @@
 							"listen": "prerequest",
 							"script": {
 								"id": "262230a7-feab-4c42-a075-bd3638472c07",
-								"type": "text/javascript",
 								"exec": [
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "test",
 							"script": {
 								"id": "fecd1fce-8620-492f-9e03-468d4c41aef0",
-								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1534,10 +1533,11 @@
 									"",
 									"it(\"Should return updated changes by previous PUT\", () => {",
 									"   response.body.additionalInfo.should.include(\"Name was previously put in for incorporation but it is actually for an extra-provincial registration\");",
-									"   response.body.names[0].name.should.include(\"BOOKED BY US Inc.\");",
+									"   response.body.names[0].name.should.include(\"BOOKED BY US INC.\");",
 									"   response.body.natureBusinessInfo.should.include(\"fencing equipment supply\");",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -1607,7 +1607,7 @@
 									"",
 									"it(\"Should return old values for this NR\", () => {",
 									"    response.body.additionalInfo.should.include(\"**AB NUANS Provided**  **SK Name Provided** This is info entered by the applicant to see if it makes it's way  into namex.\");",
-									"    response.body.id.should.equal(16);",
+									"    response.body.id.should.equal(10462);",
 									"    for (var i=0;i<response.body.names.length;i++) {",
 									"        if (response.body.names[i].choice == 1)",
 									"            response.body.names[i].name.should.include(\"STRANGWAY ACCOUNTING SERVICES INC.\");",

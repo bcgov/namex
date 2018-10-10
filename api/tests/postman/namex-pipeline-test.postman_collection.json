@@ -1699,7 +1699,6 @@
 							"listen": "test",
 							"script": {
 								"id": "a6e789d9-f171-4a1a-9aaf-da98837d6105",
-								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1735,8 +1734,14 @@
 									"   response.body.applicants.clientFirstName.should.equal(`${pm.environment.get(\"clientFirstName\")}`);",
 									"   response.body.natureBusinessInfo.should.equal(`${pm.environment.get(\"natureBusinessInfo\")}`);",
 									"   response.body.state.should.equal(\"HOLD\");",
+									"   for (var i=0; i<response.body.names.length;i++) {",
+									"       if (response.body.names[i].choice == 1) {",
+									"           response.body.names[i].name.should.include(\"STRANGWAY & SONS ACCOUNTING SERVICES\");",
+									"       }",
+									"   }",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
