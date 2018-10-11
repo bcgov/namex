@@ -328,12 +328,11 @@ if ( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
                 dir('api') {
                     try {
                         sh '''
-                            env
-                            cd ~/opt/app-root
                             pip install pip --upgrade
-                            pip install setuptools --upgrade
+                            rm -r .eggs
+                            pip install setuptools==28.8.0
                             pip install -r requirements/dev.txt
-                            pytest
+                            python setup.py test
                         '''
 
                         //send msg to slack
