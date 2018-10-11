@@ -284,12 +284,12 @@ if( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
                 dir('colin-api') {
                     try {
                         sh '''
-                            env
                             pip install pip --upgrade
-                            pip install setuptools --upgrade
+                            pip install setuptools==28.8.0
+                            pip install python-dotenv==0.8.2
+                            pip install click==6.7
                             pip install -r requirements.txt
-
-                            pytest
+                            python setup.py test
                         '''
 
                         //send msg to slack

@@ -58,7 +58,7 @@ parameters: [
           "displayName": "ENV_TAG",
           "description": "the tag for the environment that the job image runs from.",
           "required": true,
-          "value": "test"
+          "value": "dev"
         },
         {
           "name": "MAX_ROWS",
