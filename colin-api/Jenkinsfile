@@ -284,6 +284,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
                 dir('colin-api') {
                     try {
                         sh '''
+                            env
                             pip install pip --upgrade
                             pip install setuptools==28.8.0
                             pip install python-dotenv==0.8.2
@@ -300,7 +301,6 @@ if( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
                         notifySlack("colin-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
 
                     } catch (Exception e) {
-                        sh 'pip freeze'
                         echo "EXCEPTION: ${e}"
 
                         //send msg to slack
