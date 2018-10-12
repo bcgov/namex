@@ -108,7 +108,38 @@ String triggerBuild(String contextDirectory) {
 // define job properties - keep 10 builds only
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]])
 
-if( triggerBuild(CONTEXT_DIRECTORY) != "" ) {
+def run_pipeline = true
+if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
+    node {
+        SLACK_TOKEN = sh (
+                    script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                        returnStdout: true).trim()
+
+        // send msg to slack
+        def attachment = [:]
+        attachment.fallback = "See build log for more details"
+        attachment.title = "SOLR-FEEDER Build ${BUILD_ID} has no changes"
+        attachment.color = "#00FF00" // Lime Green
+        attachment.text = "Proceed anyways?" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+        def decision = [:]
+        decision.type = "button"
+        decision.text = "Proceed/Abort?"
+        decision.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-solr-feeder-pipeline/${BUILD_ID}/input"
+        decision.short = false
+        attachment.actions = [decision]
+        notifySlack("solr-feeder-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+    }
+    try {
+        timeout(time: 1, unit: 'DAYS') {
+            input message: "Run solr-feeder-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit'
+        }
+    } catch (Exception e) {
+        run_pipeline = false;
+    }
+
+}
+
+if (run_pipeline) {
 
     node {
         SLACK_TOKEN = sh (
