@@ -657,6 +657,103 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "restricted_words (document analysis)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "647799c6-697b-41da-a698-e01e131f06d5",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['restricted_words_conditions']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['restricted_words_conditions']",
+									"    });",
+									"});",
+									"",
+									"it('should return the corresponding restricted words', () => {",
+									"    response.body.restricted_words_conditions.should.be.an('array').with.lengthOf(8);",
+									"    var words = ''",
+									"    for (var i=0; i<response.body.restricted_words_conditions.length; i++) {",
+									"        response.body.restricted_words_conditions[i].should.be.an('object').with.keys(['cnd_info','word_info']);",
+									"        words += response.body.restricted_words_conditions[i].word_info.phrase;",
+									"    }",
+									"    words.should.include('B C');",
+									"    words.should.include('BC');",
+									"    words.should.include('BC ROYAL');",
+									"    words.should.include('BCR');",
+									"    words.should.include('C T');",
+									"    words.should.include('DR');",
+									"    words.should.include('RE');",
+									"    words.should.include('ROYAL');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"type\":\"plain_text\",\"content\":\"retstrictedwordsdrbc royal -minus+plus+ @at@at \\\"quotes\\\"*asterisk*ques???\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/documents:restricted_words",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents:restricted_words"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
