@@ -83,6 +83,7 @@ setup(
     ],
     tests_require=[
         'pytest',
+        'pytest-mock'
     ],
     classifiers=[
           'Development Status :: Beta',

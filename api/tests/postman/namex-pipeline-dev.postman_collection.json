@@ -1147,18 +1147,17 @@
 							"listen": "prerequest",
 							"script": {
 								"id": "5e5e7102-694d-4200-a50b-5401e06d4ad1",
-								"type": "text/javascript",
 								"exec": [
 									"",
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "test",
 							"script": {
 								"id": "ca95fc6d-d25e-4528-9022-c4ee670bbf66",
-								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1194,9 +1193,10 @@
 									"",
 									"it('Should return the new data updated by the previous PUT', () => {",
 									"    response.text.should.include(\"\\\"state\\\": \\\"REJECTED\\\"\");",
-									"    response.text.should.include(\"\\\"name\\\": \\\"PUT success\\\"\");",
+									"    response.text.should.include(\"\\\"name\\\": \\\"PUT SUCCESS\\\"\");",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -1332,7 +1332,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "9460265d-e86b-4e68-b49e-9468156ae8d4",
+								"id": "6e48f1bf-f4db-4778-a81d-761c4fc57c9e",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1361,7 +1361,7 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
 									"});",
 									"",
 									"pm.environment.set(\"bodyJSON\",pm.response.json())"
@@ -1402,8 +1402,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2a03af56-5bbb-4b24-b203-c3f57c73545d",
-								"type": "text/javascript",
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1431,25 +1430,26 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
 									"});",
 									"",
 									"it(\"Should return updated changes in the body\", () => {",
 									"   response.body.additionalInfo.should.include(\"Name was previously put in for incorporation but it is actually for an extra-provincial registration\");",
-									"   response.body.names[0].name.should.include(\"BOOKED BY US Inc.\");",
+									"   response.body.names[0].name.should.include(\"BOOKED BY US INC.\");",
 									"   response.body.natureBusinessInfo.should.include(\"fencing equipment supply\");",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "prerequest",
 							"script": {
 								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
-								"type": "text/javascript",
 								"exec": [
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -1491,17 +1491,16 @@
 							"listen": "prerequest",
 							"script": {
 								"id": "262230a7-feab-4c42-a075-bd3638472c07",
-								"type": "text/javascript",
 								"exec": [
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "test",
 							"script": {
-								"id": "e16645d3-1cca-4f69-a246-3ac0d6bdf11a",
-								"type": "text/javascript",
+								"id": "fecd1fce-8620-492f-9e03-468d4c41aef0",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1529,15 +1528,16 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
 									"});",
 									"",
 									"it(\"Should return updated changes by previous PUT\", () => {",
 									"   response.body.additionalInfo.should.include(\"Name was previously put in for incorporation but it is actually for an extra-provincial registration\");",
-									"   response.body.names[0].name.should.include(\"BOOKED BY US Inc.\");",
+									"   response.body.names[0].name.should.include(\"BOOKED BY US INC.\");",
 									"   response.body.natureBusinessInfo.should.include(\"fencing equipment supply\");",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -1574,8 +1574,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "48073982-95d2-4884-ab71-41cadb1395fd",
-								"type": "text/javascript",
+								"id": "482ae5d8-3c7d-48bb-8875-bb9a386ef4f2",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1603,18 +1602,25 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
 									"});",
 									"",
 									"it(\"Should return old values for this NR\", () => {",
-									"   response.body.additionalInfo.should.include(\"**Resubmit (NR 2997198)**\");",
-									"   response.body.id.should.equal(16);",
-									"   response.body.names[0].choice.should.equal(1);",
-									"   response.body.names[0].name.should.include(\"META GROWTH ENTERPRISES INC.\");",
-									"   response.body.natureBusinessInfo.should.include(\"Operating medical cannabis clinics, offering educational materials relating to medical cannabis\");",
-									"   response.body.submitCount.should.equal(2);",
+									"    response.body.additionalInfo.should.include(\"**AB NUANS Provided**  **SK Name Provided** This is info entered by the applicant to see if it makes it's way  into namex.\");",
+									"    response.body.id.should.equal(10462);",
+									"    for (var i=0;i<response.body.names.length;i++) {",
+									"        if (response.body.names[i].choice == 1)",
+									"            response.body.names[i].name.should.include(\"STRANGWAY ACCOUNTING SERVICES INC.\");",
+									"        else if (response.body.names[i].choice == 2)",
+									"            response.body.names[i].name.should.include(\"STRANGWAY & ASSOCIATES CA FIRM INC.\");",
+									"        else",
+									"            response.body.names[i].name.should.include(\"STRANGWAY AND PARNTERS ACCOUNTING SERVICES INC.\");",
+									"    }",
+									"    response.body.natureBusinessInfo.should.include(\"Corporate accounting services.\");",
+									"    response.body.submitCount.should.equal(1);",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],

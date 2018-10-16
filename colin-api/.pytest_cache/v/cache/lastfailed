@@ -1,6 +1,0 @@
-{
-  "tests/unit/test_corporations.py::test_auth_check": true,
-  "tests/unit/test_corporations.py::test_corp_authorization": true,
-  "tests/unit/test_corporations.py::test_corp_details": true,
-  "tests/unit/test_corporations.py::test_corp_request_not_authorized": true
-}

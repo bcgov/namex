@@ -1147,18 +1147,17 @@
 							"listen": "prerequest",
 							"script": {
 								"id": "5e5e7102-694d-4200-a50b-5401e06d4ad1",
-								"type": "text/javascript",
 								"exec": [
 									"",
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "test",
 							"script": {
 								"id": "ede29a8f-a986-4e8a-a733-186962afa803",
-								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1194,9 +1193,10 @@
 									"",
 									"it('Should return the new data updated by the previous PUT', () => {",
 									"    response.text.should.include(\"\\\"state\\\": \\\"REJECTED\\\"\");",
-									"    response.text.should.include(\"\\\"name\\\": \\\"PUT success\\\"\");",
+									"    response.text.should.include(\"\\\"name\\\": \\\"PUT SUCCESS\\\"\");",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -1332,7 +1332,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "56dac7a8-85f6-454e-8c11-a0bab327f161",
+								"id": "8d49854e-c2dd-43bc-983c-3d5b0a4a10c9",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1361,7 +1361,7 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
 									"});",
 									"",
 									"var response = pm.response.json();",
@@ -1405,7 +1405,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "1c49c78c-4861-418c-ac7c-5ad5c538feb0",
+								"id": "8e962016-31ad-44e1-83d2-f87eb08b986e",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1434,7 +1434,7 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
 									"});",
 									"",
 									"it(\"Should return updated changes in the body\", () => {",
@@ -1498,7 +1498,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8d68037d-df75-4cbe-801f-8e01a115b98d",
+								"id": "6182de4b-ffa3-4ce5-b7f0-718befb44ac7",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -1527,7 +1527,7 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
 									"});",
 									"",
 									"it(\"Should return updated changes by previous PUT\", () => {",
@@ -1698,8 +1698,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b21caae4-819e-42ed-a90f-21ac05d89c7a",
-								"type": "text/javascript",
+								"id": "a6e789d9-f171-4a1a-9aaf-da98837d6105",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -1727,7 +1726,7 @@
 									"});",
 									"",
 									"it(\"Should return the required fields for an NR\", () => {",
-									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','priorityCd','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
 									"});",
 									"",
 									"it(\"Should return old values for this NR\", () => {",
@@ -1735,8 +1734,14 @@
 									"   response.body.applicants.clientFirstName.should.equal(`${pm.environment.get(\"clientFirstName\")}`);",
 									"   response.body.natureBusinessInfo.should.equal(`${pm.environment.get(\"natureBusinessInfo\")}`);",
 									"   response.body.state.should.equal(\"HOLD\");",
+									"   for (var i=0; i<response.body.names.length;i++) {",
+									"       if (response.body.names[i].choice == 1) {",
+									"           response.body.names[i].name.should.include(\"STRANGWAY & SONS ACCOUNTING SERVICES\");",
+									"       }",
+									"   }",
 									"});"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],

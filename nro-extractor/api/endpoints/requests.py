@@ -124,7 +124,7 @@ class NRORequest(Resource):
         nr_submitter = get_nr_submitter(nro_session, nr_header['request_id'])
         nr_applicant = get_nr_requester(nro_session, nr_header['request_id'])
         nr_ex_comments = get_exam_comments(nro_session, nr_header['request_id'])
-        nr_nwpat = get_nwpta(nro_session, nr_header['request_id'])
+        nr_nwpta = get_nwpta(nro_session, nr_header['request_id'])
         nr_names = get_names(nro_session, nr_header['request_id'])
 
         current_app.logger.debug('completed all gets')
@@ -142,8 +142,8 @@ class NRORequest(Resource):
         if nr_ex_comments:
             add_comments(nr, nr_ex_comments, update)
             current_app.logger.debug('completed comments for {}'.format(nr.nrNum))
-        if nr_nwpat:
-            add_nwpta(nr, nr_nwpat, update)
+        if nr_nwpta:
+            add_nwpta(nr, nr_nwpta, update)
             current_app.logger.debug('completed nwpta for {}'.format(nr.nrNum))
         if nr_names:
             add_names(nr, nr_names, update)
@@ -230,7 +230,7 @@ def add_comments(nr, comments, update=False):
             nr.comments.append(comm)
 
 
-def add_nwpta(nr, nr_nwpat, update=False):
+def add_nwpta(nr, nr_nwpta, update=False):
 
     # naive approach, if updating remove all the old PNS'es
     # TODO change to an update / delete / insert flow
@@ -238,14 +238,16 @@ def add_nwpta(nr, nr_nwpat, update=False):
         for pn in nr.partnerNS.all():
             nr.partnerNS.remove(pn)
 
-    if nr_nwpat:
-        for p in nr_nwpat:
+    if nr_nwpta:
+        for p in nr_nwpta:
             pns = PartnerNameSystem()
             pns.partnerNameTypeCd = p['partner_name_type_cd']
             pns.partnerNameNumber = p['partner_name_number']
             pns.partnerJurisdictionTypeCd = p['partner_jurisdiction_type_cd']
             pns.partnerNameDate = p['partner_name_date']
             pns.partnerName = p['partner_name']
+
+            pns.set_requested_flag();
 
             nr.partnerNS.append(pns)
 
@@ -284,11 +286,13 @@ def add_names(nr, nr_names, update=False):
 
 def add_applicant(nr, nr_applicant, update=False):
 
+    applicant = None
     if update:
-        applicant = nr.applicants
-        # TODO: can an existing NR ever not have applicants?
-    else:
+        applicant = nr.applicants.one_or_none()
+
+    if not applicant:
         applicant = Applicant()
+        nr.applicants.append(applicant)
 
     applicant.lastName = nr_applicant['last_name']
     applicant.firstName = nr_applicant['first_name']
@@ -307,9 +311,6 @@ def add_applicant(nr, nr_applicant, update=False):
     applicant.postalCd = nr_applicant['postal_cd']
     applicant.stateProvinceCd = nr_applicant['state_province_cd']
     applicant.countryTypeCd = nr_applicant['country_type_cd']
-
-    if not update:
-        nr.applicants.append(applicant)
 
 
 # ######## Fetch Current NRO Information ##########################################

@@ -57,6 +57,9 @@ class Name(db.Model):
         return cls.query.filter_by(name=name).first()
 
     def save_to_db(self):
+        # force uppercase names
+        self.name = self.name.upper()
+
         db.session.add(self)
         db.session.commit()
 

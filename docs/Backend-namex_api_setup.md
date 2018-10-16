@@ -12,15 +12,21 @@
 	- File > New Project (select api folder from within your local namex)
 
 4. Set project interpreter/venv in PyCharm
-	- File > default settings > Project Interpreter
-		```
-		- press wheel beside project interpreter drop down field > add
-		- select location as new empty folder within api (name folder venv)
-		- select base interpreter as python 3.6
-		- press okay
-		```
+	- **Windows:** File > default settings > Project Interpreter
+	- **Mac OS:** Pycharm > Preferences >  Project: docs > Project Interpreter
+	- Press wheel beside project interpreter drop down field > add
+	- Select location as new empty folder within api (name folder venv)
+	- Select base interpreter as python 3.6
+		 - If you don't have python 3.6 installed, and you don't want to update the system python, install pyenv:
+		        
+		        > pip install pyenv
+		        > pyenv install 3.6.x
+           (e.g. 3.6.6)
+          - Add the new interpreter by finding it within the ~/.pyenv directory; 
+           Then you will be able to select it in the list.
+	- Press okay
 
-5. Install requirments in "requirements.txt"
+5. Install requirements in "requirements.txt"
 	- a banner should have appeared in your project window after setting up your venv asking you to install these
 	- click install
 
@@ -31,9 +37,6 @@
 	- change username/password to your username/password in postgres
 	- place .env in api folder (make sure it is named ".env")
 	```
-
-8. Get "client_secrets.dev.json" file from developer
-	- place in "client_secrets" folder
 
 9. Run wsgi in PyCharm
 	- select wsgi.py
@@ -47,7 +50,7 @@
 		```
 
 10. Create database tables
-	- open terminal in PyCharm (view > tool widndows > terminal)
+	- open terminal in PyCharm (view > tool windows > terminal)
 		```sh
 		python manage.py db upgrade
 		```

@@ -7,7 +7,7 @@ Flask-SQLAlchemy
 Flask-RESTplus
 Flask-Marshmallow
 flask-jwt-oidc
-python-dotenv
+python-dotenv==0.8.2
 psycopg2-binary
 marshmallow
 marshmallow-sqlalchemy
