@@ -9,14 +9,15 @@ AS
            INNER JOIN NAME n ON n.request_id = r.request_id
            INNER JOIN name_instance ni ON ni.name_id = n.name_id
            INNER JOIN name_state ns ON ns.name_id = ni.name_id
-           INNER JOIN event e ON e.event_id = ns.start_event_id
+           INNER JOIN request_state rs ON rs.request_id = r.request_id
      WHERE ri.end_event_id IS NULL
        AND ni.end_event_id IS NULL
        AND ns.end_event_id IS NULL
+       AND rs.end_event_id IS NULL
+       AND rs.state_type_cd = 'COMPLETED'
        AND ns.name_state_type_cd IN ('A', 'C')
-       AND e.event_type_cd = 'EXAM'
        AND ni.consumption_date IS NULL
-       AND ri.expiration_date > SYSDATE
+       AND TRUNC (ri.expiration_date) > TRUNC (SYSDATE)
        AND ri.request_type_cd NOT IN
                ('CEM', 'CFR', 'CLL', 'CLP', 'FR', 'LIB', 'LL', 'LP', 'NON', 'PAR', 'RLY', 'TMY',
                 'XCLL', 'XCLP', 'XLL', 'XLP');
