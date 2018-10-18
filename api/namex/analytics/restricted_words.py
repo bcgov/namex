@@ -54,14 +54,13 @@ class RestrictedWords(object):
         """ Strip all special characters and spaces of given string
                 - this will be compared against all restricted words/phrases in the db
         """
-        return content.upper().\
+        return ' ' + content.upper().\
             replace('+','').\
             replace('"','').\
             replace('@','').\
             replace('-','').\
             replace('?','').\
-            replace('*','').\
-            replace(' ','')
+            replace('*','') + ' '
 
     @staticmethod
     def find_restricted_words(content):
@@ -72,7 +71,7 @@ class RestrictedWords(object):
         restricted_words_obj = db.engine.execute("select * from restricted_word;")
         restricted_words_dict = []
         for row in restricted_words_obj:
-            if row[1].upper().replace(' ', '') in content:
+            if ' ' + row[1].upper().strip() + ' ' in content:
                 restricted_words_dict.append({'id': row[0], 'phrase': row[1].upper()})
 
         return restricted_words_dict

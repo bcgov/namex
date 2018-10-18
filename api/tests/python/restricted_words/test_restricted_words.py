@@ -23,8 +23,7 @@ def test_get_restricted_short():
 
 def test_get_restricted_long(db):
     # test strip_content
-    content = RestrictedWords().strip_content('+DR-royal @"b c" *re* bc??royal')
-    assert ' ' not in content
+    content = RestrictedWords().strip_content('+DR -royal @"bc" *bc??royalre* nd')
     assert '+' not in content
     assert '-' not in content
     assert '@' not in content
@@ -32,7 +31,7 @@ def test_get_restricted_long(db):
     assert '*' not in content
     assert '?' not in content
     assert 'r' not in content  # uppercase check
-    assert content == 'DRROYALBCREBCROYAL'
+    assert content == ' DR ROYAL BC BCROYALRE ND '
 
     # test find_restricted_words
     restricted_info = RestrictedWords.find_restricted_words(content)
@@ -44,7 +43,7 @@ def test_get_restricted_long(db):
 
         returned_words.append(obj['phrase'])
 
-    expected_words = ['B C', 'BC', 'BC ROYAL', 'BCR', 'DR', 'RE', 'ROYAL', 'ROYAL BC']
+    expected_words = ['BC', 'DR', 'ROYAL', 'ROYAL BC', 'ND']
     assert set(returned_words).issubset(expected_words)
     assert set(expected_words).issubset(returned_words)
 
