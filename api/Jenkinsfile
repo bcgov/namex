@@ -63,7 +63,7 @@ def notifySlack(text, channel, url, attachments) {
     ])
     def encodedReq = URLEncoder.encode(payload, "UTF-8")
     sh("curl -s -S -X POST " +
-            "--data \'payload=${encodedReq}\' ${slackURL}")    
+            "--data \'payload=${encodedReq}\' ${slackURL}")
 }
 
 // Determine whether there were any changes the files within the project's context directory.
@@ -81,7 +81,7 @@ String triggerBuild(String contextDirectory) {
             def entry = entries[j]
             //echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
             def files = new ArrayList(entry.affectedFiles)
-            
+
             for (int k = 0; k < files.size(); k++) {
                 def file = files[k]
                 def filePath = file.path
@@ -192,6 +192,16 @@ if (run_pipeline) {
                 notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
                 error('Aborted')
             }
+            stage ('local pytest'){
+                echo "Testing build: ${BUILD_ID}"
+                echo "Running tests "
+                sh '''
+                     pip install pip --upgrade
+                     pip install -r requirements/dev.txt
+                     pytest
+                '''
+
+            } // end stage - local pytest
 
         }//end stage
 
