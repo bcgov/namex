@@ -221,14 +221,41 @@ if (run_pipeline) {
             stage ('local pytest'){
                 echo "Testing build: ${BUILD_ID}"
                 echo "Running tests "
-                sh '''
-                     cd api
-                     pip install pip --upgrade
-                     pip install -r requirements/dev.txt
-                     pytest --junitxml=pytest_report.xml
-                '''
-                junit 'api/pytest_report.xml'
-                stash includes: 'api/pytest_report.xml', name: 'namex-pytests'
+                try {
+                    sh '''
+                         cd api
+                         pip install pip --upgrade
+                         pip install -r requirements/dev.txt
+                         pytest --junitxml=pytest_report.xml
+                    '''
+                    junit 'api/pytest_report.xml'
+                    stash includes: 'api/pytest_report.xml', name: 'namex-pytests'
+
+                } catch (Exception e) {
+                    echo "EXCEPTION: ${e}"
+
+                    //send msg to slack
+                    def attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NAMEX-API failed LOCAL PYTEST! :bangbang:"
+                    attachment.color = "danger" // red
+                    attachment.text = "- check logs for more info" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+                    def logs = [:]
+                    logs.type = "button"
+                    logs.text = "Build Log"
+                    logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-namex-api-pipeline/${BUILD_ID}/console"
+                    logs.short = false
+                    attachment.actions = [logs]
+                    notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                }
+
+                //send msg to slack
+                def attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NAMEX-API passed local pytest! :white_check_mark:"
+                attachment.color = "#00FF00" // lime green
+                notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+
             } // end stage - local pytest
 
         }//end stage
