@@ -702,19 +702,13 @@
 									"});",
 									"",
 									"it('should return the corresponding restricted words', () => {",
-									"    response.body.restricted_words_conditions.should.be.an('array').with.lengthOf(8);",
+									"    response.body.restricted_words_conditions.should.be.an('array').with.lengthOf(2);",
 									"    var words = ''",
 									"    for (var i=0; i<response.body.restricted_words_conditions.length; i++) {",
 									"        response.body.restricted_words_conditions[i].should.be.an('object').with.keys(['cnd_info','word_info']);",
 									"        words += response.body.restricted_words_conditions[i].word_info.phrase;",
 									"    }",
-									"    words.should.include('B C');",
-									"    words.should.include('BC');",
-									"    words.should.include('BC ROYAL');",
-									"    words.should.include('BCR');",
-									"    words.should.include('C T');",
 									"    words.should.include('DR');",
-									"    words.should.include('RE');",
 									"    words.should.include('ROYAL');",
 									"});"
 								],
@@ -727,19 +721,19 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{token}}",
-								"type": "text"
+								"type": "text",
+								"value": "Bearer {{token}}"
 							},
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"type": "text",
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"type\":\"plain_text\",\"content\":\"retstrictedwordsdrbc royal -minus+plus+ @at@at \\\"quotes\\\"*asterisk*ques???\"}"
+							"raw": "{\"type\":\"plain_text\",\"content\":\"retstrictedwordsdrbc royal -minus+plus+ @at@at \\\"quotes\\\"*asterisk*ques??? +dr\"}"
 						},
 						"url": {
 							"raw": "{{url}}/api/v1/documents:restricted_words",

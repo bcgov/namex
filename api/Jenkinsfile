@@ -148,7 +148,27 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
 
 }
 
-if (run_pipeline) {
+if (!run_pipeline)
+    // The changeSets did not contain any changes within the project's context directory.
+    // Clearly indicate there were no changes.
+    stage('No Changes') {
+        node {
+            SLACK_TOKEN = sh (
+                    script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                        returnStdout: true).trim()
+
+            // send msg to slack
+            def attachment = [:]
+            attachment.fallback = "See build log for more details"
+            attachment.title = "NAMEX-API Build {$BUILD_ID} prevented because there were no changes"
+            attachment.color = "#00FF00" // Lime Green
+            attachment.text = "No changes applied to namex-api" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+            notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+
+            currentBuild.result = 'SUCCESS'
+        }
+    }
+} else {
     //node/pod needs environment setup for testing
     def py3njs_label = "jenkins-py3nodejs-${UUID.randomUUID().toString()}"
     podTemplate(label: py3njs_label, name: py3njs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
@@ -221,14 +241,41 @@ if (run_pipeline) {
             stage ('local pytest'){
                 echo "Testing build: ${BUILD_ID}"
                 echo "Running tests "
-                sh '''
-                     cd api
-                     pip install pip --upgrade
-                     pip install -r requirements/dev.txt
-                     pytest --junitxml=pytest_report.xml
-                '''
-                junit 'api/pytest_report.xml'
-                stash includes: 'api/pytest_report.xml', name: 'namex-pytests'
+                try {
+                    sh '''
+                         cd api
+                         pip install pip --upgrade
+                         pip install -r requirements/dev.txt
+                         pytest --junitxml=pytest_report.xml
+                    '''
+                    junit 'api/pytest_report.xml'
+                    stash includes: 'api/pytest_report.xml', name: 'namex-pytests'
+
+                } catch (Exception e) {
+                    echo "EXCEPTION: ${e}"
+
+                    //send msg to slack
+                    def attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NAMEX-API failed LOCAL PYTEST! :bangbang:"
+                    attachment.color = "danger" // red
+                    attachment.text = "- check logs for more info" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+                    def logs = [:]
+                    logs.type = "button"
+                    logs.text = "Build Log"
+                    logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-namex-api-pipeline/${BUILD_ID}/console"
+                    logs.short = false
+                    attachment.actions = [logs]
+                    notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                }
+
+                //send msg to slack
+                def attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NAMEX-API passed local pytest! :white_check_mark:"
+                attachment.color = "#00FF00" // lime green
+                notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+
             } // end stage - local pytest
 
         }//end stage
@@ -836,26 +883,6 @@ if (run_pipeline) {
                 notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
                 currentBuild.result='SUCCESS'
             }
-        }
-    }
-} else {
-    // The changeSets did not contain any changes within the project's context directory.
-    // Clearly indicate there were no changes.
-    stage('No Changes') {
-        node {
-            SLACK_TOKEN = sh (
-                    script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
-                        returnStdout: true).trim()
-
-            // send msg to slack
-            def attachment = [:]
-            attachment.fallback = "See build log for more details"
-            attachment.title = "NAMEX-API Build {$BUILD_ID} prevented because there were no changes"
-            attachment.color = "#00FF00" // Lime Green
-            attachment.text = "No changes applied to namex-api" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-            notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
-
-            currentBuild.result = 'SUCCESS'
         }
     }
 }
