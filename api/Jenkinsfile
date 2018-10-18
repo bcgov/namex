@@ -149,8 +149,34 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
 }
 
 if (run_pipeline) {
-
-    node {
+    //node/pod needs environment setup for testing
+    def py3njs_label = "jenkins-py3nodejs-${UUID.randomUUID().toString()}"
+    podTemplate(label: py3njs_label, name: py3njs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+        containerTemplate(
+            name: 'jnlp',
+            image: '172.50.0.2:5000/openshift/jenkins-slave-py3nodejs',
+            resourceRequestCpu: '500m',
+            resourceLimitCpu: '1000m',
+            resourceRequestMemory: '1Gi',
+            resourceLimitMemory: '2Gi',
+            workingDir: '/tmp',
+            command: '',
+            args: '${computer.jnlpmac} ${computer.name}',
+            envVars: [
+                envVar(key:'DATABASE_TEST_HOST', value: "postgresql-test"),
+                envVar(key:'DATABASE_TEST_PORT', value: "5432"),
+                secretEnvVar(key: 'DATABASE_TEST_USERNAME', secretName: 'postgresql-test', secretKey: 'database-user'),
+                secretEnvVar(key: 'DATABASE_TEST_PASSWORD', secretName: 'postgresql-test', secretKey: 'database-password'),
+                secretEnvVar(key: 'DATABASE_TEST_NAME', secretName: 'postgresql-test', secretKey: 'database-name'),
+                secretEnvVar(key: 'JWT_OIDC_WELL_KNOWN_CONFIG', secretName: 'namex-keycloak-secrets', secretKey: 'JWT_OIDC_WELL_KNOWN_CONFIG'),
+                secretEnvVar(key: 'JWT_OIDC_ALGORITHMS', secretName: 'namex-keycloak-secrets', secretKey: 'JWT_OIDC_ALGORITHMS'),
+                secretEnvVar(key: 'JWT_OIDC_AUDIENCE', secretName: 'namex-keycloak-secrets', secretKey: 'JWT_OIDC_AUDIENCE'),
+                secretEnvVar(key: 'JWT_OIDC_CLIENT_SECRET', secretName: 'namex-keycloak-secrets', secretKey: 'JWT_OIDC_CLIENT_SECRET')
+           ]
+        )
+    ])
+    {
+    node (py3njs_label){
         SLACK_TOKEN = sh (
                 script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
                     returnStdout: true).trim()
@@ -196,11 +222,13 @@ if (run_pipeline) {
                 echo "Testing build: ${BUILD_ID}"
                 echo "Running tests "
                 sh '''
+                     cd api
                      pip install pip --upgrade
                      pip install -r requirements/dev.txt
-                     pytest
+                     pytest --junitxml=pytest_report.xml
                 '''
-
+                junit 'api/pytest_report.xml'
+                stash includes: 'api/pytest_report.xml', name: 'namex-pytests'
             } // end stage - local pytest
 
         }//end stage
@@ -320,6 +348,7 @@ if (run_pipeline) {
             notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
         }//end stage
     }//end node
+    }
 
     // Part 2 - Integration Testing API
 
