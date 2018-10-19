@@ -128,6 +128,9 @@
     <field name="source" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
     <field name="name_copy" type="text_name_copy" multiValued="false" indexed="true" stored="true"/>
 
+    <field name="name_with_synonyms" type="text_name_singular_synonyms" multiValued="false" indexed="true" stored="true"/>
+    <field name="name_compressed" type="text_name_compressed" multiValued="false" indexed="true" stored="true"/>
+
     <!-- Only enabled in the "schemaless" data-driven example (assuming the client
          does not know what fields may be searched) because it's very expensive to index everything twice. -->
     <!-- <copyField source="*" dest="_text_"/> -->
@@ -485,21 +488,16 @@
     </fieldType>
 
    <fieldType name="text_name_copy" class="solr.TextField" positionIncrementGap="100" multiValued="true">
-    <analyzer type="index">
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
-     <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="1" generateWordParts="1" catenateAll="0" catenateWords="0"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-     <!--<filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="restricted_synonyms.txt"/>-->
-    </analyzer>
-    <analyzer type="query">
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
-      <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="0" generateNumberParts="1" splitOnCaseChange="1" generateWordParts="1" catenateAll="0" catenateWords="0"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-      <!--<filter class="solr.SynonymGraphFilterFactory" expand="true" ignoreCase="true" synonyms="restricted_synonyms.txt"/>-->
-    </analyzer>
-  </fieldType>
+       <analyzer type="index">
+         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+   	 <filter class="solr.LowerCaseFilterFactory"/>
+
+       </analyzer>
+       <analyzer type="query">
+         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+   	  <filter class="solr.LowerCaseFilterFactory"/>
+   	 </analyzer>
+     </fieldType>
 
     <!-- Less flexible matching, but less false matches.  Probably not ideal for product names,
          but may be good for SKUs.  Can insert dashes in the wrong place and still match. -->
@@ -644,7 +642,157 @@
     -->
     <fieldType name="currency" class="solr.CurrencyField" precisionStep="8" defaultCurrency="USD" currencyConfig="currency.xml" />
              
+    <!-- additions for namex -->
+    <fieldType name="text_name_singular_synonyms" class="solr.TextField" positionIncrementGap="100" multiValued="true">
+        <analyzer type="index">
+          <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+    	   <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
+           <filter class="solr.LowerCaseFilterFactory"/>
+    	   <filter class="solr.PorterStemFilterFactory"/>
+    	   <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="1" generateNumberParts="0" splitOnCaseChange="0" generateWordParts="0" catenateAll="1" catenateWords="1"/>
+    	   <filter class="solr.FlattenGraphFilterFactory"/>
+    	   <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
 
+
+        </analyzer>
+        <analyzer type="query">
+          <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+    	   <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
+           <filter class="solr.LowerCaseFilterFactory"/>
+    	   <filter class="solr.PorterStemFilterFactory"/>
+    	   <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="1" generateNumberParts="0" splitOnCaseChange="0" generateWordParts="0" catenateAll="1" catenateWords="1"/>
+    	   <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+     	   <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
+                     sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
+                     ignoreCase="true" expand="true"/>
+    	   <filter class="solr.FlattenGraphFilterFactory"/>
+
+    	</analyzer>
+      </fieldType>
+
+      <!-- recreate the search name field from NRO -->
+      <fieldType name="text_name_compressed" class="solr.TextField" positionIncrementGap="100" multiValued="true">
+         <analyzer>
+    	  <!-- remove all designations -->
+
+    		<filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LIMITED"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LTD."
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" INCORPORATED"
+             replacement=""
+             replace="all" />
+
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" INC."
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" CORPORATION"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" CORP."
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LIMITEE"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LTEE"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" INCORPOREE"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LLC"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" L.L.C."
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LIMITED LIABILITY COMPANY"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LIMITED LIABILITY CO."
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LLP"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" LIMITED LIABILITY PARTNERSHIP"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" SOCIETE A RESPONSABILITE LIMITEE"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" SOCIIETE EN NOM COLLECTIF ARESPONSABILITE LIMITEE"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" SRL"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" SENCRL"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" ULC"
+             replacement=""
+             replace="all" />
+
+    		 <filter class="solr.PatternReplaceFilterFactory"
+             pattern=" UNLIMITED LIABILITY COMPANY"
+             replacement=""
+             replace="all" />
+
+    		 <!-- strip out all white space and non-alpha characters-->
+
+    		<filter class="solr.PatternReplaceFilterFactory"
+             pattern="[^\w]+"
+             replacement=""
+             replace="all" />
+
+    		 <tokenizer class="solr.KeywordTokenizerFactory" />
+             <filter class="solr.LowerCaseFilterFactory"/>
+     	  </analyzer>
+
+      </fieldType>
 
     <!-- some examples for different languages (generally ordered by ISO code) -->
 
@@ -1073,4 +1221,6 @@
     -->
 
     <copyField source="name" dest="name_copy"/>
+    <copyField source="name" dest="name_with_synonyms"/>
+    <copyField source="name" dest="name_compressed"/>
 </schema>
