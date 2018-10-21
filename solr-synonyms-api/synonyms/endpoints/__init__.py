@@ -18,5 +18,5 @@ api = flask_restplus.Api(
 # Remove the default namespace so that it doesn't show up in Swagger.
 api.namespaces.clear()
 
-api.add_namespace(probes.api, path='/probes')
+api.add_namespace(probes.api, path='/synonyms/probes')
 api.add_namespace(synonyms.api, path='/synonyms')
