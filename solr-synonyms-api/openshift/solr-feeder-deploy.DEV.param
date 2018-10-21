@@ -1,0 +1,7 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: namex solr-feeder
+# JSON Template File: templates/solr-feeder-deploy.json
+#=========================================================
+TAG_NAME=dev
+APPLICATION_HOSTNAME=namex-dev
