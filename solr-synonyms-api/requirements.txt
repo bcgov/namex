@@ -1,0 +1,4 @@
+Flask
+Flask-Restplus
+python-dotenv
+requests
