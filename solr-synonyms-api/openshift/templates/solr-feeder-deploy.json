@@ -139,7 +139,7 @@
                 "name": "${NAME}",
                 "env": [
                     {
-                        "name": "SOLR_FEEDER_FLASK_SECRET_KEY",
+                        "name": "SOLR_SYNONYMS_API_FLASK_SECRET_KEY",
                         "valueFrom": {
                             "secretKeyRef": {
                                 "name": "solr-synonyms-api",
@@ -182,7 +182,7 @@
                 ],
                 "livenessProbe": {
                   "httpGet": {
-                    "path": "/api/v1/probes/liveness",
+                    "path": "/api/v1/synonyms/probes/liveness",
                     "port": 8080,
                     "scheme": "HTTP"
                   },
@@ -193,7 +193,7 @@
                 },
                 "readinessProbe": {
                   "httpGet": {
-                    "path": "/api/v1/probes/readiness",
+                    "path": "/api/v1/synonyms/probes/readiness",
                     "port": 8080,
                     "scheme": "HTTP"
                   },
@@ -250,7 +250,7 @@
       "name": "APPLICATION_DOMAIN",
       "displayName": "Application Hostname",
       "description": "The exposed hostname that will route to the application service, if left blank a value will be defaulted.",
-      "value": ""
+      "value": "pathfinder.gov.bc.ca"
     },
     {
       "name": "APPLICATION_HOSTNAME",

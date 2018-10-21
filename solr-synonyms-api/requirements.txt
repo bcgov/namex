@@ -1,4 +1,4 @@
 Flask
 Flask-Restplus
+Flask-SQLAlchemy
 python-dotenv
-requests
