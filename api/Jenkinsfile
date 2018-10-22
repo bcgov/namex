@@ -140,7 +140,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
     }
     try {
         timeout(time: 1, unit: 'DAYS') {
-            input message: "Run namex-api-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit'
+            input message: "Run namex-api-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
         }
     } catch (Exception e) {
         run_pipeline = false;
@@ -148,7 +148,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
 
 }
 
-if (!run_pipeline)
+if (!run_pipeline) {
     // The changeSets did not contain any changes within the project's context directory.
     // Clearly indicate there were no changes.
     stage('No Changes') {
@@ -238,7 +238,7 @@ if (!run_pipeline)
                 notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
                 error('Aborted')
             }
-            stage ('local pytest'){
+            stage ('local pytest') {
                 echo "Testing build: ${BUILD_ID}"
                 echo "Running tests "
                 try {
@@ -601,7 +601,7 @@ if (!run_pipeline)
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit'
+                input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
@@ -827,7 +827,7 @@ if (!run_pipeline)
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy to prod?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit'
+                input message: "Deploy to prod?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
