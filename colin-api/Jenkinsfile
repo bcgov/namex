@@ -131,7 +131,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
     }
     try {
         timeout(time: 1, unit: 'DAYS') {
-            input message: "Run colin-api-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit'
+            input message: "Run colin-api-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
         }
     } catch (Exception e) {
         run_pipeline = false;
@@ -139,8 +139,27 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
 
 }
 
-if (run_pipeline) {
+if (!run_pipeline) {
 
+    // Clearly indicate there were no changes and no build was run.
+    stage('No Changes') {
+        node {
+            SLACK_TOKEN = sh (
+                        script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                            returnStdout: true).trim()
+
+            // send msg to slack
+            def attachment = [:]
+            attachment.fallback = "See build log for more details"
+            attachment.title = "COLIN-API Build ${BUILD_ID} prevented because there were no changes"
+            attachment.color = "#00FF00" // Lime Green
+            attachment.text = "No changes applied to colin-api" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+            notifySlack("colin-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+
+            currentBuild.result = 'SUCCESS'
+        }
+    }
+} else {
     node {
         SLACK_TOKEN = sh (
                 script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
@@ -471,7 +490,7 @@ if (run_pipeline) {
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy colin-api to test?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit'
+                input message: "Deploy colin-api to test?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
@@ -692,7 +711,7 @@ if (run_pipeline) {
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy colin-api to prod?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit'
+                input message: "Deploy colin-api to prod?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
@@ -747,27 +766,6 @@ if (run_pipeline) {
                 attachment.color = "#00FF00" // Lime Green
                 notifySlack("colin-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
             }
-        }
-    }
-
-} else {
-    // The changeSets did not contain any changes within the project's context directory.
-    // Clearly indicate there were no changes.
-    stage('No Changes') {
-        node {
-            SLACK_TOKEN = sh (
-                        script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
-                            returnStdout: true).trim()
-
-            // send msg to slack
-            def attachment = [:]
-            attachment.fallback = "See build log for more details"
-            attachment.title = "COLIN-API Build ${BUILD_ID} prevented because there were no changes"
-            attachment.color = "#00FF00" // Lime Green
-            attachment.text = "No changes applied to colin-api" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-            notifySlack("colin-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
-
-            currentBuild.result = 'SUCCESS'
         }
     }
 }
