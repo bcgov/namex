@@ -20,6 +20,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
+    SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
     NRO_EXTRACTOR_URI = os.getenv('NRO_EXTRACTOR_URI', None)
 
     ALEMBIC_INI='migrations/alembic.ini'
