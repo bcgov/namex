@@ -163,10 +163,6 @@ class SolrQueries:
     @classmethod
     def _get_synonyms_clause(cls, name):
         clause = ''
-
-        # There's no easy way to split the name with whitespace as a delimiter, because quotes can be used to preserve
-        # terms with internal whitespace and additionally the quotes may also be prefixed with +, -, or *, or
-        # combinations of such.
         synonyms = []
 
         tokens = cls._tokenize_name(name)
