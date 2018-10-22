@@ -255,7 +255,7 @@ if (!run_pipeline) {
                     echo "EXCEPTION: ${e}"
 
                     //send msg to slack
-                    def attachment = [:]
+                    attachment = [:]
                     attachment.fallback = "See build log for more details"
                     attachment.title = "NAMEX-API failed LOCAL PYTEST! :bangbang:"
                     attachment.color = "danger" // red
@@ -270,7 +270,7 @@ if (!run_pipeline) {
                 }
 
                 //send msg to slack
-                def attachment = [:]
+                attachment = [:]
                 attachment.fallback = "See build log for more details"
                 attachment.title = "NAMEX-API passed local pytest! :white_check_mark:"
                 attachment.color = "#00FF00" // lime green
