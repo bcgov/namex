@@ -13,11 +13,13 @@ compress_name_test_data = [
     ('Waffle Mania ', 'wafflemania'),
     ('  Waffle   Mania  ', 'wafflemania'),
     ('waffle mania inc.', 'wafflemania'),
+    ('waffle mania inc. ', 'wafflemania'),
     ('waffle @mania inc.', 'wafflemania'),
     ('@waffle mania inc.', 'wafflemania'),
     ('waffle mania 123', 'wafflemania'),
     ('waffle a.b.c. ltd.', 'waffleabc'),
-#    ('i have ulcers', 'ihaveulcers')  # ULC designation
+    ('i have ulcers', 'ihaveulcers'),  # ULC designation
+    ('waffle mania inc. / le wafflemania inc.', 'wafflemanialewafflemania'),
 ]
 
 tokenize_name_test_data = [

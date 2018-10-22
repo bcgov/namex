@@ -271,7 +271,7 @@
       "displayName": "Database Name",
       "description": "The name of the synonyms db.",
       "required": true,
-      "value": "SOLR"
+      "value": "solr"
     }
   ]
 }

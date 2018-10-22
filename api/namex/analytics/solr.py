@@ -1,5 +1,6 @@
 from flask import current_app
 from urllib import request, parse
+from urllib.error import HTTPError
 import json
 import re
 
@@ -92,13 +93,14 @@ class SolrQueries:
 
         # TODO: these should be loaded from somewhere.
         designations = [
-            ' corp.', ' corporation', ' inc.', ' incorporated', ' incorporee', ' l.l.c.', ' limited',
-            ' limited liability co.', ' limited liability company', ' limited liability partnership', ' limitee',
-            ' llc', ' llp', ' ltd.', ' ltee', ' sencrl', ' societe a responsabilite limitee',
-            ' societe en nom collectif a responsabilite limitee', ' srl', ' ulc', ' unlimited liability company']
+            'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited', 'limited liability co.',
+            'limited liability company', 'limited liability partnership', 'limitee', 'llc', 'llp', 'ltd.', 'ltee',
+            'sencrl', 'societe a responsabilite limitee', 'societe en nom collectif a responsabilite limitee', 'srl',
+            'ulc', 'unlimited liability company']
 
+        # Match the designation with whitespace before and either followed by whitespace or end of line.
         for designation in designations:
-            name = re.sub(designation, '', name)
+            name = re.sub(' ' + designation + '(\s|$)', '', name)
 
         return re.sub('[^a-z]', '', name)
 
@@ -153,11 +155,18 @@ class SolrQueries:
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
         query = solr_synonyms_api_base_url + '/' + parse.quote(token)
-        connection = request.urlopen(query)
-        response = json.load(connection)
 
-        # We'll get 200 with results or a 404 if no results.
-        return response.getcode() == 200
+        try:
+            connection = request.urlopen(query)
+        except HTTPError as http_error:
+            # Expected when the token does not have synonyms.
+            if http_error.code == 404:
+                return False
+
+            # Not sure what it is, pass it up.
+            raise http_error
+
+        return connection.status == 200
 
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod
@@ -167,6 +176,9 @@ class SolrQueries:
 
         tokens = cls._tokenize_name(name)
         for token in tokens:
+            # We will ignore some special characters. This list is not exhaustive and will likely need rework.
+            token = re.sub('\+', '', token)
+
             if cls._synonyms_exist(token):
                 synonyms.append(token)
 
