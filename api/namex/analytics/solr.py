@@ -149,12 +149,12 @@ class SolrQueries:
     # Call the synonyms API for the given token.
     @classmethod
     def _synonyms_exist(cls, token):
-        solr_synonyms_api_base_url = current_app.config.get('SOLR_SYNONYMS_API_BASE_URL', None)
-        if not solr_synonyms_api_base_url:
-            raise Exception('SOLR: SOLR_SYNONYMS_API_BASE_URL is not set')
+        solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
+        if not solr_synonyms_api_url:
+            raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
-        query = solr_synonyms_api_base_url + '/' + parse.quote(token)
+        query = solr_synonyms_api_url + '/' + parse.quote(token)
 
         try:
             connection = request.urlopen(query)
