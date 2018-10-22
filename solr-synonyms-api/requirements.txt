@@ -1,4 +1,5 @@
 Flask
 Flask-Restplus
 Flask-SQLAlchemy
+psycopg2-binary
 python-dotenv
