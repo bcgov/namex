@@ -55,16 +55,18 @@ class SolrQueries:
 
         current_app.logger.debug('Solr Query - type:{qtype} - name:{name}'
                                  .format(qtype=query_type, name=parse.quote(name)))
-        query = solr_base_url + SolrQueries.queries[query_type].format(
-            start=start,
-            rows=rows,
-            name=parse.quote(name.replace(NO_SYNONYMS_INDICATOR, '')),
-            compressed_name=cls._compress_name(name),
-            synonyms_clause=cls._get_synonyms_clause(name),
-            name_copy_clause=cls._get_name_copy_clause(name)
-        )
-        current_app.logger.debug('Query: ' + query)
+
         try:
+            query = solr_base_url + SolrQueries.queries[query_type].format(
+                start=start,
+                rows=rows,
+                name=parse.quote(name.replace(NO_SYNONYMS_INDICATOR, '')),
+                compressed_name=cls._compress_name(name),
+                synonyms_clause=cls._get_synonyms_clause(name),
+                name_copy_clause=cls._get_name_copy_clause(name)
+            )
+            current_app.logger.debug('Query: ' + query)
+
             connection = request.urlopen(query)
         except Exception as err:
             current_app.logger.error(err, query)
@@ -142,6 +144,21 @@ class SolrQueries:
 
         return tokens
 
+    # Call the synonyms API for the given token.
+    @classmethod
+    def _synonyms_exist(cls, token):
+        solr_synonyms_api_base_url = current_app.config.get('SOLR_SYNONYMS_API_BASE_URL', None)
+        if not solr_synonyms_api_base_url:
+            raise Exception('SOLR: SOLR_SYNONYMS_API_BASE_URL is not set')
+
+        # If the web service call fails, the caller will catch and then return a 500 for us.
+        query = solr_synonyms_api_base_url + '/' + parse.quote(token)
+        connection = request.urlopen(query)
+        response = json.load(connection)
+
+        # We'll get 200 with results or a 404 if no results.
+        return response.getcode() == 200
+
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod
     def _get_synonyms_clause(cls, name):
@@ -154,8 +171,8 @@ class SolrQueries:
 
         tokens = cls._tokenize_name(name)
         for token in tokens:
-            # If token exists in synonyms database:
-            synonyms.append(token)
+            if cls._synonyms_exist(token):
+                synonyms.append(token)
 
         if synonyms:
             clause = SYNONYMS_PREFIX + '(' + parse.quote(' '.join(synonyms)) + ')'
