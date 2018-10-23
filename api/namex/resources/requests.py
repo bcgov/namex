@@ -994,3 +994,31 @@ class SyncNR(Resource):
             return jsonify(resp), 206
 
         return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
+
+
+@cors_preflight("GET")
+@api.route('/stats', methods=['GET', 'OPTIONS'])
+class Stats(Resource):
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.requires_auth
+    def get(*args, **kwargs):
+
+        # default is last 1 hour, but can be sent as parameter
+        timespan = int(request.args.get('timespan', 1))
+
+        q = RequestDAO.query\
+            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE + [State.CANCELLED]))\
+            .filter(RequestDAO.lastUpdate >= datetime.datetime.utcnow() - datetime.timedelta(hours=timespan))\
+            .order_by(RequestDAO.lastUpdate.desc())
+
+        requests = q.all()
+
+        rep = {
+            'numRecords': len(requests),
+            'nameRequests': request_search_schemas.dump(requests)[0]
+        }
+
+        return jsonify(rep)
+
