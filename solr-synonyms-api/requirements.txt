@@ -1,5 +1,2 @@
-Flask
-Flask-Restplus
-Flask-SQLAlchemy
-psycopg2-binary
-python-dotenv
+# Just installs the production requirements.
+-r requirements/prod.txt
