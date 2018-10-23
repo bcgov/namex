@@ -4,4 +4,3 @@
 # JSON Template File: templates/solr-synonyms-api-deploy.json
 #============================================================
 TAG_NAME=dev
-APPLICATION_HOSTNAME=namex-solr-dev
