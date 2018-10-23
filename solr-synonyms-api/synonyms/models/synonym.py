@@ -19,8 +19,9 @@ class Synonym(db.Model):
         # We're matching in a comma-separated list of terms, which means that a search for "art" will match "martial".
         # Split synonyms into their components and then match exactly on those.
         synonyms_list = []
+        term = term.lower()
         for row in rows:
-            synonyms = [synonym.strip() for synonym in row.synonyms_text.split(',')]
+            synonyms = [synonym.strip().lower() for synonym in row.synonyms_text.split(',')]
             if term in synonyms:
                 synonyms_list.append(row)
 
