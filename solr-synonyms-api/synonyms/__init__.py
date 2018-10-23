@@ -20,6 +20,6 @@ def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):
     endpoints.api.init_app(application)
 
     # Create the connection to the database.
-    models.db = flask_sqlalchemy.SQLAlchemy(application)
+    models.db.init_app(application)
 
     return application
