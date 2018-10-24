@@ -60,7 +60,8 @@ class RestrictedWords(object):
             replace('@','').\
             replace('-','').\
             replace('?','').\
-            replace('*','') + ' '
+            replace('*',''). \
+            replace('.', '') + ' '
 
     @staticmethod
     def find_restricted_words(content):
