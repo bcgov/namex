@@ -99,11 +99,29 @@ If the following do not answer your operations questions, please add a new one (
 ##### How do I know if Solr is running?
 
 The easiest way to check that Solr is running is to look at the OpenShift pod called `solr` in the environment. If the
-pod it up, it means that Solr's liveness probe is answering requests.
+pod is up, it means that Solr's liveness probe is answering requests.
 
 You can also visit Solr's web-based UI for the environment. The URL for the UI can be found in OpenShift's routes, with
 the name `solr`. The _Dashboard_ tells you how long Solr has been running, and how much JVM memory is being used. The
 _Core Admin_ tells you when a core was started, when it was last updated, and how many documents it contains.
+
+##### How do I deal with a corrupt index?
+
+We have previously encountered the situation where the Lucene index for a core is corrupt. When this happens the `solr`
+pod cannot start. It is unknown what causes the corruption, but it could be due to Solr writing to the index when a pod
+is evacuated. We should set up a shutdown hook to call `solr stop -all`.
+
+If you have a corrupt index, one option is to edit the index files and correct the error. This will not be easy, and
+`vi` is not on the server, although we do have `od` and `sed`. The other option is to delete all the files in the core
+and then do a `dataimport` for the core.
+
+##### How do I monitor performance?
+
+The first place to look for any sudden performance degradation in a Java application is the memory management system.
+You can run `oc rsync solr-XX-XXXXX:/opt/solr/server/logs/solr_gc.log.0.current .` to copy the garbage collector (GC)
+log to your local computer. You can then analyze the log to see what is going on, such as stop-the-world GC events. One
+good tool is [gceasy.io](https://gceasy.io). Note that core reloads cause a lot of memory churn. It may be necessary to
+tune the garbage collector, switch to something like G1GC, or increase the memory for the process.
 
 ##### How do I make `solr-admin-app` editable in dev?
 
@@ -121,29 +139,51 @@ to flow from the database to Solr, so if the data is rapidly changing it may be 
 
 The _possible.conflicts_ core is up to date if it contains the same number of documents as there are rows in the
 `solr_dataimport_conflicts_vw` view in the NAMES database (NAMESD/NAMEST/NAMESP) plus the REGISTRY database
-(CDEV/CTST/CPRD). Note that it can take a minute for data to flow from the databases to Solr.
+(CDEV/CTST/CPRD). Note that it can take a minute for data to flow from the databases to Solr, so if the data is rapidly
+changing it may be difficult to do the comparison.
 
 ##### What do I do if the cores are not up to date?
 
-This indicates a problem with the feeders. Due to the high volume of changes, investigating the problem in production
+This is tricky, as the approach depends on the severity of the differences.
+indicates a problem with the feeders. Due to the high volume of changes, investigating the problem in production
 will not be easy. The cores should be reloaded to synchronize, and then carefully monitored to narrow down the time
 period during which the core data diverged from the view. It will probably be necessary to periodically dump the view
 data so that changes can be tracked and compared against the trigger tables.
+
+##### How do I reload the _names_ or _possible.conflicts_ core?
+
+In production this is not straightforward. The _names_ core has taken as long as 40 minutes to load, but the
+_possible.conflicts_ core is only a couple of minutes. Ideally you do not want the data to change during the load, so it
+should be done when the applications are closed (note that the Societies application never closes, so it could generate
+changes at any time). Starting at 05:00 is usually a good time for the loads. It is a good idea to disable the Oracle
+jobs before the load and re-enable afterwards (and you may need to tweak the data? Not straightforward).
+
+To load these cores, go into the Solr UI and choose the core from the drop-down list. Select *Dataimport* from the left
+hand menu, and click *Execute*. You can select *Auto-Refresh Status* and open the *Raw Status-Ouput* pane to watch the
+progress.
 
 ##### How do I know that the _trademarks_ core is up to date?
 
 The _trademarks_ core only changes twice a year, so basically if it has data it should be correct. All environments
 should have the same number of documents.
 
+##### How do I reload the _trademarks_ core?
+
+See the [trademarks](https://github.com/bcgov/namex/tree/master/solr/trademarks) project for details.
+
 ##### How do I know that the solr-feeder is running?
 
-The easiest way is to look at the OpenShift pod called `solr-feeder` in the environment. If the pod it up, it means that
+The easiest way is to look at the OpenShift pod called `solr-feeder` in the environment. If the pod is up, it means that
 the liveness and readiness probes are answering requests.
 
 ##### How do I know that the solr-feeder is working?
 
 Check the logs for the OpenShift `solr-feeder` pod. Every Solr update is logged, but note that dev and test have a much
 lower volume of changes than production.
+
+##### How do I check the Oracle jobs?
+
+Check the feeder.sql file.
 
 ##### Where is the solr-feeder endpoint configured?
 
