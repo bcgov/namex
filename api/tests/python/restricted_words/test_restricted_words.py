@@ -23,7 +23,7 @@ def test_get_restricted_short():
 
 def test_get_restricted_long(db):
     # test strip_content
-    content = RestrictedWords().strip_content('+DR -royal @"bc" *bc??royalre* nd')
+    content = RestrictedWords().strip_content('+DR. -royal @"bc" *bc??royalre* nd')
     assert '+' not in content
     assert '-' not in content
     assert '@' not in content
