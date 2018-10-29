@@ -33,7 +33,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
             -- Quick and dirty: do this by hand in 11. 12 has JSON stuff.
             content := content || '\"add\": {\"doc\": {' ||
                     '\"id\": \"' || view_row.id || '\", ' ||
-                    '\"name\": \"' || REPLACE(view_row.name, '"', '\\\"') || '\", ' ||
+                    '\"name\": \"' || REPLACE(REPLACE(view_row.name, '\', '\\\\'), '"', '\\\"') || '\", ' ||
                     '\"state_type_cd\": \"' || view_row.state_type_cd || '\", ' ||
                     '\"source\": \"' || view_row.source || '\" ' ||
                     '} }, ';
@@ -79,7 +79,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
                         '\"name_instance_id\": \"' || view_row.name_instance_id || '\", ' ||
                         '\"choice_number\": \"' || view_row.choice_number || '\", ' ||
                         '\"corp_num\": \"' || view_row.corp_num || '\", ' ||
-                        '\"name\": \"' || REPLACE(view_row.name, '"', '\\\"') || '\", ' ||
+                        '\"name\": \"' || REPLACE(REPLACE(view_row.name, '\', '\\\\'), '"', '\\\"') || '\", ' ||
                         '\"nr_num\": \"' || view_row.nr_num || '\", ' ||
                         '\"request_id\": \"' || view_row.request_id || '\", ' ||
                         '\"submit_count\": \"' || view_row.submit_count || '\", ' ||
