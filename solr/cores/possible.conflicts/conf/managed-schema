@@ -659,12 +659,12 @@
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+		<filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
+            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true" ignoreCase="true"
+            expand="true"/>
         <filter class="solr.PorterStemFilterFactory"/>
         <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="1" generateNumberParts="0" splitOnCaseChange="0" generateWordParts="0" catenateAll="1" catenateWords="1"/>
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
-        <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true" ignoreCase="true"
-            expand="true"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
       </analyzer>
     </fieldType>
