@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "0956d20d-e222-4fd1-8dbb-e289cab98988",
+		"name": "Solr Analysis Endpoint",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "analysis test localhost",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fe69f40f-256f-4025-b455-7f8debce095b",
+						"exec": [
+							"pm.test(\"Check for synonym hit\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"SYNONYM\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f6504969-155e-416f-8f08-9c3930210407",
+						"exec": [
+							"console.log(\"Synonym being checked: \" + data[\"synonym\"])"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8983/solr/possible.conflicts/analysis/field?_=1540931275899&analysis.fieldname=name_with_synonyms&analysis.query={{synonym}}&analysis.showmatch=true&verbose_output=1&wt=json",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8983",
+					"path": [
+						"solr",
+						"possible.conflicts",
+						"analysis",
+						"field"
+					],
+					"query": [
+						{
+							"key": "_",
+							"value": "1540931275899"
+						},
+						{
+							"key": "analysis.fieldname",
+							"value": "name_with_synonyms"
+						},
+						{
+							"key": "analysis.query",
+							"value": "{{synonym}}"
+						},
+						{
+							"key": "analysis.showmatch",
+							"value": "true"
+						},
+						{
+							"key": "verbose_output",
+							"value": "1"
+						},
+						{
+							"key": "wt",
+							"value": "json"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
