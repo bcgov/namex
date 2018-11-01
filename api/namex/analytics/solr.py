@@ -159,57 +159,9 @@ class SolrQueries:
             tokens.append(line[start_token:])
         return tokens
 
-    # Split a string into a list of tokens, where tokens are delimited by whitespace, but quotation marks escape
-    # whitespace, and quotation marks may be preceded by control characters such as +.
-    @classmethod
-    def _tokenize_name(cls, name):
-        tokens = []
-
-        # strip quotes hyphens in quotes
-        name = re.sub(r'(?!(([^"]*"){2})*[^"]*$)-', ' ', name)
-        # push @ across "
-        name = re.sub(r"([ \-+@])(.)(?<=\")(.*)(?=\")", lambda m: '{1}{0}'.format((' '+m.group(1)).join(m.group(3).split()),m.group(1)), name)
-        # strip punctuation
-        name = re.sub('[^a-z +-@]', ' ', name)
-
-        word = ''
-        ignore_indicator_on = False
-        quotes_on = False
-        for letter in name:
-            if letter == NO_SYNONYMS_INDICATOR or letter == '-':
-                # Only allow the indicator outside of quotes.
-                if not quotes_on:
-                    ignore_indicator_on = True
-
-                continue
-
-            if letter == '"':
-                quotes_on = not quotes_on
-
-                if not ignore_indicator_on:
-                    continue
-
-            if letter in ', ' and not quotes_on:
-                if not ignore_indicator_on:
-                    if word != '':
-                        tokens.append(word)
-                        word = ''
-
-                ignore_indicator_on = False
-
-                continue
-
-            if not ignore_indicator_on:
-                word += letter
-
-        # Handle when the last word was prefixed with the indicator.
-        if not ignore_indicator_on and word != '':
-            tokens.append(word)
-
-        return tokens
 
     @classmethod
-    def _parse_for_synonym_candidates(cls, tokens):
+    def _parse_for_synonym_candidates(cls, tokens: List[str]) -> List[str]:
         """
         A list of tokens is passed in.
         We parse with the following rules:
@@ -217,7 +169,7 @@ class SolrQueries:
         token after a '-' token is ignored unless it is between quotes, then it is ignored
         '@' mean ignore next token, if next token is ", ignore everything until the balancing " or until end of list
         :param tokens:
-        :return:
+        :return: List[str] of tokens that are candidates as synonym tokens
         """
 
         candidates: List[str] = []
@@ -296,7 +248,6 @@ class SolrQueries:
         clause = ''
         synonyms = []
 
-        # tokens = cls._tokenize_name(name)
         tokens = cls._tokenize(name, [string.digits,
                                       string.whitespace,
                                       RESERVED_CHARACTERS,

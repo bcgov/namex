@@ -31,38 +31,6 @@ def test_compress_name(name, expected):
 
     assert expected == response
 
-
-tokenize_name_test_data = [
-    ('waffle', ['waffle']),
-    (' waffle', ['waffle']),
-    ('waffle ', ['waffle']),
-    ('waffle mania', ['waffle', 'mania']),
-    (' waffle mania', ['waffle', 'mania']),
-    ('waffle mania ', ['waffle', 'mania']),
-    ('   waffle   mania   ', ['waffle', 'mania']),
-    ('-waffle mania', ['mania']),
-    ('waffle -mania', ['waffle']),
-    ('waffle "mania inc"', ['waffle', 'mania', 'inc']),
-    ('waffle -"mania inc"', ['waffle']),
-    ('   waffle     -"   mania    inc   "    ', ['waffle']),
-    ('belgian @waffles,', ['belgian']),                        # testing ignore @ == no-synonyms
-    ('belgian, waffles,', ['belgian', 'waffles']),             # testing trailing comma
-    ('belgian waffle-cream,', ['belgian', 'waffle']),          # testing trailing comma
-    ('belgian "waffle-cream",', ['belgian', 'waffle', 'cream']),          # testing trailing comma with -hyphen not minus
-    ('belgian waffle,cream,', ['belgian', 'waffle', 'cream']), # testing trailing comma
-    ('belgian @"waffle-cream",', ['belgian']),          # testing trailing comma with -hyphen not minus
-    ('"waffles and strawberries", @waffle, "whipped cream,"', ['waffles', 'and', 'strawberries', 'whipped', 'cream']), # testing trailing comma
-    ('"waffles and strawberries", @waffle, @"whipped cream,"', ['waffles', 'and', 'strawberries']), # testing trailing comma
-]
-
-
-@pytest.mark.parametrize("search_string,expected", tokenize_name_test_data)
-def test_tokenize_name(search_string, expected):
-    response = SolrQueries._tokenize_name(search_string)
-
-    assert expected == response
-
-
 name_copy_test_data = [
     ('waffle corp', ''),
     ('waffle ' + NO_SYNONYMS_INDICATOR + ' corp', ''),
