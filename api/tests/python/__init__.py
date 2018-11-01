@@ -13,4 +13,5 @@ from .util import \
     integration_oracle_namesdb,\
     integration_fdw_namex,\
     integration_solr,\
+    integration_synonym_api, \
     integration_nro_extractor
