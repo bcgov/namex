@@ -100,7 +100,7 @@ parameters: [
           "displayName": "MIN_DELAY_SECONDS",
           "description": "The minimum amount of time between when the job started and the approve/rejected timestamp of the Name Request",
           "required": true,
-          "value": "600"
+          "value": "120"
         },{
           "name": "EXPIRES_DAYS",
           "displayName": "EXPIRES_DAYS",
