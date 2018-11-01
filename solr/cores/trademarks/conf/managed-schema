@@ -123,6 +123,7 @@
     <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
 	
     <field name="application_number" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+	<field name="registration_number" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
     <field name="category" type="string" multiValued="false" indexed="false" required="false" stored="true"/>
     <field name="status" type="string" multiValued="false" indexed="false" required="false" stored="true"/>
     <field name="name" type="text_en_splitting" multiValued="false" indexed="true" required="false" stored="true"
