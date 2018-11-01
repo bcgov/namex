@@ -194,9 +194,9 @@ class Requests(Resource):
         nrNum = request.args.get('nrNum', None)
         activeUser = request.args.get('activeUser', None)
         compName = request.args.get('compName', None)
-        # priorityCd = request.args.get('priorityCd', None)
-        furnished = request.args.get('furnished', None)
-        unfurnished = request.args.get('unfurnished', None)
+        priority = request.args.get('ranking', None)
+        notification = request.args.get('notification', None)
+        interval = request.args.get('interval', None)
 
         q = RequestDAO.query.filter()
         if queue: q = q.filter(RequestDAO.stateCd.in_(queue))
@@ -215,11 +215,33 @@ class Requests(Resource):
         if compName:
             q = q.join(RequestDAO.names).filter(Name.name.ilike('%' + compName + '%'))
 
-        if furnished == 'false':
+        if priority == 'Standard':
+            q = q.filter(RequestDAO.priorityCd != 'Y')
+        elif priority == 'Priority':
+            q = q.filter(RequestDAO.priorityCd != 'N')
+
+        if notification == 'Notified':
+            q = q.filter(RequestDAO.furnished != 'N')
+        elif notification == 'Not Notified':
             q = q.filter(RequestDAO.furnished != 'Y')
 
-        if unfurnished == 'false':
-            q = q.filter(RequestDAO.furnished != 'N')
+        if interval == 'Today':
+            current_hour = datetime.datetime.now()
+            hour_offset = current_hour.hour + 1
+            q = q.filter(RequestDAO.submittedDate > text(
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=hour_offset)))
+        elif interval == '7 days':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'7 DAYS\''))
+        elif interval == '30 days':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'30 DAYS\''))
+        elif interval == '90 days':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'90 DAYS\''))
+        elif interval == '1 year':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'1 YEARS\''))
+        elif interval == '3 years':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'3 YEARS\''))
+        elif interval == '5 years':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'5 YEARS\''))
 
         q = q.order_by(text(sort_by))
 
@@ -242,23 +264,6 @@ class Requests(Resource):
                            },
                'nameRequests': request_search_schemas.dump(q.all())
                }
-
-        ## counts for updatedToday and priorities
-        # data = rep['nameRequests']
-        # for row in data:
-        #     try:
-        #         if row['priorityCd'] == 'Y':
-        #             rep['response']['numPriorities'] += 1
-        #     except KeyError or AttributeError:
-        #         pass
-        #
-        # today = str(datetime.datetime.now)[0:10]
-        # for row in data:
-        #     try:
-        #         if row['lastUpdate'][0:10] == today:
-        #             rep['response']['numUpdatedToday'] += 1
-        #     except KeyError or AttributeError:
-        #         pass
 
         return jsonify(rep), 200
 
