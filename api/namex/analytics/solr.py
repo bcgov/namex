@@ -1,12 +1,20 @@
+import json
+import re
+import string
+from typing import List
+
 from flask import current_app
 from urllib import request, parse
 from urllib.error import HTTPError
-import json
-import re
 
 
 # Use this character in the search strings to indicate that the word should not by synonymized.
 NO_SYNONYMS_INDICATOR = '@'
+
+# Constant names for useful chars used by the functions below
+RESERVED_CHARACTERS = '-+@"'
+DOUBLE_QUOTE = '"'
+HYPHEN = '-'
 
 # Prefix used to indicate that words are not to have synonyms.
 NO_SYNONYMS_PREFIX = '&fq=name_copy:'
@@ -73,17 +81,20 @@ class SolrQueries:
             current_app.logger.error(err, query)
             return None, 'Internal server error', 500
 
-        solr = json.load(connection)
-        results = {"response": {"numFound": solr['response']['numFound'],
-                                "start": solr['response']['start'],
-                                "rows": solr['responseHeader']['params']['rows'],
-                                "maxScore": solr['response']['maxScore'],
-                                "name": solr['responseHeader']['params']['q']
-                                },
-                   'names': solr['response']['docs'],
-                   'highlighting': solr['highlighting']}
-
-        return results, '', None
+        try:
+            solr = json.load(connection)
+            results = {"response": {"numFound": solr['response']['numFound'],
+                                    "start": solr['response']['start'],
+                                    "rows": solr['responseHeader']['params']['rows'],
+                                    "maxScore": solr['response']['maxScore'],
+                                    "name": solr['responseHeader']['params']['q']
+                                    },
+                       'names': solr['response']['docs'],
+                       'highlighting': solr['highlighting']}
+            return results, '', None
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'Internal server error', 500
 
     # Compress the name by removing designations and then striping all non-alpha characters. Solr eventually converts to
     # lowercase so we'll choose that over doing everything in uppercase.
@@ -104,47 +115,110 @@ class SolrQueries:
 
         return re.sub('[^a-z]', '', name)
 
-    # Split a string into a list of tokens, where tokens are delimited by whitespace, but quotation marks escape
-    # whitespace, and quotation marks may be preceded by control characters such as +.
     @classmethod
-    def _tokenize_name(cls, name):
-        tokens = []
+    def _tokenize(cls, line: str, categories: List[str] = []) -> List[str]:
+        """
+        Builds a list of tokens based upon the categories defined
+        The tokens are in the same order as the original input
 
-        word = ''
-        ignore_indicator_on = False
-        quotes_on = False
-        for letter in name:
-            if letter == NO_SYNONYMS_INDICATOR or letter == '-':
-                # Only allow the indicator outside of quotes.
-                if not quotes_on:
-                    ignore_indicator_on = True
+        Categories are scanned left->right,
+           so if you do repeat the contents in categories, the one to the left wins
 
+        example in Doctest format <- because like, why not?!
+
+        >>> _tokenize('a set of tokens', [' ', string.ascii_lowercase])
+        ['a', ' ', 'set', ' ', 'of', ' ', 'tokens']
+        >>> _tokenize('a "set of" tokens', [' ', string.ascii_lowercase])
+        ['a', ' ', '"', 'set', ' ', 'of', '"', ' ', 'tokens']
+        >>> _tokenize('a +"set of" tokens', [' ', '+"', ' "' string.ascii_lowercase])
+        ['a', ' ', '+"', 'set', ' ', 'of', '"', ' ', 'tokens']
+
+        :param line: str: the string to tokenize
+        :param categories: List[str]: a list of strings used as categories to classify the tokens
+        :return: List[str]: a list of string tokens that can be parsed left-> as order is preserved
+        """
+        tokens = [] # yep, lazy format
+        start_token: int = 0
+        idx: int
+        category: List[str] = None
+        for idx, char in enumerate(line):
+
+            if category and char not in category:
+                tokens.append(line[start_token:idx])
+                category = None
+
+            if not category:
+                category = '\u0000'
+                for cat in categories:
+                    if char in cat:
+                        category = cat
+                        break
+                start_token = idx
+
+        if start_token <= idx:
+            tokens.append(line[start_token:])
+        return tokens
+
+
+    @classmethod
+    def _parse_for_synonym_candidates(cls, tokens: List[str]) -> List[str]:
+        """
+        A list of tokens is passed in.
+        We parse with the following rules:
+        prefix " str str str .. str " -  prefix is applied to all terms inside of the "  " tokens
+        token after a '-' token is ignored unless it is between quotes, then it is ignored
+        '@' mean ignore next token, if next token is ", ignore everything until the balancing " or until end of list
+        :param tokens:
+        :return: List[str] of tokens that are candidates as synonym tokens
+        """
+
+        candidates: List[str] = []
+        previous_token: str = None
+        double_quote_flag: bool = False
+        skip_token_flag: bool = False
+
+        for token in tokens:
+            if token in string.whitespace:
+                previous_token = token
+                if not double_quote_flag:
+                    skip_token_flag = False
                 continue
 
-            if letter == '"':
-                quotes_on = not quotes_on
+            elif token is DOUBLE_QUOTE:
+                if double_quote_flag:
+                    skip_token_flag = False
+                double_quote_flag = not double_quote_flag
+                previous_token = token
+                continue
 
-                if not ignore_indicator_on:
+            elif token is HYPHEN:
+                if double_quote_flag:
+                    previous_token = token
                     continue
 
-            if letter == ' ' and not quotes_on:
-                if not ignore_indicator_on:
-                    if word != '':
-                        tokens.append(word)
-                        word = ''
+                if previous_token in string.whitespace:
+                    skip_token_flag = True
+                    previous_token = token
+                    continue
 
-                ignore_indicator_on = False
-
+            elif token is NO_SYNONYMS_INDICATOR:
+                skip_token_flag = True
+                previous_token = token
                 continue
 
-            if not ignore_indicator_on:
-                word += letter
+            else:
+                if skip_token_flag:
+                    if not double_quote_flag:
+                        skip_token_flag = False
 
-        # Handle when the last word was prefixed with the indicator.
-        if not ignore_indicator_on and word != '':
-            tokens.append(word)
+                    previous_token = token
+                    continue
 
-        return tokens
+                candidates.append(token)
+
+            previous_token = token
+
+        return candidates
 
     # Call the synonyms API for the given token.
     @classmethod
@@ -174,11 +248,13 @@ class SolrQueries:
         clause = ''
         synonyms = []
 
-        tokens = cls._tokenize_name(name)
-        for token in tokens:
-            # We will ignore some special characters. This list is not exhaustive and will likely need rework.
-            token = re.sub('\+', '', token)
-
+        tokens = cls._tokenize(name, [string.digits,
+                                      string.whitespace,
+                                      RESERVED_CHARACTERS,
+                                      string.punctuation,
+                                      string.ascii_lowercase])
+        candidates = cls._parse_for_synonym_candidates(tokens)
+        for token in candidates:
             if cls._synonyms_exist(token):
                 synonyms.append(token)
 

@@ -1,10 +1,12 @@
 #
 # Pytests for checking the code that produces the more intricate components of the Solr query string.
 #
+import string
+from typing import List
 
 import pytest
 
-from namex.analytics.solr import NO_SYNONYMS_INDICATOR, NO_SYNONYMS_PREFIX, SolrQueries
+from namex.analytics.solr import NO_SYNONYMS_INDICATOR, NO_SYNONYMS_PREFIX, RESERVED_CHARACTERS, SolrQueries
 
 
 compress_name_test_data = [
@@ -22,20 +24,12 @@ compress_name_test_data = [
     ('waffle mania inc. / le wafflemania inc.', 'wafflemanialewafflemania'),
 ]
 
-tokenize_name_test_data = [
-    ('waffle', ['waffle']),
-    (' waffle', ['waffle']),
-    ('waffle ', ['waffle']),
-    ('waffle mania', ['waffle', 'mania']),
-    (' waffle mania', ['waffle', 'mania']),
-    ('waffle mania ', ['waffle', 'mania']),
-    ('   waffle   mania   ', ['waffle', 'mania']),
-    ('-waffle mania', ['mania']),
-    ('waffle -mania', ['waffle']),
-    ('waffle "mania inc"', ['waffle', 'mania inc']),
-    ('waffle -"mania inc"', ['waffle']),
-    ('   waffle     -"   mania    inc   "    ', ['waffle']),
-]
+
+@pytest.mark.parametrize("name,expected", compress_name_test_data)
+def test_compress_name(name, expected):
+    response = SolrQueries._compress_name(name)
+
+    assert expected == response
 
 name_copy_test_data = [
     ('waffle corp', ''),
@@ -57,22 +51,62 @@ name_copy_test_data = [
 ]
 
 
-@pytest.mark.parametrize("name,expected", compress_name_test_data)
-def test_compress_name(name, expected):
-    response = SolrQueries()._compress_name(name)
-
-    assert expected == response
-
-
-@pytest.mark.parametrize("search_string,expected", tokenize_name_test_data)
-def test_tokenize_name(search_string, expected):
-    response = SolrQueries()._tokenize_name(search_string)
-
-    assert expected == response
-
-
 @pytest.mark.parametrize("search_string,expected", name_copy_test_data)
 def test_get_name_copy_clause(search_string, expected):
-    response = SolrQueries()._get_name_copy_clause(search_string)
+    response = SolrQueries._get_name_copy_clause(search_string)
 
     assert expected == response
+
+
+name_tokenize_data = [
+    ('three tokens', ['three', ' ', 'tokens']),
+    ('skinny garçon "puppy-records" ®',
+     ['skinny', ' ', 'gar', 'ç', 'on', ' ', '"', 'puppy', '-', 'records', '"', ' ', '®']),
+    ('skinny "puppy-records" ®',
+     ['skinny', ' ', '"', 'puppy', '-', 'records', '"', ' ', '®']),
+    ('waffle', ['waffle']),
+    (' waffle', [' ', 'waffle']),
+    ('waffle ', ['waffle', ' ']),
+    ('waffle mania', ['waffle', ' ', 'mania']),
+    (' waffle mania', [' ', 'waffle', ' ', 'mania']),
+    ('waffle mania ', ['waffle', ' ', 'mania', ' ']),
+]
+
+
+@pytest.mark.parametrize("name_string, expected", name_tokenize_data)
+def test_tokenz(name_string, expected):
+
+    response = SolrQueries._tokenize(name_string,
+                                     [string.digits,
+                                      string.whitespace,
+                                      RESERVED_CHARACTERS,
+                                      string.punctuation,
+                                      string.ascii_lowercase])
+
+    assert expected == response
+
+
+name_parse_data = [
+    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', '-', '"', 'records', '"'], ['skinny']),
+    (['skinny', ' ', '"', 'puppy', ' ', 'records', '"'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', 'puppy', '-', 'records'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', 'puppy', ' ', '-', 'records'], ['skinny', 'puppy']),
+    (['skinny', ' ', '@', 'puppy'], ['skinny']),
+    (['skinny', ' ', '@', '"', 'puppy', ' ', 'records', '"'], ['skinny']),
+    (['skinny', ' ', '@', '"', 'puppy', '-', 'records', '"'], ['skinny']),
+    (['skinny', ' ', '@', '"', 'puppy', ' ', 'records', '"', 'chain'], ['skinny', 'chain']),
+    (['skinny', ' ', '@', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
+]
+
+
+@pytest.mark.parametrize("tokens, expected", name_parse_data)
+def test_parse_for_synonym_candidates(tokens, expected):
+
+    synonym_candidates = SolrQueries._parse_for_synonym_candidates(tokens)
+
+    print (synonym_candidates)
+
+    assert expected == synonym_candidates
+
