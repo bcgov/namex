@@ -60,6 +60,21 @@ class Name(db.Model):
         # force uppercase names
         self.name = self.name.upper()
 
+        # remove NR numbers from conflicts - replace with generic NR number
+        # - this is for regulatory/privacy reasons
+        try:
+            if self.conflict1_num[0:2] == 'NR': self.conflict1_num = "NR 0000000"
+        except (TypeError, IndexError) as e:
+            pass
+        try:
+            if self.conflict2_num[0:2] == 'NR': self.conflict2_num = "NR 0000000"
+        except (TypeError, IndexError) as e:
+            pass
+        try:
+            if self.conflict3_num[0:2] == 'NR': self.conflict3_num = "NR 0000000"
+        except (TypeError, IndexError) as e:
+            pass
+
         db.session.add(self)
         db.session.commit()
 
