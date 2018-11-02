@@ -6,6 +6,10 @@ from flask import request, jsonify, g, current_app, get_flashed_messages
 from flask_restplus import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
+from namex.utils.logging import setup_logging
+setup_logging() ## important to do this first
+
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
@@ -27,6 +31,7 @@ from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANAL
 from namex.services.nro import NROServicesError
 
 import datetime
+from datetime import datetime as dt
 import json
 import urllib
 import sys
@@ -209,7 +214,7 @@ class Requests(Resource):
         if activeUser:
             q = q.join(RequestDAO.activeUser).filter(User.username.ilike('%'+activeUser+'%'))
 
-        #TODO: fix count on search by compName -- returns count of all names that match
+#******      #TODO: fix count on search by compName -- returns count of all names that match
         # -- want it to be all NRs (nrs can have multiple names that match)
         # ---- right now count is adjusted on the frontend in method 'populateTable'
         if compName:
@@ -1013,17 +1018,36 @@ class Stats(Resource):
         # default is last 1 hour, but can be sent as parameter
         timespan = int(request.args.get('timespan', 1))
 
-        q = RequestDAO.query\
-            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE + [State.CANCELLED]))\
-            .filter(RequestDAO.lastUpdate >= datetime.datetime.utcnow() - datetime.timedelta(hours=timespan))\
+        # validate row & start params
+        start = request.args.get('currentpage', 1)
+        rows = request.args.get('perpage', 100)
+
+        try:
+            start = int(start) - 1
+            rows = int(rows)
+        except Exception as err:
+            current_app.logger.info('start or rows not an int, err: {}'.format(err))
+            return jsonify({'message': 'paging parameters were not integers'}), 406
+
+        q = RequestDAO.query \
+            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE))\
+            .filter(RequestDAO.lastUpdate >= text('NOW() - INTERVAL \'{delay} HOURS\''.format(delay=timespan))) \
             .order_by(RequestDAO.lastUpdate.desc())
 
-        requests = q.all()
+        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+        count = db.session.execute(count_q).scalar()
 
+        q = q.offset(start)
+        q = q.limit(rows)
+
+        # current_app.logger.debug(str(q.statement.compile(
+        #     dialect=postgresql.dialect(),
+        #     compile_kwargs={"literal_binds": True}))
+        # )
+
+        requests = q.all()
         rep = {
-            'numRecords': len(requests),
+            'numRecords': count,
             'nameRequests': request_search_schemas.dump(requests)[0]
         }
-
         return jsonify(rep)
-
