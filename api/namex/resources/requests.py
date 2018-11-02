@@ -214,7 +214,7 @@ class Requests(Resource):
         if activeUser:
             q = q.join(RequestDAO.activeUser).filter(User.username.ilike('%'+activeUser+'%'))
 
-#******      #TODO: fix count on search by compName -- returns count of all names that match
+        #TODO: fix count on search by compName -- returns count of all names that match
         # -- want it to be all NRs (nrs can have multiple names that match)
         # ---- right now count is adjusted on the frontend in method 'populateTable'
         if compName:
@@ -1023,14 +1023,14 @@ class Stats(Resource):
         rows = request.args.get('perpage', 100)
 
         try:
-            start = int(start) - 1
             rows = int(rows)
+            start = (int(start)-1) * rows
         except Exception as err:
             current_app.logger.info('start or rows not an int, err: {}'.format(err))
             return jsonify({'message': 'paging parameters were not integers'}), 406
 
         q = RequestDAO.query \
-            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE))\
+            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE + [State.CANCELLED]))\
             .filter(RequestDAO.lastUpdate >= text('NOW() - INTERVAL \'{delay} HOURS\''.format(delay=timespan))) \
             .order_by(RequestDAO.lastUpdate.desc())
 
