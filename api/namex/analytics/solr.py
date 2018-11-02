@@ -245,14 +245,16 @@ class SolrQueries:
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod
     def _get_synonyms_clause(cls, name):
+
+        current_app.logger.debug('getting synonyms for: {}'.format(name))
         clause = ''
         synonyms = []
 
-        tokens = cls._tokenize(name, [string.digits,
-                                      string.whitespace,
-                                      RESERVED_CHARACTERS,
-                                      string.punctuation,
-                                      string.ascii_lowercase])
+        tokens = cls._tokenize(name.lower(), [string.digits,
+                                              string.whitespace,
+                                              RESERVED_CHARACTERS,
+                                              string.punctuation,
+                                              string.ascii_lowercase])
         candidates = cls._parse_for_synonym_candidates(tokens)
         for token in candidates:
             if cls._synonyms_exist(token):

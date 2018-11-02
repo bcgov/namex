@@ -70,6 +70,7 @@ name_tokenize_data = [
     ('waffle mania', ['waffle', ' ', 'mania']),
     (' waffle mania', [' ', 'waffle', ' ', 'mania']),
     ('waffle mania ', ['waffle', ' ', 'mania', ' ']),
+    ("dave's auto services ltd.", ['dave', "'", 's', ' ', 'auto', ' ', 'services', ' ', 'ltd', '.']),
 ]
 
 

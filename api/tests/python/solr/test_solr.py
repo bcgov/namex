@@ -65,3 +65,22 @@ def test_get_results_query_to_solr(mocker, monkeypatch, name, compresed_name, es
     mocker.patch('urllib.request.urlopen')
     response = SolrQueries.get_results(SolrQueries.CONFLICTS, name)
     urllib.request.urlopen.assert_called_once_with(query)
+
+
+solr_get_synonym_test_data = [
+    ("DAVE'S AUTO SERVICES LTD.", 'dave%20%27%20s%20auto%20services%20ltd%20.'),
+]
+
+
+@pytest.mark.parametrize("name, expected", solr_get_synonym_test_data)
+def test_solr__get_synonyms_clause(monkeypatch, name, expected):
+
+    def mock_solr__synonyms_exist(token):
+        return True
+    monkeypatch.setattr(SolrQueries, '_synonyms_exist', mock_solr__synonyms_exist)
+
+    syn = SolrQueries._get_synonyms_clause(name)
+
+    print (syn)
+
+    assert SYNONYMS_PREFIX+'(' + expected + ')' == syn
