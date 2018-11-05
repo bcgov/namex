@@ -1020,7 +1020,7 @@ class Stats(Resource):
 
         # validate row & start params
         start = request.args.get('currentpage', 1)
-        rows = request.args.get('perpage', 100)
+        rows = request.args.get('perpage', 50)
 
         try:
             rows = int(rows)
@@ -1030,7 +1030,7 @@ class Stats(Resource):
             return jsonify({'message': 'paging parameters were not integers'}), 406
 
         q = RequestDAO.query \
-            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE + [State.CANCELLED]))\
+            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE))\
             .filter(RequestDAO.lastUpdate >= text('NOW() - INTERVAL \'{delay} HOURS\''.format(delay=timespan))) \
             .order_by(RequestDAO.lastUpdate.desc())
 
