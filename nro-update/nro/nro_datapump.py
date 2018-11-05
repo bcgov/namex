@@ -41,11 +41,11 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
             )
 
         if name.conflict1:
-            nro_names[choice]['conflict1'] = '{}****{}'.format(name.conflict1_num[:10], name.conflict1[:150])
+            nro_names[choice]['conflict1'] = '{}****{}'.format(_clear_NR_num_from_conflict(name.conflict1_num[:10]), name.conflict1[:150])
         if name.conflict2:
-            nro_names[choice]['conflict2'] = '{}****{}'.format(name.conflict2_num[:10], name.conflict2[:150])
+            nro_names[choice]['conflict2'] = '{}****{}'.format(_clear_NR_num_from_conflict(name.conflict2_num[:10]), name.conflict2[:150])
         if name.conflict3:
-            nro_names[choice]['conflict3'] = '{}****{}'.format(name.conflict3_num[:10], name.conflict3[:150])
+            nro_names[choice]['conflict3'] = '{}****{}'.format(_clear_NR_num_from_conflict(name.conflict3_num[:10]), name.conflict3[:150])
 
         if name.comment:
             # use the last name comment as the examiner comment, whether that was a rejection or approval
@@ -91,3 +91,17 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=60):
     # and record the expiry date we sent to NRO
     nr.furnished = 'Y'
     nr.expirationDate = expiry_date
+
+def _clear_NR_num_from_conflict(conflict_num):
+    '''
+    Remove NR numbers from conflicts when pushing to Oracle - replace with "NR", this is for
+    regulatory/privacy reasons.
+    :param conflict_num:
+    :return: string - conflict_num
+    '''
+    try:
+        if conflict_num[:2] == 'NR': conflict_num = "NR"
+    except (TypeError, IndexError) as e:
+        pass
+
+    return conflict_num
