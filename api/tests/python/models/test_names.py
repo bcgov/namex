@@ -101,7 +101,7 @@ def test_name_update_via_save_to_db_method(session):
     assert name.id is not None
     assert name.id == name_id
     assert name.name == test_name.upper() # name should be uppercase
-    assert name.conflict1_num == "NR 0000000" # NR number conflicts should be replaced with NR 0000000
+    assert name.conflict1_num == "NR 0000001" # NR number conflicts should be unchanged
     assert name.conflict2_num == "A123456" # corp number conflicts should be unchanged
     assert name.conflict3_num in ("", None)
 
