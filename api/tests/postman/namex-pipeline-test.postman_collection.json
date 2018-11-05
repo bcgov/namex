@@ -2786,238 +2786,6 @@
 					"response": []
 				},
 				{
-					"name": "/requests - furnished=false",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "828fd0f9-f533-461f-89b5-70f6693436f4",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"id": "2355404c-83ce-4397-a442-0cecb2f85f58",
-								"type": "text/javascript",
-								"exec": [
-									"eval(globals.postmanBDD);",
-									"",
-									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
-									"",
-									"",
-									"it('Should be an success response', () => {",
-									"    response.ok.should.be.true;            // 2XX",
-									"    response.error.should.be.false;          // 4XX or 5XX",
-									"    response.clientError.should.be.false;    // 4XX",
-									"    response.serverError.should.be.false;   // 5XX",
-									"    response.should.have.status(200);",
-									"    response.statusType.should.equal(2);",
-									"});",
-									"",
-									"it('Should return JSON', () => {",
-									"    response.should.be.json;",
-									"    response.should.have.header('Content-Type', 'application/json');",
-									"    response.type.should.equal('application/json');",
-									"});",
-									"",
-									"it('Should contain the un-parsed JSON text', () => {",
-									"    response.text.should.be.a('string').with.length.above(10);",
-									"});",
-									"",
-									"it('Should contain the parsed JSON keys', () => {",
-									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
-									"});",
-									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
-									"",
-									"it('Should match against a JSON Schema', () => {",
-									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
-									"    response.body.should.have.schema({",
-									"        type: 'object',",
-									"        required: ['nameRequests', 'response']",
-									"    });",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests[0];",
-									"    for (var i=0;i<nameRequests.length;i++) {",
-									"        nameRequests[i].should.have.schema({",
-									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
-									"        });",
-									"    }",
-									"}); ",
-									"",
-									"describe('No NameRequests should be \\'unfurnished\\'', () => {",
-									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
-									"          response.body.nameRequests[0][i].should.have.property('furnished')",
-									"          response.body.nameRequests[0][i].furnished.should.equal('N')",
-									"      }",
-									"  })",
-									"})",
-									""
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{url}}/api/v1/requests?furnished=false&rows=10",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"requests"
-							],
-							"query": [
-								{
-									"key": "furnished",
-									"value": "false"
-								},
-								{
-									"key": "rows",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/requests - unfurnished=false",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "828fd0f9-f533-461f-89b5-70f6693436f4",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"id": "46a38d4c-2d18-4347-b5a3-4963752b6142",
-								"type": "text/javascript",
-								"exec": [
-									"eval(globals.postmanBDD);",
-									"",
-									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
-									"",
-									"",
-									"it('Should be an success response', () => {",
-									"    response.ok.should.be.true;            // 2XX",
-									"    response.error.should.be.false;          // 4XX or 5XX",
-									"    response.clientError.should.be.false;    // 4XX",
-									"    response.serverError.should.be.false;   // 5XX",
-									"    response.should.have.status(200);",
-									"    response.statusType.should.equal(2);",
-									"});",
-									"",
-									"it('Should return JSON', () => {",
-									"    response.should.be.json;",
-									"    response.should.have.header('Content-Type', 'application/json');",
-									"    response.type.should.equal('application/json');",
-									"});",
-									"",
-									"it('Should contain the un-parsed JSON text', () => {",
-									"    response.text.should.be.a('string').with.length.above(10);",
-									"});",
-									"",
-									"it('Should contain the parsed JSON keys', () => {",
-									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
-									"});",
-									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
-									"",
-									"it('Should match against a JSON Schema', () => {",
-									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
-									"    response.body.should.have.schema({",
-									"        type: 'object',",
-									"        required: ['nameRequests', 'response']",
-									"    });",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"it('Should return the required fields in nameRequests', () => {",
-									"    var nameRequests = jsonData.nameRequests[0];",
-									"    for (var i=0;i<nameRequests.length;i++) {",
-									"        nameRequests[i].should.have.schema({",
-									"            type: 'object',",
-									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
-									"        });",
-									"    }",
-									"}); ",
-									"",
-									"describe('No NameRequests should be \\'unfurnished\\'', () => {",
-									"  it('Should check the id property is present', () => {",
-									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
-									"          response.body.nameRequests[0][i].should.have.property('furnished')",
-									"          response.body.nameRequests[0][i].furnished.should.equal('Y')",
-									"      }",
-									"  })",
-									"})",
-									""
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{url}}/api/v1/requests?unfurnished=false&rows=10",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"requests"
-							],
-							"query": [
-								{
-									"key": "unfurnished",
-									"value": "false"
-								},
-								{
-									"key": "rows",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "/requests - PriorityCd:desc & submitDate:asc",
 					"event": [
 						{
@@ -3338,7 +3106,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests?furnished=false",
+							"raw": "{{url}}/api/v1/requests?notified=Not Notified",
 							"host": [
 								"{{url}}"
 							],
@@ -3349,8 +3117,8 @@
 							],
 							"query": [
 								{
-									"key": "furnished",
-									"value": "false"
+									"key": "notified",
+									"value": "Not Notified"
 								}
 							]
 						}
@@ -3450,7 +3218,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests?notification=notified",
+							"raw": "{{url}}/api/v1/requests?notification=Notified",
 							"host": [
 								"{{url}}"
 							],
@@ -3462,7 +3230,7 @@
 							"query": [
 								{
 									"key": "notification",
-									"value": "notified"
+									"value": "Notified"
 								}
 							]
 						}
