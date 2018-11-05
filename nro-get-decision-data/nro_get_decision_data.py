@@ -97,7 +97,7 @@ try:
                 continue
 
 
-            # update NR with data - keep last update date as is
+            # update names with decision data
             namex_names = nr.names.all()
             for nro_name in nro_names:
                 for namex_name in namex_names:
@@ -110,13 +110,8 @@ try:
                         namex_name.conflict2_num = nro_name['conflict_2_number']
                         namex_name.conflict3_num = nro_name['conflict_3_number']
 
-                        #namex_name.save()
-
                         db.session.add(namex_name)
             db.session.commit()
-
-
-
 
             # update status in processing table
             db.engine.execute("update get_decision_data_table_tracker "
