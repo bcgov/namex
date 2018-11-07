@@ -17,7 +17,7 @@ AS
        AND rs.state_type_cd = 'COMPLETED'
        AND ns.name_state_type_cd IN ('A', 'C')
        AND ni.consumption_date IS NULL
-       AND TRUNC (ri.expiration_date) > TRUNC (SYSDATE)
+       AND TRUNC (ri.expiration_date) >= TRUNC (SYSDATE)
        AND ri.request_type_cd NOT IN
                ('CEM', 'CFR', 'CLL', 'CLP', 'FR', 'LIB', 'LL', 'LP', 'NON', 'PAR', 'RLY', 'TMY',
                 'XCLL', 'XCLP', 'XLL', 'XLP');
