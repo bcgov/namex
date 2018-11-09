@@ -8,7 +8,7 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(1000))
+    username = db.Column(db.String(1000), index=True)
     firstname = db.Column(db.String(1000))
     lastname = db.Column(db.String(1000))
     sub = db.Column(db.String(36), unique=True)
