@@ -17,7 +17,7 @@ class PartnerNameSystem(db.Model):
     requested = db.Column('requested', db.Boolean(), default=False)
 
     # parent keys
-    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
+    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
 
     def as_dict(self):
         return {

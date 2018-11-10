@@ -25,7 +25,7 @@ class Request(db.Model):
 
     # core fields
     id = db.Column(db.Integer, primary_key=True)
-    submittedDate = db.Column('submitted_date', db.DateTime, default=datetime.utcnow)
+    submittedDate = db.Column('submitted_date', db.DateTime, default=datetime.utcnow, index=True)
     lastUpdate = db.Column('last_update', db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     nrNum = db.Column('nr_num', db.String(10), unique=True)
@@ -39,10 +39,10 @@ class Request(db.Model):
     corpNum = db.Column('corp_num', db.String(20), default=None)
     submitter_userid = db.Column('submitter_userid', db.Integer, db.ForeignKey('users.id'))
     #legacy sync tracking
-    furnished = db.Column('furnished', db.String(1), default='N')
+    furnished = db.Column('furnished', db.String(1), default='N', index=True)
 
     # parent keys
-    userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+    userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'), index=True)
 
     # legacy fields
     requestId = db.Column('request_id', db.Integer)
@@ -51,7 +51,7 @@ class Request(db.Model):
     nroLastUpdate = db.Column('nro_last_update', db.DateTime)
 
     # Relationship State
-    stateCd = db.Column('state_cd', db.String(40), db.ForeignKey('states.cd'))
+    stateCd = db.Column('state_cd', db.String(40), db.ForeignKey('states.cd'), index=True)
     # Relationships - Users
     activeUser = db.relationship('User', backref=backref('active_user', uselist=False), foreign_keys=[userId])
     submitter = db.relationship('User', backref=backref('submitter', uselist=False), foreign_keys=[submitter_userid])

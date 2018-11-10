@@ -12,8 +12,8 @@ class Comment(db.Model):
     timestamp = db.Column('timestamp', db.DateTime, default=datetime.utcnow)
 
     # parent keys
-    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
-    examinerId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
+    examinerId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'), index=True)
 
     # Relationships - Users
     examiner = db.relationship("User", backref=backref("examiner_comments"), foreign_keys=[examinerId])
