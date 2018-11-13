@@ -352,6 +352,7 @@ class Request(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
+            start_state = nrd.stateCd
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
@@ -402,6 +403,13 @@ class Request(Resource):
                         new_comment.nrId = nrd.id
 
             ### END comments ###
+
+            # if our state wasn't INPROGRESS and it is now, ensure the furnished flag is N
+            if (start_state in locals()
+                and start_state != State.INPROGRESS
+                and nrd.stateCd == State.INPROGRESS):
+                # set / reset the furnished flag to N
+                nrd.furnished = 'N'
 
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
@@ -498,7 +506,6 @@ class Request(Resource):
             if errors:
                 # return jsonify(errors), 400
                 MessageServices.add_message(MessageServices.ERROR, 'request_validation', errors)
-
 
             # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
             reset = False
