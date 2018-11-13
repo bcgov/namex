@@ -30,9 +30,14 @@ with open('trademarks.json') as file:
         if count % 1000 == 0:
             print(count)
 
-        # 20 (or thereabouts) in a batch is the sweet spot when running locally.
-        if count % 20 != 0:
+        # 20 (or thereabouts) in a batch was the sweet spot when running locally on Windows 7. New Windows 10 laptops
+        # are much faster and actually bomb if the value is too low. The problem is that it sends the data so quickly
+        # that the entire connection pool ends up in TIME_WAIT status and new connections cannot be created.
+        if count % 100 != 0:
             continue
+
+        if count % 50000 == 0:
+            requests.post(SOLR_URL, data='{ "commit": {} }')
 
         response = requests.post(SOLR_URL, data='{' + ','.join(json) + '}')
 
