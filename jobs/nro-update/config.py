@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv, find_dotenv
 
-#this will load all the envars from a .env file located in the project root (api)
+# this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
 
@@ -11,6 +11,8 @@ class Config(object):
     MAX_ROW_LIMIT = os.getenv('MAX_ROWS','100')
     MIN_DELAY_SECONDS = os.getenv('MIN_DELAY_SECONDS','600')
     EXPIRES_DAYS = os.getenv('EXPIRES_DAYS','60')
+
+    NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

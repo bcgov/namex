@@ -9,7 +9,7 @@ class BaseConfig(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    NRO_SERVICE_ACCOUNT = 'nro_service_account'
+    NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

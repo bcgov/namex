@@ -19,6 +19,8 @@ class Config(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
+
     SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
     SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
     NRO_EXTRACTOR_URI = os.getenv('NRO_EXTRACTOR_URI', None)

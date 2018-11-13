@@ -1,18 +1,21 @@
-from namex.utils.logging import setup_logging
-setup_logging() ## important to do this first
+import sys
+from datetime import datetime, timedelta
 
+import cx_Oracle
 from sqlalchemy.dialects import postgresql
 from sqlalchemy import text
+from flask import Flask, g, current_app
+
+from namex.utils.logging import setup_logging
+from namex.models import Request, State, User, Event
+from namex.services import EventRecorder
+
+from config import Config
 from nro.nro_datapump import nro_data_pump_update
 from nro.app import create_app, db
-from datetime import datetime, timedelta
-import cx_Oracle
-import sys
-from flask import Flask, g, current_app
-from config import Config
-from namex.models import Request, State
 from util.job_tracker import JobTracker
 
+setup_logging() # important to do this first
 
 def get_ops_params():
     try:
@@ -44,6 +47,9 @@ row_count = 0
 
 try:
     job_id = JobTracker.start_job(db, start_time)
+
+    # get the service account user to save BRO Requests
+    user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
 
     ora_con = cx_Oracle.connect(Config.ORA_USER,
                                 Config.ORA_PASSWORD,
@@ -81,6 +87,7 @@ try:
 
             nro_data_pump_update(r, ora_cursor, expires_days)
             db.session.add(r)
+            EventRecorder.record(user, Event.NRO_UPDATE, r, {}, save_to_session=True)
 
             ora_con.commit()
             db.session.commit()
@@ -92,7 +99,6 @@ try:
             db.session.rollback()
             ora_con.rollback()
             JobTracker.job_detail_error(db, job_id, r.nrNum, str(err))
-
 
     JobTracker.end_job(db, job_id, datetime.utcnow(), 'success')
 
