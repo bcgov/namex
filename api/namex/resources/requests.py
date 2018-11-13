@@ -171,7 +171,6 @@ class Requests(Resource):
         # queue must be a list of states
         queue = request.args.get('queue', None)
         if queue:
-            states = queue.upper()
             if queue == 'COMPLETED':
                 queue = 'APPROVED,CONDITIONAL,REJECTED'
             queue = queue.upper().split(',')
