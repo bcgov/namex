@@ -211,7 +211,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
             -- If we don't care about it, mark it as ignored.
             status := STATUS_IGNORED;
 
-            IF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM', 'RESET') THEN
+            IF row_transaction_type_cd IN ('CANCL', 'CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM', 'RESET') THEN
                 SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
                         row_transaction_id;
 
@@ -249,7 +249,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                                 ACTION_UPDATE);
                         status := STATUS_COMPLETE;
                     END IF;
-                ELSIF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL') THEN
+                ELSIF row_transaction_type_cd IN ('CANCL', 'CONSUME', 'EXPIR', 'HISTORICAL') THEN
                     INSERT INTO solr_feeder (id, transaction_id, nr_num, solr_core, action) VALUES
                             (solr_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, SOLR_CORE_CONFLICTS,
                             ACTION_DELETE);
