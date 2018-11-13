@@ -31,6 +31,7 @@ class Event(db.Model):
     PATCH='patch'
     POST='post'
     DELETE='DELETE'
+    NRO_UPDATE = 'nro_update'
 
     VALID_ACTIONS=[GET, PUT, PATCH, POST, DELETE]
 
@@ -41,6 +42,9 @@ class Event(db.Model):
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
+
+    def save_to_session(self):
+        db.session.add(self)
 
     def delete_from_db(self):
         raise BusinessException()

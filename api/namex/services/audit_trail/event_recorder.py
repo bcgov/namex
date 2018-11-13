@@ -8,10 +8,13 @@ import zlib
 class EventRecorder(object):
 
     @staticmethod
-    def record(user, action, nr, data_dict):
+    def record(user, action, nr, data_dict, save_to_session=False):
         try:
             event = EventRecorder.create_event(user, action, nr, data_dict)
-            event.save_to_db()
+            if save_to_session:
+                event.save_to_session()
+            else:
+                event.save_to_db()
         except Exception as err:
             current_app.logger.error('AUDIT BROKEN: change was - NRNUM: {}, ACTION: {}, USER {}, JSON{}'
                                      .format(nr.nr_num, action, user.username, data_dict)

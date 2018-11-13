@@ -6,7 +6,7 @@ from namex.models import Request, Name, State, User
 
 
 # TODO Add more tests for the various use-cases.
-def test_datapump(mocker):
+def test_datapump(app, mocker):
 
     # create minimal NR to send to NRO
     nr = Request()
@@ -64,7 +64,7 @@ consent_testdata = [
 
 
 @pytest.mark.parametrize("consent_flag,state_cd", consent_testdata)
-def test_datapump_nr_requires_consent_flag(mocker,consent_flag,state_cd):
+def test_datapump_nr_requires_consent_flag(app, mocker,consent_flag,state_cd):
 
     # create minimal NR to send to NRO
     nr = Request()
