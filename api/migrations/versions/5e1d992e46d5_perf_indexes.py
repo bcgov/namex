@@ -1,7 +1,7 @@
 """perf_indexes
 
 Revision ID: 5e1d992e46d5
-Revises: 1246e7c47388
+Revises: 73d051437ad0
 Create Date: 2018-11-08 20:54:59.981331
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '5e1d992e46d5'
-down_revision = '1246e7c47388'
+down_revision = '73d051437ad0'
 branch_labels = None
 depends_on = None
 
@@ -30,14 +30,6 @@ def upgrade():
     op.create_index(op.f('ix_requests_submitted_date'), 'requests', ['submitted_date'], unique=False)
     op.create_index(op.f('ix_requests_user_id'), 'requests', ['user_id'], unique=False)
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=False)
-
-    op.execute("""
-    CREATE INDEX requests_completed_updated_at_index
-    ON public.requests USING btree
-    (last_update DESC)
-    TABLESPACE pg_default
-    WHERE state_cd::text = ANY (ARRAY['APPROVED'::character varying, 'REJECTED'::character varying, 'CONDITIONAL'::character varying]::text[]);
-    """)
 
     op.execute('CREATE INDEX ' + op.f('ix_names_name')
                + ' ON public.names USING btree'
@@ -70,5 +62,3 @@ def downgrade():
     op.drop_index(op.f('ix_comments_user_id'), table_name='comments')
     op.drop_index(op.f('ix_comments_nr_id'), table_name='comments')
     op.drop_index(op.f('ix_applicants_nr_id'), table_name='applicants')
-
-    op.drop_index(op.f('requests_completed_updated_at_index'), table_name='requests')

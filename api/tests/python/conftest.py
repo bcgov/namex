@@ -73,7 +73,7 @@ def db(app, request):
                 print ('Error: {}'.format(e))
         sess.commit()
 
-            # ############################################
+        # ############################################
         # There are 2 approaches, an empty database, or the same one that the app will use
         #     create the tables
         #     _db.create_all()
