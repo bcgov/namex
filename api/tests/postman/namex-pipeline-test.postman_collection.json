@@ -2786,6 +2786,117 @@
 					"response": []
 				},
 				{
+					"name": "/requests - queue = COMPLETED",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3d818d6a-3381-437f-b613-77ac1a5db3b6",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "228245f6-48c9-4820-b30d-6c15813aed40",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('All NameRequests should be in \\'REJECTED\\' or \\'APPROVED\\' or \\'CONDITIONAL\\'', () => {",
+									"  it('Should check the stateCd property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          pm.expect(response.body.nameRequests[0][i].stateCd).to.be.oneOf(['REJECTED','APPROVED','CONDITIONAL'])",
+									"      }",
+									"  })",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=COMPLETED",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "COMPLETED"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "/requests - PriorityCd:desc & submitDate:asc",
 					"event": [
 						{
@@ -3079,8 +3190,8 @@
 									"    }",
 									"}); ",
 									"",
-									"describe('No NameRequests should be \\'unfurnished\\'', () => {",
-									"  it('No NameRequests should be \\'unfurnished\\'', () => {",
+									"describe('No NameRequests should be \\'furnished\\'', () => {",
+									"  it('should check it has property furnished', () => {",
 									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
 									"          response.body.nameRequests[0][i].should.have.property('furnished')",
 									"          response.body.nameRequests[0][i].furnished.should.equal('N')",
@@ -3106,7 +3217,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/api/v1/requests?notified=Not Notified",
+							"raw": "{{url}}/api/v1/requests?notification=Not Notified",
 							"host": [
 								"{{url}}"
 							],
@@ -3117,7 +3228,7 @@
 							],
 							"query": [
 								{
-									"key": "notified",
+									"key": "notification",
 									"value": "Not Notified"
 								}
 							]
