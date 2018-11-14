@@ -1,13 +1,18 @@
-from namex.utils.logging import setup_logging
-setup_logging() ## important to do this first
-
-from datetime import datetime, timedelta
 import sys
-from flask import Flask, g, current_app
-from config import Config
-from namex import db
-from namex.models import Request, State
+
 from sqlalchemy import text
+from datetime import datetime, timedelta
+
+from flask import Flask, g, current_app
+
+from namex import db
+from namex.models import Request, State, User, Event
+from namex.services import EventRecorder
+from namex.utils.logging import setup_logging
+
+from config import Config
+
+setup_logging() ## important to do this first
 
 
 def create_app(config=Config):
@@ -16,17 +21,6 @@ def create_app(config=Config):
     db.init_app(app)
     app.app_context().push()
     current_app.logger.debug('created the Flask App and pushed the App Context')
-
-    # probably don't need this since not connecting to oracle
-    @app.teardown_appcontext
-    def shutdown_session(exception=None):
-        ''' Enable Flask to automatically remove database sessions at the
-         end of the request or when the application shuts down.
-         Ref: http://flask.pocoo.org/docs/patterns/sqlalchemy/
-        '''
-        current_app.logger.debug('Tearing down the Flask App and the App Context')
-        if hasattr(g, 'ora_conn'):
-            g.ora_conn.close()
 
     return app
 
@@ -39,22 +33,19 @@ def get_ops_params():
         max_rows = int(current_app.config.get('MAX_ROW_LIMIT', 100))
     except:
         max_rows = 100
-    try:
-        expires_days = int(current_app.config.get('EXPIRES_DAYS', 60))
-    except:
-        expires_days=60
 
-
-    return delay, max_rows, expires_days
+    return delay, max_rows
 
 
 app = create_app(Config)
-delay, max_rows, expires_days = get_ops_params()
+delay, max_rows = get_ops_params()
 
 start_time = datetime.utcnow()
 row_count = 0
 
 try:
+    user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
+
     reqs = db.session.query(Request).\
                 filter(Request.stateCd == State.INPROGRESS). \
                 filter(Request.lastUpdate <= text('NOW() - INTERVAL \'{delay} SECONDS\''.format(delay=delay))). \
@@ -69,6 +60,7 @@ try:
 
         r.stateCd = State.HOLD
         db.session.add(r)
+        EventRecorder.record(user, Event.MARKED_ON_HOLD, r, {}, save_to_session=True)
 
     db.session.commit()
 

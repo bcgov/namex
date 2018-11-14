@@ -13,6 +13,8 @@ class Config(object):
 
     SECRET_KEY = 'a secret'
 
+    NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # POSTGRESQL
