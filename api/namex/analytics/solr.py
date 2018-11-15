@@ -4,7 +4,6 @@ import string
 from typing import List
 
 from flask import current_app
-import urllib
 from urllib import request, parse
 from urllib.error import HTTPError
 
