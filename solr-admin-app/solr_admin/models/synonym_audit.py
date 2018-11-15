@@ -10,7 +10,6 @@ def _to_string(string):
 
     return string
 
-
 # The class that corresponds to the database table for synonym audits.
 class SynonymAudit(db.Model):
     __tablename__ = 'synonym_audit'
@@ -26,12 +25,12 @@ class SynonymAudit(db.Model):
     enabled = db.Column(db.Boolean())
 
     def __init__(
-            self, synonym_id: int, username: str, action: str, category: str, synonyms_text: str, comment: str,
+            self, username: str, action: str, synonym_id: int, category: str, synonyms_text: str, comment: str,
             enabled: bool) -> None:
         self.timestamp = datetime.datetime.now()
-        self.synonym_id = synonym_id
         self.username = username
         self.action = action
+        self.synonym_id = synonym_id
         self.category = _to_string(category)
         self.synonyms_text = synonyms_text
         self.comment = _to_string(comment)
