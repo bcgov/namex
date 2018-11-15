@@ -1,15 +1,14 @@
 import pytest
 from pytest_mock import mocker
-
-from namex import create_app, jwt as _jwt
 from flask import current_app
-from namex.models import db as _db
 from sqlalchemy import event, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, DropConstraint
 from flask_migrate import Migrate, upgrade
-import sys
-import os
+
+from namex import create_app, jwt as _jwt
+from namex.models import db as _db
+
 
 @pytest.fixture(scope="session")
 def app(request):
@@ -74,7 +73,7 @@ def db(app, request):
                 print ('Error: {}'.format(e))
         sess.commit()
 
-            # ############################################
+        # ############################################
         # There are 2 approaches, an empty database, or the same one that the app will use
         #     create the tables
         #     _db.create_all()

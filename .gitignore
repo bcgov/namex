@@ -93,3 +93,9 @@ solr/cores/.DS_Store
 */.pytest_cache
 .coverage
 .hypothesis
+
+# Solr core data
+#######################
+**/cores/**/data/index
+**/cores/**/data/tlog
+**/cores/**/core.properties

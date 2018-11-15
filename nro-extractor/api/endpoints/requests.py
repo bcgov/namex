@@ -8,6 +8,7 @@ from namex.models import Request, User, State, Applicant, Comment, PartnerNameSy
 from namex.services import EventRecorder
 
 import sys
+import re
 
 api = Namespace('nroRequests', description='Name Request System - extracts legacy NRs and puts them into the new system')
 
@@ -212,6 +213,18 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
         nr.priorityCd = 'Y'
     else:
         nr.priorityCd = 'N'
+
+
+    # if this was a change of name with related corp num, populate the corpNum field
+    # - the string in Additional Info field is form: **Change of Name** **XXXXXXXXXXXXXX**
+    try:
+        if '**Change of Name**' in nr.additionalInfo:
+            regex = r"\*\*Change of Name\*\* \*\*([a-zA-Z0-9]*)\*\*"
+            m = re.search(regex, nr.additionalInfo)
+            if m:
+                nr.corpNum = m.group(1)
+    except:
+        pass
 
 
 def add_comments(nr, comments, update=False):

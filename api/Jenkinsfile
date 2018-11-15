@@ -63,7 +63,7 @@ def notifySlack(text, channel, url, attachments) {
     ])
     def encodedReq = URLEncoder.encode(payload, "UTF-8")
     sh("curl -s -S -X POST " +
-            "--data \'payload=${encodedReq}\' ${slackURL}")    
+            "--data \'payload=${encodedReq}\' ${slackURL}")
 }
 
 // Determine whether there were any changes the files within the project's context directory.
@@ -81,7 +81,7 @@ String triggerBuild(String contextDirectory) {
             def entry = entries[j]
             //echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
             def files = new ArrayList(entry.affectedFiles)
-            
+
             for (int k = 0; k < files.size(); k++) {
                 def file = files[k]
                 def filePath = file.path
@@ -140,7 +140,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
     }
     try {
         timeout(time: 1, unit: 'DAYS') {
-            input message: "Run namex-api-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit'
+            input message: "Run namex-api-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
         }
     } catch (Exception e) {
         run_pipeline = false;
@@ -148,9 +148,55 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
 
 }
 
-if (run_pipeline) {
+if (!run_pipeline) {
+    // The changeSets did not contain any changes within the project's context directory.
+    // Clearly indicate there were no changes.
+    stage('No Changes') {
+        node {
+            SLACK_TOKEN = sh (
+                    script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
+                        returnStdout: true).trim()
 
-    node {
+            // send msg to slack
+            def attachment = [:]
+            attachment.fallback = "See build log for more details"
+            attachment.title = "NAMEX-API Build {$BUILD_ID} prevented because there were no changes"
+            attachment.color = "#00FF00" // Lime Green
+            attachment.text = "No changes applied to namex-api" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+            notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+
+            currentBuild.result = 'SUCCESS'
+        }
+    }
+} else {
+    //node/pod needs environment setup for testing
+    def py3njs_label = "jenkins-py3nodejs-${UUID.randomUUID().toString()}"
+    podTemplate(label: py3njs_label, name: py3njs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+        containerTemplate(
+            name: 'jnlp',
+            image: '172.50.0.2:5000/openshift/jenkins-slave-py3nodejs',
+            resourceRequestCpu: '500m',
+            resourceLimitCpu: '1000m',
+            resourceRequestMemory: '1Gi',
+            resourceLimitMemory: '2Gi',
+            workingDir: '/tmp',
+            command: '',
+            args: '${computer.jnlpmac} ${computer.name}',
+            envVars: [
+                envVar(key:'DATABASE_TEST_HOST', value: "postgresql-test"),
+                envVar(key:'DATABASE_TEST_PORT', value: "5432"),
+                secretEnvVar(key: 'DATABASE_TEST_USERNAME', secretName: 'postgresql-test', secretKey: 'database-user'),
+                secretEnvVar(key: 'DATABASE_TEST_PASSWORD', secretName: 'postgresql-test', secretKey: 'database-password'),
+                secretEnvVar(key: 'DATABASE_TEST_NAME', secretName: 'postgresql-test', secretKey: 'database-name'),
+                secretEnvVar(key: 'JWT_OIDC_WELL_KNOWN_CONFIG', secretName: 'namex-keycloak-secrets', secretKey: 'JWT_OIDC_WELL_KNOWN_CONFIG'),
+                secretEnvVar(key: 'JWT_OIDC_ALGORITHMS', secretName: 'namex-keycloak-secrets', secretKey: 'JWT_OIDC_ALGORITHMS'),
+                secretEnvVar(key: 'JWT_OIDC_AUDIENCE', secretName: 'namex-keycloak-secrets', secretKey: 'JWT_OIDC_AUDIENCE'),
+                secretEnvVar(key: 'JWT_OIDC_CLIENT_SECRET', secretName: 'namex-keycloak-secrets', secretKey: 'JWT_OIDC_CLIENT_SECRET')
+           ]
+        )
+    ])
+    {
+    node (py3njs_label){
         SLACK_TOKEN = sh (
                 script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
                     returnStdout: true).trim()
@@ -192,6 +238,45 @@ if (run_pipeline) {
                 notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
                 error('Aborted')
             }
+            stage ('local pytest') {
+                echo "Testing build: ${BUILD_ID}"
+                echo "Running tests "
+                try {
+                    sh '''
+                         cd api
+                         pip install pip --upgrade
+                         pip install -r requirements/dev.txt
+                         pytest --junitxml=pytest_report.xml
+                    '''
+                    junit 'api/pytest_report.xml'
+                    stash includes: 'api/pytest_report.xml', name: 'namex-pytests'
+
+                } catch (Exception e) {
+                    echo "EXCEPTION: ${e}"
+
+                    //send msg to slack
+                    attachment = [:]
+                    attachment.fallback = "See build log for more details"
+                    attachment.title = "NAMEX-API failed LOCAL PYTEST! :bangbang:"
+                    attachment.color = "danger" // red
+                    attachment.text = "- check logs for more info" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
+                    def logs = [:]
+                    logs.type = "button"
+                    logs.text = "Build Log"
+                    logs.url = "https://jenkins-servicebc-ne-tools.pathfinder.gov.bc.ca/job/servicebc-ne-tools/job/servicebc-ne-tools-namex-api-pipeline/${BUILD_ID}/console"
+                    logs.short = false
+                    attachment.actions = [logs]
+                    notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+                }
+
+                //send msg to slack
+                attachment = [:]
+                attachment.fallback = "See build log for more details"
+                attachment.title = "NAMEX-API passed local pytest! :white_check_mark:"
+                attachment.color = "#00FF00" // lime green
+                notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
+
+            } // end stage - local pytest
 
         }//end stage
 
@@ -310,6 +395,7 @@ if (run_pipeline) {
             notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
         }//end stage
     }//end node
+    }
 
     // Part 2 - Integration Testing API
 
@@ -515,7 +601,7 @@ if (run_pipeline) {
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit'
+                input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
@@ -741,7 +827,7 @@ if (run_pipeline) {
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy to prod?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit'
+                input message: "Deploy to prod?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
@@ -797,26 +883,6 @@ if (run_pipeline) {
                 notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
                 currentBuild.result='SUCCESS'
             }
-        }
-    }
-} else {
-    // The changeSets did not contain any changes within the project's context directory.
-    // Clearly indicate there were no changes.
-    stage('No Changes') {
-        node {
-            SLACK_TOKEN = sh (
-                    script: """oc get secret/slack -o template --template="{{.data.token}}" | base64 --decode""",
-                        returnStdout: true).trim()
-
-            // send msg to slack
-            def attachment = [:]
-            attachment.fallback = "See build log for more details"
-            attachment.title = "NAMEX-API Build {$BUILD_ID} prevented because there were no changes"
-            attachment.color = "#00FF00" // Lime Green
-            attachment.text = "No changes applied to namex-api" //+ "\nCommit ${GIT_COMMIT_SHORT_HASH} by ${GIT_COMMIT_AUTHOR}"
-            notifySlack("namex-api-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
-
-            currentBuild.result = 'SUCCESS'
         }
     }
 }
