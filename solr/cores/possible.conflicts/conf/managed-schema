@@ -753,7 +753,8 @@
           <filter class="solr.PatternReplaceFilterFactory" pattern="(,)" replacement="" replace="all"/>
           <filter class="solr.PatternReplaceFilterFactory" pattern="(\!)" replacement="" replace="all"/>
           <filter class="solr.PatternReplaceFilterFactory" pattern="(&amp;)" replacement="" replace="all"/>
-          <filter class="solr.PatternReplaceFilterFactory" pattern="([a-z]|\s)\1+" replacement="$1" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="([a-z])\1+" replacement="$1" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="\s" replacement="" replace="all"/>
       </analyzer>
     </fieldType>
 
