@@ -1,9 +1,9 @@
 from flask import jsonify, request
 from flask_restplus import Resource, Namespace, cors
 from namex.utils.util import cors_preflight
-import requests
 import json
 from namex import jwt
+import urllib
 
 api = Namespace('exactMatchMeta', description='Exact Match System - Metadata')
 import os
@@ -24,10 +24,10 @@ class ExactMatch(Resource):
               'sow=false' + \
               '&df=name_exact_match' + \
               '&wt=json' + \
-              '&q=' + query
-        results = requests.get(url)
-        text = results.text
-        answer = json.loads(text)
+              '&q=' + urllib.parse.quote(query)
+        print(url)
+        connection = urllib.request.urlopen(url)
+        answer = json.loads(connection.read())
         docs = answer['response']['docs']
         names =[{ 'name':doc['name'], 'id':doc['id'], 'source':doc['source'] } for doc in docs ]
 
