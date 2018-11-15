@@ -4,6 +4,7 @@ from namex.utils.util import cors_preflight
 import json
 from namex import jwt
 import urllib
+from flask import current_app
 
 api = Namespace('exactMatchMeta', description='Exact Match System - Metadata')
 import os
@@ -25,7 +26,7 @@ class ExactMatch(Resource):
               '&df=name_exact_match' + \
               '&wt=json' + \
               '&q=' + urllib.parse.quote(query)
-        print(url)
+        current_app.logger.debug('Exact-match query: ' + url)
         connection = urllib.request.urlopen(url)
         answer = json.loads(connection.read())
         docs = answer['response']['docs']
