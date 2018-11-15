@@ -4,6 +4,7 @@ import string
 from typing import List
 
 from flask import current_app
+import urllib
 from urllib import request, parse
 from urllib.error import HTTPError
 
@@ -24,6 +25,7 @@ SYNONYMS_PREFIX = '&fq=name_with_synonyms:'
 
 
 class SolrQueries:
+    SYN_CONFLICTS = 'synconflicts'
     CONFLICTS = 'conflicts'
     HISTORY = 'histories'
     TRADEMARKS = 'trademarks'
@@ -35,6 +37,10 @@ class SolrQueries:
     #     /solr/<core name>/select? ... &q={name} ... &wt=json&start={start}&rows={rows}&fl=source,id,name,score
     #
     queries = {
+        SYN_CONFLICTS:
+            '/solr/possible.conflicts/select?hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
+            'hl=on&indent=on&q=txt_starts_with:{start_str}&wt=json&'
+            'start={start}&rows={rows}&fl=source,id,name,score&sort=score%20desc{synonyms_clause}{name_copy_clause}',
         CONFLICTS:
             '/solr/possible.conflicts/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
@@ -50,6 +56,71 @@ class SolrQueries:
             'start={start}&rows={rows}&fl=application_number,name,status,description,score&'
             'bq=status:%22Registration%20published%22^5.0&sort=score%20desc{synonyms_clause}{name_copy_clause}'
     }
+
+    @classmethod
+    def get_synonym_results(cls, name, start=0, rows=100):
+        solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
+        if not solr_base_url:
+            current_app.logger.error('SOLR: SOLR_BASE_URL is not set')
+
+            return None, 'Internal server error', 500
+
+        try:
+            name = name.replace('&',' ').replace('+', '')
+            list_name_split = name.split()
+            combined_terms = ''
+            search_strs = []
+            iterator = 0
+            for term in list_name_split:
+                iterator += 1
+                combined_terms += term + '\\ '
+                search_strs.insert(0,(combined_terms.strip(),name[len(combined_terms)-iterator:]))
+
+            connections = []
+            for str_tuple in search_strs:
+                start_str = str_tuple[0][:-1]
+                synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
+                query = solr_base_url + SolrQueries.queries['synconflicts'].format(
+                    start=start,
+                    rows=rows,
+                    name=parse.quote(name.replace(NO_SYNONYMS_INDICATOR, '')),
+                    start_str=start_str.replace(' ','%20')+'*',
+                    synonyms_clause=synonyms_clause,
+                    name_copy_clause=cls._get_name_copy_clause(name)
+                )
+                current_app.logger.debug('Query: ' + query)
+                connections.append((request.urlopen(query),'----'+start_str.replace('\\','')+'*'+' '
+                                    +synonyms_clause.replace('&fq=name_with_','').replace('%20',', ')))
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'Internal server error', 500
+
+        try:
+            solr = {'response':{'numFound': 0,
+                                'start': None,
+                                'maxScore': 0.0,
+                                'docs': []},
+                    'highlighting': []}
+            for connection in connections:
+                result = json.load(connection[0])
+                solr['response']['numFound'] += result['response']['numFound']
+                solr['response']['start'] = result['response']['start']
+                solr['response']['docs'].append({'name': connection[1]})
+                if len(result['response']['docs']) > 0:
+                    solr['response']['docs'] += result['response']['docs']
+
+            results = {"response": {"numFound": solr['response']['numFound'],
+                                    "start": solr['response']['start'],
+                                    # "rows": solr['responseHeader']['params']['rows'],
+                                    "maxScore": solr['response']['maxScore'],
+                                    # "name": solr['responseHeader']['params']['q']
+                                    },
+                       'names': solr['response']['docs'],
+                       'highlighting': solr['highlighting']}
+            return results, '', None
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'Internal server error', 500
 
     @classmethod
     def get_results(cls, query_type, name, start=0, rows=10):
@@ -75,7 +146,6 @@ class SolrQueries:
                 name_copy_clause=cls._get_name_copy_clause(name)
             )
             current_app.logger.debug('Query: ' + query)
-
             connection = request.urlopen(query)
         except Exception as err:
             current_app.logger.error(err, query)
@@ -250,15 +320,16 @@ class SolrQueries:
         clause = ''
         synonyms = []
 
-        tokens = cls._tokenize(name.lower(), [string.digits,
-                                              string.whitespace,
-                                              RESERVED_CHARACTERS,
-                                              string.punctuation,
-                                              string.ascii_lowercase])
-        candidates = cls._parse_for_synonym_candidates(tokens)
-        for token in candidates:
-            if cls._synonyms_exist(token):
-                synonyms.append(token)
+        if name:
+            tokens = cls._tokenize(name.lower(), [string.digits,
+                                                  string.whitespace,
+                                                  RESERVED_CHARACTERS,
+                                                  string.punctuation,
+                                                  string.ascii_lowercase])
+            candidates = cls._parse_for_synonym_candidates(tokens)
+            for token in candidates:
+                if cls._synonyms_exist(token):
+                    synonyms.append(token)
 
         if synonyms:
             clause = SYNONYMS_PREFIX + '(' + parse.quote(' '.join(synonyms)) + ')'
