@@ -31,6 +31,7 @@ class Request(db.Model):
     nrNum = db.Column('nr_num', db.String(10), unique=True)
     requestTypeCd = db.Column('request_type_cd', db.String(10))
     priorityCd = db.Column('priority_cd', db.String(2))
+    priorityDate = db.Column('priority_date', db.DateTime)
     expirationDate = db.Column('expiration_date', db.DateTime)
     consentFlag = db.Column('consent_flag', db.String(1))
     additionalInfo = db.Column('additional_info', db.String(150))
@@ -82,7 +83,6 @@ class Request(db.Model):
         except:
             previousNr = None
 
-
         return {'id' : self.id,
                 'submittedDate' : self.submittedDate,
                 'lastUpdate' : self.lastUpdate,
@@ -94,6 +94,7 @@ class Request(db.Model):
                 'expirationDate' : self.expirationDate,
                 'requestTypeCd' : self.requestTypeCd,
                 'priorityCd' : self.priorityCd,
+                'priorityDate': self.priorityDate,
                 'xproJurisdiction' : self.xproJurisdiction,
                 'additionalInfo' : self.additionalInfo,
                 'natureBusinessInfo' : self.natureBusinessInfo,
@@ -225,6 +226,7 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'nrNum'
                  ,'nroLastUpdate'
                  ,'priorityCd'
+                 ,'priorityDate'
                  ,'requestTypeCd'
                  ,'stateCd'
                  ,'submitCount'
@@ -249,6 +251,7 @@ class RequestsSearchSchema(ma.ModelSchema):
                  ,'nrNum'
                  ,'nroLastUpdate'
                  ,'priorityCd'
+                 ,'priorityDate'
                  ,'requestTypeCd'
                  ,'stateCd'
                  ,'submitCount'
