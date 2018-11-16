@@ -1,14 +1,17 @@
+import sys
+import re
+import datetime
+
 from flask_restplus import Namespace, Resource, fields
 from flask import request, jsonify, current_app, g
 from sqlalchemy import text
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
+
 from api import db
 from namex.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name, Event
 from namex.services import EventRecorder
 
-import sys
-import re
 
 api = Namespace('nroRequests', description='Name Request System - extracts legacy NRs and puts them into the new system')
 
@@ -193,6 +196,9 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
     else:
         submitter = None
 
+    previous_priorityDate = nr.priorityDate
+    previous_priorityCd = nr.priorityCd
+
     nr.userId = user.id
     nr.stateCd = State.DRAFT if nr_header['state_type_cd'] is None else NR_STATE[nr_header['state_type_cd']]
     nr.nrNum = nr_header['nr_num']
@@ -204,6 +210,7 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
     nr.additionalInfo = nr_header['additional_info']
     nr.natureBusinessInfo = nr_header['nature_business_info']
     nr.xproJurisdiction = nr_header['xpro_jurisdiction']
+    # TODO This should NOT be None, but due to some legacy issues, it's set to None
     nr.submittedDate = None if not nr_submitter else nr_submitter['submitted_date']
     nr.submitter_userid = None if not submitter else submitter.id
     nr.nroLastUpdate = nr_header['last_update']
@@ -211,6 +218,10 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
 
     if nr_header['priority_cd'] == 'PQ':
         nr.priorityCd = 'Y'
+        if update and not previous_priorityDate:
+            nr.priorityDate = datetime.datetime.utcnow()
+        else:
+            nr.priorityDate = nr.submittedDate
     else:
         nr.priorityCd = 'N'
 
