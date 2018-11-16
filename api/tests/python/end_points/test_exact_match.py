@@ -247,6 +247,32 @@ def test_numbers_preserved(client, jwt, app):
     )
 
 @integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('J M HOLDINGS', 'J M HOLDINGS INC'),
+    ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
+    ('J&M HOLDINGS', 'JM HOLDINGS INC'),
+    ('J. & M. HOLDINGS', 'JM HOLDINGS INC'),
+    ('J and M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J or M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J-M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J_M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J_\'_-M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J@M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J=M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J!=@_M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J+M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J\M HOLDINGS', 'J. & M. HOLDINGS')
+])
+def test_explore_complex_cases(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_exact_match(client, jwt,
+       query=criteria,
+       expected=seed
+    )
+
+@integration_solr
 def test_returns_all_fields_that_we_need(client, jwt, app):
     seed_database_with(client, jwt, 'Van Trucking Inc', 'any-id', 'any-source')
     verify_exact_match_results(client, jwt,
@@ -256,21 +282,23 @@ def test_returns_all_fields_that_we_need(client, jwt, app):
        ]
     )
 
+
+@pytest.mark.skip(reason="dont know how to make solr handle those scenarios")
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
-    ('J M HOLDINGS', 'J M HOLDINGS INC'),
-    ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
-    ('J&M HOLDINGS', 'JM HOLDINGS INC'),
-    ('J. & M. HOLDINGS', 'JM HOLDINGS INC'),
-    ('J and M HOLDINGS', 'J. & M. HOLDINGS')
+    ('{JM} HOLDINGS', 'J. & M. HOLDINGS'),
+    ('[JM] HOLDINGS', 'J. & M. HOLDINGS'),
+    ('(JM) HOLDINGS', 'J.M HOLDINGS'),
+    ('J^M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J~M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J*M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J:M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J?M HOLDINGS', 'J. & M. HOLDINGS')
 ])
-def test_explore_complex_cases(client, jwt, app, criteria, seed):
+def test_special_characters(client, jwt, app, criteria, seed):
     seed_database_with(client, jwt, seed)
     verify_exact_match(client, jwt,
        query=criteria,
        expected=seed
     )
-
-
-
 
