@@ -748,11 +748,10 @@
           <filter class="solr.PatternReplaceFilterFactory" pattern=" soc."  replacement="" replace="all" />
 
           <filter class="solr.PatternReplaceFilterFactory" pattern=" and "  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" or "  replacement="" replace="all" />
 
-          <filter class="solr.PatternReplaceFilterFactory" pattern="(\.)" replacement="" replace="all"/>
-          <filter class="solr.PatternReplaceFilterFactory" pattern="(,)" replacement="" replace="all"/>
-          <filter class="solr.PatternReplaceFilterFactory" pattern="(\!)" replacement="" replace="all"/>
-          <filter class="solr.PatternReplaceFilterFactory" pattern="(&amp;)" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="(\.|\!|-|_|'|,|&amp;|@|\=)" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="\+" replacement="" replace="all"/>
           <filter class="solr.PatternReplaceFilterFactory" pattern="([a-z])\1+" replacement="$1" replace="all"/>
           <filter class="solr.PatternReplaceFilterFactory" pattern="\s" replacement="" replace="all"/>
       </analyzer>
