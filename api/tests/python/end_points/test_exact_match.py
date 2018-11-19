@@ -252,7 +252,8 @@ def test_numbers_preserved(client, jwt, app):
     ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
     ('J&M HOLDINGS', 'JM HOLDINGS INC'),
     ('J. & M. HOLDINGS', 'JM HOLDINGS INC'),
-    ('J and M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J and M HOLDINGS', 'J and M HOLDINGS'),
+    ('J AND M HOLDINGS', 'J AND M HOLDINGS'),
     ('J or M HOLDINGS', 'J. & M. HOLDINGS'),
     ('J-M HOLDINGS', 'J. & M. HOLDINGS'),
     ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
@@ -263,7 +264,8 @@ def test_numbers_preserved(client, jwt, app):
     ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
     ('J!=@_M HOLDINGS', 'J. & M. HOLDINGS'),
     ('J+M HOLDINGS', 'J. & M. HOLDINGS'),
-    ('J\M HOLDINGS', 'J. & M. HOLDINGS')
+    ('J\M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('GREAT NORTH OIL AND GAS LIMITED', 'GREAT NORTH OIL AND GAS LIMITED')
 ])
 def test_explore_complex_cases(client, jwt, app, criteria, seed):
     seed_database_with(client, jwt, seed)
