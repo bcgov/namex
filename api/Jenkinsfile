@@ -419,7 +419,7 @@ if (!run_pipeline) {
                 secretEnvVar(key: 'DEV_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets-dev', secretKey: 'authurl'),
                 secretEnvVar(key: 'DEV_API_TEST_CLIENT_ID', secretName: 'apitest-secrets-dev', secretKey: 'clientid'),
                 secretEnvVar(key: 'DEV_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-dev', secretKey: 'client_secret'),
-                secretEnvVar(key: 'DEV_API_TEST_NR', secretName: 'apitest-secrets-dev', secretKey: 'test_nr')
+                secretEnvVar(key: 'DEV_API_TEST_NR', secretName: 'apitest-secrets-dev', secretKey: 'nr')
             ]
         )
     ])
@@ -681,7 +681,7 @@ if (!run_pipeline) {
                 secretEnvVar(key: 'TEST_API_TEST_AUTH_SERVER', secretName: 'apitest-secrets-test', secretKey: 'authurl'),
                 secretEnvVar(key: 'TEST_API_TEST_CLIENT_ID', secretName: 'apitest-secrets-test', secretKey: 'clientid'),
                 secretEnvVar(key: 'TEST_API_TEST_CLIENT_SECRET', secretName: 'apitest-secrets-test', secretKey: 'client_secret'),
-                secretEnvVar(key: 'TEST_API_TEST_NR', secretName: 'apitest-secrets-test', secretKey: 'test_nr')
+                secretEnvVar(key: 'TEST_API_TEST_NR', secretName: 'apitest-secrets-test', secretKey: 'nr')
             ]
         )
     ])
