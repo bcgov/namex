@@ -244,6 +244,7 @@ if (!run_pipeline) {
                 try {
                     sh '''
                          cd api
+                         python --version
                          pip install pip --upgrade
                          pip install -r requirements/dev.txt
                          pytest --junitxml=pytest_report.xml
