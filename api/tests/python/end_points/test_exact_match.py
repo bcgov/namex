@@ -99,6 +99,14 @@ def test_find_same_name(client, jwt, app):
     )
 
 @integration_solr
+def test_resist_empty(client, jwt, app):
+    seed_database_with(client, jwt, 'JM Van Damme inc')
+    verify_exact_match(client, jwt,
+        query='',
+        expected=None
+    )
+
+@integration_solr
 def test_resists_different_type(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_exact_match(client, jwt,
@@ -252,7 +260,8 @@ def test_numbers_preserved(client, jwt, app):
     ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
     ('J&M HOLDINGS', 'JM HOLDINGS INC'),
     ('J. & M. HOLDINGS', 'JM HOLDINGS INC'),
-    ('J and M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J and M HOLDINGS', 'J and M HOLDINGS'),
+    ('J AND M HOLDINGS', 'J AND M HOLDINGS'),
     ('J or M HOLDINGS', 'J. & M. HOLDINGS'),
     ('J-M HOLDINGS', 'J. & M. HOLDINGS'),
     ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
@@ -263,7 +272,8 @@ def test_numbers_preserved(client, jwt, app):
     ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
     ('J!=@_M HOLDINGS', 'J. & M. HOLDINGS'),
     ('J+M HOLDINGS', 'J. & M. HOLDINGS'),
-    ('J\M HOLDINGS', 'J. & M. HOLDINGS')
+    ('J\M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('GREAT NORTH OIL AND GAS LIMITED', 'GREAT NORTH OIL AND GAS LIMITED')
 ])
 def test_explore_complex_cases(client, jwt, app, criteria, seed):
     seed_database_with(client, jwt, seed)
