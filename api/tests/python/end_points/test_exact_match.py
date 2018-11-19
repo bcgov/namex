@@ -99,6 +99,14 @@ def test_find_same_name(client, jwt, app):
     )
 
 @integration_solr
+def test_resist_empty(client, jwt, app):
+    seed_database_with(client, jwt, 'JM Van Damme inc')
+    verify_exact_match(client, jwt,
+        query='',
+        expected=None
+    )
+
+@integration_solr
 def test_resists_different_type(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_exact_match(client, jwt,
