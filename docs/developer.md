@@ -41,7 +41,7 @@ git rebase upstream/master
 
 Branch from it:
 ```sh
-git checkout -b myfeature
+git checkout -b <feature# from ZenHub>-<short_name_for_this_work>
 ```
 
 #### Test
@@ -66,10 +66,10 @@ and useful (see below). You can also consider changing your `.git/config` file v
 Commit your changes.
 
 ```sh
-git commit -m "a useful comment including the issue #"
+git commit -s -m "a useful comment including the issue #"
 ```
-Likely you go back and edit/build/test some more then `commit --amend`
-in a few cycles.
+Likely you will need to go back and edit/build/test some more.
+Use `commit --amend` in a few cycles.
 
 ### 6 Push
 
@@ -97,10 +97,6 @@ Commit changes made in response to review comments to the same branch on your
 fork.
 
 Very small PRs are easy to review.  Very large PRs are very difficult to review.
-At the assigned reviewer's discretion, a PR may be switched to use
-[Reviewable](https://reviewable.k8s.io) instead.  Once a PR is switched to
-Reviewable, please ONLY send or reply to comments through Reviewable.  Mixing
-code review tools can be very confusing.
 
 #### Squash and Merge
 
