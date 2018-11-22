@@ -1,6 +1,7 @@
 
 import enum
 import json
+import sys
 
 import psycopg2.extras
 import requests
@@ -78,6 +79,10 @@ def compare(solr_core, environment, username):
     oracle_results = cursor.fetchall()
 
     solr_results = requests.get(get_solr_url(solr_core, environment))
+    if solr_results.status_code != 200:
+        print('Solr: {} ({})'.format(solr_results.reason, solr_results.status_code))
+
+        sys.exit(-1)
 
     # OK, we have fetched everything from the two sources at roughly the same time. Now compare.
 
