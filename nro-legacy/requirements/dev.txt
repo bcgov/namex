@@ -1,0 +1,6 @@
+-r prod.txt
+
+pytest
+PyHamcrest
+psycopg2
+python-dotenv
