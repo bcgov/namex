@@ -5,11 +5,11 @@ from flask import current_app, request
 from flask_admin.contrib import sqla
 from wtforms import validators
 
-from solr_admin import keycloak
-from solr_admin import models
-from solr_admin.models import restricted_condition_audit
+from namex_admin import keycloak
+from namex_admin import models
+from namex_admin.models import restricted_condition_audit
 
-# The customized ModelView that is used for working with the synonyms.
+# The customized ModelView that is used for working with the restricted conditions.
 class RestrictedConditionView(sqla.ModelView):
 
     column_list = ['cnd_id','cnd_text','consent_required','consenting_body','instructions','allow_use']
@@ -73,7 +73,7 @@ class RestrictedConditionView(sqla.ModelView):
         pass
         # _validate_something??(model.cnd_text)
 
-    # After saving the data create the audit log (we need to wait for a synonym.id value when creating)
+    # After saving the data create the audit log (we need to wait for a new id value when creating)
     def after_model_change(self, form, model, is_created):
         if is_created:
             _create_audit_log(model, 'CREATE')
@@ -87,8 +87,8 @@ class RestrictedConditionView(sqla.ModelView):
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
     audit = restricted_condition_audit.RestrictedConditionAudit(
-        keycloak.Keycloak(None).get_username(), action,  model.id, model.cnd_text, model.word_phrase,
-        model.consent_required, model.enabled)
+        keycloak.Keycloak(None).get_username(), action,  model.cnd_id, model.cnd_text, model.consent_required,
+        model.consenting_body, model.instructions, model.allow_use)
 
     session = models.db.session
     session.add(audit)

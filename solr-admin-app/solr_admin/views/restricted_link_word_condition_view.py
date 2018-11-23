@@ -4,10 +4,10 @@ import re
 from flask import current_app, request
 from flask_admin.contrib import sqla
 from wtforms import validators
-from solr_admin.models import restricted_link_word_condition_audit
+from namex_admin.models import restricted_link_word_condition_audit
 
-from solr_admin import keycloak
-from solr_admin import models
+from namex_admin import keycloak
+from namex_admin import models
 
 
 # The customized ModelView that is used for working with the synonyms.
@@ -71,6 +71,7 @@ class RestrictedLinkWordConditionView(sqla.ModelView):
 
     # When the user goes to save the data, trim whitespace and put the list back into alphabetical order.
     def on_model_change(self, form, model, is_created):
+        _validate_id_exist(model.cnd_id)
         _validate_id_exist(model.word_id)
 
     # After saving the data create the audit log (we need to wait for a synonym.id value when creating)
@@ -91,7 +92,7 @@ def _validate_id_exist(test_id: str) -> None:
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
     audit = restricted_link_word_condition_audit.RestrictedLinkWordConditionAudit(
-        keycloak.Keycloak(None).get_username(), action, model.word_id, model.word_phrase)
+        keycloak.Keycloak(None).get_username(), action,model.link_id, model.cnd_id, model.word_id)
 
     session = models.db.session
     session.add(audit)

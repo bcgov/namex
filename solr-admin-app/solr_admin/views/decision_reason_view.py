@@ -5,11 +5,11 @@ from flask import current_app, request
 from flask_admin.contrib import sqla
 from wtforms import validators
 
-from solr_admin import keycloak
-from solr_admin import models
-from solr_admin.models import decision_reason_audit
+from namex_admin import keycloak
+from namex_admin import models
+from namex_admin.models import decision_reason_audit
 
-# The customized ModelView that is used for working with the synonyms.
+# The customized ModelView that is used for working with the decision reason.
 class DecisionReasonView(sqla.ModelView):
 
     column_list = ['name','reason']
@@ -74,7 +74,7 @@ class DecisionReasonView(sqla.ModelView):
         # _validate_something(model.name)
 
 
-    # After saving the data create the audit log (we need to wait for a synonym.id value when creating)
+    # After saving the data create the audit log (we need to wait for a new id value when creating)
     def after_model_change(self, form, model, is_created):
         if is_created:
             _create_audit_log(model, 'CREATE')
@@ -88,7 +88,7 @@ class DecisionReasonView(sqla.ModelView):
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
     audit = decision_reason_audit.DecisionReasonAudit(
-        keycloak.Keycloak(None).get_username(), action, model.word_id, model.name, model.reason)
+        keycloak.Keycloak(None).get_username(), action, model.dr_id, model.name, model.reason)
 
     session = models.db.session
     session.add(audit)

@@ -2,8 +2,8 @@
 from . import db
 
 
-# The class that corresponds to the database table for restricted words.
-class RestrictedWordConditon(db.Model):
+# The class that corresponds to the database link table between restricted words and restricted conditions.
+class RestrictedLinkWordCondition(db.Model):
     __tablename__ = 'restricted_link_word_condition'
 
     link_id = db.Column(db.Integer, primary_key=True)

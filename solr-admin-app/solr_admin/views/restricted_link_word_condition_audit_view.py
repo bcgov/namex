@@ -2,10 +2,10 @@
 from flask import request
 from flask_admin.contrib import sqla
 
-from solr_admin import keycloak
+from namex_admin import keycloak
 
 
-# The customized ModelView that is used for working with the synonyms.
+# The customized ModelView that is used for working with the table that links the restricted words and restricted condition audit.
 class RestrictedLinkWordConditionAuditView(sqla.ModelView):
     # Disallow the creation of audit events.
     can_create = False

@@ -2,10 +2,10 @@
 from flask import request
 from flask_admin.contrib import sqla
 
-from solr_admin import keycloak
+from namex_admin import keycloak
 
 
-# The customized ModelView that is used for working with the synonyms.
+# The customized ModelView that is used for working with the restricted condition audit.
 class RestrictedConditionAuditView(sqla.ModelView):
     # Disallow the creation of audit events.
     can_create = False
@@ -25,13 +25,13 @@ class RestrictedConditionAuditView(sqla.ModelView):
     # Display by timestamp.
     column_default_sort = ('timestamp', True)
 
-    # Allow the user to filter on the synonym_id and category columns. Order is significant here.
-    column_filters = ['cnd_text']
+    # Allow the user to filter on the cnd_id and cnd_text columns. Order is significant here.
+    column_filters = ['cnd_id','cnd_text']
 
-    # Search within the synonyms_text.
+    # Search within the cnd_text and cnd_id.
     column_searchable_list = ['cnd_text','cnd_id']
 
-    # Use a custom list.html that provides a page size drop down with extra choices.
+    # Use the generic list.html that provides a page size drop down with extra choices.
     list_template = 'generic_list.html'
 
     # Flask-OIDC function that states whether or not the user is logged in and has permissions.

@@ -9,7 +9,7 @@ def _to_string(string):
 
     return string
 
-# The class that corresponds to the database table for restricted condition audits.
+# The class that corresponds to the database link table between restricted words and restricted conditions audits.
 class RestrictedLinkWordConditionAudit(db.Model):
     __tablename__ = 'restricted_link_word_condition_audit'
 
@@ -22,12 +22,12 @@ class RestrictedLinkWordConditionAudit(db.Model):
     word_id = db.Column(db.Integer)
 
     def __init__(
-            self, username: str, action: str, lnk_id: str,
+            self, username: str, action: str, link_id: str,
             cnd_id: str, word_id: str ) -> None:
         self.timestamp = datetime.datetime.now()
         self.username = username
         self.action = action
-        self.lnk_id = lnk_id
+        self.link_id = link_id
         self.cnd_id = cnd_id
         self.word_id = word_id
 
