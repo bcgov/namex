@@ -3,6 +3,8 @@ import os
 import requests
 import json
 import pytest
+from tests.python import integration_solr
+import urllib
 
 token_header = {
                 "alg": "RS256",
@@ -36,6 +38,7 @@ def reload_schema(request):
 
     assert r.status_code == 200
 
+@integration_solr
 def test_solr_available(app, client, jwt):
     url = SOLR_URL + '/solr/possible.conflicts/admin/ping'
     r = requests.get(url)
@@ -80,11 +83,14 @@ def verify_exact_match(client, jwt, query, expected):
 def search_exact_match(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
-    rv = client.get('/api/v1/exact-match?query='+query, headers=headers)
+    url = '/api/v1/exact-match?query=' + urllib.parse.quote(query)
+    print(url)
+    rv = client.get(url, headers=headers)
 
     assert rv.status_code == 200
     return json.loads(rv.data)
 
+@integration_solr
 def test_find_same_name(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_exact_match(client, jwt,
@@ -92,6 +98,15 @@ def test_find_same_name(client, jwt, app):
         expected='JM Van Damme inc'
     )
 
+@integration_solr
+def test_resist_empty(client, jwt, app):
+    seed_database_with(client, jwt, 'JM Van Damme inc')
+    verify_exact_match(client, jwt,
+        query='',
+        expected=None
+    )
+
+@integration_solr
 def test_resists_different_type(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_exact_match(client, jwt,
@@ -99,6 +114,7 @@ def test_resists_different_type(client, jwt, app):
         expected='JM Van Damme inc'
     )
 
+@integration_solr
 def test_case_insensitive(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_exact_match(client, jwt,
@@ -106,6 +122,7 @@ def test_case_insensitive(client, jwt, app):
         expected='JM Van Damme inc'
     )
 
+@integration_solr
 def test_no_match(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_exact_match(client, jwt,
@@ -113,6 +130,7 @@ def test_no_match(client, jwt, app):
         expected=None
     )
 
+@integration_solr
 def test_ignores_and(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_exact_match(client, jwt,
@@ -120,6 +138,7 @@ def test_ignores_and(client, jwt, app):
        expected='JM Van Damme inc'
     )
 
+@integration_solr
 def test_ignores_dots(client, jwt, app):
     seed_database_with(client, jwt, 'J.M. Van Damme Inc')
     verify_exact_match(client, jwt,
@@ -127,6 +146,7 @@ def test_ignores_dots(client, jwt, app):
        expected='J.M. Van Damme Inc'
     )
 
+@integration_solr
 def test_ignores_ampersand(client, jwt, app):
     seed_database_with(client, jwt, 'J&M & Van Damme Inc')
     verify_exact_match(client, jwt,
@@ -134,6 +154,7 @@ def test_ignores_ampersand(client, jwt, app):
        expected='J&M & Van Damme Inc'
     )
 
+@integration_solr
 def test_ignores_comma(client, jwt, app):
     seed_database_with(client, jwt, 'JM, Van Damme Inc')
     verify_exact_match(client, jwt,
@@ -141,6 +162,7 @@ def test_ignores_comma(client, jwt, app):
        expected='JM, Van Damme Inc'
     )
 
+@integration_solr
 def test_ignores_exclamation_mark(client, jwt, app):
     seed_database_with(client, jwt, 'JM! Van Damme Inc')
     verify_exact_match(client, jwt,
@@ -148,6 +170,7 @@ def test_ignores_exclamation_mark(client, jwt, app):
        expected='JM! Van Damme Inc'
     )
 
+@integration_solr
 def test_no_match_because_additional_initial(client, jwt, app):
     seed_database_with(client, jwt, 'J.M.J. Van Damme Trucking Inc')
     verify_exact_match(client, jwt,
@@ -155,6 +178,7 @@ def test_no_match_because_additional_initial(client, jwt, app):
        expected=None
     )
 
+@integration_solr
 def test_no_match_because_additional_word(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme Trucking Inc')
     verify_exact_match(client, jwt,
@@ -162,6 +186,7 @@ def test_no_match_because_additional_word(client, jwt, app):
        expected=None
     )
 
+@integration_solr
 def test_no_match_because_missing_one_word(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme Physio inc')
     verify_exact_match(client, jwt,
@@ -169,6 +194,7 @@ def test_no_match_because_missing_one_word(client, jwt, app):
        expected=None
     )
 
+@integration_solr
 def test_duplicated_letters(client, jwt, app):
     seed_database_with(client, jwt, 'Damme Trucking Inc')
     verify_exact_match(client, jwt,
@@ -176,6 +202,7 @@ def test_duplicated_letters(client, jwt, app):
        expected='Damme Trucking Inc'
     )
 
+@integration_solr
 def test_entity_suffixes(client, jwt, app):
     suffixes = [
         'limited',
@@ -218,6 +245,7 @@ def test_entity_suffixes(client, jwt, app):
            expected='Van Trucking ' + suffix
         )
 
+@integration_solr
 def test_numbers_preserved(client, jwt, app):
     seed_database_with(client, jwt, 'Van 4 Trucking Inc')
     verify_exact_match(client, jwt,
@@ -226,6 +254,35 @@ def test_numbers_preserved(client, jwt, app):
 
     )
 
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('J M HOLDINGS', 'J M HOLDINGS INC'),
+    ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
+    ('J&M HOLDINGS', 'JM HOLDINGS INC'),
+    ('J. & M. HOLDINGS', 'JM HOLDINGS INC'),
+    ('J and M HOLDINGS', 'J and M HOLDINGS'),
+    ('J AND M HOLDINGS', 'J AND M HOLDINGS'),
+    ('J or M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J-M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J_M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J_\'_-M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J@M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J=M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J!=@_M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J+M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J\M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('GREAT NORTH OIL AND GAS LIMITED', 'GREAT NORTH OIL AND GAS LIMITED')
+])
+def test_explore_complex_cases(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_exact_match(client, jwt,
+       query=criteria,
+       expected=seed
+    )
+
+@integration_solr
 def test_returns_all_fields_that_we_need(client, jwt, app):
     seed_database_with(client, jwt, 'Van Trucking Inc', 'any-id', 'any-source')
     verify_exact_match_results(client, jwt,
@@ -236,5 +293,22 @@ def test_returns_all_fields_that_we_need(client, jwt, app):
     )
 
 
-
+@pytest.mark.skip(reason="dont know how to make solr handle those scenarios")
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('{JM} HOLDINGS', 'J. & M. HOLDINGS'),
+    ('[JM] HOLDINGS', 'J. & M. HOLDINGS'),
+    ('(JM) HOLDINGS', 'J.M HOLDINGS'),
+    ('J^M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J~M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J*M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J:M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J?M HOLDINGS', 'J. & M. HOLDINGS')
+])
+def test_special_characters(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_exact_match(client, jwt,
+       query=criteria,
+       expected=seed
+    )
 

@@ -133,6 +133,7 @@
         stored="true"/>
     <field name="name_compressed" type="text_name_compressed" multiValued="false" indexed="true" stored="true"/>
     <field name="name_exact_match" type="text_name_exact_match" multiValued="false" indexed="true" stored="true"/>
+    <field name="txt_starts_with" type="txt_starts_with" multiValued="false" indexed="true" stored="false"/>
 
     <!-- Only enabled in the "schemaless" data-driven example (assuming the client
          does not know what fields may be searched) because it's very expensive to index everything twice. -->
@@ -747,13 +748,36 @@
           <filter class="solr.PatternReplaceFilterFactory" pattern=" soc."  replacement="" replace="all" />
 
           <filter class="solr.PatternReplaceFilterFactory" pattern=" and "  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" or "  replacement="" replace="all" />
 
-          <filter class="solr.PatternReplaceFilterFactory" pattern="(\.)" replacement="" replace="all"/>
-          <filter class="solr.PatternReplaceFilterFactory" pattern="(,)" replacement="" replace="all"/>
-          <filter class="solr.PatternReplaceFilterFactory" pattern="(\!)" replacement="" replace="all"/>
-          <filter class="solr.PatternReplaceFilterFactory" pattern="(&amp;)" replacement="" replace="all"/>
-          <filter class="solr.PatternReplaceFilterFactory" pattern="([a-z]|\s)\1+" replacement="$1" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="(\.|\!|-|_|'|,|&amp;|@|\=)" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="\+" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="([a-z])\1+" replacement="$1" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="\s" replacement="" replace="all"/>
       </analyzer>
+    </fieldType>
+
+    <fieldType name="txt_starts_with" class="solr.TextField">
+        <analyzer type="index">
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,]*" replacement="" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s([a-z])\s" replacement="$1$2$3 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s" replacement="$1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z]{2})\s" replacement="$1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z]{2})\s([a-z])\s" replacement="$1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\s" replacement="" />
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+        </analyzer>
+        <analyzer type="query">
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,]*" replacement="" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s([a-z])\s" replacement="$1$2$3 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s" replacement="$1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z]{2})\s" replacement="$1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z]{2})\s([a-z])\s" replacement="$1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\s" replacement="" />
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+        </analyzer>
     </fieldType>
 
     <!-- some examples for different languages (generally ordered by ISO code) -->
@@ -1186,4 +1210,5 @@
     <copyField source="name" dest="name_with_synonyms"/>
     <copyField source="name" dest="name_compressed"/>
     <copyField source="name" dest="name_exact_match"/>
+    <copyField source="name" dest="txt_starts_with"/>
 </schema>

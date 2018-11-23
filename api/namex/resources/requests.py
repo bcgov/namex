@@ -861,12 +861,29 @@ class RequestsAnalysis(Resource):
             results, msg, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
 
         else:
-            results, msg, code  = SolrQueries.get_results(analysis_type, nrd_name.name, start=start, rows=rows)
+            results, msg, code = SolrQueries.get_results(analysis_type, nrd_name.name, start=start, rows=rows)
 
         if code:
             return jsonify(message=msg), code
         return jsonify(results), 200
 
+@cors_preflight("GET")
+@api.route('/synonymbucket/<string:name>', methods=['GET','OPTIONS'])
+class SynonymBucket(Resource):
+    START = 0
+    ROWS = 100
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.requires_auth
+    def get(name, *args, **kwargs):
+        start = request.args.get('start', SynonymBucket.START)
+        rows = request.args.get('rows', SynonymBucket.ROWS)
+
+        results, msg, code = SolrQueries.get_synonym_results(name.upper(), start=start, rows=rows)
+        if code:
+            return jsonify(message=msg), code
+        return jsonify(results), 200
 
 @cors_preflight("GET, PUT, PATCH")
 @api.route('/<string:nr>/names/<int:choice>', methods=['GET', "PUT", "PATCH",'OPTIONS'])

@@ -39,8 +39,7 @@ with the appropriate `[username]` and `[password]` settings:
         <Arg>
             <New class="org.postgresql.ds.PGSimpleDataSource">
                 <Set name="User">[username]</Set>
-                <Set name="Password">[password]</Set>
-                <Set name="DatabaseName">namex</Set>
+                <Set name="DatabaseName">solr</Set>
                 <Set name="ServerName">localhost</Set>
                 <Set name="PortNumber">54321</Set>
             </New>
@@ -63,7 +62,6 @@ with the appropriate `[username]` and `[password]` settings:
         <Arg>
             <New class="org.postgresql.ds.PGSimpleDataSource">
                 <Set name="User">[username]</Set>
-                <Set name="Password">[password]</Set>
                 <Set name="DatabaseName">BC_REGISTRIES</Set>
                 <Set name="ServerName">localhost</Set>
                 <Set name="PortNumber">54322</Set>
@@ -87,7 +85,6 @@ with the appropriate `[username]` and `[password]` settings:
         <Arg>
             <New class="org.postgresql.ds.PGSimpleDataSource">
                 <Set name="User">[username]</Set>
-                <Set name="Password">[password]</Set>
                 <Set name="DatabaseName">BC_REGISTRIES_NAMES</Set>
                 <Set name="ServerName">localhost</Set>
                 <Set name="PortNumber">54323</Set>
