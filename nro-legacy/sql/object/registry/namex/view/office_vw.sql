@@ -12,9 +12,12 @@ CREATE OR REPLACE FORCE VIEW namex.office_vw (corp_num,
                                               email_address
                                              )
 AS
-    SELECT corp_num, office_typ_cd, start_event_id, end_event_id, mailing_addr_id, delivery_addr_id,
+    SELECT corp_num, office_typ_cd, start_event_id,
+            end_event_id, mailing_addr_id, delivery_addr_id,
            dd_corp_num, email_address
-      FROM office;
+      FROM office
+      WHERE delivery_addr_id is not null
+            and end_event_id is null;
 
 
 DROP PUBLIC SYNONYM OFFICE_VW;
