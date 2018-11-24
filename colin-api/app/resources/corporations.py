@@ -146,7 +146,9 @@ class Methods(Resource):
     def build_addr_id_sql(corp_num_sql):
         return text("select delivery_addr_id "
                     "from bc_registries.office_vw "
-                    "where corp_num={} and end_event_id IS NULL;".format(corp_num_sql))
+                    "where corp_num={} "
+                    "and end_event_id IS NULL "
+                    "and delivery_addr_id IS NOT NULL;".format(corp_num_sql))
 
     @staticmethod
     def build_jurisdiction_sql(corp_num_sql):

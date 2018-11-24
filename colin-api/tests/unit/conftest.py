@@ -30,3 +30,11 @@ def client_ctx(app):
     """
     with app.test_client() as c:
         yield c
+
+
+@pytest.fixture(scope="session")
+def db():
+    from flask_sqlalchemy import SQLAlchemy
+    db = SQLAlchemy()
+
+    return db

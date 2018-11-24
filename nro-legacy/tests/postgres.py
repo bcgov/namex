@@ -13,8 +13,8 @@ class Postgres(object):
             with connection.cursor() as cursor:
                 cursor.execute(sql, values)
 
-    def selectFirst(self, sql):
+    def select(self, sql):
         with psycopg2.connect(host='localhost',dbname=self.database, user=self.user, password=self.password) as connection:
             with connection.cursor() as cursor:
                 cursor.execute(sql)
-                return cursor.fetchone()
+                return cursor.fetchall()

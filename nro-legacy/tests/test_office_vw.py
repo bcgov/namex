@@ -34,7 +34,7 @@ def before_each():
     Postgres().execute(open('tests/sql/create.table.office.sql').read())
 
 
-def test_select_current_office():
+def test_select_current_addresses():
     Postgres().execute("""
         insert into office(
             corp_num, 
@@ -46,14 +46,8 @@ def test_select_current_office():
             dd_corp_num, 
             email_address
         )
-        values ('1', '1', '1', null, '1', '1', '1', '1')
+        values ('1', '1', '1', '1', '1', '1', '1', '1')
     """)
-    result = Postgres().selectFirst(extract_select())
-
-    assert_that(result[0], equal_to('1'))
-
-
-def test_ignores_null_delivery_address():
     Postgres().execute("""
             insert into office(
                 corp_num, 
@@ -65,27 +59,9 @@ def test_ignores_null_delivery_address():
                 dd_corp_num, 
                 email_address
             )
-            values ('1', '1', '1', '1', '1', null, '1', '1')
+            values ('2', '2', '2', '2', '2', '2', '2', '2')
         """)
-    result = Postgres().selectFirst(extract_select())
+    result = Postgres().select(extract_select())
 
-    assert_that(result, equal_to(None))
+    assert_that(len(result), equal_to(2))
 
-
-def test_ignores_historical_address():
-    Postgres().execute("""
-            insert into office(
-                corp_num, 
-                office_typ_cd, 
-                start_event_id, 
-                end_event_id, 
-                mailing_addr_id, 
-                delivery_addr_id,
-                dd_corp_num, 
-                email_address
-            )
-            values ('1', '1', '1', '1', '1', '1', '1', '1')
-        """)
-    result = Postgres().selectFirst(extract_select())
-
-    assert_that(result, equal_to(None))
