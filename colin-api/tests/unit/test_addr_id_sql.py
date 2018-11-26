@@ -4,7 +4,7 @@ from sqlalchemy import text
 
 
 @pytest.fixture(autouse=True)
-def given(db):
+def given(fake_names_db):
     background = [
         'drop schema if exists bc_registries cascade;',
         'create schema bc_registries;',
@@ -17,7 +17,7 @@ def given(db):
         """
     ]
     for sql in background:
-        db.engine.execute(sql)
+        fake_names_db.engine.execute(sql)
 
 
 def insert(addr_id, end_event_id, corp_num):
@@ -29,24 +29,24 @@ def insert(addr_id, end_event_id, corp_num):
         corp_num
     ))
 
-def test_ignores_past_addresses(app, db):
-    db.engine.execute(insert(addr_id='1', end_event_id='1', corp_num='12345'))
+def test_ignores_past_addresses(app, fake_names_db):
+    fake_names_db.engine.execute(insert(addr_id='1', end_event_id='1', corp_num='12345'))
     sql = Methods.build_addr_id_sql('\'12345\'')
-    result = db.engine.execute(sql).fetchall()
+    result = fake_names_db.engine.execute(sql).fetchall()
 
     assert [] == result
 
-def test_return_current_addresses(app, db):
-    db.engine.execute(insert(addr_id='1', end_event_id=None, corp_num='12345'))
-    db.engine.execute(insert('2', None, '12345'))
+def test_return_current_addresses(app, fake_names_db):
+    fake_names_db.engine.execute(insert(addr_id='1', end_event_id=None, corp_num='12345'))
+    fake_names_db.engine.execute(insert('2', None, '12345'))
     sql = Methods.build_addr_id_sql('\'12345\'')
-    result = db.engine.execute(sql).fetchall()
+    result = fake_names_db.engine.execute(sql).fetchall()
 
     assert 2 == len(result)
 
-def test_ignores_empty_address(app, db):
-    db.engine.execute(insert(addr_id=None, end_event_id=None, corp_num='12345'))
+def test_ignores_empty_address(app, fake_names_db):
+    fake_names_db.engine.execute(insert(addr_id=None, end_event_id=None, corp_num='12345'))
     sql = Methods.build_addr_id_sql('\'12345\'')
-    result = db.engine.execute(sql).fetchall()
+    result = fake_names_db.engine.execute(sql).fetchall()
 
     assert [] == result
