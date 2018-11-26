@@ -1,6 +1,6 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
-CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
+CREATE OR REPLACE PACKAGE BODY solr AS
     -- Action Types
     ACTION_UPDATE CONSTANT VARCHAR2(1) := 'U';
     ACTION_DELETE CONSTANT VARCHAR2(1) := 'D';
@@ -72,6 +72,9 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                 'destination_url';
 
         content := generate_json_conflicts(nr_number, action);
+
+        -- Convert the content to UTF-8, so that accented characters, etc, are handled.
+        content := CONVERT(content, 'UTF8');
 
         -- At some point it would make sense to move the ReST stuff out of here and into somewhere re-usable.
         utl_http.set_wallet(oracle_wallet);
