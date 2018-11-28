@@ -195,6 +195,14 @@ def test_no_match_because_missing_one_word(client, jwt, app):
     )
 
 @integration_solr
+def test_no_match_star(client, jwt, app):
+    seed_database_with(client, jwt, 'SCHOLARSHIP')
+    verify_exact_match(client, jwt,
+       query='SCHOL*',
+       expected=None
+    )
+
+@integration_solr
 def test_duplicated_letters(client, jwt, app):
     seed_database_with(client, jwt, 'Damme Trucking Inc')
     verify_exact_match(client, jwt,

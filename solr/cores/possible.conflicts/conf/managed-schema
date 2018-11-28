@@ -759,8 +759,10 @@
 
     <fieldType name="txt_starts_with" class="solr.TextField">
         <analyzer type="index">
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,]*" replacement="" />
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([a-z]{3,})(s\W|s$)" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s([a-z])\s" replacement="$1$2$3 " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s" replacement="$1$2 " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z]{2})\s" replacement="$1$2 " />
@@ -769,8 +771,10 @@
             <tokenizer class="solr.KeywordTokenizerFactory"/>
         </analyzer>
         <analyzer type="query">
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,]*" replacement="" />
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([a-z]{3,})(s\W|s$)" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s([a-z])\s" replacement="$1$2$3 " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s" replacement="$1$2 " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z]{2})\s" replacement="$1$2 " />

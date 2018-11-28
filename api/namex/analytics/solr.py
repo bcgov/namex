@@ -39,7 +39,8 @@ class SolrQueries:
         SYN_CONFLICTS:
             '/solr/possible.conflicts/select?hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q=txt_starts_with:{start_str}&wt=json&'
-            'start={start}&rows={rows}&fl=source,id,name,score&sort=score%20desc{synonyms_clause}{name_copy_clause}',
+            'start={start}&rows={rows}&fl=source,id,name,score&sort=score%20desc,txt_starts_with%20asc{synonyms_clause}'
+            '{name_copy_clause}',
         CONFLICTS:
             '/solr/possible.conflicts/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'

@@ -64,22 +64,39 @@ def seed_database_with(client, jwt, name, id='1', source='2'):
     assert r.status_code == 200
 
 def verify(data, expected):
+    verified = False
     print(data['names'])
+    for name in data['names']:
+        print('ACTUAL ', name['name'])
+        print('EXPECTED ',expected)
 
-    assert expected == data['names']
+        if expected == None:
+        # check that the name is the title of a query sent (no real names were returned from solr)
+            if name['name'].find('----') == -1:
+                print('HERE')
+                verified = False
+                break
+            else:
+                verified = True
+            print(verified)
+        # if the expected name is in the names returned this will set 'verified' to true before the loop finishes
+        elif expected.find(name['name']) != -1:
+            verified = True
+            break
 
-def verify_synonym_match_results(client, jwt, query, expected):
+    assert verified
+
+# def verify_synonym_match_results(client, jwt, query, expected):
+#     data = search_synonym_match(client, jwt, query)
+#     verify(data, expected)
+
+def verify_synonym_match(client, jwt, query, expected_list):
     data = search_synonym_match(client, jwt, query)
-    verify(data, expected)
-
-def verify_synonym_match(client, jwt, query, expected):
-    data = search_synonym_match(client, jwt, query)
-    expect = [
-        { 'name':expected, 'id':'1', 'source':'2' }
-    ]
-    if expected == None:
-        expect = []
-    verify(data, expect)
+    if expected_list:
+        for expected in expected_list:
+            verify(data, expected)
+    else:
+        verify(data, None)
 
 def search_synonym_match(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
@@ -93,190 +110,149 @@ def search_synonym_match(client, jwt, query):
 
 @integration_synonym_api
 @integration_solr
-def test_find_same_name(client, jwt, app):
+def test_find_with_first_word(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_synonym_match(client, jwt,
         query='JM',
-        expected='[----JM*,JM]'
+        expected_list=['----JM* ','JM Van Damme inc ']
     )
 
+@pytest.mark.skip(reason="frontend handles empty string for now")
 @integration_synonym_api
 @integration_solr
 def test_resist_empty(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_synonym_match(client, jwt,
         query='',
-        expected=None
+        expected_list=None
     )
 
-# @integration_solr
-# def test_case_insensitive(client, jwt, app):
-#     seed_database_with(client, jwt, 'JM Van Damme inc')
-#     verify_synonym_match(client, jwt,
-#         query='JM VAN DAMME INC',
-#         expected='JM Van Damme inc'
-#     )
-#
-# @integration_solr
-# def test_no_match(client, jwt, app):
-#     seed_database_with(client, jwt, 'JM Van Damme inc')
-#     verify_synonym_match(client, jwt,
-#         query='Hello BC inc',
-#         expected=None
-#     )
-#
-# @integration_solr
-# def test_ignores_and(client, jwt, app):
-#     seed_database_with(client, jwt, 'JM Van Damme inc')
-#     verify_synonym_match(client, jwt,
-#        query='J and M Van Damme inc',
-#        expected='JM Van Damme inc'
-#     )
-#
-# @integration_solr
-# def test_ignores_dots(client, jwt, app):
-#     seed_database_with(client, jwt, 'J.M. Van Damme Inc')
-#     verify_synonym_match(client, jwt,
-#        query='JM Van Damme Inc',
-#        expected='J.M. Van Damme Inc'
-#     )
-#
-# @integration_solr
-# def test_ignores_ampersand(client, jwt, app):
-#     seed_database_with(client, jwt, 'J&M & Van Damme Inc')
-#     verify_synonym_match(client, jwt,
-#        query='JM Van Damme Inc',
-#        expected='J&M & Van Damme Inc'
-#     )
-#
-# @integration_solr
-# def test_ignores_comma(client, jwt, app):
-#     seed_database_with(client, jwt, 'JM, Van Damme Inc')
-#     verify_synonym_match(client, jwt,
-#        query='JM Van Damme Inc',
-#        expected='JM, Van Damme Inc'
-#     )
-#
-# @integration_solr
-# def test_ignores_exclamation_mark(client, jwt, app):
-#     seed_database_with(client, jwt, 'JM! Van Damme Inc')
-#     verify_synonym_match(client, jwt,
-#        query='JM Van Damme Inc',
-#        expected='JM! Van Damme Inc'
-#     )
-#
-# @integration_solr
-# def test_no_match_because_additional_initial(client, jwt, app):
-#     seed_database_with(client, jwt, 'J.M.J. Van Damme Trucking Inc')
-#     verify_synonym_match(client, jwt,
-#        query='J.M. Van Damme Trucking Inc',
-#        expected=None
-#     )
-#
-# @integration_solr
-# def test_no_match_because_additional_word(client, jwt, app):
-#     seed_database_with(client, jwt, 'JM Van Damme Trucking Inc')
-#     verify_synonym_match(client, jwt,
-#        query='JM Van Damme Trucking International Inc',
-#        expected=None
-#     )
-#
-# @integration_solr
-# def test_no_match_because_missing_one_word(client, jwt, app):
-#     seed_database_with(client, jwt, 'JM Van Damme Physio inc')
-#     verify_synonym_match(client, jwt,
-#        query='JM Van Damme inc',
-#        expected=None
-#     )
-#
-# @integration_solr
-# def test_duplicated_letters(client, jwt, app):
-#     seed_database_with(client, jwt, 'Damme Trucking Inc')
-#     verify_synonym_match(client, jwt,
-#        query='Dame Trucking Inc',
-#        expected='Damme Trucking Inc'
-#     )
-#
-# @integration_solr
-# def test_entity_suffixes(client, jwt, app):
-#     suffixes = [
-#         'limited',
-#         'ltd.',
-#         'ltd',
-#         'incorporated',
-#         'inc',
-#         'inc.',
-#         'corporation',
-#         'corp.',
-#         'limitee',
-#         'ltee',
-#         'incorporee',
-#         'llc',
-#         'l.l.c.',
-#         'limited liability company',
-#         'limited liability co.',
-#         'llp',
-#         'limited liability partnership',
-#         'societe a responsabilite limitee',
-#         'societe en nom collectif a responsabilite limitee',
-#         'srl',
-#         'sencrl',
-#         'ulc',
-#         'unlimited liability company',
-#         'association',
-#         'assoc',
-#         'assoc.',
-#         'assn',
-#         'co',
-#         'co.',
-#         'society',
-#         'soc',
-#         'soc.'
-#     ]
-#     for suffix in suffixes:
-#         seed_database_with(client, jwt, 'Van Trucking ' + suffix)
-#         verify_synonym_match(client, jwt,
-#            query='Van Trucking',
-#            expected='Van Trucking ' + suffix
-#         )
-#
-# @integration_solr
-# def test_numbers_preserved(client, jwt, app):
-#     seed_database_with(client, jwt, 'Van 4 Trucking Inc')
-#     verify_synonym_match(client, jwt,
-#        query='Van 4 Trucking ltd',
-#        expected='Van 4 Trucking Inc'
-#
-#     )
-#
-# @integration_solr
-# @pytest.mark.parametrize("criteria, seed", [
-#     ('J M HOLDINGS', 'J M HOLDINGS INC'),
-#     ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
-#     ('J&M HOLDINGS', 'JM HOLDINGS INC'),
-#     ('J. & M. HOLDINGS', 'JM HOLDINGS INC'),
-#     ('J and M HOLDINGS', 'J and M HOLDINGS'),
-#     ('J AND M HOLDINGS', 'J AND M HOLDINGS'),
-#     ('J or M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J-M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J_M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J_\'_-M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J@M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J=M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J!=@_M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J+M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J\M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('GREAT NORTH OIL AND GAS LIMITED', 'GREAT NORTH OIL AND GAS LIMITED')
-# ])
-# def test_explore_complex_cases(client, jwt, app, criteria, seed):
-#     seed_database_with(client, jwt, seed)
-#     verify_synonym_match(client, jwt,
-#        query=criteria,
-#        expected=seed
-#     )
-#
+@integration_synonym_api
+@integration_solr
+def test_returns_names_for_all_queries(client, jwt, app):
+    seed_database_with(client, jwt, 'JM VAN DAMME INC')
+    verify_synonym_match(client, jwt,
+        query='JM VAN DAMME INC',
+        expected_list=['----JM VAN DAMME INC* ', 'JM VAN DAMME INC', '----JM VAN DAMME* ', 'JM VAN DAMME INC',
+                '----JM VAN* ', 'JM VAN DAMME INC', '----JM* ', 'JM VAN DAMME INC']
+    )
+
+@integration_synonym_api
+@integration_solr
+def test_case_insensitive(client, jwt, app):
+    seed_database_with(client, jwt, 'JacKlEs')
+    verify_synonym_match(client, jwt,
+        query='jackles',
+        expected_list=['----JACKLES* ', 'JacKlEs']
+    )
+
+@integration_synonym_api
+@integration_solr
+def test_no_match(client, jwt, app):
+    seed_database_with(client, jwt, 'JM VAN DAMME INC')
+    verify_synonym_match(client, jwt,
+        query='Hello BC inc',
+        expected_list=None
+    )
+
+@integration_synonym_api
+@integration_solr
+def test_numbers_preserved(client, jwt, app):
+    seed_database_with(client, jwt, 'VAN 4 TRUCKING INC')
+    verify_synonym_match(client, jwt,
+       query='VAN 4 TRUCKING',
+       expected_list=['VAN 4 TRUCKING INC']
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('JAM\' HOLDING', 'JAM HOLDING'),
+    ('JAM\'S HOLDING', 'JAM HOLDING'),
+    ('JAM HOLDING', 'JAM\'S HOLDING'),
+    ('JAM\'S HOLDING', 'JAM\'S HOLDING'),
+    ('JAMS HOLDING', 'JAM HOLDING'),
+    ('JAM HOLDING', 'JAMS HOLDING'),
+    ('JAMS HOLDING', 'JAMS HOLDING'),
+    ('JAMS HOLDINGS', 'JAM HOLDING'),
+    ('JAM HOLDING', 'JAMS HOLDINGS'),
+    ('JAMS\' HOLDINGS\'', 'JAM HOLDINGS'),
+    ('JAM HOLDINGS', 'JAMS\' HOLDINGS\''),
+    ('JASONS HOLSTERS', 'JASON HOLSTER'),
+    ('A.S. HOLDERS', 'AS HOLDER'),
+    ('A.S\'S HOLDERS', 'AS HOLDER'),
+])
+def test_handles_s_and_possession(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('J.M. HOLDING', 'JM HOLDING'),
+    ('J M HOLDING', 'JM HOLDING'),
+    ('J. M. HOLDING', 'JM HOLDING'),
+    ('J&M HOLDING', 'JM HOLDING'),
+    ('J & M HOLDING', 'JM HOLDING'),
+    ('J. & M. HOLDING', 'JM HOLDING'),
+    ('J-M HOLDING', 'JM HOLDING'),
+])
+def test_finds_variations_on_initials(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@pytest.mark.skip(reason="'and' not handled yet")
+@integration_synonym_api
+@integration_solr
+def test_ignores_and(client, jwt, app):
+    seed_database_with(client, jwt, 'JM Van Damme inc')
+    verify_synonym_match(client, jwt,
+       query='J and M Van and Damme inc',
+       expected_list=None
+    )
+
+@pytest.mark.skip(reason="duplicates not handled yet")
+@integration_synonym_api
+@integration_solr
+def test_duplicated_letters(client, jwt, app):
+    seed_database_with(client, jwt, 'Damme Trucking Inc')
+    verify_synonym_match(client, jwt,
+       query='Dame Trucking Inc',
+       expected_list=None
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('J M HOLDINGS', 'J M HOLDINGS INC'),
+    ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
+    ('J&M HOLDINGS', 'JM HOLDINGS INC'),
+    ('J. & M. HOLDINGS', 'JM HOLDING INC'),
+    ('J AND M HOLDINGS', 'J AND M HOLDINGS'),
+    ('J-M HOLDINGS', 'J. & M. HOLDINGS'),
+    # ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
+    # ('J_M HOLDINGS', 'J. & M. HOLDINGS'),
+    # ('J_\'_-M HOLDINGS', 'J.M. HOLDINGS'),
+    # ('J@M HOLDINGS', 'J.M. HOLDINGS'),
+    # ('J=M HOLDINGS', 'J. M. HOLDINGS'),
+    ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
+    # ('J!=@_M HOLDINGS', 'J. M. HOLDINGS'),
+    ('J+M HOLDINGS', 'J. & M. HOLDING\'S'),
+    ('J\M HOLDINGS', 'J. & M. HOLDINGS'),
+])
+def test_explore_complex_cases(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+       query=criteria,
+       expected_list=[seed]
+    )
+
 # @integration_solr
 # def test_returns_all_fields_that_we_need(client, jwt, app):
 #     seed_database_with(client, jwt, 'Van Trucking Inc', 'any-id', 'any-source')
