@@ -1,0 +1,4 @@
+pytest
+PyHamcrest
+psycopg2
+python-dotenv
