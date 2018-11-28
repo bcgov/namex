@@ -3,7 +3,7 @@
 
 # Testing
 pytest
-pytest_mock
+pytest-mock
 
 # Lint and code style
 flake8
@@ -13,3 +13,4 @@ flake8-docstrings
 flake8-isort
 flake8-quotes
 pep8-naming
+requests

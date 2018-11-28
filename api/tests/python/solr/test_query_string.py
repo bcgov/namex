@@ -1,98 +1,113 @@
 #
-# I desperately needed tests but had no time to figure out pytest in Pycharm. It's hacked together for now, but the
-# tests at least are written.
+# Pytests for checking the code that produces the more intricate components of the Solr query string.
 #
+import string
+from typing import List
 
-from namex.analytics.solr import NO_SYNONYMS_INDICATOR, NO_SYNONYMS_PREFIX, SolrQueries
+import pytest
 
-
-def test_plain_search():
-    response = SolrQueries()._get_name_copy_clause('waffle corp')
-    print(response)
-    assert response == ''
+from namex.analytics.solr import NO_SYNONYMS_INDICATOR, NO_SYNONYMS_PREFIX, RESERVED_CHARACTERS, SolrQueries
 
 
-def test_empty_term():
-    response = SolrQueries()._get_name_copy_clause('waffle ' + NO_SYNONYMS_INDICATOR + ' corp')
-    print(response)
-    assert response == ''
+compress_name_test_data = [
+    ('Waffle Mania', 'wafflemania'),
+    (' Waffle Mania', 'wafflemania'),
+    ('Waffle Mania ', 'wafflemania'),
+    ('  Waffle   Mania  ', 'wafflemania'),
+    ('waffle mania inc.', 'wafflemania'),
+    ('waffle mania inc. ', 'wafflemania'),
+    ('waffle @mania inc.', 'wafflemania'),
+    ('@waffle mania inc.', 'wafflemania'),
+    ('waffle mania 123', 'wafflemania'),
+    ('waffle a.b.c. ltd.', 'waffleabc'),
+    ('i have ulcers', 'ihaveulcers'),  # ULC designation
+    ('waffle mania inc. / le wafflemania inc.', 'wafflemanialewafflemania'),
+]
 
 
-def test_empty_term_end():
-    response = SolrQueries()._get_name_copy_clause('waffle corp ' + NO_SYNONYMS_INDICATOR)
-    print(response)
-    assert response == ''
+@pytest.mark.parametrize("name,expected", compress_name_test_data)
+def test_compress_name(name, expected):
+    response = SolrQueries._compress_name(name)
+
+    assert expected == response
+
+name_copy_test_data = [
+    ('waffle corp', ''),
+    ('waffle ' + NO_SYNONYMS_INDICATOR + ' corp', ''),
+    ('waffle corp ' + NO_SYNONYMS_INDICATOR, ''),
+    ('waffle' + NO_SYNONYMS_INDICATOR + ' corp', ''),
+    ('waffle corp' + NO_SYNONYMS_INDICATOR, ''),
+    ('waffle' + NO_SYNONYMS_INDICATOR + 'corp', NO_SYNONYMS_PREFIX + '(corp)'),
+    ('the waffle' + NO_SYNONYMS_INDICATOR + 'corp', NO_SYNONYMS_PREFIX + '(corp)'),
+    (NO_SYNONYMS_INDICATOR + '^corp!', NO_SYNONYMS_PREFIX + '(%5Ecorp%21)'),
+    (NO_SYNONYMS_INDICATOR + 'waffle corp', NO_SYNONYMS_PREFIX + '(waffle)'),
+    ('big ' + NO_SYNONYMS_INDICATOR + 'waffle corp', NO_SYNONYMS_PREFIX + '(waffle)'),
+    ('big corp for ' + NO_SYNONYMS_INDICATOR + 'waffle', NO_SYNONYMS_PREFIX + '(waffle)'),
+    ('my "happy waffle"', ''),
+    ('my "happy ' + NO_SYNONYMS_INDICATOR + 'waffle"', ''),
+    ('my ' + NO_SYNONYMS_INDICATOR + '"happy waffle"', NO_SYNONYMS_PREFIX + '(%22happy%20waffle%22)'),
+    ('my ' + NO_SYNONYMS_INDICATOR + '"happy ' + NO_SYNONYMS_INDICATOR + 'waffle"', NO_SYNONYMS_PREFIX +
+        '(%22happy%20waffle%22)')
+]
 
 
-def test_trailing_indicator():
-    response = SolrQueries()._get_name_copy_clause('waffle' + NO_SYNONYMS_INDICATOR + ' corp')
-    print(response)
-    assert response == ''
+@pytest.mark.parametrize("search_string,expected", name_copy_test_data)
+def test_get_name_copy_clause(search_string, expected):
+    response = SolrQueries._get_name_copy_clause(search_string)
+
+    assert expected == response
 
 
-def test_trailing_indicator_end():
-    response = SolrQueries()._get_name_copy_clause('waffle corp' + NO_SYNONYMS_INDICATOR)
-    print(response)
-    assert response == ''
+name_tokenize_data = [
+    ('three tokens', ['three', ' ', 'tokens']),
+    ('skinny garçon "puppy-records" ®',
+     ['skinny', ' ', 'gar', 'ç', 'on', ' ', '"', 'puppy', '-', 'records', '"', ' ', '®']),
+    ('skinny "puppy-records" ®',
+     ['skinny', ' ', '"', 'puppy', '-', 'records', '"', ' ', '®']),
+    ('waffle', ['waffle']),
+    (' waffle', [' ', 'waffle']),
+    ('waffle ', ['waffle', ' ']),
+    ('waffle mania', ['waffle', ' ', 'mania']),
+    (' waffle mania', [' ', 'waffle', ' ', 'mania']),
+    ('waffle mania ', ['waffle', ' ', 'mania', ' ']),
+    ("dave's auto services ltd.", ['dave', "'", 's', ' ', 'auto', ' ', 'services', ' ', 'ltd', '.']),
+]
 
 
-def test_one_term_first():
-    response = SolrQueries()._get_name_copy_clause(NO_SYNONYMS_INDICATOR + 'waffle corp')
+@pytest.mark.parametrize("name_string, expected", name_tokenize_data)
+def test_tokenz(name_string, expected):
 
-    assert response == NO_SYNONYMS_PREFIX + 'waffle'
+    response = SolrQueries._tokenize(name_string,
+                                     [string.digits,
+                                      string.whitespace,
+                                      RESERVED_CHARACTERS,
+                                      string.punctuation,
+                                      string.ascii_lowercase])
 
-
-def test_one_term_middle():
-    response = SolrQueries()._get_name_copy_clause('big ' + NO_SYNONYMS_INDICATOR + 'waffle corp')
-
-    assert response == NO_SYNONYMS_PREFIX + 'waffle'
-
-
-def test_one_term_last():
-    response = SolrQueries()._get_name_copy_clause('big corp for ' + NO_SYNONYMS_INDICATOR + 'waffle')
-
-    assert response == NO_SYNONYMS_PREFIX + 'waffle'
+    assert expected == response
 
 
-def test_quoted():
-    response = SolrQueries()._get_name_copy_clause('my "happy waffle"')
-
-    assert response == ''
-
-
-def test_quoted_ignore_embedded_indicator():
-    response = SolrQueries()._get_name_copy_clause('my "happy ' + NO_SYNONYMS_INDICATOR + 'waffle"')
-
-    assert response == ''
-
-
-def test_indicatored_quoted():
-    response = SolrQueries()._get_name_copy_clause('my ' + NO_SYNONYMS_INDICATOR + '"happy waffle"')
-
-    assert response == NO_SYNONYMS_PREFIX + '%22happy%20waffle%22'
+name_parse_data = [
+    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', '-', '"', 'records', '"'], ['skinny']),
+    (['skinny', ' ', '"', 'puppy', ' ', 'records', '"'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', 'puppy', '-', 'records'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', 'puppy', ' ', '-', 'records'], ['skinny', 'puppy']),
+    (['skinny', ' ', '@', 'puppy'], ['skinny']),
+    (['skinny', ' ', '@', '"', 'puppy', ' ', 'records', '"'], ['skinny']),
+    (['skinny', ' ', '@', '"', 'puppy', '-', 'records', '"'], ['skinny']),
+    (['skinny', ' ', '@', '"', 'puppy', ' ', 'records', '"', 'chain'], ['skinny', 'chain']),
+    (['skinny', ' ', '@', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
+]
 
 
-def test_quoted_ignore_embedded_indicator2():
-    response = SolrQueries()._get_name_copy_clause('my ' + NO_SYNONYMS_INDICATOR + '"happy ' + NO_SYNONYMS_INDICATOR +
-                                                   'waffle"')
+@pytest.mark.parametrize("tokens, expected", name_parse_data)
+def test_parse_for_synonym_candidates(tokens, expected):
 
-    assert response == NO_SYNONYMS_PREFIX + '%22happy%20waffle%22'
+    synonym_candidates = SolrQueries._parse_for_synonym_candidates(tokens)
 
+    print (synonym_candidates)
 
-# No idea how to get the tests running, so do it manually for now.
-try:
-    test_plain_search()
-    test_empty_term()
-    test_empty_term_end()
-    test_trailing_indicator()
-    test_trailing_indicator_end()
-    test_one_term_first()
-    test_one_term_middle()
-    test_one_term_last()
-    test_quoted()
-    test_quoted_ignore_embedded_indicator()
-    test_indicatored_quoted()
-    test_quoted_ignore_embedded_indicator2()
-except AssertionError as exception:
-    pass  # (for a breakpoint)
-    raise exception
+    assert expected == synonym_candidates
+

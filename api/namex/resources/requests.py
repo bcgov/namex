@@ -6,6 +6,10 @@ from flask import request, jsonify, g, current_app, get_flashed_messages
 from flask_restplus import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
+from namex.utils.logging import setup_logging
+setup_logging() ## important to do this first
+
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
@@ -27,6 +31,7 @@ from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANAL
 from namex.services.nro import NROServicesError
 
 import datetime
+from datetime import datetime as dt
 import json
 import urllib
 import sys
@@ -166,6 +171,8 @@ class Requests(Resource):
         # queue must be a list of states
         queue = request.args.get('queue', None)
         if queue:
+            if queue == 'COMPLETED':
+                queue = 'APPROVED,CONDITIONAL,REJECTED'
             queue = queue.upper().split(',')
             for q in queue:
                 if q not in State.VALID_STATES:
@@ -194,9 +201,9 @@ class Requests(Resource):
         nrNum = request.args.get('nrNum', None)
         activeUser = request.args.get('activeUser', None)
         compName = request.args.get('compName', None)
-        # priorityCd = request.args.get('priorityCd', None)
-        furnished = request.args.get('furnished', None)
-        unfurnished = request.args.get('unfurnished', None)
+        priority = request.args.get('ranking', None)
+        notification = request.args.get('notification', None)
+        interval = request.args.get('interval', None)
 
         q = RequestDAO.query.filter()
         if queue: q = q.filter(RequestDAO.stateCd.in_(queue))
@@ -215,11 +222,33 @@ class Requests(Resource):
         if compName:
             q = q.join(RequestDAO.names).filter(Name.name.ilike('%' + compName + '%'))
 
-        if furnished == 'false':
+        if priority == 'Standard':
+            q = q.filter(RequestDAO.priorityCd != 'Y')
+        elif priority == 'Priority':
+            q = q.filter(RequestDAO.priorityCd != 'N')
+
+        if notification == 'Notified':
+            q = q.filter(RequestDAO.furnished != 'N')
+        elif notification == 'Not Notified':
             q = q.filter(RequestDAO.furnished != 'Y')
 
-        if unfurnished == 'false':
-            q = q.filter(RequestDAO.furnished != 'N')
+        if interval == 'Today':
+            current_hour = datetime.datetime.now()
+            hour_offset = current_hour.hour + 1
+            q = q.filter(RequestDAO.submittedDate > text(
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=hour_offset)))
+        elif interval == '7 days':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'7 DAYS\''))
+        elif interval == '30 days':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'30 DAYS\''))
+        elif interval == '90 days':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'90 DAYS\''))
+        elif interval == '1 year':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'1 YEARS\''))
+        elif interval == '3 years':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'3 YEARS\''))
+        elif interval == '5 years':
+            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'5 YEARS\''))
 
         q = q.order_by(text(sort_by))
 
@@ -242,23 +271,6 @@ class Requests(Resource):
                            },
                'nameRequests': request_search_schemas.dump(q.all())
                }
-
-        ## counts for updatedToday and priorities
-        # data = rep['nameRequests']
-        # for row in data:
-        #     try:
-        #         if row['priorityCd'] == 'Y':
-        #             rep['response']['numPriorities'] += 1
-        #     except KeyError or AttributeError:
-        #         pass
-        #
-        # today = str(datetime.datetime.now)[0:10]
-        # for row in data:
-        #     try:
-        #         if row['lastUpdate'][0:10] == today:
-        #             rep['response']['numUpdatedToday'] += 1
-        #     except KeyError or AttributeError:
-        #         pass
 
         return jsonify(rep), 200
 
@@ -342,6 +354,7 @@ class Request(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
+            start_state = nrd.stateCd
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return jsonify({"message": "Request:{} not found".format(nr)}), 404
@@ -392,6 +405,13 @@ class Request(Resource):
                         new_comment.nrId = nrd.id
 
             ### END comments ###
+
+            # if our state wasn't INPROGRESS and it is now, ensure the furnished flag is N
+            if (start_state in locals()
+                and start_state != State.INPROGRESS
+                and nrd.stateCd == State.INPROGRESS):
+                # set / reset the furnished flag to N
+                nrd.furnished = 'N'
 
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
@@ -488,7 +508,6 @@ class Request(Resource):
             if errors:
                 # return jsonify(errors), 400
                 MessageServices.add_message(MessageServices.ERROR, 'request_validation', errors)
-
 
             # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
             reset = False
@@ -617,10 +636,11 @@ class Request(Resource):
                         new_name_choice = Name()
                         new_name_choice.nrId = nrd.id
 
-                        # convert data to ascii, removing data that won't save to Oracle
-                        new_name_choice.name = convert_to_ascii(new_name_choice.name)
-
                         names_schema.load(in_name, instance=new_name_choice, partial=False)
+
+                        # convert data to ascii, removing data that won't save to Oracle
+                        # - also force uppercase
+                        new_name_choice.name = convert_to_ascii(new_name_choice.name.upper())
 
                         nrd.names.append(new_name_choice)
 
@@ -651,7 +671,9 @@ class Request(Resource):
                             nrd_name.comment = None
 
                         # convert data to ascii, removing data that won't save to Oracle
+                        # - also force uppercase
                         nrd_name.name = convert_to_ascii(nrd_name.name)
+                        if (nrd_name.name is not None): nrd_name.name = nrd_name.name.upper()
 
 
                         # check if any of the Oracle db fields have changed, so we can send them back
@@ -839,12 +861,29 @@ class RequestsAnalysis(Resource):
             results, msg, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
 
         else:
-            results, msg, code  = SolrQueries.get_results(analysis_type, nrd_name.name, start=start, rows=rows)
+            results, msg, code = SolrQueries.get_results(analysis_type, nrd_name.name, start=start, rows=rows)
 
         if code:
             return jsonify(message=msg), code
         return jsonify(results), 200
 
+@cors_preflight("GET")
+@api.route('/synonymbucket/<string:name>', methods=['GET','OPTIONS'])
+class SynonymBucket(Resource):
+    START = 0
+    ROWS = 100
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.requires_auth
+    def get(name, *args, **kwargs):
+        start = request.args.get('start', SynonymBucket.START)
+        rows = request.args.get('rows', SynonymBucket.ROWS)
+
+        results, msg, code = SolrQueries.get_synonym_results(name.upper(), start=start, rows=rows)
+        if code:
+            return jsonify(message=msg), code
+        return jsonify(results), 200
 
 @cors_preflight("GET, PUT, PATCH")
 @api.route('/<string:nr>/names/<int:choice>', methods=['GET', "PUT", "PATCH",'OPTIONS'])
@@ -991,3 +1030,50 @@ class SyncNR(Resource):
             return jsonify(resp), 206
 
         return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
+
+
+@cors_preflight("GET")
+@api.route('/stats', methods=['GET', 'OPTIONS'])
+class Stats(Resource):
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.requires_auth
+    def get(*args, **kwargs):
+
+        # default is last 1 hour, but can be sent as parameter
+        timespan = int(request.args.get('timespan', 1))
+
+        # validate row & start params
+        start = request.args.get('currentpage', 1)
+        rows = request.args.get('perpage', 50)
+
+        try:
+            rows = int(rows)
+            start = (int(start)-1) * rows
+        except Exception as err:
+            current_app.logger.info('start or rows not an int, err: {}'.format(err))
+            return jsonify({'message': 'paging parameters were not integers'}), 406
+
+        q = RequestDAO.query \
+            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE))\
+            .filter(RequestDAO.lastUpdate >= text('NOW() - INTERVAL \'{delay} HOURS\''.format(delay=timespan))) \
+            .order_by(RequestDAO.lastUpdate.desc())
+
+        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+        count = db.session.execute(count_q).scalar()
+
+        q = q.offset(start)
+        q = q.limit(rows)
+
+        # current_app.logger.debug(str(q.statement.compile(
+        #     dialect=postgresql.dialect(),
+        #     compile_kwargs={"literal_binds": True}))
+        # )
+
+        requests = q.all()
+        rep = {
+            'numRecords': count,
+            'nameRequests': request_search_schemas.dump(requests)[0]
+        }
+        return jsonify(rep)

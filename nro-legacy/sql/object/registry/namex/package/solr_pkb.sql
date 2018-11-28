@@ -29,7 +29,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
             -- Quick and dirty: do this by hand in 11. 12 has JSON stuff.
             content := content || '\"add\": {\"doc\": {' ||
                     '\"id\": \"' || view_row.id || '\", ' ||
-                    '\"name\": \"' || REPLACE(view_row.name, '"', '\\\"') || '\", ' ||
+                    '\"name\": \"' || REPLACE(REPLACE(view_row.name, '\', '\\\\'), '"', '\\\"') || '\", ' ||
                     '\"state_type_cd\": \"' || view_row.state_type_cd || '\", ' ||
                     '\"source\": \"' || view_row.source || '\" ' ||
                     '} }, ';

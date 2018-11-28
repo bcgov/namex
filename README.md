@@ -2,39 +2,40 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 
-# Application Name
+# NameX
 
 BC Registries Names Examination, research and approval system API
 
 ## Technology Stack Used
-* Python, Flask
-* Postgres -  SQLAlchemy, psycopg2-binary & alembic 
+* Python, Flask, Flask-restplus, Marshmallow
+* Pytest, Pytest-Mock
+* Postgres -  SQLAlchemy, psycopg2-binary & alembic
+* Keycloak 
+* Solr
 
 ## Third-Party Products/Libraries used and the the License they are covert by
 
 ## Project Status
-As of 2018-02-22 in **ALPHA**
+2018-11-01 * changes to solr synonyms
+2018-10-19 **Release**
 
-## Documnentation
+## Documentation
 
 GitHub Pages (https://guides.github.com/features/pages/) are a neat way to document you application/project.
-
-## Security
-
-Future - BCGov Keycloak
-
-Current - JWT hack
 
 ## Files in this repository
 
 ```
-docs/           - Project Documentation
-└── images        
-└── icons         
+api        - the core API service
 
-openshift/      - OpenShift-specific files
-├── scripts     - helper scripts
-└── templates   - application templates
+solr       - solr is used as a search service providing advanced semantic support
+solr-feeder
+solr-synonyms-api
+
+nro-update    - updates the legacy database, used as an integration point for downstream systems
+nro-extractor - pulling incoming requests from the legacy systems
+
+nro-legacy    - scripts to manage integration objects with the legacy Oracle DB      
 ```
 
 ## Deployment (Local Development)

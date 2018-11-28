@@ -1,5 +1,0 @@
-[
-  "tests/unit/test_corporations.py::test_readyz",
-  "tests/unit/test_corporations.py::test_healthz",
-  "tests/unit/test_corporations.py::test_not_authenticated"
-]

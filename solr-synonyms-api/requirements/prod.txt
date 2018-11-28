@@ -1,0 +1,10 @@
+Flask
+Flask-Restplus
+Flask-SQLAlchemy
+psycopg2-binary
+python-dotenv
+
+gunicorn
+gunicorn[eventlet]
+greenlet
+eventlet

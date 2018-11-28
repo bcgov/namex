@@ -30,7 +30,14 @@ Using project "servicebc-ne-tools".
 (Note that you could also run `oc login` and enter the same credentials).
 
 
-## TODO: configmap
+## The configmap
+
+Solr currently needs a configmap that defines the data sources. We should probably get rid of this configmap - at the
+moment the only difference between environments is the route to the PostgreSQL foreign data wrappers. Ideally these
+should be read from environment variables, and the configmap perhaps stores in the GitHub repository.
+
+However, until the above above is complete, the `solr-datasources` configmap is required - copy it from an existing
+environment and update as needed.
 
 ## Creating and Replacing the `solr` Build
 
@@ -137,89 +144,16 @@ C:\> oc tag servicebc-ne-tools/solr:latest servicebc-ne-tools/solr:dev
 Tag solr:ENV set to servicebc-ne-tools/solr@sha256:1d39a55e77076835a67e38ff01cc188cdc713839c96a19c4a14d92e124c269d2.
 ```
 
-.
+## TODO: Pipeline
 
-.
+There are pipeline scripts and a Jenkinsfile. There is a `solr-pipeline` in the tools namespace, but not sure what it
+does. We should look into what the scripts do, and document them. The only documentation we have is:
 
-.
+```
+Pipeline
 
-.
+Adapted from https://github.com/BCDevOps/openshift-tools/blob/master/provisioning/pipeline/create-pipeline.sh
 
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-TODO: create a new route name solr2, hostname 192.168.99.100.nip.io, Secure route, Insecure: redirect. Visit
-https://192.168.99.100.nip.io
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-
-
-
-
-
-
-
-#### TODO: Clean up below and move to the above.
- 
-
-* Need  image.  See TheOrgBook/docker/manage for original "solr-base" build files.
-
-created templates/solr-build.json
-
-* BUILDNOTES for namex-solr
-As per the project documentation but build will only work for local OpenShift
-
-* Pipeline
-* Adapted from https://github.com/BCDevOps/openshift-tools/blob/master/provisioning/pipeline/create-pipeline.sh
 oc process -f solr-pipeline-build.json --param-file=solr-pipeline.param | oc create -f -
+```
 
-* Extracting a template from OpenShift
-EXAMPLE: extracting a deployment config
-
-oc export --as-template=solr-deploy dc solr-names -o json
---as-template=solr-deploy   is the name of the root object
-dc                          is deployment config
-solr-names                  is the name of the deployment config
--o json                     specifies json as the output format

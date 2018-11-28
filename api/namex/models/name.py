@@ -8,7 +8,7 @@ class Name(db.Model):
     __tablename__ = 'names'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1024))
+    name = db.Column(db.String(1024), index=True)
     state = db.Column(db.String(15), default='NE') # NE=Not Examined; R=Rejected; A=Accepted; C=Cond. Accepted
     choice = db.Column(db.Integer)
     designation = db.Column(db.String(50), default=None)
@@ -24,7 +24,7 @@ class Name(db.Model):
     conflict3_num = db.Column(db.String(250), default='') # optional conflict name - corp or NR number
     decision_text = db.Column(db.String(1000), default='')
 
-    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
+    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
     commentId = db.Column('comment_id', db.Integer, db.ForeignKey('comments.id'))
     # nameRequest = db.relationship('Request')
 
@@ -57,6 +57,9 @@ class Name(db.Model):
         return cls.query.filter_by(name=name).first()
 
     def save_to_db(self):
+        # force uppercase names
+        self.name = self.name.upper()
+
         db.session.add(self)
         db.session.commit()
 

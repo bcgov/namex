@@ -34,7 +34,7 @@ If you need to add fixture data (eg.a lookup table with default values) then you
 
 To make a new revision file:
 ```bash
-python manage.py db revsion -m 'short name of your revision'
+python manage.py db revision -m 'short_name_of_your_revision'
 ```
 
 ### Want to know the Head or current revsion?

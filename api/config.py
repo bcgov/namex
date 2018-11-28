@@ -19,7 +19,10 @@ class Config(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
+
     SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
+    SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
     NRO_EXTRACTOR_URI = os.getenv('NRO_EXTRACTOR_URI', None)
 
     ALEMBIC_INI='migrations/alembic.ini'
@@ -70,7 +73,7 @@ class TestConfig(Config):
     DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD','')
     DB_NAME = os.getenv('DATABASE_TEST_NAME','')
     DB_HOST = os.getenv('DATABASE_TEST_HOST','')
-    DB_PORT = os.getenv('DATABASE_TEST_PORT','5432')
+    DB_PORT = os.getenv('DATABASE_PORT','5432')
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
          user=DB_USER,
          password=DB_PASSWORD,

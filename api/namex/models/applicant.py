@@ -27,7 +27,7 @@ class Applicant(db.Model):
     stateProvinceCd = db.Column('state_province_cd', db.String(2))
     countryTypeCd = db.Column('country_type_cd', db.String(2))
 
-    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
+    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
 
     # Relationships - Requests
     # applicants = db.relationship("Requests", backref=backref("applicants", uselist=False), foreign_keys=[nrId])

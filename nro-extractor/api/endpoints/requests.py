@@ -1,13 +1,17 @@
+import sys
+import re
+import datetime
+
 from flask_restplus import Namespace, Resource, fields
 from flask import request, jsonify, current_app, g
 from sqlalchemy import text
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
+
 from api import db
 from namex.models import Request, User, State, Applicant, Comment, PartnerNameSystem, Name, Event
 from namex.services import EventRecorder
 
-import sys
 
 api = Namespace('nroRequests', description='Name Request System - extracts legacy NRs and puts them into the new system')
 
@@ -124,7 +128,7 @@ class NRORequest(Resource):
         nr_submitter = get_nr_submitter(nro_session, nr_header['request_id'])
         nr_applicant = get_nr_requester(nro_session, nr_header['request_id'])
         nr_ex_comments = get_exam_comments(nro_session, nr_header['request_id'])
-        nr_nwpat = get_nwpta(nro_session, nr_header['request_id'])
+        nr_nwpta = get_nwpta(nro_session, nr_header['request_id'])
         nr_names = get_names(nro_session, nr_header['request_id'])
 
         current_app.logger.debug('completed all gets')
@@ -142,8 +146,8 @@ class NRORequest(Resource):
         if nr_ex_comments:
             add_comments(nr, nr_ex_comments, update)
             current_app.logger.debug('completed comments for {}'.format(nr.nrNum))
-        if nr_nwpat:
-            add_nwpta(nr, nr_nwpat, update)
+        if nr_nwpta:
+            add_nwpta(nr, nr_nwpta, update)
             current_app.logger.debug('completed nwpta for {}'.format(nr.nrNum))
         if nr_names:
             add_names(nr, nr_names, update)
@@ -192,6 +196,9 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
     else:
         submitter = None
 
+    previous_priorityDate = nr.priorityDate
+    previous_priorityCd = nr.priorityCd
+
     nr.userId = user.id
     nr.stateCd = State.DRAFT if nr_header['state_type_cd'] is None else NR_STATE[nr_header['state_type_cd']]
     nr.nrNum = nr_header['nr_num']
@@ -203,6 +210,7 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
     nr.additionalInfo = nr_header['additional_info']
     nr.natureBusinessInfo = nr_header['nature_business_info']
     nr.xproJurisdiction = nr_header['xpro_jurisdiction']
+    # TODO This should NOT be None, but due to some legacy issues, it's set to None
     nr.submittedDate = None if not nr_submitter else nr_submitter['submitted_date']
     nr.submitter_userid = None if not submitter else submitter.id
     nr.nroLastUpdate = nr_header['last_update']
@@ -210,8 +218,24 @@ def add_nr_header(nr, nr_header, nr_submitter, user, update=False):
 
     if nr_header['priority_cd'] == 'PQ':
         nr.priorityCd = 'Y'
+        if update and not previous_priorityDate:
+            nr.priorityDate = datetime.datetime.utcnow()
+        else:
+            nr.priorityDate = nr.submittedDate
     else:
         nr.priorityCd = 'N'
+
+
+    # if this was a change of name with related corp num, populate the corpNum field
+    # - the string in Additional Info field is form: **Change of Name** **XXXXXXXXXXXXXX**
+    try:
+        if '**Change of Name**' in nr.additionalInfo:
+            regex = r"\*\*Change of Name\*\* \*\*([a-zA-Z0-9]*)\*\*"
+            m = re.search(regex, nr.additionalInfo)
+            if m:
+                nr.corpNum = m.group(1)
+    except:
+        pass
 
 
 def add_comments(nr, comments, update=False):
@@ -230,7 +254,7 @@ def add_comments(nr, comments, update=False):
             nr.comments.append(comm)
 
 
-def add_nwpta(nr, nr_nwpat, update=False):
+def add_nwpta(nr, nr_nwpta, update=False):
 
     # naive approach, if updating remove all the old PNS'es
     # TODO change to an update / delete / insert flow
@@ -238,14 +262,16 @@ def add_nwpta(nr, nr_nwpat, update=False):
         for pn in nr.partnerNS.all():
             nr.partnerNS.remove(pn)
 
-    if nr_nwpat:
-        for p in nr_nwpat:
+    if nr_nwpta:
+        for p in nr_nwpta:
             pns = PartnerNameSystem()
             pns.partnerNameTypeCd = p['partner_name_type_cd']
             pns.partnerNameNumber = p['partner_name_number']
             pns.partnerJurisdictionTypeCd = p['partner_jurisdiction_type_cd']
             pns.partnerNameDate = p['partner_name_date']
             pns.partnerName = p['partner_name']
+
+            pns.set_requested_flag();
 
             nr.partnerNS.append(pns)
 
@@ -284,11 +310,13 @@ def add_names(nr, nr_names, update=False):
 
 def add_applicant(nr, nr_applicant, update=False):
 
+    applicant = None
     if update:
-        applicant = nr.applicants
-        # TODO: can an existing NR ever not have applicants?
-    else:
+        applicant = nr.applicants.one_or_none()
+
+    if not applicant:
         applicant = Applicant()
+        nr.applicants.append(applicant)
 
     applicant.lastName = nr_applicant['last_name']
     applicant.firstName = nr_applicant['first_name']
@@ -307,9 +335,6 @@ def add_applicant(nr, nr_applicant, update=False):
     applicant.postalCd = nr_applicant['postal_cd']
     applicant.stateProvinceCd = nr_applicant['state_province_cd']
     applicant.countryTypeCd = nr_applicant['country_type_cd']
-
-    if not update:
-        nr.applicants.append(applicant)
 
 
 # ######## Fetch Current NRO Information ##########################################

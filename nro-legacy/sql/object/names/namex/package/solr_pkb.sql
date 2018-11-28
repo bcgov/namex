@@ -1,6 +1,4 @@
--- noinspection SqlNoDataSourceInspectionForFile
-
-CREATE OR REPLACE PACKAGE BODY solr AS
+CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     -- Action Types
     ACTION_UPDATE CONSTANT VARCHAR2(1) := 'U';
     ACTION_DELETE CONSTANT VARCHAR2(1) := 'D';
@@ -33,7 +31,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
             -- Quick and dirty: do this by hand in 11. 12 has JSON stuff.
             content := content || '\"add\": {\"doc\": {' ||
                     '\"id\": \"' || view_row.id || '\", ' ||
-                    '\"name\": \"' || REPLACE(view_row.name, '"', '\\\"') || '\", ' ||
+                    '\"name\": \"' || REPLACE(REPLACE(view_row.name, '\', '\\\\'), '"', '\\\"') || '\", ' ||
                     '\"state_type_cd\": \"' || view_row.state_type_cd || '\", ' ||
                     '\"source\": \"' || view_row.source || '\" ' ||
                     '} }, ';
@@ -79,7 +77,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
                         '\"name_instance_id\": \"' || view_row.name_instance_id || '\", ' ||
                         '\"choice_number\": \"' || view_row.choice_number || '\", ' ||
                         '\"corp_num\": \"' || view_row.corp_num || '\", ' ||
-                        '\"name\": \"' || REPLACE(view_row.name, '"', '\\\"') || '\", ' ||
+                        '\"name\": \"' || REPLACE(REPLACE(view_row.name, '\', '\\\\'), '"', '\\\"') || '\", ' ||
                         '\"nr_num\": \"' || view_row.nr_num || '\", ' ||
                         '\"request_id\": \"' || view_row.request_id || '\", ' ||
                         '\"submit_count\": \"' || view_row.submit_count || '\", ' ||
@@ -134,10 +132,13 @@ CREATE OR REPLACE PACKAGE BODY solr AS
             content := generate_json_names(nr_number, action);
         END IF;
 
+        -- Convert the content to UTF-8, so that accented characters, etc, are handled.
+        content := CONVERT(content, 'UTF8');
+
         -- At some point it would make sense to move the ReST stuff out of here and into somewhere re-usable.
         utl_http.set_wallet(oracle_wallet);
         request := utl_http.begin_request(destination_url, 'POST', 'HTTP/1.1');
-        utl_http.set_header(request, 'Content-Type', 'application/json');
+        utl_http.set_header(request, 'Content-Type', 'application/json;charset=UTF-8');
         utl_http.set_header(request, 'Content-Length', LENGTH(content));
         utl_http.write_text(request, content);
 
@@ -210,7 +211,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
             -- If we don't care about it, mark it as ignored.
             status := STATUS_IGNORED;
 
-            IF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM', 'RESET') THEN
+            IF row_transaction_type_cd IN ('CANCL', 'CONSUME', 'EXPIR', 'HISTORICAL', 'NAME_EXAM', 'RESET') THEN
                 SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
                         row_transaction_id;
 
@@ -248,7 +249,7 @@ CREATE OR REPLACE PACKAGE BODY solr AS
                                 ACTION_UPDATE);
                         status := STATUS_COMPLETE;
                     END IF;
-                ELSIF row_transaction_type_cd IN ('CONSUME', 'EXPIR', 'HISTORICAL') THEN
+                ELSIF row_transaction_type_cd IN ('CANCL', 'CONSUME', 'EXPIR', 'HISTORICAL') THEN
                     INSERT INTO solr_feeder (id, transaction_id, nr_num, solr_core, action) VALUES
                             (solr_feeder_id_seq.NEXTVAL, row_transaction_id, row_nr_num, SOLR_CORE_CONFLICTS,
                             ACTION_DELETE);
