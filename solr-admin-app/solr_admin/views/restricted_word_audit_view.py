@@ -2,7 +2,7 @@
 from flask import request
 from flask_admin.contrib import sqla
 
-from namex_admin import keycloak
+from solr_admin import keycloak
 
 
 # The customized ModelView that is used for working with the synonyms.

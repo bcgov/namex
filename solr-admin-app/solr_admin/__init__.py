@@ -6,32 +6,32 @@ import flask_admin
 import flask_sqlalchemy
 
 import config
-from namex_admin import keycloak
-from namex_admin import models
+from solr_admin import keycloak
+from solr_admin import models
 
-from namex_admin.models import synonym
-from namex_admin.models import restricted_view
-from namex_admin.models import restricted_word
-from namex_admin.models import restricted_condition
-from namex_admin.models import restricted_link_word_condition
-from namex_admin.models import decision_reason
-from namex_admin.models import synonym_audit
-from namex_admin.models import restricted_word_audit
-from namex_admin.models import restricted_condition_audit
-from namex_admin.models import restricted_link_word_condition_audit
-from namex_admin.models import decision_reason_audit
+from solr_admin.models import synonym
+from solr_admin.models import restricted_view
+from solr_admin.models import restricted_word
+from solr_admin.models import restricted_condition
+from solr_admin.models import restricted_link_word_condition
+from solr_admin.models import decision_reason
+from solr_admin.models import synonym_audit
+from solr_admin.models import restricted_word_audit
+from solr_admin.models import restricted_condition_audit
+from solr_admin.models import restricted_link_word_condition_audit
+from solr_admin.models import decision_reason_audit
 
-from namex_admin.views import synonym_view
-from namex_admin.views import restricted_view_view
-from namex_admin.views import restricted_word_view
-from namex_admin.views import restricted_condition_view
-from namex_admin.views import restricted_link_word_condition_view
-from namex_admin.views import decision_reason_view
-from namex_admin.views import synonym_audit_view
-from namex_admin.views import restricted_word_audit_view
-from namex_admin.views import restricted_condition_audit_view
-from namex_admin.views import restricted_link_word_condition_audit_view
-from namex_admin.views import decision_reason_audit_view
+from solr_admin.views import synonym_view
+from solr_admin.views import restricted_view_view
+from solr_admin.views import restricted_word_view
+from solr_admin.views import restricted_condition_view
+from solr_admin.views import restricted_link_word_condition_view
+from solr_admin.views import decision_reason_view
+from solr_admin.views import synonym_audit_view
+from solr_admin.views import restricted_word_audit_view
+from solr_admin.views import restricted_condition_audit_view
+from solr_admin.views import restricted_link_word_condition_audit_view
+from solr_admin.views import decision_reason_audit_view
 
 
 # Create admin site

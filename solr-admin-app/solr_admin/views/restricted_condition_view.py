@@ -5,9 +5,9 @@ from flask import current_app, request
 from flask_admin.contrib import sqla
 from wtforms import validators
 
-from namex_admin import keycloak
-from namex_admin import models
-from namex_admin.models import restricted_condition_audit
+from solr_admin import keycloak
+from solr_admin import models
+from solr_admin.models import restricted_condition_audit
 
 # The customized ModelView that is used for working with the restricted conditions.
 class RestrictedConditionView(sqla.ModelView):
