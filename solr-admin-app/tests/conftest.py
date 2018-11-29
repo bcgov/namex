@@ -41,14 +41,18 @@ def base_url(port, server):
 
 
 @pytest.fixture(scope="session")
-def db():
+def schema():
+    return open('../../database/database_create.sql').read()
+
+
+@pytest.fixture(scope="session")
+def db(schema):
     from flask_sqlalchemy import SQLAlchemy
     from solr_admin import create_application
     app = create_application(run_mode='testing')
     db = SQLAlchemy(app)
 
-    content = open('../../database/database_create.sql').read()
-    sqls = [sql for sql in [x.replace('\n','').strip() for x in content.split(';')] if len(sql)>0]
+    sqls = [sql for sql in [x.replace('\n', '').strip() for x in schema.split(';')] if len(sql) > 0]
 
     for sql in sqls:
         db.engine.execute(sql)
