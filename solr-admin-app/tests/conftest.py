@@ -46,24 +46,10 @@ def db():
     from solr_admin import create_application
     app = create_application(run_mode='testing')
     db = SQLAlchemy(app)
-    sqls = [
-        'DROP TABLE IF EXISTS public.synonym CASCADE;',
-        'DROP SEQUENCE IF EXISTS public.synonym_id_seq;',
-        'CREATE SEQUENCE public.synonym_id_seq;',
-        """
-        CREATE TABLE public.synonym
-        (
-            id integer NOT NULL DEFAULT nextval('synonym_id_seq'::regclass),
-            category character varying(100) COLLATE pg_catalog."default" DEFAULT ''::character varying,
-            synonyms_text character varying(1000) COLLATE pg_catalog."default",
-            comment character varying(1000) COLLATE pg_catalog."default" DEFAULT ''::character varying,
-            enabled boolean DEFAULT true,
-            CONSTRAINT synonym_pkey PRIMARY KEY (id),
-            CONSTRAINT synonyms_text_unique UNIQUE (synonyms_text),
-            CONSTRAINT synonyms_text_not_null CHECK (synonyms_text IS NOT NULL) NOT VALID
-        )
-        """
-    ]
+
+    content = open('../../database/database_create.sql').read()
+    sqls = [sql for sql in [x.replace('\n','').strip() for x in content.split(';')] if len(sql)>0]
+
     for sql in sqls:
         db.engine.execute(sql)
 
