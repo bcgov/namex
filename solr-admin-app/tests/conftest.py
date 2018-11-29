@@ -38,3 +38,33 @@ def browser(server):
 @pytest.fixture(scope="session")
 def base_url(port, server):
     return 'http://localhost:' + str(port)
+
+
+@pytest.fixture(scope="session")
+def db():
+    from flask_sqlalchemy import SQLAlchemy
+    from solr_admin import create_application
+    app = create_application(run_mode='testing')
+    db = SQLAlchemy(app)
+    sqls = [
+        'DROP TABLE IF EXISTS public.synonym CASCADE;',
+        'DROP SEQUENCE IF EXISTS public.synonym_id_seq;',
+        'CREATE SEQUENCE public.synonym_id_seq;',
+        """
+        CREATE TABLE public.synonym
+        (
+            id integer NOT NULL DEFAULT nextval('synonym_id_seq'::regclass),
+            category character varying(100) COLLATE pg_catalog."default" DEFAULT ''::character varying,
+            synonyms_text character varying(1000) COLLATE pg_catalog."default",
+            comment character varying(1000) COLLATE pg_catalog."default" DEFAULT ''::character varying,
+            enabled boolean DEFAULT true,
+            CONSTRAINT synonym_pkey PRIMARY KEY (id),
+            CONSTRAINT synonyms_text_unique UNIQUE (synonyms_text),
+            CONSTRAINT synonyms_text_not_null CHECK (synonyms_text IS NOT NULL) NOT VALID
+        )
+        """
+    ]
+    for sql in sqls:
+        db.engine.execute(sql)
+
+    return db
