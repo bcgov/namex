@@ -2,7 +2,7 @@
 from . import db
 
 # The class that corresponds to the database table for restricted words.
-class RestrictedWord(db.Model):
+class RestrictedWordTable(db.Model):
     __tablename__ = 'restricted_word'
 
     word_id = db.Column(db.Integer, primary_key=True)

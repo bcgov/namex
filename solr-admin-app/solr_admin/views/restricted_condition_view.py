@@ -10,9 +10,9 @@ from solr_admin import models
 from solr_admin.models import restricted_condition_audit
 
 # The customized ModelView that is used for working with the restricted conditions.
-class RestrictedConditionView(sqla.ModelView):
+class RestrictedCondition2View(sqla.ModelView):
 
-    column_list = ['cnd_id','cnd_text','consent_required','consenting_body','instructions','allow_use']
+    column_list = ['cnd_id','cnd_text','consent_required','consenting_body','instructions','allow_use','word_phrase']
 
     # We're unlikely to do multiple deletes, so just get rid of the checkboxes and the drop down for delete.
     action_disallowed_list = ['delete']
@@ -27,7 +27,7 @@ class RestrictedConditionView(sqla.ModelView):
     column_default_sort = 'cnd_id'
 
     #This needs to be initialized, but we will override it in is_accessible.
-    column_editable_list = ['cnd_text','consent_required','consenting_body','instructions','allow_use']
+    column_editable_list = ['cnd_text','consent_required','consenting_body','instructions','allow_use','word_phrase']
 
     # Allow the user to filter on the these columns.
     column_filters = ['cnd_id','consenting_body','cnd_text']
@@ -56,7 +56,7 @@ class RestrictedConditionView(sqla.ModelView):
 
         if editable:
             # Make columns editable.
-            self.column_editable_list = ['cnd_text','consent_required','consenting_body','instructions','allow_use']
+            self.column_editable_list = ['cnd_text','consent_required','consenting_body','instructions','allow_use','word_phrase']
         else:
             self.column_editable_list = []
 
@@ -86,10 +86,11 @@ class RestrictedConditionView(sqla.ModelView):
 
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
-    audit = restricted_condition_audit.RestrictedConditionAudit(
-        keycloak.Keycloak(None).get_username(), action,  model.cnd_id, model.cnd_text, model.consent_required,
-        model.consenting_body, model.instructions, model.allow_use)
+    pass
+    #audit = restricted_condition_audit.RestrictedConditionAudit(
+    #    keycloak.Keycloak(None).get_username(), action,  model.cnd_id, model.cnd_text, model.consent_required,
+    #    model.consenting_body, model.instructions, model.allow_use)
 
-    session = models.db.session
-    session.add(audit)
-    session.commit()
+    #session = models.db.session
+    #session.add(audit)
+    #session.commit()

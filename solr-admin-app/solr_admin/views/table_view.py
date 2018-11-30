@@ -4,7 +4,7 @@ import re
 from flask import request
 from flask_admin.contrib import sqla
 
-from solr_admin.models.restricted_word import RestrictedWord
+from solr_admin.models.restricted_word_table import RestrictedWord
 from solr_admin import keycloak
 
 # The customized ModelView that is used for working with the synonyms.
