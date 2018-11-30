@@ -2,6 +2,7 @@ from . import db, ma
 from datetime import datetime
 from sqlalchemy.orm import backref
 
+
 class PartnerNameSystem(db.Model):
     __tablename__ = 'partner_name_system'
 
