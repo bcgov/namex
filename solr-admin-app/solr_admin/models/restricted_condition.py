@@ -2,7 +2,7 @@
 from . import db
 
 # The class that corresponds to the database table for restricted conditions.
-class RestrictedCondition(db.Model):
+class RestrictedCondition2(db.Model):
     __tablename__ = 'restricted_condition2'
 
     cnd_id = db.Column(db.Integer, primary_key=True)

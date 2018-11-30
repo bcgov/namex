@@ -1,3 +1,4 @@
+import os
 import pytest
 from selenium import webdriver
 from tests.support.driver.server_driver import ServerDriver
@@ -10,8 +11,9 @@ def port():
 
 @pytest.fixture(scope="session")
 def server(port):
+    app = os.path.join(os.path.dirname(__file__), '..', 'app.py')
     server = ServerDriver(name='MyServer', port=port)
-    server.start(cmd=['python', 'app.py'])
+    server.start(cmd=['python', app])
     return server
 
 

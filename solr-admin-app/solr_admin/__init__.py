@@ -26,7 +26,6 @@ from solr_admin.views import synonym_audit_view
 from solr_admin.views import restricted_condition_audit_view
 from solr_admin.views import decision_reason_audit_view
 
-from solr_admin.views import table_view
 
 
 
