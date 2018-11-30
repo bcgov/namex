@@ -4,4 +4,3 @@ pytest
 Pyhamcrest
 behave
 splinter
-gunicorn

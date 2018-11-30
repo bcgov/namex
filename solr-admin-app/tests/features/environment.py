@@ -2,7 +2,7 @@ from tests import conftest
 
 
 def before_all(context):
-    context.db = conftest.db(open('database/database_create.sql').read())
+    context.db = conftest.db()
     context.server_port = conftest.port()
     context.server = conftest.server(conftest.port())
     context.base_url = conftest.base_url(context.server_port, context.server)
