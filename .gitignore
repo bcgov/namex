@@ -56,6 +56,8 @@ selenium-debug.log
 __pycache__
 /**/venv
 /**/build
+/**/.flake8
+/**/*.egg-info
 
 # Editor directories and files
 .idea
@@ -69,6 +71,8 @@ __pycache__
 # ######################
 /**/.env*
 /**/.envrc
+/**/*.temp
+/**/*.last
 
 # Security
 #########################
@@ -90,7 +94,7 @@ solr/cores/.DS_Store
 .eggs/
 .tox
 .cache
-*/.pytest_cache
+**/.pytest_cache
 .coverage
 .hypothesis
 

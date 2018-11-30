@@ -1,16 +1,19 @@
 import json
 import urllib
 
-from flask import current_app, _app_ctx_stack, flash
+from flask import current_app, _app_ctx_stack
 from datetime import datetime
 import cx_Oracle
 
-from namex.models import State
+from namex.models import State, Request, User, Event
 from namex.services.nro import NROServicesError
+from namex.services import EventRecorder
 from namex.services.nro.change_nr import update_nr, _get_event_id, _create_nro_transaction
 
 from .exceptions import NROServicesError
 from .utils import nro_examiner_name
+from .request_utils import add_nr_header, add_comments, add_nwpta, add_names, add_applicant, \
+    get_nr_header, get_nr_submitter, get_nr_requester, get_exam_comments, get_nwpta, get_names
 
 
 class NROServices(object):
@@ -33,11 +36,9 @@ class NROServices(object):
 
     def teardown(self, exception):
         # the oracle session pool will clean up after itself
-        #
-        # ctx = _app_ctx_stack.top
-        # if hasattr(ctx, 'nro_oracle_pool'):
-        #     ctx.nro_oracle_pool.close()
-        pass
+        ctx = _app_ctx_stack.top
+        if hasattr(ctx, 'nro_oracle_pool'):
+            ctx.nro_oracle_pool.close()
 
     def _create_pool(self):
         """create the cx_oracle connection pool from the Flask Config Environment
@@ -190,7 +191,7 @@ class NROServices(object):
                     con.rollback()
                 raise NROServicesError({"code": "unable_to_set_state",
                                         "description": "Unable to set the state of the NR in NRO"}, 500)
-        #
+
         except Exception as err:
             # something went wrong, roll it all back
             current_app.logger.error("NR#:", nr_num, err.with_traceback(None))
@@ -219,6 +220,13 @@ class NROServices(object):
         """
         warnings = []
 
+        if not (nr and user):
+            warnings.append({'type': 'warn',
+                             'code': 'unable_to_move_control_from_nro',
+                             'message': 'NameRequest and User must be provided to attempt to move control from NRO.'
+                             })
+            return warnings
+
         # save the current state, as we'll need to set it back to this before returning
         nr_saved_state = nr.stateCd
         # get the last modification timestamp before we alter the record
@@ -230,7 +238,6 @@ class NROServices(object):
                              'code': 'unable_to_get_last_nro_ts',
                              'message': 'Unable to get last time the NR was updated in NRO'
             })
-
         if not closed_nr:
             current_app.logger.debug('set state to h')
             try:
@@ -265,17 +272,11 @@ class NROServices(object):
                 # mark the NR as being updated
                 nr.stateCd = State.NRO_UPDATING
                 nr.save_to_db()
-                data = {
-                    'nameRequest': nr.nrNum
-                }
-                url = current_app.config.get('NRO_EXTRACTOR_URI')
 
-                nro_req = urllib.request.Request(url,
-                                                 data=json.dumps(data).encode('utf8'),
-                                                 headers={'content-type': 'application/json'})
-                nro_req.get_method = lambda: 'PUT'
-                nro_response = urllib.request.urlopen(nro_req).read()
-                current_app.logger.debug('response from extractor: {}'.format(nro_response))
+                nr = self.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr.nrNum, name_request=nr)
+                nr.stateCd = nr_saved_state
+                nr.save_to_db()
+                EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, {})
 
             except Exception as missed_error:
                 warnings.append({'type': 'warn',
@@ -287,7 +288,6 @@ class NROServices(object):
                 current_app.logger.error(missed_error.with_traceback(None))
             finally:
                 # set the NR back to its initial state
-                # nr.stateCd = State.INPROGRESS
                 nr.stateCd = nr_saved_state
                 nr.save_to_db()
 
@@ -409,3 +409,57 @@ class NROServices(object):
                         "description": "Unable to set the state of the NR in NRO"}, 500)
 
         return None
+
+    def fetch_nro_request_and_copy_to_namex_request(self, user: User, nr_number: str, name_request: Request = None) \
+            -> Request:
+        """Utility function to gather up and copy a Request from NRO to a NameX Request Object
+           The request is NOT persisted in this helper method
+        """
+        try:
+            cursor = self.connection.cursor()
+
+            if name_request:
+                nr = name_request
+                nr_num = nr.nrNum
+            else:
+                nr_num = nr_number
+                nr = Request.find_by_nr(nr_num)
+                if not nr:
+                    nr = Request()
+
+            nr_header = get_nr_header(cursor, nr_num)
+
+            if not nr_header:
+                current_app.logger.info('Attempting to fetch Request:{} from NRO, but does not exist'.format(nr_num))
+                return None
+            current_app.logger.debug('fetched nr_header: {}'.format(nr_header))
+
+            # get all the request segments from NRO
+            nr_submitter = get_nr_submitter(cursor, nr_header['request_id'])
+            nr_applicant = get_nr_requester(cursor, nr_header['request_id'])
+            nr_ex_comments = get_exam_comments(cursor, nr_header['request_id'])
+            nr_nwpta = get_nwpta(cursor, nr_header['request_id'])
+            nr_names = get_names(cursor, nr_header['request_id'])
+
+            current_app.logger.debug('completed all gets')
+
+        except Exception as err:
+            current_app.logger.debug('unable to load nr_header: {}'.format(nr_num), err.with_traceback(None))
+            return None
+
+        add_nr_header(nr, nr_header, nr_submitter, user)
+        current_app.logger.debug('completed header for {}'.format(nr.nrNum))
+        if nr_applicant:
+            add_applicant(nr, nr_applicant)
+            current_app.logger.debug('completed applicants for {}'.format(nr.nrNum))
+        if nr_ex_comments:
+            add_comments(nr, nr_ex_comments)
+            current_app.logger.debug('completed comments for {}'.format(nr.nrNum))
+        if nr_nwpta:
+            add_nwpta(nr, nr_nwpta)
+            current_app.logger.debug('completed nwpta for {}'.format(nr.nrNum))
+        if nr_names:
+            add_names(nr, nr_names)
+            current_app.logger.debug('completed names for {}'.format(nr.nrNum))
+
+        return nr
