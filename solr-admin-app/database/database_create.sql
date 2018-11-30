@@ -4,9 +4,13 @@
 
   DROP TABLE IF EXISTS public.synonym CASCADE;
 
+  DROP TABLE IF EXISTS public.restricted_condition2 CASCADE;
+
   DROP SEQUENCE IF EXISTS public.synonym_audit_id_seq;
 
   DROP SEQUENCE IF EXISTS public.synonym_id_seq;
+
+  DROP SEQUENCE IF EXISTS public.cnd_id_seq;
 
   DROP TYPE IF EXISTS public.audit_action;
 
@@ -14,6 +18,8 @@
   CREATE TYPE public.audit_action AS ENUM ('CREATE', 'DELETE', 'UPDATE');
 
   CREATE SEQUENCE public.synonym_audit_id_seq;
+
+  CREATE SEQUENCE public.cnd_id_seq;
 
   CREATE TABLE public.synonym_audit
   (
@@ -52,3 +58,20 @@
       OIDS = FALSE
   )
   TABLESPACE pg_default;
+
+  CREATE TABLE public.restricted_condition2
+  (
+      cnd_id integer NOT NULL DEFAULT nextval('cnd_id_seq'::regclass),
+      cnd_text character varying(1000) COLLATE pg_catalog."default",
+      allow_use character varying(1) COLLATE pg_catalog."default" DEFAULT 'Y'::character varying,
+      consent_required character varying(1) COLLATE pg_catalog."default" DEFAULT 'Y'::character varying,
+      consenting_body character varying(195) COLLATE pg_catalog."default",
+      instructions character varying(1000) COLLATE pg_catalog."default",
+      word_phrase character varying(300) COLLATE pg_catalog."default",
+      CONSTRAINT cnd_pkey PRIMARY KEY (cnd_id)
+  )
+  WITH (
+      OIDS = FALSE
+  )
+  TABLESPACE pg_default;
+
