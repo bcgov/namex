@@ -205,6 +205,7 @@ class Requests(Resource):
         notification = request.args.get('notification', None)
         submittedInterval = request.args.get('submittedInterval', None)
         lastUpdateInterval = request.args.get('lastUpdateInterval', None)
+        current_hour = int(request.args.get('hour', None))
 
         q = RequestDAO.query.filter()
         if queue: q = q.filter(RequestDAO.stateCd.in_(queue))
@@ -234,16 +235,17 @@ class Requests(Resource):
             q = q.filter(RequestDAO.furnished != 'Y')
 
         if submittedInterval == 'Today':
-            current_hour = datetime.datetime.now()
-            hour_offset = current_hour.hour + 1
             q = q.filter(RequestDAO.submittedDate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=hour_offset)))
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour)))
         elif submittedInterval == '7 days':
-            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'7 DAYS\''))
+            q = q.filter(RequestDAO.submittedDate > text(
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24*6)))
         elif submittedInterval == '30 days':
-            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'30 DAYS\''))
+            q = q.filter(RequestDAO.submittedDate > text(
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24*29)))
         elif submittedInterval == '90 days':
-            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'90 DAYS\''))
+            q = q.filter(RequestDAO.submittedDate > text(
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24*89)))
         elif submittedInterval == '1 year':
             q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'1 YEARS\''))
         elif submittedInterval == '3 years':
@@ -252,24 +254,24 @@ class Requests(Resource):
             q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'5 YEARS\''))
 
         if lastUpdateInterval == 'Today':
-            current_hour = datetime.datetime.now()
-            hour_offset = current_hour.hour + 1
             q = q.filter(RequestDAO.lastUpdate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=hour_offset)))
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour)))
         if lastUpdateInterval == 'Yesterday':
-            current_hour = datetime.datetime.now()
-            today_offset = current_hour.hour + 1
+            today_offset = current_hour
             yesterday_offset = today_offset+24
             q = q.filter(RequestDAO.lastUpdate < text(
                 'NOW() - INTERVAL \'{today_offset} HOURS\''.format(today_offset=today_offset)))
             q = q.filter(RequestDAO.lastUpdate > text(
                 'NOW() - INTERVAL \'{yesterday_offset} HOURS\''.format(yesterday_offset=yesterday_offset)))
         elif lastUpdateInterval == '2 days':
-            q = q.filter(RequestDAO.lastUpdate > text('NOW() - INTERVAL \'2 DAYS\''))
+            q = q.filter(RequestDAO.lastUpdate > text(
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24)))
         elif lastUpdateInterval == '7 days':
-            q = q.filter(RequestDAO.lastUpdate > text('NOW() - INTERVAL \'7 DAYS\''))
+            q = q.filter(RequestDAO.lastUpdate > text(
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24*6)))
         elif lastUpdateInterval == '30 days':
-            q = q.filter(RequestDAO.lastUpdate > text('NOW() - INTERVAL \'30 DAYS\''))
+            q = q.filter(RequestDAO.lastUpdate > text(
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24*29)))
 
         q = q.order_by(text(sort_by))
 
