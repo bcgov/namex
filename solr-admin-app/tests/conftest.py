@@ -42,17 +42,19 @@ def base_url(port, server):
     return 'http://localhost:' + str(port)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def db():
     from flask_sqlalchemy import SQLAlchemy
     from solr_admin import create_application
+    from solr_admin.models.synonym import Synonym
+    from solr_admin.models.restricted_condition import RestrictedCondition2
+
     app = create_application(run_mode='testing')
     db = SQLAlchemy(app)
+    db.engine.execute('drop table if exists ' + Synonym.__tablename__ + ' cascade;')
+    db.engine.execute('drop table if exists ' + RestrictedCondition2.__tablename__ + ' cascade;')
 
-    schema = open('database/database_create.sql').read()
-    sqls = [sql for sql in [x.replace('\n', '').strip() for x in schema.split(';')] if len(sql) > 0]
-
-    for sql in sqls:
-        db.engine.execute(sql)
+    Synonym.metadata.create_all(bind=db.engine)
+    RestrictedCondition2.metadata.create_all(bind=db.engine)
 
     return db

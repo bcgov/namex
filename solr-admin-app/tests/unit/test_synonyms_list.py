@@ -1,8 +1,11 @@
 from hamcrest import *
+from solr_admin.models.synonym import Synonym
 
 
-def test_can_access_synonyms_list(browser, base_url, db):
-    db.engine.execute("insert into public.synonym(category, synonyms_text) values('hello', 'world');")
+def test_synonyms_list(browser, base_url, db):
+    db.session.add(Synonym(category='hello', synonyms_text='world'))
+    db.session.commit()
+
     browser.get(base_url + '/')
     browser.find_element_by_tag_name('a').click()
     browser.find_element_by_link_text('Synonym').click()

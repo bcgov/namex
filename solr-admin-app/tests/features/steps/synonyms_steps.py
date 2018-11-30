@@ -1,14 +1,13 @@
 from behave import fixture, given, when, then, step
 from hamcrest import *
+from solr_admin.models.synonym import Synonym
 
 
 @given(u'the database is seeded with the synonyms')
 def seed(context):
     for row in context.table:
-        category = row['category']
-        synonyms = row['synonyms']
-        context.db.engine.execute(
-            "insert into public.synonym(category, synonyms_text) values('{}', '{}');".format(category, synonyms))
+        context.db.session.add(Synonym(category=row['category'], synonyms_text=row['synonyms']))
+        context.db.session.commit()
 
 
 @when(u'I access the synonym list')

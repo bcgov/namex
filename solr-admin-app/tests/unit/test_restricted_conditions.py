@@ -1,12 +1,13 @@
 from hamcrest import *
+from solr_admin.models.restricted_condition import RestrictedCondition2
 
 
-def test_can_access_synonyms_list(browser, base_url, db):
-    db.engine.execute("""
-        insert into public.restricted_condition2
-        (cnd_id, cnd_text, allow_use, consent_required, consenting_body, instructions, word_phrase) 
-        values
-        (1, 'first restriction', 'Y', 'Y', 'this body needs to give approval', 'call them', 'tdd, code, bdd, quality');""")
+def test_conditions_list(browser, base_url, db):
+    db.session.add(RestrictedCondition2(
+        consenting_body='this body needs to give approval',
+        word_phrase='tdd, code, bdd, quality'))
+    db.session.commit()
+
     browser.get(base_url + '/')
     browser.find_element_by_tag_name('a').click()
     browser.find_element_by_link_text('Restricted Condition2').click()
