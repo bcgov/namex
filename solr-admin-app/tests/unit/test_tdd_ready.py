@@ -9,7 +9,7 @@ def test_can_access_home_page(browser, base_url):
     browser.get(base_url + '/')
     body = browser.find_element_by_tag_name('body').text
 
-    assert 'Click me to get to Synonyms!' == body
+    assert 'Login to administration.' == body
 
 
 def test_can_access_synonyms_list(browser, base_url, db):
