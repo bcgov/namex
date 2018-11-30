@@ -1,5 +1,4 @@
 
-  -- Drops
 
   DROP TABLE IF EXISTS public.synonym_audit CASCADE;
 
@@ -11,7 +10,6 @@
 
   DROP TYPE IF EXISTS public.audit_action;
 
-  -- Creates
 
   CREATE TYPE public.audit_action AS ENUM ('CREATE', 'DELETE', 'UPDATE');
 

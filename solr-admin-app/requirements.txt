@@ -1,12 +1,1 @@
-Flask
-Flask-Admin
-Flask-Script
-Flask-Migrate
-Flask-OIDC
-Flask-SQLAlchemy
-httplib2
-psycopg2-binary
-python-dotenv
-requests
-requests-futures
-wtforms
+-r requirements/prod.txt

@@ -53,3 +53,14 @@ class DevConfig(Config):
 class TestConfig(Config):
     DEBUG = True
     TESTING = True
+
+    from solr_admin.keycloak import Keycloak
+
+    class FakeOidc:
+        user_loggedin = True
+
+        def user_getfield(self, key):
+            return 'Joe'
+
+    Keycloak._oidc = FakeOidc()
+
