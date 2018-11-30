@@ -205,7 +205,7 @@ class Requests(Resource):
         notification = request.args.get('notification', None)
         submittedInterval = request.args.get('submittedInterval', None)
         lastUpdateInterval = request.args.get('lastUpdateInterval', None)
-        current_hour = int(request.args.get('hour', None))
+        current_hour = int(request.args.get('hour', 0))
 
         q = RequestDAO.query.filter()
         if queue: q = q.filter(RequestDAO.stateCd.in_(queue))
