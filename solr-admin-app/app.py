@@ -6,7 +6,6 @@ import dotenv
 import monkeypatch
 import solr_admin
 
-
 # Load all the environment variables from a .env file located in the nearest directory above.
 dotenv.load_dotenv(dotenv.find_dotenv(), override=True)
 

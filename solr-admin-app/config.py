@@ -1,5 +1,8 @@
 
 import os
+import dotenv
+
+dotenv.load_dotenv(dotenv.find_dotenv(), override=True)
 
 CONFIGURATION = {
     'development': 'config.DevConfig',
@@ -18,6 +21,7 @@ class Config(object):
     OIDC_VALID_ISSUERS = [os.getenv('SOLR_ADMIN_APP_OIDC_VALID_ISSUERS', '')]
     OVERWRITE_REDIRECT_URI = os.getenv('SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI', '')
 
+    print("OIDC" + OIDC_CLIENT_SECRETS)
     # Undocumented Keycloak parameter: allows sending cookies without the secure flag, which we need for the local
     # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere else.
     OIDC_ID_TOKEN_COOKIE_SECURE = os.getenv('SOLR_ADMIN_APP_OIDC_ID_TOKEN_COOKIE_SECURE', 'True') == 'True'
@@ -30,7 +34,7 @@ class Config(object):
     DATABASE_USER = os.getenv('SOLR_ADMIN_APP_DATABASE_USERNAME', '')
     DATABASE_PASSWORD = os.getenv('SOLR_ADMIN_APP_DATABASE_PASSWORD', '')
     DATABASE_HOST = os.getenv('SOLR_ADMIN_APP_DATABASE_HOST', '')
-    DATABASE_PORT = os.getenv('SOLR_ADMIN_APP_DATABASE_PORT', '5432')
+    DATABASE_PORT = os.getenv('SOLR_ADMIN_APP_DATABASE_PORT', '54321')
     DATABASE_NAME = os.getenv('SOLR_ADMIN_APP_DATABASE_NAME', 'solr')
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(

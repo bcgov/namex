@@ -170,7 +170,7 @@ def _alphabetize_csv(string: str) -> str:
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
     audit = synonym_audit.SynonymAudit(
-        model.id, keycloak.Keycloak(None).get_username(), action, model.category, model.synonyms_text, model.comment,
+        keycloak.Keycloak(None).get_username(), action, model.id, model.category, model.synonyms_text, model.comment,
         model.enabled)
 
     session = models.db.session
