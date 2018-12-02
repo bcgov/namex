@@ -7,5 +7,5 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 
-integration_fdw_namex = pytest.mark.skipif((os.getenv('FDW_NAMEX_TESTS', False) is False),
-                                           reason="requires access to PostgresFDW to Oracle NAMEX")
+integration_oracle_namesdb = pytest.mark.skipif((os.getenv('ORACLE_NAMESDB_TESTS', False) is False),
+                                                reason="requires access to Oracle NamesDB")
