@@ -7,8 +7,9 @@ set :
     FDW_NAMEX_TESTS to run integration_fdw_namex
     SOLR_TESTS to run integration_solr
     NRO_EXTRACTOR_TESTS to run integration_nro_extractor
-
 """
+import datetime
+
 from .util import \
     integration_oracle_local_namesdb,\
     integration_oracle_namesdb,\
@@ -16,3 +17,6 @@ from .util import \
     integration_solr,\
     integration_synonym_api, \
     integration_nro_extractor
+
+EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
+FROZEN_DATETIME = datetime.datetime(2001, 8, 5, 7, 7, 58, 272362)

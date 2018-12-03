@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from pytest_mock import mocker
 from flask import current_app
@@ -8,6 +10,20 @@ from flask_migrate import Migrate, upgrade
 
 from namex import create_app, jwt as _jwt
 from namex.models import db as _db
+
+from . import FROZEN_DATETIME, EPOCH_DATETIME
+
+
+# fixture to freeze utcnow to a fixed date-time
+@pytest.fixture
+def freeze_datetime_utcnow(monkeypatch):
+
+    class _Datetime:
+        @classmethod
+        def utcnow(cls):
+            return FROZEN_DATETIME
+
+    monkeypatch.setattr(datetime, 'datetime', _Datetime)
 
 
 @pytest.fixture(scope="session")

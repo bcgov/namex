@@ -7,6 +7,8 @@ load_dotenv(find_dotenv())
 class BaseConfig(object):
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+    MAX_ROW_LIMIT = os.getenv('MAX_ROWS','100')
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
@@ -29,21 +31,29 @@ class BaseConfig(object):
          name=DB_NAME,
     )
 
-    # POSTGRESQL ORACLE_FDW
-    FDW_DB_USER = os.getenv('FDW_DATABASE_USERNAME', '')
-    FDW_DB_PASSWORD = os.getenv('FDW_DATABASE_PASSWORD', '')
-    FDW_DB_NAME = os.getenv('FDW_DATABASE_NAME', '')
-    FDW_DB_HOST = os.getenv('FDW_DATABASE_HOST', '')
-    FDW_DB_PORT = os.getenv('FDW_DATABASE_PORT', '54321')
+    # ORACLE
+    ORA_USER = os.getenv('ORA_USER', '')
+    ORA_PASSWORD = os.getenv('ORA_PASSWORD', '')
+    ORA_NAME = os.getenv('ORA_DB_NAME', '')
+    ORA_HOST = os.getenv('ORA_HOST', '')
+    ORA_PORT = os.getenv('ORA_PORT', '1521')
+
     SQLALCHEMY_BINDS = {
-        'nro':        'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-            user=FDW_DB_USER,
-            password=FDW_DB_PASSWORD,
-            host=FDW_DB_HOST,
-            port=int(FDW_DB_PORT),
-            name=FDW_DB_NAME
+        'extractor': 'oracle://{user}:{password}@{host}:{port}/{name}'.format(
+            user=ORA_USER,
+            password=ORA_PASSWORD,
+            host=ORA_HOST,
+            port=int(ORA_PORT),
+            name=ORA_NAME
         )
     }
+
+    NRO_USER = os.getenv('NRO_USER', '')
+    NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
+    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
+    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
+    NRO_HOST = os.getenv('NRO_HOST', '')
+    NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
 
 
 class Config(BaseConfig):
