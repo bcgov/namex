@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "07db505c-2d2b-47b7-8bb2-fb2321e225cb",
+		"_postman_id": "0ac4b9fc-44ae-458d-95a8-f0352b48a3af",
 		"name": "namex-pipeline-dev",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -639,7 +639,10 @@
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/restricted_words",
 							"host": [
@@ -3000,7 +3003,7 @@
 					"response": []
 				},
 				{
-					"name": "/requests - interval=30 days",
+					"name": "/requests - submittedInterval=30 days",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -3108,6 +3111,121 @@
 								{
 									"key": "interval",
 									"value": "30 days"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - lastUpdateInterval=2 days",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "828fd0f9-f533-461f-89b5-70f6693436f4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "46a38d4c-2d18-4347-b5a3-4963752b6142",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"it('All lastUpdates should be within 2 days', () => {",
+									"  for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"      response.body.nameRequests[0][i].should.have.property('lastUpdate')",
+									"      var lastUpdate = new Date(Date.parse(response.body.nameRequests[0][i].lastUpdate));",
+									"      var today = new Date();",
+									"      var interval = (today.getTime() - lastUpdate.getTime())/(1000*60*60*24);",
+									"      if (interval > 2) {",
+									"          response.body.nameRequests[0][i].lastUpdate.should.have.property(\"more recent date\");",
+									"      }",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?lastUpdateInterval=2 days",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "lastUpdateInterval",
+									"value": "2 days"
 								}
 							]
 						}
