@@ -44,6 +44,44 @@ class RestrictedCondition2View(sqla.ModelView):
     # Use a custom list.html that provides a page size drop down with extra choices.
     list_template = 'generic_list.html'
 
+    def get_query(self):
+        from solr_admin.models.restricted_condition import RestrictedCondition2
+        from solr_admin.models.restricted_word_table import RestrictedWordTable
+
+        return self.session.query(RestrictedCondition2, RestrictedWordTable).\
+            filter(RestrictedCondition2.cnd_id==RestrictedWordTable.cnd_id).\
+            order_by(RestrictedCondition2.cnd_id, RestrictedWordTable.word_id)
+
+    def get_list(self, page, sort_column, sort_desc, search, filters,
+                 execute=True, page_size=None):
+        from solr_admin.models.restricted_condition import RestrictedCondition2
+        count, query = sqla.ModelView.get_list(self, page, sort_column, sort_desc, search, filters, True, page_size)
+
+        data = list()
+        previous_condition = None
+        previous_word = None
+        for row in query:
+            tmp, word = row
+            condition = RestrictedCondition2(cnd_id=tmp.cnd_id,
+                                             cnd_text=tmp.cnd_text,
+                                             allow_use=tmp.allow_use,
+                                             consent_required=tmp.consent_required,
+                                             consenting_body=tmp.consenting_body,
+                                             instructions=tmp.instructions,
+                                             word_phrase=word.word)
+            if previous_word is None:
+                data.append(condition)
+            else:
+                if word.cnd_id != previous_word.cnd_id:
+                    data.append(condition)
+                else:
+                    previous_condition.word_phrase += ', ' + word.word
+            previous_condition = condition
+            previous_word = word
+
+        return count, data
+
+
     #form_choices = {'cnd_text': RestrictedWord.cnd_text}
     # At runtime determine whether or not the user has access to functionality of the view. The rule is that data is
     # only editable in the test environment.

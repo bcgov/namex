@@ -2,6 +2,7 @@ import os
 import pytest
 from selenium import webdriver
 from tests.support.driver.server_driver import ServerDriver
+from sqlalchemy.schema import MetaData, DropConstraint
 
 
 @pytest.fixture(scope="session")
@@ -42,19 +43,32 @@ def base_url(port, server):
     return 'http://localhost:' + str(port)
 
 
-@pytest.fixture()
-def db():
+@pytest.fixture(scope="function")
+def clean_db():
     from flask_sqlalchemy import SQLAlchemy
     from solr_admin import create_application
     from solr_admin.models.synonym import Synonym
     from solr_admin.models.restricted_condition import RestrictedCondition2
+    from solr_admin.models.restricted_word_table import RestrictedWordTable
 
     app = create_application(run_mode='testing')
     db = SQLAlchemy(app)
-    db.engine.execute('drop table if exists ' + Synonym.__tablename__ + ' cascade;')
-    db.engine.execute('drop table if exists ' + RestrictedCondition2.__tablename__ + ' cascade;')
+    metadata = MetaData(db.engine)
+    metadata.reflect()
+    for table in metadata.tables.values():
+        for fk in table.foreign_keys:
+            db.engine.execute(DropConstraint(fk.constraint))
+    metadata.drop_all()
+    db.drop_all()
 
     Synonym.metadata.create_all(bind=db.engine)
     RestrictedCondition2.metadata.create_all(bind=db.engine)
+    RestrictedWordTable.metadata.create_all(bind=db.engine)
 
     return db
+
+
+@pytest.fixture(scope="function")
+def db(clean_db):
+    yield clean_db
+    clean_db.session.close()
