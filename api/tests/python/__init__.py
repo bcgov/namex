@@ -10,6 +10,7 @@ set :
 
 """
 from .util import \
+    integration_oracle_local_namesdb,\
     integration_oracle_namesdb,\
     integration_fdw_namex,\
     integration_solr,\

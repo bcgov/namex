@@ -120,18 +120,6 @@ def _update_request(oracle_cursor, nr, event_id, change_flags):
                               admin_comment=row[20]
                               )
 
-    # update REQUEST table with Previous NR - no event, just an update
-    if change_flags['is_changed__previous_request']:
-
-        # set the end event for the existing record
-        oracle_cursor.execute("""
-        UPDATE request
-        SET previous_request_id = :previous_request_id
-        WHERE request_id = :request_id
-        """,
-                              request_id=nr.requestId,
-                              previous_request_id=nr.previousRequestId)
-
 
 def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
     """find the current name instance, set it's end_event_id to event_id

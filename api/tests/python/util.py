@@ -7,6 +7,9 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 
+integration_oracle_local_namesdb = pytest.mark.skipif((os.getenv('ORACLE_NAMESDB_LOCAL_TESTS', False) is False),
+                                                reason="fake schema will be created")
+
 integration_oracle_namesdb = pytest.mark.skipif((os.getenv('ORACLE_NAMESDB_TESTS', False) is False),
                                                 reason="requires access to Oracle NamesDB")
 
