@@ -759,27 +759,80 @@
 
     <fieldType name="txt_starts_with" class="solr.TextField">
         <analyzer type="index">
-            <filter class="solr.LowerCaseFilterFactory"/>
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([a-z]{3,})(s\W|s$)" replacement="$1" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s([a-z])\s" replacement="$1$2$3 " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s" replacement="$1$2 " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z]{2})\s" replacement="$1$2 " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z]{2})\s([a-z])\s" replacement="$1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$)" replacement="$1" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="((^|\W)(and|AND)(\W|$))" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(an|AN)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(are|ARE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(as|AS)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(at|AT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(be|BE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(but|BUT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(by|BY)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(for|FOR)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(if|IF)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(in|IN)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(into|INTO)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(is|IS)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(it|IT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(no|NO)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(not|NOT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(of|OF)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(on|ON)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(or|OR)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(such|SUCH)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(that|THAT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(the|THE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(their|THEIR)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(then|THEN)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(there|THERE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(these|THESE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(they|THEY)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(this|THIS)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(to|TO)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A-Z]|[a-z])\1" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\s" replacement="" />
+            <filter class="solr.LowerCaseFilterFactory"/>
             <tokenizer class="solr.KeywordTokenizerFactory"/>
         </analyzer>
         <analyzer type="query">
-            <filter class="solr.LowerCaseFilterFactory"/>
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([a-z]{3,})(s\W|s$)" replacement="$1" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s([a-z])\s" replacement="$1$2$3 " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z])\s" replacement="$1$2 " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z])\s([a-z]{2})\s" replacement="$1$2 " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^([a-z]{2})\s([a-z])\s" replacement="$1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$)" replacement="$1" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="((^|\W(and|AND)\W|$))" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(and|AND)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(an|AN)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(are|ARE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(as|AS)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(at|AT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(be|BE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(but|BUT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(by|BY)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(for|FOR)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(if|IF)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(in|IN)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(into|INTO)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(is|IS)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(it|IT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(no|NO)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(not|NOT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(of|OF)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(on|ON)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(or|OR)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(such|SUCH)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(that|THAT)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(the|THE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(their|THEIR)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(then|THEN)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(there|THERE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(these|THESE)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(they|THEY)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(this|THIS)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(to|TO)\W|$)" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A-Z]|[a-z])\1" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\s" replacement="" />
+            <filter class="solr.LowerCaseFilterFactory"/>
             <tokenizer class="solr.KeywordTokenizerFactory"/>
         </analyzer>
     </fieldType>

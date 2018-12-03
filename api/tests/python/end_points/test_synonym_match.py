@@ -63,26 +63,37 @@ def seed_database_with(client, jwt, name, id='1', source='2'):
 
     assert r.status_code == 200
 
-def verify(data, expected):
+def verify(data, expected=None, not_expected=None):
+
+    # expected + not_expected lists should be tested separately
+    if expected and not_expected:
+        assert False
+
     verified = False
     print(data['names'])
+
     for name in data['names']:
         print('ACTUAL ', name['name'])
         print('EXPECTED ',expected)
+        print('NOT EXPECTED ', not_expected)
 
-        if expected == None:
+        if expected is []:
         # check that the name is the title of a query sent (no real names were returned from solr)
             if name['name'].find('----') == -1:
-                print('HERE')
                 verified = False
                 break
             else:
                 verified = True
-            print(verified)
         # if the expected name is in the names returned this will set 'verified' to true before the loop finishes
-        elif expected.find(name['name']) != -1:
+        elif expected.lower().find(name['name'].lower()) != -1:
             verified = True
             break
+
+        elif not_expected:
+            verified = True
+            if not_expected.lower().find(name['name'].lower()) != -1:
+                verified = False
+                break
 
     assert verified
 
@@ -90,13 +101,19 @@ def verify(data, expected):
 #     data = search_synonym_match(client, jwt, query)
 #     verify(data, expected)
 
-def verify_synonym_match(client, jwt, query, expected_list):
+def verify_synonym_match(client, jwt, query, expected_list=None, not_expected_list=None):
     data = search_synonym_match(client, jwt, query)
     if expected_list:
-        for expected in expected_list:
-            verify(data, expected)
-    else:
-        verify(data, None)
+        if expected_list is []:
+            verify(data, [])
+        else:
+            for expected in expected_list:
+                verify(data, expected)
+
+    elif not_expected_list:
+        for not_expected in not_expected_list:
+            verify(data, None, not_expected)
+
 
 def search_synonym_match(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
@@ -124,7 +141,7 @@ def test_resist_empty(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_synonym_match(client, jwt,
         query='',
-        expected_list=None
+        expected_list=[]
     )
 
 @integration_synonym_api
@@ -166,23 +183,54 @@ def test_numbers_preserved(client, jwt, app):
 
 @integration_synonym_api
 @integration_solr
+def test_double_letters(client, jwt, app):
+    seed_database_with(client, jwt, 'ATTACK DOUBLES')
+    verify_synonym_match(client, jwt,
+       query='ATACK DOUBBLES',
+       expected_list=['ATTACK DOUBLES']
+    )
+
+@integration_synonym_api
+@integration_solr
+def test_designation_removal(client, jwt, app):
+    seed_database_with(client, jwt, 'designation test')
+    verify_synonym_match(client, jwt,
+        query='designation limited',
+        expected_list=['----designation* '],
+        not_expected_list=['----designation limited* ']
+    )
+
+@integration_synonym_api
+@integration_solr
 @pytest.mark.parametrize("criteria, seed", [
-    ('JAM\' HOLDING', 'JAM HOLDING'),
     ('JAM\'S HOLDING', 'JAM HOLDING'),
-    ('JAM HOLDING', 'JAM\'S HOLDING'),
     ('JAM\'S HOLDING', 'JAM\'S HOLDING'),
     ('JAMS HOLDING', 'JAM HOLDING'),
-    ('JAM HOLDING', 'JAMS HOLDING'),
-    ('JAMS HOLDING', 'JAMS HOLDING'),
     ('JAMS HOLDINGS', 'JAM HOLDING'),
-    ('JAM HOLDING', 'JAMS HOLDINGS'),
     ('JAMS\' HOLDINGS\'', 'JAM HOLDINGS'),
     ('JAM HOLDINGS', 'JAMS\' HOLDINGS\''),
     ('JASONS HOLSTERS', 'JASON HOLSTER'),
     ('A.S. HOLDERS', 'AS HOLDER'),
-    ('A.S\'S HOLDERS', 'AS HOLDER'),
+    ('H.A.S\'S HOLDERS', 'HAS HOLDER'),
 ])
 def test_handles_s_and_possession(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+# TODO: fill out tests for all stop words
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('JM AND HOLDING', 'JM HOLDING'),
+    ('AN ART HOLDING', 'ART HOLDING'),
+    ('THE HOLDING', 'HOLDING'),
+    ('WE ARE HOLD', 'WE HOLD'),
+    ('THERE IS HOLDING', 'HOLDING'),
+])
+def test_stopwords(client, jwt, app, criteria, seed):
     seed_database_with(client, jwt, seed)
     verify_synonym_match(client, jwt,
         query=criteria,

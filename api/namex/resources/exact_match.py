@@ -20,7 +20,7 @@ class ExactMatch(Resource):
     @jwt.requires_auth
     def get():
         query = request.args.get('query')
-        query = query.lower()
+        query = query.lower().replace('*','')
         url = SOLR_URL + '/solr/possible.conflicts' + \
               '/select?' + \
               'sow=false' + \
