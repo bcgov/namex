@@ -39,7 +39,8 @@ class SolrQueries:
         SYN_CONFLICTS:
             '/solr/possible.conflicts/select?hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q=txt_starts_with:{start_str}&wt=json&'
-            'start={start}&rows={rows}&fl=source,id,name,score&sort=score%20desc{synonyms_clause}{name_copy_clause}',
+            'start={start}&rows={rows}&fl=source,id,name,score&sort=score%20desc,txt_starts_with%20asc{synonyms_clause}'
+            '{name_copy_clause}',
         CONFLICTS:
             '/solr/possible.conflicts/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
@@ -65,6 +66,20 @@ class SolrQueries:
             return None, 'Internal server error', 500
 
         try:
+            # TODO: these should be loaded from somewhere.
+            designations = [
+                'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited',
+                'limited liability co.', 'limited liability company', 'limited liability partnership', 'limitee', 'llc',
+                'llp', 'ltd.', 'ltee', 'sencrl', 'societe a responsabilite limitee',
+                'societe en nom collectif a responsabilite limitee', 'srl','ulc', 'unlimited liability company']
+
+            for designation in designations:
+                index = name.upper().find(' ' + designation.upper())
+                # checks if there is a designation AND if that designation is at the end of the string
+                if index != -1 and (index + len(designation)+1) is len(name):
+                    name = name[:index]
+                    break
+
             name = name.replace('&',' ').replace('+', '')
             list_name_split = name.split()
             combined_terms = ''

@@ -4,6 +4,7 @@
 # Testing
 pytest
 pytest-mock
+requests
 
 # Lint and code style
 flake8
