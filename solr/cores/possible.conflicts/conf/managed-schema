@@ -761,7 +761,7 @@
         <analyzer type="index">
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$)" replacement="$1" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$|s\W|s$)" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="((^|\W)(and|AND)(\W|$))" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(an|AN)\W|$)" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(are|ARE)\W|$)" replacement=" " />
@@ -799,7 +799,7 @@
         <analyzer type="query">
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$)" replacement="$1" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$|s\W|s$)" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="((^|\W(and|AND)\W|$))" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(and|AND)\W|$)" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(an|AN)\W|$)" replacement=" " />
