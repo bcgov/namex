@@ -50,6 +50,10 @@ def jwt(app):
     """
     return _jwt
 
+@pytest.fixture(scope="session")
+def solr(app):
+    import os
+    return os.getenv('SOLR_TEST_URL')
 
 @pytest.fixture(scope="session")
 def client_ctx(app):
