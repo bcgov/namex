@@ -133,6 +133,7 @@
         stored="true"/>
     <field name="name_compressed" type="text_name_compressed" multiValued="false" indexed="true" stored="true"/>
     <field name="name_exact_match" type="text_name_exact_match" multiValued="false" indexed="true" stored="true"/>
+    <field name="dblmetaphone_name" type="dblmetaphone_name" multiValued="false" indexed="true" stored="true"/>
     <field name="txt_starts_with" type="txt_starts_with" multiValued="false" indexed="true" stored="false"/>
 
     <!-- Only enabled in the "schemaless" data-driven example (assuming the client
@@ -796,6 +797,21 @@
       </analyzer>
     </fieldType>
 
+    <fieldType name="dblmetaphone_name" class="solr.TextField">
+     <analyzer type="index">
+       <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
+        <filter class="solr.DoubleMetaphoneFilterFactory" inject="false"/>
+     </analyzer>
+     <analyzer type="query">
+       <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
+        <filter class="solr.DoubleMetaphoneFilterFactory" inject="false"/>
+     </analyzer>
+   </fieldType>
+
     <fieldType name="txt_starts_with" class="solr.TextField">
         <analyzer>
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(\$+(\s+|$))+" replacement="$1dollar$3" />
@@ -1280,5 +1296,6 @@
     <copyField source="name" dest="name_with_synonyms"/>
     <copyField source="name" dest="name_compressed"/>
     <copyField source="name" dest="name_exact_match"/>
+    <copyField source="name" dest="dblmetaphone_name"/>
     <copyField source="name" dest="txt_starts_with"/>
 </schema>
