@@ -78,7 +78,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
 				IF row_transaction_type_cd in ('NRREQ', 'RESUBMIT') THEN
 					row_action := ACTION_CREATE;
 					
-				ELSIFrow_transaction_type_cd in ('CANCL') THEN
+				ELSIF row_transaction_type_cd in ('CANCL') THEN
 					row_action := ACTION_CANCEL;
 					
 				ELSE
