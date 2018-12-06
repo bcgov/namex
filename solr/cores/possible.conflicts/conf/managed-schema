@@ -759,7 +759,7 @@
 
     <fieldType name="txt_starts_with" class="solr.TextField">
         <analyzer type="index">
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\'\_]*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$|s\W|s$)" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="((^|\W)(and|AND)(\W|$))" replacement=" " />
@@ -793,11 +793,15 @@
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(to|TO)\W|$)" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A-Z]|[a-z])\1" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\s" replacement="" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][N|n])"
+                                                                     replacement="bc" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a])"
+                                                                     replacement="bc" />
             <filter class="solr.LowerCaseFilterFactory"/>
             <tokenizer class="solr.KeywordTokenizerFactory"/>
         </analyzer>
         <analyzer type="query">
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\'\_]*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$|s\W|s$)" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="((^|\W(and|AND)\W|$))" replacement=" " />
@@ -832,6 +836,10 @@
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(to|TO)\W|$)" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A-Z]|[a-z])\1" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\s" replacement="" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][N|n])"
+                                                                     replacement="bc" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a])"
+                                                                     replacement="bc" />
             <filter class="solr.LowerCaseFilterFactory"/>
             <tokenizer class="solr.KeywordTokenizerFactory"/>
         </analyzer>

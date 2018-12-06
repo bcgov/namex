@@ -255,24 +255,23 @@ def test_finds_variations_on_initials(client, jwt, app, criteria, seed):
         expected_list=[seed]
     )
 
-@pytest.mark.skip(reason="'and' not handled yet")
 @integration_synonym_api
 @integration_solr
-def test_ignores_and(client, jwt, app):
-    seed_database_with(client, jwt, 'JM Van Damme inc')
+@pytest.mark.parametrize("criteria, seed", [
+    ('BRITISH COLUMBIA CORPORATION OF TESTING', 'BC CORPORATION OF TESTING'),
+    ('BRITISH COLUMBIAN CORPORATION OF TESTING', 'BC CORPORATION OF TESTING'),
+    ('British Columbian CORPORATION OF TESTING', 'BC CORPORATION OF TESTING'),
+    ('britishcolumbias CORPORATION OF TESTING', 'BC CORPORATION OF TESTING'),
+    ('britishcolumbians CORPORATION OF TESTING', 'BC CORPORATION OF TESTING'),
+    ('CORPORATION OF BRITISH COLUMBIAN TESTING', 'CORPORATION OF BC TESTING'),
+    ('CORPORATION OF TESTING BRITISH COLUMBIA', 'CORPORATION OF TESTING BC'),
+    ('CORPORATION OF TESTING BC', 'CORPORATION OF TESTING BRITISH COLUMBIA'),
+])
+def test_finds_variations_of_bc(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
     verify_synonym_match(client, jwt,
-       query='J and M Van and Damme inc',
-       expected_list=None
-    )
-
-@pytest.mark.skip(reason="duplicates not handled yet")
-@integration_synonym_api
-@integration_solr
-def test_duplicated_letters(client, jwt, app):
-    seed_database_with(client, jwt, 'Damme Trucking Inc')
-    verify_synonym_match(client, jwt,
-       query='Dame Trucking Inc',
-       expected_list=None
+        query=criteria,
+        expected_list=[seed]
     )
 
 @integration_synonym_api
@@ -282,15 +281,12 @@ def test_duplicated_letters(client, jwt, app):
     ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
     ('J&M HOLDINGS', 'JM HOLDINGS INC'),
     ('J. & M. HOLDINGS', 'JM HOLDING INC'),
-    ('J AND M HOLDINGS', 'J AND M HOLDINGS'),
+    ('J AND M HOLDINGS', 'the J M HOLDINGS'),
     ('J-M HOLDINGS', 'J. & M. HOLDINGS'),
-    # ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
-    # ('J_M HOLDINGS', 'J. & M. HOLDINGS'),
-    # ('J_\'_-M HOLDINGS', 'J.M. HOLDINGS'),
-    # ('J@M HOLDINGS', 'J.M. HOLDINGS'),
-    # ('J=M HOLDINGS', 'J. M. HOLDINGS'),
+    ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J_M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J_\'_-M HOLDINGS', 'J.M. HOLDINGS'),
     ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
-    # ('J!=@_M HOLDINGS', 'J. M. HOLDINGS'),
     ('J+M HOLDINGS', 'J. & M. HOLDING\'S'),
     ('J\M HOLDINGS', 'J. & M. HOLDINGS'),
 ])
@@ -300,34 +296,4 @@ def test_explore_complex_cases(client, jwt, app, criteria, seed):
        query=criteria,
        expected_list=[seed]
     )
-
-# @integration_solr
-# def test_returns_all_fields_that_we_need(client, jwt, app):
-#     seed_database_with(client, jwt, 'Van Trucking Inc', 'any-id', 'any-source')
-#     verify_synonym_match_results(client, jwt,
-#        query='Van Trucking ltd',
-#        expected=[
-#            {'name': 'Van Trucking Inc', 'id':'any-id', 'source':'any-source'}
-#        ]
-#     )
-#
-#
-# @pytest.mark.skip(reason="dont know how to make solr handle those scenarios")
-# @integration_solr
-# @pytest.mark.parametrize("criteria, seed", [
-#     ('{JM} HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('[JM] HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('(JM) HOLDINGS', 'J.M HOLDINGS'),
-#     ('J^M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J~M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J*M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J:M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J?M HOLDINGS', 'J. & M. HOLDINGS')
-# ])
-# def test_special_characters(client, jwt, app, criteria, seed):
-#     seed_database_with(client, jwt, seed)
-#     verify_synonym_match(client, jwt,
-#        query=criteria,
-#        expected=seed
-#     )
 
