@@ -67,10 +67,13 @@ def seed_database_with(solr, client, jwt, name, id='1', source='CORP'):
 
 
 def verify(data, expected):
-    print(data)
     actual = [{ 'name':doc['name'] } for doc in data['names']]
+    print(actual)
+    print(expected)
 
-    assert_that(actual, equal_to(expected))
+    assert_that(len(actual), equal_to(len(expected)))
+    for item in expected:
+        assert_that(actual, has_item(item))
 
 
 def verify_results(client, jwt, query, expected):
@@ -118,11 +121,11 @@ def test_sounds_like(solr, client, jwt, app):
     verify_results(client, jwt,
        query='GOLDSMITHS',
        expected=[
-           {'name': 'GOLDSTREAM ELECTRICAL LTD'},
+           {'name': 'COLDSTREAM VENTURES INC.'},
            {'name': 'GOLDSTEIN HOLDINGS INC.'},
            {'name': 'GOLDSPRING PROPERTIES LTD'},
+           {'name': 'GOLDSTREAM ELECTRICAL LTD'},
            {'name': 'GOLDSTRIPES AVIATION INC'},
-           {'name': 'COLDSTREAM VENTURES INC.'}
        ]
     )
 
