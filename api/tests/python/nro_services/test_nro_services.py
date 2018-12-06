@@ -110,6 +110,21 @@ def test_move_control_of_request_from_nro_missing_nr(app, session):
 
     assert warnings is not None
 
+def test_move_control_of_existing_request_from_nro_missing_nr(app, session):
+
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user.save_to_db()
+    nr = Request()
+    nr.nrNum = 'NR 9999999'
+    nr.stateCd = State.INPROGRESS
+    nr.nroLastUpdate = EPOCH_DATETIME
+    nr.userId = user.id
+    nr.save_to_db()
+
+    warnings = nro.move_control_of_request_from_nro(nr, user)
+
+    assert warnings is not None
+
 
 @integration_oracle_namesdb
 def test_get_nr_header(app):

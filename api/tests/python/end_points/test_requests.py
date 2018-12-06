@@ -50,6 +50,27 @@ def test_get_next(client, jwt, app):
     assert b'"nameRequest": "NR 0000001"' in rv.data
 
 
+def test_get_next_no_draft_avail(client, jwt, app):
+
+    # add NR to database
+    from namex.models import Request as RequestDAO, State
+    nr = RequestDAO()
+    nr.nrNum='NR 0000001'
+    nr.stateCd = State.APPROVED
+    nr.save_to_db()
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token}
+
+    # get the resource (this is the test)
+    rv = client.get('/api/v1/requests/queues/@me/oldest', headers=headers)
+
+    # should return 404, not found
+    assert 404 == rv.status_code
+
+
+
 def test_get_next_oldest(client, jwt, app):
 
     # add NR to database
