@@ -8,6 +8,7 @@ from flask import current_app
 
 api = Namespace('soundsLikeMeta', description='Sounds Like System - Metadata')
 import os
+
 SOLR_URL = os.getenv('SOLR_BASE_URL')
 
 
@@ -20,17 +21,22 @@ class ExactMatch(Resource):
     @jwt.requires_auth
     def get():
         query = request.args.get('query')
-        query = query.lower()
         url = SOLR_URL + '/solr/possible.conflicts' + \
               '/select?' + \
               'df=dblmetaphone_name' + \
               '&rows=15' + \
               '&wt=json' + \
-              '&q=' + urllib.parse.quote(query)
+              '&q=' + urllib.parse.quote(query.lower())
         current_app.logger.debug('Sounds-like query: ' + url)
         connection = urllib.request.urlopen(url)
         answer = json.loads(connection.read())
         docs = answer['response']['docs']
-        names =[{ 'name':doc['name'], 'id':doc['id'], 'source':doc['source'] } for doc in docs ]
+        query = query.upper()
+        indexes = [query.find('A'), query.find('E'), query.find('I'), query.find('O'), query.find('U'), query.find('Y')]
+        indexes = [x for x in indexes if x > 0]
+        vowel_index = min(indexes)
+        vowel = query[vowel_index]
+        names = [{'name': doc['name'], 'id': doc['id'], 'source': doc['source']}
+                 for doc in docs if doc['name'].upper()[vowel_index] == vowel]
 
-        return jsonify({ 'names':names })
+        return jsonify({'names': names})
