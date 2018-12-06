@@ -15,9 +15,7 @@ AS
     SELECT corp_num, office_typ_cd, start_event_id,
             end_event_id, mailing_addr_id, delivery_addr_id,
            dd_corp_num, email_address
-      FROM office
-      WHERE delivery_addr_id is not null
-            and end_event_id is null;
+      FROM office;
 
 
 DROP PUBLIC SYNONYM OFFICE_VW;

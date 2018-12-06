@@ -31,7 +31,7 @@ class Event(db.Model):
     PATCH='patch'
     POST='post'
     DELETE='DELETE'
-    NRO_UPDATE = 'nro_update'
+    UPDATE_FROM_NRO = 'update_from_nro'
     MARKED_ON_HOLD= 'marked_on_hold'
 
     VALID_ACTIONS=[GET, PUT, PATCH, POST, DELETE]

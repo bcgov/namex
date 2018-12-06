@@ -1,14 +1,8 @@
 Flask
 Flask-SQLAlchemy
-Flask-Restplus
-Flask-Marshmallow
 
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
 
+cx_Oracle
 psycopg2-binary
 python-dotenv
-marshmallow-sqlalchemy
-gunicorn
-gunicorn[eventlet]
-greenlet
-eventlet
