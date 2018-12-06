@@ -6,5 +6,5 @@ export PATH=/opt/app-root/bin:/opt/rh/rh-python35/root/usr/bin::/opt/rh/httpd24/
 
 cd /opt/app-root/src
 echo 'run nro_extractor'
-/opt/app-root/bin/python job.py
+/opt/app-root/bin/python nro_extractor.py
 
