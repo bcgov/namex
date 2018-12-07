@@ -224,3 +224,26 @@ def test_more_crazy(solr, client, jwt, app):
            {'name': 'NIPPLAA'},
        ]
     )
+
+@integration_solr
+def test_neighbour(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NEIGHBOUR', id='1')
+    verify_results(client, jwt,
+       query='NAYBOR',
+       expected=[
+           {'name': 'NEIGHBOUR'}
+       ]
+    )
+
+@integration_solr
+def test_fey(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'FEY', id='1')
+    verify_results(client, jwt,
+       query='FAY',
+       expected=[
+           {'name': 'FEY'}
+       ]
+    )
+
