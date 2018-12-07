@@ -34,7 +34,7 @@ if __name__ == "__main__":
     processed = 0
 
     # run the job
-    processed = job(app, db, nro, user, max_rows)
+    processed = job(app, db, nro.connection, user, max_rows)
 
     # clean up
     app.do_teardown_appcontext()
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     # report out
     if processed < 0:
-        print("nro-extractor: errored out: no rows process; completed in:{1}".format(end_time - start_time)
+        print("nro-extractor: errored out: no rows process; completed in:{}".format(end_time - start_time)
               ,file=sys.stderr)
         exit(1)
 
