@@ -25,6 +25,8 @@ def first_distinct_vowel_index(word):
 
 def second_distinct_vowel_index(word):
     index = first_distinct_vowel_index(word)
+    if index == len(word)-1:
+        return -1
     suffix = word[index + 1:]
     return first_distinct_vowel_index(suffix) + index + 1
 
@@ -38,65 +40,96 @@ def second_separated_vowel_index(word):
     return indexes[0] + index + 2
 
 
-def build_first_syllable_sound(param):
-    if len(param)>=3 and param[0]=='I' and param[1]==param[2]:
-        return 'E' + param[2:]
-    if len(param)>=3 and param[0]=='E' and param[1]=='E':
-        return 'E' + param[2:]
+def syllable_sound(syllable):
+    if len(syllable)>=3 and syllable[0]== 'I' and syllable[1]==syllable[2]:
+        return 'E' + syllable[2:]
+    if len(syllable)>=3 and syllable[0]== 'E' and syllable[1]== 'E':
+        return 'E' + syllable[2:]
 
-    return param
+    return syllable
 
 
-def build_first_syllable_double_vowels_sound(param):
-    if param == 'EY':
+def double_vowels_sound(double):
+    if double == 'EY':
         return 'A'
-    if param == 'EI':
+    if double == 'EI':
         return 'A'
-    if param == 'AY':
+    if double == 'AY':
         return 'A'
 
-    return param
+    return double
+
+
+def extract_first_vowel_and_following_consons(name):
+    name_second_vowel = second_separated_vowel_index(name)
+    return name[first_distinct_vowel_index(name):name_second_vowel if name_second_vowel != -1 else len(name)]
+
+
+def extract_first_two_vowels(name):
+    name_second_vowel = second_distinct_vowel_index(name)
+    return name[first_distinct_vowel_index(name):name_second_vowel + 1 if name_second_vowel != -1 else len(name)]
+
+
+def consider_first_syllable_sound(query, candidate, names):
+    name = candidate['name']
+    name_sound = syllable_sound(extract_first_vowel_and_following_consons(name))
+    query_sound = syllable_sound(extract_first_vowel_and_following_consons(query))
+
+    if name_sound == query_sound:
+        names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+
+
+def consider_double_vowels_sound(query, candidate, names):
+    name = candidate['name']
+    name_sound = double_vowels_sound(extract_first_two_vowels(name))
+    query_sound = double_vowels_sound(extract_first_two_vowels(query))
+
+    if name_sound == query_sound:
+        names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+
+
+def add_documents_matching_multi_letters_sound(query, docs, names):
+    for candidate in docs:
+        if candidate and len([doc['name'] for doc in names if doc['name'] == candidate['name']]) == 0:
+            consider_first_syllable_sound(query, candidate, names)
+
+        if candidate and len([doc['name'] for doc in names if doc['name'] == candidate['name']]) == 0:
+            consider_double_vowels_sound(query, candidate, names)
+
+
+def remove_documents_not_matching_first_vowel(query, docs):
+    vowel_index = first_distinct_vowel_index(query)
+    vowel = query[vowel_index]
+    names = [{'name': doc['name'], 'id': doc['id'], 'source': doc['source']}
+             for doc in docs if doc['name'].upper()[vowel_index] == vowel]
+    return names
+
+
+def post_treatment(docs, query):
+    names = remove_documents_not_matching_first_vowel(query, docs)
+    add_documents_matching_multi_letters_sound(query, docs, names)
+    return names
 
 
 @cors_preflight("GET")
 @api.route("", methods=['GET', 'OPTIONS'])
-class ExactMatch(Resource):
+class SoundsLike(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get():
-        query = request.args.get('query')
+        query = request.args.get('query').upper()
         url = SOLR_URL + '/solr/possible.conflicts' + \
               '/select?' + \
               'df=dblmetaphone_name' + \
               '&wt=json' + \
-              '&q=' + urllib.parse.quote(query.lower())
+              '&q=' + urllib.parse.quote(query)
         current_app.logger.debug('Sounds-like query: ' + url)
         connection = urllib.request.urlopen(url)
         answer = json.loads(connection.read())
         docs = answer['response']['docs']
-        query = query.upper()
-        vowel_index = first_distinct_vowel_index(query)
-        vowel = query[vowel_index]
-        names = [{'name': doc['name'], 'id': doc['id'], 'source': doc['source']}
-                 for doc in docs if doc['name'].upper()[vowel_index] == vowel]
-
-        for candidate in docs:
-            if candidate and len([doc['name'] for doc in names if doc['name']==candidate['name']])==0:
-                name = candidate['name']
-                name_second_vowel = second_separated_vowel_index(name)
-                query_second_vowel = second_separated_vowel_index(query)
-                if name_second_vowel > -1 and query_second_vowel > -1:
-                    name_first_syllable_sound = build_first_syllable_sound(name[first_distinct_vowel_index(name):name_second_vowel])
-                    query_first_syllable_sound = build_first_syllable_sound(query[first_distinct_vowel_index(query):query_second_vowel])
-                    if name_first_syllable_sound == query_first_syllable_sound:
-                        names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
-
-            if candidate and len([doc['name'] for doc in names if doc['name'] == candidate['name']]) == 0:
-                name_two_vowels_sound = build_first_syllable_double_vowels_sound(name[first_distinct_vowel_index(name):second_distinct_vowel_index(name) + 1])
-                query_two_vowels_sound = build_first_syllable_double_vowels_sound(query[first_distinct_vowel_index(query):second_distinct_vowel_index(query) + 1])
-                if name_two_vowels_sound == query_two_vowels_sound:
-                    names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+        names = post_treatment(docs, query)
 
         return jsonify({'names': names})
+
