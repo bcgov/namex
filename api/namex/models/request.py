@@ -231,7 +231,6 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'nrNum'
                  ,'nroLastUpdate'
                  ,'priorityCd'
-                 ,'priorityDate'
                  ,'requestTypeCd'
                  ,'stateCd'
                  ,'previousStateCd'
