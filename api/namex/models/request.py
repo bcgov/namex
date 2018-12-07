@@ -53,6 +53,10 @@ class Request(db.Model):
 
     # Relationship State
     stateCd = db.Column('state_cd', db.String(40), db.ForeignKey('states.cd'), index=True)
+
+    # previous state, used when editing NR in certain scenarios
+    previousStateCd = db.Column('prev_state_cd', db.String(40), nullable=True)
+
     # Relationships - Users
     activeUser = db.relationship('User', backref=backref('active_user', uselist=False), foreign_keys=[userId])
     submitter = db.relationship('User', backref=backref('submitter', uselist=False), foreign_keys=[submitter_userid])
@@ -89,6 +93,7 @@ class Request(db.Model):
                 'userId' : '' if (self.activeUser is None) else self.activeUser.username,
                 'submitter_userid' : '' if (self.submitter is None) else self.submitter.username,
                 'state' : self.stateCd,
+                'previousStateCd': self.previousStateCd,
                 'nrNum' : self.nrNum,
                 'consentFlag' : self.consentFlag,
                 'expirationDate' : self.expirationDate,
@@ -229,6 +234,7 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'priorityDate'
                  ,'requestTypeCd'
                  ,'stateCd'
+                 ,'previousStateCd'
                  ,'submitCount'
                  ,'submittedDate'
                  ,'xproJurisdiction'
