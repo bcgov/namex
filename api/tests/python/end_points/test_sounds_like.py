@@ -247,3 +247,25 @@ def test_fey(solr, client, jwt, app):
        ]
     )
 
+
+@integration_solr
+def test_feel(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'FEEL', id='1')
+    verify_results(client, jwt,
+       query='FILL',
+       expected=[
+           {'name': 'FEEL'}
+       ]
+    )
+
+
+@integration_solr
+def test_resist_short_word(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'FE', id='1')
+    verify_results(client, jwt,
+       query='FA',
+       expected=[
+       ]
+    )
