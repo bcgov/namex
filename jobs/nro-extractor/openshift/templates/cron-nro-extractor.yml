@@ -38,7 +38,7 @@ objects:
                       secretKeyRef:
                         key: database-password
                         name: postgresql
-                  - name: PG_DB_NAME
+                  - name: PG_NAME
                     valueFrom:
                       secretKeyRef:
                         key: database-name
@@ -49,6 +49,8 @@ objects:
                     value: '5432'
                   - name: MAX_ROWS
                     value: "${MAX_ROWS}"
+                  - name: NRO_SERVICE_ACCOUNT
+                    value: "${NRO_SERVICE_ACCOUNT}"
                   - name: NRO_PORT
                     valueFrom:
                       secretKeyRef:
@@ -90,5 +92,12 @@ parameters: [
           "description": "The maximum number of Name Requests to process per job run",
           "required": true,
           "value": "100"
+        },
+        {
+          "name": "NRO_SERVICE_ACCOUNT",
+          "displayName": "NRO_SERVICE_ACCOUNT",
+          "description": "The username of the service account",
+          "required": true,
+          "value": "nro_service_account"
         },
 ]

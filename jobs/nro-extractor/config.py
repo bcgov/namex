@@ -18,11 +18,11 @@ class BaseConfig(object):
     SQLALCHEMY_MAX_OVERFLOW = 10
 
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_PASSWORD','')
-    DB_NAME = os.getenv('DATABASE_NAME','')
-    DB_HOST = os.getenv('DATABASE_HOST','')
-    DB_PORT = os.getenv('DATABASE_PORT','5432')
+    DB_USER = os.getenv('PG_USER', '')
+    DB_PASSWORD = os.getenv('PG_PASSWORD','')
+    DB_NAME = os.getenv('PG_NAME','')
+    DB_HOST = os.getenv('PG_HOST','')
+    DB_PORT = os.getenv('PG_PORT','5432')
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
          user=DB_USER,
          password=DB_PASSWORD,
@@ -30,23 +30,6 @@ class BaseConfig(object):
          port=int(DB_PORT),
          name=DB_NAME,
     )
-
-    # ORACLE
-    ORA_USER = os.getenv('ORA_USER', '')
-    ORA_PASSWORD = os.getenv('ORA_PASSWORD', '')
-    ORA_NAME = os.getenv('ORA_DB_NAME', '')
-    ORA_HOST = os.getenv('ORA_HOST', '')
-    ORA_PORT = os.getenv('ORA_PORT', '1521')
-
-    SQLALCHEMY_BINDS = {
-        'extractor': 'oracle://{user}:{password}@{host}:{port}/{name}'.format(
-            user=ORA_USER,
-            password=ORA_PASSWORD,
-            host=ORA_HOST,
-            port=int(ORA_PORT),
-            name=ORA_NAME
-        )
-    }
 
     NRO_USER = os.getenv('NRO_USER', '')
     NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
