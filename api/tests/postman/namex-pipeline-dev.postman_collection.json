@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ee2b69d8-b22c-44d0-ac7a-dfccaf95bf89",
+		"_postman_id": "a978341b-ff1c-4867-81d3-c2fb7a66dfdb",
 		"name": "namex-pipeline-dev",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -764,8 +764,8 @@
 							"listen": "test",
 							"script": {
 								"id": "4e7b8f3b-4429-44e0-8e2b-f86dee41b6d2",
-								"type": "text/javascript",
 								"exec": [
+									"/*",
 									"eval(globals.postmanBDD);",
 									"",
 									"it('should be an success response', () => {",
@@ -786,18 +786,19 @@
 									"}else{",
 									"   pm.environment.unset(\"queued_nr\");    ",
 									"}",
-									""
-								]
+									"*/"
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "prerequest",
 							"script": {
 								"id": "c9bd0a12-0790-4f22-959b-4fbcfd4779d5",
-								"type": "text/javascript",
 								"exec": [
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -837,8 +838,8 @@
 							"listen": "test",
 							"script": {
 								"id": "665b5918-735b-4247-ba50-0643de8344e5",
-								"type": "text/javascript",
 								"exec": [
+									"/*",
 									"eval(globals.postmanBDD);",
 									"",
 									"pm.test(\"Same value as previous get from queue\", function () {",
@@ -854,8 +855,10 @@
 									"",
 									"pm.test(\"Response time is less than 5000ms\", function () {",
 									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-									"});"
-								]
+									"});",
+									"*/"
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
