@@ -129,3 +129,98 @@ def test_sounds_like(solr, client, jwt, app):
        ]
     )
 
+@integration_solr
+def test_liberti(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'LIBERTI', id='1')
+    verify_results(client, jwt,
+       query='LIBERTY',
+       expected=[
+           {'name': 'LIBERTI'},
+       ]
+    )
+
+@integration_solr
+def test_deeper(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'LABORATORY', id='1')
+    seed_database_with(solr, 'LAPORTE', id='2')
+    seed_database_with(solr, 'LIBERTI', id='3')
+    verify_results(client, jwt,
+       query='LIBERTY',
+       expected=[
+           {'name': 'LIBERTI'},
+       ]
+    )
+
+@integration_solr
+def test_jasmine(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'JASMINE', id='1')
+    verify_results(client, jwt,
+       query='OSMOND',
+       expected=[
+       ]
+    )
+
+
+@integration_solr
+def test_nikke(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NEEKA', id='1')
+    verify_results(client, jwt,
+       query='NIKKA',
+       expected=[
+           {'name': 'NEEKA'},
+       ]
+    )
+
+
+@integration_solr
+def test_neeka(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NIKKA', id='1')
+    verify_results(client, jwt,
+       query='NEEKA',
+       expected=[
+           {'name': 'NIKKA'},
+       ]
+    )
+
+
+@integration_solr
+def test_neeka_like(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NIPPA', id='1')
+    verify_results(client, jwt,
+       query='NEEPA',
+       expected=[
+           {'name': 'NIPPA'},
+       ]
+    )
+
+
+@integration_solr
+def test_crazy(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NIPPLA', id='1')
+    verify_results(client, jwt,
+       query='NEEPLA',
+       expected=[
+           {'name': 'NIPPLA'},
+       ]
+    )
+
+
+@integration_solr
+def test_more_crazy(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NIPPLA', id='1')
+    seed_database_with(solr, 'NIPPLAA', id='2')
+    verify_results(client, jwt,
+       query='NEEPLA',
+       expected=[
+           {'name': 'NIPPLA'},
+           {'name': 'NIPPLAA'},
+       ]
+    )
