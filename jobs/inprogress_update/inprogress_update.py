@@ -58,7 +58,14 @@ try:
 
         current_app.logger.debug('processing: {}'.format(r.nrNum))
 
-        r.stateCd = State.HOLD
+        # if this NR was previously in DRAFT, reset it to that state (ie: the user walked away from an open edit window)
+        if r.previousStateCd == State.DRAFT:
+            r.stateCd = State.DRAFT
+            r.previousStateCd = None
+        # otherwise put it on hold
+        else:
+            r.stateCd = State.HOLD
+
         db.session.add(r)
         EventRecorder.record(user, Event.MARKED_ON_HOLD, r, {}, save_to_session=True)
 

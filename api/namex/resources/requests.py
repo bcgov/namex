@@ -344,7 +344,7 @@ class Request(Resource):
     @cors.crossdomain(origin='*')
     @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def patch(nr, *args, **kwargs):
-        """  Patches the NR, only STATE can be changed with some business rules around roles/scopes
+        """  Patches the NR. Currently only handles STATE (with optional comment) and Previous State.
 
         :param nr (str): NameRequest Number in the format of 'NR 000000000'
         :param args:  __futures__
@@ -364,16 +364,7 @@ class Request(Resource):
         if not json_input:
             return jsonify({'message': 'No input data provided'}), 400
 
-        ### STATE - required ###
-
-        # all these checks to get removed to marshmallow
-        state = json_input.get('state', None)
-        if not state:
-            return jsonify({"message": "state not set"}), 406
-
-        if state not in State.VALID_STATES:
-            return jsonify({"message": "not a valid state"}), 406
-
+        # find NR
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
@@ -385,57 +376,75 @@ class Request(Resource):
             current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return jsonify({"message": "NR had an internal error"}), 404
 
-        if not nrd:
-            return jsonify({"message": "Request:{} not found".format(nr)}), 404
-
-        if not services.name_request.valid_state_transition(user, nrd, state):
-            return jsonify(message='you are not authorized to make these changes'), 401
-
         try:
-            existing_nr = RequestDAO.get_inprogress(user)
-            if existing_nr:
-                existing_nr.stateCd = State.HOLD
-                existing_nr.save_to_db()
 
-            # if the NR is in DRAFT then LOGICALLY lock the record in NRO
-            # if we fail to do that, send back the NR and the errors for user-intervention
-            if nrd.stateCd == State.DRAFT:
-                warnings = nro.move_control_of_request_from_nro(nrd, user)
+            ### STATE ###
 
-            nrd.stateCd = state
-            nrd.userId = user.id
+            # all these checks to get removed to marshmallow
+            state = json_input.get('state', None)
+            if state:
 
-            if state == State.CANCELLED:
-                nro.cancel_nr(nrd, user.username)
+                if state not in State.VALID_STATES:
+                    return jsonify({"message": "not a valid state"}), 406
 
-            ### COMMENTS ###
-            # we only add new comments, we do not change existing comments
-            # - we can find new comments in json as those with no ID
+                if not nrd:
+                    return jsonify({"message": "Request:{} not found".format(nr)}), 404
 
-            if json_input.get('comments', None):
+                if not services.name_request.valid_state_transition(user, nrd, state):
+                    return jsonify(message='you are not authorized to make these changes'), 401
 
-                for in_comment in json_input['comments']:
-                    is_new_comment = False
-                    try:
-                        if in_comment['id'] is None or in_comment['id'] == 0:
+                # if the user has an existing (different) INPROGRESS NR, put it on hold
+                existing_nr = RequestDAO.get_inprogress(user)
+                if existing_nr:
+                    existing_nr.stateCd = State.HOLD
+                    existing_nr.save_to_db()
+
+                # if the NR is in DRAFT then LOGICALLY lock the record in NRO
+                # if we fail to do that, send back the NR and the errors for user-intervention
+                if nrd.stateCd == State.DRAFT:
+                    warnings = nro.move_control_of_request_from_nro(nrd, user)
+
+                nrd.stateCd = state
+                nrd.userId = user.id
+
+                if state == State.CANCELLED:
+                    nro.cancel_nr(nrd, user.username)
+
+                # if our state wasn't INPROGRESS and it is now, ensure the furnished flag is N
+                if (start_state in locals()
+                        and start_state != State.INPROGRESS
+                        and nrd.stateCd == State.INPROGRESS):
+                    # set / reset the furnished flag to N
+                    nrd.furnished = 'N'
+
+                ### COMMENTS ###
+                # we only add new comments, we do not change existing comments
+                # - we can find new comments in json as those with no ID
+
+                if json_input.get('comments', None):
+
+                    for in_comment in json_input['comments']:
+                        is_new_comment = False
+                        try:
+                            if in_comment['id'] is None or in_comment['id'] == 0:
+                                is_new_comment = True
+                        except KeyError:
                             is_new_comment = True
-                    except KeyError:
-                        is_new_comment = True
-                    if is_new_comment and in_comment['comment'] is not None:
-                        new_comment = Comment()
-                        new_comment.comment = convert_to_ascii(in_comment['comment'])
-                        new_comment.examiner = user
-                        new_comment.nrId = nrd.id
+                        if is_new_comment and in_comment['comment'] is not None:
+                            new_comment = Comment()
+                            new_comment.comment = convert_to_ascii(in_comment['comment'])
+                            new_comment.examiner = user
+                            new_comment.nrId = nrd.id
 
-            ### END comments ###
+                ### END comments ###
 
-            # if our state wasn't INPROGRESS and it is now, ensure the furnished flag is N
-            if (start_state in locals()
-                and start_state != State.INPROGRESS
-                and nrd.stateCd == State.INPROGRESS):
-                # set / reset the furnished flag to N
-                nrd.furnished = 'N'
 
+            ### PREVIOUS STATE ###
+            #- None (null) is a valid value for Previous State
+            if 'previousStateCd' in json_input.keys():
+                nrd.previousStateCd = json_input.get('previousStateCd', None)
+
+            # save record
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
 
@@ -679,7 +688,7 @@ class Request(Resource):
                         names_schema.load(in_name, instance=nrd_name, partial=False)
 
                         # set comments (existing or cleared)
-                        if in_name['comment'] is not None:
+                        if in_name.get('comment', None) is not None:
 
                             # if there is a comment ID in data, just set it
                             if in_name['comment'].get('id', None) is not None:
