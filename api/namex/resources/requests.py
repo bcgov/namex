@@ -393,10 +393,14 @@ class Request(Resource):
                 if not services.name_request.valid_state_transition(user, nrd, state):
                     return jsonify(message='you are not authorized to make these changes'), 401
 
-                # if the user has an existing (different) INPROGRESS NR, put it on hold
+                # if the user has an existing (different) INPROGRESS NR, revert to previous state (default to HOLD)
                 existing_nr = RequestDAO.get_inprogress(user)
                 if existing_nr:
-                    existing_nr.stateCd = State.HOLD
+                    if existing_nr.previousStateCd:
+                        existing_nr.stateCd = existing_nr.previousStateCd
+                        existing_nr.previousStateCd = None
+                    else:
+                        existing_nr.stateCd = State.HOLD
                     existing_nr.save_to_db()
 
                 # if the NR is in DRAFT then LOGICALLY lock the record in NRO
