@@ -48,7 +48,7 @@ def test_solr_available(solr, app, client, jwt):
     assert r.status_code == 200
 
 
-def clean_database(solr, client, jwt):
+def clean_database(solr):
     url = solr + '/solr/possible.conflicts/update?commit=true'
     headers = {'content-type': 'text/xml'}
     data = '<delete><query>id:*</query></delete>'
@@ -57,7 +57,7 @@ def clean_database(solr, client, jwt):
     assert r.status_code == 200
 
 
-def seed_database_with(solr, client, jwt, name, id='1', source='CORP'):
+def seed_database_with(solr, name, id='1', source='CORP'):
     url = solr + '/solr/possible.conflicts/update?commit=true'
     headers = {'content-type': 'application/json'}
     data = '[{"source":"' + source + '", "name":"' + name + '", "id":"'+ id +'"}]'
@@ -94,8 +94,8 @@ def search(client, jwt, query):
 
 @integration_solr
 def test_all_good(solr, client, jwt, app):
-    clean_database(solr, client, jwt)
-    seed_database_with(solr, client, jwt, 'GOLDSTREAM ELECTRICAL LTD')
+    clean_database(solr)
+    seed_database_with(solr, 'GOLDSTREAM ELECTRICAL LTD')
     verify_results(client, jwt,
        query='GOLDSMITHS',
        expected=[
@@ -106,18 +106,18 @@ def test_all_good(solr, client, jwt, app):
 
 @integration_solr
 def test_sounds_like(solr, client, jwt, app):
-    clean_database(solr, client, jwt)
-    seed_database_with(solr, client, jwt, 'GAYLEDESIGNS INC.', id='1')
-    seed_database_with(solr, client, jwt, 'GOLDSTREAM ELECTRICAL LTD', id='2')
-    seed_database_with(solr, client, jwt, 'GLADSTONE JEWELLERY LTD', id='3')
-    seed_database_with(solr, client, jwt, 'GOLDSTEIN HOLDINGS INC.', id='4')
-    seed_database_with(solr, client, jwt, 'CLOUDSIDE INN INCORPORATED', id='5')
-    seed_database_with(solr, client, jwt, 'GOLDSPRING PROPERTIES LTD', id='6')
-    seed_database_with(solr, client, jwt, 'GOLDSTRIPES AVIATION INC', id='7')
-    seed_database_with(solr, client, jwt, 'GLADSTONE CAPITAL CORP', id='8')
-    seed_database_with(solr, client, jwt, 'KLETAS LAW CORPORATION', id='9')
-    seed_database_with(solr, client, jwt, 'COLDSTREAM VENTURES INC.', id='10')
-    seed_database_with(solr, client, jwt, 'BLABLA ANYTHING', id='11')
+    clean_database(solr)
+    seed_database_with(solr, 'GAYLEDESIGNS INC.', id='1')
+    seed_database_with(solr, 'GOLDSTREAM ELECTRICAL LTD', id='2')
+    seed_database_with(solr, 'GLADSTONE JEWELLERY LTD', id='3')
+    seed_database_with(solr, 'GOLDSTEIN HOLDINGS INC.', id='4')
+    seed_database_with(solr, 'CLOUDSIDE INN INCORPORATED', id='5')
+    seed_database_with(solr, 'GOLDSPRING PROPERTIES LTD', id='6')
+    seed_database_with(solr, 'GOLDSTRIPES AVIATION INC', id='7')
+    seed_database_with(solr, 'GLADSTONE CAPITAL CORP', id='8')
+    seed_database_with(solr, 'KLETAS LAW CORPORATION', id='9')
+    seed_database_with(solr, 'COLDSTREAM VENTURES INC.', id='10')
+    seed_database_with(solr, 'BLABLA ANYTHING', id='11')
     verify_results(client, jwt,
        query='GOLDSMITHS',
        expected=[
