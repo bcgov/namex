@@ -88,17 +88,17 @@ def test_tokenz(name_string, expected):
 
 
 name_parse_data = [
-    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records', 'skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
     (['skinny', ' ', '-', '"', 'records', '"'], ['skinny']),
-    (['skinny', ' ', '"', 'puppy', ' ', 'records', '"'], ['skinny', 'puppy', 'records']),
-    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
-    (['skinny', ' ', 'puppy', '-', 'records'], ['skinny', 'puppy', 'records']),
-    (['skinny', ' ', 'puppy', ' ', '-', 'records'], ['skinny', 'puppy']),
+    (['skinny', ' ', '"', 'puppy', ' ', 'records', '"'], ['skinny', 'puppy', 'records','skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
+    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records','skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
+    (['skinny', ' ', 'puppy', '-', 'records'], ['skinny', 'puppy', 'records','skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
+    (['skinny', ' ', 'puppy', ' ', '-', 'records'], ['skinny', 'puppy','skinnypuppy']),
     (['skinny', ' ', '@', 'puppy'], ['skinny']),
     (['skinny', ' ', '@', '"', 'puppy', ' ', 'records', '"'], ['skinny']),
     (['skinny', ' ', '@', '"', 'puppy', '-', 'records', '"'], ['skinny']),
-    (['skinny', ' ', '@', '"', 'puppy', ' ', 'records', '"', 'chain'], ['skinny', 'chain']),
-    (['skinny', ' ', '@', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records']),
+    (['skinny', ' ', '@', '"', 'puppy', ' ', 'records', '"', 'chain'], ['skinny', 'chain', 'skinnychain']),
+    (['skinny', ' ', '@', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records', 'skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
 ]
 
 

@@ -302,7 +302,27 @@ class SolrQueries:
 
             previous_token = token
 
+        candidates.extend(cls._get_multiples(candidates))
+
         return candidates
+
+
+    @classmethod
+    def _get_multiples(cls, candidates):
+
+        if len(candidates) < 2:
+            return []
+
+        multiples = []
+
+        for x in range(len(candidates)):
+            if x < len(candidates) - 1:
+                multiples.append("".join(candidates[x:x+2]))
+                if x < len(candidates) - 2:
+                    multiples.append("".join(candidates[x:x+3]))
+
+        return multiples
+
 
     # Call the synonyms API for the given token.
     @classmethod

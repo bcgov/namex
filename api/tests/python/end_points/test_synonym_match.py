@@ -275,6 +275,21 @@ def test_duplicated_letters(client, jwt, app):
        expected_list=None
     )
 
+
+@integration_synonym_api
+@integration_solr
+def test_multi_word_synonyms(client, jwt, app):
+    seed_database_with(client, jwt, "Imagine Four Whole Words")
+    verify_synonym_match(client, jwt,
+                         query="Imagine Four Whole Words",
+                         expected_list=[
+                             '----IMAGINE FOUR WHOLE WORDS* ',
+                             '----IMAGINE FOUR WHOLE* synonyms:(words)',
+                             '----IMAGINE FOUR* synonyms:(whole, words, wholewords)',
+                             '----IMAGINE* synonyms:(four, whole, words, fourwhole, fourwholewords, wholewords)'
+                         ])
+
+
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
