@@ -20,7 +20,10 @@ def distinct_vowels_indexes(word):
 
 
 def first_distinct_vowel_index(word):
-    return distinct_vowels_indexes(word)[0]
+    indexes = distinct_vowels_indexes(word)
+    if len(indexes) == 0:
+        return -1
+    return indexes[0]
 
 
 def second_distinct_vowel_index(word):
@@ -28,7 +31,10 @@ def second_distinct_vowel_index(word):
     if index == len(word)-1:
         return -1
     suffix = word[index + 1:]
-    return first_distinct_vowel_index(suffix) + index + 1
+    second_index = first_distinct_vowel_index(suffix)
+    if second_index == -1:
+        return -1
+    return second_index + index + 1
 
 
 def second_separated_vowel_index(word):
