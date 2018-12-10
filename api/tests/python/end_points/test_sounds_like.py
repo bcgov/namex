@@ -269,3 +269,14 @@ def test_resist_short_word(solr, client, jwt, app):
        expected=[
        ]
     )
+
+
+@integration_solr
+def test_resist_single_vowel(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'FEDS', id='1')
+    verify_results(client, jwt,
+       query='FADS',
+       expected=[
+       ]
+    )
