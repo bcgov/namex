@@ -165,78 +165,6 @@ def test_jasmine(solr, client, jwt, app):
 
 
 @integration_solr
-def test_nikke(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NEEKA', id='1')
-    verify_results(client, jwt,
-       query='NIKKA',
-       expected=[
-           {'name': 'NEEKA'},
-       ]
-    )
-
-
-@integration_solr
-def test_neeka(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NIKKA', id='1')
-    verify_results(client, jwt,
-       query='NEEKA',
-       expected=[
-           {'name': 'NIKKA'},
-       ]
-    )
-
-
-@integration_solr
-def test_neeka_like(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NIPPA', id='1')
-    verify_results(client, jwt,
-       query='NEEPA',
-       expected=[
-           {'name': 'NIPPA'},
-       ]
-    )
-
-
-@integration_solr
-def test_crazy(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NIPPLA', id='1')
-    verify_results(client, jwt,
-       query='NEEPLA',
-       expected=[
-           {'name': 'NIPPLA'},
-       ]
-    )
-
-
-@integration_solr
-def test_more_crazy(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NIPPLA', id='1')
-    seed_database_with(solr, 'NIPPLAA', id='2')
-    verify_results(client, jwt,
-       query='NEEPLA',
-       expected=[
-           {'name': 'NIPPLA'},
-           {'name': 'NIPPLAA'},
-       ]
-    )
-
-@integration_solr
-def test_neighbour(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NEIGHBOUR', id='1')
-    verify_results(client, jwt,
-       query='NAYBOR',
-       expected=[
-           {'name': 'NEIGHBOUR'}
-       ]
-    )
-
-@integration_solr
 def test_fey(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'FEY', id='1')
@@ -249,13 +177,139 @@ def test_fey(solr, client, jwt, app):
 
 
 @integration_solr
-def test_feel(solr, client, jwt, app):
+def test_venizia(solr, client, jwt, app):
     clean_database(solr)
-    seed_database_with(solr, 'FEEL', id='1')
+    seed_database_with(solr, 'VENIZIA', id='1')
+    seed_database_with(solr, 'VENEZIA', id='2')
+    seed_database_with(solr, 'VANSEA', id='3')
+    seed_database_with(solr, 'WENSO', id='4')
     verify_results(client, jwt,
-       query='FILL',
+       query='VENIZIA',
        expected=[
-           {'name': 'FEEL'}
+           {'name': 'VENIZIA'},
+           {'name': 'VENEZIA'},
+       ]
+    )
+
+
+@integration_solr
+def test_ys_and_is(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'CRYSTAL', id='1')
+    verify_results(client, jwt,
+       query='CRISTAL',
+       expected=[
+           {'name': 'CRYSTAL'},
+       ]
+    )
+
+
+@integration_solr
+def test_gold_and_cold(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'GOLDSMITHS', id='1')
+    verify_results(client, jwt,
+       query='COLDSTREAM',
+       expected=[
+           {'name': 'GOLDSMITHS'},
+       ]
+    )
+
+
+@integration_solr
+def test_cs_and_ks(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'KOLDSMITHS', id='1')
+    verify_results(client, jwt,
+       query='COLDSTREAM',
+       expected=[
+           {'name': 'KOLDSMITHS'},
+       ]
+    )
+
+
+@integration_solr
+def test_cs_and_ks_again(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'CRAZY', id='1')
+    seed_database_with(solr, 'KAIZEN', id='2')
+    verify_results(client, jwt,
+       query='CAYZEN',
+       expected=[
+           {'name': 'KAIZEN'},
+       ]
+    )
+
+@integration_solr
+def neeka(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NIKKA', id='1')
+    verify_results(client, jwt,
+       query='NEEKA',
+       expected=[
+           {'name': 'NIKKA'},
+       ]
+    )
+
+
+@integration_solr
+def neeka_like(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NIPPA', id='1')
+    verify_results(client, jwt,
+       query='NEEPA',
+       expected=[
+           {'name': 'NIPPA'},
+       ]
+    )
+
+
+@integration_solr
+def nikke(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NEEKA', id='1')
+    verify_results(client, jwt,
+       query='NIKKA',
+       expected=[
+           {'name': 'NEEKA'},
+       ]
+    )
+
+
+@integration_solr
+def crazy(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NIPPLA', id='1')
+    verify_results(client, jwt,
+       query='NEEPLA',
+       expected=[
+           {'name': 'NIPPLA'},
+       ]
+    )
+
+
+@integration_solr
+def more_crazy(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NIPPLA', id='1')
+    seed_database_with(solr, 'NIPPLAA', id='2')
+    verify_results(client, jwt,
+       query='NEEPLA',
+       expected=[
+           {'name': 'NIPPLA'},
+           {'name': 'NIPPLAA'},
+       ]
+    )
+
+
+@integration_solr
+def neighbour(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NEIGHBOUR', id='1')
+    verify_results(client, jwt,
+       query='NAYBOR',
+       expected=[
+           {'name': 'NEIGHBOUR'}
        ]
     )
 
@@ -270,7 +324,6 @@ def test_resist_short_word(solr, client, jwt, app):
        ]
     )
 
-
 @integration_solr
 def test_resist_single_vowel(solr, client, jwt, app):
     clean_database(solr)
@@ -278,5 +331,40 @@ def test_resist_single_vowel(solr, client, jwt, app):
     verify_results(client, jwt,
        query='FADS',
        expected=[
+       ]
+    )
+
+
+@integration_solr
+def test_feel(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'FEEL', id='1')
+    verify_results(client, jwt,
+       query='FILL',
+       expected=[
+       ]
+    )
+
+
+@integration_solr
+def test_bear(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'BEAR', id='1')
+    verify_results(client, jwt,
+       query='BARE',
+       expected=[
+           {'name': 'BEAR'}
+       ]
+    )
+
+
+@integration_solr
+def test_leak(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'LEAK', id='1')
+    verify_results(client, jwt,
+       query='LEEK',
+       expected=[
+           {'name': 'LEAK'}
        ]
     )
