@@ -5,6 +5,7 @@ import json
 from namex import jwt
 import urllib
 from flask import current_app
+from namex.resources.phonetic import first_vowels, first_arpabet
 
 api = Namespace('soundsLikeMeta', description='Sounds Like System - Metadata')
 import os
@@ -51,6 +52,8 @@ def syllable_sound(syllable):
         return 'E' + syllable[2:]
     if len(syllable)>=3 and syllable[0]== 'E' and syllable[1]== 'E':
         return 'E' + syllable[2:]
+    if syllable[0] == 'Y':
+        return 'I' + syllable[1:]
 
     return syllable
 
@@ -64,6 +67,15 @@ def double_vowels_sound(double):
         return 'A'
 
     return double
+
+
+def match_consons(c1, c2):
+    if set(['C', 'G']) == set([c1, c2]):
+        return True
+    if set(['C', 'K']) == set([c1, c2]):
+        return True
+
+    return c1 == c2
 
 
 def extract_first_vowel_and_following_consons(name):
@@ -96,10 +108,10 @@ def consider_double_vowels_sound(query, candidate, names):
 
 def add_documents_matching_multi_letters_sound(query, docs, names):
     for candidate in docs:
-        if candidate and len([doc['name'] for doc in names if doc['name'] == candidate['name']]) == 0:
+        if len([doc['name'] for doc in names if doc['name'] == candidate['name']]) == 0:
             consider_first_syllable_sound(query, candidate, names)
 
-        if candidate and len([doc['name'] for doc in names if doc['name'] == candidate['name']]) == 0:
+        if len([doc['name'] for doc in names if doc['name'] == candidate['name']]) == 0:
             consider_double_vowels_sound(query, candidate, names)
 
 
@@ -111,9 +123,34 @@ def remove_documents_not_matching_first_vowel(query, docs):
     return names
 
 
+def remove_documents_not_matching_first_letter(query, names):
+    query_first_consonants = query[0]
+    return [doc for doc in names if match_consons(doc['name'][0], query_first_consonants)]
+
+
+def add_documents_matching_single_letter_sound(query, docs, names):
+    for candidate in docs:
+        if len([doc['name'] for doc in names if doc['name'] == candidate['name']]) == 0:
+            consider_first_syllable_sound(query, candidate, names)
+
+
 def post_treatment(docs, query):
-    names = remove_documents_not_matching_first_vowel(query, docs)
-    add_documents_matching_multi_letters_sound(query, docs, names)
+    names = []
+    for candidate in docs:
+        name = candidate['name']
+        query_first_consonant = query[0]
+        name_first_consonant = name[0]
+        if match_consons(query_first_consonant, name_first_consonant):
+            query_first_vowels = first_vowels(query)
+            name_first_vowels = first_vowels(name)
+            if query_first_vowels == name_first_vowels:
+                names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+            else:
+                query_first_arpabet = first_arpabet(query)
+                name_first_arpabet = first_arpabet(name)
+                if query_first_arpabet == name_first_arpabet:
+                    names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+
     return names
 
 
