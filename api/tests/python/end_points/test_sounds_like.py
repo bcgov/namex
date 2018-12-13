@@ -108,7 +108,7 @@ def test_all_good(solr, client, jwt, app):
 def test_sounds_like(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'GAYLEDESIGNS INC.', id='1')
-    seed_database_with(solr, 'GOLDSTREAM ELECTRICAL LTD', id='2')
+    seed_database_with(solr, 'GOLDSTREAM ELECTRICAL CORP', id='2')
     seed_database_with(solr, 'GLADSTONE JEWELLERY LTD', id='3')
     seed_database_with(solr, 'GOLDSTEIN HOLDINGS INC.', id='4')
     seed_database_with(solr, 'CLOUDSIDE INN INCORPORATED', id='5')
@@ -124,7 +124,7 @@ def test_sounds_like(solr, client, jwt, app):
            {'name': 'COLDSTREAM VENTURES INC.'},
            {'name': 'GOLDSTEIN HOLDINGS INC.'},
            {'name': 'GOLDSPRING PROPERTIES LTD'},
-           {'name': 'GOLDSTREAM ELECTRICAL LTD'},
+           {'name': 'GOLDSTREAM ELECTRICAL CORP'},
            {'name': 'GOLDSTRIPES AVIATION INC'},
        ]
     )
