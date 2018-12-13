@@ -1,4 +1,4 @@
-def match_consons(c1, c2):
+def match_consonate(c1, c2):
     if set(['C', 'G']) == set([c1, c2]):
         return True
     if set(['C', 'K']) == set([c1, c2]):

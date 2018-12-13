@@ -5,7 +5,7 @@ import json
 from namex import jwt
 import urllib
 from flask import current_app
-from namex.resources.phonetic import first_vowels, first_arpabet, match_consons
+from namex.resources.phonetic import first_vowels, first_arpabet, match_consonate
 
 api = Namespace('soundsLikeMeta', description='Sounds Like System - Metadata')
 import os
@@ -17,20 +17,28 @@ def post_treatment(docs, query):
     names = []
     for candidate in docs:
         name = candidate['name']
-        query_first_consonant = query[0]
-        name_first_consonant = name[0]
-        if match_consons(query_first_consonant, name_first_consonant):
-            query_first_vowels = first_vowels(query)
-            name_first_vowels = first_vowels(name)
-            if query_first_vowels == name_first_vowels:
-                names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
-            else:
-                query_first_arpabet = first_arpabet(query)
-                name_first_arpabet = first_arpabet(name)
-                if query_first_arpabet == name_first_arpabet:
-                    names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+        words = name.split()
+
+        for word in words:
+            if word not in ['CORP', 'CORPORATION']:
+                keep_phonetic_match(candidate, word, names, query, name)
 
     return names
+
+
+def keep_phonetic_match(candidate, word, names, query, name):
+    word_first_consonant = word[0]
+    query_first_consonant = query[0]
+    if match_consonate(query_first_consonant, word_first_consonant):
+        query_first_vowels = first_vowels(query)
+        word_first_vowels = first_vowels(word)
+        if query_first_vowels == word_first_vowels:
+            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+        else:
+            query_first_arpabet = first_arpabet(query)
+            word_first_arpabet = first_arpabet(word)
+            if query_first_arpabet == word_first_arpabet:
+                names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
 
 
 @cors_preflight("GET")

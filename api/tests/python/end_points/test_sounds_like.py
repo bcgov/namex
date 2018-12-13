@@ -368,3 +368,27 @@ def test_leak(solr, client, jwt, app):
            {'name': 'LEAK'}
        ]
     )
+
+
+@integration_solr
+def test_two_words(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'FOOD GOLD', id='1')
+    verify_results(client, jwt,
+       query='COLD',
+       expected=[
+           {'name': 'FOOD GOLD'}
+       ]
+    )
+
+
+@integration_solr
+def test_ignore_corp(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'GLADSTONE CAPITAL CORP', id='1')
+    verify_results(client, jwt,
+       query='GOLDSMITHS',
+       expected=[
+
+       ]
+    )
