@@ -41,3 +41,7 @@ def first_arpabet(word):
         return 'IY1'
 
     return word
+
+
+def designations():
+    return ['CORP', 'CORPORATION']

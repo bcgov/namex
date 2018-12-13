@@ -5,7 +5,7 @@ import json
 from namex import jwt
 import urllib
 from flask import current_app
-from namex.resources.phonetic import first_vowels, first_arpabet, match_consonate
+from namex.resources.phonetic import first_vowels, first_arpabet, match_consonate, designations
 
 api = Namespace('soundsLikeMeta', description='Sounds Like System - Metadata')
 import os
@@ -22,7 +22,7 @@ def post_treatment(docs, query):
 
         for qword in qwords:
             for word in words:
-                if word not in ['CORP', 'CORPORATION']:
+                if word not in designations():
                     keep_phonetic_match(candidate, word, names, qword, name)
 
     return names
