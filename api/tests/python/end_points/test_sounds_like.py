@@ -359,18 +359,6 @@ def test_bear(solr, client, jwt, app):
 
 
 @integration_solr
-def test_leak(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'LEAK', id='1')
-    verify_results(client, jwt,
-       query='LEEK',
-       expected=[
-           {'name': 'LEAK'}
-       ]
-    )
-
-
-@integration_solr
 def test_two_words(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'FOOD GOLD', id='1')
@@ -385,13 +373,14 @@ def test_two_words(solr, client, jwt, app):
 @integration_solr
 def test_ignore_corp(solr, client, jwt, app):
     clean_database(solr)
-    seed_database_with(solr, 'GLADSTONE CAPITAL CORP', id='1')
+    seed_database_with(solr, 'GLADSTONE CAPITAL corp', id='1')
     verify_results(client, jwt,
        query='GOLDSMITHS',
        expected=[
 
        ]
     )
+
 
 @integration_solr
 def test_two_query_words(solr, client, jwt, app):
@@ -411,5 +400,17 @@ def test_designation_in_query_is_ignored(solr, client, jwt, app):
     verify_results(client, jwt,
        query='SUN LIMITED',
        expected=[
+       ]
+    )
+
+
+@integration_solr
+def test_leak(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'LEAK', id='1')
+    verify_results(client, jwt,
+       query='LEEK',
+       expected=[
+           {'name': 'LEAK'}
        ]
     )
