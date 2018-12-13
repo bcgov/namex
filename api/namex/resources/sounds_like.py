@@ -14,9 +14,10 @@ SOLR_URL = os.getenv('SOLR_BASE_URL')
 
 
 def post_treatment(docs, query):
+    query = query.upper()
     names = []
     for candidate in docs:
-        name = candidate['name']
+        name = candidate['name'].upper()
         words = name.split()
         qwords = query.split()
 
