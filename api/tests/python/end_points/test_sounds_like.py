@@ -403,3 +403,13 @@ def test_two_query_words(solr, client, jwt, app):
            {'name': 'FOOD GOLD'}
        ]
     )
+
+@integration_solr
+def test_designation_in_query_is_ignored(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'FINGER LIMATED', id='1')
+    verify_results(client, jwt,
+       query='SUN LIMITED',
+       expected=[
+       ]
+    )
