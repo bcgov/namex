@@ -714,6 +714,10 @@
           <tokenizer class="solr.KeywordTokenizerFactory" />
 
           <filter class="solr.LowerCaseFilterFactory"/>
+          <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(\$+(\s+|$))+" replacement="$1dollar$3" />
+          <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\$" replacement="s" />
+          <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1cent$3" />
+          <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="c" />
           <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability company"  replacement="" replace="all" />
           <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability co."  replacement="" replace="all" />
           <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability partnership"  replacement="" replace="all" />
@@ -759,7 +763,11 @@
 
     <fieldType name="txt_starts_with" class="solr.TextField">
         <analyzer type="index">
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(\$+(\s+|$))+" replacement="$1DOLLAR$3" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\$" replacement="S" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1CENT$3" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="C" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$|s\W|s$)" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="((^|\W)(and|AND)(\W|$))" replacement=" " />
@@ -797,8 +805,11 @@
             <tokenizer class="solr.KeywordTokenizerFactory"/>
         </analyzer>
         <analyzer type="query">
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(\$+(\s+|$))+" replacement="$1DOLLAR$3" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\$" replacement="S" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1CENT$3" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="C" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\']*" replacement="" />            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(([A-Z]|[a-z]){3,})(S\W|S$|s\W|s$)" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="((^|\W(and|AND)\W|$))" replacement=" " />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\W(and|AND)\W|$)" replacement=" " />
