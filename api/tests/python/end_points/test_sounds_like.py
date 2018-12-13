@@ -392,3 +392,14 @@ def test_ignore_corp(solr, client, jwt, app):
 
        ]
     )
+
+@integration_solr
+def test_two_query_words(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'FOOD GOLD', id='1')
+    verify_results(client, jwt,
+       query='FINGER COLD',
+       expected=[
+           {'name': 'FOOD GOLD'}
+       ]
+    )

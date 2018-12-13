@@ -18,10 +18,12 @@ def post_treatment(docs, query):
     for candidate in docs:
         name = candidate['name']
         words = name.split()
+        qwords = query.split()
 
-        for word in words:
-            if word not in ['CORP', 'CORPORATION']:
-                keep_phonetic_match(candidate, word, names, query, name)
+        for qword in qwords:
+            for word in words:
+                if word not in ['CORP', 'CORPORATION']:
+                    keep_phonetic_match(candidate, word, names, qword, name)
 
     return names
 
