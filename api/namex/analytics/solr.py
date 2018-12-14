@@ -38,9 +38,8 @@ class SolrQueries:
     queries = {
         SYN_CONFLICTS:
             '/solr/possible.conflicts/select?hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
-            'hl=on&indent=on&q=txt_starts_with:{start_str}&wt=json&'
-            'start={start}&rows={rows}&fl=source,id,name,score&sort=score%20desc,txt_starts_with%20asc{synonyms_clause}'
-            '{name_copy_clause}',
+            'hl=on&indent=on&q=name:{start_str}&wt=json&start={start}&rows={rows}&fl=source,id,name,'
+            'score&sort=score%20desc,txt_starts_with%20asc{synonyms_clause}',
         CONFLICTS:
             '/solr/possible.conflicts/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
@@ -73,6 +72,7 @@ class SolrQueries:
                 'llp', 'ltd.', 'ltee', 'sencrl', 'societe a responsabilite limitee',
                 'societe en nom collectif a responsabilite limitee', 'srl','ulc', 'unlimited liability company']
 
+            # remove designations if they are at the end of the name
             for designation in designations:
                 index = name.upper().find(' ' + designation.upper())
                 # checks if there is a designation AND if that designation is at the end of the string
@@ -80,30 +80,30 @@ class SolrQueries:
                     name = name[:index]
                     break
 
-            name = name.replace('&',' ').replace('+', '')
+            name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
             list_name_split = name.split()
+            num_terms = 0
             combined_terms = ''
             search_strs = []
-            iterator = 0
             for term in list_name_split:
-                iterator += 1
-                combined_terms += term + '\\ '
-                search_strs.insert(0,(combined_terms.strip(),name[len(combined_terms)-iterator:]))
+                combined_terms += term + ' '
+                num_terms += 1
+                search_strs.insert(0, (combined_terms.strip(), name[len(combined_terms):], num_terms))
 
             connections = []
             for str_tuple in search_strs:
-                start_str = str_tuple[0][:-1]
+                start_str = str_tuple[0]
                 synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
                 query = solr_base_url + SolrQueries.queries['synconflicts'].format(
                     start=start,
                     rows=rows,
                     name=parse.quote(name.replace(NO_SYNONYMS_INDICATOR, '')),
-                    start_str=start_str.replace(' ','%20')+'*',
+                    start_str='\"'+start_str.replace(' ','%20')+'\"~{}'.format(str_tuple[2]),
                     synonyms_clause=synonyms_clause,
                     name_copy_clause=cls._get_name_copy_clause(name)
                 )
                 current_app.logger.debug('Query: ' + query)
-                connections.append((request.urlopen(query),'----'+start_str.replace('\\','')+'*'+' '
+                connections.append((request.urlopen(query),'----'+start_str.replace('\\','')+' '
                                     +synonyms_clause.replace('&fq=name_with_','').replace('%20',', ')))
         except Exception as err:
             current_app.logger.error(err, query)
@@ -115,13 +115,26 @@ class SolrQueries:
                                 'maxScore': 0.0,
                                 'docs': []},
                     'highlighting': []}
+
+            # seen_names used to keep track of duplicates
+            seen_names = []
             for connection in connections:
                 result = json.load(connection[0])
                 solr['response']['numFound'] += result['response']['numFound']
                 solr['response']['start'] = result['response']['start']
                 solr['response']['docs'].append({'name': connection[1]})
                 if len(result['response']['docs']) > 0:
-                    solr['response']['docs'] += result['response']['docs']
+
+                    # add non duplicates
+                    non_duplicate_names = []
+                    for name in result['response']['docs']:
+                        if name['name'] in seen_names:
+                            pass
+                        else:
+                            seen_names.append(name['name'])
+                            non_duplicate_names.append(name)
+
+                    solr['response']['docs'] += non_duplicate_names
 
             results = {"response": {"numFound": solr['response']['numFound'],
                                     "start": solr['response']['start'],

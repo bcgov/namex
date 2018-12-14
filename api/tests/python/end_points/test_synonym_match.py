@@ -240,15 +240,10 @@ def test_stopwords(client, jwt, app, criteria, seed):
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
-    ('J.M. HOLDING', 'JM HOLDING'),
-    ('J M HOLDING', 'JM HOLDING'),
-    ('J. M. HOLDING', 'JM HOLDING'),
-    ('J&M HOLDING', 'JM HOLDING'),
-    ('J & M HOLDING', 'JM HOLDING'),
-    ('J. & M. HOLDING', 'JM HOLDING'),
-    ('J-M HOLDING', 'JM HOLDING'),
+    ('TESTING COMPANY', 'SCARY TESTING COMPANY'),
+    ('TESTS ARE GOOD', 'MANY TESTS ARE GOOD'),
 ])
-def test_finds_variations_on_initials(client, jwt, app, criteria, seed):
+def test_finds_names_with_word_to_left_of_distinctive(client, jwt, app, criteria, seed):
     seed_database_with(client, jwt, seed)
     verify_synonym_match(client, jwt,
         query=criteria,
@@ -273,6 +268,24 @@ def test_duplicated_letters(client, jwt, app):
     verify_synonym_match(client, jwt,
        query='Dame Trucking Inc',
        expected_list=None
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('J.M. HOLDING', 'JM HOLDING'),
+    ('J M HOLDING', 'JM HOLDING'),
+    ('J. M. HOLDING', 'JM HOLDING'),
+    ('J&M HOLDING', 'JM HOLDING'),
+    ('J & M HOLDING', 'JM HOLDING'),
+    ('J. & M. HOLDING', 'JM HOLDING'),
+    ('J-M HOLDING', 'JM HOLDING'),
+])
+def test_finds_variations_on_initials(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
     )
 
 @integration_synonym_api
