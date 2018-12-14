@@ -436,3 +436,104 @@ def test_krystal(solr, client, jwt, app):
            {'name': 'KRYSTAL'}
        ]
     )
+
+
+@integration_solr
+def test_kl(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'KLASS', id='1')
+    verify_results(client, jwt,
+       query='CLASS',
+       expected=[
+           {'name': 'KLASS'}
+       ]
+    )
+
+@integration_solr
+def test_pheel(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'PHEEL', id='1')
+    verify_results(client, jwt,
+       query='FEEL',
+       expected=[
+           {'name': 'PHEEL'}
+       ]
+    )
+
+@integration_solr
+def test_ghable(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'GHABLE', id='1')
+    verify_results(client, jwt,
+       query='GABLE',
+       expected=[
+           {'name': 'GHABLE'}
+       ]
+    )
+
+@integration_solr
+def test_gnat(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'GNAT', id='1')
+    verify_results(client, jwt,
+       query='NAT',
+       expected=[
+           {'name': 'GNAT'}
+       ]
+    )
+
+@integration_solr
+def test_kn(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'KNAT', id='1')
+    verify_results(client, jwt,
+       query='NAT',
+       expected=[
+           {'name': 'KNAT'}
+       ]
+    )
+
+@integration_solr
+def test_pn(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'PNEU', id='1')
+    verify_results(client, jwt,
+       query='NEU',
+       expected=[
+           {'name': 'PNEU'}
+       ]
+    )
+
+@integration_solr
+def test_wr(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'WREN', id='1')
+    verify_results(client, jwt,
+       query='REN',
+       expected=[
+           {'name': 'WREN'}
+       ]
+    )
+
+@integration_solr
+def test_rh(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'RHEN', id='1')
+    verify_results(client, jwt,
+       query='REN',
+       expected=[
+           {'name': 'RHEN'}
+       ]
+    )
+
+@integration_solr
+def test_soft_c_is_not_k(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'KIRK', id='1')
+    verify_results(client, jwt,
+       query='CIRCLE',
+       expected=[
+       ]
+    )
+
+

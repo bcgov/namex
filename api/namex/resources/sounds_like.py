@@ -5,7 +5,7 @@ import json
 from namex import jwt
 import urllib
 from flask import current_app
-from namex.resources.phonetic import first_vowels, first_arpabet, match_consonate, designations
+from namex.resources.phonetic import first_vowels, first_arpabet, match_consons, first_consonants
 
 api = Namespace('soundsLikeMeta', description='Sounds Like System - Metadata')
 import os
@@ -14,34 +14,23 @@ SOLR_URL = os.getenv('SOLR_BASE_URL')
 
 
 def post_treatment(docs, query):
-    query = query.upper()
     names = []
     for candidate in docs:
-        name = candidate['name'].upper()
-        words = name.split()
-        qwords = query.split()
-
-        for qword in qwords:
-            for word in words:
-                if word not in designations():
-                    keep_phonetic_match(candidate, word, names, qword, name)
+        name = candidate['name']
+        query_first_consonant = first_consonants(query)
+        name_first_consonant = first_consonants(name)
+        if match_consons(query_first_consonant, name_first_consonant):
+            query_first_vowels = first_vowels(query)
+            name_first_vowels = first_vowels(name)
+            if query_first_vowels == name_first_vowels:
+                names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+            else:
+                query_first_arpabet = first_arpabet(query)
+                name_first_arpabet = first_arpabet(name)
+                if query_first_arpabet == name_first_arpabet:
+                    names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
 
     return names
-
-
-def keep_phonetic_match(candidate, word, names, query, name):
-    word_first_consonant = word[0]
-    query_first_consonant = query[0]
-    if match_consonate(query_first_consonant, word_first_consonant):
-        query_first_vowels = first_vowels(query)
-        word_first_vowels = first_vowels(word)
-        if query_first_vowels == word_first_vowels:
-            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
-        else:
-            query_first_arpabet = first_arpabet(query)
-            word_first_arpabet = first_arpabet(word)
-            if query_first_arpabet == word_first_arpabet:
-                names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
 
 
 @cors_preflight("GET")
