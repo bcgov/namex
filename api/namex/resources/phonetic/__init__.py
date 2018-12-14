@@ -1,9 +1,28 @@
 import pronouncing
 
 def match_consons(c1, c2):
+
     if set(['C', 'G']) == set([c1, c2]):
         return True
     if set(['C', 'K']) == set([c1, c2]):
+        return True
+    if set(['CR', 'KR']) == set([c1, c2]):
+        return True
+    if set(['CL', 'KL']) == set([c1, c2]):
+        return True
+    if set(['PH', 'F']) == set([c1, c2]):
+        return True
+    if set(['GH', 'G']) == set([c1, c2]):
+        return True
+    if set(['GN', 'N']) == set([c1, c2]):
+        return True
+    if set(['KN', 'N']) == set([c1, c2]):
+        return True
+    if set(['PN', 'N']) == set([c1, c2]):
+        return True
+    if set(['WR', 'R']) == set([c1, c2]):
+        return True
+    if set(['RH', 'R']) == set([c1, c2]):
         return True
 
     return c1 == c2
@@ -32,6 +51,20 @@ def first_vowels(word):
         value = 'A'
     if value == 'Y':
         value = 'I'
+
+    return value
+
+
+def first_consonants(word):
+    consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'X']
+    value = ''
+    first_consonant_found = False
+    for letter in word:
+        if letter not in consonants and first_consonant_found:
+            break
+        if letter in consonants:
+            value += letter
+            first_consonant_found = True
 
     return value
 
