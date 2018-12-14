@@ -87,9 +87,15 @@ def compare(solr_core, environment, username):
     # OK, we have fetched everything from the two sources at roughly the same time. Now compare.
 
     oracle_results_dict = dict()
+    column_names = [description[0] for description in cursor.description]
     for row in oracle_results:
         key = row['id']
-        oracle_results_dict[key] = row
+
+        row_data = dict()
+        for column_name in column_names:
+            row_data[column_name] = row[column_name]
+
+        oracle_results_dict[key] = row_data
 
     # Free some memory?
     del oracle_results
@@ -113,6 +119,32 @@ def compare(solr_core, environment, username):
 
     print('In view but not in Solr core: ' + str(sorted(only_in_oracle)))
     print('In Solr core but not in view: ' + str(sorted(only_in_solr)))
+
+    # Next: compare the actual data.
+
+    in_both = oracle_key_set.intersection(solr_key_set)
+    for key in in_both:
+        solr = solr_results_dict[key]
+        oracle = oracle_results_dict[key]
+
+        for field_name in oracle.keys():
+            # Convert missing values to empty strings.
+            try:
+                solr_field = solr[field_name]
+            except KeyError as error:
+                solr_field = ''
+
+            # Convert nulls to empty strings.
+            oracle_field = oracle[field_name]
+            if oracle_field is None:
+                oracle_field = ''
+
+            # Compare as strings, since Solr incorrectly stores some of the numeric fields.
+            if str(solr_field) != str(oracle_field):
+                print('Error with id={}: field {} has the Solr value "{}", but the value in Oracle is "{}"'
+                      .format(key, field_name, solr_field, oracle_field))
+                print(solr)
+                print(oracle)
 
 
 # Remember to:
