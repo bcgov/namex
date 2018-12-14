@@ -414,3 +414,25 @@ def test_leak(solr, client, jwt, app):
            {'name': 'LEAK'}
        ]
     )
+
+@integration_solr
+def test_plank(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'PLANCK', id='1')
+    verify_results(client, jwt,
+       query='PLANK',
+       expected=[
+           {'name': 'PLANCK'}
+       ]
+    )
+
+@integration_solr
+def test_krystal(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'KRYSTAL', id='1')
+    verify_results(client, jwt,
+       query='CRISTAL',
+       expected=[
+           {'name': 'KRYSTAL'}
+       ]
+    )
