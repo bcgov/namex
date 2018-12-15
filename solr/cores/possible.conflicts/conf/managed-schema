@@ -489,12 +489,11 @@
         <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.SynonymGraphFilterFactory" synonyms="multi_word_syns.txt" ignoreCase="true" expand="true"/>
-        <filter class="solr.SnowballPorterFilterFactory" protected="protected-multi.txt" language="English"/>
+        <filter class="solr.SnowballPorterFilterFactory" protected="protected_syns.txt" language="English"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\$\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\\_']*" replacement="" />
-        <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A-Z]|[a-z])\1" replacement="$1" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2$3 " />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W|$" replacement=" $1$2 " />
@@ -519,7 +518,7 @@
         <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
             sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
-        <filter class="solr.SnowballPorterFilterFactory" protected="protected-multi.txt" language="English"/>
+        <filter class="solr.SnowballPorterFilterFactory" protected="protected_syns.txt" language="English"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
       </analyzer>
     </fieldType>
