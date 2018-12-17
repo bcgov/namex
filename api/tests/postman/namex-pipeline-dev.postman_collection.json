@@ -1535,6 +1535,10 @@
 									"   response.body.names[0].name.should.include(\"A C C DIAMONDS LTD. LIMITED TESTING\");",
 									"   response.body.applicants.addrLine1.should.include(\"940 Blanshard Street TESTING\");",
 									"});",
+									"",
+									"it(\"Should add a comment re. name change\", () => {",
+									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"Name choice 1 changed from A C C DIAMONDS LTD. LIMITED to A C C DIAMONDS LTD. LIMITED TESTING\");",
+									"});",
 									""
 								],
 								"type": "text/javascript"

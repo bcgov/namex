@@ -1539,7 +1539,12 @@
 									"   }",
 									"   response.body.natureBusinessInfo.should.include(\"TEST\");",
 									"   response.body.applicants.clientFirstName.should.include(\"TEST\");",
-									"});"
+									"});",
+									"",
+									"it(\"Should add a comment re. name change\", () => {",
+									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"Name choice 1 changed from STRANGWAY & SONS ACCOUNTING SERVICES to TEST\");",
+									"});",
+									""
 								],
 								"type": "text/javascript"
 							}
