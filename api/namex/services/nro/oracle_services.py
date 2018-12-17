@@ -273,7 +273,9 @@ class NROServices(object):
                 nr.stateCd = State.NRO_UPDATING
                 nr.save_to_db()
 
-                nr = self.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr.nrNum, name_request=nr)
+                nrf = self.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr.nrNum, name_request=nr)
+                if nrf:
+                    nr = nrf
                 nr.stateCd = nr_saved_state
                 nr.save_to_db()
                 EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, {})
