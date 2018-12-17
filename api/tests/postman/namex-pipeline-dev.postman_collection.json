@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a978341b-ff1c-4867-81d3-c2fb7a66dfdb",
+		"_postman_id": "ba3f0ef2-ce4a-4704-9c8a-96a89bdd8b0f",
 		"name": "namex-pipeline-dev",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1537,7 +1537,7 @@
 									"});",
 									"",
 									"it(\"Should add a comment re. name change\", () => {",
-									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"Name choice 1 changed from A C C DIAMONDS LTD. LIMITED to A C C DIAMONDS LTD. LIMITED TESTING\");",
+									"   response.body.comments[0].comment.should.include(\"Name choice 1 changed from A C C DIAMONDS LTD. LIMITED to A C C DIAMONDS LTD. LIMITED TESTING\");",
 									"});",
 									""
 								],

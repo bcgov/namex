@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "434c5ba0-8f29-40bd-920f-ea06fc183545",
+		"_postman_id": "7f5c6071-2798-43b1-918c-5656a31523e5",
 		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1542,7 +1542,7 @@
 									"});",
 									"",
 									"it(\"Should add a comment re. name change\", () => {",
-									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"Name choice 1 changed from STRANGWAY & SONS ACCOUNTING SERVICES to TEST\");",
+									"   response.body.comments[0].comment.should.include(\"Name choice 1 changed from STRANGWAY & SONS ACCOUNTING SERVICES to TEST\");",
 									"});",
 									""
 								],
