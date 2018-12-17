@@ -32,7 +32,7 @@ class Request(db.Model):
     requestTypeCd = db.Column('request_type_cd', db.String(10))
     priorityCd = db.Column('priority_cd', db.String(2))
     priorityDate = db.Column('priority_date', db.DateTime)
-    expirationDate = db.Column('expiration_date', db.DateTime)
+    expirationDate = db.Column('expiration_date', db.DateTime(timezone=True))
     consentFlag = db.Column('consent_flag', db.String(1))
     additionalInfo = db.Column('additional_info', db.String(150))
     natureBusinessInfo = db.Column('nature_business_info', db.String(1000))
