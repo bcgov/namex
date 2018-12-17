@@ -266,6 +266,23 @@ def test_duplicated_letters(client, jwt, app):
        expected_list=None
     )
 
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO PROCESS* synonyms:(server)'),
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO* synonyms:(process, server, processserver)'),
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO* synonyms:(process, server, processserver)'),
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR* synonyms:(two, process, server, twozero, processserver)'),
+    ("Jameisons four two zero process server", '----JAMEISONS* synonyms:(four, two, process, server, fourtwo, fourtwozero, twozero, processserver)'),
+])
+def test_multi_word_synonyms(client, jwt, app, criteria, seed):
+    verify_synonym_match(client, jwt,
+                         query=criteria,
+                         expected_list=[seed]
+                         )
+
+
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
