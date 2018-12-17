@@ -468,7 +468,6 @@
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1CENT$3" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="C" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\\_']*" replacement="" />
-        <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A-Z]|[a-z])\1" replacement="$1" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2$3 " />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W|$" replacement=" $1$2 " />
