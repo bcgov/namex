@@ -131,7 +131,7 @@ def test_find_with_first_word(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_synonym_match(client, jwt,
         query='JM',
-        expected_list=['----JM* ','JM Van Damme inc ']
+        expected_list=['----JM ','JM Van Damme inc ']
     )
 
 @pytest.mark.skip(reason="frontend handles empty string for now")
@@ -146,21 +146,11 @@ def test_resist_empty(client, jwt, app):
 
 @integration_synonym_api
 @integration_solr
-def test_returns_names_for_all_queries(client, jwt, app):
-    seed_database_with(client, jwt, 'JM VAN DAMME INC')
-    verify_synonym_match(client, jwt,
-        query='JM VAN DAMME INC',
-        expected_list=['----JM VAN DAMME INC* ', 'JM VAN DAMME INC', '----JM VAN DAMME* ', 'JM VAN DAMME INC',
-                '----JM VAN* ', 'JM VAN DAMME INC', '----JM* ', 'JM VAN DAMME INC']
-    )
-
-@integration_synonym_api
-@integration_solr
 def test_case_insensitive(client, jwt, app):
     seed_database_with(client, jwt, 'JacKlEs')
     verify_synonym_match(client, jwt,
         query='jackles',
-        expected_list=['----JACKLES* ', 'JacKlEs']
+        expected_list=['----JACKLES ', 'JacKlEs']
     )
 
 @integration_synonym_api
@@ -193,11 +183,11 @@ def test_double_letters(client, jwt, app):
 @integration_synonym_api
 @integration_solr
 def test_designation_removal(client, jwt, app):
-    seed_database_with(client, jwt, 'designation test')
+    seed_database_with(client, jwt, 'DESIGNATION TEST')
     verify_synonym_match(client, jwt,
-        query='designation limited',
-        expected_list=['----designation* '],
-        not_expected_list=['----designation limited* ']
+        query='DESIGNATION LIMITED',
+        expected_list=['----DESIGNATION ', 'DESIGNATION TEST'],
+        not_expected_list=['----DESIGNATION LIMITED ']
     )
 
 @integration_synonym_api
@@ -240,6 +230,42 @@ def test_stopwords(client, jwt, app, criteria, seed):
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
+    ('TESTING COMPANY', 'SCARY TESTING COMPANY'),
+    ('TESTS ARE GOOD', 'MANY TESTS ARE GOOD'),
+])
+def test_finds_names_with_word_to_left_of_distinctive(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('KIALS TESTING COMPANY', 'TESTING KIALS COMPANY'),
+    ('TESTS GOOD COMPANY', 'COMPANY GOOD TESTS'),
+])
+def test_word_order_mixed(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@pytest.mark.skip(reason="duplicates not handled yet")
+@integration_synonym_api
+@integration_solr
+def test_duplicated_letters(client, jwt, app):
+    seed_database_with(client, jwt, 'Damme Trucking Inc')
+    verify_synonym_match(client, jwt,
+       query='Dame Trucking Inc',
+       expected_list=None
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
     ('J.M. HOLDING', 'JM HOLDING'),
     ('J M HOLDING', 'JM HOLDING'),
     ('J. M. HOLDING', 'JM HOLDING'),
@@ -253,26 +279,6 @@ def test_finds_variations_on_initials(client, jwt, app, criteria, seed):
     verify_synonym_match(client, jwt,
         query=criteria,
         expected_list=[seed]
-    )
-
-@pytest.mark.skip(reason="'and' not handled yet")
-@integration_synonym_api
-@integration_solr
-def test_ignores_and(client, jwt, app):
-    seed_database_with(client, jwt, 'JM Van Damme inc')
-    verify_synonym_match(client, jwt,
-       query='J and M Van and Damme inc',
-       expected_list=None
-    )
-
-@pytest.mark.skip(reason="duplicates not handled yet")
-@integration_synonym_api
-@integration_solr
-def test_duplicated_letters(client, jwt, app):
-    seed_database_with(client, jwt, 'Damme Trucking Inc')
-    verify_synonym_match(client, jwt,
-       query='Dame Trucking Inc',
-       expected_list=None
     )
 
 @integration_synonym_api
