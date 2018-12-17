@@ -302,13 +302,13 @@ class SolrQueries:
 
             previous_token = token
 
-        candidates.extend(cls._get_multiples(candidates))
+        candidates.extend(cls._get_concatenated_terms(candidates))
 
         return candidates
 
 
     @classmethod
-    def _get_multiples(cls, candidates):
+    def _get_concatenated_terms(cls, candidates):
 
         if len(candidates) < 2:
             return []

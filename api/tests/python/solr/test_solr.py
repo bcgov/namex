@@ -7,11 +7,11 @@ from tests.python import integration_synonym_api
 
 
 solr_name_test_data = [
-    ('some name', 'somename', 'some%20name', 'some%20name'),
+    ('some name', 'somename', 'some%20name', 'some%20name%20somename'),
     ('a longer name jesus and the mary chain'
      ,'alongernamejesusandthemarychain'
      ,'a%20longer%20name%20jesus%20and%20the%20mary%20chain'
-     ,'a%20longer%20name%20jesus%20and%20the%20mary%20chain'),
+     ,'a%20longer%20name%20jesus%20and%20the%20mary%20chain%20alonger%20alongername%20longername%20longernamejesus%20namejesus%20namejesusand%20jesusand%20jesusandthe%20andthe%20andthemary%20themary%20themarychain%20marychain'),
 ]
 
 
@@ -68,7 +68,7 @@ def test_get_results_query_to_solr(mocker, monkeypatch, name, compresed_name, es
 
 
 solr_get_synonym_test_data = [
-    ("DAVE'S AUTO SERVICES LTD.", 'dave%20%27%20s%20auto%20services%20ltd%20.'),
+    ("DAVE'S AUTO SERVICES LTD.", 'dave%20%27%20s%20auto%20services%20ltd%20.%20dave%27%20dave%27s%20%27s%20%27sauto%20sauto%20sautoservices%20autoservices%20autoservicesltd%20servicesltd%20servicesltd.%20ltd.'),
 ]
 
 
