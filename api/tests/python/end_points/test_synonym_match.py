@@ -173,15 +173,6 @@ def test_numbers_preserved(client, jwt, app):
 
 @integration_synonym_api
 @integration_solr
-def test_double_letters(client, jwt, app):
-    seed_database_with(client, jwt, 'ATTACK DOUBLES')
-    verify_synonym_match(client, jwt,
-       query='ATACK DOUBBLES',
-       expected_list=['ATTACK DOUBLES']
-    )
-
-@integration_synonym_api
-@integration_solr
 def test_designation_removal(client, jwt, app):
     seed_database_with(client, jwt, 'DESIGNATION TEST')
     verify_synonym_match(client, jwt,
@@ -201,9 +192,21 @@ def test_designation_removal(client, jwt, app):
     ('JAM HOLDINGS', 'JAMS\' HOLDINGS\''),
     ('JASONS HOLSTERS', 'JASON HOLSTER'),
     ('A.S. HOLDERS', 'AS HOLDER'),
-    ('H.A.S\'S HOLDERS', 'HAS HOLDER'),
+    ('H.A.S\'S HOLDERS', 'HASS HOLDER'),
 ])
 def test_handles_s_and_possession(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('MY $ $TORE$', 'MY DOLLAR STORES'),
+])
+def test_handles_money(client, jwt, app, criteria, seed):
     seed_database_with(client, jwt, seed)
     verify_synonym_match(client, jwt,
         query=criteria,
