@@ -333,7 +333,9 @@ def test_add_names(app, request, session, test_names, previous_names):
 
 priority_flag_testdata = [
     ('PQ', 'Y'),
-    ('PJ', 'N'),
+    ('PJ', 'Y'),
+    ('RQ', 'N'),
+    ('RJ', 'Y'),
     ('P', 'N'),
     ('R', 'N')
 ]
@@ -373,9 +375,13 @@ def test_add_nr_header_with_priority(priority_cd, expected):
 # test for changing priority codes
 mutating_priority_flag_testdata = [
     ('priority_not_changed', 'PQ', 'PQ', 'Y', EPOCH_DATETIME),
-    ('priority_changed', 'PJ', 'PQ', 'Y', FROZEN_DATETIME),
+    ('priority_changed', 'PJ', 'PQ', 'Y', EPOCH_DATETIME),
+    ('priority_changed', 'RJ', 'PQ', 'Y', EPOCH_DATETIME),
     ('priority_changed', 'P', 'PQ', 'Y', FROZEN_DATETIME),
     ('priority_changed', 'R', 'PQ', 'Y', FROZEN_DATETIME),
+    ('priority_changed', 'RQ', 'PQ', 'Y', FROZEN_DATETIME),
+    ('priority_changed', 'RQ', 'PJ', 'Y', FROZEN_DATETIME),
+    ('priority_changed', 'RQ', 'RJ', 'Y', FROZEN_DATETIME),
 ]
 
 
