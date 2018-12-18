@@ -36,12 +36,17 @@ def keep_phonetic_match(candidate, word, names, query, name):
         query_first_vowels = first_vowels(query)
         word_first_vowels = first_vowels(word)
         if query_first_vowels == word_first_vowels:
-            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+            keep_candidate(candidate, name, names)
         else:
             query_first_arpabet = first_arpabet(query)
             word_first_arpabet = first_arpabet(word)
             if query_first_arpabet == word_first_arpabet:
-                names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+                keep_candidate(candidate, name, names)
+
+
+def keep_candidate(candidate, name, names):
+    if len([doc['id'] for doc in names if doc['id'] == candidate['id']]) == 0:
+        names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
 
 
 @cors_preflight("GET")
