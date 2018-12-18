@@ -537,7 +537,7 @@ def test_soft_c_is_not_k(solr, client, jwt, app):
     )
 
 @integration_solr
-def test_oi_oy(solr, client, jwt, app):
+def oi_oy(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'OYSTER', id='1')
     verify_results(client, jwt,
