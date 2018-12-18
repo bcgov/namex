@@ -548,3 +548,14 @@ def oi_oy(solr, client, jwt, app):
     )
 
 
+
+@integration_solr
+def test_dont_add_match_twice(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'RHEN GNAT', id='1')
+    verify_results(client, jwt,
+       query='REN NAT',
+       expected=[
+           {'name': 'RHEN GNAT'}
+       ]
+    )
