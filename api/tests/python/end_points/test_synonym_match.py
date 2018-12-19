@@ -131,7 +131,7 @@ def test_find_with_first_word(client, jwt, app):
     seed_database_with(client, jwt, 'JM Van Damme inc')
     verify_synonym_match(client, jwt,
         query='JM',
-        expected_list=['----JM ','JM Van Damme inc ']
+        expected_list=['----JM - PROXIMITY SEARCH','JM Van Damme inc ']
     )
 
 @pytest.mark.skip(reason="frontend handles empty string for now")
@@ -177,7 +177,7 @@ def test_designation_removal(client, jwt, app):
     seed_database_with(client, jwt, 'DESIGNATION TEST')
     verify_synonym_match(client, jwt,
         query='DESIGNATION LIMITED',
-        expected_list=['----DESIGNATION ', 'DESIGNATION TEST'],
+        expected_list=['----DESIGNATION - PROXIMITY SEARCH', 'DESIGNATION TEST'],
         not_expected_list=['----DESIGNATION LIMITED ']
     )
 
@@ -270,11 +270,11 @@ def test_duplicated_letters(client, jwt, app):
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO PROCESS* synonyms:(server)'),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO* synonyms:(process, server, processserver)'),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO* synonyms:(process, server, processserver)'),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR* synonyms:(two, process, server, twozero, processserver)'),
-    ("Jameisons four two zero process server", '----JAMEISONS* synonyms:(four, two, process, server, fourtwo, fourtwozero, twozero, processserver)'),
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO PROCESS synonyms:(server) - PROXIMITY SEARCH'),
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO synonyms:(process, server, processserver) - PROXIMITY SEARCH'),
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO synonyms:(process, server, processserver) - PROXIMITY SEARCH'),
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR synonyms:(two, process, server, twozero, processserver) - PROXIMITY SEARCH'),
+    ("Jameisons four two zero process server", '----JAMEISONS synonyms:(four, two, process, server, fourtwo, fourtwozero, twozero, processserver) - PROXIMITY SEARCH'),
 ])
 def test_multi_word_synonyms(client, jwt, app, criteria, seed):
     verify_synonym_match(client, jwt,
@@ -304,19 +304,38 @@ def test_finds_variations_on_initials(client, jwt, app, criteria, seed):
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
+    ('WEST FOR* TIMBER', 'WEST FOREST TIMBER'),
+    ('W* FORE* TIMBER', 'WEST FOREST TIMBER'),
+    ('W*T FOR*T TI*BER', 'WEST FOREST TIMBER'),
+    ('W*T FORE* TI*BER', 'WEST FOREST TIMBER'),
+    ('WEST FORE?T TIMBER', 'WEST FOREST TIMBER'),
+    ('WE?? FOREST TIMBER', 'WEST FOREST TIMBER'),
+    ('WE?? FORE?T TI??ER', 'WEST FOREST TIMBER'),
+    ('WE?? FO*ST T?M*R', 'WEST FOREST TIMBER'),
+])
+def test_wildcard_operator(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
     ('J M HOLDINGS', 'J M HOLDINGS INC'),
     ('JM Van Damme Inc', 'J&M & Van Damme Inc'),
     ('J&M HOLDINGS', 'JM HOLDINGS INC'),
     ('J. & M. HOLDINGS', 'JM HOLDING INC'),
     ('J AND M HOLDINGS', 'J AND M HOLDINGS'),
     ('J-M HOLDINGS', 'J. & M. HOLDINGS'),
-    # ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
-    # ('J_M HOLDINGS', 'J. & M. HOLDINGS'),
-    # ('J_\'_-M HOLDINGS', 'J.M. HOLDINGS'),
-    # ('J@M HOLDINGS', 'J.M. HOLDINGS'),
-    # ('J=M HOLDINGS', 'J. M. HOLDINGS'),
+    ('J\'M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J_M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J_\'_-M HOLDINGS', 'J.M. HOLDINGS'),
+    ('J@M HOLDINGS', 'J.M. HOLDINGS'),
+    ('J=M HOLDINGS', 'J. M. HOLDINGS'),
     ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
-    # ('J!=@_M HOLDINGS', 'J. M. HOLDINGS'),
+    ('J!=@_M HOLDINGS', 'J. M. HOLDINGS'),
     ('J+M HOLDINGS', 'J. & M. HOLDING\'S'),
     ('J\M HOLDINGS', 'J. & M. HOLDINGS'),
 ])
