@@ -24,7 +24,8 @@ SYNONYMS_PREFIX = '&fq=name_with_synonyms:'
 
 
 class SolrQueries:
-    SYN_CONFLICTS = 'synconflicts'
+    PROX_SYN_CONFLICTS = 'proxsynconflicts'
+    OLD_SYN_CONFLICTS = 'oldsynconflicts'
     CONFLICTS = 'conflicts'
     HISTORY = 'histories'
     TRADEMARKS = 'trademarks'
@@ -36,10 +37,14 @@ class SolrQueries:
     #     /solr/<core name>/select? ... &q={name} ... &wt=json&start={start}&rows={rows}&fl=source,id,name,score
     #
     queries = {
-        SYN_CONFLICTS:
+        PROX_SYN_CONFLICTS:
             '/solr/possible.conflicts/select?hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q=name:{start_str}&wt=json&start={start}&rows={rows}&fl=source,id,name,'
             'score&sort=score%20desc,txt_starts_with%20asc{synonyms_clause}',
+        OLD_SYN_CONFLICTS:
+            '/solr/possible.conflicts/select?hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
+            'hl=on&indent=on&q=txt_starts_with:{start_str}&wt=json&start={start}&rows={rows}&fl=source,id,name,'
+            'score&sort=score%20desc,txt_starts_with%20asc{synonyms_clause}{name_copy_clause}',
         CONFLICTS:
             '/solr/possible.conflicts/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
@@ -83,28 +88,51 @@ class SolrQueries:
             name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
             list_name_split = name.split()
             num_terms = 0
-            combined_terms = ''
-            search_strs = []
+            prox_combined_terms = ''
+            prox_search_strs = []
+            old_alg_combined_terms = ''
+            old_alg_search_strs = []
             for term in list_name_split:
-                combined_terms += term + ' '
                 num_terms += 1
-                search_strs.insert(0, (combined_terms.strip(), name[len(combined_terms):], num_terms))
+                prox_combined_terms += term + ' '
+                prox_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
+
+                old_alg_combined_terms += term + '\ '
+                old_alg_search_strs.insert(0, old_alg_combined_terms)
 
             connections = []
-            for str_tuple in search_strs:
-                start_str = str_tuple[0]
-                synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
-                query = solr_base_url + SolrQueries.queries['synconflicts'].format(
+            for prox_search_tuple,old_alg_search in zip(prox_search_strs,old_alg_search_strs):
+
+                prox_search_str = prox_search_tuple[0]
+                old_alg_search_str = old_alg_search[:-2].replace(' ', '%20') + '*'  # [:-2] takes off the last '\ '
+
+                synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1])
+
+                ### Proximity (name:) search query
+                query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
                     start=start,
                     rows=rows,
-                    name=parse.quote(name.replace(NO_SYNONYMS_INDICATOR, '')),
-                    start_str='\"'+start_str.replace(' ','%20')+'\"~{}'.format(str_tuple[2]),
+                    start_str='\"'+prox_search_str.replace(' ','%20')+'\"~{}'.format(prox_search_tuple[2]),
+                    synonyms_clause=synonyms_clause,
+                )
+                current_app.logger.debug('Query: ' + query)
+                connections.append((request.urlopen(query),'----'+prox_search_str.replace('\\','') +
+                                    synonyms_clause.replace('&fq=name_with_',' ').replace('%20',', ') +
+                                    ' - PROXIMITY SEARCH'))
+
+                ### Old (txt_starts_with:) search query
+                query = solr_base_url + SolrQueries.queries['oldsynconflicts'].format(
+                    start=start,
+                    rows=rows,
+                    start_str=old_alg_search_str,
                     synonyms_clause=synonyms_clause,
                     name_copy_clause=cls._get_name_copy_clause(name)
                 )
                 current_app.logger.debug('Query: ' + query)
-                connections.append((request.urlopen(query),'----'+start_str.replace('\\','')+' '
-                                    +synonyms_clause.replace('&fq=name_with_','').replace('%20',', ')))
+                connections.append((request.urlopen(query), '----' +
+                                    old_alg_search_str.replace('\\', '').replace('%20', ' ') +
+                                    synonyms_clause.replace('&fq=name_with_',' ').replace('%20',', ') +
+                                    ' - EXACT WORD ORDER (OLD SEARCH)'))
         except Exception as err:
             current_app.logger.error(err, query)
             return None, 'Internal server error', 500
