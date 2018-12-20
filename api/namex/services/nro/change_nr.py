@@ -13,6 +13,7 @@
 """
 
 from flask import current_app
+from .utils import generate_compressed_name
 
 def update_nr (nr, ora_cursor, change_flags):
     """Update the Name Request in NRO
@@ -182,13 +183,13 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
 
             oracle_cursor.execute("""
             INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name)
-            VALUES (name_instance_seq.nextval, :name_id, :choice, :search_name, :event_id, :name)
+            VALUES (name_instance_seq.nextval, :name_id, :choice, :name, :event_id, :search_name)
             """,
                                   name_id=n_id,
                                   choice=name.choice,
                                   name=name.name,
                                   event_id=event_id,
-                                  search_name=name.name)
+                                  search_name=generate_compressed_name(name.name))
 
 def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
     """find the current address (request_party), set it's end_event_id to event_id
