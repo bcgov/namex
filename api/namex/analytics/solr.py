@@ -6,6 +6,7 @@ from typing import List
 from flask import current_app
 from urllib import request, parse
 from urllib.error import HTTPError
+import re
 
 
 # Use this character in the search strings to indicate that the word should not by synonymized.
@@ -362,7 +363,7 @@ class SolrQueries:
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod
     def _get_synonyms_clause(cls, name):
-        name = name.replace('  ', ' ').replace('  ', ' ')
+        name = re.sub(' +', ' ', name)
         current_app.logger.debug('getting synonyms for: {}'.format(name))
         clause = ''
         synonyms = []
