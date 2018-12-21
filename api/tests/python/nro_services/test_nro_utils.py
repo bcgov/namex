@@ -14,6 +14,12 @@ testdata = [
 ]
 
 
+@pytest.mark.parametrize("username,expected", testdata)
+def test_nro_examiner_name(username, expected):
+    en = utils.nro_examiner_name(username)
+    assert expected == en
+
+
 compress_name_test_data = [
     ('the Waffle the Mania the', 'WAFFLEMANIATHE'),
     ('the Waffle 123 the Mania the', 'WAFFLEONETWOTHREEMANIATHE'),
@@ -22,12 +28,6 @@ compress_name_test_data = [
     ('the Waffle & the Mania the', 'WAFFLEANDMANIATHE'),
     ('BRITISHCOLUMBIA the Waffle the Mania BRITISHCOLUMBIA the', 'BCWAFFLEMANIABRITISHCOLUMBIATH')
 ]
-
-
-@pytest.mark.parametrize("username,expected", testdata)
-def test_nro_examiner_name(username, expected):
-    en = utils.nro_examiner_name(username)
-    assert expected == en
 
 
 @pytest.mark.parametrize("original_name,expected", compress_name_test_data)
