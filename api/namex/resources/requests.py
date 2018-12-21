@@ -368,6 +368,8 @@ class Request(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
+            if not nrd:
+                return jsonify({"message": "Request:{} not found".format(nr)}), 404
             start_state = nrd.stateCd
         except NoResultFound as nrf:
             # not an error we need to track in the log
@@ -485,6 +487,8 @@ class Request(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
+            if not nrd:
+                return jsonify({"message": "Request:{} not found".format(nr)}), 404
             orig_nrd = nrd.json()
         except NoResultFound as nrf:
             # not an error we need to track in the log
@@ -492,9 +496,6 @@ class Request(Resource):
         except Exception as err:
             current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return jsonify({"message": "NR had an internal error"}), 404
-
-        if 'nrd' not in locals() or not nrd:
-            return jsonify({"message": "Request:{} not found".format(nr)}), 404
 
         if not services.name_request.valid_state_transition(user, nrd, state):
             return jsonify(message='you are not authorized to make these changes'), 401
