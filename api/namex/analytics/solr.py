@@ -72,6 +72,7 @@ class SolrQueries:
             '&wt=json'
             '&start={start}&rows={rows}'
             '&sort=score%20desc,txt_starts_with%20asc'
+            '&fq=-{exact_name}'
             '{synonyms_clause}',
         CONFLICTS:
             '/solr/possible.conflicts/select?'
@@ -263,6 +264,7 @@ class SolrQueries:
                     rows=rows,
                     start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
                     synonyms_clause=synonyms_clause,
+                    exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
                 )
                 current_app.logger.debug('Query: ' + query)
                 result = json.load(request.urlopen(query))
