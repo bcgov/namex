@@ -1,5 +1,5 @@
 from hamcrest import *
-from namex.resources.phonetic import first_vowels
+from namex.analytics.phonetic import first_vowels
 
 
 def test_can_extract_o():
