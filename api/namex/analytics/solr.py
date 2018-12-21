@@ -28,10 +28,9 @@ class SolrQueries:
     PROX_SYN_CONFLICTS = 'proxsynconflicts'
     OLD_SYN_CONFLICTS = 'oldsynconflicts'
     CONFLICTS = 'conflicts'
-    HISTORY = 'histories'
     TRADEMARKS = 'trademarks'
     RESTRICTED_WORDS = 'restricted_words'
-    VALID_QUERIES = [CONFLICTS, HISTORY, TRADEMARKS]
+    VALID_QUERIES = [CONFLICTS, TRADEMARKS]
 
     #
     # Prototype:
@@ -50,11 +49,6 @@ class SolrQueries:
             '/solr/possible.conflicts/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
             'hl=on&indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
             'start={start}&rows={rows}&fl=source,id,name,score&sort=score%20desc{synonyms_clause}{name_copy_clause}',
-        HISTORY:
-            '/solr/names/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&'
-            'indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
-            'start={start}&rows={rows}&fl=nr_num,name,score,submit_count,name_state_type_cd&sort=score%20desc'
-            '{synonyms_clause}{name_copy_clause}',
         TRADEMARKS:
             '/solr/trademarks/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&'
             'indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
