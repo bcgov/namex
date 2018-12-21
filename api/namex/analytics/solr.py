@@ -252,7 +252,7 @@ class SolrQueries:
             return None, 'Internal server error', 500
 
     @classmethod
-    def get_phonetic_results(cls, solr_base_url, name, search_strs, start=0, rows=10000):
+    def get_phonetic_results(cls, solr_base_url, name, search_strs, start=0, rows=100000):
         try:
             connections = []
             for str_tuple in search_strs:
@@ -576,8 +576,11 @@ class SolrQueries:
     def post_treatment(cls, docs, query_name):
         query_name = query_name.upper()
         names = []
+        count = 0
         for candidate in docs:
+            count+=1
             candidate_name = candidate['name'].upper()
+            print('checking: ', candidate_name)
             words = candidate_name.split()
             qwords = query_name.split()
 
@@ -585,6 +588,7 @@ class SolrQueries:
                 for word in words:
                     if word not in designations():
                         cls.keep_phonetic_match(candidate, word, names, qword, candidate_name)
+        print(count)
         return names
 
     @classmethod

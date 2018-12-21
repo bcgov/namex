@@ -135,7 +135,6 @@
     <field name="name_exact_match" type="text_name_exact_match" multiValued="false" indexed="true" stored="true"/>
     <field name="dblmetaphone_name" type="dblmetaphone_name" multiValued="false" indexed="true" stored="true"/>
     <field name="txt_starts_with" type="txt_starts_with" multiValued="false" indexed="true" stored="false"/>
-    <field name="dblmetaphone_name" type="dblmetaphone_name" multiValued="false" indexed="true" stored="true"/>
 
     <!-- Only enabled in the "schemaless" data-driven example (assuming the client
          does not know what fields may be searched) because it's very expensive to index everything twice. -->
@@ -751,54 +750,32 @@
     </fieldType>
 
     <fieldType name="dblmetaphone_name" class="solr.TextField">
-     <analyzer type="index">
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(\$+(\s+|$))+" replacement="$1dollar$3" /><charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\$" replacement="s" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1cent$3" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="c" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\\_']*" replacement="" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2$3 " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W|$" replacement=" $1$2 " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z][a-z|A-Z])\W|$" replacement=" $1$2 " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z][a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2 " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][\W][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][N|n][\W|$|s|S])"
-                                                                replacement="bc" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][\W][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][\W|$|s|S])"
-                                                                replacement="bc" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][N|n][\W|$|s|S])"
-                                                                replacement="bc" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][\W|$|s|S])"
-                                                                replacement="bc" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[O|o][F|f][\W](([C|c][A|a][N|n][A|a][D|d][A|a])|[B|b][C|c])$" replacement="" />
-       <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
-        <filter class="solr.DoubleMetaphoneFilterFactory" inject="false"/>
-     </analyzer>
-     <analyzer type="query">
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(\$+(\s+|$))+" replacement="$1dollar$3" /><charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\$" replacement="s" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1cent$3" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="c" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\\_']*" replacement="" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2$3 " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W|$" replacement=" $1$2 " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z][a-z|A-Z])\W|$" replacement=" $1$2 " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z][a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2 " />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][\W][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][N|n][\W|$|s|S])"
-                                                                replacement="bc" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][\W][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][\W|$|s|S])"
-                                                                replacement="bc" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][N|n][\W|$|s|S])"
-                                                                replacement="bc" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][\W|$|s|S])"
-                                                                replacement="bc" />
-       <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[O|o][F|f][\W](([C|c][A|a][N|n][A|a][D|d][A|a])|[B|b][C|c])$" replacement="" />
-       <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
-        <filter class="solr.DoubleMetaphoneFilterFactory" inject="false"/>
-     </analyzer>
+        <analyzer>
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(\$+(\s+|$))+" replacement="$1dollar$3" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\$" replacement="s" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1cent$3" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="c" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\'\_]*" replacement="" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2$3 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W|$" replacement=" $1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z][a-z|A-Z])\W|$" replacement=" $1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z][a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2 " />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][\W][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][N|n][\W|$|s|S])"
+                                                                     replacement="bc" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][\W][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][\W|$|s|S])"
+                                                                     replacement="bc" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][N|n][\W|$|s|S])"
+                                                                     replacement="bc" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][\W|$|s|S])"
+                                                                     replacement="bc" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[O|o][F|f][\W](([C|c][A|a][N|n][A|a][D|d][A|a])|[B|b][C|c])$" replacement="" />
+
+            <tokenizer class="solr.StandardTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
+            <filter class="solr.DoubleMetaphoneFilterFactory" inject="false"/>
+        </analyzer>
     </fieldType>
 
     <fieldType name="text_name_exact_match" class="solr.TextField" positionIncrementGap="100" multiValued="false">
@@ -848,21 +825,6 @@
           <filter class="solr.PatternReplaceFilterFactory" pattern="\s" replacement="" replace="all"/>
       </analyzer>
     </fieldType>
-
-    <fieldType name="dblmetaphone_name" class="solr.TextField">
-     <analyzer type="index">
-       <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
-        <filter class="solr.DoubleMetaphoneFilterFactory" inject="false"/>
-     </analyzer>
-     <analyzer type="query">
-       <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
-        <filter class="solr.DoubleMetaphoneFilterFactory" inject="false"/>
-     </analyzer>
-   </fieldType>
 
     <fieldType name="txt_starts_with" class="solr.TextField">
         <analyzer>
@@ -1350,5 +1312,4 @@
     <copyField source="name" dest="name_exact_match"/>
     <copyField source="name" dest="dblmetaphone_name"/>
     <copyField source="name" dest="txt_starts_with"/>
-    <copyField source="name" dest="dblmetaphone_name"/>
 </schema>
