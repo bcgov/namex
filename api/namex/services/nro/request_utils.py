@@ -42,7 +42,7 @@ def add_nr_header(nr, nr_header, nr_submitter, user):
     nr.nroLastUpdate = nr_header['last_update']
     nr.lastUpdate = nr.nroLastUpdate # this needs to be set to the same Point In Time as NRO until NameX owns it
 
-    if nr_header['priority_cd'] == 'PQ':
+    if nr_header['priority_cd'] in ('PQ', 'PJ', 'RJ'):
         nr.priorityCd = 'Y'
         if previous_priorityCd == 'N':
             nr.priorityDate = datetime.datetime.utcnow()
