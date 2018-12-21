@@ -7,6 +7,7 @@ from flask import current_app
 from urllib import request, parse
 from urllib.error import HTTPError
 import re
+from namex.analytics.phonetic import first_vowels, first_arpabet, match_consonate, designations, first_consonants
 
 
 # Use this character in the search strings to indicate that the word should not by synonymized.
@@ -27,6 +28,7 @@ SYNONYMS_PREFIX = '&fq=name_with_synonyms:'
 class SolrQueries:
     PROX_SYN_CONFLICTS = 'proxsynconflicts'
     OLD_SYN_CONFLICTS = 'oldsynconflicts'
+    PHONETIC_CONFLICTS = 'phonconflicts'
     CONFLICTS = 'conflicts'
     HISTORY = 'histories'
     TRADEMARKS = 'trademarks'
@@ -39,104 +41,129 @@ class SolrQueries:
     #
     queries = {
         PROX_SYN_CONFLICTS:
-            '/solr/possible.conflicts/select?hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
-            'hl=on&indent=on&q=name:{start_str}&wt=json&start={start}&rows={rows}&fl=source,id,name,'
-            'score&sort=score%20desc,txt_starts_with%20asc{synonyms_clause}',
+            '/solr/possible.conflicts/select?'
+            'hl.fl=name'
+            '&hl.simple.post=%3C/b%3E'
+            '&hl.simple.pre=%3Cb%3E'
+            '&hl=on'
+            '&indent=on'
+            '&q=name:{start_str}'
+            '&wt=json'
+            '&start={start}&rows={rows}'
+            '&fl=source,id,name,score'
+            '&sort=score%20desc,txt_starts_with%20asc'
+            '{synonyms_clause}',
         OLD_SYN_CONFLICTS:
-            '/solr/possible.conflicts/select?hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
-            'hl=on&indent=on&q=txt_starts_with:{start_str}&wt=json&start={start}&rows={rows}&fl=source,id,name,'
-            'score&sort=score%20desc,txt_starts_with%20asc{synonyms_clause}{name_copy_clause}',
+            '/solr/possible.conflicts/select?'
+            'hl.fl=name'
+            '&hl.simple.post=%3C/b%3E'
+            '&hl.simple.pre=%3Cb%3E'
+            '&hl=on'
+            '&indent=on'
+            '&q=txt_starts_with:{start_str}'
+            '&wt=json'
+            '&start={start}&rows={rows}'
+            '&fl=source,id,name,score'
+            '&sort=score%20desc,txt_starts_with%20asc'
+            '{synonyms_clause}{name_copy_clause}',
+        PHONETIC_CONFLICTS:
+            '/solr/possible.conflicts/select?'
+            '&q=dblmetaphone_name:{start_str}'
+            '&wt=json'
+            '&start={start}&rows={rows}'
+            '&sort=score%20desc,txt_starts_with%20asc'
+            '{synonyms_clause}',
         CONFLICTS:
-            '/solr/possible.conflicts/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&'
-            'hl=on&indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
-            'start={start}&rows={rows}&fl=source,id,name,score&sort=score%20desc{synonyms_clause}{name_copy_clause}',
+            '/solr/possible.conflicts/select?'
+            'defType=edismax'
+            '&hl.fl=name'
+            '&hl.simple.post=%3C/b%3E'
+            '&hl.simple.pre=%3Cb%3E'
+            '&hl=on'
+            '&indent=on'
+            '&q={compressed_name}%20OR%20{name}'
+            '&qf=name_compressed^6%20name_with_synonyms'
+            '&wt=json'
+            '&start={start}&rows={rows}'
+            '&fl=source,id,name,score'
+            '&sort=score%20desc'
+            '{synonyms_clause}{name_copy_clause}',
         HISTORY:
-            '/solr/names/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&'
-            'indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
-            'start={start}&rows={rows}&fl=nr_num,name,score,submit_count,name_state_type_cd&sort=score%20desc'
+            '/solr/names/select?'
+            'defType=edismax'
+            '&hl.fl=name'
+            '&hl.simple.post=%3C/b%3E'
+            '&hl.simple.pre=%3Cb%3E'
+            '&hl=on&'
+            'indent=on'
+            '&q={compressed_name}%20OR%20{name}'
+            '&qf=name_compressed^6%20name_with_synonyms'
+            '&wt=json'
+            '&start={start}&rows={rows}'
+            '&fl=nr_num,name,score,submit_count,name_state_type_cd'
+            '&sort=score%20desc'
             '{synonyms_clause}{name_copy_clause}',
         TRADEMARKS:
-            '/solr/trademarks/select?defType=edismax&hl.fl=name&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&'
-            'indent=on&q={compressed_name}%20OR%20{name}&qf=name_compressed^6%20name_with_synonyms&wt=json&'
-            'start={start}&rows={rows}&fl=application_number,name,status,description,score&'
-            'bq=status:%22Registration%20published%22^5.0&sort=score%20desc{synonyms_clause}{name_copy_clause}'
+            '/solr/trademarks/select?'
+            'defType=edismax'
+            '&hl.fl=name'
+            '&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E'
+            '&hl=on'
+            '&indent=on'
+            '&q={compressed_name}%20OR%20{name}'
+            '&qf=name_compressed^6%20name_with_synonyms'
+            '&wt=json'
+            '&start={start}&rows={rows}'
+            '&fl=application_number,name,status,description,score'
+            '&bq=status:%22Registration%20published%22^5.0'
+            '&sort=score%20desc{synonyms_clause}{name_copy_clause}'
     }
 
     @classmethod
-    def get_synonym_results(cls, name, start=0, rows=100):
+    def get_conflict_results(cls, name, bucket, start=0, rows=100):
         solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
         if not solr_base_url:
             current_app.logger.error('SOLR: SOLR_BASE_URL is not set')
 
             return None, 'Internal server error', 500
 
-        try:
-            # TODO: these should be loaded from somewhere.
-            designations = [
-                'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited',
-                'limited liability co.', 'limited liability company', 'limited liability partnership', 'limitee', 'llc',
-                'llp', 'ltd.', 'ltee', 'sencrl', 'societe a responsabilite limitee',
-                'societe en nom collectif a responsabilite limitee', 'srl','ulc', 'unlimited liability company']
+        # TODO: these should be loaded from somewhere.
+        designations = [
+            'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited',
+            'limited liability co.', 'limited liability company', 'limited liability partnership', 'limitee', 'llc',
+            'llp', 'ltd.', 'ltee', 'sencrl', 'societe a responsabilite limitee',
+            'societe en nom collectif a responsabilite limitee', 'srl', 'ulc', 'unlimited liability company']
 
-            # remove designations if they are at the end of the name
-            for designation in designations:
-                index = name.upper().find(' ' + designation.upper())
-                # checks if there is a designation AND if that designation is at the end of the string
-                if index != -1 and (index + len(designation)+1) is len(name):
-                    name = name[:index]
-                    break
+        # remove designations if they are at the end of the name
+        for designation in designations:
+            index = name.upper().find(' ' + designation.upper())
+            # checks if there is a designation AND if that designation is at the end of the string
+            if index != -1 and (index + len(designation) + 1) is len(name):
+                name = name[:index]
+                break
 
-            name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
-            list_name_split = name.split()
-            num_terms = 0
-            prox_combined_terms = ''
-            prox_search_strs = []
-            old_alg_combined_terms = ''
-            old_alg_search_strs = []
-            for term in list_name_split:
-                num_terms += 1
-                prox_combined_terms += term + ' '
-                prox_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
+        name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
+        list_name_split = name.split()
+        num_terms = 0
+        prox_combined_terms = ''
+        prox_search_strs = []
+        old_alg_combined_terms = ''
+        old_alg_search_strs = []
+        for term in list_name_split:
+            print(term)
+            num_terms += 1
+            prox_combined_terms += term + ' '
+            prox_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
+            print(prox_combined_terms)
+            old_alg_combined_terms += term + '\ '
+            old_alg_search_strs.insert(0, old_alg_combined_terms)
 
-                old_alg_combined_terms += term + '\ '
-                old_alg_search_strs.insert(0, old_alg_combined_terms)
+        if bucket == 'synonym':
+            connections = cls.get_synonym_results(solr_base_url, name, prox_search_strs, old_alg_search_strs, start, rows)
 
-            connections = []
-            for prox_search_tuple,old_alg_search in zip(prox_search_strs,old_alg_search_strs):
-
-                prox_search_str = prox_search_tuple[0]
-                old_alg_search_str = old_alg_search[:-2].replace(' ', '%20') + '*'  # [:-2] takes off the last '\ '
-
-                synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1])
-
-                ### Proximity (name:) search query
-                query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
-                    start=start,
-                    rows=rows,
-                    start_str='\"'+prox_search_str.replace(' ','%20')+'\"~{}'.format(prox_search_tuple[2]),
-                    synonyms_clause=synonyms_clause,
-                )
-                current_app.logger.debug('Query: ' + query)
-                connections.append((request.urlopen(query),'----'+prox_search_str.replace('\\','') +
-                                    synonyms_clause.replace('&fq=name_with_',' ').replace('%20',', ') +
-                                    ' - PROXIMITY SEARCH'))
-
-                ### Old (txt_starts_with:) search query
-                query = solr_base_url + SolrQueries.queries['oldsynconflicts'].format(
-                    start=start,
-                    rows=rows,
-                    start_str=old_alg_search_str,
-                    synonyms_clause=synonyms_clause,
-                    name_copy_clause=cls._get_name_copy_clause(name)
-                )
-                current_app.logger.debug('Query: ' + query)
-                connections.append((request.urlopen(query), '----' +
-                                    old_alg_search_str.replace('\\', '').replace('%20', ' ') +
-                                    synonyms_clause.replace('&fq=name_with_',' ').replace('%20',', ') +
-                                    ' - EXACT WORD ORDER (OLD SEARCH)'))
-        except Exception as err:
-            current_app.logger.error(err, query)
-            return None, 'Internal server error', 500
+        # bucket == 'phonetic'
+        else:
+            connections = cls.get_phonetic_results(solr_base_url, name, prox_search_strs)
 
         try:
             solr = {'response':{'numFound': 0,
@@ -148,7 +175,7 @@ class SolrQueries:
             # seen_names used to keep track of duplicates
             seen_names = []
             for connection in connections:
-                result = json.load(connection[0])
+                result = connection[0]
                 solr['response']['numFound'] += result['response']['numFound']
                 solr['response']['start'] = result['response']['start']
                 solr['response']['docs'].append({'name': connection[1]})
@@ -173,7 +200,82 @@ class SolrQueries:
                                     },
                        'names': solr['response']['docs'],
                        'highlighting': solr['highlighting']}
+
             return results, '', None
+
+        except Exception as err:
+            current_app.logger.error(err)
+            return None, 'Internal server error', 500
+
+    @classmethod
+    def get_synonym_results(cls, solr_base_url, name, prox_search_strs, old_alg_search_strs, start=0, rows=100):
+
+        try:
+            connections = []
+
+            for prox_search_tuple, old_alg_search in zip(prox_search_strs, old_alg_search_strs):
+                prox_search_str = prox_search_tuple[0]
+                old_alg_search_str = old_alg_search[:-2].replace(' ', '%20') + '*'  # [:-2] takes off the last '\ '
+
+                synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1])
+
+                ### Proximity (name:) search query
+                query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
+                    start=start,
+                    rows=rows,
+                    start_str='\"' + prox_search_str.replace(' ', '%20') + '\"~{}'.format(prox_search_tuple[2]),
+                    synonyms_clause=synonyms_clause,
+                )
+                current_app.logger.debug('Query: ' + query)
+                connections.append((json.load(request.urlopen(query)), '----' + prox_search_str.replace('\\', '') +
+                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
+                                    ' - PROXIMITY SEARCH'))
+
+                ### Old (txt_starts_with:) search query
+                query = solr_base_url + SolrQueries.queries['oldsynconflicts'].format(
+                    start=start,
+                    rows=rows,
+                    start_str=old_alg_search_str,
+                    synonyms_clause=synonyms_clause,
+                    name_copy_clause=cls._get_name_copy_clause(name)
+                )
+                current_app.logger.debug('Query: ' + query)
+                connections.append((json.load(request.urlopen(query)), '----' +
+                                    old_alg_search_str.replace('\\', '').replace('%20', ' ') +
+                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
+                                    ' - EXACT WORD ORDER (OLD SEARCH)'))
+
+            return connections
+
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'Internal server error', 500
+
+    @classmethod
+    def get_phonetic_results(cls, solr_base_url, name, search_strs, start=0, rows=10000):
+        try:
+            connections = []
+            for str_tuple in search_strs:
+                start_str = str_tuple[0]
+                synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
+                query = solr_base_url + SolrQueries.queries['phonconflicts'].format(
+                    start=start,
+                    rows=rows,
+                    start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                    synonyms_clause=synonyms_clause,
+                )
+                current_app.logger.debug('Query: ' + query)
+                result = json.load(request.urlopen(query))
+
+                docs = result['response']['docs']
+                result['response']['docs'] = cls.post_treatment(docs, name)
+
+                connections.append((result, '----' + start_str +
+                                   synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
+                                    ' - PHONETIC SEARCH'))
+
+            return connections
+
         except Exception as err:
             current_app.logger.error(err, query)
             return None, 'Internal server error', 500
@@ -469,3 +571,39 @@ class SolrQueries:
             clause = NO_SYNONYMS_PREFIX + '(' + parse.quote(' '.join(unsynonymed_words)) + ')'
 
         return clause
+
+    @classmethod
+    def post_treatment(cls, docs, query_name):
+        query_name = query_name.upper()
+        names = []
+        for candidate in docs:
+            candidate_name = candidate['name'].upper()
+            words = candidate_name.split()
+            qwords = query_name.split()
+
+            for qword in qwords:
+                for word in words:
+                    if word not in designations():
+                        cls.keep_phonetic_match(candidate, word, names, qword, candidate_name)
+        return names
+
+    @classmethod
+    def keep_phonetic_match(cls, candidate, word, names, query, name):
+        word_first_consonant = first_consonants(word)
+        query_first_consonant = first_consonants(query)
+        if match_consonate(query_first_consonant, word_first_consonant):
+            query_first_vowels = first_vowels(query)
+            word_first_vowels = first_vowels(word)
+            if query_first_vowels == word_first_vowels:
+                cls.keep_candidate(candidate, name, names)
+            else:
+                query_first_arpabet = first_arpabet(query)
+                word_first_arpabet = first_arpabet(word)
+                if query_first_arpabet == word_first_arpabet:
+                    cls.keep_candidate(candidate, name, names)
+
+    @classmethod
+    def keep_candidate(cls, candidate, name, names):
+        if len([doc['id'] for doc in names if doc['id'] == candidate['id']]) == 0:
+            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
+

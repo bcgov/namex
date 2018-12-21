@@ -927,7 +927,24 @@ class SynonymBucket(Resource):
         start = request.args.get('start', SynonymBucket.START)
         rows = request.args.get('rows', SynonymBucket.ROWS)
 
-        results, msg, code = SolrQueries.get_synonym_results(name.upper(), start=start, rows=rows)
+        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='synonym', start=start, rows=rows)
+        if code:
+            return jsonify(message=msg), code
+        return jsonify(results), 200
+
+@cors_preflight("GET")
+@api.route('/phonetics/<string:name>', methods=['GET','OPTIONS'])
+class PhoneticBucket(Resource):
+    START = 0
+    ROWS = 100
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.requires_auth
+    def get(name, *args, **kwargs):
+        start = request.args.get('start', PhoneticBucket.START)
+        rows = request.args.get('rows', PhoneticBucket.ROWS)
+        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='phonetic', start=start, rows=rows)
         if code:
             return jsonify(message=msg), code
         return jsonify(results), 200

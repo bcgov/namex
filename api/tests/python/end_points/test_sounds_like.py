@@ -84,7 +84,7 @@ def verify_results(client, jwt, query, expected):
 def search(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
-    url = '/api/v1/sounds-like?query=' + urllib.parse.quote(query)
+    url = '/api/v1/requests/phonetics?query=' + urllib.parse.quote(query)
     print(url)
     rv = client.get(url, headers=headers)
 

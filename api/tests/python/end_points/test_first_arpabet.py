@@ -1,5 +1,5 @@
 from hamcrest import *
-from namex.resources.phonetic import first_arpabet
+from namex.analytics.phonetic import first_arpabet
 
 
 def test_return_as_is_when_not_a_word():

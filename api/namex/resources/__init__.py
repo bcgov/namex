@@ -5,7 +5,6 @@ from .ops import api as nr_ops
 from .document_analysis import api as analysis_api
 from .meta import api as meta_api
 from .exact_match import api as exact_match_api
-from .sounds_like import api as sounds_like_api
 
 
 # This will add the Authorize button to the swagger docs
@@ -31,4 +30,3 @@ api.add_namespace(nr_ops, path='/nr-ops')
 api.add_namespace(analysis_api, path='/documents')
 api.add_namespace(meta_api, path='/meta')
 api.add_namespace(exact_match_api, path='/exact-match')
-api.add_namespace(sounds_like_api, path='/sounds-like')
