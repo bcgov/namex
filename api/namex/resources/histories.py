@@ -9,7 +9,7 @@ from flask import current_app
 api = Namespace('historiesMeta', description='Histories Match - Metadata')
 import os
 SOLR_URL = os.getenv('SOLR_BASE_URL')
-
+MAX_RESULTS = '50'
 
 @cors_preflight("GET")
 @api.route("", methods=['GET', 'OPTIONS'])
@@ -26,6 +26,7 @@ class Histories(Resource):
               'sow=false' + \
               '&df=name_exact_match' + \
               '&wt=json' + \
+              '&rows=' + MAX_RESULTS + \
               '&q=' + urllib.parse.quote(query)
         current_app.logger.debug('Histories match query: ' + url)
         connection = urllib.request.urlopen(url)
