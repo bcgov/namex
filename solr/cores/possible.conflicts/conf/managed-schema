@@ -771,7 +771,8 @@
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][\W|$|s|S])"
                                                                      replacement="bc" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[O|o][F|f][\W](([C|c][A|a][N|n][A|a][D|d][A|a])|[B|b][C|c])$" replacement="" />
-
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s)([E|e][X|x]){1,}" replacement="$1X" />
+			
             <tokenizer class="solr.StandardTokenizerFactory"/>
             <filter class="solr.LowerCaseFilterFactory"/>
             <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />
