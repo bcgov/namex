@@ -67,9 +67,9 @@ def seed_database_with(solr, name, id='1', source='CORP'):
 
 
 def verify(data, expected):
-    actual = [{ 'name':doc['name'] } for doc in data['names']]
-    print(actual)
-    print(expected)
+
+    # remove the search divider(s): ----<query term> - PHONETIC SEARCH
+    actual = [{ 'name':doc['name'] } for doc in data['names'] if '----' not in doc['name']]
 
     assert_that(len(actual), equal_to(len(expected)))
     for item in expected:
@@ -84,12 +84,13 @@ def verify_results(client, jwt, query, expected):
 def search(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
-    url = '/api/v1/requests/phonetics?query=' + urllib.parse.quote(query)
+    url = '/api/v1/requests/phonetics/' + urllib.parse.quote(query)
     print(url)
     rv = client.get(url, headers=headers)
 
     assert rv.status_code == 200
     return json.loads(rv.data)
+
 
 
 @integration_solr
@@ -186,7 +187,6 @@ def test_venizia(solr, client, jwt, app):
     verify_results(client, jwt,
        query='VENIZIA',
        expected=[
-           {'name': 'VENIZIA'},
            {'name': 'VENEZIA'},
        ]
     )
@@ -240,79 +240,6 @@ def test_cs_and_ks_again(solr, client, jwt, app):
        ]
     )
 
-@integration_solr
-def neeka(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NIKKA', id='1')
-    verify_results(client, jwt,
-       query='NEEKA',
-       expected=[
-           {'name': 'NIKKA'},
-       ]
-    )
-
-
-@integration_solr
-def neeka_like(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NIPPA', id='1')
-    verify_results(client, jwt,
-       query='NEEPA',
-       expected=[
-           {'name': 'NIPPA'},
-       ]
-    )
-
-
-@integration_solr
-def nikke(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NEEKA', id='1')
-    verify_results(client, jwt,
-       query='NIKKA',
-       expected=[
-           {'name': 'NEEKA'},
-       ]
-    )
-
-
-@integration_solr
-def crazy(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NIPPLA', id='1')
-    verify_results(client, jwt,
-       query='NEEPLA',
-       expected=[
-           {'name': 'NIPPLA'},
-       ]
-    )
-
-
-@integration_solr
-def more_crazy(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NIPPLA', id='1')
-    seed_database_with(solr, 'NIPPLAA', id='2')
-    verify_results(client, jwt,
-       query='NEEPLA',
-       expected=[
-           {'name': 'NIPPLA'},
-           {'name': 'NIPPLAA'},
-       ]
-    )
-
-
-@integration_solr
-def neighbour(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'NEIGHBOUR', id='1')
-    verify_results(client, jwt,
-       query='NAYBOR',
-       expected=[
-           {'name': 'NEIGHBOUR'}
-       ]
-    )
-
 
 @integration_solr
 def test_resist_short_word(solr, client, jwt, app):
@@ -359,18 +286,6 @@ def test_bear(solr, client, jwt, app):
 
 
 @integration_solr
-def test_two_words(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'FOOD GOLD', id='1')
-    verify_results(client, jwt,
-       query='COLD',
-       expected=[
-           {'name': 'FOOD GOLD'}
-       ]
-    )
-
-
-@integration_solr
 def test_ignore_corp(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'GLADSTONE CAPITAL corp', id='1')
@@ -381,17 +296,6 @@ def test_ignore_corp(solr, client, jwt, app):
        ]
     )
 
-
-@integration_solr
-def test_two_query_words(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'FOOD GOLD', id='1')
-    verify_results(client, jwt,
-       query='FINGER COLD',
-       expected=[
-           {'name': 'FOOD GOLD'}
-       ]
-    )
 
 @integration_solr
 def test_designation_in_query_is_ignored(solr, client, jwt, app):
@@ -432,6 +336,18 @@ def test_krystal(solr, client, jwt, app):
     seed_database_with(solr, 'KRYSTAL', id='1')
     verify_results(client, jwt,
        query='CRISTAL',
+       expected=[
+           {'name': 'KRYSTAL'}
+       ]
+    )
+
+
+@integration_solr
+def test_christal(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'KRYSTAL', id='1')
+    verify_results(client, jwt,
+       query='CHRISTAL',
        expected=[
            {'name': 'KRYSTAL'}
        ]
@@ -537,7 +453,7 @@ def test_soft_c_is_not_k(solr, client, jwt, app):
     )
 
 @integration_solr
-def oi_oy(solr, client, jwt, app):
+def test_oi_oy(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'OYSTER', id='1')
     verify_results(client, jwt,
@@ -546,7 +462,6 @@ def oi_oy(solr, client, jwt, app):
            {'name': 'OYSTER'}
        ]
     )
-
 
 
 @integration_solr
@@ -559,3 +474,159 @@ def test_dont_add_match_twice(solr, client, jwt, app):
            {'name': 'RHEN GNAT'}
        ]
     )
+
+
+@integration_solr
+def test_neighbour(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'NEIGHBOUR', id='1')
+    verify_results(client, jwt,
+       query='NAYBOR',
+       expected=[
+           {'name': 'NEIGHBOUR'}
+       ]
+    )
+
+
+@integration_solr
+def test_mac_mc(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'MCGREGOR', id='1')
+    verify_results(client, jwt,
+       query='MACGREGOR',
+       expected=[
+           {'name': 'MCGREGOR'}
+       ]
+)
+
+
+@integration_solr
+def test_ex_x(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'EXTREME', id='1')
+    verify_results(client, jwt,
+       query='XTREME',
+       expected=[
+           {'name': 'EXTREME'}
+       ]
+)
+
+
+@integration_solr
+def test_wh(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'WHITE', id='1')
+    verify_results(client, jwt,
+       query='WITE',
+       expected=[
+           {'name': 'WHITE'}
+       ]
+)
+
+
+@integration_solr
+def test_qu(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'KWIK', id='1')
+    verify_results(client, jwt,
+       query='QUICK',
+       expected=[
+           {'name': 'KWIK'}
+       ]
+)
+
+
+@integration_solr
+def test_ps(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'PSYCHO', id='1')
+    verify_results(client, jwt,
+       query='SYCHO',
+       expected=[
+           {'name': 'PSYCHO'}
+       ]
+)
+
+
+@integration_solr
+def test_terra(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'TERRA', id='1')
+    verify_results(client, jwt,
+       query='TARA',
+       expected=[
+           {'name': 'TERRA'}
+       ]
+)
+
+
+@integration_solr
+def test_ayaan(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'AYAAN', id='1')
+    verify_results(client, jwt,
+       query='AYAN',
+       expected=[
+           {'name': 'AYAAN'}
+       ]
+)
+
+
+@integration_solr
+def test_aggri(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'AGGRI', id='1')
+    verify_results(client, jwt,
+       query='AGRI',
+       expected=[
+           {'name': 'AGGRI'}
+       ]
+)
+
+
+@integration_solr
+def test_kofi(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'KOFI', id='1')
+    verify_results(client, jwt,
+       query='COFFI',
+       expected=[
+           {'name': 'KOFI'}
+       ]
+)
+
+
+@integration_solr
+def test_tru(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'TRU', id='1')
+    verify_results(client, jwt,
+       query='TRUE',
+       expected=[
+           {'name': 'TRU'}
+       ]
+)
+
+
+@integration_solr
+def test_dymond(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'DYMOND', id='1')
+    verify_results(client, jwt,
+       query='DIAMOND',
+       expected=[
+           {'name': 'DYMOND'}
+       ]
+)
+
+
+@integration_solr
+def test_bee_kleen(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'BEE KLEEN', id='1')
+    verify_results(client, jwt,
+       query='BE-CLEAN',
+       expected=[
+           {'name': 'BEE KLEEN'}
+       ]
+)

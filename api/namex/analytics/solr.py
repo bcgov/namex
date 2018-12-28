@@ -151,11 +151,11 @@ class SolrQueries:
         old_alg_combined_terms = ''
         old_alg_search_strs = []
         for term in list_name_split:
-            print(term)
+            #print(term)
             num_terms += 1
             prox_combined_terms += term + ' '
             prox_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
-            print(prox_combined_terms)
+            #print(prox_combined_terms)
             old_alg_combined_terms += term + '\ '
             old_alg_search_strs.insert(0, old_alg_combined_terms)
 
@@ -270,7 +270,7 @@ class SolrQueries:
                 result = json.load(request.urlopen(query))
 
                 docs = result['response']['docs']
-                result['response']['docs'] = cls.post_treatment(docs, name)
+                result['response']['docs'] = cls.post_treatment(docs, start_str)
 
                 connections.append((result, '----' + start_str +
                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
@@ -582,7 +582,7 @@ class SolrQueries:
         for candidate in docs:
             count+=1
             candidate_name = candidate['name'].upper()
-            print('checking: ', candidate_name)
+            #print('checking: ', candidate_name)
             words = candidate_name.split()
             qwords = query_name.split()
 
@@ -590,11 +590,29 @@ class SolrQueries:
                 for word in words:
                     if word not in designations():
                         cls.keep_phonetic_match(candidate, word, names, qword, candidate_name)
-        print(count)
+        #print(count)
         return names
 
     @classmethod
     def keep_phonetic_match(cls, candidate, word, names, query, name):
+        #Make QU == KW
+        if word[:2] == 'QU':
+            word = 'KW' + word[2:]
+        if query[:2] == 'QU':
+            query = 'KW' + query[2:]
+
+        #Make EX == X
+        if word[:2] == 'EX':
+            word = 'X' + word[2:]
+        if query[:2] == 'EX':
+            query = 'X' + query[2:]
+
+        #Make MAC == MC
+        if word[:3] == 'MAC':
+            word = 'MC' + word[3:]
+        if query[:3] == 'MAC':
+            query = 'MC' + query[3:]
+
         word_first_consonant = first_consonants(word)
         query_first_consonant = first_consonants(query)
         if match_consonate(query_first_consonant, word_first_consonant):
