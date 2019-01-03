@@ -1,4 +1,3 @@
-import pronouncing
 
 def match_consonate(c1, c2):
     if set(['C', 'G']) == set([c1, c2]):
@@ -141,13 +140,3 @@ def designations():
         'SOC',
         'SOC.'
     ]
-
-
-def first_arpabet(word):
-    arpabet = pronouncing.phones_for_word(word)
-    if not arpabet:
-        return word
-    # arpabet[0] - Only return the first pronounciation in case there are two
-    # list_of_phonemes[:3] - Only return the first three phonemes for fuzzier matching
-    list_of_phonemes = arpabet[0].split(' ')
-    return list_of_phonemes[:3]

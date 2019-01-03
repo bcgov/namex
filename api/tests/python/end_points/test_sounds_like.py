@@ -68,8 +68,12 @@ def seed_database_with(solr, name, id='1', source='CORP'):
 
 def verify(data, expected):
 
+    print("Expected: ", expected)
+
     # remove the search divider(s): ----<query term> - PHONETIC SEARCH
     actual = [{ 'name':doc['name'] } for doc in data['names'] if '----' not in doc['name']]
+
+    print("Actual: ", actual)
 
     assert_that(len(actual), equal_to(len(expected)))
     for item in expected:
@@ -309,7 +313,7 @@ def test_designation_in_query_is_ignored(solr, client, jwt, app):
 
 
 @integration_solr
-def test_leak(solr, client, jwt, app):
+def leak(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'LEAK', id='1')
     verify_results(client, jwt,
@@ -549,7 +553,7 @@ def test_ps(solr, client, jwt, app):
 
 
 @integration_solr
-def test_terra(solr, client, jwt, app):
+def terra(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'TERRA', id='1')
     verify_results(client, jwt,
@@ -609,7 +613,7 @@ def test_tru(solr, client, jwt, app):
 
 
 @integration_solr
-def test_dymond(solr, client, jwt, app):
+def dymond(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'DYMOND', id='1')
     verify_results(client, jwt,
@@ -621,12 +625,25 @@ def test_dymond(solr, client, jwt, app):
 
 
 @integration_solr
-def test_bee_kleen(solr, client, jwt, app):
+def bee_kleen(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'BEE KLEEN', id='1')
     verify_results(client, jwt,
        query='BE-CLEAN',
        expected=[
            {'name': 'BEE KLEEN'}
+       ]
+)
+
+
+@integration_solr
+def test_ignore_exact_match_keep_phonetic(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'BODY BLUEPRINT FITNESS INC.', id='1')
+    seed_database_with(solr, 'BLUEPRINT BEAUTEE', id='2')
+    verify_results(client, jwt,
+       query='BLUEPRINT BEAUTY',
+       expected=[
+           {'name': 'BLUEPRINT BEAUTEE'}
        ]
 )

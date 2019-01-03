@@ -7,7 +7,7 @@ from flask import current_app
 from urllib import request, parse
 from urllib.error import HTTPError
 import re
-from namex.analytics.phonetic import first_vowels, first_arpabet, match_consonate, designations, first_consonants
+from namex.analytics.phonetic import first_vowels, match_consonate, designations, first_consonants
 
 
 # Use this character in the search strings to indicate that the word should not by synonymized.
@@ -588,13 +588,16 @@ class SolrQueries:
 
             for qword in qwords:
                 for word in words:
-                    if word not in designations():
+                    if word not in designations() and qword not in designations():
                         cls.keep_phonetic_match(candidate, word, names, qword, candidate_name)
         #print(count)
         return names
 
     @classmethod
     def keep_phonetic_match(cls, candidate, word, names, query, name):
+        original_word = word
+        original_query = query
+
         #Make QU == KW
         if word[:2] == 'QU':
             word = 'KW' + word[2:]
@@ -618,13 +621,9 @@ class SolrQueries:
         if match_consonate(query_first_consonant, word_first_consonant):
             query_first_vowels = first_vowels(query)
             word_first_vowels = first_vowels(word)
-            if query_first_vowels == word_first_vowels:
+            if query_first_vowels == word_first_vowels and original_word != original_query:
                 cls.keep_candidate(candidate, name, names)
-            else:
-                query_first_arpabet = first_arpabet(query)
-                word_first_arpabet = first_arpabet(word)
-                if query_first_arpabet == word_first_arpabet:
-                    cls.keep_candidate(candidate, name, names)
+
 
     @classmethod
     def keep_candidate(cls, candidate, name, names):
