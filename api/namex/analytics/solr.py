@@ -28,6 +28,7 @@ SYNONYMS_PREFIX = '&fq=name_with_synonyms:'
 class SolrQueries:
     PROX_SYN_CONFLICTS = 'proxsynconflicts'
     OLD_SYN_CONFLICTS = 'oldsynconflicts'
+    COBRS_PHONETIC_CONFLICTS = 'cobrsphonconflicts'
     PHONETIC_CONFLICTS = 'phonconflicts'
     CONFLICTS = 'conflicts'
     HISTORY = 'histories'
@@ -66,6 +67,14 @@ class SolrQueries:
             '&fl=source,id,name,score'
             '&sort=score%20desc,txt_starts_with%20asc'
             '{synonyms_clause}{name_copy_clause}',
+        COBRS_PHONETIC_CONFLICTS:
+            '/solr/possible.conflicts/select?'
+            '&q=cobrs_phonetic:{start_str}'
+            '&wt=json'
+            '&start={start}&rows={rows}'
+            '&sort=score%20desc,txt_starts_with%20asc'
+            '&fq=-{exact_name}'
+            '{synonyms_clause}',
         PHONETIC_CONFLICTS:
             '/solr/possible.conflicts/select?'
             '&q=dblmetaphone_name:{start_str}'
@@ -162,6 +171,9 @@ class SolrQueries:
         if bucket == 'synonym':
             connections = cls.get_synonym_results(solr_base_url, name, prox_search_strs, old_alg_search_strs, start, rows)
 
+        elif bucket == 'cobrs_phonetic':
+            connections = cls.get_cobrs_phonetic_results(solr_base_url, prox_search_strs, start, rows)
+
         # bucket == 'phonetic'
         else:
             connections = cls.get_phonetic_results(solr_base_url, name, prox_search_strs)
@@ -245,6 +257,32 @@ class SolrQueries:
                                     old_alg_search_str.replace('\\', '').replace('%20', ' ') +
                                     synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
                                     ' - EXACT WORD ORDER (OLD SEARCH)'))
+
+            return connections
+
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'Internal server error', 500
+
+    @classmethod
+    def get_cobrs_phonetic_results(cls, solr_base_url, search_strs, start=0, rows=100):
+        try:
+            connections = []
+            for str_tuple in search_strs:
+                start_str = str_tuple[0]
+                synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
+                query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
+                    start=start,
+                    rows=rows,
+                    start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                    synonyms_clause=synonyms_clause,
+                    exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                )
+                current_app.logger.debug('Query: ' + query)
+                result = json.load(request.urlopen(query))
+
+                connections.append((result, '----' + start_str +
+                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
 
             return connections
 

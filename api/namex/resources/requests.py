@@ -933,10 +933,27 @@ class SynonymBucket(Resource):
         return jsonify(results), 200
 
 @cors_preflight("GET")
+@api.route('/cobrsphonetics/<string:name>', methods=['GET','OPTIONS'])
+class CobrsPhoneticBucket(Resource):
+    START = 0
+    ROWS = 100
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.requires_auth
+    def get(name, *args, **kwargs):
+        start = request.args.get('start', CobrsPhoneticBucket.START)
+        rows = request.args.get('rows', CobrsPhoneticBucket.ROWS)
+        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='cobrs_phonetic', start=start, rows=rows)
+        if code:
+            return jsonify(message=msg), code
+        return jsonify(results), 200
+
+@cors_preflight("GET")
 @api.route('/phonetics/<string:name>', methods=['GET','OPTIONS'])
 class PhoneticBucket(Resource):
     START = 0
-    ROWS = 100
+    ROWS = 100000
 
     @staticmethod
     @cors.crossdomain(origin='*')
