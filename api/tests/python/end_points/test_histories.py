@@ -67,34 +67,21 @@ def seed_database_with(client, jwt, name, id='1', name_state_type_cd='A', submit
            '", "submit_count":"' +submit_count +\
            '", "nr_num":"' + nr_num + '"}]'
 
-    print(data)
     r = requests.post(url, headers=headers, data=data)
     assert r.status_code == 200
 
 
 def verify(data, expected):
-    assert expected == data['names']
-
-
-def verify_same_or_similar_results(client, jwt, query, expected):
-    data = search_histories(client, jwt, query)
-    verify(data, expected)
+    assert expected == data
 
 
 def verify_same_or_similar(client, jwt, query, expected):
     data = search_histories(client, jwt, query)
-    expect = [
-            {
-                'id': '1',
-                'name': expected,
-                'name_state_type_cd': 'A',
-                'nr_num': 'NR 12345',
-                'submit_count': 1,
-            }
-        ]
-    if expected is None:
-        expect = []
-    verify(data, expect)
+    result = None
+    if len(data['names']) > 0:
+        result = data['names'][0]['name']
+
+    verify(result, expected)
 
 
 def extract_list_of_values_for_key(array_of_dictionaries, key):
@@ -111,10 +98,11 @@ def extract_list_of_values_for_key(array_of_dictionaries, key):
 
 def search_histories(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token}
-    url = '/api/v1/histories?query=' + urllib.parse.quote(query)
-    print(url)
-    rv = client.get(url, headers=headers)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+    url = '/api/v1/documents:histories'
+
+    content = {"type": "plain_text", "content": query}
+    rv = client.post(url, data=json.dumps(content), headers=headers)
 
     assert rv.status_code == 200
     return json.loads(rv.data)
@@ -126,15 +114,6 @@ def test_find_same_name(client, jwt, app):
     verify_same_or_similar(client, jwt,
                            query='JM Van Damme inc',
                            expected='JM Van Damme inc'
-                           )
-
-
-@integration_solr
-def test_resist_empty(client, jwt, app):
-    seed_database_with(client, jwt, 'JM Van Damme inc')
-    verify_same_or_similar(client, jwt,
-                           query='',
-                           expected=None
                            )
 
 
