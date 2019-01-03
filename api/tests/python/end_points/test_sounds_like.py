@@ -71,13 +71,13 @@ def verify(data, expected):
     print("Expected: ", expected)
 
     # remove the search divider(s): ----<query term> - PHONETIC SEARCH
-    actual = [{ 'name':doc['name'] } for doc in data['names'] if '----' not in doc['name']]
+    actual = [{ 'name':doc['name'] } for doc in data['names']]
 
     print("Actual: ", actual)
 
     assert_that(len(actual), equal_to(len(expected)))
-    for item in expected:
-        assert_that(actual, has_item(item))
+    for i in range(len(actual)):
+        assert_that(actual[i]['name'], equal_to(expected[i]['name']))
 
 
 def verify_results(client, jwt, query, expected):
@@ -104,6 +104,7 @@ def test_all_good(solr, client, jwt, app):
     verify_results(client, jwt,
        query='GOLDSMITHS',
        expected=[
+           {'name': '----GOLDSMITHS - PHONETIC SEARCH'},
            {'name': 'GOLDSTREAM ELECTRICAL LTD'}
        ]
     )
@@ -126,9 +127,10 @@ def test_sounds_like(solr, client, jwt, app):
     verify_results(client, jwt,
        query='GOLDSMITHS',
        expected=[
+           {'name': '----GOLDSMITHS - PHONETIC SEARCH'},
            {'name': 'COLDSTREAM VENTURES INC.'},
-           {'name': 'GOLDSTEIN HOLDINGS INC.'},
            {'name': 'GOLDSPRING PROPERTIES LTD'},
+           {'name': 'GOLDSTEIN HOLDINGS INC.'},
            {'name': 'GOLDSTREAM ELECTRICAL CORP'},
            {'name': 'GOLDSTRIPES AVIATION INC'},
        ]
@@ -141,6 +143,7 @@ def test_liberti(solr, client, jwt, app):
     verify_results(client, jwt,
        query='LIBERTY',
        expected=[
+           {'name': '----LIBERTY - PHONETIC SEARCH'},
            {'name': 'LIBERTI'},
        ]
     )
@@ -154,6 +157,7 @@ def test_deeper(solr, client, jwt, app):
     verify_results(client, jwt,
        query='LIBERTY',
        expected=[
+           {'name': '----LIBERTY - PHONETIC SEARCH'},
            {'name': 'LIBERTI'},
        ]
     )
@@ -165,6 +169,7 @@ def test_jasmine(solr, client, jwt, app):
     verify_results(client, jwt,
        query='OSMOND',
        expected=[
+           {'name': '----OSMOND - PHONETIC SEARCH'}
        ]
     )
 
@@ -176,6 +181,7 @@ def test_fey(solr, client, jwt, app):
     verify_results(client, jwt,
        query='FAY',
        expected=[
+           {'name': '----FAY - PHONETIC SEARCH'},
            {'name': 'FEY'}
        ]
     )
@@ -191,6 +197,7 @@ def test_venizia(solr, client, jwt, app):
     verify_results(client, jwt,
        query='VENIZIA',
        expected=[
+           {'name': '----VENIZIA - PHONETIC SEARCH'},
            {'name': 'VENEZIA'},
        ]
     )
@@ -203,6 +210,7 @@ def test_ys_and_is(solr, client, jwt, app):
     verify_results(client, jwt,
        query='CRISTAL',
        expected=[
+           {'name': '----CRISTAL - PHONETIC SEARCH'},
            {'name': 'CRYSTAL'},
        ]
     )
@@ -215,6 +223,7 @@ def test_gold_and_cold(solr, client, jwt, app):
     verify_results(client, jwt,
        query='COLDSTREAM',
        expected=[
+           {'name': '----COLDSTREAM - PHONETIC SEARCH'},
            {'name': 'GOLDSMITHS'},
        ]
     )
@@ -227,6 +236,7 @@ def test_cs_and_ks(solr, client, jwt, app):
     verify_results(client, jwt,
        query='COLDSTREAM',
        expected=[
+           {'name': '----COLDSTREAM - PHONETIC SEARCH'},
            {'name': 'KOLDSMITHS'},
        ]
     )
@@ -240,6 +250,7 @@ def test_cs_and_ks_again(solr, client, jwt, app):
     verify_results(client, jwt,
        query='CAYZEN',
        expected=[
+           {'name': '----CAYZEN - PHONETIC SEARCH'},
            {'name': 'KAIZEN'},
        ]
     )
@@ -252,6 +263,7 @@ def test_resist_short_word(solr, client, jwt, app):
     verify_results(client, jwt,
        query='FA',
        expected=[
+           {'name': '----FA - PHONETIC SEARCH'}
        ]
     )
 
@@ -262,6 +274,7 @@ def test_resist_single_vowel(solr, client, jwt, app):
     verify_results(client, jwt,
        query='FADS',
        expected=[
+           {'name': '----FADS - PHONETIC SEARCH'}
        ]
     )
 
@@ -273,6 +286,7 @@ def test_feel(solr, client, jwt, app):
     verify_results(client, jwt,
        query='FILL',
        expected=[
+           {'name': '----FILL - PHONETIC SEARCH'}
        ]
     )
 
@@ -284,6 +298,7 @@ def test_bear(solr, client, jwt, app):
     verify_results(client, jwt,
        query='BARE',
        expected=[
+           {'name': '----BARE - PHONETIC SEARCH'},
            {'name': 'BEAR'}
        ]
     )
@@ -296,7 +311,7 @@ def test_ignore_corp(solr, client, jwt, app):
     verify_results(client, jwt,
        query='GOLDSMITHS',
        expected=[
-
+           {'name': '----GOLDSMITHS - PHONETIC SEARCH'}
        ]
     )
 
@@ -308,6 +323,7 @@ def test_designation_in_query_is_ignored(solr, client, jwt, app):
     verify_results(client, jwt,
        query='SUN LIMITED',
        expected=[
+           {'name': '----SUN - PHONETIC SEARCH'}
        ]
     )
 
@@ -330,6 +346,7 @@ def test_plank(solr, client, jwt, app):
     verify_results(client, jwt,
        query='PLANK',
        expected=[
+           {'name': '----PLANK - PHONETIC SEARCH'},
            {'name': 'PLANCK'}
        ]
     )
@@ -341,6 +358,7 @@ def test_krystal(solr, client, jwt, app):
     verify_results(client, jwt,
        query='CRISTAL',
        expected=[
+           {'name': '----CRISTAL - PHONETIC SEARCH'},
            {'name': 'KRYSTAL'}
        ]
     )
@@ -353,6 +371,7 @@ def test_christal(solr, client, jwt, app):
     verify_results(client, jwt,
        query='CHRISTAL',
        expected=[
+           {'name': '----CHRISTAL - PHONETIC SEARCH'},
            {'name': 'KRYSTAL'}
        ]
     )
@@ -365,6 +384,7 @@ def test_kl(solr, client, jwt, app):
     verify_results(client, jwt,
        query='CLASS',
        expected=[
+           {'name': '----CLASS - PHONETIC SEARCH'},
            {'name': 'KLASS'}
        ]
     )
@@ -376,6 +396,7 @@ def test_pheel(solr, client, jwt, app):
     verify_results(client, jwt,
        query='FEEL',
        expected=[
+           {'name': '----FEEL - PHONETIC SEARCH'},
            {'name': 'PHEEL'}
        ]
     )
@@ -387,6 +408,7 @@ def test_ghable(solr, client, jwt, app):
     verify_results(client, jwt,
        query='GABLE',
        expected=[
+           {'name': '----GABLE - PHONETIC SEARCH'},
            {'name': 'GHABLE'}
        ]
     )
@@ -398,6 +420,7 @@ def test_gnat(solr, client, jwt, app):
     verify_results(client, jwt,
        query='NAT',
        expected=[
+           {'name': '----NAT - PHONETIC SEARCH'},
            {'name': 'GNAT'}
        ]
     )
@@ -409,6 +432,7 @@ def test_kn(solr, client, jwt, app):
     verify_results(client, jwt,
        query='NAT',
        expected=[
+           {'name': '----NAT - PHONETIC SEARCH'},
            {'name': 'KNAT'}
        ]
     )
@@ -420,6 +444,7 @@ def test_pn(solr, client, jwt, app):
     verify_results(client, jwt,
        query='NEU',
        expected=[
+           {'name': '----NEU - PHONETIC SEARCH'},
            {'name': 'PNEU'}
        ]
     )
@@ -431,6 +456,7 @@ def test_wr(solr, client, jwt, app):
     verify_results(client, jwt,
        query='REN',
        expected=[
+           {'name': '----REN - PHONETIC SEARCH'},
            {'name': 'WREN'}
        ]
     )
@@ -442,6 +468,7 @@ def test_rh(solr, client, jwt, app):
     verify_results(client, jwt,
        query='REN',
        expected=[
+           {'name': '----REN - PHONETIC SEARCH'},
            {'name': 'RHEN'}
        ]
     )
@@ -453,6 +480,7 @@ def test_soft_c_is_not_k(solr, client, jwt, app):
     verify_results(client, jwt,
        query='CIRCLE',
        expected=[
+           {'name': '----CIRCLE - PHONETIC SEARCH'}
        ]
     )
 
@@ -463,6 +491,7 @@ def test_oi_oy(solr, client, jwt, app):
     verify_results(client, jwt,
        query='OISTER',
        expected=[
+           {'name': '----OISTER - PHONETIC SEARCH'},
            {'name': 'OYSTER'}
        ]
     )
@@ -475,7 +504,9 @@ def test_dont_add_match_twice(solr, client, jwt, app):
     verify_results(client, jwt,
        query='REN NAT',
        expected=[
-           {'name': 'RHEN GNAT'}
+           {'name': '----REN NAT - PHONETIC SEARCH'},
+           {'name': 'RHEN GNAT'},
+           {'name': '----REN - PHONETIC SEARCH'}
        ]
     )
 
@@ -487,6 +518,7 @@ def test_neighbour(solr, client, jwt, app):
     verify_results(client, jwt,
        query='NAYBOR',
        expected=[
+           {'name': '----NAYBOR - PHONETIC SEARCH'},
            {'name': 'NEIGHBOUR'}
        ]
     )
@@ -499,9 +531,10 @@ def test_mac_mc(solr, client, jwt, app):
     verify_results(client, jwt,
        query='MACGREGOR',
        expected=[
+           {'name': '----MACGREGOR - PHONETIC SEARCH'},
            {'name': 'MCGREGOR'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -511,9 +544,10 @@ def test_ex_x(solr, client, jwt, app):
     verify_results(client, jwt,
        query='XTREME',
        expected=[
+           {'name': '----XTREME - PHONETIC SEARCH'},
            {'name': 'EXTREME'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -523,9 +557,10 @@ def test_wh(solr, client, jwt, app):
     verify_results(client, jwt,
        query='WITE',
        expected=[
+           {'name': '----WITE - PHONETIC SEARCH'},
            {'name': 'WHITE'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -535,9 +570,10 @@ def test_qu(solr, client, jwt, app):
     verify_results(client, jwt,
        query='QUICK',
        expected=[
+           {'name': '----QUICK - PHONETIC SEARCH'},
            {'name': 'KWIK'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -547,9 +583,10 @@ def test_ps(solr, client, jwt, app):
     verify_results(client, jwt,
        query='SYCHO',
        expected=[
+           {'name': '----SYCHO - PHONETIC SEARCH'},
            {'name': 'PSYCHO'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -561,7 +598,7 @@ def terra(solr, client, jwt, app):
        expected=[
            {'name': 'TERRA'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -571,9 +608,10 @@ def test_ayaan(solr, client, jwt, app):
     verify_results(client, jwt,
        query='AYAN',
        expected=[
+           {'name': '----AYAN - PHONETIC SEARCH'},
            {'name': 'AYAAN'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -583,9 +621,10 @@ def test_aggri(solr, client, jwt, app):
     verify_results(client, jwt,
        query='AGRI',
        expected=[
+           {'name': '----AGRI - PHONETIC SEARCH'},
            {'name': 'AGGRI'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -595,9 +634,10 @@ def test_kofi(solr, client, jwt, app):
     verify_results(client, jwt,
        query='COFFI',
        expected=[
+           {'name': '----COFFI - PHONETIC SEARCH'},
            {'name': 'KOFI'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -607,9 +647,10 @@ def test_tru(solr, client, jwt, app):
     verify_results(client, jwt,
        query='TRUE',
        expected=[
+           {'name': '----TRUE - PHONETIC SEARCH'},
            {'name': 'TRU'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -621,7 +662,7 @@ def dymond(solr, client, jwt, app):
        expected=[
            {'name': 'DYMOND'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -633,7 +674,7 @@ def bee_kleen(solr, client, jwt, app):
        expected=[
            {'name': 'BEE KLEEN'}
        ]
-)
+    )
 
 
 @integration_solr
@@ -644,6 +685,49 @@ def test_ignore_exact_match_keep_phonetic(solr, client, jwt, app):
     verify_results(client, jwt,
        query='BLUEPRINT BEAUTY',
        expected=[
-           {'name': 'BLUEPRINT BEAUTEE'}
+           {'name': '----BLUEPRINT BEAUTY - PHONETIC SEARCH'},
+           {'name': 'BLUEPRINT BEAUTEE'},
+           {'name': '----BLUEPRINT synonyms:(beauty) - PHONETIC SEARCH'}
        ]
-)
+    )
+
+
+@integration_solr
+def test_match_both_words(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'ANDERSON BEHAVIOR CONSULTING', id='1')
+    verify_results(client, jwt,
+       query='INTERVENTION BEHAVIOUR',
+       expected=[
+           {'name': '----INTERVENTION BEHAVIOUR - PHONETIC SEARCH'},
+           {'name': '----INTERVENTION - PHONETIC SEARCH'}
+       ]
+    )
+
+
+@integration_solr
+def test_match_at_right_level(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'ANDERSON BEHAVIOR CONSULTING INC.', id='1')
+    verify_results(client, jwt,
+       query='BEHAVIOUR INTERVENTION',
+       expected=[
+           {'name': '----BEHAVIOUR INTERVENTION - PHONETIC SEARCH'},
+           {'name': '----BEHAVIOUR - PHONETIC SEARCH'},
+           {'name': 'ANDERSON BEHAVIOR CONSULTING INC.'}
+       ]
+    )
+
+
+@integration_solr
+def test_resists_qword_matching_several_words(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'ANDERSON BEHAVIOR BEHAVIOR', id='1')
+    verify_results(client, jwt,
+       query='BEHAVIOUR INTERVENTION',
+       expected=[
+           {'name': '----BEHAVIOUR INTERVENTION - PHONETIC SEARCH'},
+           {'name': '----BEHAVIOUR - PHONETIC SEARCH'},
+           {'name': 'ANDERSON BEHAVIOR BEHAVIOR'}
+       ]
+    )
