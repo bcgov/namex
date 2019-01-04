@@ -772,15 +772,6 @@
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([B|b][R|r][I|i][T|t][I|i][S|s][H|h][C|c][O|o][L|l][U|u][M|m][B|b][I|i][A|a][\W|$|s|S])"
                                                                      replacement="bc" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[O|o][F|f][\W](([C|c][A|a][N|n][A|a][D|d][A|a])|[B|b][C|c])$" replacement="" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([S|s])" replacement="z" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([Y|y])" replacement="i" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([C|c])" replacement="k" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([E|e][A|a])" replacement="ee" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A|a])" replacement="o" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([E|e][X|x])" replacement="x" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([P|p][H|h])" replacement="f" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([M|m][A|a][C|c])" replacement="mc" />
-            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A-Z]|[a-z])\1" replacement="$1" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(0)" replacement="zero" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(1)" replacement="one" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(2)" replacement="two" />
@@ -791,6 +782,16 @@
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(7)" replacement="seven" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(8)" replacement="eight" />
             <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(9)" replacement="nine" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([S|s])" replacement="z" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([Y|y])" replacement="i" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([M|m][A|a][C|c])" replacement="mc" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([C|c])" replacement="k" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([K|k][H|h])" replacement="k" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([E|e][A|a])" replacement="ee" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A|a])" replacement="o" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([E|e][X|x])" replacement="x" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([P|p][H|h])" replacement="f" />
+            <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([A-Z]|[a-z])\1" replacement="$1" />
             <tokenizer class="solr.StandardTokenizerFactory"/>
             <filter class="solr.LowerCaseFilterFactory"/>
             <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt" />

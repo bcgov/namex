@@ -206,7 +206,7 @@ def test_handles_s_and_possession(client, jwt, app, criteria, seed):
 @pytest.mark.parametrize("criteria, seed", [
     ('MY $ $TORE$', 'MY DOLLAR STORES'),
 ])
-def test_handles_money(client, jwt, app, criteria, seed):
+def test_handles_dollar_cent(client, jwt, app, criteria, seed):
     seed_database_with(client, jwt, seed)
     verify_synonym_match(client, jwt,
         query=criteria,
