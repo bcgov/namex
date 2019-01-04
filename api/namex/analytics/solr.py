@@ -7,7 +7,7 @@ from flask import current_app
 from urllib import request, parse
 from urllib.error import HTTPError
 import re
-from namex.analytics.phonetic import first_vowels, first_arpabet, match_consonate, designations, first_consonants
+from namex.analytics.phonetic import first_vowels, match_consonate, designations, first_consonants
 
 
 # Use this character in the search strings to indicate that the word should not by synonymized.
@@ -308,10 +308,10 @@ class SolrQueries:
                 result = json.load(request.urlopen(query))
 
                 docs = result['response']['docs']
-                result['response']['docs'] = cls.post_treatment(docs, name)
+                result['response']['docs'] = cls.post_treatment(docs, start_str)
 
                 connections.append((result, '----' + start_str +
-                                   synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
+                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
                                     ' - PHONETIC SEARCH'))
 
             return connections
@@ -618,33 +618,53 @@ class SolrQueries:
         names = []
         count = 0
         for candidate in docs:
-            count+=1
+            count += 1
             candidate_name = candidate['name'].upper()
-            print('checking: ', candidate_name)
             words = candidate_name.split()
             qwords = query_name.split()
 
+            count = 0
             for qword in qwords:
+                found = False
                 for word in words:
-                    if word not in designations():
-                        cls.keep_phonetic_match(candidate, word, names, qword, candidate_name)
-        print(count)
+                    if word not in designations() and qword not in designations():
+                        should_keep = cls.keep_phonetic_match(word, qword)
+                        if should_keep:
+                            if not found:
+                                count += 1
+                            found = True
+
+            if count == len(qwords):
+                cls.keep_candidate(candidate, candidate_name, names)
+
         return names
 
     @classmethod
-    def keep_phonetic_match(cls, candidate, word, names, query, name):
+    def keep_phonetic_match(cls, word, query):
+        if word[:2] == 'QU':
+            word = 'KW' + word[2:]
+        if query[:2] == 'QU':
+            query = 'KW' + query[2:]
+
+        if word[:2] == 'EX':
+            word = 'X' + word[2:]
+        if query[:2] == 'EX':
+            query = 'X' + query[2:]
+
+        if word[:3] == 'MAC':
+            word = 'MC' + word[3:]
+        if query[:3] == 'MAC':
+            query = 'MC' + query[3:]
+
         word_first_consonant = first_consonants(word)
         query_first_consonant = first_consonants(query)
         if match_consonate(query_first_consonant, word_first_consonant):
             query_first_vowels = first_vowels(query)
             word_first_vowels = first_vowels(word)
             if query_first_vowels == word_first_vowels:
-                cls.keep_candidate(candidate, name, names)
-            else:
-                query_first_arpabet = first_arpabet(query)
-                word_first_arpabet = first_arpabet(word)
-                if query_first_arpabet == word_first_arpabet:
-                    cls.keep_candidate(candidate, name, names)
+                return True
+
+        return False
 
     @classmethod
     def keep_candidate(cls, candidate, name, names):

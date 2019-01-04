@@ -1,4 +1,3 @@
-import pronouncing
 
 def match_consonate(c1, c2):
     if set(['C', 'G']) == set([c1, c2]):
@@ -6,6 +5,8 @@ def match_consonate(c1, c2):
     if set(['C', 'K']) == set([c1, c2]):
         return True
     if set(['CR', 'KR']) == set([c1, c2]):
+        return True
+    if set(['CHR', 'KR']) == set([c1, c2]):
         return True
     if set(['CL', 'KL']) == set([c1, c2]):
         return True
@@ -19,9 +20,13 @@ def match_consonate(c1, c2):
         return True
     if set(['PN', 'N']) == set([c1, c2]):
         return True
+    if set(['PS', 'S']) == set([c1, c2]):
+        return True
     if set(['WR', 'R']) == set([c1, c2]):
         return True
     if set(['RH', 'R']) == set([c1, c2]):
+        return True
+    if set(['WH', 'W']) == set([c1, c2]):
         return True
 
     return c1 == c2
@@ -50,12 +55,19 @@ def first_vowels(word):
         value = 'A'
     if value == 'Y':
         value = 'I'
+    if value == 'OY':
+        value = 'OI'
+    if value == 'UE':
+        value = 'U'
+
+    if 'AA' in value:
+        value = value.replace('AA', 'A')
 
     return value
 
 
 def first_consonants(word):
-    consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'X']
+    consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'X', 'W']
     value = ''
     first_consonant_found = False
     for letter in word:
@@ -64,6 +76,9 @@ def first_consonants(word):
         if letter in consonants:
             value += letter
             first_consonant_found = True
+
+    if 'GG' in value:
+        value = value.replace('GG', 'G')
 
     return value
 
@@ -125,10 +140,3 @@ def designations():
         'SOC',
         'SOC.'
     ]
-
-
-def first_arpabet(word):
-    arpabet = pronouncing.phones_for_word(word)
-    if not arpabet:
-        return word
-    return arpabet
