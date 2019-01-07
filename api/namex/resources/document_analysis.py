@@ -63,7 +63,7 @@ class DocumentAnalysis(Resource):
     @api.expect(a_document)
     def post(analysis=None, *args, **kwargs):
         start = request.args.get('start', DocumentAnalysis.START)
-        rows = request.args.get('rows' ,DocumentAnalysis.ROWS)
+        rows = request.args.get('rows', DocumentAnalysis.ROWS)
 
         if analysis.lower() not in VALID_ANALYSIS:
             current_app.logger.info('requested analysis:{} is not valid'.format(analysis.lower()))

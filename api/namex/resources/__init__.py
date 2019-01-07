@@ -6,7 +6,6 @@ from .document_analysis import api as analysis_api
 from .meta import api as meta_api
 from .exact_match import api as exact_match_api
 
-
 # This will add the Authorize button to the swagger docs
 # TODO oauth2 & openid may not yet be supported by restplus <- check on this
 authorizations = {

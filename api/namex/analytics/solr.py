@@ -13,6 +13,8 @@ from namex.analytics.phonetic import first_vowels, match_consonate, designations
 # Use this character in the search strings to indicate that the word should not by synonymized.
 NO_SYNONYMS_INDICATOR = '@'
 
+WILD_CARD = "*"
+
 # Constant names for useful chars used by the functions below
 RESERVED_CHARACTERS = '-+@"'
 DOUBLE_QUOTE = '"'
@@ -99,20 +101,7 @@ class SolrQueries:
             '&sort=score%20desc'
             '{synonyms_clause}{name_copy_clause}',
         HISTORY:
-            '/solr/names/select?'
-            'defType=edismax'
-            '&hl.fl=name'
-            '&hl.simple.post=%3C/b%3E'
-            '&hl.simple.pre=%3Cb%3E'
-            '&hl=on&'
-            'indent=on'
-            '&q={compressed_name}%20OR%20{name}'
-            '&qf=name_compressed^6%20name_with_synonyms'
-            '&wt=json'
-            '&start={start}&rows={rows}'
-            '&fl=nr_num,name,score,submit_count,name_state_type_cd'
-            '&sort=score%20desc'
-            '{synonyms_clause}{name_copy_clause}',
+            '/solr/names/select?sow=false&df=name_exact_match&wt=json&&rows={rows}&q={name}&fl=nr_num,name,score,submit_count,name_state_type_cd',
         TRADEMARKS:
             '/solr/trademarks/select?'
             'defType=edismax'
@@ -369,7 +358,7 @@ class SolrQueries:
             query = solr_base_url + SolrQueries.queries[query_type].format(
                 start=start,
                 rows=rows,
-                name=parse.quote(name.replace(NO_SYNONYMS_INDICATOR, '')),
+                name=cls._get_parsed_name(name),
                 compressed_name=cls._compress_name(name),
                 synonyms_clause=cls._get_synonyms_clause(name),
                 name_copy_clause=cls._get_name_copy_clause(name)
@@ -389,11 +378,15 @@ class SolrQueries:
                                     "name": solr['responseHeader']['params']['q']
                                     },
                        'names': solr['response']['docs'],
-                       'highlighting': solr['highlighting']}
+                       'highlighting': solr['highlighting'] if 'highlighting' in solr.keys() else ''}
             return results, '', None
         except Exception as err:
             current_app.logger.error(err, query)
             return None, 'Internal server error', 500
+
+    @classmethod
+    def _get_parsed_name(cls, name):
+        return parse.quote(name.lower().replace(WILD_CARD, "").replace(NO_SYNONYMS_INDICATOR, ''))
 
     # Compress the name by removing designations and then striping all non-alpha characters. Solr eventually converts to
     # lowercase so we'll choose that over doing everything in uppercase.

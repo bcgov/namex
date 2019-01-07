@@ -144,6 +144,8 @@
     <field name="name_with_synonyms" type="text_name_singular_synonyms" multiValued="false" indexed="true"
         stored="true"/>
     <field name="name_compressed" type="text_name_compressed" multiValued="false" indexed="true" stored="true"/>
+    <field name="name_exact_match" type="text_name_exact_match" multiValued="false" indexed="true" stored="true"/>
+
 
     <!-- Only enabled in the "schemaless" data-driven example (assuming the client
          does not know what fields may be searched) because it's very expensive to index everything twice. -->
@@ -713,9 +715,109 @@
             replace="all"/>
 
         <!-- strip out all white space and non-alpha characters -->
+        <filter class="solr.PatternReplaceFilterFactory" pattern="'s " replacement="" />
         <filter class="solr.PatternReplaceFilterFactory" pattern="[^\w]+" replacement="" replace="all"/>
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <fieldType name="text_name_exact_match" class="solr.TextField" positionIncrementGap="100" multiValued="false">
+      <analyzer type="index">
+          <tokenizer class="solr.KeywordTokenizerFactory" />
+
+          <filter class="solr.LowerCaseFilterFactory"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability company"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability co."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability partnership"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" societe a responsabilite limitee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" societe en nom collectif a responsabilite limitee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" incorporee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" unlimited liability company"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limited"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" ltd."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" ltd"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" incorporated"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" inc."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" inc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" corporation"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" corp."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limitee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" ltee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" llc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" llp"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" l.l.c."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" srl"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" sencrl"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" ulc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" association"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" assoc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" assoc."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" assn"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" co"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" co."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" society"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" soc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" soc."  replacement="" replace="all" />
+
+          <filter class="solr.PatternReplaceFilterFactory" pattern="'s " replacement=" " replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern="( and | '*n'* | an' )"  replacement=" " replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" or "  replacement=" " replace="all" />
+
+          <filter class="solr.PatternReplaceFilterFactory" pattern="(\.|\!|-|_|'|,|&amp;|@|\=)+" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="\+" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="[\s]+" replacement="" replace="all"/>
+
+          <filter class="solr.PatternReplaceFilterFactory" pattern="([a-z])\1+" replacement="$1" replace="all"/>
+      </analyzer>
+      <analyzer type="query">
+          <tokenizer class="solr.KeywordTokenizerFactory" />
+
+          <filter class="solr.LowerCaseFilterFactory"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability company"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability co."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limited liability partnership"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" societe a responsabilite limitee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" societe en nom collectif a responsabilite limitee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" incorporee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" unlimited liability company"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limited"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" ltd."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" ltd"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" incorporated"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" inc."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" inc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" corporation"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" corp."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" limitee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" ltee"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" llc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" llp"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" l.l.c."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" srl"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" sencrl"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" ulc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" association"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" assoc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" assoc."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" assn"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" co"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" co."  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" society"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" soc"  replacement="" replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" soc."  replacement="" replace="all" />
+
+
+          <filter class="solr.PatternReplaceFilterFactory" pattern="'s " replacement=" " replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern="( and | '*n'* | an' )"  replacement=" " replace="all" />
+          <filter class="solr.PatternReplaceFilterFactory" pattern=" or "  replacement=" " replace="all" />
+
+
+          <filter class="solr.PatternReplaceFilterFactory" pattern="(\.|\!|-|_|'|,|&amp;|@|\=)+" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="\+" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="[\s]+" replacement="" replace="all"/>
+          <filter class="solr.PatternReplaceFilterFactory" pattern="([a-z])\1+" replacement="$1" replace="all"/>
+
       </analyzer>
     </fieldType>
 
@@ -1148,4 +1250,5 @@
     <copyField source="name" dest="name_copy"/>
     <copyField source="name" dest="name_with_synonyms"/>
     <copyField source="name" dest="name_compressed"/>
+    <copyField source="name" dest="name_exact_match"/>
 </schema>
