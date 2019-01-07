@@ -165,23 +165,6 @@ def test_duplicated_letters(client, jwt, app):
        expected_list=['Damme Trucking Inc']
     )
 
-
-@integration_synonym_api
-@integration_solr
-@pytest.mark.parametrize("criteria, seed", [
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO PROCESS synonyms:(server) '),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO synonyms:(process, server, processserver) '),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO synonyms:(process, server, processserver) '),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR synonyms:(two, process, server, twozero, processserver) '),
-    ("Jameisons four two zero process server", '----JAMEISONS synonyms:(four, two, process, server, fourtwo, fourtwozero, twozero, processserver) '),
-])
-def test_multi_word_synonyms(client, jwt, app, criteria, seed):
-    verify_match(client, jwt,
-        query=criteria,
-        expected_list=[seed]
-    )
-
-
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
@@ -229,34 +212,4 @@ def test_phonetic_number_swaps(client, jwt, app, criteria, seed):
         query=criteria,
         expected_list=[seed]
     )
-
-# @integration_solr
-# def test_returns_all_fields_that_we_need(client, jwt, app):
-#     seed_database_with(client, jwt, 'Van Trucking Inc', 'any-id', 'any-source')
-#     verify_match_results(client, jwt,
-#        query='Van Trucking ltd',
-#        expected=[
-#            {'name': 'Van Trucking Inc', 'id':'any-id', 'source':'any-source'}
-#        ]
-#     )
-#
-#
-# @pytest.mark.skip(reason="dont know how to make solr handle those scenarios")
-# @integration_solr
-# @pytest.mark.parametrize("criteria, seed", [
-#     ('{JM} HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('[JM] HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('(JM) HOLDINGS', 'J.M HOLDINGS'),
-#     ('J^M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J~M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J*M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J:M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J?M HOLDINGS', 'J. & M. HOLDINGS')
-# ])
-# def test_special_characters(client, jwt, app, criteria, seed):
-#     seed_database_with(client, jwt, seed)
-#     verify_match(client, jwt,
-#        query=criteria,
-#        expected=seed
-#     )
 

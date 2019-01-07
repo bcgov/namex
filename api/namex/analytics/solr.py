@@ -154,17 +154,41 @@ class SolrQueries:
 
         name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
         list_name_split = name.split()
+
+        def replace_nth(string, deleted_substr, added_substr, n):
+            nth_index = [m.start() for m in re.finditer(deleted_substr, string)][n - 1]
+            before = string[:nth_index]
+            after = string[nth_index:]
+            after = after.replace(deleted_substr, added_substr, 1)
+            newString = before + after
+            return newString
+
         num_terms = 0
         prox_combined_terms = ''
         prox_search_strs = []
+        phon_search_strs = []
         old_alg_combined_terms = ''
         old_alg_search_strs = []
         for term in list_name_split:
-            print(term)
             num_terms += 1
+
             prox_combined_terms += term + ' '
-            prox_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
-            print(prox_combined_terms)
+            prox_compounded_words = [prox_combined_terms.strip()]
+
+            if num_terms > 2:
+                prox_compounded_words.append(prox_combined_terms.replace(' ',''))
+
+            # concat for compound versions of combined terms
+            combined_terms_list = prox_combined_terms.split()
+
+            n = 1
+            while n < len(combined_terms_list):
+                compunded_name = replace_nth(prox_combined_terms, ' ', '', n)
+                prox_compounded_words.append(compunded_name)
+                n += 1
+
+            prox_search_strs.insert(0, (prox_compounded_words, name[len(prox_combined_terms):], num_terms))
+            phon_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
             old_alg_combined_terms += term + '\ '
             old_alg_search_strs.insert(0, old_alg_combined_terms)
 
@@ -176,7 +200,7 @@ class SolrQueries:
 
         # bucket == 'phonetic'
         else:
-            connections = cls.get_phonetic_results(solr_base_url, name, prox_search_strs)
+            connections = cls.get_phonetic_results(solr_base_url, name, phon_search_strs)
 
         try:
             solr = {'response':{'numFound': 0,
@@ -187,11 +211,16 @@ class SolrQueries:
 
             # seen_names used to keep track of duplicates
             seen_names = []
+            previous_stack_title = ''
             for connection in connections:
                 result = connection[0]
                 solr['response']['numFound'] += result['response']['numFound']
                 solr['response']['start'] = result['response']['start']
-                solr['response']['docs'].append({'name': connection[1]})
+
+                if previous_stack_title.replace(' ','') != connection[1].replace(' ',''):
+                    solr['response']['docs'].append({'name': connection[1]})
+                    previous_stack_title = connection[1]
+
                 if len(result['response']['docs']) > 0:
 
                     # add non duplicates
@@ -227,22 +256,24 @@ class SolrQueries:
             connections = []
 
             for prox_search_tuple, old_alg_search in zip(prox_search_strs, old_alg_search_strs):
-                prox_search_str = prox_search_tuple[0]
+
                 old_alg_search_str = old_alg_search[:-2].replace(' ', '%20') + '*'  # [:-2] takes off the last '\ '
 
                 synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1])
 
-                ### Proximity (name:) search query
-                query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
-                    start=start,
-                    rows=rows,
-                    start_str='\"' + prox_search_str.replace(' ', '%20') + '\"~{}'.format(prox_search_tuple[2]),
-                    synonyms_clause=synonyms_clause,
-                )
-                current_app.logger.debug('Query: ' + query)
-                connections.append((json.load(request.urlopen(query)), '----' + prox_search_str.replace('\\', '') +
-                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
-                                    ' - PROXIMITY SEARCH'))
+                for name in prox_search_tuple[0]:
+                    prox_search_str = name
+                    ### Proximity (name:) search query
+                    query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
+                        start=start,
+                        rows=rows,
+                        start_str='\"' + prox_search_str.replace(' ', '%20') + '\"~{}'.format(prox_search_tuple[2]),
+                        synonyms_clause=synonyms_clause,
+                    )
+                    current_app.logger.debug('Query: ' + query)
+                    connections.append((json.load(request.urlopen(query)), '----' + prox_search_str.replace('\\', '')
+                                        .replace('*','') + synonyms_clause.replace('&fq=name_with_', ' ')
+                                        .replace('%20', ', ') + ' - PROXIMITY SEARCH'))
 
                 ### Old (txt_starts_with:) search query
                 query = solr_base_url + SolrQueries.queries['oldsynconflicts'].format(
@@ -254,7 +285,7 @@ class SolrQueries:
                 )
                 current_app.logger.debug('Query: ' + query)
                 connections.append((json.load(request.urlopen(query)), '----' +
-                                    old_alg_search_str.replace('\\', '').replace('%20', ' ') +
+                                    old_alg_search_str.replace('\\', '').replace('%20', ' ').replace('**','*') +
                                     synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
                                     ' - EXACT WORD ORDER (OLD SEARCH)'))
 
@@ -269,20 +300,21 @@ class SolrQueries:
         try:
             connections = []
             for str_tuple in search_strs:
-                start_str = str_tuple[0]
                 synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
-                query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
-                    start=start,
-                    rows=rows,
-                    start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
-                    synonyms_clause=synonyms_clause,
-                    exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
-                )
-                current_app.logger.debug('Query: ' + query)
-                result = json.load(request.urlopen(query))
+                for name in str_tuple[0]:
+                    start_str = name
+                    query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
+                        start=start,
+                        rows=rows,
+                        start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                        synonyms_clause=synonyms_clause,
+                        exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                    )
+                    current_app.logger.debug('Query: ' + query)
+                    result = json.load(request.urlopen(query))
 
-                connections.append((result, '----' + start_str +
-                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
+                    connections.append((result, '----' + start_str.replace('*','') +
+                                        synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
 
             return connections
 
@@ -295,8 +327,8 @@ class SolrQueries:
         try:
             connections = []
             for str_tuple in search_strs:
-                start_str = str_tuple[0]
                 synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
+                start_str = str_tuple[0]
                 query = solr_base_url + SolrQueries.queries['phonconflicts'].format(
                     start=start,
                     rows=rows,
@@ -310,9 +342,8 @@ class SolrQueries:
                 docs = result['response']['docs']
                 result['response']['docs'] = cls.post_treatment(docs, start_str)
 
-                connections.append((result, '----' + start_str +
-                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
-                                    ' - PHONETIC SEARCH'))
+                connections.append((result, '----' + start_str.replace('*','') +
+                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
 
             return connections
 

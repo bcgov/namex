@@ -346,6 +346,40 @@ def test_explore_complex_cases(client, jwt, app, criteria, seed):
        expected_list=[seed]
     )
 
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('TESTING AND TRYING', 'TESTING TRYING'),
+    ('TESTING + TRYING', 'TESTING TRYING'),
+    ('TESTING & TRYING', 'TESTING TRYING'),
+    ('TESTING\'N TRYING', 'TESTING TRYING'),
+    ('TESTING\'N TRYING', 'TESTING AND TRYING'),
+    ('TESTING AND TRYING', 'TESTING & TRYING'),
+    ('TESTING + TRYING', 'TESTING\'N TRYING'),
+    ('TESTING & TRYING', 'TESTING + TRYING'),
+])
+def test_strips_and_variations(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+       query=criteria,
+       expected_list=[seed]
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('TESTING AND TRYING', 'TESTINGAND TRYING'),
+    ('TESTING AND TRYING', 'TESTING ANDTRYING'),
+    ('TESTING AND TRYING', 'TESTINGANDTRYING'),
+])
+def test_compound_concat(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+       query=criteria,
+       expected_list=[seed]
+    )
+
+
 # @integration_solr
 # def test_returns_all_fields_that_we_need(client, jwt, app):
 #     seed_database_with(client, jwt, 'Van Trucking Inc', 'any-id', 'any-source')

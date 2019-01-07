@@ -470,6 +470,7 @@
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\$" replacement="s" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1cent$3" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="c" />
+        <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\'][N|n])" replacement="" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\_\']*" replacement="" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2$3 " />
@@ -503,6 +504,7 @@
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\$" replacement="s" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="(^|\s+)(¢+(\s+|$))+" replacement="$1cent$3" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\¢" replacement="c" />
+        <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\'][N|n])" replacement="" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\_\']*" replacement="" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2$3 " />
