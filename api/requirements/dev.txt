@@ -5,6 +5,7 @@
 pytest
 pytest-mock
 requests
+pyhamcrest
 
 # Lint and code style
 flake8
