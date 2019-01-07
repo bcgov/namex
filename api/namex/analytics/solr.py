@@ -7,7 +7,7 @@ from flask import current_app
 from urllib import request, parse
 from urllib.error import HTTPError
 import re
-from namex.analytics.phonetic import first_vowels, match_consonate, designations, first_consonants
+from namex.analytics.phonetic import first_vowels, match_consonate, designations, first_consonants, has_leading_vowel
 
 
 # Use this character in the search strings to indicate that the word should not by synonymized.
@@ -680,11 +680,14 @@ class SolrQueries:
         if query[:3] == 'MAC':
             query = 'MC' + query[3:]
 
+        word_has_leading_vowel = has_leading_vowel(word)
+        query_has_leading_vowel = has_leading_vowel(query)
+
         word_first_consonant = first_consonants(word)
         query_first_consonant = first_consonants(query)
         if match_consonate(query_first_consonant, word_first_consonant):
-            query_first_vowels = first_vowels(query)
-            word_first_vowels = first_vowels(word)
+            query_first_vowels = first_vowels(query, query_has_leading_vowel)
+            word_first_vowels = first_vowels(word, word_has_leading_vowel)
             if query_first_vowels == word_first_vowels:
                 return True
 

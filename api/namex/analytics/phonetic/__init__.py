@@ -1,7 +1,5 @@
 
 def match_consonate(c1, c2):
-    if set(['C', 'G']) == set([c1, c2]):
-        return True
     if set(['C', 'K']) == set([c1, c2]):
         return True
     if set(['CR', 'KR']) == set([c1, c2]):
@@ -32,7 +30,7 @@ def match_consonate(c1, c2):
     return c1 == c2
 
 
-def first_vowels(word):
+def first_vowels(word, leading_vowel = False):
     vowels = ['A', 'E', 'I', 'O', 'U', 'Y']
     value = ''
     first_vowel_found = False
@@ -43,22 +41,25 @@ def first_vowels(word):
             value += letter
             first_vowel_found = True
 
-    if value == 'EY':
-        value = 'A'
-    if value == 'EI':
-        value = 'A'
-    if value == 'EA':
-        value = 'A'
-    if value == 'AY':
-        value = 'A'
-    if value == 'AI':
-        value = 'A'
-    if value == 'Y':
-        value = 'I'
-    if value == 'OY':
-        value = 'OI'
-    if value == 'UE':
-        value = 'U'
+    if leading_vowel == False:
+        if value == 'EY':
+            value = 'A'
+        if value == 'EI':
+            value = 'A'
+        if value == 'EA':
+            value = 'A'
+        if value == 'AY':
+            value = 'A'
+        if value == 'AI':
+            value = 'A'
+        if value == 'Y':
+            value = 'I'
+        if value == 'UE':
+            value = 'U'
+    else:
+        if value == 'OY':
+            value = 'OI'
+
 
     if 'AA' in value:
         value = value.replace('AA', 'A')
@@ -67,7 +68,7 @@ def first_vowels(word):
 
 
 def first_consonants(word):
-    consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'X', 'W']
+    consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'X', 'W', 'V', 'Z']
     value = ''
     first_consonant_found = False
     for letter in word:
@@ -81,6 +82,13 @@ def first_consonants(word):
         value = value.replace('GG', 'G')
 
     return value
+
+
+def has_leading_vowel(word):
+    if word[0] in ['A', 'E', 'I', 'O', 'U', 'Y']:
+        return True
+    else:
+        return False
 
 
 def designations():

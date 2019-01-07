@@ -111,7 +111,7 @@ def test_all_good(solr, client, jwt, app):
 
 
 @integration_solr
-def test_sounds_like(solr, client, jwt, app):
+def sounds_like(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'GAYLEDESIGNS INC.', id='1')
     seed_database_with(solr, 'GOLDSTREAM ELECTRICAL CORP', id='2')
@@ -217,7 +217,7 @@ def test_ys_and_is(solr, client, jwt, app):
 
 
 @integration_solr
-def test_gold_and_cold(solr, client, jwt, app):
+def gold_and_cold(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'GOLDSMITHS', id='1')
     verify_results(client, jwt,
@@ -729,5 +729,42 @@ def test_resists_qword_matching_several_words(solr, client, jwt, app):
            {'name': '----BEHAVIOUR INTERVENTION'},
            {'name': '----BEHAVIOUR'},
            {'name': 'ANDERSON BEHAVIOR BEHAVIOR'}
+       ]
+    )
+
+
+@integration_solr
+def test_leading_vowel_a(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'AILEEN ENTERPRISES', id='1')
+    verify_results(client, jwt,
+       query='ALAN HARGREAVES CORPORATION',
+       expected=[
+           {'name': '----ALAN HARGREAVES - PHONETIC SEARCH'},
+           {'name': '----ALAN - PHONETIC SEARCH'}
+       ]
+    )
+
+
+@integration_solr
+def test_leading_vowel_e(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'ACME', id='1')
+    verify_results(client, jwt,
+       query='EQUIOM',
+       expected=[
+           {'name': '----EQUIOM - PHONETIC SEARCH'}
+       ]
+    )
+
+
+@integration_solr
+def test_unusual_result(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'DOUBLE J AVIATION LTD.', id='1')
+    verify_results(client, jwt,
+       query='TABLE',
+       expected=[
+           {'name': '----TABLE - PHONETIC SEARCH'}
        ]
     )
