@@ -74,7 +74,7 @@ def test_view():
     seed_corp_state('A0038332','5')
     seed_corp_state('A0041224','6')
 
-
+    #ensure tables are seeded
     result = Postgres().select("select * from corporation where corp_typ_cd= 'A' ")
     assert_that(len(result), equal_to(6))
 
@@ -84,9 +84,12 @@ def test_view():
     result = Postgres().select(extract_select())
     assert_that(len(result),equal_to(9))
 
+    #seed XPROS that have an assumed name row with a CO row to duplicate production
     seed_corp_name('A0037274','18','CO','ROBEV VENTURES LTD.')
     seed_corp_name('A0038332', '19','CO', 'RED-L HOSE DISTRIBUTORS LTD.')
     seed_corp_name('A0041224', '20', 'CO','571266 SASKATCHEWAN INC.')
 
+    #ensure these XPRO CO rows do not appear in the view
     result = Postgres().select(extract_select())
     assert_that(len(result),equal_to(9))
+
