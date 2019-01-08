@@ -213,3 +213,12 @@ def test_phonetic_number_swaps(client, jwt, app, criteria, seed):
         expected_list=[seed]
     )
 
+@integration_synonym_api
+@integration_solr
+def test_stack_ignores_wildcards(client, jwt, app):
+    verify_match(client, jwt,
+        query="TESTING* @WILDCARDS",
+        expected_list=['----TESTING WILDCARDS'],
+        not_expected_list=['----TESTING* @WILDCARDS']
+    )
+

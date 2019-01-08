@@ -379,34 +379,41 @@ def test_compound_concat(client, jwt, app, criteria, seed):
        expected_list=[seed]
     )
 
+@pytest.mark.skip(reason="dont know how to make solr handle those scenarios")
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('{JM} HOLDINGS', 'J. & M. HOLDINGS'),
+    ('[JM] HOLDINGS', 'J. & M. HOLDINGS'),
+    ('(JM) HOLDINGS', 'J.M HOLDINGS'),
+    ('J^M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J~M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J*M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J:M HOLDINGS', 'J. & M. HOLDINGS'),
+    ('J?M HOLDINGS', 'J. & M. HOLDINGS')
+])
+def test_special_characters(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+       query=criteria,
+       expected_list=[seed]
+    )
 
-# @integration_solr
-# def test_returns_all_fields_that_we_need(client, jwt, app):
-#     seed_database_with(client, jwt, 'Van Trucking Inc', 'any-id', 'any-source')
-#     verify_synonym_match_results(client, jwt,
-#        query='Van Trucking ltd',
-#        expected=[
-#            {'name': 'Van Trucking Inc', 'id':'any-id', 'source':'any-source'}
-#        ]
-#     )
-#
-#
-# @pytest.mark.skip(reason="dont know how to make solr handle those scenarios")
-# @integration_solr
-# @pytest.mark.parametrize("criteria, seed", [
-#     ('{JM} HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('[JM] HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('(JM) HOLDINGS', 'J.M HOLDINGS'),
-#     ('J^M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J~M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J*M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J:M HOLDINGS', 'J. & M. HOLDINGS'),
-#     ('J?M HOLDINGS', 'J. & M. HOLDINGS')
-# ])
-# def test_special_characters(client, jwt, app, criteria, seed):
-#     seed_database_with(client, jwt, seed)
-#     verify_synonym_match(client, jwt,
-#        query=criteria,
-#        expected=seed
-#     )
+@integration_synonym_api
+@integration_solr
+def test_prox_search_ignores_wildcards(client, jwt, app):
+    seed_database_with(client, jwt, 'TESTING WILDCARDS')
+    verify_synonym_match(client, jwt,
+        query="TESTING* @WILDCARDS",
+        expected_list=['----TESTING WILDCARDS - PROXIMITY SEARCH', 'TESTING WILDCARDS'],
+        not_expected_list=['----TESTING* @WILDCARDS - PROXIMITY SEARCH']
+    )
 
+@integration_synonym_api
+@integration_solr
+def test_exact_word_order_stack_title_with_wilcards(client, jwt, app):
+    verify_synonym_match(client, jwt,
+        query="TESTING* WILDCARDS",
+        expected_list=['----TESTING* WILDCARDS* - EXACT WORD ORDER', '----TESTING* - EXACT WORD ORDER'],
+        not_expected_list=['----TESTING** - EXACT WORD ORDER']
+    )
