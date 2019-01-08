@@ -1,33 +1,4 @@
 
-def match_consonate(c1, c2):
-    if set(['C', 'K']) == set([c1, c2]):
-        return True
-    if set(['CR', 'KR']) == set([c1, c2]):
-        return True
-    if set(['CHR', 'KR']) == set([c1, c2]):
-        return True
-    if set(['CL', 'KL']) == set([c1, c2]):
-        return True
-    if set(['PH', 'F']) == set([c1, c2]):
-        return True
-    if set(['GH', 'G']) == set([c1, c2]):
-        return True
-    if set(['GN', 'N']) == set([c1, c2]):
-        return True
-    if set(['KN', 'N']) == set([c1, c2]):
-        return True
-    if set(['PN', 'N']) == set([c1, c2]):
-        return True
-    if set(['PS', 'S']) == set([c1, c2]):
-        return True
-    if set(['WR', 'R']) == set([c1, c2]):
-        return True
-    if set(['RH', 'R']) == set([c1, c2]):
-        return True
-    if set(['WH', 'W']) == set([c1, c2]):
-        return True
-
-    return c1 == c2
 
 
 def first_vowels(word, leading_vowel = False):
@@ -78,8 +49,47 @@ def first_consonants(word):
             value += letter
             first_consonant_found = True
 
+    if 'CHR' in value:
+        value = value.replace('CHR', 'KR')
+
     if 'GG' in value:
         value = value.replace('GG', 'G')
+
+    if 'C' in value:
+        value = value.replace('C', 'K')
+
+    if 'CR' in value:
+        value = value.replace('CR', 'KR')
+
+    if 'CL' in value:
+        value = value.replace('CL', 'KL')
+
+    if 'PH' in value:
+        value = value.replace('PH', 'F')
+
+    if 'GH' in value:
+        value = value.replace('GH', 'G')
+
+    if 'GN' in value:
+        value = value.replace('GN', 'N')
+
+    if 'KN' in value:
+        value = value.replace('KN', 'N')
+
+    if 'PN' in value:
+        value = value.replace('PN', 'N')
+
+    if 'PS' in value:
+        value = value.replace('PS', 'S')
+
+    if 'WR' in value:
+        value = value.replace('WR', 'R')
+
+    if 'RH' in value:
+        value = value.replace('RH', 'R')
+
+    if 'WH' in value:
+        value = value.replace('WH', 'W')
 
     return value
 
@@ -148,3 +158,12 @@ def designations():
         'SOC',
         'SOC.'
     ]
+
+
+def replace_special_leading_sounds(word):
+
+    for (special_leading_sound, replacement) in [['QU', 'KW'], ['EX', 'X'], ['MAC', 'MC']]:
+        if word[:len(special_leading_sound)] == special_leading_sound:
+            word = replacement + word[len(special_leading_sound):]
+
+    return word
