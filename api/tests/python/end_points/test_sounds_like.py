@@ -740,8 +740,8 @@ def test_leading_vowel_a(solr, client, jwt, app):
     verify_results(client, jwt,
        query='ALAN HARGREAVES CORPORATION',
        expected=[
-           {'name': '----ALAN HARGREAVES - PHONETIC SEARCH'},
-           {'name': '----ALAN - PHONETIC SEARCH'}
+           {'name': '----ALAN HARGREAVES'},
+           {'name': '----ALAN'}
        ]
     )
 
@@ -753,7 +753,7 @@ def test_leading_vowel_e(solr, client, jwt, app):
     verify_results(client, jwt,
        query='EQUIOM',
        expected=[
-           {'name': '----EQUIOM - PHONETIC SEARCH'}
+           {'name': '----EQUIOM'}
        ]
     )
 
@@ -766,7 +766,7 @@ def test_leading_vowel_not_match_consonant(solr, client, jwt, app):
     verify_results(client, jwt,
        query='EH',
        expected=[
-           {'name': '----EH - PHONETIC SEARCH'}
+           {'name': '----EH'}
        ]
     )
 
@@ -778,6 +778,6 @@ def test_unusual_result(solr, client, jwt, app):
     verify_results(client, jwt,
        query='TABLE',
        expected=[
-           {'name': '----TABLE - PHONETIC SEARCH'}
+           {'name': '----TABLE'}
        ]
     )
