@@ -44,6 +44,6 @@ WHERE corp.end_event_id IS NULL
   AND corp.corp_name_typ_cd IN ('AS')
   AND cs.end_event_id IS NULL
   AND op.op_state_typ_cd = 'ACT'
-  AND ct.corp_class IN ('XPRO')
-ORDER BY 1;
+  AND ct.corp_class IN ('XPRO');
+
 
