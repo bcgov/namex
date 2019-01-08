@@ -33,8 +33,8 @@ class NRONamesSyncJob(db.Model):
     # core fields
     id = db.Column('id', db.Integer, primary_key=True)
     statusCd = db.Column('status_cd', db.String(10), db.ForeignKey('nro_names_sync_job_status.cd'))
-    startTime = db.Column('start_time', db.DateTime, default=None)
-    endTime = db.Column('end_time', db.DateTime, default=None)
+    startTime = db.Column('start_time', db.DateTime(timezone=True), default=None)
+    endTime = db.Column('end_time', db.DateTime(timezone=True), default=None)
 
 
 class NRONamesSyncJobDetail(db.Model):
