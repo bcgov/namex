@@ -113,7 +113,7 @@ def test_all_good(solr, client, jwt, app):
 @pytest.mark.skip(reason="Rhyming not implemented yet")
 @integration_synonym_api
 @integration_solr
-def sounds_like(solr, client, jwt, app):
+def test_sounds_like(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'GAYLEDESIGNS INC.', id='1')
     seed_database_with(solr, 'GOLDSTREAM ELECTRICAL CORP', id='2')
@@ -840,6 +840,7 @@ def test_leading_vowel_not_match_consonant(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_unusual_result(solr, client, jwt, app):
     clean_database(solr)
