@@ -7,7 +7,7 @@ from flask import current_app
 from urllib import request, parse
 from urllib.error import HTTPError
 import re
-from namex.analytics.phonetic import first_vowels, match_consonate, designations, first_consonants
+from namex.analytics.phonetic import first_vowels, designations, first_consonants, has_leading_vowel, replace_special_leading_sounds
 
 
 # Use this character in the search strings to indicate that the word should not by synonymized.
@@ -665,27 +665,29 @@ class SolrQueries:
 
     @classmethod
     def keep_phonetic_match(cls, word, query):
-        if word[:2] == 'QU':
-            word = 'KW' + word[2:]
-        if query[:2] == 'QU':
-            query = 'KW' + query[2:]
+        word = replace_special_leading_sounds(word)
+        query = replace_special_leading_sounds(query)
 
-        if word[:2] == 'EX':
-            word = 'X' + word[2:]
-        if query[:2] == 'EX':
-            query = 'X' + query[2:]
-
-        if word[:3] == 'MAC':
-            word = 'MC' + word[3:]
-        if query[:3] == 'MAC':
-            query = 'MC' + query[3:]
+        word_has_leading_vowel = has_leading_vowel(word)
+        query_has_leading_vowel = has_leading_vowel(query)
 
         word_first_consonant = first_consonants(word)
         query_first_consonant = first_consonants(query)
-        if match_consonate(query_first_consonant, word_first_consonant):
-            query_first_vowels = first_vowels(query)
-            word_first_vowels = first_vowels(word)
-            if query_first_vowels == word_first_vowels:
+
+        query_first_vowels = first_vowels(query, query_has_leading_vowel)
+        word_first_vowels = first_vowels(word, word_has_leading_vowel)
+
+        if query_has_leading_vowel:
+            query_sound = query_first_vowels + query_first_consonant
+        else:
+            query_sound = query_first_consonant + query_first_vowels
+
+        if word_has_leading_vowel:
+            word_sound = word_first_vowels + word_first_consonant
+        else:
+            word_sound = word_first_consonant + word_first_vowels
+
+        if word_sound == query_sound:
                 return True
 
         return False

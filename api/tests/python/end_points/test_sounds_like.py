@@ -2,7 +2,7 @@ from namex.models import User
 import requests
 import json
 import pytest
-from tests.python import integration_solr
+from tests.python import integration_solr, integration_synonym_api
 import urllib
 from hamcrest import *
 
@@ -96,7 +96,7 @@ def search(client, jwt, query):
     return json.loads(rv.data)
 
 
-
+@integration_synonym_api
 @integration_solr
 def test_all_good(solr, client, jwt, app):
     clean_database(solr)
@@ -110,6 +110,8 @@ def test_all_good(solr, client, jwt, app):
     )
 
 
+@pytest.mark.skip(reason="Rhyming not implemented yet")
+@integration_synonym_api
 @integration_solr
 def test_sounds_like(solr, client, jwt, app):
     clean_database(solr)
@@ -136,6 +138,8 @@ def test_sounds_like(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_liberti(solr, client, jwt, app):
     clean_database(solr)
@@ -148,6 +152,8 @@ def test_liberti(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_deeper(solr, client, jwt, app):
     clean_database(solr)
@@ -162,6 +168,8 @@ def test_deeper(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_jasmine(solr, client, jwt, app):
     clean_database(solr)
@@ -174,6 +182,7 @@ def test_jasmine(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_fey(solr, client, jwt, app):
     clean_database(solr)
@@ -187,6 +196,7 @@ def test_fey(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_venizia(solr, client, jwt, app):
     clean_database(solr)
@@ -203,6 +213,7 @@ def test_venizia(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_ys_and_is(solr, client, jwt, app):
     clean_database(solr)
@@ -216,19 +227,7 @@ def test_ys_and_is(solr, client, jwt, app):
     )
 
 
-@integration_solr
-def test_gold_and_cold(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'GOLDSMITHS', id='1')
-    verify_results(client, jwt,
-       query='COLDSTREAM',
-       expected=[
-           {'name': '----COLDSTREAM'},
-           {'name': 'GOLDSMITHS'},
-       ]
-    )
-
-
+@integration_synonym_api
 @integration_solr
 def test_cs_and_ks(solr, client, jwt, app):
     clean_database(solr)
@@ -242,6 +241,7 @@ def test_cs_and_ks(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_cs_and_ks_again(solr, client, jwt, app):
     clean_database(solr)
@@ -256,6 +256,7 @@ def test_cs_and_ks_again(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_resist_short_word(solr, client, jwt, app):
     clean_database(solr)
@@ -267,6 +268,8 @@ def test_resist_short_word(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_resist_single_vowel(solr, client, jwt, app):
     clean_database(solr)
@@ -279,6 +282,7 @@ def test_resist_single_vowel(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_feel(solr, client, jwt, app):
     clean_database(solr)
@@ -291,6 +295,7 @@ def test_feel(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_bear(solr, client, jwt, app):
     clean_database(solr)
@@ -304,6 +309,7 @@ def test_bear(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_ignore_corp(solr, client, jwt, app):
     clean_database(solr)
@@ -316,6 +322,7 @@ def test_ignore_corp(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_designation_in_query_is_ignored(solr, client, jwt, app):
     clean_database(solr)
@@ -328,6 +335,7 @@ def test_designation_in_query_is_ignored(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def leak(solr, client, jwt, app):
     clean_database(solr)
@@ -339,6 +347,8 @@ def leak(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_plank(solr, client, jwt, app):
     clean_database(solr)
@@ -351,6 +361,8 @@ def test_plank(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_krystal(solr, client, jwt, app):
     clean_database(solr)
@@ -364,6 +376,7 @@ def test_krystal(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_christal(solr, client, jwt, app):
     clean_database(solr)
@@ -377,6 +390,7 @@ def test_christal(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_kl(solr, client, jwt, app):
     clean_database(solr)
@@ -389,6 +403,8 @@ def test_kl(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_pheel(solr, client, jwt, app):
     clean_database(solr)
@@ -401,6 +417,8 @@ def test_pheel(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_ghable(solr, client, jwt, app):
     clean_database(solr)
@@ -413,6 +431,8 @@ def test_ghable(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_gnat(solr, client, jwt, app):
     clean_database(solr)
@@ -425,6 +445,8 @@ def test_gnat(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_kn(solr, client, jwt, app):
     clean_database(solr)
@@ -437,6 +459,8 @@ def test_kn(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_pn(solr, client, jwt, app):
     clean_database(solr)
@@ -449,6 +473,8 @@ def test_pn(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_wr(solr, client, jwt, app):
     clean_database(solr)
@@ -461,6 +487,8 @@ def test_wr(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_rh(solr, client, jwt, app):
     clean_database(solr)
@@ -473,6 +501,8 @@ def test_rh(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_soft_c_is_not_k(solr, client, jwt, app):
     clean_database(solr)
@@ -484,6 +514,8 @@ def test_soft_c_is_not_k(solr, client, jwt, app):
        ]
     )
 
+
+@integration_synonym_api
 @integration_solr
 def test_oi_oy(solr, client, jwt, app):
     clean_database(solr)
@@ -497,6 +529,7 @@ def test_oi_oy(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_dont_add_match_twice(solr, client, jwt, app):
     clean_database(solr)
@@ -511,6 +544,7 @@ def test_dont_add_match_twice(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_neighbour(solr, client, jwt, app):
     clean_database(solr)
@@ -524,6 +558,7 @@ def test_neighbour(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_mac_mc(solr, client, jwt, app):
     clean_database(solr)
@@ -537,6 +572,7 @@ def test_mac_mc(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_ex_x(solr, client, jwt, app):
     clean_database(solr)
@@ -550,6 +586,7 @@ def test_ex_x(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_wh(solr, client, jwt, app):
     clean_database(solr)
@@ -563,6 +600,7 @@ def test_wh(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_qu(solr, client, jwt, app):
     clean_database(solr)
@@ -576,6 +614,7 @@ def test_qu(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_ps(solr, client, jwt, app):
     clean_database(solr)
@@ -589,8 +628,10 @@ def test_ps(solr, client, jwt, app):
     )
 
 
+@pytest.mark.skip(reason="not handled yet")
+@integration_synonym_api
 @integration_solr
-def terra(solr, client, jwt, app):
+def test_terra(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'TERRA', id='1')
     verify_results(client, jwt,
@@ -601,6 +642,7 @@ def terra(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_ayaan(solr, client, jwt, app):
     clean_database(solr)
@@ -614,6 +656,7 @@ def test_ayaan(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_aggri(solr, client, jwt, app):
     clean_database(solr)
@@ -627,6 +670,7 @@ def test_aggri(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_kofi(solr, client, jwt, app):
     clean_database(solr)
@@ -640,6 +684,7 @@ def test_kofi(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_tru(solr, client, jwt, app):
     clean_database(solr)
@@ -653,8 +698,10 @@ def test_tru(solr, client, jwt, app):
     )
 
 
+@pytest.mark.skip(reason="not handled yet")
+@integration_synonym_api
 @integration_solr
-def dymond(solr, client, jwt, app):
+def test_dymond(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'DYMOND', id='1')
     verify_results(client, jwt,
@@ -665,8 +712,10 @@ def dymond(solr, client, jwt, app):
     )
 
 
+@pytest.mark.skip(reason="compound words not handled yet")
+@integration_synonym_api
 @integration_solr
-def bee_kleen(solr, client, jwt, app):
+def test_bee_kleen(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'BEE KLEEN', id='1')
     verify_results(client, jwt,
@@ -677,6 +726,7 @@ def bee_kleen(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_ignore_exact_match_keep_phonetic(solr, client, jwt, app):
     clean_database(solr)
@@ -692,6 +742,7 @@ def test_ignore_exact_match_keep_phonetic(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_match_both_words(solr, client, jwt, app):
     clean_database(solr)
@@ -705,6 +756,7 @@ def test_match_both_words(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_match_at_right_level(solr, client, jwt, app):
     clean_database(solr)
@@ -719,6 +771,7 @@ def test_match_at_right_level(solr, client, jwt, app):
     )
 
 
+@integration_synonym_api
 @integration_solr
 def test_resists_qword_matching_several_words(solr, client, jwt, app):
     clean_database(solr)
@@ -729,5 +782,59 @@ def test_resists_qword_matching_several_words(solr, client, jwt, app):
            {'name': '----BEHAVIOUR INTERVENTION'},
            {'name': '----BEHAVIOUR'},
            {'name': 'ANDERSON BEHAVIOR BEHAVIOR'}
+       ]
+    )
+
+
+@integration_synonym_api
+@integration_solr
+def test_leading_vowel_a(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'AILEEN ENTERPRISES', id='1')
+    verify_results(client, jwt,
+       query='ALAN HARGREAVES CORPORATION',
+       expected=[
+           {'name': '----ALAN HARGREAVES'},
+           {'name': '----ALAN'}
+       ]
+    )
+
+
+@integration_synonym_api
+@integration_solr
+def test_leading_vowel_e(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'ACME', id='1')
+    verify_results(client, jwt,
+       query='EQUIOM',
+       expected=[
+           {'name': '----EQUIOM'}
+       ]
+    )
+
+
+@integration_synonym_api
+@integration_solr
+def test_leading_vowel_not_match_consonant(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'HELENAH WU & CO. INC.', id='1')
+    seed_database_with(solr, 'A BETTER WAY HERBALS LTD.', id='2')
+    verify_results(client, jwt,
+       query='EH',
+       expected=[
+           {'name': '----EH'}
+       ]
+    )
+
+
+@integration_synonym_api
+@integration_solr
+def test_unusual_result(solr, client, jwt, app):
+    clean_database(solr)
+    seed_database_with(solr, 'DOUBLE J AVIATION LTD.', id='1')
+    verify_results(client, jwt,
+       query='TABLE',
+       expected=[
+           {'name': '----TABLE'}
        ]
     )
