@@ -101,7 +101,8 @@ class SolrQueries:
             '&sort=score%20desc'
             '{synonyms_clause}{name_copy_clause}',
         HISTORY:
-            '/solr/names/select?sow=false&df=name_exact_match&wt=json&&rows={rows}&q={name}&fl=nr_num,name,score,submit_count,name_state_type_cd',
+            '/solr/names/select?sow=false&df=name_exact_match&wt=json&&rows={rows}&q={name}'
+            '&fl=nr_num,name,score,submit_count,name_state_type_cd',
         TRADEMARKS:
             '/solr/trademarks/select?'
             'defType=edismax'
@@ -260,9 +261,10 @@ class SolrQueries:
                         synonyms_clause=synonyms_clause,
                     )
                     current_app.logger.debug('Query: ' + query)
-                    connections.append((json.load(request.urlopen(query)), '----' + prox_search_str.replace('\\', '')
-                                        .replace('*','') + synonyms_clause.replace('&fq=name_with_', ' ')
-                                        .replace('%20', ', ') + ' - PROXIMITY SEARCH'))
+                    connections.append((json.load(request.urlopen(query)),
+                                        '----' + prox_search_str.replace('\\', '').replace('*','').replace('@','')
+                                        + synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')
+                                        + ' - PROXIMITY SEARCH'))
 
                 ### Old (txt_starts_with:) search query
                 query = solr_base_url + SolrQueries.queries['oldsynconflicts'].format(
@@ -276,7 +278,7 @@ class SolrQueries:
                 connections.append((json.load(request.urlopen(query)), '----' +
                                     old_alg_search_str.replace('\\', '').replace('%20', ' ').replace('**','*') +
                                     synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
-                                    ' - EXACT WORD ORDER (OLD SEARCH)'))
+                                    ' - EXACT WORD ORDER'))
 
             return connections
 
@@ -302,7 +304,7 @@ class SolrQueries:
                     current_app.logger.debug('Query: ' + query)
                     result = json.load(request.urlopen(query))
 
-                    connections.append((result, '----' + start_str.replace('*','') +
+                    connections.append((result, '----' + start_str.replace('*','').replace('@','') +
                                         synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
 
             return connections
@@ -331,7 +333,7 @@ class SolrQueries:
                 docs = result['response']['docs']
                 result['response']['docs'] = cls.post_treatment(docs, start_str)
 
-                connections.append((result, '----' + start_str.replace('*','') +
+                connections.append((result, '----' + start_str.replace('*','').replace('@','') +
                                     synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
 
             return connections
