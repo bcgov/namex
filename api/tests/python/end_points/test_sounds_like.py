@@ -838,3 +838,14 @@ def test_unusual_result(solr, client, jwt, app):
            {'name': '----TABLE'}
        ]
     )
+
+@integration_synonym_api
+@integration_solr
+def test_stack_ignores_wildcards(client, jwt, app):
+    verify_results(client, jwt,
+        query="TESTING* @WILDCARDS",
+        expected=[
+            {'name': '----TESTING WILDCARDS'},
+            {'name': '----TESTING'}
+        ]
+    )
