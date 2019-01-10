@@ -26,24 +26,10 @@ def upgrade():
     )
 
     op.alter_column(
-        table_name='event',
+        table_name='events',
         column_name='event_dt',
         type_=sa.TIMESTAMP(timezone=True),
         postgresql_using="(event_dt::timestamp || 'UTC')::timestamptz"
-    )
-
-    op.alter_column(
-        table_name='names',
-        column_name='consumption_date',
-        type_=sa.TIMESTAMP(timezone=True),
-        postgresql_using="(consumption_date::timestamp || 'PST')::timestamptz"
-    )
-
-    op.alter_column(
-        table_name='partner_name_system',
-        column_name='partner_name_date',
-        type_=sa.TIMESTAMP(timezone=True),
-        postgresql_using="date_trunc('day', (partner_name_date::timestamp || 'UTC')::timestamptz)"
     )
 
     op.alter_column(
@@ -55,30 +41,16 @@ def upgrade():
 
     op.alter_column(
         table_name='requests',
-        column_name='nro_last_update',
-        type_=sa.TIMESTAMP(timezone=True),
-        postgresql_using="(nro_last_update::timestamp || 'PST')::timestamptz"
-    )
-
-    op.alter_column(
-        table_name='requests',
         column_name='priority_date',
         type_=sa.TIMESTAMP(timezone=True),
         postgresql_using="(priority_date::timestamp || 'UTC')::timestamptz"
     )
 
     op.alter_column(
-        table_name='requests',
-        column_name='submitted_date',
-        type_=sa.TIMESTAMP(timezone=True),
-        postgresql_using="date_trunc('day', (submitted_date::timestamp || 'PST')::timestamptz)"
-    )
-
-    op.alter_column(
         table_name='users',
-        column_name='creationdate',
+        column_name='creationDate',
         type_=sa.TIMESTAMP(timezone=True),
-        postgresql_using="(creationdate::timestamp || 'UTC')::timestamptz"
+        postgresql_using="(\"creationDate\"::timestamp || 'UTC')::timestamptz"
     )
 
 

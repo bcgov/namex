@@ -10,7 +10,7 @@ class PartnerNameSystem(db.Model):
     partnerNameTypeCd = db.Column('partner_name_type_cd', db.String(10))
     partnerNameNumber = db.Column('partner_name_number', db.String(20))
     partnerJurisdictionTypeCd = db.Column('partner_jurisdiction_type_cd', db.String(3))
-    partnerNameDate = db.Column('partner_name_date', db.DateTime(timezone=True))
+    partnerNameDate = db.Column('partner_name_date', db.DateTime)
     partnerName = db.Column('partner_name', db.String(255))
 
     # "do it for me" (ie: NWPTA requested) indicator, set when data comes from Oracle so we have a

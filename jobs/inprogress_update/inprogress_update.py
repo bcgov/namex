@@ -37,46 +37,66 @@ def get_ops_params():
     return delay, max_rows
 
 
-app = create_app(Config)
-delay, max_rows = get_ops_params()
+def job(user: User, max_rows: int, delay: int) -> (int, bool):
+    row_count = 0
 
-start_time = datetime.utcnow()
-row_count = 0
+    try:
 
-try:
-    user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
+        reqs = db.session.query(Request). \
+            filter(Request.stateCd == State.INPROGRESS). \
+            filter(Request.lastUpdate <= text('(now() at time zone \'utc\') - INTERVAL \'{delay} SECONDS\''.format(delay=delay))). \
+            order_by(Request.lastUpdate.asc()). \
+            limit(max_rows). \
+            with_for_update().all()
 
-    reqs = db.session.query(Request).\
-                filter(Request.stateCd == State.INPROGRESS). \
-                filter(Request.lastUpdate <= text('NOW() - INTERVAL \'{delay} SECONDS\''.format(delay=delay))). \
-            order_by(Request.lastUpdate.asc()).\
-                limit(max_rows).\
-                with_for_update().all()
+        for r in reqs:
+            row_count += 1
 
-    for r in reqs:
-        row_count += 1
+            current_app.logger.debug('processing: {}'.format(r.nrNum))
 
-        current_app.logger.debug('processing: {}'.format(r.nrNum))
+            print ('nr {}, state: {} last_update:{}'.format(r.nrNum, r.stateCd, r.lastUpdate))
 
-        # if this NR was previously in DRAFT, reset it to that state (ie: the user walked away from an open edit window)
-        if r.previousStateCd == State.DRAFT:
-            r.stateCd = State.DRAFT
-            r.previousStateCd = None
-        # otherwise put it on hold
-        else:
-            r.stateCd = State.HOLD
+            # if this NR was previously in DRAFT, reset it to that state (ie: the user walked away from an open edit window)
+            if r.previousStateCd == State.DRAFT:
+                r.stateCd = State.DRAFT
+                r.previousStateCd = None
+            # otherwise put it on hold
+            else:
+                r.stateCd = State.HOLD
 
-        db.session.add(r)
-        EventRecorder.record(user, Event.MARKED_ON_HOLD, r, {}, save_to_session=True)
+            db.session.add(r)
+            EventRecorder.record(user, Event.MARKED_ON_HOLD, r, {}, save_to_session=True)
 
-    db.session.commit()
+        db.session.commit()
+        return row_count, True
 
-except Exception as err:
-    db.session.rollback()
+    except Exception as err:
+        current_app.logger.error(err)
+        db.session.rollback()
+        return -1, False
+
+
+if __name__ == "__main__":
+    NRO_SERVICE_ACCOUNT = 'NRO_SERVICE_ACCOUNT'
+    app = create_app(Config)
+    delay, max_rows = get_ops_params()
+
+    start_time = datetime.utcnow()
+
+    user = User.find_by_username(current_app.config[NRO_SERVICE_ACCOUNT])
+    if not user:
+        print("job: unable to load {0}, current config value={1}"
+              .format(NRO_SERVICE_ACCOUNT, current_app.config[NRO_SERVICE_ACCOUNT]))
+        exit(0)
+
+    row_count, success = job(user, max_rows, delay)
+
+    app.do_teardown_appcontext()
+    end_time = datetime.utcnow()
+
+    if success:
+        print("job - requests processed: {0} completed in:{1}".format(row_count, end_time-start_time))
+        exit(0)
+
     print('Failed to move timed out INPROGRESS NRs to HOLD: ', err, err.with_traceback(None), file=sys.stderr)
     exit(1)
-
-app.do_teardown_appcontext()
-end_time = datetime.utcnow()
-print("job - requests processed: {0} completed in:{1}".format(row_count, end_time-start_time))
-exit(0)

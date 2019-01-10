@@ -205,7 +205,7 @@ def test_add_comments(app, request, session, test_comments, test_size, should_ha
                 continue
 
         assert comment_found
-        assert EPOCH_DATETIME == com.timestamp
+        assert EPOCH_DATETIME == com.timestamp.replace(tzinfo=None)
 
 
 pns_test_data=[([{'partner_name_type_cd': 'type_cd'
