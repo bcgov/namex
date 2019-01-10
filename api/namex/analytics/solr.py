@@ -142,6 +142,7 @@ class SolrQueries:
                 name = name[:index]
                 break
 
+        name = parse.quote(name)
         name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
         list_name_split = name.split()
 
@@ -208,8 +209,8 @@ class SolrQueries:
                 solr['response']['start'] = result['response']['start']
 
                 if previous_stack_title.replace(' ','') != connection[1].replace(' ',''):
-                    solr['response']['docs'].append({'name': connection[1]})
-                    previous_stack_title = connection[1]
+                    solr['response']['docs'].append({'name': parse.unquote(connection[1])})
+                    previous_stack_title = parse.unquote(connection[1])
 
                 if len(result['response']['docs']) > 0:
 
