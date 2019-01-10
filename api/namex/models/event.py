@@ -14,7 +14,7 @@ class Event(db.Model):
     __tablename__ = 'events'
 
     id = db.Column(db.Integer, primary_key=True)
-    eventDate = db.Column('event_dt', db.DateTime, default=datetime.utcnow)
+    eventDate = db.Column('event_dt', db.DateTime(timezone=True), default=datetime.utcnow)
     action = db.Column(db.String(1000))
     jsonZip = db.Column('json_zip', db.LargeBinary)
 

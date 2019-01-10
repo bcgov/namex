@@ -33,7 +33,7 @@ def test_create_expiry_date(test_name, start_date, days, hours, mins, tz, expect
 
 
 datapump_test_data = [
-    (datetime.utcfromtimestamp(0), datetime(1970, 3, 2, 23, 59)),
+    (datetime.utcfromtimestamp(0), datetime(1970, 2, 26, 23, 59)),
     (datetime(2001, 8, 5,  9, 00, tzinfo=timezone('US/Pacific',)), datetime(2001, 9, 30, 23, 59)),
     (datetime(2001, 8, 5, 19, 00, tzinfo=timezone('US/Pacific',)), datetime(2001, 9, 30, 23, 59)),
 ]

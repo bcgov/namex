@@ -255,23 +255,23 @@ class Requests(Resource):
 
         if lastUpdateInterval == 'Today':
             q = q.filter(RequestDAO.lastUpdate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour)))
+                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour)))
         if lastUpdateInterval == 'Yesterday':
             today_offset = current_hour
             yesterday_offset = today_offset+24
             q = q.filter(RequestDAO.lastUpdate < text(
-                'NOW() - INTERVAL \'{today_offset} HOURS\''.format(today_offset=today_offset)))
+                '(now() at time zone \'utc\') - INTERVAL \'{today_offset} HOURS\''.format(today_offset=today_offset)))
             q = q.filter(RequestDAO.lastUpdate > text(
-                'NOW() - INTERVAL \'{yesterday_offset} HOURS\''.format(yesterday_offset=yesterday_offset)))
+                '(now() at time zone \'utc\') - INTERVAL \'{yesterday_offset} HOURS\''.format(yesterday_offset=yesterday_offset)))
         elif lastUpdateInterval == '2 days':
             q = q.filter(RequestDAO.lastUpdate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24)))
+                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24)))
         elif lastUpdateInterval == '7 days':
             q = q.filter(RequestDAO.lastUpdate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24*6)))
+                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24*6)))
         elif lastUpdateInterval == '30 days':
             q = q.filter(RequestDAO.lastUpdate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24*29)))
+                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24*29)))
 
         q = q.order_by(text(sort_by))
 
@@ -1138,7 +1138,7 @@ class Stats(Resource):
 
         q = RequestDAO.query \
             .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE))\
-            .filter(RequestDAO.lastUpdate >= text('NOW() - INTERVAL \'{delay} HOURS\''.format(delay=timespan))) \
+            .filter(RequestDAO.lastUpdate >= text('(now() at time zone \'utc\') - INTERVAL \'{delay} HOURS\''.format(delay=timespan))) \
             .order_by(RequestDAO.lastUpdate.desc())
 
         count_q = q.statement.with_only_columns([func.count()]).order_by(None)

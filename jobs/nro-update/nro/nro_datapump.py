@@ -7,7 +7,7 @@ from namex.models import Name, State
 from namex.services.nro.utils import nro_examiner_name
 
 
-def create_expiry_date(start: datetime, expires_in_days: int, expiry_hour: int = 23, expiry_min: int = 0, tz: timezone = timezone('US/Pacific')) -> datetime:
+def create_expiry_date(start: datetime, expires_in_days: int, expiry_hour: int = 23, expiry_min: int = 59, tz: timezone = timezone('US/Pacific')) -> datetime:
 
     date = (start.astimezone(tz) + timedelta(days=expires_in_days))\
         .replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
@@ -19,6 +19,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
 
     expiry_date = create_expiry_date(start=nr.lastUpdate, expires_in_days=expires_days, tz=timezone('US/Pacific'))
 
+    print (expiry_date)
     # init dict for examiner comment data, populated below in loop through names
     examiner_comment = {
         'choice': 0,

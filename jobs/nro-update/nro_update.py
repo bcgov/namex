@@ -62,10 +62,11 @@ try:
     # so just leaving it here for future reference
     # q = q.filter(Request.lastUpdate < datetime.utcnow()-timedelta(seconds=delay)). \
     #
+
     q = db.session.query(Request).\
                 filter(Request.stateCd.in_([State.APPROVED, State.REJECTED, State.CONDITIONAL])).\
                 filter(Request.furnished != 'Y').\
-                filter(Request.lastUpdate <= text('NOW() - INTERVAL \'{delay} SECONDS\''.format(delay=delay))).\
+                filter(Request.lastUpdate <= text('(now() at time zone \'utc\') - INTERVAL \'{delay} SECONDS\''.format(delay=delay))).\
                 order_by(Request.lastUpdate.asc()). \
                 limit(max_rows). \
                 with_for_update()
