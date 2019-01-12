@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ba3f0ef2-ce4a-4704-9c8a-96a89bdd8b0f",
+		"_postman_id": "7fd6ec08-4748-4625-93dd-e1aab8ccf27a",
 		"name": "namex-pipeline-dev",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1537,7 +1537,7 @@
 									"});",
 									"",
 									"it(\"Should add a comment re. name change\", () => {",
-									"   response.body.comments[0].comment.should.include(\"Name choice 1 changed from A C C DIAMONDS LTD. LIMITED to A C C DIAMONDS LTD. LIMITED TESTING\");",
+									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"Name choice 1 changed from A C C DIAMONDS LTD. LIMITED to A C C DIAMONDS LTD. LIMITED TESTING\");",
 									"});",
 									""
 								],
@@ -1671,7 +1671,178 @@
 					"response": []
 				},
 				{
-					"name": "/requests - put NR #-reset",
+					"name": "/requests - put NR # - test RESET - prep data - set to furnished",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should be marked as furnished in prep for RESET testing (step 2)\", () => {",
+									"   response.body.furnished.should.include(\"Y\");",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"additionalInfo\": \"More info TESTING\",\r\n\t\"applicants\": {\r\n\t\t\"addrLine1\": \"940 Blanshard Street TESTING\",\r\n\t\t\"addrLine2\": null,\r\n\t\t\"addrLine3\": null,\r\n\t\t\"city\": \"Victoria\",\r\n\t\t\"clientFirstName\": null,\r\n\t\t\"clientLastName\": null,\r\n\t\t\"contact\": \"John Test\",\r\n\t\t\"countryTypeCd\": \"CA\",\r\n\t\t\"declineNotificationInd\": null,\r\n\t\t\"emailAddress\": \"testoutputs@gov.bc.ca\",\r\n\t\t\"faxNumber\": null,\r\n\t\t\"firstName\": \"John\",\r\n\t\t\"lastName\": \"Test\",\r\n\t\t\"middleName\": null,\r\n\t\t\"partyId\": 1486844,\r\n\t\t\"phoneNumber\": \"2505555555\",\r\n\t\t\"postalCd\": \"V8V4K8\",\r\n\t\t\"stateProvinceCd\": \"BC\"\r\n\t},\r\n\t\"comments\": [],\r\n\t\"consentFlag\": null,\r\n\t\"corpNum\": null,\r\n\t\"expirationDate\": null,\r\n\t\"furnished\": \"Y\",\r\n\t\"lastUpdate\": \"Tue, 04 Dec 2018 14:45:19 GMT\",\r\n\t\"names\": [{\r\n\t\t\"choice\": 1,\r\n\t\t\"comment\": null,\r\n\t\t\"conflict1\": \"\",\r\n\t\t\"conflict1_num\": \"\",\r\n\t\t\"conflict2\": \"\",\r\n\t\t\"conflict2_num\": \"\",\r\n\t\t\"conflict3\": \"\",\r\n\t\t\"conflict3_num\": \"\",\r\n\t\t\"consumptionDate\": null,\r\n\t\t\"decision_text\": \"\",\r\n\t\t\"name\": \"A C C DIAMONDS LTD. LIMITED TESTING\",\r\n\t\t\"state\": \"NE\"\r\n\t}],\r\n\t\"natureBusinessInfo\": \"Nature of business can be pretty long so this one is more realistic. It even contains spaces and punctuation.\",\r\n\t\"nrNum\": \"NR 3597836\",\r\n\t\"nwpta\": [],\r\n\t\"previousNr\": null,\r\n\t\"previousRequestId\": null,\r\n\t\"priorityCd\": \"Y\",\r\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\r\n\t\"requestTypeCd\": \"CR\",\r\n\t\"state\": \"INPROGRESS\",\r\n\t\"submitCount\": 1,\r\n\t\"submittedDate\": \"Thu, 15 Nov 2018 08:59:18 GMT\",\r\n\t\"submitter_userid\": \"\",\r\n\t\"userId\": \"katie-ex\",\r\n\t\"xproJurisdiction\": null\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR # - test RESET functionality",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should be unfurnished\", () => {",
+									"   response.body.furnished.should.include(\"N\");",
+									"});",
+									"",
+									"it(\"Should add a comment re. reset\", () => {",
+									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"This NR was RESET.\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"additionalInfo\": \"More info TESTING\",\r\n\t\"applicants\": {\r\n\t\t\"addrLine1\": \"940 Blanshard Street TESTING\",\r\n\t\t\"addrLine2\": null,\r\n\t\t\"addrLine3\": null,\r\n\t\t\"city\": \"Victoria\",\r\n\t\t\"clientFirstName\": null,\r\n\t\t\"clientLastName\": null,\r\n\t\t\"contact\": \"John Test\",\r\n\t\t\"countryTypeCd\": \"CA\",\r\n\t\t\"declineNotificationInd\": null,\r\n\t\t\"emailAddress\": \"testoutputs@gov.bc.ca\",\r\n\t\t\"faxNumber\": null,\r\n\t\t\"firstName\": \"John\",\r\n\t\t\"lastName\": \"Test\",\r\n\t\t\"middleName\": null,\r\n\t\t\"partyId\": 1486844,\r\n\t\t\"phoneNumber\": \"2505555555\",\r\n\t\t\"postalCd\": \"V8V4K8\",\r\n\t\t\"stateProvinceCd\": \"BC\"\r\n\t},\r\n\t\"comments\": [],\r\n\t\"consentFlag\": null,\r\n\t\"corpNum\": null,\r\n\t\"expirationDate\": null,\r\n\t\"furnished\": \"N\",\r\n\t\"lastUpdate\": \"Tue, 04 Dec 2018 14:45:19 GMT\",\r\n\t\"names\": [{\r\n\t\t\"choice\": 1,\r\n\t\t\"comment\": null,\r\n\t\t\"conflict1\": \"\",\r\n\t\t\"conflict1_num\": \"\",\r\n\t\t\"conflict2\": \"\",\r\n\t\t\"conflict2_num\": \"\",\r\n\t\t\"conflict3\": \"\",\r\n\t\t\"conflict3_num\": \"\",\r\n\t\t\"consumptionDate\": null,\r\n\t\t\"decision_text\": \"\",\r\n\t\t\"name\": \"A C C DIAMONDS LTD. LIMITED TESTING\",\r\n\t\t\"state\": \"NE\"\r\n\t}],\r\n\t\"natureBusinessInfo\": \"Nature of business can be pretty long so this one is more realistic. It even contains spaces and punctuation.\",\r\n\t\"nrNum\": \"NR 3597836\",\r\n\t\"nwpta\": [],\r\n\t\"previousNr\": null,\r\n\t\"previousRequestId\": null,\r\n\t\"priorityCd\": \"Y\",\r\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\r\n\t\"requestTypeCd\": \"CR\",\r\n\t\"state\": \"INPROGRESS\",\r\n\t\"submitCount\": 1,\r\n\t\"submittedDate\": \"Thu, 15 Nov 2018 08:59:18 GMT\",\r\n\t\"submitter_userid\": \"\",\r\n\t\"userId\": \"katie-ex\",\r\n\t\"xproJurisdiction\": null\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR #- reset test data to original state",
 					"event": [
 						{
 							"listen": "test",
