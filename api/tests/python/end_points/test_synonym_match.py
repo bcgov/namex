@@ -417,3 +417,18 @@ def test_exact_word_order_stack_title_with_wilcards(client, jwt, app):
         expected_list=['----TESTING* WILDCARDS* - EXACT WORD ORDER', '----TESTING* - EXACT WORD ORDER'],
         not_expected_list=['----TESTING** - EXACT WORD ORDER']
     )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('WALTER’S “WAFFLE” HOUSE', '----WALTER’S “WAFFLE” HOUSE - PROXIMITY SEARCH'),
+    ('TJ´S BACKCOUNTRY ADVENTURES.', '----TJ´S BACKCOUNTRY ADVENTURES. - PROXIMITY SEARCH'),
+    ('THE HOUSE OF BÜBÜ AN DA WOLF.', '----THE HOUSE OF BÜBÜ AN DA WOLF. - PROXIMITY SEARCH'),
+    ('DIAMANTÉ DIAMOND SETTING', '----DIAMANTÉ DIAMOND SETTING - PROXIMITY SEARCH'),
+])
+def test_bypass_nonascii_characters(client, jwt, app, criteria, seed):
+    # seed_database_with(client, jwt, seed)
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
