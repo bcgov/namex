@@ -551,6 +551,9 @@ class Request(Resource):
             if nrd.furnished == RequestDAO.REQUEST_FURNISHED and json_input.get('furnished', None) == 'N':
                 reset = True
 
+                # add a generated comment re. this NR being reset
+                json_input['comments'].append({'comment': 'This NR was RESET.'})
+
             request_header_schema.load(json_input, instance=nrd, partial=True)
             nrd.additionalInfo = convert_to_ascii(json_input.get('additionalInfo', None))
             nrd.furnished = json_input.get('furnished', 'N')

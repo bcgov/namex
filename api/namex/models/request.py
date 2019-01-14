@@ -65,7 +65,7 @@ class Request(db.Model):
     # Relationships - Applicants
     applicants = db.relationship('Applicant', lazy='dynamic')
     # Relationships - Examiner Comments
-    comments = db.relationship('Comment', lazy='dynamic')
+    comments = db.relationship('Comment', lazy='dynamic', order_by="Comment.timestamp")
     # Relationships - Examiner Comments
     partnerNS = db.relationship('PartnerNameSystem', lazy='dynamic')
 

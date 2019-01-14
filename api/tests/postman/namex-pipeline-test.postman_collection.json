@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "7f5c6071-2798-43b1-918c-5656a31523e5",
+		"_postman_id": "d5056118-faa1-4004-906f-b4524c337fe2",
 		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1542,7 +1542,7 @@
 									"});",
 									"",
 									"it(\"Should add a comment re. name change\", () => {",
-									"   response.body.comments[0].comment.should.include(\"Name choice 1 changed from STRANGWAY & SONS ACCOUNTING SERVICES to TEST\");",
+									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"Name choice 1 changed from STRANGWAY & SONS ACCOUNTING SERVICES to TEST\");",
 									"});",
 									""
 								],
@@ -1792,7 +1792,164 @@
 					]
 				},
 				{
-					"name": "/requests - put NR #-reset",
+					"name": "/requests - put NR # - test RESET - prep data - set to furnished",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8e962016-31ad-44e1-83d2-f87eb08b986e",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should be marked as furnished in prep for RESET testing (step 2)\", () => {",
+									"   response.body.furnished.should.include(\"Y\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"additionalInfo\": \"TEST\",\n    \"applicants\": {\n        \"addrLine1\": \"zzz1571 ABBOTT ST\",\n        \"addrLine2\": null,\n        \"addrLine3\": null,\n        \"city\": \"zzzVictoria\",\n        \"clientFirstName\": \"TEST\",\n        \"clientLastName\": \"qqqSmith\",\n        \"contact\": \"zzzJeffrey Hall\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"lorna.trent@gov.bc.ca\",\n        \"faxNumber\": \"250-638-9694\",\n        \"firstName\": \"zzzLorna\",\n        \"lastName\": \"zzzTrent\",\n        \"middleName\": null,\n        \"partyId\": 1051,\n        \"phoneNumber\": \"250-635-7342\",\n        \"postalCd\": \"V9E 4S3\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"Y\",\n    \"id\": 1051,\n    \"lastUpdate\": \"Mon, 24 Sep 2018 18:24:15 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"TEST\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"TEST\",\n    \"nrNum\": \"NR 2943527\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"Y\",\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 10:27:55 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"kial-ex\",\n    \"xproJurisdiction\": \"NEW BRUNSWICK\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR # - test RESET functionality",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8e962016-31ad-44e1-83d2-f87eb08b986e",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 8000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(8000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should be unfurnished\", () => {",
+									"   response.body.furnished.should.include(\"N\");",
+									"});",
+									"",
+									"it(\"Should add a comment re. reset\", () => {",
+									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"This NR was RESET.\");",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"additionalInfo\": \"TEST\",\n    \"applicants\": {\n        \"addrLine1\": \"zzz1571 ABBOTT ST\",\n        \"addrLine2\": null,\n        \"addrLine3\": null,\n        \"city\": \"zzzVictoria\",\n        \"clientFirstName\": \"TEST\",\n        \"clientLastName\": \"qqqSmith\",\n        \"contact\": \"zzzJeffrey Hall\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"lorna.trent@gov.bc.ca\",\n        \"faxNumber\": \"250-638-9694\",\n        \"firstName\": \"zzzLorna\",\n        \"lastName\": \"zzzTrent\",\n        \"middleName\": null,\n        \"partyId\": 1051,\n        \"phoneNumber\": \"250-635-7342\",\n        \"postalCd\": \"V9E 4S3\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 1051,\n    \"lastUpdate\": \"Mon, 24 Sep 2018 18:24:15 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"TEST\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"TEST\",\n    \"nrNum\": \"NR 2943527\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"Y\",\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 10:27:55 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"kial-ex\",\n    \"xproJurisdiction\": \"NEW BRUNSWICK\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						},
+						"description": "Test RESET"
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR #- reset test data to original state",
 					"event": [
 						{
 							"listen": "test",
