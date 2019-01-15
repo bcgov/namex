@@ -799,40 +799,36 @@ class Request(Resource):
                         return jsonify(errors=warning_and_errors), 400
 
 
-            # update oracle if this nr was reset
             if reset:
+                nrd.stateCd = State.DRAFT
+                is_changed__request_state = True
+
                 nrd.expirationDate = None
-                current_app.logger.debug('set state to h')
-                try:
-                    nro.set_request_status_to_h(nr, user.username)
-                except (NROServicesError, Exception) as err:
-                    MessageServices.add_message('error', 'reset_request_in_NRO', err)
-                    # flash(err.error, 'error')
+                is_changed__request = True
 
-            ### Update NR Details in NRO (not for reset)
-            else:
-                try:
-                    change_flags = {
-                        'is_changed__request': is_changed__request,
-                        'is_changed__previous_request': is_changed__previous_request,
-                        'is_changed__applicant': is_changed__applicant,
-                        'is_changed__address': is_changed__address,
-                        'is_changed__name1': is_changed__name1,
-                        'is_changed__name2': is_changed__name2,
-                        'is_changed__name3': is_changed__name3,
-                        'is_changed__nwpta_ab': is_changed__nwpta_ab,
-                        'is_changed__nwpta_sk': is_changed__nwpta_sk,
-                        'is_changed__request_state': is_changed__request_state,
-                    }
+            ### Update NR Details in NRO
+            try:
+                change_flags = {
+                    'is_changed__request': is_changed__request,
+                    'is_changed__previous_request': is_changed__previous_request,
+                    'is_changed__applicant': is_changed__applicant,
+                    'is_changed__address': is_changed__address,
+                    'is_changed__name1': is_changed__name1,
+                    'is_changed__name2': is_changed__name2,
+                    'is_changed__name3': is_changed__name3,
+                    'is_changed__nwpta_ab': is_changed__nwpta_ab,
+                    'is_changed__nwpta_sk': is_changed__nwpta_sk,
+                    'is_changed__request_state': is_changed__request_state,
+                }
 
-                    # if any data has changed from an NR Details edit, update it in Oracle
-                    if any(value is True for value in change_flags.values()):
-                        warnings = nro.change_nr(nrd, change_flags)
-                        if warnings:
-                            MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
+                # if any data has changed from an NR Details edit, update it in Oracle
+                if any(value is True for value in change_flags.values()):
+                    warnings = nro.change_nr(nrd, change_flags)
+                    if warnings:
+                        MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
 
-                except (NROServicesError, Exception) as err:
-                    MessageServices.add_message('error', 'change_request_in_NRO', err)
+            except (NROServicesError, Exception) as err:
+                MessageServices.add_message('error', 'change_request_in_NRO', err)
 
             # if there were errors, return the set of errors
             warning_and_errors = MessageServices.get_all_messages()
