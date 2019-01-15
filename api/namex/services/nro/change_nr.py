@@ -4,7 +4,7 @@
    the following pattern:
 
    create new event of type 'SYST'
-   create new transaction of type 'ADMIN'
+   create new transaction of type 'ADMIN' or 'CORRT'
    using STAFF_IDIR of 'namex'
 
    Each main segment has its own function call to facilitate testing,
@@ -13,7 +13,8 @@
 """
 
 from flask import current_app
-from .utils import generate_compressed_name
+from .utils import generate_compressed_name, nro_examiner_name
+from namex.models import State
 
 def update_nr (nr, ora_cursor, change_flags):
     """Update the Name Request in NRO
@@ -23,7 +24,8 @@ def update_nr (nr, ora_cursor, change_flags):
     eid = _get_event_id(ora_cursor)
     current_app.logger.debug('got to update_nr() for NR:{}'.format(nr.nrNum))
     current_app.logger.debug('event ID for NR Details edit:{}'.format(eid))
-    _create_nro_transaction(ora_cursor, nr, eid)
+    _create_nro_transaction(ora_cursor, nr, eid, transaction_type='CORRT')
+    _update_nro_request_state(ora_cursor, nr, eid, change_flags)
     _update_request(ora_cursor, nr, eid, change_flags)
     _update_nro_names(ora_cursor, nr, eid, change_flags)
     _update_nro_address(ora_cursor, nr, eid, change_flags)
@@ -52,15 +54,57 @@ def _get_event_id(oracle_cursor):  # -> (int)
     return event_id
 
 
-def _create_nro_transaction(oracle_cursor, nr, event_id):
+def _create_nro_transaction(oracle_cursor, nr, event_id, transaction_type='ADMIN'):
 
     oracle_cursor.execute("""
     INSERT INTO transaction (transaction_id, request_id, transaction_type_cd, event_id, staff_idir)
-      VALUES (transaction_seq.nextval, :request_id, 'ADMIN', :event_id, 'namex')
+      VALUES (transaction_seq.nextval, :request_id, :transaction_type, :event_id, 'namex')
     """,
                           request_id=nr.requestId,
+                          transaction_type=transaction_type,
                           event_id=event_id
                           )
+    current_app.logger.debug('transaction record created')
+
+def _update_nro_request_state(oracle_cursor, nr, event_id, change_flags):
+    """ Update the current request state. Can be used to set to any state except H. Mainly used to
+        set to Draft after edits pre-examination.
+
+        Only handles setting NR to following states in NRO:
+            D (Draft)
+    """
+
+    if 'is_changed__request_state' in change_flags.keys() and change_flags['is_changed__request_state']:
+
+        new_state = None
+        if nr.stateCd == State.DRAFT:
+            new_state = 'D'
+        else:
+            return
+
+        # set the end event for the existing record
+        oracle_cursor.execute("""
+        UPDATE request_state
+        SET end_event_id = :event_id
+        WHERE request_id = :request_id
+        AND end_event_id IS NULL
+        """,
+                       event_id=event_id,
+                       request_id=nr.requestId)
+
+        # create new request_state record
+        oracle_cursor.execute("""
+        INSERT INTO request_state (request_state_id, request_id, state_type_cd, 
+            start_event_id, end_event_id, examiner_idir, examiner_comment, state_comment, 
+            batch_id)
+        VALUES (request_state_seq.nextval, :request_id, :state, :event_id, NULL, 
+                  :examiner_id, NULL, NULL, NULL)
+        """,
+                       request_id=nr.requestId,
+                       state=new_state,
+                       event_id=event_id,
+                       examiner_id=nro_examiner_name(nr.activeUser.username)
+                       )
 
 
 def _update_request(oracle_cursor, nr, event_id, change_flags):
