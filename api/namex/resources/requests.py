@@ -982,7 +982,7 @@ class RequestsAnalysis(Resource):
 @api.route('/synonymbucket/<string:name>', methods=['GET','OPTIONS'])
 class SynonymBucket(Resource):
     START = 0
-    ROWS = 100
+    ROWS = 500
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -1000,7 +1000,7 @@ class SynonymBucket(Resource):
 @api.route('/cobrsphonetics/<string:name>', methods=['GET','OPTIONS'])
 class CobrsPhoneticBucket(Resource):
     START = 0
-    ROWS = 100
+    ROWS = 500
 
     @staticmethod
     @cors.crossdomain(origin='*')
