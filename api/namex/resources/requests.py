@@ -569,12 +569,14 @@ class Request(Resource):
             # check if any of the Oracle db fields have changed, so we can send them back
             is_changed__request = False
             is_changed__previous_request = False
+            is_changed__request_state = False
             if nrd.requestTypeCd != orig_nrd['requestTypeCd']: is_changed__request = True
             if nrd.expirationDate != orig_nrd['expirationDate']: is_changed__request = True
             if nrd.xproJurisdiction != orig_nrd['xproJurisdiction']: is_changed__request = True
             if nrd.additionalInfo != orig_nrd['additionalInfo']: is_changed__request = True
             if nrd.natureBusinessInfo != orig_nrd['natureBusinessInfo']: is_changed__request = True
             if nrd.previousRequestId != orig_nrd['previousRequestId']: is_changed__previous_request = True
+            if nrd.stateCd != orig_nrd['state']: is_changed__request_state = True
 
             ### END request header ###
 
@@ -820,6 +822,7 @@ class Request(Resource):
                         'is_changed__name3': is_changed__name3,
                         'is_changed__nwpta_ab': is_changed__nwpta_ab,
                         'is_changed__nwpta_sk': is_changed__nwpta_sk,
+                        'is_changed__request_state': is_changed__request_state,
                     }
 
                     # if any data has changed from an NR Details edit, update it in Oracle
