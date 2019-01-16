@@ -257,7 +257,7 @@ class SolrQueries:
                     query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
                         start=start,
                         rows=rows,
-                        start_str='\"' + parse.quote(prox_search_str) + '\"~{}'.format(prox_search_tuple[2]),
+                        start_str='\"' + parse.quote(prox_search_str).replace('%2A', '') + '\"~{}'.format(prox_search_tuple[2]),
                         synonyms_clause=synonyms_clause,
                     )
                     current_app.logger.debug('Query: ' + query)
@@ -297,7 +297,7 @@ class SolrQueries:
                     query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
                         start=start,
                         rows=rows,
-                        start_str='\"' + parse.quote(start_str) + '\"~{}'.format(str_tuple[2]),
+                        start_str='\"' + parse.quote(start_str).replace('%2A', '') + '\"~{}'.format(str_tuple[2]),
                         synonyms_clause=synonyms_clause,
                         exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
                     )
@@ -323,7 +323,7 @@ class SolrQueries:
                 query = solr_base_url + SolrQueries.queries['phonconflicts'].format(
                     start=start,
                     rows=rows,
-                    start_str='\"' + parse.quote(start_str) + '\"~{}'.format(str_tuple[2]),
+                    start_str='\"' + parse.quote(start_str).replace('%2A', '') + '\"~{}'.format(str_tuple[2]),
                     synonyms_clause=synonyms_clause,
                     exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
                 )
