@@ -142,7 +142,6 @@ class SolrQueries:
                 name = name[:index]
                 break
 
-        name = parse.quote(name)
         name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
         list_name_split = name.split()
 
@@ -209,8 +208,8 @@ class SolrQueries:
                 solr['response']['start'] = result['response']['start']
 
                 if previous_stack_title.replace(' ','') != connection[1].replace(' ',''):
-                    solr['response']['docs'].append({'name': parse.unquote(connection[1])})
-                    previous_stack_title = parse.unquote(connection[1])
+                    solr['response']['docs'].append({'name': connection[1]})
+                    previous_stack_title = connection[1]
 
                 if len(result['response']['docs']) > 0:
 
@@ -258,7 +257,7 @@ class SolrQueries:
                     query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
                         start=start,
                         rows=rows,
-                        start_str='\"' + prox_search_str.replace(' ', '%20') + '\"~{}'.format(prox_search_tuple[2]),
+                        start_str='\"' + parse.quote(prox_search_str) + '\"~{}'.format(prox_search_tuple[2]),
                         synonyms_clause=synonyms_clause,
                     )
                     current_app.logger.debug('Query: ' + query)
@@ -271,7 +270,7 @@ class SolrQueries:
                 query = solr_base_url + SolrQueries.queries['oldsynconflicts'].format(
                     start=start,
                     rows=rows,
-                    start_str=old_alg_search_str,
+                    start_str=parse.quote(old_alg_search_str).replace('%2A', '*').replace('%5C%2520', '\\%20'),
                     synonyms_clause=synonyms_clause,
                     name_copy_clause=cls._get_name_copy_clause(name)
                 )
@@ -298,7 +297,7 @@ class SolrQueries:
                     query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
                         start=start,
                         rows=rows,
-                        start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                        start_str='\"' + parse.quote(start_str) + '\"~{}'.format(str_tuple[2]),
                         synonyms_clause=synonyms_clause,
                         exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
                     )
@@ -324,7 +323,7 @@ class SolrQueries:
                 query = solr_base_url + SolrQueries.queries['phonconflicts'].format(
                     start=start,
                     rows=rows,
-                    start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                    start_str='\"' + parse.quote(start_str) + '\"~{}'.format(str_tuple[2]),
                     synonyms_clause=synonyms_clause,
                     exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
                 )
