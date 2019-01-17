@@ -410,6 +410,26 @@ class Request(Resource):
                 if nrd.stateCd == State.DRAFT:
                     warnings = nro.move_control_of_request_from_nro(nrd, user)
 
+                # if we're changing to DRAFT, update NRO status to "D" in NRO
+                if state == State.DRAFT:
+                    change_flags = {
+                        'is_changed__request': False,
+                        'is_changed__previous_request': False,
+                        'is_changed__applicant': False,
+                        'is_changed__address': False,
+                        'is_changed__name1': False,
+                        'is_changed__name2': False,
+                        'is_changed__name3': False,
+                        'is_changed__nwpta_ab': False,
+                        'is_changed__nwpta_sk': False,
+                        'is_changed__request_state': True,
+                    }
+
+                    warnings = nro.change_nr(nrd, change_flags)
+                    if warnings:
+                        MessageServices.add_message(MessageServices.ERROR,
+                                                    'change_request_in_NRO', warnings)
+
                 nrd.stateCd = state
                 nrd.userId = user.id
 
