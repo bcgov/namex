@@ -330,6 +330,140 @@ def test_add_names(app, request, session, test_names, previous_names):
 
         assert name_found
 
+names_test_after_reset_data = [
+    ([
+        {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'A'},
+    ], [
+        {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ], ['APPROVED',]),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'A'},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ], [
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ], ['APPROVED', 'NE']),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'R'},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'R'},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'A'},
+    ], [
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ], ['REJECTED', 'REJECTED', 'APPROVED']),
+]
+
+
+@pytest.mark.parametrize("previous_names, test_names, expected_states", names_test_after_reset_data)
+def test_add_names_after_reset(app, request, session, previous_names, test_names, expected_states):
+
+    # imports for just this test
+    from namex.services.nro.request_utils import add_names
+
+    # SETUP
+    # create an NR
+    nr = Request()
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+
+    if previous_names:
+        add_names(nr, previous_names)
+
+    nr.hasBeenReset = True
+
+    session.add(nr)
+    session.commit()
+
+    # Test
+    add_names(nr, test_names)
+    session.add(nr)
+    session.commit()
+
+    names = nr.names.all()
+
+    assert len(test_names) == len(names)
+
+    for name in names:
+        name_found = False
+        decision_data_intact = False
+        for tn in test_names:
+            if tn['name'] == name.name:
+                name_found = True
+                if name.state == expected_states[tn['choice_number']-1]:
+                    decision_data_intact = True
+                continue
+
+        assert name_found
+        assert decision_data_intact
+
+names_test_with_changes_data = [
+    ([
+        {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ], [
+        {'choice_number': 1, 'name': 'name corp new', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ]),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ], [
+        {'choice_number': 1, 'name': 'name corp1 new', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 2, 'name': 'name corp2 new', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ]),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ], [
+        {'choice_number': 1, 'name': 'name corp1 new', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 2, 'name': 'name corp2 new', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 3, 'name': 'name corp3 new', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+    ]),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+     ], [
+        {'choice_number': 1, 'name': 'name corp1 new', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 2, 'name': 'name corp2 new', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+     ]),
+]
+
+@pytest.mark.parametrize("previous_names, test_names", names_test_with_changes_data)
+def test_add_names_with_changes(app, request, session, previous_names, test_names):
+
+    # imports for just this test
+    from namex.services.nro.request_utils import add_names
+
+    # SETUP
+    # create an NR
+    nr = Request()
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+
+    if previous_names:
+        add_names(nr, previous_names)
+
+    session.add(nr)
+    session.commit()
+
+    # Test
+    add_names(nr, test_names)
+    session.add(nr)
+    session.commit()
+
+    names = nr.names.all()
+
+    assert len(test_names) == len(names)
+
+    for name in names:
+        name_found = False
+        decision_data_intact = False
+        for tn in test_names:
+            if tn['name'] == name.name:
+                name_found = True
+                continue
+
+        assert name_found
+
 
 priority_flag_testdata = [
     ('PQ', 'Y'),

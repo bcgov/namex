@@ -42,6 +42,10 @@ class Request(db.Model):
     #legacy sync tracking
     furnished = db.Column('furnished', db.String(1), default='N', index=True)
 
+    # Flag to indicate this NR has been reset. Cleared upon submission, so it is only true after
+    # reset before subsequent examination is complete.
+    hasBeenReset = db.Column('has_been_reset', db.Boolean, default=False)
+
     # parent keys
     userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'), index=True)
 
