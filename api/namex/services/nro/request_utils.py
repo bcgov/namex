@@ -106,28 +106,63 @@ def add_names(nr, nr_names):
         'R': Name.REJECTED,
         'C': Name.CONDITION
     }
-    # naive approach
-    # TODO change to an update / delete / insert flow
-    # remove all names
-    for ne in nr.names.all():
-        nr.names.remove(ne)
 
-    # add in the names from this request
+    # tracker to check whether all name choices are covered
+    name_choice_numbers = [1,2,3]
+
     for n in nr_names:
-        name = Name()
-        name.state = Name.NOT_EXAMINED if n['name_state_type_cd'] is None else NAME_STATE[n['name_state_type_cd']]
-        name.choice = n['choice_number']
-        name.name = n['name']
-        name.designation = n['designation']
 
-        if nr.stateCd in ['COMPLETED', State.REJECTED] and name.state == Name.APPROVED:
-            nr.stateCd = State.APPROVED
-        elif nr.stateCd in ['COMPLETED', State.REJECTED, State.APPROVED] and name.state == Name.CONDITION:
-            nr.stateCd = State.CONDITIONAL
-        elif nr.stateCd == 'COMPLETED' and name.state == Name.REJECTED:
-            nr.stateCd = State.REJECTED
+        # find existing name record
+        name_found = False
+        for name in nr.names.all():
+            if name.choice == n['choice_number']:
+                name_found = True
 
-        nr.names.append(name)
+                name.name = n['name']
+                name.designation = n['designation']
+
+                # if this NR hasn't recently been reset, set name and NR states as well
+                if not nr.hasBeenReset:
+                    name.state = Name.NOT_EXAMINED if n['name_state_type_cd'] is None \
+                        else NAME_STATE[n['name_state_type_cd']]
+
+                    if nr.stateCd in ['COMPLETED', State.REJECTED] and name.state == Name.APPROVED:
+                        nr.stateCd = State.APPROVED
+                    elif nr.stateCd in ['COMPLETED', State.REJECTED,
+                                        State.APPROVED] and name.state == Name.CONDITION:
+                        nr.stateCd = State.CONDITIONAL
+                    elif nr.stateCd == 'COMPLETED' and name.state == Name.REJECTED:
+                        nr.stateCd = State.REJECTED
+
+                name_choice_numbers.remove(name.choice)
+
+                break
+
+        # if we didn't find the name in the existing Namex names, add it - it's been added in NRO
+        if not name_found:
+            name = Name()
+            name.state = Name.NOT_EXAMINED if n['name_state_type_cd'] is None else NAME_STATE[n['name_state_type_cd']]
+            name.choice = n['choice_number']
+            name.name = n['name']
+            name.designation = n['designation']
+
+            if nr.stateCd in ['COMPLETED', State.REJECTED] and name.state == Name.APPROVED:
+                nr.stateCd = State.APPROVED
+            elif nr.stateCd in ['COMPLETED', State.REJECTED, State.APPROVED] and name.state == Name.CONDITION:
+                nr.stateCd = State.CONDITIONAL
+            elif nr.stateCd == 'COMPLETED' and name.state == Name.REJECTED:
+                nr.stateCd = State.REJECTED
+
+            nr.names.append(name)
+
+            name_choice_numbers.remove(name.choice)
+
+    # if there were any names not send back from NRO that are in Namex, remove them from Namex
+    # since they were deleted in NRO
+    if name_choice_numbers is not []:
+        for name in nr.names.all():
+            if name.choice in name_choice_numbers:
+                nr.names.remove(name)
 
 
 def add_applicant(nr, nr_applicant):
@@ -312,8 +347,12 @@ def get_nwpta(session, request_id):
 
 
 def get_names(session, request_id):
-    # get the NRO Names
-    #############################
+    """
+    Get the NRO Names.
+
+    To support reset functionality - keep decision data in Namex but clear it in NRO - this
+    function will not overwrite name decision data if the reset flag is true.
+    """
     sql = 'select choice_number,' \
           ' name,' \
           ' designation,' \
