@@ -2,11 +2,15 @@ import cx_Oracle
 from namex import nro
 from namex.models import User
 from tests.python import integration_oracle_namesdb, integration_oracle_local_namesdb
+<<<<<<< HEAD
 from namex.services.nro.change_nr import \
     _update_request, \
     _get_event_id, \
     _create_nro_transaction, \
     _update_nro_request_state
+=======
+from namex.services.nro.change_nr import _update_request, _cancel_nro_transaction
+>>>>>>> Set cancel status instead of admin status when cancel a NR
 
 
 @integration_oracle_namesdb
@@ -48,6 +52,7 @@ def test_preserves_previous_request_id(app):
     assert '99' == value
 
 
+<<<<<<< HEAD
 @integration_oracle_namesdb
 def test_create_nro_transaction(app):
     con = nro.connection
@@ -134,3 +139,29 @@ def test_update_nro_request_state_to_approved(app):
     resultset = cursor.fetchone()
 
     assert resultset is None
+=======
+@integration_oracle_local_namesdb
+def test_create_cancel_nro_transaction(app):
+    con = nro.connection
+    cursor = con.cursor()
+
+    cursor.execute("BEGIN EXECUTE IMMEDIATE 'DROP TABLE transaction'; EXCEPTION WHEN OTHERS THEN "
+                   "IF SQLCODE != -942 THEN NULL; END IF; END;")
+    cursor.execute("BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE transaction_seq'; EXCEPTION WHEN OTHERS THEN "
+                   "IF SQLCODE != -942 THEN NULL; END IF; END;")
+
+    cursor.execute('create sequence transaction_seq minvalue 1 maxvalue 9999999999 increment by 1 start with 1')
+    cursor.execute('create table transaction (transaction_id number(10), request_id varchar2(10), '
+                   'transaction_type_cd varchar2(10), event_id number(10),staff_idir varchar2(8))')
+    _cancel_nro_transaction(cursor, FakeRequest(), None)
+
+    cursor.execute("select transaction_type_cd from transaction")
+    (value,) = cursor.fetchone()
+
+    cursor.execute("BEGIN EXECUTE IMMEDIATE 'DROP TABLE transaction'; EXCEPTION WHEN OTHERS THEN "
+                   "IF SQLCODE != -942 THEN NULL; END IF; END;")
+    cursor.execute("BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE transaction_seq'; EXCEPTION WHEN OTHERS THEN "
+                   "IF SQLCODE != -942 THEN NULL; END IF; END;")
+
+    assert 'CANCL' == value
+>>>>>>> Set cancel status instead of admin status when cancel a NR
