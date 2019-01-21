@@ -68,6 +68,7 @@ def test_create_nro_transaction(app):
     assert value != None
     assert transaction_type_cd == 'ADMIN'
 
+
 @integration_oracle_namesdb
 def test_create_nro_transaction_with_type(app):
     con = nro.connection
@@ -134,3 +135,5 @@ def test_update_nro_request_state_to_approved(app):
     resultset = cursor.fetchone()
 
     assert resultset is None
+
+
