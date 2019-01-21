@@ -576,18 +576,19 @@ class Request(Resource):
             if nrd.furnished == RequestDAO.REQUEST_FURNISHED and json_input.get('furnished', None) == 'N':
                 reset = True
 
-                # set the flag indicating that the NR has been reset
-                nrd.hasBeenReset = True
-
-                # add a generated comment re. this NR being reset
-                json_input['comments'].append({'comment': 'This NR was RESET.'})
-
             request_header_schema.load(json_input, instance=nrd, partial=True)
             nrd.additionalInfo = convert_to_ascii(json_input.get('additionalInfo', None))
             nrd.furnished = json_input.get('furnished', 'N')
             nrd.natureBusinessInfo = convert_to_ascii(json_input.get('natureBusinessInfo', None))
             nrd.stateCd = state
             nrd.userId = user.id
+
+            if reset:
+                # set the flag indicating that the NR has been reset
+                nrd.hasBeenReset = True
+
+                # add a generated comment re. this NR being reset
+                json_input['comments'].append({'comment': 'This NR was RESET.'})
 
             try:
                 previousNr = json_input['previousNr']

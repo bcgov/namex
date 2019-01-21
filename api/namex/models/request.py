@@ -108,6 +108,7 @@ class Request(db.Model):
                 'additionalInfo' : self.additionalInfo,
                 'natureBusinessInfo' : self.natureBusinessInfo,
                 'furnished': self.furnished if (self.furnished is not None) else 'N',
+                'hasBeenReset': self.hasBeenReset,
                 'previousRequestId': self.previousRequestId,
                 'previousNr': previousNr,
                 'submitCount': self.submitCount,
@@ -230,6 +231,7 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'corpNum'
                  ,'expirationDate'
                  ,'furnished'
+                 ,'hasBeenReset'
                  ,'id'
                  ,'natureBusinessInfo'
                  ,'nrNum'
