@@ -9,7 +9,6 @@ from namex.models import State, Request, User, Event
 from namex.services.nro import NROServicesError
 from namex.services import EventRecorder
 from namex.services.nro.change_nr import update_nr, _get_event_id, _create_nro_transaction
-from namex.services.nro.change_nr import update_nr, _get_event_id, _cancel_nro_transaction
 
 from .exceptions import NROServicesError
 from .utils import nro_examiner_name
@@ -52,20 +51,18 @@ class NROServices(object):
         # so we don't have to that here
 
         return cx_Oracle.SessionPool(user=current_app.config.get('NRO_USER'),
-                                  password=current_app.config.get('NRO_PASSWORD'),
-                                  dsn='{0}:{1}/{2}'.format(current_app.config.get('NRO_HOST'),
-                                                           current_app.config.get('NRO_PORT'),
-                                                           current_app.config.get('NRO_DB_NAME')
-                                                           ),
-                                  min=1,
-                                  max=10,
-                                  increment=1,
-                                  connectiontype=cx_Oracle.Connection,
-                                  threaded=True,
-                                  getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,
-                                  waitTimeout=1500,
-                                  timeout=3600
-                                  )
+                                     password=current_app.config.get('NRO_PASSWORD'),
+                                     dsn='{0}:{1}/{2}'.format(current_app.config.get('NRO_HOST'),
+                                                              current_app.config.get('NRO_PORT'),
+                                                              current_app.config.get('NRO_DB_NAME')),
+                                     min=1,
+                                     max=10,
+                                     increment=1,
+                                     connectiontype=cx_Oracle.Connection,
+                                     threaded=True,
+                                     getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,
+                                     waitTimeout=1500,
+                                     timeout=3600)
 
     @property
     def connection(self):
@@ -343,14 +340,14 @@ class NROServices(object):
 
         try:
             con = self.connection
-            con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
+            con.begin() # explicit transaction in case we need to do other things than just call the stored proc
             try:
                 cursor = con.cursor()
 
                 event_id = _get_event_id(cursor)
                 current_app.logger.debug('got to cancel_nr() for NR:{}'.format(nr.nrNum))
                 current_app.logger.debug('event ID for NR:{}'.format(event_id))
-                _cancel_nro_transaction(cursor, nr, event_id)
+                _create_nro_transaction(cursor, nr, event_id, 'CANCL')
 
                 # get request_state record, with all fields
                 cursor.execute("""
@@ -395,13 +392,13 @@ class NROServices(object):
                 if con:
                     con.rollback()
                 raise NROServicesError({"code": "unable_to_set_state",
-                                        "description": "Unable to set the state of the NR in NRO"}, 500)
+                        "description": "Unable to set the state of the NR in NRO"}, 500)
             except Exception as err:
                 current_app.logger.error(err.with_traceback(None))
                 if con:
                     con.rollback()
                 raise NROServicesError({"code": "unable_to_set_state",
-                                        "description": "Unable to set the state of the NR in NRO"}, 500)
+                        "description": "Unable to set the state of the NR in NRO"}, 500)
 
         except Exception as err:
             # something went wrong, roll it all back
@@ -409,7 +406,7 @@ class NROServices(object):
             if con:
                 con.rollback()
             raise NROServicesError({"code": "unable_to_set_state",
-                                    "description": "Unable to set the state of the NR in NRO"}, 500)
+                        "description": "Unable to set the state of the NR in NRO"}, 500)
 
         return None
 
@@ -466,3 +463,4 @@ class NROServices(object):
             current_app.logger.debug('completed names for {}'.format(nr.nrNum))
 
         return nr
+
