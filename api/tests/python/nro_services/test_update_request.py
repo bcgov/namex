@@ -1,7 +1,7 @@
 import cx_Oracle
 from namex import nro
 from tests.python import integration_oracle_namesdb, integration_oracle_local_namesdb
-from namex.services.nro.change_nr import _update_request
+from namex.services.nro.change_nr import _update_request, _cancel_nro_transaction
 
 
 @integration_oracle_namesdb
@@ -41,3 +41,29 @@ def test_preserves_previous_request_id(app):
     (value,) = cursor.fetchone()
 
     assert '99' == value
+
+
+@integration_oracle_local_namesdb
+def test_create_cancel_nro_transaction(app):
+    con = nro.connection
+    cursor = con.cursor()
+
+    cursor.execute("BEGIN EXECUTE IMMEDIATE 'DROP TABLE transaction'; EXCEPTION WHEN OTHERS THEN "
+                   "IF SQLCODE != -942 THEN NULL; END IF; END;")
+    cursor.execute("BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE transaction_seq'; EXCEPTION WHEN OTHERS THEN "
+                   "IF SQLCODE != -942 THEN NULL; END IF; END;")
+
+    cursor.execute('create sequence transaction_seq minvalue 1 maxvalue 9999999999 increment by 1 start with 1')
+    cursor.execute('create table transaction (transaction_id number(10), request_id varchar2(10), '
+                   'transaction_type_cd varchar2(10), event_id number(10),staff_idir varchar2(8))')
+    _cancel_nro_transaction(cursor, FakeRequest(), None)
+
+    cursor.execute("select transaction_type_cd from transaction")
+    (value,) = cursor.fetchone()
+
+    cursor.execute("BEGIN EXECUTE IMMEDIATE 'DROP TABLE transaction'; EXCEPTION WHEN OTHERS THEN "
+                   "IF SQLCODE != -942 THEN NULL; END IF; END;")
+    cursor.execute("BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE transaction_seq'; EXCEPTION WHEN OTHERS THEN "
+                   "IF SQLCODE != -942 THEN NULL; END IF; END;")
+
+    assert 'CANCL' == value
