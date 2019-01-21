@@ -117,6 +117,16 @@ def _cancel_nro_transaction(oracle_cursor, nr, event_id):
                           event_id=event_id
                           )
 
+def _cancel_nro_transaction(oracle_cursor, nr, event_id):
+
+    oracle_cursor.execute("""
+    INSERT INTO transaction (transaction_id, request_id, transaction_type_cd, event_id, staff_idir)
+      VALUES (transaction_seq.nextval, :request_id, 'CANCL', :event_id, 'namex')
+    """,
+                          request_id=nr.requestId,
+                          event_id=event_id
+                          )
+
 def _update_request(oracle_cursor, nr, event_id, change_flags):
     """ Update the current request instance.
     """

@@ -3,6 +3,7 @@ from namex import nro
 from namex.models import User
 from tests.python import integration_oracle_namesdb, integration_oracle_local_namesdb
 <<<<<<< HEAD
+<<<<<<< HEAD
 from namex.services.nro.change_nr import \
     _update_request, \
     _get_event_id, \
@@ -11,6 +12,9 @@ from namex.services.nro.change_nr import \
 =======
 from namex.services.nro.change_nr import _update_request, _cancel_nro_transaction
 >>>>>>> Set cancel status instead of admin status when cancel a NR
+=======
+from namex.services.nro.change_nr import _update_request, _cancel_nro_transaction
+>>>>>>> c38389a4df40324987e72adac61e0f9897a2144d
 
 
 @integration_oracle_namesdb
@@ -52,6 +56,7 @@ def test_preserves_previous_request_id(app):
     assert '99' == value
 
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 @integration_oracle_namesdb
 def test_create_nro_transaction(app):
@@ -140,6 +145,8 @@ def test_update_nro_request_state_to_approved(app):
 
     assert resultset is None
 =======
+=======
+>>>>>>> c38389a4df40324987e72adac61e0f9897a2144d
 @integration_oracle_local_namesdb
 def test_create_cancel_nro_transaction(app):
     con = nro.connection
@@ -164,4 +171,7 @@ def test_create_cancel_nro_transaction(app):
                    "IF SQLCODE != -942 THEN NULL; END IF; END;")
 
     assert 'CANCL' == value
+<<<<<<< HEAD
 >>>>>>> Set cancel status instead of admin status when cancel a NR
+=======
+>>>>>>> c38389a4df40324987e72adac61e0f9897a2144d
