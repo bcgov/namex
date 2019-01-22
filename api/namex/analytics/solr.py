@@ -154,10 +154,11 @@ class SolrQueries:
             passed_names = []
             previous_stack_title = ''
             stemmed_words = cls.word_pre_processing(list_name_split, 'stems', solr_base_url)['stems']
-            print('stems: ', stemmed_words)
             stem_count = len(stemmed_words) * 2 + 1
-
+            count = 0
             for connection in connections:
+                seen_ordered_names = seen_names.copy()
+
                 result = connection[0]
                 solr['response']['numFound'] += result['response']['numFound']
                 result_name = parse.unquote(connection[1])
@@ -171,7 +172,6 @@ class SolrQueries:
 
                 if len(result['response']['docs']) > 0:
 
-                    seen_ordered_names = []
                     ordered_names = []
                     missed_names = []
                     # if there is a bracket in the stack title then there is a 'synonyms:(...)' clause
@@ -191,75 +191,74 @@ class SolrQueries:
                                         processed_name = cls.name_pre_processing(item['name']).upper()
                                         if processed_synonyms_dict[word].upper() in processed_name or word.upper() in processed_name:
                                             seen_ordered_names.append(item['name'])
-                                            ordered_names.append((item, processed_synonyms_dict[word].upper()))
+                                            ordered_names.append({'name_info':item, 'stems': [processed_synonyms_dict[word].upper()]})
                                             missed_names.remove(item['name'])
 
                     else:
                         for item in result['response']['docs']:
-                            ordered_names.append((item, []))
-                    print('missed names: ', missed_names)
+                            if item['name'] not in seen_ordered_names:
+                                ordered_names.append({'name_info': item, 'stems': []})
                     for missed in missed_names:
-                        ordered_names.append(missed, [])
+                        print('MISSED: ', missed)
                     final_names_list = []
 
                     # order based on alphabetization of swapped in synonyms
                     if bucket == 'synonym':
-                        pivot_exactwords = []
-                        exactwords_stems = []
+
                         processed_words_dict = cls.word_pre_processing(list_name_split, 'synonyms', solr_base_url)
-                        # key = pivot (original word without preprocessing)
+
+                        pivot_list = []
                         for key in processed_words_dict:
-                            exactwords_for_processed_word = []
-                            exactwords_for_processed_word += exactwords_stems
-                            pivot_exactwords.insert(0, (key, exactwords_for_processed_word))
-                            exactwords_stems.append(processed_words_dict[key])
-
-                        for pair in pivot_exactwords:
-
-                            # pivot can be swapped for synonym, exact words must match exactly
-                            pivot = pair[0]
-                            exactwords = pair[1]
+                            pivot_list.insert(0,key)
+                        for pivot in pivot_list[count:]:
                             sorted_names = []
-                            print(synonyms_for_word[pivot])
                             processed_synonyms_dict = cls.word_pre_processing(synonyms_for_word[pivot], 'synonyms', solr_base_url)
-                            print(processed_synonyms_dict)
                             for synonym in processed_synonyms_dict:
                                 for name in ordered_names:
-                                    if name[0]['name'] in seen_names:
+                                    if name['name_info']['name'] in seen_ordered_names:
                                         pass
                                     else:
-                                        processed_name = cls.name_pre_processing(name[0]['name'])
-                                        exactwords_in_name = True
-                                        for word in exactwords:
-                                            if word.upper() not in processed_name.upper():
-                                                exactwords_in_name = False
-                                        if exactwords_in_name:
-                                            if processed_synonyms_dict[synonym].upper() in processed_name.upper() or synonym.upper() in processed_name.upper():
-                                                print(synonym)
-                                                print(name)
-                                                print('added')
-                                                stems = exactwords + [processed_synonyms_dict[synonym].upper()]
-                                                sorted_names.append({'name': name, 'stems': stems})
-                                                seen_names.append(name[0]['name'])
-                                                if name[0]['name'] in passed_names:
-                                                    passed_names.remove(name[0]['name'])
+                                        processed_name = cls.name_pre_processing(name['name_info']['name'])
+                                        if processed_synonyms_dict[synonym].upper() in processed_name.upper() or synonym.upper() in processed_name.upper():
+                                            stem = [processed_synonyms_dict[synonym].upper()]
 
-                                            elif name[0]['name'] not in passed_names:
-                                                passed_names.append(name[0]['name'])
+                                            if stem not in name['stems']:
+                                                sorted_names.append({'name_info': name['name_info'], 'stems': stem + name['stems']})
+                                            else:
+                                                sorted_names.append({'name_info': name['name_info'], 'stems': name['stems']})
 
+                                            seen_ordered_names.append(name['name_info']['name'])
+                                            if name['name_info']['name'] in passed_names:
+                                                passed_names.remove(name['name_info']['name'])
 
+                                        elif name['name_info']['name'] not in passed_names:
+                                            passed_names.append(name['name_info']['name'])
 
-                            # put new sorted names at the beginning of the list
-                            final_names_list += sorted_names
-                            print('new sorted names list: ', final_names_list)
+                            no_duplicates = []
+                            duplicate = False
+                            for ordered in ordered_names:
+                                for sorted in sorted_names:
+                                    if ordered['name_info']['name'] == sorted['name_info']['name']:
+                                        duplicate = True
+                                if not duplicate:
+                                    no_duplicates.append(ordered)
+
+                            ordered_names = sorted_names.copy() + no_duplicates.copy()
+
+                            print('ordered names: ', ordered_names)
+                            print('seen_ordered_names: ', seen_ordered_names)
+                            seen_names += seen_ordered_names.copy()
+                            print('seen names: ', seen_names)
+                            seen_ordered_names.clear()
+                            sorted_names.clear()
 
                         print('names that did not get added: ', passed_names)
-                        final_names_list += passed_names
-
+                        final_names_list += ordered_names #+ passed_names
                     else:
                         final_names_list += ordered_names
 
                     solr['response']['docs'] += final_names_list
+                    count += 1
 
             results = {"response": {"numFound": solr['response']['numFound'],
                                     "maxScore": solr['response']['maxScore'],
@@ -779,9 +778,20 @@ class SolrQueries:
         synonyms_for_word = {}
         for word in list_name_split:
             synonyms_for_word[word] = [x.upper().strip() for x in cls._get_synonym_list(word)]
+
             if synonyms_for_word[word]:
                 synonyms_for_word[word].remove(word)
                 synonyms_for_word[word].sort()
+
+                for synonym in synonyms_for_word[word]:
+                    temp_list = synonyms_for_word[word].copy()
+                    temp_list.remove(synonym)
+                    swaps = [s for s in temp_list if synonym in s]
+                    swaps.reverse()
+                    for swap in swaps:
+                        synonyms_for_word[word].remove(swap)
+                        index = synonyms_for_word[word].index(synonym)
+                        synonyms_for_word[word].insert(index, swap)
 
             synonyms_for_word[word].insert(0, word)
             print('synonyms list for {}:'.format(word), synonyms_for_word[word])
