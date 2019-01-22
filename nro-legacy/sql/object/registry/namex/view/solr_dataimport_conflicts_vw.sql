@@ -31,7 +31,7 @@ WHERE corp.end_event_id IS NULL
   and c.corp_num NOT IN (select cname.corp_num   from corp_name cname
                          left outer join corporation c1 on c1.corp_num = cname.corp_num
                          where cname.corp_num = c.corp_num
-                           and cname.corp_name_typ_cd ='AS')
+                           and cname.corp_name_typ_cd ='AS' and cname.end_event_id IS NULL)
 UNION ALL
 SELECT c.corp_num AS ID, corp.corp_nme AS NAME, op.state_typ_cd AS state_type_cd,
        'CORP' AS SOURCE

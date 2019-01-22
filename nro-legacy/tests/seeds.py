@@ -2,16 +2,28 @@ from .postgres import Postgres
 
 
 def seed_corp_name(corp_num, start_event_id, corp_name_typ_cd, corp_nme):
+      Postgres().execute("""
+           insert into corp_name(
+                corp_num,
+                start_event_id,
+                corp_name_typ_cd ,
+                corp_nme
+            )
+        values ('{}','{}','{}','{}')
+     """.format(corp_num, start_event_id, corp_name_typ_cd, corp_nme))
+
+
+def seed_corp_expired_name(corp_num, start_event_id, end_event_id, corp_name_typ_cd, corp_nme):
     Postgres().execute("""
            insert into corp_name(
                 corp_num,
                 start_event_id,
-                end_event_id ,
+                end_event_id,
                 corp_name_typ_cd ,
                 corp_nme
             )
-        values ('{}','{}',null,'{}','{}')
-     """.format(corp_num, start_event_id, corp_name_typ_cd, corp_nme))
+        values ('{}','{}', null, '{}','{}')
+     """.format(corp_num, start_event_id, end_event_id,corp_name_typ_cd, corp_nme))
 
 
 def seed_corp_state(corp_num, start_event_id):
