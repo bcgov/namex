@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "84149696-a442-4931-95db-52c1710cab83",
+		"_postman_id": "e8e8817a-d37c-4ff0-a750-ff8d811334ff",
 		"name": "namex-pipeline-dev",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -20,7 +20,7 @@
 									"// If the \"postman_bdd_path\" environment variable is set, then we'll use it.",
 									"// Otherwise, we'll default to the published version",
 									"if (!environment.postman_bdd_path) {",
-									"    postman.setGlobalVariable('postman_bdd_path', 'http://bigstickcarpet.com/postman-bdd/dist/postman-bdd.min.js');",
+									"    postman.setGlobalVariable('postman_bdd_path', 'https://raw.githubusercontent.com/bcgov/postman-bdd/master/dist/postman-bdd.min.js');",
 									"}",
 									""
 								]
