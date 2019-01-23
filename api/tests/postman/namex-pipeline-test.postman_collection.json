@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "fed80a74-1217-4b07-b098-dc03765bf8bd",
+		"_postman_id": "8c51af7c-6750-4018-9313-060211afb807",
 		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -8,7 +8,59 @@
 	"item": [
 		{
 			"name": "setup",
-			"item": []
+			"item": [
+				{
+					"name": "Install Postman BDD Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// If the \"postman_bdd_path\" environment variable is set, then we'll use it.",
+									"// Otherwise, we'll default to the published version",
+									"if (!environment.postman_bdd_path) {",
+									"    postman.setGlobalVariable('postman_bdd_path', 'https://raw.githubusercontent.com/bcgov/postman-bdd/master/dist/postman-bdd.min.js');",
+									"}",
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// \"install\" Postman BDD",
+									"postman.setGlobalVariable('postmanBDD', responseBody);",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{postman_bdd_path}}",
+							"host": [
+								"{{postman_bdd_path}}"
+							]
+						},
+						"description": "This request downloads [Postman BDD](https://github.com/BigstickCarpet/postman-bdd) and then \"installs\" it by setting a global variable\n"
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "authenticate",
