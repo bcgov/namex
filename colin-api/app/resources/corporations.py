@@ -48,7 +48,7 @@ class RequestColin(Resource):
 
         incorp_info_sql = Methods.build_info_sql(corp_num_sql)
         incorp_addr_id_sql = Methods.build_addr_id_sql(corp_num_sql)
-        incorp_directors_sql = Methods.build_directors_sql(corp_num_sql)
+        incorp_directors_sql = Methods.bc_get_objs(corp_num_sql)
 
         try:
             incorp_nr_sql = Methods.build_nr_sql(corp_num_sql)
