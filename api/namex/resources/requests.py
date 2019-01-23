@@ -982,7 +982,7 @@ class RequestsAnalysis(Resource):
 @api.route('/synonymbucket/<string:name>', methods=['GET','OPTIONS'])
 class SynonymBucket(Resource):
     START = 0
-    ROWS = 500
+    ROWS = 1000
 
     @staticmethod
     @cors.crossdomain(origin='*')

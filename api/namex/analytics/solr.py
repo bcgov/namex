@@ -189,9 +189,14 @@ class SolrQueries:
                                         missed_names.append(item['name'])
                                     if item['name'] not in seen_ordered_names:
                                         processed_name = cls.name_pre_processing(item['name']).upper()
-                                        if processed_synonyms_dict[word].upper() in processed_name or word.upper() in processed_name:
+                                        if ' ' + processed_synonyms_dict[word].upper() in ' ' + processed_name.upper():
                                             seen_ordered_names.append(item['name'])
                                             ordered_names.append({'name_info':item, 'stems': [processed_synonyms_dict[word].upper()]})
+                                            missed_names.remove(item['name'])
+                                        elif ' ' + word.upper() in ' ' + processed_name.upper():
+                                            print('edge case 1')
+                                            seen_ordered_names.append(item['name'])
+                                            ordered_names.append({'name_info': item, 'stems': [word.upper()]})
                                             missed_names.remove(item['name'])
 
                     else:
@@ -211,6 +216,8 @@ class SolrQueries:
                         for key in processed_words_dict:
                             pivot_list.insert(0,key)
                         for pivot in pivot_list[count:]:
+                            if '*' not in connection[1]:
+                                count += 1
                             sorted_names = []
                             processed_synonyms_dict = cls.word_pre_processing(synonyms_for_word[pivot], 'synonyms', solr_base_url)
                             for synonym in processed_synonyms_dict:
@@ -219,18 +226,29 @@ class SolrQueries:
                                         pass
                                     else:
                                         processed_name = cls.name_pre_processing(name['name_info']['name'])
-                                        if processed_synonyms_dict[synonym].upper() in processed_name.upper() or synonym.upper() in processed_name.upper():
-                                            stem = [processed_synonyms_dict[synonym].upper()]
 
+                                        if ' ' + processed_synonyms_dict[synonym].upper() in ' ' + processed_name.upper():
+                                            stem = [processed_synonyms_dict[synonym].upper()]
                                             if stem not in name['stems']:
-                                                sorted_names.append({'name_info': name['name_info'], 'stems': stem + name['stems']})
+                                                sorted_names.append({'name_info': name['name_info'], 'stems': stem + name['stems'].copy()})
                                             else:
                                                 sorted_names.append({'name_info': name['name_info'], 'stems': name['stems']})
 
                                             seen_ordered_names.append(name['name_info']['name'])
                                             if name['name_info']['name'] in passed_names:
                                                 passed_names.remove(name['name_info']['name'])
+                                        elif ' ' + synonym in ' ' + processed_name.upper():
+                                            stem = [synonym.upper()]
+                                            if stem not in name['stems']:
+                                                sorted_names.append({'name_info': name['name_info'],
+                                                                     'stems': stem + name['stems'].copy()})
+                                            else:
+                                                sorted_names.append(
+                                                    {'name_info': name['name_info'], 'stems': name['stems']})
 
+                                            seen_ordered_names.append(name['name_info']['name'])
+                                            if name['name_info']['name'] in passed_names:
+                                                passed_names.remove(name['name_info']['name'])
                                         elif name['name_info']['name'] not in passed_names:
                                             passed_names.append(name['name_info']['name'])
 
@@ -246,19 +264,16 @@ class SolrQueries:
                             ordered_names = sorted_names.copy() + no_duplicates.copy()
 
                             print('ordered names: ', ordered_names)
-                            print('seen_ordered_names: ', seen_ordered_names)
                             seen_names += seen_ordered_names.copy()
-                            print('seen names: ', seen_names)
                             seen_ordered_names.clear()
                             sorted_names.clear()
 
-                        print('names that did not get added: ', passed_names)
+                        print('names that did not get ordered: ', passed_names)
                         final_names_list += ordered_names #+ passed_names
                     else:
                         final_names_list += ordered_names
 
                     solr['response']['docs'] += final_names_list
-                    count += 1
 
             results = {"response": {"numFound": solr['response']['numFound'],
                                     "maxScore": solr['response']['maxScore'],
@@ -837,6 +852,14 @@ class SolrQueries:
             for text in processed_words['analysis']['field_names']['name']['index'][count]:
                 processed_list.append(text['text'])
 
+            stem_in_name = False
+            for item in list_of_words:
+                for processed_synonym in processed_list:
+                    if processed_synonym.upper() in item.upper():
+                        stem_in_name = True
+                        break
+                if not stem_in_name:
+                    processed_list.insert(0, item)
             return_dict['stems'] = processed_list
         return return_dict
 
@@ -863,7 +886,6 @@ class SolrQueries:
             .replace('_', '') \
             .replace('\'', '') \
             .replace('\"', '') \
-            .replace(' ', '') \
             .replace('britishcolumbia', 'bc') \
             .replace('britishcolumbias', 'bc') \
             .replace('britishcolumbian', 'bc') \

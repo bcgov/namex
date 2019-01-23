@@ -72,7 +72,8 @@ def verify(data, expected=[], not_expected=None):
     verified = False
     print(data['names'])
 
-    for name in data['names']:
+    for result in data['names']:
+        name = result['name_info']
         print('ACTUAL ', name['name'])
         print('EXPECTED ', expected)
         print('NOT EXPECTED ', not_expected)
