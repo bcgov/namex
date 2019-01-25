@@ -126,6 +126,8 @@ class SolrQueries:
 
             return None, 'Internal server error', 500
 
+        # handle non-ascii chars in name
+        name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
         name = cls.remove_stopwords_designations(name)
         list_name_split = name.split()
 
@@ -163,19 +165,16 @@ class SolrQueries:
                 solr['response']['numFound'] += result['response']['numFound']
                 result_name = parse.unquote(connection[1])
                 if previous_stack_title.replace(' ','') != result_name.replace(' ',''):
-                    solr['response']['docs'].append({'name': result_name, 'stem': stemmed_words[:int(stem_count/2)]})
+                    solr['response']['docs'].append({'name_info': {'name':result_name}, 'stems': stemmed_words[:int(stem_count/2)]})
                     stem_count -= 1
                     previous_stack_title = result_name
-                if previous_stack_title.replace(' ','') != result_name.replace(' ',''):
-                    solr['response']['docs'].append({'name': result_name})
-                    previous_stack_title = parse.unquote(result_name)
 
                 if len(result['response']['docs']) > 0:
                     ordered_names = []
                     missed_names = []
                     # if there is a bracket in the stack title then there is a 'synonyms:(...)' clause
-                    if 'synonyms:(' in connection[1]:
-                        synonyms = connection[1][connection[1].find('(') + 1:connection[1].find(')')]
+                    if 'synonyms:(' in result_name:
+                        synonyms = result_name[result_name.find('(') + 1:result_name.find(')')]
                         synonyms = [x.strip() for x in synonyms.split(',')]
                         for synonym in synonyms:
                             processed_synonyms_dict = cls.word_pre_processing(synonyms_for_word[synonym.upper()],
@@ -310,6 +309,7 @@ class SolrQueries:
                 synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1])
 
                 for name in prox_search_tuple[0]:
+                    # handle non-ascii chars in name
                     prox_search_str = name
                     ### Proximity (name:) search query
                     query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
@@ -324,7 +324,6 @@ class SolrQueries:
                                         + synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')
                                         + ' - PROXIMITY SEARCH'))
 
-                ### Old (txt_starts_with:) search query
                 query = solr_base_url + SolrQueries.queries['oldsynconflicts'].format(
                     start=start,
                     rows=rows,
@@ -337,7 +336,6 @@ class SolrQueries:
                                     old_alg_search_str.replace('\\', '').replace('%20', ' ').replace('**','*') +
                                     synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
                                     ' - EXACT WORD ORDER'))
-
             return connections
 
         except Exception as err:
@@ -749,8 +747,8 @@ class SolrQueries:
             name = ' ' + name + ' '
             name = name.upper().replace(' ' + stop_word.upper() + ' ', ' ').strip()
 
-        # handle non-ascii chars in name
-        name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
+        # # handle non-ascii chars in name
+        # name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
         name = name.upper().replace(' AND ', ' ').replace('&', ' ').replace('+', ' ')
         return name
 
@@ -792,6 +790,7 @@ class SolrQueries:
             phon_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
             old_alg_combined_terms += term + '\ '
             old_alg_search_strs.insert(0, old_alg_combined_terms)
+            print(prox_search_strs)
 
         return prox_search_strs, old_alg_search_strs, phon_search_strs
 

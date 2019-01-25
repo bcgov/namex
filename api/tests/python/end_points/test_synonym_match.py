@@ -465,7 +465,6 @@ def test_exact_word_order_stack_title_with_wilcards(client, jwt, app):
     ('TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR.', '----TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR. - PROXIMITY SEARCH'),
 ])
 def test_bypass_nonascii_characters(client, jwt, app, criteria, seed):
-    seed_database_with(client, jwt, seed)
     verify_synonym_match(client,
                          jwt,
                          query=criteria,
