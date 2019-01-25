@@ -155,7 +155,7 @@ class SolrQueries:
             previous_stack_title = ''
             stemmed_words = cls.word_pre_processing(list_name_split, 'stems', solr_base_url)['stems']
             stem_count = len(stemmed_words) * 2 + 1
-            count = 0
+            count = -1
             for connection in connections:
                 seen_ordered_names = seen_names.copy()
 
@@ -171,11 +171,10 @@ class SolrQueries:
                     previous_stack_title = parse.unquote(result_name)
 
                 if len(result['response']['docs']) > 0:
-
                     ordered_names = []
                     missed_names = []
                     # if there is a bracket in the stack title then there is a 'synonyms:(...)' clause
-                    if '(' in connection[1]:
+                    if 'synonyms:(' in connection[1]:
                         synonyms = connection[1][connection[1].find('(') + 1:connection[1].find(')')]
                         synonyms = [x.strip() for x in synonyms.split(',')]
                         for synonym in synonyms:
@@ -194,7 +193,6 @@ class SolrQueries:
                                             ordered_names.append({'name_info':item, 'stems': [processed_synonyms_dict[word].upper()]})
                                             missed_names.remove(item['name'])
                                         elif ' ' + word.upper() in ' ' + processed_name.upper():
-                                            print('edge case 1')
                                             seen_ordered_names.append(item['name'])
                                             ordered_names.append({'name_info': item, 'stems': [word.upper()]})
                                             missed_names.remove(item['name'])
@@ -204,10 +202,11 @@ class SolrQueries:
                             if item['name'] not in seen_ordered_names:
                                 ordered_names.append({'name_info': item, 'stems': []})
                     for missed in missed_names:
-                        print('MISSED: ', missed)
+                        current_app.logger.error('MISSED results: ', missed)
                     final_names_list = []
 
                     # order based on alphabetization of swapped in synonyms
+
                     if bucket == 'synonym':
 
                         processed_words_dict = cls.word_pre_processing(list_name_split, 'synonyms', solr_base_url)
@@ -215,14 +214,15 @@ class SolrQueries:
                         pivot_list = []
                         for key in processed_words_dict:
                             pivot_list.insert(0,key)
+                        seen_for_pivot = []
+                        if '*' not in connection[1]:
+                            count += 1
                         for pivot in pivot_list[count:]:
-                            if '*' not in connection[1]:
-                                count += 1
                             sorted_names = []
                             processed_synonyms_dict = cls.word_pre_processing(synonyms_for_word[pivot], 'synonyms', solr_base_url)
                             for synonym in processed_synonyms_dict:
                                 for name in ordered_names:
-                                    if name['name_info']['name'] in seen_ordered_names:
+                                    if name['name_info']['name'] in seen_for_pivot:
                                         pass
                                     else:
                                         processed_name = cls.name_pre_processing(name['name_info']['name'])
@@ -234,9 +234,10 @@ class SolrQueries:
                                             else:
                                                 sorted_names.append({'name_info': name['name_info'], 'stems': name['stems']})
 
-                                            seen_ordered_names.append(name['name_info']['name'])
+                                            seen_for_pivot.append(name['name_info']['name'])
                                             if name['name_info']['name'] in passed_names:
                                                 passed_names.remove(name['name_info']['name'])
+
                                         elif ' ' + synonym in ' ' + processed_name.upper():
                                             stem = [synonym.upper()]
                                             if stem not in name['stems']:
@@ -246,9 +247,10 @@ class SolrQueries:
                                                 sorted_names.append(
                                                     {'name_info': name['name_info'], 'stems': name['stems']})
 
-                                            seen_ordered_names.append(name['name_info']['name'])
+                                            seen_for_pivot.append(name['name_info']['name'])
                                             if name['name_info']['name'] in passed_names:
                                                 passed_names.remove(name['name_info']['name'])
+
                                         elif name['name_info']['name'] not in passed_names:
                                             passed_names.append(name['name_info']['name'])
 
@@ -263,15 +265,22 @@ class SolrQueries:
 
                             ordered_names = sorted_names.copy() + no_duplicates.copy()
 
-                            print('ordered names: ', ordered_names)
-                            seen_names += seen_ordered_names.copy()
-                            seen_ordered_names.clear()
+                            for seen in seen_for_pivot:
+                                if seen not in seen_ordered_names:
+                                    seen_ordered_names.append(seen)
+
+                            seen_for_pivot.clear()
                             sorted_names.clear()
 
-                        print('names that did not get ordered: ', passed_names)
-                        final_names_list += ordered_names #+ passed_names
-                    else:
                         final_names_list += ordered_names
+                    else:
+                        for item in ordered_names:
+                            if item['name_info']['name'] not in seen_ordered_names:
+                                final_names_list.append(item)
+                                seen_ordered_names.append(item['name_info']['name'])
+
+                    seen_names += seen_ordered_names.copy()
+                    seen_ordered_names.clear()
 
                     solr['response']['docs'] += final_names_list
 
@@ -329,7 +338,6 @@ class SolrQueries:
                                     synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
                                     ' - EXACT WORD ORDER'))
 
-            print('here')
             return connections
 
         except Exception as err:
@@ -790,6 +798,7 @@ class SolrQueries:
     @classmethod
     def get_synonyms_for_words(cls, list_name_split):
         # get synonym list for each word in the name
+        list_name_split = [w.replace('*','') for w in list_name_split]
         synonyms_for_word = {}
         for word in list_name_split:
             synonyms_for_word[word] = [x.upper().strip() for x in cls._get_synonym_list(word)]
@@ -815,52 +824,57 @@ class SolrQueries:
 
     @classmethod
     def word_pre_processing(cls, list_of_words, type, solr_base_url):
+
+        list_of_words = [w.replace('*', '') for w in list_of_words]
         words_to_process = ''
         for item in list_of_words:
             words_to_process += ' ' + item
-        query = solr_base_url + \
-                '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={words}&analysis.fieldname=name' \
-                '&wt=json&indent=true'.format(words=words_to_process.strip()).replace(' ', '%20')
-
-        processed_words = json.load(request.urlopen(query))
-        count = 0
 
         return_dict = {}
-        if type == 'synonyms':
-            for item in processed_words['analysis']['field_names']['name']['index']:
-                if item == 'org.apache.lucene.analysis.core.FlattenGraphFilter':
-                    count += 1
-                    break
-                count += 1
+        if words_to_process != '':
+            query = solr_base_url + \
+                    '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={words}&analysis.fieldname=name' \
+                    '&wt=json&indent=true'.format(words=parse.quote(words_to_process.strip()))
 
-            processed_list = []
-            for text in processed_words['analysis']['field_names']['name']['index'][count]:
-                processed_list.append(text['text'])
+            processed_words = json.load(request.urlopen(query))
 
-            for original, processed in zip(list_of_words, processed_list):
-                return_dict[original] = processed
+            count = 0
 
-        # type == 'stems'
-        else:
-            for item in processed_words['analysis']['field_names']['name']['index']:
-                if item == 'org.apache.lucene.analysis.snowball.SnowballFilter':
-                    count += 1
-                    break
-                count += 1
-
-            processed_list = []
-            for text in processed_words['analysis']['field_names']['name']['index'][count]:
-                processed_list.append(text['text'])
-
-            stem_in_name = False
-            for item in list_of_words:
-                for processed_synonym in processed_list:
-                    if processed_synonym.upper() in item.upper():
-                        stem_in_name = True
+            if type == 'synonyms':
+                for item in processed_words['analysis']['field_names']['name']['index']:
+                    if item == 'org.apache.lucene.analysis.core.FlattenGraphFilter':
+                        count += 1
                         break
-                if not stem_in_name:
-                    processed_list.insert(0, item)
-            return_dict['stems'] = processed_list
+                    count += 1
+
+                processed_list = []
+                for text in processed_words['analysis']['field_names']['name']['index'][count]:
+                    processed_list.append(text['text'])
+
+                for original, processed in zip(list_of_words, processed_list):
+                    return_dict[original] = processed
+
+            # type == 'stems'
+            else:
+                for item in processed_words['analysis']['field_names']['name']['index']:
+                    if item == 'org.apache.lucene.analysis.snowball.SnowballFilter':
+                        count += 1
+                        break
+                    count += 1
+
+                processed_list = []
+                for text in processed_words['analysis']['field_names']['name']['index'][count]:
+                    processed_list.append(text['text'])
+
+                stem_in_name = False
+                for item in list_of_words:
+                    for processed_synonym in processed_list:
+                        if processed_synonym.upper() in item.upper():
+                            stem_in_name = True
+                            break
+                    if not stem_in_name:
+                        processed_list.insert(0, item)
+                return_dict['stems'] = processed_list
         return return_dict
 
     @classmethod
