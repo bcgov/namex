@@ -142,7 +142,9 @@ class SolrQueries:
                 name = name[:index]
                 break
 
-        name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
+        # handle non-ascii chars in name
+        name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
+        name = name.upper().replace(' AND ', ' ').replace('&', ' ').replace('+', ' ')
         list_name_split = name.split()
 
         def replace_nth(string, deleted_substr, added_substr, n):
@@ -207,9 +209,10 @@ class SolrQueries:
                 solr['response']['numFound'] += result['response']['numFound']
                 solr['response']['start'] = result['response']['start']
 
-                if previous_stack_title.replace(' ','') != connection[1].replace(' ',''):
-                    solr['response']['docs'].append({'name': connection[1]})
-                    previous_stack_title = connection[1]
+                result_name = parse.unquote(connection[1])
+                if previous_stack_title.replace(' ','') != result_name.replace(' ',''):
+                    solr['response']['docs'].append({'name': result_name})
+                    previous_stack_title = parse.unquote(result_name)
 
                 if len(result['response']['docs']) > 0:
 
