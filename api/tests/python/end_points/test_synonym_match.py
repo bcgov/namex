@@ -3,7 +3,7 @@ import os
 import requests
 import json
 import pytest
-from tests.python import integration_solr, integration_synonym_api
+from tests.python import integration_solr, integration_synonym_api, integration_postgres_solr
 import urllib
 
 token_header = {
@@ -57,9 +57,9 @@ def clean_database(client, jwt):
 
     assert r.status_code == 200
 
-
-def seed_database_with(client, jwt, name, id='1', source='2'):
-    clean_database(client, jwt)
+def seed_database_with(client, jwt, name, id='1', source='2', clear=True):
+    if clear:
+        clean_database(client, jwt)
     url = SOLR_URL + '/solr/possible.conflicts/update?commit=true'
     headers = {'content-type': 'application/json'}
     data = '[{"source":"' + source + '", "name":"' + name + '", "id":"'+ id +'"}]'
@@ -77,7 +77,8 @@ def verify(data, expected=None, not_expected=None):
     verified = False
     print(data['names'])
 
-    for name in data['names']:
+    for result in data['names']:
+        name = result['name_info']
         print('ACTUAL ', name['name'])
         print('EXPECTED ',expected)
         print('NOT EXPECTED ', not_expected)
@@ -102,11 +103,6 @@ def verify(data, expected=None, not_expected=None):
 
     assert verified
 
-# def verify_synonym_match_results(client, jwt, query, expected):
-#     data = search_synonym_match(client, jwt, query)
-#     verify(data, expected)
-
-
 def verify_synonym_match(client, jwt, query, expected_list=None, not_expected_list=None):
     data = search_synonym_match(client, jwt, query)
     if expected_list:
@@ -120,6 +116,22 @@ def verify_synonym_match(client, jwt, query, expected_list=None, not_expected_li
         for not_expected in not_expected_list:
             verify(data, None, not_expected)
 
+def verify_order(client, jwt, query, expected_order):
+    data = search_synonym_match(client, jwt, query)
+    print('data[names]: ', data['names'])
+    for result, expected in zip(data['names'], expected_order):
+        actual = result['name_info']['name']
+        print('Actual: ', actual)
+        print('Expected: ', expected)
+        assert actual.upper() == expected.upper()
+
+def verify_stems(client, jwt, query, stems):
+    data = search_synonym_match(client, jwt, query)
+
+    for actual,expected in zip(data['names'][0]['stems'], stems):
+        print('Actual: ', actual)
+        print('Expected: ', expected)
+        assert actual.upper() == expected.upper()
 
 def search_synonym_match(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
@@ -445,7 +457,7 @@ def test_exact_word_order_stack_title_with_wilcards(client, jwt, app):
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
     ('TJ´S BACKCOUNTRY ADVENTURES.', '----TJ´S BACKCOUNTRY ADVENTURES. - PROXIMITY SEARCH'),
-    ('THE HOUSE OF BÜBÜ AN DA WOLF.', '----THE HOUSE OF BÜBÜ AN DA WOLF. - PROXIMITY SEARCH'),
+    ('HOUSE BÜBÜ DA WOLF.', '----HOUSE BÜBÜ DA WOLF. - PROXIMITY SEARCH'),
     ('DIAMANTÉ DIAMOND SETTING', '----DIAMANTÉ DIAMOND SETTING - PROXIMITY SEARCH'),
     ('MICHELLE¿S BEAR ESSENTIALS.', '----MICHELLE¿S BEAR ESSENTIALS. - PROXIMITY SEARCH'),
     ('TEST àâçèéêëîïôöùûü BEAR.', '----TEST àâçèéêëîïôöùûü BEAR. - PROXIMITY SEARCH'),
@@ -453,8 +465,53 @@ def test_exact_word_order_stack_title_with_wilcards(client, jwt, app):
     ('TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR.', '----TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR. - PROXIMITY SEARCH'),
 ])
 def test_bypass_nonascii_characters(client, jwt, app, criteria, seed):
-    seed_database_with(client, jwt, seed)
     verify_synonym_match(client,
                          jwt,
                          query=criteria,
                          expected_list=[seed])
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('AN AND ARE AS AT TEST', '----TEST - PROXIMITY SEARCH'),
+    ('BE BUT BY FOR IF TO TEST', '----TEST - PROXIMITY SEARCH'),
+    ('IN INTO IS IT NO NOT TEST', '----TEST - PROXIMITY SEARCH'),
+    ('OF ON OR SUCH THAT THE TEST', '----TEST - PROXIMITY SEARCH'),
+    ('THEIR THEN THERE THESE THEY THIS TEST', '----TEST - PROXIMITY SEARCH'),
+])
+def test_strips_stop_words(client, jwt, app, criteria, seed):
+    verify_synonym_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+@integration_postgres_solr
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query, ordered_list", [
+    ('TESTING ORDER DEVELOPMENTS SYNONYMS', ['----TESTING ORDER DEVELOPMENTS SYNONYMS - PROXIMITY SEARCH',
+                                                  'TESTING ORDER DEVELOPMENT SYNONYMS',
+                                                  'TESTING ORDER CONSTRUCTION SYNONYMS',
+                                                  'TESTING ORDER STRUCTURE SYNONYMS',
+                                                  ]),
+])
+def test_order(client, jwt, app, query, ordered_list):
+    #  for loop didn't work for seeding so manual
+    seed_database_with(client, jwt, 'TESTING ORDER CONSTRUCTION SYNONYMS', id='1', source='2', clear=False)
+    seed_database_with(client, jwt, 'TESTING ORDER DEVELOPMENT SYNONYMS', id='2', source='4', clear=False)
+    seed_database_with(client, jwt, 'TESTING ORDER STRUCTURE SYNONYMS', id='3', source='3', clear=False)
+    verify_order(client, jwt, query=query, expected_order=ordered_list)
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query, stems", [
+    ('CONSTRUCTION', ['CONSTRUCT']),
+    ('DEVELOPMENT', ['DEVELOP']),
+    ('CONSULTING', ['CONSULT']),
+    ('CONSTRUCTION DEVELOPMENT', ['CONSTRUCT', 'DEVELOP']),
+    ('CONSULTING CONSTRUCTION DEVELOPMENT', ['CONSULT', 'CONSTRUCT', 'DEVELOP']),
+    ('PROPERTY', ['PROPERTY', 'PROPERTI']),
+    ('PROPERTIES', ['PROPERTI']),
+])
+def test_stems(client, jwt, app, query, stems):
+    verify_stems(client, jwt, query=query, stems=stems)
+

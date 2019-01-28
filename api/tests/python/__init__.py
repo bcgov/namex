@@ -16,6 +16,7 @@ from .util import \
     integration_fdw_namex,\
     integration_solr,\
     integration_synonym_api, \
+    integration_postgres_solr, \
     integration_nro_extractor
 
 EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)

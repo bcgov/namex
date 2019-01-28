@@ -71,7 +71,7 @@ def verify(data, expected):
     print("Expected: ", expected)
 
     # remove the search divider(s): ----<query term>
-    actual = [{ 'name':doc['name'] } for doc in data['names']]
+    actual = [{ 'name':doc['name_info']['name'] } for doc in data['names']]
 
     print("Actual: ", actual)
 

@@ -22,5 +22,8 @@ integration_solr = pytest.mark.skipif((os.getenv('SOLR_TESTS', False) is False),
 integration_synonym_api = pytest.mark.skipif((os.getenv('SOLR_SYNONYM_TESTS', False) is False),
                                       reason="requires access to Solr Synonym API")
 
+integration_postgres_solr = pytest.mark.skipif((os.getenv('POSTGRES_SOLR_TESTS', False) is False),
+                                      reason="requires access to postgres_solr")
+
 integration_nro_extractor = pytest.mark.skipif((os.getenv('NRO_EXTRACTOR_TESTS', False) is False),
                                                reason="requires access to nor-extractor via HTTPS POST/PUT")
