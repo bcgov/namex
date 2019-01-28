@@ -732,7 +732,6 @@ class SolrQueries:
                     if line.find('#') == -1:
                         stop_words.append(line.strip('\n').strip())
         except Exception as err:
-            print('failed opening stopwords file')
             current_app.logger.error(err)
 
         # remove designations if they are at the end of the name
@@ -790,7 +789,6 @@ class SolrQueries:
             phon_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
             old_alg_combined_terms += term + '\ '
             old_alg_search_strs.insert(0, old_alg_combined_terms)
-            print(prox_search_strs)
 
         return prox_search_strs, old_alg_search_strs, phon_search_strs
 
@@ -817,7 +815,6 @@ class SolrQueries:
                         synonyms_for_word[word].insert(index, swap)
 
             synonyms_for_word[word].insert(0, word)
-            print('synonyms list for {}:'.format(word), synonyms_for_word[word])
 
         return synonyms_for_word
 
