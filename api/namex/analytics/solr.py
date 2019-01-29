@@ -726,7 +726,7 @@ class SolrQueries:
 
         stop_words = []
         try:
-            with open('../solr/mycores/possible.conflicts/conf/stopwords.txt') as stop_words_file:
+            with open('stopwords.txt') as stop_words_file:
                 stop_words = []
                 for line in stop_words_file.readlines():
                     if line.find('#') == -1:
