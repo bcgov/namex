@@ -1,0 +1,3886 @@
+{
+	"info": {
+		"_postman_id": "e8e8817a-d37c-4ff0-a750-ff8d811334ff",
+		"name": "namex-viewer-role",
+		"description": "# Introduction\nThe namex API has certain roles that have been granted different privileges. ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "authenticate",
+			"item": [
+				{
+					"name": "authenticate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c6720c75-f388-4f9a-a157-c4b4b560a99f",
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"token\", jsonData.access_token);",
+									"pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+									"",
+									"pm.environment.set(\"token_expires\", Date.now()+(jsonData.expires_in * 1000));",
+									"pm.environment.set(\"refresh_token_expires\", Date.now()+(jsonData.refresh_expires_in * 1000));",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "grant_type=password&client_id={{clientid}}&username={{userid}}&password={{password}}&client_secret={{client_secret}}"
+						},
+						"url": {
+							"raw": "{{authurl}}/auth/realms/{{realm}}/protocol/openid-connect/token",
+							"host": [
+								"{{authurl}}"
+							],
+							"path": [
+								"auth",
+								"realms",
+								"{{realm}}",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ops",
+			"item": [
+				{
+					"name": "healthz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "df32db93-cf13-4d61-a431-c1885098d5fc",
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"api is healthy\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('api is healthy');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/nr-ops/healthz",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"nr-ops",
+								"healthz"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "readyz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8d543ba4-a0ab-47ef-a981-9eb31fed5b0e",
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"api is ready\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    //pm.expect(jsonData.message).to.eql('api is ready');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/nr-ops/readyz",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"nr-ops",
+								"readyz"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "echo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9db68384-c517-460b-975e-258e9c2ab53f",
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"token includes key:preferred_username\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('preferred_username');",
+									"});",
+									"",
+									"pm.test(\"token includes key:roles\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.realm_access).to.have.property('roles');",
+									"});",
+									"",
+									"pm.test(\"token type:Bearer\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.typ).to.eql(\"Bearer\");",
+									"});"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6055f61a-24f3-489c-a833-6a48ed309bc8",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/echo",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"echo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "analysis",
+			"item": [
+				{
+					"name": "conflicts",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "83bbced6-bf73-4814-b326-079cef0b8d46",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "53d9f6ae-6779-4a7f-9b05-615b9891d03c",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['highlighting', 'names', 'response']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['names', 'highlighting', 'response']",
+									"    });",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/conflicts?start=0&rows=35",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"analysis",
+								"1",
+								"conflicts"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "0"
+								},
+								{
+									"key": "rows",
+									"value": "35"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "histories",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "09b76a8b-6acd-468e-8b8a-6f46da66c50f",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "b9e1eabe-cf5b-4d1f-b451-4859541cd9bf",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['highlighting', 'names', 'response']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['names', 'highlighting', 'response']",
+									"    });",
+									"});",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/histories?start=1&rows=32",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"analysis",
+								"1",
+								"histories"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1"
+								},
+								{
+									"key": "rows",
+									"value": "32"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "trademarks",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "7fb8750f-14da-49a5-9e46-cf863344a97e",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "837330d0-b434-4449-bd3a-301b6e9ef58c",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['highlighting', 'names', 'response']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['names', 'highlighting', 'response']",
+									"    });",
+									"});",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/trademarks?start=1&rows=32",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"analysis",
+								"1",
+								"trademarks"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1"
+								},
+								{
+									"key": "rows",
+									"value": "32"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "restricted_words",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0337a293-ee86-4afb-be86-fe207f53c9d9",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['restricted_words_conditions']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['restricted_words_conditions']",
+									"    });",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/analysis/1/restricted_words",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"analysis",
+								"1",
+								"restricted_words"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "restricted_words (document analysis)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "647799c6-697b-41da-a698-e01e131f06d5",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['restricted_words_conditions']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['restricted_words_conditions']",
+									"    });",
+									"});",
+									"",
+									"it('should return the corresponding restricted words', () => {",
+									"    response.body.restricted_words_conditions.should.be.an('array').with.lengthOf(2);",
+									"    var words = ''",
+									"    for (var i=0; i<response.body.restricted_words_conditions.length; i++) {",
+									"        response.body.restricted_words_conditions[i].should.be.an('object').with.keys(['cnd_info','word_info']);",
+									"        words += response.body.restricted_words_conditions[i].word_info.phrase;",
+									"    }",
+									"    words.should.include('DR');",
+									"    words.should.include('ROYAL');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"type\":\"plain_text\",\"content\":\"retstrictedwordsdrbc royal -minus+plus+ @at@at \\\"quotes\\\"*asterisk*ques??? +dr\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/documents:restricted_words",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents:restricted_words"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "requests+names",
+			"item": [
+				{
+					"name": "requests/queues/@me/oldest",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4e7b8f3b-4429-44e0-8e2b-f86dee41b6d2",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"if (typeof jsonData.nameRequest !== 'undefined' || jsonData.nameRequest !== null) {",
+									"   pm.environment.set(\"queued_nr\", jsonData.nameRequest);",
+									"}else{",
+									"   pm.environment.unset(\"queued_nr\");    ",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "c9bd0a12-0790-4f22-959b-4fbcfd4779d5",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/queues/@me/oldest",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"queues",
+								"@me",
+								"oldest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/queues/@me/oldest getsame again",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "665b5918-735b-4247-ba50-0643de8344e5",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Same value as previous get from queue\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nameRequest).to.eql( pm.environment.get(\"queued_nr\"));",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/queues/@me/oldest",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"queues",
+								"@me",
+								"oldest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR # change state to DRAFT",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "36e019ae-a7c4-4599-8631-564ad3d11ef0",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "346c9a5d-ee8f-48cd-9b21-bad29baf9ecb",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should contain \\'message\\' confirming patch', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"    jsonData.message.should.include('- patched');",
+									"});",
+									"",
+									"pm.environment.unset(\"queued_nr\");  ",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"state\": \"DRAFT\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{queued_nr}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{queued_nr}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR # change state to inprogress",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "36e019ae-a7c4-4599-8631-564ad3d11ef0",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "346c9a5d-ee8f-48cd-9b21-bad29baf9ecb",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should contain \\'message\\' confirming patch', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"    jsonData.message.should.include('- patched');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"state\": \"INPROGRESS\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR #/names/1 change name state to APPROVED",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6a01c013-3092-4bd2-be65-7adc5421a9ec",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "0ebe351b-0618-4dd9-821c-8659eb5f189d",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should contain \\'message\\' confirming patch', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"    jsonData.message.should.include('Patched NR');",
+									"});",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"state\": \"APPROVED\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests/NR #/names/1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5e5e7102-694d-4200-a50b-5401e06d4ad1",
+								"type": "text/javascript",
+								"exec": [
+									"",
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "7076416f-00f1-4623-802c-38f59f444b83",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"var bodyJSON = JSON.parse(response.body);",
+									"pm.environment.set(\"nrOrigName\",bodyJSON.name);",
+									"bodyJSON.state = 'REJECTED'",
+									"bodyJSON.name = 'PUT success'",
+									"bodyJSON.comment = null",
+									"",
+									"for (var i in bodyJSON) {",
+									"    if (bodyJSON[i]==\"\") bodyJSON[i]=null;",
+									"    pm.environment.set(i,bodyJSON[i]);",
+									"}",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return a string', () => {",
+									"    response.body.should.be.string;",
+									"});",
+									"",
+									"it('Should contain the required properties', () => {",
+									"    response.text.should.include(\"designation\");",
+									"    response.text.should.include(\"name\");",
+									"    response.text.should.include(\"state\");",
+									"    response.text.should.include(\"choice\");",
+									"    response.text.should.include(\"consumptionDate\");",
+									"    response.text.should.include(\"decision_text\");",
+									"    response.text.should.include(\"conflict1\");",
+									"    response.text.should.include(\"conflict2\");",
+									"    response.text.should.include(\"conflict3\");",
+									"    response.text.should.include(\"conflict1_num\");",
+									"    response.text.should.include(\"conflict2_num\");",
+									"    response.text.should.include(\"conflict3_num\");",
+									"});",
+									"",
+									"it('Should include \\\"state\\\": \\\"APPROVED\\\" as a result of the previous patch', () => {",
+									"    response.text.should.include(\"\\\"state\\\": \\\"APPROVED\\\"\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR #/names/1-test",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "20d5933f-5e04-4d20-8592-0b91e3290e7c",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "459ea6d3-6ec3-4f1c-a0fe-e47d57baab53",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON key: message', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"});",
+									"",
+									"it('Should contain changes in the returned message', () => {",
+									"    response.body.message.should.include(\"'state': 'REJECTED'\");",
+									"    response.body.message.should.include(\"'name': 'PUT success'\");",
+									"})"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"conflict1\": null, \"designation\": \"{{designation}}\", \"state\": \"{{state}}\", \"conflict3_num\": null, \"choice\": {{choice}}, \"conflict1_num\": null, \"name\": \"{{name}}\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null, \"comment\": null}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests/NR #/names/1 - test update",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5e5e7102-694d-4200-a50b-5401e06d4ad1",
+								"exec": [
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "ca95fc6d-d25e-4528-9022-c4ee670bbf66",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return a string', () => {",
+									"    response.body.should.be.string;",
+									"});",
+									"",
+									"it('Should contain the required properties', () => {",
+									"    response.text.should.include(\"designation\");",
+									"    response.text.should.include(\"name\");",
+									"    response.text.should.include(\"state\");",
+									"    response.text.should.include(\"choice\");",
+									"    response.text.should.include(\"consumptionDate\");",
+									"    response.text.should.include(\"decision_text\");",
+									"    response.text.should.include(\"conflict1\");",
+									"    response.text.should.include(\"conflict2\");",
+									"    response.text.should.include(\"conflict3\");",
+									"    response.text.should.include(\"conflict1_num\");",
+									"    response.text.should.include(\"conflict2_num\");",
+									"    response.text.should.include(\"conflict3_num\");",
+									"});",
+									"",
+									"it('Should return the new data updated by the previous PUT', () => {",
+									"    response.text.should.include(\"\\\"state\\\": \\\"REJECTED\\\"\");",
+									"    response.text.should.include(\"\\\"name\\\": \\\"PUT SUCCESS\\\"\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR #/names/1-reset",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b5c5c8cb-e855-4d96-93e0-7abc81d02560",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "30365f67-06ec-40b4-8360-b00668ad0f21",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON key: message', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"});",
+									"",
+									"it('Should contain changes in the returned message', () => {",
+									"    response.body.message.should.include(\"\\'state\\': \\'NE\\'\");",
+									"    response.body.message.should.include(`\\'name\\': \\'${pm.environment.get(\"nrOrigName\")}\\'`);",
+									"})"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"choice\": {{choice}}, \"conflict1\": null, \"name\": \"{{nrOrigName}}\", \"conflict2\": null, \"consumptionDate\": null, \"conflict1_num\": null, \"state\": \"NE\", \"conflict2_num\": null, \"decision_text\": null, \"designation\": \"{{designation}}\", \"conflict3\": null, \"conflict3_num\": null, \"comment\": null}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR # set bodyJSON",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "262230a7-feab-4c42-a075-bd3638472c07",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "6e48f1bf-f4db-4778-a81d-761c4fc57c9e",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','previousStateCd', 'priorityCd', 'priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
+									"});",
+									"",
+									"pm.environment.set(\"bodyJSON\",pm.response.json())"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR #-test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should return updated changes in the body\", () => {",
+									"   response.body.additionalInfo.should.include(\"More info TESTING\");",
+									"   response.body.names[0].name.should.include(\"A C C DIAMONDS LTD. LIMITED TESTING\");",
+									"   response.body.applicants.addrLine1.should.include(\"940 Blanshard Street TESTING\");",
+									"});",
+									"",
+									"it(\"Should add a comment re. name change\", () => {",
+									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"Name choice 1 changed from A C C DIAMONDS LTD. LIMITED to A C C DIAMONDS LTD. LIMITED TESTING\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"additionalInfo\": \"More info TESTING\",\r\n\t\"applicants\": {\r\n\t\t\"addrLine1\": \"940 Blanshard Street TESTING\",\r\n\t\t\"addrLine2\": null,\r\n\t\t\"addrLine3\": null,\r\n\t\t\"city\": \"Victoria\",\r\n\t\t\"clientFirstName\": null,\r\n\t\t\"clientLastName\": null,\r\n\t\t\"contact\": \"John Test\",\r\n\t\t\"countryTypeCd\": \"CA\",\r\n\t\t\"declineNotificationInd\": null,\r\n\t\t\"emailAddress\": \"testoutputs@gov.bc.ca\",\r\n\t\t\"faxNumber\": null,\r\n\t\t\"firstName\": \"John\",\r\n\t\t\"lastName\": \"Test\",\r\n\t\t\"middleName\": null,\r\n\t\t\"partyId\": 1486844,\r\n\t\t\"phoneNumber\": \"2505555555\",\r\n\t\t\"postalCd\": \"V8V4K8\",\r\n\t\t\"stateProvinceCd\": \"BC\"\r\n\t},\r\n\t\"comments\": [\r\n\t\t{\r\n\t\t\t\"comment\": \"This is a new comment\"\r\n\t\t}\r\n\t],\r\n\t\"consentFlag\": null,\r\n\t\"corpNum\": null,\r\n\t\"expirationDate\": null,\r\n\t\"furnished\": \"N\",\r\n\t\"lastUpdate\": \"Tue, 04 Dec 2018 14:45:19 GMT\",\r\n\t\"names\": [{\r\n\t\t\"choice\": 1,\r\n\t\t\"comment\": null,\r\n\t\t\"conflict1\": \"\",\r\n\t\t\"conflict1_num\": \"\",\r\n\t\t\"conflict2\": \"\",\r\n\t\t\"conflict2_num\": \"\",\r\n\t\t\"conflict3\": \"\",\r\n\t\t\"conflict3_num\": \"\",\r\n\t\t\"consumptionDate\": null,\r\n\t\t\"decision_text\": \"\",\r\n\t\t\"name\": \"A C C DIAMONDS LTD. LIMITED TESTING\",\r\n\t\t\"state\": \"NE\"\r\n\t}],\r\n\t\"natureBusinessInfo\": \"Nature of business can be pretty long so this one is more realistic. It even contains spaces and punctuation.\",\r\n\t\"nrNum\": \"NR 3597836\",\r\n\t\"nwpta\": [],\r\n\t\"previousNr\": null,\r\n\t\"previousRequestId\": null,\r\n\t\"priorityCd\": \"Y\",\r\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\r\n\t\"requestTypeCd\": \"CR\",\r\n\t\"state\": \"INPROGRESS\",\r\n\t\"submitCount\": 1,\r\n\t\"submittedDate\": \"Thu, 15 Nov 2018 08:59:18 GMT\",\r\n\t\"submitter_userid\": \"\",\r\n\t\"userId\": \"postman\",\r\n\t\"xproJurisdiction\": null\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR #",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c1429a8d-6bf6-485e-a78f-3401419da30d",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should return updated changes by previous PUT\", () => {",
+									"   response.body.additionalInfo.should.include(\"More info TESTING\");",
+									"   response.body.names[0].name.should.include(\"A C C DIAMONDS LTD. LIMITED TESTING\");",
+									"   response.body.applicants.addrLine1.should.include(\"940 Blanshard Street TESTING\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3e5719a3-cbda-4b7f-85fd-7bc70b5f58c2",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR # - test RESET - prep data - set to furnished",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should be marked as furnished in prep for RESET testing (step 2)\", () => {",
+									"   response.body.furnished.should.include(\"Y\");",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"additionalInfo\": \"More info TESTING\",\r\n\t\"applicants\": {\r\n\t\t\"addrLine1\": \"940 Blanshard Street TESTING\",\r\n\t\t\"addrLine2\": null,\r\n\t\t\"addrLine3\": null,\r\n\t\t\"city\": \"Victoria\",\r\n\t\t\"clientFirstName\": null,\r\n\t\t\"clientLastName\": null,\r\n\t\t\"contact\": \"John Test\",\r\n\t\t\"countryTypeCd\": \"CA\",\r\n\t\t\"declineNotificationInd\": null,\r\n\t\t\"emailAddress\": \"testoutputs@gov.bc.ca\",\r\n\t\t\"faxNumber\": null,\r\n\t\t\"firstName\": \"John\",\r\n\t\t\"lastName\": \"Test\",\r\n\t\t\"middleName\": null,\r\n\t\t\"partyId\": 1486844,\r\n\t\t\"phoneNumber\": \"2505555555\",\r\n\t\t\"postalCd\": \"V8V4K8\",\r\n\t\t\"stateProvinceCd\": \"BC\"\r\n\t},\r\n\t\"comments\": [],\r\n\t\"consentFlag\": null,\r\n\t\"corpNum\": null,\r\n\t\"expirationDate\": null,\r\n\t\"furnished\": \"Y\",\r\n\t\"hasBeenReset\": false,\r\n\t\"lastUpdate\": \"Tue, 04 Dec 2018 14:45:19 GMT\",\r\n\t\"names\": [{\r\n\t\t\"choice\": 1,\r\n\t\t\"comment\": null,\r\n\t\t\"conflict1\": \"\",\r\n\t\t\"conflict1_num\": \"\",\r\n\t\t\"conflict2\": \"\",\r\n\t\t\"conflict2_num\": \"\",\r\n\t\t\"conflict3\": \"\",\r\n\t\t\"conflict3_num\": \"\",\r\n\t\t\"consumptionDate\": null,\r\n\t\t\"decision_text\": \"\",\r\n\t\t\"name\": \"A C C DIAMONDS LTD. LIMITED TESTING\",\r\n\t\t\"state\": \"NE\"\r\n\t}],\r\n\t\"natureBusinessInfo\": \"Nature of business can be pretty long so this one is more realistic. It even contains spaces and punctuation.\",\r\n\t\"nrNum\": \"NR 3597836\",\r\n\t\"nwpta\": [],\r\n\t\"previousNr\": null,\r\n\t\"previousRequestId\": null,\r\n\t\"priorityCd\": \"Y\",\r\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\r\n\t\"requestTypeCd\": \"CR\",\r\n\t\"state\": \"INPROGRESS\",\r\n\t\"submitCount\": 1,\r\n\t\"submittedDate\": \"Thu, 15 Nov 2018 08:59:18 GMT\",\r\n\t\"submitter_userid\": \"\",\r\n\t\"userId\": \"postman\",\r\n\t\"xproJurisdiction\": null\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR # - test RESET functionality",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should be unfurnished\", () => {",
+									"   response.body.furnished.should.include(\"N\");",
+									"});",
+									"",
+									"it(\"Should add a comment re. reset\", () => {",
+									"   response.body.comments[response.body.comments.length-1].comment.should.include(\"This NR was RESET.\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"additionalInfo\": \"More info TESTING\",\r\n\t\"applicants\": {\r\n\t\t\"addrLine1\": \"940 Blanshard Street TESTING\",\r\n\t\t\"addrLine2\": null,\r\n\t\t\"addrLine3\": null,\r\n\t\t\"city\": \"Victoria\",\r\n\t\t\"clientFirstName\": null,\r\n\t\t\"clientLastName\": null,\r\n\t\t\"contact\": \"John Test\",\r\n\t\t\"countryTypeCd\": \"CA\",\r\n\t\t\"declineNotificationInd\": null,\r\n\t\t\"emailAddress\": \"testoutputs@gov.bc.ca\",\r\n\t\t\"faxNumber\": null,\r\n\t\t\"firstName\": \"John\",\r\n\t\t\"lastName\": \"Test\",\r\n\t\t\"middleName\": null,\r\n\t\t\"partyId\": 1486844,\r\n\t\t\"phoneNumber\": \"2505555555\",\r\n\t\t\"postalCd\": \"V8V4K8\",\r\n\t\t\"stateProvinceCd\": \"BC\"\r\n\t},\r\n\t\"comments\": [],\r\n\t\"consentFlag\": null,\r\n\t\"corpNum\": null,\r\n\t\"expirationDate\": null,\r\n\t\"furnished\": \"N\",\r\n\t\"hasBeenReset\": false,\r\n\t\"lastUpdate\": \"Tue, 04 Dec 2018 14:45:19 GMT\",\r\n\t\"names\": [{\r\n\t\t\"choice\": 1,\r\n\t\t\"comment\": null,\r\n\t\t\"conflict1\": \"\",\r\n\t\t\"conflict1_num\": \"\",\r\n\t\t\"conflict2\": \"\",\r\n\t\t\"conflict2_num\": \"\",\r\n\t\t\"conflict3\": \"\",\r\n\t\t\"conflict3_num\": \"\",\r\n\t\t\"consumptionDate\": null,\r\n\t\t\"decision_text\": \"\",\r\n\t\t\"name\": \"A C C DIAMONDS LTD. LIMITED TESTING\",\r\n\t\t\"state\": \"NE\"\r\n\t}],\r\n\t\"natureBusinessInfo\": \"Nature of business can be pretty long so this one is more realistic. It even contains spaces and punctuation.\",\r\n\t\"nrNum\": \"NR 3597836\",\r\n\t\"nwpta\": [],\r\n\t\"previousNr\": null,\r\n\t\"previousRequestId\": null,\r\n\t\"priorityCd\": \"Y\",\r\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\r\n\t\"requestTypeCd\": \"CR\",\r\n\t\"state\": \"INPROGRESS\",\r\n\t\"submitCount\": 1,\r\n\t\"submittedDate\": \"Thu, 15 Nov 2018 08:59:18 GMT\",\r\n\t\"submitter_userid\": \"\",\r\n\t\"userId\": \"postman\",\r\n\t\"xproJurisdiction\": null\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR # change state to INPROGRESS",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "36e019ae-a7c4-4599-8631-564ad3d11ef0",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "346c9a5d-ee8f-48cd-9b21-bad29baf9ecb",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should contain \\'message\\' confirming patch', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"    jsonData.message.should.include('- patched');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"state\": \"INPROGRESS\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						},
+						"description": "Must change to INPROGRESS before HOLD (next call) because DRAFT to HOLD is not a valid transition."
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR #- reset test data to original state",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "482ae5d8-3c7d-48bb-8875-bb9a386ef4f2",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 8000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(8000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should return old values for this NR\", () => {",
+									"   response.body.additionalInfo.should.include(\"More info\");",
+									"   response.body.names[0].name.should.include(\"A C C DIAMONDS LTD. LIMITED\");",
+									"   response.body.applicants.addrLine1.should.include(\"940 Blanshard Street\");",
+									"   response.body.submitCount.should.equal(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"additionalInfo\": \"More info\",\r\n\t\"applicants\": {\r\n\t\t\"addrLine1\": \"940 Blanshard Street\",\r\n\t\t\"addrLine2\": null,\r\n\t\t\"addrLine3\": null,\r\n\t\t\"city\": \"Victoria\",\r\n\t\t\"clientFirstName\": null,\r\n\t\t\"clientLastName\": null,\r\n\t\t\"contact\": \"John Test\",\r\n\t\t\"countryTypeCd\": \"CA\",\r\n\t\t\"declineNotificationInd\": null,\r\n\t\t\"emailAddress\": \"testoutputs@gov.bc.ca\",\r\n\t\t\"faxNumber\": null,\r\n\t\t\"firstName\": \"John\",\r\n\t\t\"lastName\": \"Test\",\r\n\t\t\"middleName\": null,\r\n\t\t\"partyId\": 1486844,\r\n\t\t\"phoneNumber\": \"2505555555\",\r\n\t\t\"postalCd\": \"V8V4K8\",\r\n\t\t\"stateProvinceCd\": \"BC\"\r\n\t},\r\n\t\"comments\": [],\r\n\t\"consentFlag\": null,\r\n\t\"corpNum\": null,\r\n\t\"expirationDate\": null,\r\n\t\"furnished\": \"N\",\r\n\t\"hasBeenReset\": false,\r\n\t\"lastUpdate\": \"Tue, 04 Dec 2018 14:45:19 GMT\",\r\n\t\"names\": [{\r\n\t\t\"choice\": 1,\r\n\t\t\"comment\": null,\r\n\t\t\"conflict1\": \"\",\r\n\t\t\"conflict1_num\": \"\",\r\n\t\t\"conflict2\": \"\",\r\n\t\t\"conflict2_num\": \"\",\r\n\t\t\"conflict3\": \"\",\r\n\t\t\"conflict3_num\": \"\",\r\n\t\t\"consumptionDate\": null,\r\n\t\t\"decision_text\": \"\",\r\n\t\t\"name\": \"A C C DIAMONDS LTD. LIMITED\",\r\n\t\t\"state\": \"NE\"\r\n\t}],\r\n\t\"natureBusinessInfo\": \"Nature of business can be pretty long so this one is more realistic. It even contains spaces and punctuation.\",\r\n\t\"nrNum\": \"NR 3597836\",\r\n\t\"nwpta\": [],\r\n\t\"previousNr\": null,\r\n\t\"previousRequestId\": null,\r\n\t\"priorityCd\": \"Y\",\r\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\r\n\t\"requestTypeCd\": \"CR\",\r\n\t\"state\": \"HOLD\",\r\n\t\"submitCount\": 1,\r\n\t\"submittedDate\": \"Thu, 15 Nov 2018 08:59:18 GMT\",\r\n\t\"submitter_userid\": \"\",\r\n\t\"userId\": \"postman\",\r\n\t\"xproJurisdiction\": null\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR # that doesn't exist in NRO",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be a fail response', () => {",
+									"    response.ok.should.be.false;            // 2XX",
+									"    response.clientError.should.be.true;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(400);",
+									"    response.statusType.should.equal(4);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"additionalInfo\": \"Name was previously put in for incorporation but it is actually for an extra-provincial registration\",\n    \"applicants\": {\n        \"addrLine1\": \"234 Test StreetT\",\n        \"addrLine2\": \"T\",\n        \"addrLine3\": \"T\",\n        \"city\": \"VictoriaT\",\n        \"clientFirstName\": \"JohnT\",\n        \"clientLastName\": \"LaneT\",\n        \"contact\": \"Test Contact\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"wontwork@bcgov.bc.ca\",\n        \"faxNumber\": \"2500000000\",\n        \"firstName\": \"JohnT\",\n        \"lastName\": \"LaneT\",\n        \"middleName\": \"T\",\n        \"partyId\": 1393576,\n        \"phoneNumber\": \"250000000\",\n        \"postalCd\": \"V8V4K8T\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"lastUpdate\": \"Fri, 21 Sep 2018 19:30:22 GMT\",\n    \"names\": [\n        {\n            \"choice\": 3,\n            \"comment\": null,\n            \"conflict1\": \"\",\n            \"conflict1_num\": \"\",\n            \"conflict2\": \"\",\n            \"conflict2_num\": \"\",\n            \"conflict3\": \"\",\n            \"conflict3_num\": \"\",\n            \"consumptionDate\": null,\n            \"decision_text\": \"\",\n            \"name\": \"BOOKED BY US Inc.\",\n            \"state\": \"NE\"\n        },\n        {\n            \"choice\": 2,\n            \"comment\": null,\n            \"conflict1\": \"\",\n            \"conflict1_num\": \"\",\n            \"conflict2\": \"\",\n            \"conflict2_num\": \"\",\n            \"conflict3\": \"\",\n            \"conflict3_num\": \"\",\n            \"consumptionDate\": null,\n            \"decision_text\": \"\",\n            \"name\": \"BOOKED BY US Inc.\",\n            \"state\": \"NE\"\n        },\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"BOOKED BY US Inc.\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"fencing equipment supply\",\n    \"nrNum\": \"NR 6879307\",\n    \"nwpta\": [\n        {\n            \"partnerJurisdictionTypeCd\": \"AB\",\n            \"partnerName\": null,\n            \"partnerNameDate\": null,\n            \"partnerNameNumber\": null,\n            \"partnerNameTypeCd\": \"CO\",\n            \"requested\": true\n        },\n        {\n            \"partnerJurisdictionTypeCd\": \"SK\",\n            \"partnerName\": null,\n            \"partnerNameDate\": null,\n            \"partnerNameNumber\": null,\n            \"partnerNameTypeCd\": \"CO\",\n            \"requested\": true\n        }\n    ],\n    \"previousNr\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"CR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 11:08:53 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"postman\",\n    \"xproJurisdiction\": null\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/NR%206879307",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"NR%206879307"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR #-reset that doesn't exist in NRO",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "482ae5d8-3c7d-48bb-8875-bb9a386ef4f2",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 8000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(8000);",
+									"});",
+									"",
+									"it('should be an failure response', () => {",
+									"    response.ok.should.be.false;            // 2XX",
+									"    response.clientError.should.be.true;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(400);",
+									"    response.statusType.should.equal(4);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"additionalInfo\": \"**AB NUANS Requested**  **SK Name Search Requested** test\\n\\nTest additional info.\",\n    \"applicants\": {\n        \"addrLine1\": \"234 Test StreetT\",\n        \"addrLine2\": \"T\",\n        \"addrLine3\": \"T\",\n        \"city\": \"VictoriaT\",\n        \"clientFirstName\": \"JohnT\",\n        \"clientLastName\": \"LaneT\",\n        \"contact\": \"Test Contact\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"wontwork@bcgov.bc.ca\",\n        \"faxNumber\": \"2500000000\",\n        \"firstName\": \"JohnT\",\n        \"lastName\": \"LaneT\",\n        \"middleName\": \"T\",\n        \"partyId\": 1393576,\n        \"phoneNumber\": \"250000000\",\n        \"postalCd\": \"V8V4K8T\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [\n        {\n            \"comment\": \"internal comment test JL\",\n            \"examiner\": \"idir/jamlane\",\n            \"id\": 113397,\n            \"timestamp\": \"Fri, 19 Oct 2018 20:46:46 GMT\"\n        },\n        {\n            \"comment\": \"Internal comment 2\",\n            \"examiner\": \"idir/jamlane\",\n            \"id\": 113398,\n            \"timestamp\": \"Fri, 19 Oct 2018 20:58:57 GMT\"\n        },\n        {\n            \"comment\": \"To test\",\n            \"examiner\": \"idir/jinkster\",\n            \"id\": 121572,\n            \"timestamp\": \"Mon, 29 Oct 2018 21:19:59 GMT\"\n        },\n        {\n            \"comment\": \"Please do not touch this NR - it is used for namex postman testing\",\n            \"examiner\": \"kial-ex\",\n            \"id\": 121865,\n            \"timestamp\": \"Fri, 09 Nov 2018 18:47:54 GMT\"\n        }\n    ],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"id\": 1676787,\n    \"lastUpdate\": \"Fri, 09 Nov 2018 18:52:02 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"ZZZZZZ POSTMAN TEST INCORPORATION\",\n            \"state\": \"NE\"\n        },\n        {\n            \"choice\": 3,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"ZZZ TEST INCORPORATION JL 5 INCORPOREE\",\n            \"state\": \"NE\"\n        },\n        {\n            \"choice\": 2,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"ZZZZZZ TEST INCORPORATION JL 4 INCORPORATED\",\n            \"state\": \"NE\"\n        }\n    ],\n    \"natureBusinessInfo\": \"test\",\n    \"nrNum\": \"NR 6879307\",\n    \"nwpta\": [\n        {\n            \"partnerJurisdictionTypeCd\": \"AB\",\n            \"partnerName\": null,\n            \"partnerNameDate\": null,\n            \"partnerNameNumber\": null,\n            \"partnerNameTypeCd\": \"CO\",\n            \"requested\": true\n        },\n        {\n            \"partnerJurisdictionTypeCd\": \"SK\",\n            \"partnerName\": null,\n            \"partnerNameDate\": null,\n            \"partnerNameNumber\": null,\n            \"partnerNameTypeCd\": \"CO\",\n            \"requested\": true\n        }\n    ],\n    \"previousNr\": null,\n    \"previousRequestId\": null,\n    \"priorityCd\": \"N\",\n    \"requestTypeCd\": \"CR\",\n    \"state\": \"HOLD\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 18 Oct 2018 15:26:42 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"postman\",\n    \"xproJurisdiction\": null\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/NR%206879307",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"NR%206879307"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "request-search",
+			"item": [
+				{
+					"name": "/requests - no params",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "499cb36e-a63a-4d12-ab4c-ee484a04809a",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "c3b20ffb-bd96-454a-8332-b20139f1d2f2",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['activeUser','comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); "
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - start & end",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "7a815bfc-89d6-4d8f-bff2-48b09aabf83e",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "dd5dc319-9fa0-4819-8163-18054bff2f25",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"// isn't checking schema",
+									"//TODO fix the schema checking",
+									"const searchSchema = {",
+									"    \"title\": \"nameRequest\",",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"activeUser\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"furnished\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									" //   \"required\": [\"firstName\", \"lastName\"]",
+									"}",
+									"",
+									"// Test whether the response matches the schema",
+									"it('should match the search schema', () => {",
+									"//    var customerSchema = JSON.parse(environment.customerSchema));",
+									"    response.body.should.have.schema(searchSchema);",
+									"  });",
+									"",
+									"pm.test(\"Response echoes rows == 10\", () => {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.response.rows).to.eql(10);",
+									"});",
+									"",
+									"it('should get an array of 10 nameRequests', () => {",
+									"    response.body.nameRequests[0].length.should.eq(10);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?start=10&rows=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "10"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - queue = HOLD",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e1a55e74-5c04-4485-989c-25bbcaa94b4a",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "95e35078-04fe-476b-b360-ba4bf658257e",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('All NameRequests should be in \\'HOLD\\'', () => {",
+									"  it('Should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('HOLD')",
+									"      }",
+									"  })",
+									"})",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=hold&rows=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "hold"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - queue = INPROGRESS Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3d818d6a-3381-437f-b613-77ac1a5db3b6",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "016e6990-f48a-4668-a3ae-63a56b4d94d0",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('All NameRequests should be in \\'INPROGRESS\\'', () => {",
+									"  it('Should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('INPROGRESS')",
+									"      }",
+									"  })",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=inprogress&rows=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "inprogress"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - queue = DRAFT",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3d818d6a-3381-437f-b613-77ac1a5db3b6",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "1ddd411d-6b91-40ec-9ba4-61298d954fd4",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('All NameRequests should be in \\'DRAFT\\'', () => {",
+									"  it('Should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('DRAFT')",
+									"      }",
+									"  })",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=draft&rows=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "draft"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - queue = CONDITIONAL",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3d818d6a-3381-437f-b613-77ac1a5db3b6",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "9ecd37a6-cd7d-4064-9c76-144e8eb65413",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('All NameRequests should be in \\'CONDITIONAL\\'', () => {",
+									"  it('Should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('CONDITIONAL')",
+									"      }",
+									"  })",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=conditional&rows=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "conditional"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - queue = APPROVED",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3d818d6a-3381-437f-b613-77ac1a5db3b6",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "b06ada10-d9a3-403e-83c4-32db3bd7953a",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('All NameRequests should be in \\'APPROVED\\'', () => {",
+									"  it('Should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('APPROVED')",
+									"      }",
+									"  })",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=approved&rows=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "approved"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - queue = REJECTED",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3d818d6a-3381-437f-b613-77ac1a5db3b6",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "228245f6-48c9-4820-b30d-6c15813aed40",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('All NameRequests should be in \\'REJECTED\\'', () => {",
+									"  it('Should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          response.body.nameRequests[0][i].stateCd.should.equal('REJECTED')",
+									"      }",
+									"  })",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=rejected&rows=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "rejected"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - queue = COMPLETED",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3d818d6a-3381-437f-b613-77ac1a5db3b6",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "228245f6-48c9-4820-b30d-6c15813aed40",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('All NameRequests should be in \\'REJECTED\\' or \\'APPROVED\\' or \\'CONDITIONAL\\'', () => {",
+									"  it('Should check the stateCd property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('stateCd')",
+									"          pm.expect(response.body.nameRequests[0][i].stateCd).to.be.oneOf(['REJECTED','APPROVED','CONDITIONAL'])",
+									"      }",
+									"  })",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?queue=COMPLETED",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "queue",
+									"value": "COMPLETED"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - notified=Not Notified",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "828fd0f9-f533-461f-89b5-70f6693436f4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "2355404c-83ce-4397-a442-0cecb2f85f58",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('No NameRequests should be \\'unfurnished\\'', () => {",
+									"  it('Should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('furnished')",
+									"          response.body.nameRequests[0][i].furnished.should.equal('N')",
+									"      }",
+									"  })",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?notification=Not Notified",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "notification",
+									"value": "Not Notified"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - notified=Noftified",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "828fd0f9-f533-461f-89b5-70f6693436f4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "46a38d4c-2d18-4347-b5a3-4963752b6142",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"describe('No NameRequests should be \\'unfurnished\\'', () => {",
+									"  it('Should check the id property is present', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          response.body.nameRequests[0][i].should.have.property('furnished')",
+									"          response.body.nameRequests[0][i].furnished.should.equal('Y')",
+									"      }",
+									"  })",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?notification=Notified",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "notification",
+									"value": "Notified"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - submittedInterval=30 days",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "828fd0f9-f533-461f-89b5-70f6693436f4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "46a38d4c-2d18-4347-b5a3-4963752b6142",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"it('All submittedDates should be within 30 days', () => {",
+									"  for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"      response.body.nameRequests[0][i].should.have.property('submittedDate')",
+									"      var submittedDate = new Date(Date.parse(response.body.nameRequests[0][i].submittedDate));",
+									"      var today = new Date();",
+									"      var interval = (today.getTime() - submittedDate.getTime())/(1000*60*60*24);",
+									"      if (interval > 30) {",
+									"          response.body.nameRequests[0][i].submittedDate.should.have.property(\"more recent date\");",
+									"      }",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?interval=30 days",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "interval",
+									"value": "30 days"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - lastUpdateInterval=2 days",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "828fd0f9-f533-461f-89b5-70f6693436f4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "46a38d4c-2d18-4347-b5a3-4963752b6142",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"it('All lastUpdates should be within 2 days', () => {",
+									"  for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"      response.body.nameRequests[0][i].should.have.property('lastUpdate')",
+									"      var lastUpdate = new Date(Date.parse(response.body.nameRequests[0][i].lastUpdate));",
+									"      var today = new Date();",
+									"      var interval = (today.getTime() - lastUpdate.getTime())/(1000*60*60*24);",
+									"      if (interval > 2) {",
+									"          response.body.nameRequests[0][i].lastUpdate.should.have.property(\"more recent date\");",
+									"      }",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?lastUpdateInterval=2 days",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "lastUpdateInterval",
+									"value": "2 days"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - ranking=Priority",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "828fd0f9-f533-461f-89b5-70f6693436f4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "46a38d4c-2d18-4347-b5a3-4963752b6142",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('Should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','natureBusinessInfo','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"",
+									"it('All requests should have priority ranking', () => {",
+									"  for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"      response.body.nameRequests[0][i].should.have.property('priorityCd');",
+									"      response.body.nameRequests[0][i].priorityCd.should.equal('Y');",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?ranking=Priority",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "ranking",
+									"value": "Priority"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - PriorityCd:desc & submitDate:asc",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "82edf8a1-3195-466d-9af3-12bd5b558902",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "23939174-235b-474c-a80f-f03aecbac9f3",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									" tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['nameRequests','response']);",
+									"});",
+									"//'activeUser', 'names', 'comments', 'expirationDate', 'furnished', 'nrNum', 'priorityCd', 'submittedDate'",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['nameRequests', 'response']",
+									"    });",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should return the required fields in nameRequests', () => {",
+									"    var nameRequests = jsonData.nameRequests[0];",
+									"    for (var i=0;i<nameRequests.length;i++) {",
+									"        nameRequests[i].should.have.schema({",
+									"            type: 'object',",
+									"            required: ['comments','furnished','lastUpdate','names','nrNum','nroLastUpdate','priorityCd','requestTypeCd','stateCd','submitCount','submittedDate','xproJurisdiction']",
+									"        });",
+									"    }",
+									"}); ",
+									"  ",
+									"describe('NameRequests should have PriorityCD=Y first', () => {",
+									"  var seenIt='Y'",
+									"  it('should check that all Priority codes are first', () => {",
+									"      for(i=0; i < response.body.nameRequests[0].length; i++) {",
+									"          if (response.body.nameRequests[0][i].priorityCd != 'Y'){",
+									"              if (seenIt == 'Y'){ seenIt = 'N' }",
+									"          }",
+									"          if (seenIt == 'Y'){",
+									"              response.body.nameRequests[0][i].priorityCd.should.equal('Y')",
+									"          } else {",
+									"              response.body.nameRequests[0][i].priorityCd.should.equal('N')",
+									"          }",
+									"      }",
+									"  })",
+									"})"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests?order=priorityCd:desc,submittedDate:asc",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "order",
+									"value": "priorityCd:desc,submittedDate:asc"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
