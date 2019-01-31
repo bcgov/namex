@@ -22,12 +22,12 @@ python manage.py db upgrade
 ```
 
 1. cd to the root director of the component
-- cd api
+   - cd api
 2. python manage.py db migrate
-- this will add a new revision into the migrations/versions directory
+   - this will add a new revision into the migrations/versions directory
 3. Add the migrations to GitHub
 4. python manage.py db upgrade
-- this will upgrade the database to support your new model
+   - this will upgrade the database to support your new model
 
 ### Manual changes to the DB
 If you need to add fixture data (eg.a lookup table with default values) then you can add them to your revision of the model *or* make a new revsion and add your changes to that file.

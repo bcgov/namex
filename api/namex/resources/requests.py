@@ -323,6 +323,7 @@ class Request(Resource):
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
     def get(nr):
+
         # return jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
         return jsonify(RequestDAO.query.filter_by(nrNum =nr.upper()).first_or_404().json())
 
@@ -342,7 +343,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_roles([User.APPROVER, User.EDITOR])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def patch(nr, *args, **kwargs):
         """  Patches the NR. Currently only handles STATE (with optional comment) and Previous State.
 
@@ -489,7 +490,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_roles([User.APPROVER, User.EDITOR])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def put(nr, *args, **kwargs):
 
         # do the cheap check first before the more expensive ones
@@ -1152,7 +1153,7 @@ class DecisionReasons(Resource):
 class SyncNR(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_roles([User.APPROVER, User.EDITOR])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def get(nr):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
