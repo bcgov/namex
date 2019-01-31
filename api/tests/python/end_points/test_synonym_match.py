@@ -305,6 +305,8 @@ def test_duplicated_letters(client, jwt, app):
     ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO synonyms:(process, server, processserver) - PROXIMITY SEARCH'),
     ("Jameisons four two zero process server", '----JAMEISONS FOUR synonyms:(two, process, server, twozero, processserver) - PROXIMITY SEARCH'),
     ("Jameisons four two zero process server", '----JAMEISONS synonyms:(four, two, process, server, fourtwo, fourtwozero, twozero, processserver) - PROXIMITY SEARCH'),
+    ("pacific real estate", "----PACIFIC REALESTATE - PROXIMITY SEARCH"),
+    ("pacific real estate", "----PACIFIC synonyms:(realestate) - PROXIMITY SEARCH")
 ])
 def test_multi_word_synonyms(client, jwt, app, criteria, seed):
     verify_synonym_match(client, jwt,
@@ -456,13 +458,13 @@ def test_exact_word_order_stack_title_with_wilcards(client, jwt, app):
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
-    ('TJ´S BACKCOUNTRY ADVENTURES.', '----TJ´S BACKCOUNTRY ADVENTURES. - PROXIMITY SEARCH'),
-    ('HOUSE BÜBÜ DA WOLF.', '----HOUSE BÜBÜ DA WOLF. - PROXIMITY SEARCH'),
-    ('DIAMANTÉ DIAMOND SETTING', '----DIAMANTÉ DIAMOND SETTING - PROXIMITY SEARCH'),
-    ('MICHELLE¿S BEAR ESSENTIALS.', '----MICHELLE¿S BEAR ESSENTIALS. - PROXIMITY SEARCH'),
-    ('TEST àâçèéêëîïôöùûü BEAR.', '----TEST àâçèéêëîïôöùûü BEAR. - PROXIMITY SEARCH'),
-    ('TEST ÀÂÇÈÉÊËÎÏÔÖÙÛÜS BEAR.', '----TEST ÀÂÇÈÉÊËÎÏÔÖÙÛÜS BEAR. - PROXIMITY SEARCH'),
-    ('TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR.', '----TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR. - PROXIMITY SEARCH'),
+    ('TJ´S BACKCOUNTRY ADVENTURES.', '----TJC 2 B 4 S BACKCOUNTRY ADVENTURES - PROXIMITY SEARCH'),
+    ('HOUSE BÜBÜ DA WOLF.', '----HOUSE BC 39 CBC 39 C DA WOLF - PROXIMITY SEARCH'),
+    ('DIAMANTÉ DIAMOND SETTING', '----DIAMANTC 389 DIAMOND SETTING - PROXIMITY SEARCH'),
+    ('MICHELLE¿S BEAR ESSENTIALS.', '----MICHELLEC 2 BFS BEAR ESSENTIALS - PROXIMITY SEARCH'),
+    ('TEST àâçèéêëîïôöùûü BEAR.', '----TEST C 380 C 382 C 387C388C389C38AC38BC38EC38FC394C396C399C39BC39CBEAR - PROXIMITY SEARCH'),
+    ('TEST ÀÂÇÈÉÊËÎÏÔÖÙÛÜS BEAR.', '----TEST C 380 C 382 C 387C388C389C38AC38BC38EC38FC394C396C399C39BC39CSBEAR - PROXIMITY SEARCH'),
+    ('TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR.', '----TEST C 2 B 0 C 2A3C3B7C2A5C2B7C2A9C2A7C2B6C2BCC2BDC2BEC2A2C2A6C2ABC2AAC2A1C2B9C2B2C2B3C2BBC2BFC2ACC2B1C2A4C2AEC397BEAR - PROXIMITY SEARCH'),
 ])
 def test_bypass_nonascii_characters(client, jwt, app, criteria, seed):
     verify_synonym_match(client,
