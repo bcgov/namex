@@ -3937,6 +3937,562 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "namex-roles editor can edit",
+			"item": [
+				{
+					"name": "requests/NR # change state to inprogress for editor",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "36e019ae-a7c4-4599-8631-564ad3d11ef0",
+								"exec": [
+									"userid = pm.environment.set(\"userid\", \"names-editor\");",
+									"eval(environment.auth_script);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "346c9a5d-ee8f-48cd-9b21-bad29baf9ecb",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should contain \\'message\\' confirming patch', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"    jsonData.message.should.include('- patched');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"state\": \"INPROGRESS\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR #/names/1 editor can change name state to APPROVED",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6a01c013-3092-4bd2-be65-7adc5421a9ec",
+								"exec": [
+									"userid = pm.environment.set(\"userid\", \"names-editor\");",
+									"eval(environment.auth_script);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "0ebe351b-0618-4dd9-821c-8659eb5f189d",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should contain \\'message\\' confirming patch', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"    jsonData.message.should.include('Patched NR');",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"state\": \"APPROVED\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests/NR #/names/1 for editor",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5e5e7102-694d-4200-a50b-5401e06d4ad1",
+								"exec": [
+									"userid = pm.environment.set(\"userid\", \"names-editor\");",
+									"eval(environment.auth_script);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "7076416f-00f1-4623-802c-38f59f444b83",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"var bodyJSON = JSON.parse(response.body);",
+									"pm.environment.set(\"nrOrigName\",bodyJSON.name);",
+									"bodyJSON.state = 'REJECTED'",
+									"bodyJSON.name = 'PUT success'",
+									"bodyJSON.comment = null",
+									"",
+									"for (var i in bodyJSON) {",
+									"    if (bodyJSON[i]==\"\") bodyJSON[i]=null;",
+									"    pm.environment.set(i,bodyJSON[i]);",
+									"}",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return a string', () => {",
+									"    response.body.should.be.string;",
+									"});",
+									"",
+									"it('Should contain the required properties', () => {",
+									"    response.text.should.include(\"designation\");",
+									"    response.text.should.include(\"name\");",
+									"    response.text.should.include(\"state\");",
+									"    response.text.should.include(\"choice\");",
+									"    response.text.should.include(\"consumptionDate\");",
+									"    response.text.should.include(\"decision_text\");",
+									"    response.text.should.include(\"conflict1\");",
+									"    response.text.should.include(\"conflict2\");",
+									"    response.text.should.include(\"conflict3\");",
+									"    response.text.should.include(\"conflict1_num\");",
+									"    response.text.should.include(\"conflict2_num\");",
+									"    response.text.should.include(\"conflict3_num\");",
+									"});",
+									"",
+									"it('Should include \\\"state\\\": \\\"APPROVED\\\" as a result of the previous patch', () => {",
+									"    response.text.should.include(\"\\\"state\\\": \\\"APPROVED\\\"\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR #/names/1-test for editor",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "20d5933f-5e04-4d20-8592-0b91e3290e7c",
+								"exec": [
+									"userid = pm.environment.set(\"userid\", \"names-editor\");",
+									"eval(environment.auth_script);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "459ea6d3-6ec3-4f1c-a0fe-e47d57baab53",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON key: message', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"});",
+									"",
+									"it('Should contain changes in the returned message', () => {",
+									"    response.body.message.should.include(\"'state': 'REJECTED'\");",
+									"    response.body.message.should.include(\"'name': 'PUT success'\");",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"conflict1\": null, \"designation\": \"{{designation}}\", \"state\": \"{{state}}\", \"conflict3_num\": null, \"choice\": {{choice}}, \"conflict1_num\": null, \"name\": \"{{name}}\", \"conflict2\": null, \"conflict3\": null, \"consumptionDate\": null, \"decision_text\": null, \"conflict2_num\": null, \"comment\": null}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests/NR #/names/1 - test update for editor",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5e5e7102-694d-4200-a50b-5401e06d4ad1",
+								"exec": [
+									"userid = pm.environment.set(\"userid\", \"names-editor\");",
+									"eval(environment.auth_script);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "ca95fc6d-d25e-4528-9022-c4ee670bbf66",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return a string', () => {",
+									"    response.body.should.be.string;",
+									"});",
+									"",
+									"it('Should contain the required properties', () => {",
+									"    response.text.should.include(\"designation\");",
+									"    response.text.should.include(\"name\");",
+									"    response.text.should.include(\"state\");",
+									"    response.text.should.include(\"choice\");",
+									"    response.text.should.include(\"consumptionDate\");",
+									"    response.text.should.include(\"decision_text\");",
+									"    response.text.should.include(\"conflict1\");",
+									"    response.text.should.include(\"conflict2\");",
+									"    response.text.should.include(\"conflict3\");",
+									"    response.text.should.include(\"conflict1_num\");",
+									"    response.text.should.include(\"conflict2_num\");",
+									"    response.text.should.include(\"conflict3_num\");",
+									"});",
+									"",
+									"it('Should return the new data updated by the previous PUT', () => {",
+									"    response.text.should.include(\"\\\"state\\\": \\\"REJECTED\\\"\");",
+									"    response.text.should.include(\"\\\"name\\\": \\\"PUT SUCCESS\\\"\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR #/names/1-reset for editor",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b5c5c8cb-e855-4d96-93e0-7abc81d02560",
+								"exec": [
+									"userid = pm.environment.set(\"userid\", \"names-editor\");",
+									"eval(environment.auth_script);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "30365f67-06ec-40b4-8360-b00668ad0f21",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('Should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('Should contain the parsed JSON key: message', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"});",
+									"",
+									"it('Should contain changes in the returned message', () => {",
+									"    response.body.message.should.include(\"\\'state\\': \\'NE\\'\");",
+									"    response.body.message.should.include(`\\'name\\': \\'${pm.environment.get(\"nrOrigName\")}\\'`);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"choice\": {{choice}}, \"conflict1\": null, \"name\": \"{{nrOrigName}}\", \"conflict2\": null, \"consumptionDate\": null, \"conflict1_num\": null, \"state\": \"NE\", \"conflict2_num\": null, \"decision_text\": null, \"designation\": \"{{designation}}\", \"conflict3\": null, \"conflict3_num\": null, \"comment\": null}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/names/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"names",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Making sure that an editor user can edit an NR.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "223dbff0-9ed7-4665-8920-77ae339bb595",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "44a48790-47aa-4240-945f-d7de9ba4c423",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
 		}
 	]
 }
