@@ -171,7 +171,8 @@ def _update_request(oracle_cursor, nr, event_id, change_flags):
 
 def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
     """find the current name instance, set it's end_event_id to event_id
-       create a new name_instance and set it start_event_id to event_id
+       if the name was deleted, nothing more needs to be done.
+       otherwise, create a new name_instance and set its start_event_id to event_id
     """
 
     for name in nr.names.all():
@@ -228,15 +229,17 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
                                       name_id=n_id,
                                       start_event=event_id)
 
-            oracle_cursor.execute("""
-            INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name)
-            VALUES (name_instance_seq.nextval, :name_id, :choice, :name, :event_id, :search_name)
-            """,
-                                  name_id=n_id,
-                                  choice=name.choice,
-                                  name=name.name,
-                                  event_id=event_id,
-                                  search_name=generate_compressed_name(name.name))
+            # If the new name is not blank, do this:
+            if name.name:
+                oracle_cursor.execute("""
+                INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name)
+                VALUES (name_instance_seq.nextval, :name_id, :choice, :name, :event_id, :search_name)
+                """,
+                                      name_id=n_id,
+                                      choice=name.choice,
+                                      name=name.name,
+                                      event_id=event_id,
+                                      search_name=generate_compressed_name(name.name))
 
 
 def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
