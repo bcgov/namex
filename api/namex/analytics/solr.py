@@ -131,8 +131,6 @@ class SolrQueries:
         name = cls.remove_stopwords_designations(name)
 
         if name.find('*') != -1:
-            # handle non-ascii chars in name
-            name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
             list_name_split = name.split()
         else:
             list_name_split,name = cls.combine_multi_word_synonyms(name, solr_base_url)
