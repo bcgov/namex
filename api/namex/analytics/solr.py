@@ -129,11 +129,18 @@ class SolrQueries:
         # handle non-ascii chars in name
         name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
         name = cls.remove_stopwords_designations(name)
-        list_name_split = name.split()
+
+        if name.find('*') != -1:
+            # handle non-ascii chars in name
+            name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
+            list_name_split = name.split()
+        else:
+            list_name_split,name = cls.combine_multi_word_synonyms(name, solr_base_url)
+            list_name_split = [x.upper() for x in list_name_split]
 
         prox_search_strs,old_alg_search_strs,phon_search_strs = cls.build_solr_search_strs(name, list_name_split)
-        synonyms_for_word = cls.get_synonyms_for_words(list_name_split)
 
+        synonyms_for_word = cls.get_synonyms_for_words(list_name_split)
         if bucket == 'synonym':
             connections = cls.get_synonym_results(solr_base_url, name, prox_search_strs, old_alg_search_strs, start, rows)
 
@@ -177,24 +184,25 @@ class SolrQueries:
                         synonyms = result_name[result_name.find('(') + 1:result_name.find(')')]
                         synonyms = [x.strip() for x in synonyms.split(',')]
                         for synonym in synonyms:
-                            processed_synonyms_dict = cls.word_pre_processing(synonyms_for_word[synonym.upper()],
-                                                                              'synonyms',
-                                                                              solr_base_url
-                                                                              )
-                            for word in processed_synonyms_dict:
-                                for item in result['response']['docs']:
-                                    if item['name'] not in seen_ordered_names and item['name'] not in missed_names:
-                                        missed_names.append(item['name'])
-                                    if item['name'] not in seen_ordered_names:
-                                        processed_name = cls.name_pre_processing(item['name']).upper()
-                                        if ' ' + processed_synonyms_dict[word].upper() in ' ' + processed_name.upper():
-                                            seen_ordered_names.append(item['name'])
-                                            ordered_names.append({'name_info':item, 'stems': [processed_synonyms_dict[word].upper()]})
-                                            missed_names.remove(item['name'])
-                                        elif ' ' + word.upper() in ' ' + processed_name.upper():
-                                            seen_ordered_names.append(item['name'])
-                                            ordered_names.append({'name_info': item, 'stems': [word.upper()]})
-                                            missed_names.remove(item['name'])
+                            if synonym.upper() in synonyms_for_word:
+                                processed_synonyms_dict = cls.word_pre_processing(synonyms_for_word[synonym.upper()],
+                                                                                  'synonyms',
+                                                                                  solr_base_url
+                                                                                  )
+                                for word in processed_synonyms_dict:
+                                    for item in result['response']['docs']:
+                                        if item['name'] not in seen_ordered_names and item['name'] not in missed_names:
+                                            missed_names.append(item['name'])
+                                        if item['name'] not in seen_ordered_names:
+                                            processed_name = cls.name_pre_processing(item['name']).upper()
+                                            if ' ' + processed_synonyms_dict[word].upper() in ' ' + processed_name.upper():
+                                                seen_ordered_names.append(item['name'])
+                                                ordered_names.append({'name_info':item, 'stems': [processed_synonyms_dict[word].upper()]})
+                                                missed_names.remove(item['name'])
+                                            elif ' ' + word.upper() in ' ' + processed_name.upper():
+                                                seen_ordered_names.append(item['name'])
+                                                ordered_names.append({'name_info': item, 'stems': [word.upper()]})
+                                                missed_names.remove(item['name'])
 
                     else:
                         for item in result['response']['docs']:
@@ -205,9 +213,7 @@ class SolrQueries:
                     final_names_list = []
 
                     # order based on alphabetization of swapped in synonyms
-
                     if bucket == 'synonym':
-
                         processed_words_dict = cls.word_pre_processing(list_name_split, 'synonyms', solr_base_url)
 
                         pivot_list = []
@@ -454,10 +460,10 @@ class SolrQueries:
 
         # TODO: these should be loaded from somewhere.
         designations = [
-            'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited', 'limited liability co.',
-            'limited liability company', 'limited liability partnership', 'limitee', 'llc', 'llp', 'ltd.', 'ltee',
+            'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited liability co.',
+            'limited liability company', 'limited liability partnership', 'limited partnership','limitee', 'llc', 'llp', 'ltd.', 'ltee',
             'sencrl', 'societe a responsabilite limitee', 'societe en nom collectif a responsabilite limitee', 'srl',
-            'ulc', 'unlimited liability company']
+            'ulc', 'unlimited liability company', 'limited',]
 
         # Match the designation with whitespace before and either followed by whitespace or end of line.
         for designation in designations:
@@ -636,7 +642,7 @@ class SolrQueries:
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod
     def _get_synonyms_clause(cls, name):
-        name = re.sub(' +', ' ', name)
+        # name = re.sub(' +', ' ', name)
         current_app.logger.debug('getting synonyms for: {}'.format(name))
         clause = ''
         synonyms = []
@@ -719,10 +725,10 @@ class SolrQueries:
     def remove_stopwords_designations(cls, name):
         # TODO: these should be loaded from somewhere.
         designations = [
-            'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited',
-            'limited liability co.', 'limited liability company', 'limited liability partnership', 'limitee', 'llc',
-            'llp', 'ltd.', 'ltee', 'sencrl', 'societe a responsabilite limitee',
-            'societe en nom collectif a responsabilite limitee', 'srl', 'ulc', 'unlimited liability company']
+            'corp.', 'corp', 'corporation', 'inc.', 'inc', 'incorporated', 'incorporee', 'l.l.c.', 'llc', 'limited partnership',
+            'limited liability co.', 'limited liability co','limited liability company', 'limited liability partnership', 'limitee',
+            'llp', 'ltd.', 'ltd', 'ltee', 'sencrl', 'societe a responsabilite limitee',
+            'societe en nom collectif a responsabilite limitee', 'limited', 'srl', 'ulc', 'unlimited liability company']
 
         stop_words = []
         try:
@@ -750,6 +756,36 @@ class SolrQueries:
         # name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
         name = name.upper().replace(' AND ', ' ').replace('&', ' ').replace('+', ' ')
         return name
+
+    @classmethod
+    def combine_multi_word_synonyms(cls, name, solr_base_url):
+
+        max_len = len(name.split()) * 2
+        query = solr_base_url + \
+                '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={name}&analysis.fieldname=name' \
+                '&wt=json&indent=true'.format(name=parse.quote(name.strip()).replace('%2A', ''))
+
+        processed_words = json.load(request.urlopen(query))
+
+        count = 0
+        for item in processed_words['analysis']['field_names']['name']['index']:
+            if item == 'org.apache.lucene.analysis.synonym.SynonymGraphFilter':
+                count += 1
+                break
+            count += 1
+
+        name = ''
+        word_count = 0
+        for text in processed_words['analysis']['field_names']['name']['index'][count]:
+            if word_count < max_len:
+                name += text['text'] + ' '
+            else:
+                name += text['text']
+            word_count += 1
+        name = parse.unquote(name)
+        processed_list = name.split()
+
+        return processed_list,name.strip()
 
     @classmethod
     def build_solr_search_strs(cls, name, list_name_split):
@@ -795,7 +831,7 @@ class SolrQueries:
     @classmethod
     def get_synonyms_for_words(cls, list_name_split):
         # get synonym list for each word in the name
-        list_name_split = [w.replace('*','') for w in list_name_split]
+        list_name_split = [wrd.replace('*','').upper() for wrd in list_name_split]
         synonyms_for_word = {}
         for word in list_name_split:
             synonyms_for_word[word] = [x.upper().strip() for x in cls._get_synonym_list(word)]
@@ -820,7 +856,6 @@ class SolrQueries:
 
     @classmethod
     def word_pre_processing(cls, list_of_words, type, solr_base_url):
-
         list_of_words = [w.replace('*', '') for w in list_of_words]
         words_to_process = ''
         for item in list_of_words:
