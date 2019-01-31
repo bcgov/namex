@@ -6,7 +6,7 @@ Flask-Moment
 Flask-SQLAlchemy
 Flask-RESTplus
 Flask-Marshmallow
-flask-jwt-oidc
+flask-jwt-oidc>=0.1.5
 python-dotenv==0.8.2
 psycopg2-binary
 marshmallow
