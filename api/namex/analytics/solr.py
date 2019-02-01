@@ -895,8 +895,8 @@ class SolrQueries:
                 for text in processed_words['analysis']['field_names']['name']['index'][count]:
                     processed_list.append(text['text'])
 
-                stem_in_name = False
                 for item in list_of_words:
+                    stem_in_name = False
                     for processed_synonym in processed_list:
                         if processed_synonym.upper() in item.upper():
                             stem_in_name = True
