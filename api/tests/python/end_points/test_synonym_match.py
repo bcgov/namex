@@ -513,6 +513,7 @@ def test_order(client, jwt, app, query, ordered_list):
     ('CONSULTING CONSTRUCTION DEVELOPMENT', ['CONSULT', 'CONSTRUCT', 'DEVELOP']),
     ('PROPERTY', ['PROPERTY', 'PROPERTI']),
     ('PROPERTIES', ['PROPERTI']),
+    ('MANAGEMENT PROPERTY', ['PROPERTY','MANAG','PROPERTI']),
 ])
 def test_stems(client, jwt, app, query, stems):
     verify_stems(client, jwt, query=query, stems=stems)
