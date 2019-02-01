@@ -847,10 +847,6 @@ class Request(Resource):
                 except (NROServicesError, Exception) as err:
                     MessageServices.add_message('error', 'reset_request_in_NRO', err)
 
-                # change state to DRAFT
-                nrd.stateCd = State.DRAFT
-                is_changed__request_state = True
-
                 nrd.expirationDate = None
                 is_changed__request = True
 
