@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c3c2bf5d-25c7-4296-8d33-7771c6774af5",
+		"_postman_id": "f4078534-fd78-48a1-a4df-7721aeaec1c2",
 		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -2025,87 +2025,6 @@
 							]
 						},
 						"description": "Test RESET"
-					},
-					"response": []
-				},
-				{
-					"name": "requests/NR # - change state to INPROGRESS",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "36e019ae-a7c4-4599-8631-564ad3d11ef0",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"id": "346c9a5d-ee8f-48cd-9b21-bad29baf9ecb",
-								"exec": [
-									"eval(globals.postmanBDD);",
-									"",
-									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
-									"",
-									"it('Should be an success response', () => {",
-									"    response.ok.should.be.true;            // 2XX",
-									"    response.error.should.be.false;          // 4XX or 5XX",
-									"    response.clientError.should.be.false;    // 4XX",
-									"    response.serverError.should.be.false;   // 5XX",
-									"    response.should.have.status(200);",
-									"    response.statusType.should.equal(2);",
-									"});",
-									"",
-									"it('Should return JSON', () => {",
-									"    response.should.be.json;",
-									"    response.should.have.header('Content-Type', 'application/json');",
-									"    response.type.should.equal('application/json');",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"it('Should contain \\'message\\' confirming patch', () => {",
-									"    response.body.should.be.an('object').with.keys(['message']);",
-									"    jsonData.message.should.include('- patched');",
-									"});",
-									"",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"state\": \"INPROGRESS\"}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v1/requests/{{NR}}",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"requests",
-								"{{NR}}"
-							]
-						},
-						"description": "Must change to INPROGRESS before HOLD (next call) because DRAFT to HOLD is not a valid transition."
 					},
 					"response": []
 				},

@@ -46,13 +46,9 @@ def valid_state_transition(user, nr, new_state):
     if new_state == State.CANCELLED and nr.stateCd in State.CANCELLABLE_STATES:
         return True
 
-    # allow Editor or Approver to move to draft
-    if new_state == State.DRAFT and (jwt.validate_roles([User.APPROVER]) or jwt.validate_roles([User.EDITOR])):
-        return True
-
     # NR is in a final state, but maybe the user wants to pull it back for corrections
     if nr.stateCd in State.COMPLETED_STATE:
-        if not jwt.validate_roles([User.APPROVER]):
+        if not jwt.validate_roles([User.APPROVER]) and not jwt.validate_roles([User.EDITOR]):
             return False
             # return jsonify({"message": "Only Names Examiners can alter completed Requests"}), 401
 
