@@ -56,7 +56,11 @@ class Config(object):
     JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
     JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
     JWT_OIDC_CACHING_ENABLED = os.getenv('JWT_OIDC_CACHING_ENABLED')
-    JWT_OIDC_JWKS_CACHE_TIMEOUT = os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT')
+    try:
+        JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT'))
+    except:
+        JWT_OIDC_JWKS_CACHE_TIMEOUT = 300
+
 
     TESTING = False,
     DEBUG = False
