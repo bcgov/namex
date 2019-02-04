@@ -1,6 +1,5 @@
 from flask import jsonify
-from unittest import mock
-import sys
+from flask import json
 from namex.models import User
 
 token_header = {
@@ -211,3 +210,80 @@ def test_put_nr_view_only(client, jwt, app):
     assert 401 == rv.status_code
     assert expected_response == rv.data
 
+
+def test_add_new_name_to_nr(client, jwt, app):
+
+    # add NR to database
+    from namex.models import Request as RequestDAO, State, Name as NameDAO
+    nr = RequestDAO()
+    nr.nrNum = 'NR 0000002'
+    nr.stateCd = State.INPROGRESS
+    nr.requestId = 1460775
+    name1 = NameDAO()
+    name1.choice = 1
+    name1.name = 'ONE'
+    nr.names = [name1]
+    nr.save_to_db()
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    # get the resource so we have a template for the request:
+    rv = client.get('/api/v1/requests/NR%200000002', headers=headers)
+    assert rv.status_code == 200
+    # assert we're starting with just one name:
+    data = json.loads(rv.data)
+    assert len(data['names']) == 1
+
+    new_name = data['names'][0]
+    new_name['name'] = 'Name 2'
+    new_name['choice'] = 2
+    data['names'].append(new_name)
+
+    # Update with a brand new name (this is the test)
+    rv = client.put('/api/v1/requests/NR%200000002', data=json.dumps(data), headers=headers)
+
+    data = json.loads(rv.data)
+    assert 200 == rv.status_code
+    assert len(data['names']) == 2
+
+
+def test_remove_name_from_nr(client, jwt, app):
+
+    # add NR to database
+    from namex.models import Request as RequestDAO, State, Name as NameDAO
+    nr = RequestDAO()
+    nr.nrNum = 'NR 0000002'
+    nr.stateCd = State.INPROGRESS
+    nr.requestId = 1460775
+    name1 = NameDAO()
+    name1.choice = 1
+    name1.name = 'ONE'
+    name2 = NameDAO()
+    name2.choice = 2
+    name2.name = 'TWO'
+    nr.names = [name1, name2]
+    nr.save_to_db()
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    # get the resource so we have a template for the request:
+    rv = client.get('/api/v1/requests/NR%200000002', headers=headers)
+    assert rv.status_code == 200
+    # assert we're starting with just one name:
+    data = json.loads(rv.data)
+    assert len(data['names']) == 2
+
+    for name in data['names'] :
+        if name['choice'] == 2:
+            name['name'] = ''
+
+    # Update with one blank name name (should remove the blank name)
+    rv = client.put('/api/v1/requests/NR%200000002', data=json.dumps(data), headers=headers)
+
+    data = json.loads(rv.data)
+    assert 200 == rv.status_code
+    assert len(data['names']) == 1

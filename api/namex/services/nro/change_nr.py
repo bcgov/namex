@@ -17,7 +17,7 @@ from .utils import generate_compressed_name, nro_examiner_name
 from namex.models import State
 
 
-def update_nr (nr, ora_cursor, change_flags):
+def update_nr(nr, ora_cursor, change_flags):
     """Update the Name Request in NRO
     :raises Exception: what ever error we get, let our caller handle, this is here in case we want to wrap it - future
     """

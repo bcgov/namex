@@ -67,6 +67,9 @@ class Name(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def __init__(self, *args, **kwargs):
+        pass
+
 
 class NameSchema(ma.ModelSchema):
     class Meta:

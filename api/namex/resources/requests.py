@@ -687,6 +687,7 @@ class Request(Resource):
             is_changed__name1 = False
             is_changed__name2 = False
             is_changed__name3 = False
+            deleted_names = [False] * 3
 
             if len(nrd.names.all()) == 0:
                 new_name_choice = Name()
@@ -762,12 +763,21 @@ class Request(Resource):
                                                                     .format(orig_name['name'], nrd_name.name)})
                             if nrd_name.choice == 2:
                                 is_changed__name2 = True
+                                if not nrd_name.name:
+                                    deleted_names[nrd_name.choice - 1] = True
                                 json_input['comments'].append({'comment': 'Name choice 2 changed from {0} to {1}'\
                                                                     .format(orig_name['name'], nrd_name.name)})
                             if nrd_name.choice == 3:
                                 is_changed__name3 = True
+                                if not nrd_name.name:
+                                    deleted_names[nrd_name.choice - 1] = True
                                 json_input['comments'].append({'comment': 'Name choice 3 changed from {0} to {1}'\
                                                                     .format(orig_name['name'], nrd_name.name)})
+
+                ### Finaly delete any names that were blanked out
+                for nrd_name in nrd.names:
+                    if deleted_names[nrd_name.choice - 1]:
+                        nrd_name.delete_from_db()
 
             ### END names ###
 
