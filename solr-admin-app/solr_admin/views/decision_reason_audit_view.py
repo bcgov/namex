@@ -7,7 +7,7 @@ from solr_admin.views.secured_view import SecuredView
 class DecisionReasonAuditView(SecuredView):
 
     column_labels = {
-        'dr_id': 'Decision Reason Id',
+        'id': 'Decision Reason Id',
     }
 
     # Disallow the creation of audit events.
@@ -29,10 +29,10 @@ class DecisionReasonAuditView(SecuredView):
     column_default_sort = ('timestamp', True)
 
     # Allow the user to filter on the name and reason columns. Order is significant here.
-    column_filters = ['username', 'action', 'dr_id', 'name', 'reason']
+    column_filters = ['username', 'action', 'id', 'name', 'reason']
 
     # Search within the name and reason text.
-    column_searchable_list = ['username', 'action', 'dr_id', 'name', 'reason']
+    column_searchable_list = ['username', 'action', 'id', 'name', 'reason']
 
     # Use a custom list.html that provides a page size drop down with extra choices.
     list_template = 'generic_list.html'

@@ -5,7 +5,7 @@ from . import db
 class DecisionReason(db.Model):
     __tablename__ = 'decision_reason'
 
-    dr_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.VARCHAR(1024))
     reason = db.Column(db.VARCHAR(1024))
 

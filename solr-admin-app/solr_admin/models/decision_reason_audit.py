@@ -23,12 +23,12 @@ class DecisionReasonAudit(db.Model):
     reason = db.Column(db.VARCHAR(1024))
 
     def __init__(
-            self, username: str, action: str, dr_id: str,
+            self, username: str, action: str, id: str,
             name: str, reason: str ) -> None:
         self.username = username
         self.timestamp = datetime.datetime.now()
         self.action = action
-        self.dr_id = dr_id
+        self.dr_id = id
         self.name = name
         self.reason = reason
 
