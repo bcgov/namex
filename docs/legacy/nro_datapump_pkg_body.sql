@@ -1370,7 +1370,7 @@ END;
                  AND ns.end_event_id IS NULL;
    
              INSERT INTO name_state(name_state_id, name_id,start_event_id,end_event_id,name_state_type_cd,state_comment)
-                   VALUES(name_state_seq.nextval, ni_rec.name_id, l_event_id, NULL, l_state_code, l_state_comment);
+                   VALUES(name_state_seq.nextval, ni_rec.name_id, l_event_id, NULL, l_state_code, TRIM(l_state_comment));
 
              -- now insert conflicting names:
              IF (ni_rec.choice_number = 1) THEN
