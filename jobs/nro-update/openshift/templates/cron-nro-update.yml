@@ -13,7 +13,7 @@ objects:
     name: "nro-update"
   spec:
     concurrencyPolicy: "Forbid"
-    schedule: "*/1 7-19 * * *"
+    schedule: "*/1 0-2,14-23 * * *"
     suspend: false
     jobTemplate:
       spec:
