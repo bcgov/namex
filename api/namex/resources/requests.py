@@ -774,10 +774,6 @@ class Request(Resource):
                                 json_input['comments'].append({'comment': 'Name choice 3 changed from {0} to {1}'\
                                                                     .format(orig_name['name'], nrd_name.name)})
 
-                ### Finaly delete any names that were blanked out
-                for nrd_name in nrd.names:
-                    if deleted_names[nrd_name.choice - 1]:
-                        nrd_name.delete_from_db()
 
             ### END names ###
 
@@ -876,7 +872,6 @@ class Request(Resource):
                 if warnings:
                     MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
 
-
             ### Update NR Details in NRO (not for reset)
             else:
                 try:
@@ -898,6 +893,11 @@ class Request(Resource):
                         warnings = nro.change_nr(nrd, change_flags)
                         if warnings:
                             MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
+                        else:
+                            ### now it's safe to delete any names that were blanked out
+                            for nrd_name in nrd.names:
+                                if deleted_names[nrd_name.choice - 1]:
+                                    nrd_name.delete_from_db()
 
                 except (NROServicesError, Exception) as err:
                     MessageServices.add_message('error', 'change_request_in_NRO', err)

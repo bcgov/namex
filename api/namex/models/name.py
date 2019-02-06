@@ -66,7 +66,7 @@ class Name(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
-        
+
 
 class NameSchema(ma.ModelSchema):
     class Meta:
