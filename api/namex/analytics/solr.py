@@ -206,8 +206,9 @@ class SolrQueries:
                         for item in result['response']['docs']:
                             if item['name'] not in seen_ordered_names:
                                 ordered_names.append({'name_info': item, 'stems': []})
-                    for missed in missed_names:
-                        current_app.logger.error('MISSED results: ', missed)
+
+                    if len(missed_names) > 0:
+                        current_app.logger.error('MISSED results: {}'.format(missed_names))
                     final_names_list = []
 
                     # order based on alphabetization of swapped in synonyms
@@ -635,7 +636,13 @@ class SolrQueries:
             # Not sure what it is, pass it up.
             raise http_error
 
-        return json.load(connection)[1][0].split(',')
+        results = json.load(connection)
+        synonym_list = []
+        # in case a token is part of multiple synonym lists
+        for synonyms in results[1]:
+            synonym_list += synonyms.split(',')
+
+        return synonym_list
 
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod

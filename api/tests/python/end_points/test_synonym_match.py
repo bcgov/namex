@@ -486,11 +486,12 @@ def test_strips_stop_words(client, jwt, app, criteria, seed):
         query=criteria,
         expected_list=[seed]
     )
+
 @integration_postgres_solr
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("query, ordered_list", [
-    ('TESTING ORDER DEVELOPMENTS SYNONYMS', ['----TESTING ORDER DEVELOPMENTS SYNONYMS - PROXIMITY SEARCH',
+    ('TESTING ORDER DEVELOPMENT SYNONYMS', ['----TESTING ORDER DEVELOPMENT SYNONYMS - PROXIMITY SEARCH',
                                                   'TESTING ORDER DEVELOPMENT SYNONYMS',
                                                   'TESTING ORDER CONSTRUCTION SYNONYMS',
                                                   'TESTING ORDER STRUCTURE SYNONYMS',
@@ -498,7 +499,7 @@ def test_strips_stop_words(client, jwt, app, criteria, seed):
 ])
 def test_order(client, jwt, app, query, ordered_list):
     #  for loop didn't work for seeding so manual
-    seed_database_with(client, jwt, 'TESTING ORDER CONSTRUCTION SYNONYMS', id='1', source='2', clear=False)
+    seed_database_with(client, jwt, 'TESTING ORDER CONSTRUCTION SYNONYMS', id='1', source='2')
     seed_database_with(client, jwt, 'TESTING ORDER DEVELOPMENT SYNONYMS', id='2', source='4', clear=False)
     seed_database_with(client, jwt, 'TESTING ORDER STRUCTURE SYNONYMS', id='3', source='3', clear=False)
     verify_order(client, jwt, query=query, expected_order=ordered_list)
@@ -517,4 +518,16 @@ def test_order(client, jwt, app, query, ordered_list):
 ])
 def test_stems(client, jwt, app, query, stems):
     verify_stems(client, jwt, query=query, stems=stems)
+
+@integration_postgres_solr
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query, expected_list", [
+    ('PACIFIC FASTFOOD', ['PACIFIC TAKEOUT', 'PACIFIC CONCESSION']),
+])
+def test_synonyms_match_on_all_synonym_lists_(client, jwt, app, query, expected_list):
+    #  some synonyms are part of multiple lists so check that they return matches on both
+    seed_database_with(client, jwt, 'PACIFIC TAKEOUT', id='1', source='2')
+    seed_database_with(client, jwt, 'PACIFIC CONCESSION', id='2', source='2', clear=False)
+    verify_synonym_match(client, jwt, query=query, expected_list=expected_list)
 
