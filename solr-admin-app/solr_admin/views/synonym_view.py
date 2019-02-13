@@ -1,8 +1,6 @@
 
 import re
 
-from flask import current_app, request
-from flask_admin.contrib import sqla
 from wtforms import validators
 
 from solr_admin import keycloak
@@ -12,7 +10,12 @@ from solr_admin.models import synonym_audit
 
 
 # The customized ModelView that is used for working with the synonyms.
-class SynonymView(sqla.ModelView):
+from solr_admin.services.get_stems import get_stems
+from solr_admin.services.get_multi_word_synonyms import get_multi_word_synonyms
+from solr_admin.views.secured_view import SecuredView
+
+
+class SynonymView(SecuredView):
     # We're unlikely to do multiple deletes, so just get rid of the checkboxes and the drop down for delete.
     action_disallowed_list = ['delete']
 
@@ -26,13 +29,14 @@ class SynonymView(sqla.ModelView):
     column_default_sort = 'synonyms_text'
 
     # For some reason this needs to be initialized, but we will override it in is_accessible.
-    column_editable_list = ['category', 'comment', 'synonyms_text']
+    column_editable_list = ['category', 'synonyms_text', 'comment']
+    form_columns = ['category', 'synonyms_text', 'comment']
 
     # Allow the user to filter on the category column.
-    column_filters = ['category']
+    column_filters = ['category', 'synonyms_text', 'comment' ]
 
     # Search within the synonyms_text.
-    column_searchable_list = ['category', 'synonyms_text']
+    column_searchable_list = ['category', 'synonyms_text', 'comment']
 
     # Use a custom create.html that warns the user about sorting what they enter.
     create_template = 'synonyms_create.html'
@@ -42,29 +46,6 @@ class SynonymView(sqla.ModelView):
 
     # Use a custom list.html that provides a page size drop down with extra choices.
     list_template = 'synonyms_list.html'
-
-    # At runtime determine whether or not the user has access to functionality of the view. The rule is that data is
-    # only editable in the test environment.
-    def is_accessible(self):
-        # Disallow editing unless in the 'testing' environment.
-        editable = current_app.env == 'testing'
-        self.can_create = editable
-        self.can_delete = editable
-        self.can_edit = editable
-
-        if editable:
-            # Make all columns editable. [temporarily except the Boolean field "enabled" - see Flask-Admin problem 1604]
-            self.column_editable_list = ['category', 'comment', 'synonyms_text']
-        else:
-            self.column_editable_list = []
-
-        # Flask-OIDC function that states whether or not the user is logged in and has permissions.
-        return keycloak.Keycloak(None).has_access()
-
-    # At runtime determine what to do if the view is not accessible.
-    def inaccessible_callback(self, name, **kwargs):
-        # Flask-OIDC function that is called if the user is not logged in or does not have permissions.
-        return keycloak.Keycloak(None).get_redirect_url(request.url)
 
     # When the user goes to save the data, trim whitespace and put the list back into alphabetical order.
     def on_model_change(self, form, model, is_created):
@@ -78,7 +59,8 @@ class SynonymView(sqla.ModelView):
         else:
             _create_audit_log(model, 'UPDATE')
 
-        solr.reload_solr_cores()
+        model.stems_text = get_stems(model.synonyms_text)
+        self.session.commit()
 
     # After deleting the data create the audit log.
     def after_model_delete(self, model):
@@ -94,10 +76,20 @@ def _validate_synonyms_text(synonyms_text: str) -> None:
     # Strip leading and trailing spaces.
     values = list(map(str.strip, values))
 
+    _validation_multi_word_check(values)
     _validation_character_check(values)
     _validation_multiple_spaces(values)
     _validation_duplicates_check(values)
     _validation_minimum_count(values)
+
+# Check for multi-word synonyms
+def _validation_multi_word_check(values) -> None:
+    disallowed_values = get_multi_word_synonyms(values)
+
+    if disallowed_values:
+        raise validators.ValidationError(
+            'Multi-word synonyms text cannot be processed here, please contact application support. ({})'
+                .format(', '.join(disallowed_values)))
 
 
 # Only a-z, 0-9, and space are allowed in the synonyms.
@@ -170,7 +162,7 @@ def _alphabetize_csv(string: str) -> str:
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
     audit = synonym_audit.SynonymAudit(
-        model.id, keycloak.Keycloak(None).get_username(), action, model.category, model.synonyms_text, model.comment,
+        keycloak.Keycloak(None).get_username(), action, model.id, model.category, model.synonyms_text, model.comment,
         model.enabled)
 
     session = models.db.session
