@@ -3,6 +3,8 @@ Flask-Restplus
 Flask-SQLAlchemy
 psycopg2-binary
 python-dotenv
+flask-migrate
+flask_script
 
 gunicorn
 gunicorn[eventlet]

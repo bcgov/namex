@@ -105,9 +105,7 @@ def verify(data, expected=[], not_expected=None):
 def verify_match(client, jwt, query, expected_list=[], not_expected_list=None):
     data = search_cobrs_phonetic_match(client, jwt, query)
     if expected_list == [] or expected_list:
-        print('here 1')
         if expected_list == []:
-            print('here 2')
             verify(data, [])
         else:
             for expected in expected_list:
@@ -160,10 +158,10 @@ def test_designation_removal(client, jwt, app):
 @integration_synonym_api
 @integration_solr
 def test_duplicated_letters(client, jwt, app):
-    seed_database_with(client, jwt, 'Damme Trucking Inc')
+    seed_database_with(client, jwt, 'Damme Trukking Inc')
     verify_match(client, jwt,
-       query='Dame Trucking Inc',
-       expected_list=['Damme Trucking Inc']
+       query='Dame Truccing Inc',
+       expected_list=['Damme Trukking Inc']
     )
 
 @integration_synonym_api
