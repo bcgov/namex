@@ -50,6 +50,11 @@ class NROServices(object):
         # setting threaded =True wraps the underlying calls in a Mutex
         # so we don't have to that here
 
+
+        def InitSession(conn, requestedTag):
+            cursor = conn.cursor()
+            cursor.execute("alter session set TIME_ZONE = 'America/Vancouver'")
+
         return cx_Oracle.SessionPool(user=current_app.config.get('NRO_USER'),
                                      password=current_app.config.get('NRO_PASSWORD'),
                                      dsn='{0}:{1}/{2}'.format(current_app.config.get('NRO_HOST'),
@@ -62,7 +67,8 @@ class NROServices(object):
                                      threaded=True,
                                      getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,
                                      waitTimeout=1500,
-                                     timeout=3600)
+                                     timeout=3600,
+                                     sessionCallback=InitSession)
 
     @property
     def connection(self):
@@ -92,7 +98,7 @@ class NROServices(object):
             cursor = self.connection.cursor()
 
             cursor.execute("""
-                SELECT last_update
+                SELECT SYS_EXTRACT_UTC (cast(last_update as timestamp)) as last_update
                 FROM req_instance_max_event
                 WHERE request_id = :req_id"""
                 ,req_id=nro_request_id)
