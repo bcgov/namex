@@ -737,7 +737,7 @@ def test_ignore_exact_match_keep_phonetic(solr, client, jwt, app):
        expected=[
            {'name': '----BLUEPRINT BEAUTY'},
            {'name': 'BLUEPRINT BEAUTEE'},
-           {'name': '----BLUEPRINT synonyms:(beauty)'}
+           {'name': '----BLUEPRINT synonyms:(BEAUTI)'}
        ]
     )
 

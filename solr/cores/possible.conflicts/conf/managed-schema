@@ -489,11 +489,7 @@
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <!-- Case insensitive stop word removal.
         -->
-        <filter class="solr.StopFilterFactory"
-                ignoreCase="true"
-                words="lang/stopwords_en.txt"
-        />
-        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.SynonymGraphFilterFactory" synonyms="multi_word_syns.txt" ignoreCase="true" expand="true"/>
         <filter class="solr.SnowballPorterFilterFactory" protected="protected_syns.txt" language="English"/>
@@ -521,16 +517,12 @@
                                                                  replacement="bc" />
         <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([O|o][F|f][\W](([C|c][A|a][N|n][A|a][D|d][A|a])|[B|b][C|c])$)" replacement="" />
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory"
-                ignoreCase="true"
-                words="lang/stopwords_en.txt"
-        />
-        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_en.txt"/>
         <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
-            ignoreCase="true" expand="true"/>
         <filter class="solr.SnowballPorterFilterFactory" protected="protected_syns.txt" language="English"/>
+        <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
+            sql="select stems_text from synonym where enabled = true" ignoreMissingDatabase="true"
+            ignoreCase="true" expand="true"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
       </analyzer>
     </fieldType>
