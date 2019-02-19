@@ -13,7 +13,7 @@ objects:
     name: "nro-extractor"
   spec:
     concurrencyPolicy: "Forbid"
-    schedule: "*/1 0-2,14-23 * * *"
+    schedule: "*/1 * * * *"
     suspend: false
     jobTemplate:
       spec:
