@@ -550,3 +550,20 @@ def test_number_synonyms(client, jwt, app, query, expected_list):
     seed_database_with(client, jwt, 'FIFTH ZZZZZ', id='1', source='2')
     verify_synonym_match(client, jwt, query=query, expected_list=expected_list)
 
+@integration_postgres_solr
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query, ordered_list", [
+    ('PACIFIC WEST CONSTRUCTION', ['----PACIFIC WEST CONSTRUCTION - PROXIMITY SEARCH',
+                                    '----PACIFIC WEST CONSTRUCTION* - EXACT WORD ORDER',
+                                    '----PACIFIC WEST synonyms:(CONSTRUCT) - PROXIMITY SEARCH',
+                                    '----PACIFIC WEST* synonyms:(CONSTRUCT) - EXACT WORD ORDER',
+                                    '----PACIFIC synonyms:(CONSTRUCT) - PROXIMITY SEARCH',
+                                    'PACIFIC DEVELOPMENT',
+                                                  ]),
+])
+def test_synonym_clause_stemmed(client, jwt, app, query, ordered_list):
+    #  for loop didn't work for seeding so manual
+    seed_database_with(client, jwt, 'PACIFIC DEVELOPMENT', id='1', source='2')
+    verify_order(client, jwt, query=query, expected_order=ordered_list)
+
