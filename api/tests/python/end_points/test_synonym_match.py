@@ -556,9 +556,9 @@ def test_number_synonyms(client, jwt, app, query, expected_list):
 @pytest.mark.parametrize("query, ordered_list", [
     ('PACIFIC WEST CONSTRUCTION', ['----PACIFIC WEST CONSTRUCTION - PROXIMITY SEARCH',
                                     '----PACIFIC WEST CONSTRUCTION* - EXACT WORD ORDER',
-                                    '----PACIFIC WEST (CONSTRUCT) - PROXIMITY SEARCH',
-                                    '----PACIFIC WEST* (CONSTRUCTION) - EXACT WORD ORDER',
-                                    '----PACIFIC (CONSTRUCT) - PROXIMITY SEARCH',
+                                    '----PACIFIC WEST synonyms:(CONSTRUCT) - PROXIMITY SEARCH',
+                                    '----PACIFIC WEST* synonyms:(CONSTRUCT) - EXACT WORD ORDER',
+                                    '----PACIFIC synonyms:(CONSTRUCT) - PROXIMITY SEARCH',
                                     'PACIFIC DEVELOPMENT',
                                                   ]),
 ])
