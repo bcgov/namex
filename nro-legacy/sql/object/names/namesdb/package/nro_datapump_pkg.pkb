@@ -12,7 +12,7 @@ PROCEDURE log_debug(p_message IN VARCHAR2) IS
 
 BEGIN
   message_var := substr(p_message, 1, 250);
-  dbms_output.put_line(message_var);
+  --dbms_output.put_line(message_var);
 END;
 
 
@@ -1038,448 +1038,6 @@ END;
   END;
 
 
-/*
-**
-** PROCEDURE name_examination
-**
-** PURPOSE: Update request with the results of a mainframe name examination transaction.
-**
-** COMMENTS:
-** Added to replace the update_name_rule, update_request_state and update_name_rule
-** NRO datapump COBRS->NAMESDB events.
-**
-**
-*/
-  PROCEDURE name_examination(p_nr_number IN VARCHAR2,
-                             p_status IN VARCHAR2,
-                             p_expiry_date IN VARCHAR2,
-                             p_consent_flag IN VARCHAR2,
-                             p_examiner_id IN VARCHAR2,
-                             p_choice1 IN VARCHAR2 DEFAULT 'NE',
-                             p_choice2 IN VARCHAR2 DEFAULT 'NA',
-                             p_choice3 IN VARCHAR2 DEFAULT 'NA',
-                             p_exam_comment IN VARCHAR2 DEFAULT NULL,
-                             p_add_info IN VARCHAR2 DEFAULT NULL,
-                             p_confname1A IN VARCHAR2 DEFAULT 'NA',
-                             p_confname1B IN VARCHAR2 DEFAULT 'NA',
-                             p_confname1C IN VARCHAR2 DEFAULT 'NA',
-                             p_confname2A IN VARCHAR2 DEFAULT 'NA',
-                             p_confname2B IN VARCHAR2 DEFAULT 'NA',
-                             p_confname2C IN VARCHAR2 DEFAULT 'NA',
-                             p_confname3A IN VARCHAR2 DEFAULT 'NA',
-                             p_confname3B IN VARCHAR2 DEFAULT 'NA',
-                             p_confname3C IN VARCHAR2 DEFAULT 'NA') IS
-    l_unit_name   VARCHAR2(100);
-    l_message   VARCHAR2(256);
-
-    l_request_id NUMBER := 0;
-    l_event_id NUMBER := 0;
-    l_current_state_type request_state.state_type_cd%TYPE;
-    l_expiry_date request_instance.expiration_date%TYPE;
-    l_request_type request_instance.request_type_cd%TYPE;
-    l_name_state_id name_state.name_state_id%TYPE;
-    ri_rec request_instance%ROWTYPE;
-    ns_rec name_state%ROWTYPE;
-    ni_rec name_instance%ROWTYPE;
-    l_state_code name_state.name_state_type_cd%TYPE;
-    l_state_comment varchar2(1000);
-    l_conf_number name_rule.conf_number%TYPE;
-    l_conf_name name_rule.conf_name%TYPE;
-    
-    CURSOR name_state_cur(p_request_id name.request_id%TYPE) IS
-       SELECT *
-         FROM name_state ns
-        WHERE ns.name_id IN (SELECT n.name_id FROM name n WHERE n.request_id = p_request_id)
-          AND ns.end_event_id IS NULL;
-
-    CURSOR name_instance_cur(p_request_id name.request_id%TYPE) IS
-       SELECT *
-         FROM name_instance ni
-        WHERE ni.name_id IN (SELECT n.name_id FROM name n WHERE n.request_id = p_request_id)
-          AND ni.end_event_id IS NULL;
-
-  BEGIN
-    l_unit_name := 'name_examination';
-    IF (p_status NOT IN ('A', 'R', 'H')) THEN
-      RETURN;
-    END IF;
-
-    l_message := l_unit_name || ' updating system_variable code DP_REQUEST_TS to current timestamp';
-    UPDATE system_variable s
-       SET s.value = TO_CHAR(sysdate, 'YYYY-MM-DD HH24:MI:SS')
-     WHERE s.code = 'DP_REQUEST_TS';
-    COMMIT;
-
-   l_message := l_unit_name || ' getting request_id, state code for NR number ' || p_nr_number;
-   log_debug(l_message);
-    SELECT r.REQUEST_ID, rs.state_type_cd
-      INTO l_request_id, l_current_state_type
-      FROM request r, request_state rs
-     WHERE r.NR_NUM = p_nr_number
-       AND r.request_id = rs.request_id
-       AND rs.end_event_id IS NULL;
-
-     log_debug(l_unit_name || ' requestId= ' || l_request_id || ' existing stateCode=' || 
-               l_current_state_type || ' incoming stateCode=' || p_status);
-
-    -- Do nothing if states have not changed (still in held state)
-    IF (p_status = 'H' AND l_current_state_type = 'H' OR
-        (l_current_state_type = 'COMPLETED' AND p_status IN ('A', 'R'))) THEN
-      RETURN;
-    END IF;
-
-    -- Only change status - and only if current status is Draft
-    IF (p_status = 'H' AND l_current_state_type = 'D') THEN
-       log_debug(l_unit_name || ' HELD state update only');
-       l_event_id := get_event;
-       update_state(l_request_id, l_event_id, 'H', TRIM(p_examiner_id), p_exam_comment);
-       log_debug(l_unit_name || ' HELD state update committing changes');
-       COMMIT;
-       RETURN;
-    END IF;
-
-    -- If get to here either reset or name examination 
-
-    l_event_id := get_event('EXAM');
-
-    -- Resetting request
-    IF (p_status = 'H' AND l_current_state_type = 'COMPLETED') THEN
-       log_debug(l_unit_name || ' resetting request: state returned to H from COMPLETED');
-
-       l_message := l_unit_name || ' inserting RESET transaction for requestId=' || l_request_id || ' eventId=' || l_event_id;
-       log_debug(l_message);
-       INSERT INTO transaction(transaction_id, transaction_type_cd, request_id, event_id, bcol_racf_id)
-              VALUES(transaction_seq.nextval, 'RESET', l_request_id, l_event_id, TRIM(p_examiner_id));
-
-       update_state(l_request_id, l_event_id, 'H', TRIM(p_examiner_id), p_exam_comment);
-
-       l_message := l_unit_name || ' RESET closing out consent records for request_id ' || l_request_id;
-       log_debug(l_message);
-       UPDATE consent c
-          SET c.end_event_id = l_event_id
-        WHERE c.request_id = l_request_id;
-
-       l_message := l_unit_name || ' RESET updating name_rule records for request_id ' || l_request_id;
-       dbms_output.put_line(l_message);
-       DELETE
-         FROM name_rule nr
-        WHERE nr.name_id IN (SELECT n.name_id FROM name n WHERE n.request_id = l_request_id);
-
-       l_message := l_unit_name || ' RESET updating name_state records for request_id ' || l_request_id;
-       log_debug(l_message);
-        FOR ns_rec in name_state_cur(l_request_id) LOOP
-          UPDATE name_state ns
-             SET ns.end_event_id = l_event_id
-            WHERE ns.name_state_id = ns_rec.name_state_id;
-          INSERT INTO name_state(name_state_id,name_id,start_event_id,end_event_id,name_state_type_cd,state_comment)
-                VALUES(name_state_seq.nextval, ns_rec.name_id, l_event_id, NULL, 'NE', null);
-        END LOOP;
-
-       l_message := l_unit_name || ' RESET updating request_instance for request_id ' || l_request_id;
-       log_debug(l_message);
-        SELECT ri.*
-          INTO ri_rec
-          FROM request_instance ri
-         WHERE ri.request_id = l_request_id
-           AND ri.end_event_id IS NULL;
-
-       UPDATE request_instance ri
-          SET ri.end_event_id = l_event_id
-        WHERE ri.request_id = l_request_id
-          AND ri.end_event_id IS NULL;
-
-          l_message := l_unit_name || ' RESET inserting initial request_instance from request_instance_id ' || ri_rec.request_instance_id;
-          log_debug(l_message);
-          INSERT INTO request_instance(request_instance_id,
-                                       request_id,
-                                       priority_cd,
-                                       request_type_cd,
-                                       expiration_date,
-                                       start_event_id,
-                                       end_event_id,
-                                       xpro_jurisdiction,
-                                       queue_position,
-                                       additional_info,
-                                       tilma_ind,
-                                       nuans_expiration_date,
-                                       nuans_num,
-                                       assumed_nuans_num,
-                                       assumed_nuans_name,
-                                       assumed_nuans_expiration_date,
-                                       last_nuans_update_role,
-                                       tilma_transaction_id, nature_business_info)
-              VALUES(request_instance_seq.nextval,
-                     ri_rec.request_id,
-                     ri_rec.priority_cd,
-                     ri_rec.request_type_cd,
-                     null,
-                     l_event_id,
-                     null,
-                     ri_rec.xpro_jurisdiction,
-                     ri_rec.queue_position,
-                     ri_rec.additional_info,
-                     ri_rec.tilma_ind,
-                     ri_rec.nuans_expiration_date,
-                     ri_rec.nuans_num,
-                     ri_rec.assumed_nuans_num,
-                     ri_rec.assumed_nuans_name,
-                     ri_rec.assumed_nuans_expiration_date,
-                     ri_rec.last_nuans_update_role,
-                     ri_rec.tilma_transaction_id,
-                     ri_rec.nature_business_info);
-       log_debug(l_unit_name || ' RESET committing changes');
-       COMMIT;
-       RETURN;
-    END IF;
-
-    -- Request accepted or rejected
-    l_message := l_unit_name || ' inserting NAME_EXAM transaction for requestId=' || l_request_id || ' eventId=' || l_event_id;
-    log_debug(l_message);
-    INSERT INTO transaction(transaction_id, transaction_type_cd, request_id, event_id, bcol_racf_id)
-           VALUES(transaction_seq.nextval, 'NAME_EXAM', l_request_id, l_event_id, TRIM(p_examiner_id));
-    IF (p_expiry_date IS NOT NULL AND LENGTH(p_expiry_date) = 8 AND p_status = 'A') THEN
-
-      l_message := l_unit_name || ' APPROVED NAME EXAM looking up existing request_instance for request_id ' || l_request_id;
-      log_debug(l_message);
-      SELECT ri.*
-        INTO ri_rec
-        FROM request_instance ri
-       WHERE ri.request_id = l_request_id
-         AND ri.end_event_id IS NULL;
-
-        l_request_type := ri_rec.request_type_cd;
-        IF (l_request_type IN ('AS', 'AL', 'UA')) THEN
-          l_request_type := get_assumed_request_type(l_request_id);
-          IF (l_request_type = '') THEN
-            l_request_type := ri_rec.request_type_cd;
-          END IF;
-        END IF;
-        IF (INSTR(RESTORATION_TYPES, ' ' || l_request_type || ' ') > 0) THEN
-          l_expiry_date := TO_DATE(p_expiry_date, 'YYYYMMDD') + 365;
-        ELSE
-          l_expiry_date := TO_DATE(p_expiry_date, 'YYYYMMDD');
-        END IF;
-      l_message := l_unit_name || ' APPROVED NAME EXAM expiry date=' || l_expiry_date || ' updating request_instance';
-      log_debug(l_message);
-      UPDATE request_instance ri
-         SET ri.end_event_id = l_event_id
-       WHERE ri.request_id = l_request_id
-         AND ri.end_event_id IS NULL;
-
-      l_message := l_unit_name || ' APPROVED NAME EXAM inserting request_instance eventId=' || l_event_id || ' requestId=' || l_request_id;
-      log_debug(l_message);
-      INSERT INTO request_instance(request_instance_id,
-                                 request_id,
-                                 priority_cd,
-                                 request_type_cd,
-                                 expiration_date,
-                                 start_event_id,
-                                 end_event_id,
-                                 xpro_jurisdiction,
-                                 queue_position,
-                                 additional_info,
-                                 tilma_ind,
-                                 nuans_expiration_date,
-                                 nuans_num,
-                                 assumed_nuans_num,
-                                 assumed_nuans_name,
-                                 assumed_nuans_expiration_date,
-                                 last_nuans_update_role,
-                                 tilma_transaction_id, nature_business_info)
-        VALUES(request_instance_seq.nextval,
-               l_request_id,
-               ri_rec.priority_cd,
-               ri_rec.request_type_cd,
-               l_expiry_date,
-               l_event_id,
-               null,
-               ri_rec.xpro_jurisdiction,
-               ri_rec.queue_position,
---               TRIM(p_add_info),
-               ri_rec.additional_info,
-               ri_rec.tilma_ind,
-               ri_rec.nuans_expiration_date,
-               ri_rec.nuans_num,
-               ri_rec.assumed_nuans_num,
-               ri_rec.assumed_nuans_name,
-               ri_rec.assumed_nuans_expiration_date,
-               ri_rec.last_nuans_update_role,
-               ri_rec.tilma_transaction_id,
-               ri_rec.nature_business_info);
-
-       -- If accepted, conditionally create consent required/received record.
-       IF (p_consent_flag IN ('Y', 'R')) THEN
-           l_message := l_unit_name || ' APPROVED EXAM inserting into consent with start_event_id ' || l_event_id;
-           log_debug(l_message);
-           INSERT INTO consent (consent_id, request_id, consent_type_cd,
-                                start_event_id, received_flag)
-                VALUES (consent_seq.NEXTVAL, l_request_id, 'NAME', l_event_id, p_consent_flag);
-       END IF;
-     END IF;
-
-      l_message := l_unit_name || ' NAME EXAM updating request_state.end_event_id with event_id ' || l_event_id;
-      log_debug(l_message);
-      UPDATE request_state rs
-         SET rs.end_event_id = l_event_id
-       WHERE rs.request_id = l_request_id
-         AND rs.end_event_id IS NULL;
-
-      l_message := l_unit_name || ' NAME EXAM inserting into request_state with event_id ' || l_event_id;
-      log_debug(l_message);
-      INSERT INTO request_state (request_state_id, request_id, state_type_cd,
-                               start_event_id, examiner_idir, examiner_comment)
-           VALUES (request_state_seq.NEXTVAL, l_request_id, 'COMPLETED', l_event_id, TRIM(p_examiner_id), p_exam_comment);
-
-      -- Now update name_state, name_rule
-       l_message := l_unit_name || ' NAME_EXAM updating name_state records for request_id ' || l_request_id 
-                    || ' choice1 length=' ||  LENGTH(p_choice1) || ' choice2 length=' ||  LENGTH(p_choice2)|| ' choice3 length=' ||  LENGTH(p_choice3);
-       log_debug(l_message);
-        FOR ni_rec in name_instance_cur(l_request_id) LOOP
-          l_state_comment := '';
-          IF (ni_rec.choice_number = 1) THEN
-             l_state_code := SUBSTR(TRIM(p_choice1), 1, 1);
-             IF (l_state_code IN ('A', 'R') AND LENGTH(p_choice1) > 5) THEN
-               l_message := l_unit_name || ' NAME_EXAM extracting state comment for choice 1: length=' || LENGTH(p_choice1);
-               l_state_comment := SUBSTR(p_choice1, 6);
-             END IF;
-          ELSIF (ni_rec.choice_number = 2) THEN
-             l_state_code := SUBSTR(TRIM(p_choice2), 1, 1);
-             IF (l_state_code IN ('A', 'R') AND LENGTH(p_choice2) > 5) THEN
-               l_message := l_unit_name || ' NAME_EXAM extracting state comment for choice 2: length=' || LENGTH(p_choice2);
-               l_state_comment := SUBSTR(p_choice2, 6);
-             END IF;
-          ELSE
-             l_state_code := SUBSTR(TRIM(p_choice3), 1, 1);
-             IF (l_state_code IN ('A', 'R') AND LENGTH(p_choice3) > 5) THEN
-               l_message := l_unit_name || ' NAME_EXAM extracting state comment for choice 3: length=' || LENGTH(p_choice3);
-               l_state_comment := SUBSTR(p_choice3, 6);
-             END IF;
-          END IF;
-
-          -- If not examined do not update record.
-          IF (l_state_code IN ('A', 'R')) THEN
-            IF (l_state_code = 'A' AND p_consent_flag IN ('Y', 'R')) THEN
-              l_state_code := 'C';
-            END IF;
-            l_message := l_unit_name || ' NAME_EXAM updating name_state for choice=' || ni_rec.choice_number ||
-                         ' name_id=' || ni_rec.name_id || ' stateCode=' || l_state_code;
-            log_debug(l_message);
-
-             UPDATE name_state ns
-                SET ns.end_event_id = l_event_id
-               WHERE ns.name_id = ni_rec.name_id
-                 AND ns.end_event_id IS NULL;
-   
-             INSERT INTO name_state(name_state_id, name_id,start_event_id,end_event_id,name_state_type_cd,state_comment)
-                   VALUES(name_state_seq.nextval, ni_rec.name_id, l_event_id, NULL, l_state_code, l_state_comment);
-
-             -- now insert conflicting names:
-             IF (ni_rec.choice_number = 1) THEN
-                IF (p_confname1a != 'NA' AND p_confname1a IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname1a, 1, (INSTR(p_confname1a, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname1a, (INSTR(p_confname1a, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-                IF (p_confname1b != 'NA' AND p_confname1b IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname1b, 1, (INSTR(p_confname1b, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname1b, (INSTR(p_confname1b, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-                IF (p_confname1c != 'NA' AND p_confname1c IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname1c, 1, (INSTR(p_confname1c, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname1c, (INSTR(p_confname1c, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-             ELSIF (ni_rec.choice_number = 2) THEN
-                IF (p_confname2a != 'NA' AND p_confname2a IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname2a, 1, (INSTR(p_confname2a, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname2a, (INSTR(p_confname2a, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-                IF (p_confname2b != 'NA' AND p_confname2b IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname2b, 1, (INSTR(p_confname2b, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname2b, (INSTR(p_confname2b, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-                IF (p_confname2c != 'NA' AND p_confname2c IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname2c, 1, (INSTR(p_confname2c, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname2c, (INSTR(p_confname2c, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-             ELSE
-                IF (p_confname3a != 'NA' AND p_confname3a IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname3a, 1, (INSTR(p_confname3a, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname3a, (INSTR(p_confname3a, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-                IF (p_confname3b != 'NA' AND p_confname3b IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname3b, 1, (INSTR(p_confname3b, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname3b, (INSTR(p_confname3b, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-                IF (p_confname3c != 'NA' AND p_confname3c IS NOT NULL) THEN
-                  l_conf_number := SUBSTR(p_confname3c, 1, (INSTR(p_confname3c, '****') - 1));
-                  l_conf_name := SUBSTR(p_confname3c, (INSTR(p_confname3c, '****') + 4));
-                  l_message := l_unit_name || ' NAME EXAM inserting into name_rule for name_id ' || ni_rec.name_id ||
-                               ' confNumber=' || l_conf_number || ' confName=' || l_conf_name;
-                  log_debug(l_message);
-                  INSERT INTO name_rule (name_id, name_rule_id, reject_reason_cd, rule_id, conf_number, conf_name, rejected_by)
-                     VALUES (ni_rec.name_id, name_rule_seq.NEXTVAL, 'CONFLICT', 1, l_conf_number, l_conf_name, 'EXAMINER');
-                END IF;
-             END IF;
-          END IF;          
-          
-        END LOOP;
-
---    consume_request takes care of consuming of name requests. 
-
-    IF (p_status IN ('A', 'R')) THEN
-      cancel_resubmit(l_request_id, l_event_id);
-    END IF;
-
-    log_debug(l_unit_name || ' NAME_EXAM committing changes');
-    COMMIT;
-
-  EXCEPTION
-    WHEN OTHERS THEN
-      log_debug(l_message || ' FAILED: rolling back changes');
-      application_log_insert('nro_datapump_pkg', SYSDATE, 1, string_limit( 'Exception in ' ||
-                             l_message || '; SQLERRM: ' || SQLERRM, 4000));
-      ROLLBACK;
-  END;
-
 
 /*
 **
@@ -1498,7 +1056,7 @@ END;
   END;
     
 /*
-**
+**l_corp_num := format_corp_num(p_corp_num);l_corp_num := format_corp_num(p_corp_num);
 ** FUNCTION name_examination_func
 **
 ** PURPOSE: Giving caller a return message if name_examination_func is failed. Otherwise, it will return empty string. 
@@ -1973,5 +1531,45 @@ FUNCTION name_examination_func(p_nr_number IN VARCHAR2,
     END name_examination_func;
 
   
+  
+  /*
+**
+** PROCEDURE name_examination
+**
+** PURPOSE: Update request with the results of a mainframe name examination transaction.
+**
+** COMMENTS:
+** Added to replace the update_name_rule, update_request_state and update_name_rule
+** NRO datapump COBRS->NAMESDB events.
+**
+**
+*/
+  PROCEDURE name_examination(p_nr_number IN VARCHAR2,
+                             p_status IN VARCHAR2,
+                             p_expiry_date IN VARCHAR2,
+                             p_consent_flag IN VARCHAR2,
+                             p_examiner_id IN VARCHAR2,
+                             p_choice1 IN VARCHAR2 DEFAULT 'NE',
+                             p_choice2 IN VARCHAR2 DEFAULT 'NA',
+                             p_choice3 IN VARCHAR2 DEFAULT 'NA',
+                             p_exam_comment IN VARCHAR2 DEFAULT NULL,
+                             p_add_info IN VARCHAR2 DEFAULT NULL,
+                             p_confname1A IN VARCHAR2 DEFAULT 'NA',
+                             p_confname1B IN VARCHAR2 DEFAULT 'NA',
+                             p_confname1C IN VARCHAR2 DEFAULT 'NA',
+                             p_confname2A IN VARCHAR2 DEFAULT 'NA',
+                             p_confname2B IN VARCHAR2 DEFAULT 'NA',
+                             p_confname2C IN VARCHAR2 DEFAULT 'NA',
+                             p_confname3A IN VARCHAR2 DEFAULT 'NA',
+                             p_confname3B IN VARCHAR2 DEFAULT 'NA',
+                             p_confname3C IN VARCHAR2 DEFAULT 'NA') IS
+                             
+      l_return   VARCHAR2(32500);                            
+      BEGIN                           
+         l_return := name_examination_func(p_nr_number, p_status, p_expiry_date, p_consent_flag, p_examiner_id, 
+                                         p_choice1, p_choice2, p_choice3, p_exam_comment, p_add_info, p_confname1A, 
+                                         p_confname1B, p_confname1C, p_confname2A, p_confname2B, p_confname2C, 
+                                         p_confname3A, p_confname3B, p_confname3C );
+      END;
         
 END nro_datapump_pkg;
