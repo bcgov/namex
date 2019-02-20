@@ -300,13 +300,9 @@ def test_duplicated_letters(client, jwt, app):
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO PROCESS synonyms:(server) - PROXIMITY SEARCH'),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO synonyms:(process, server, processserver) - PROXIMITY SEARCH'),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO synonyms:(process, server, processserver) - PROXIMITY SEARCH'),
-    ("Jameisons four two zero process server", '----JAMEISONS FOUR synonyms:(two, process, server, twozero, processserver) - PROXIMITY SEARCH'),
-    ("Jameisons four two zero process server", '----JAMEISONS synonyms:(four, two, process, server, fourtwo, fourtwozero, twozero, processserver) - PROXIMITY SEARCH'),
+    ("Jameisons four two zero process server", '----JAMEISONS FOUR TWO ZERO synonyms:(PROCESS, SERVER, PROCESSSERVER) - PROXIMITY SEARCH'),
     ("pacific real estate", "----PACIFIC REALESTATE - PROXIMITY SEARCH"),
-    ("pacific real estate", "----PACIFIC synonyms:(realestate) - PROXIMITY SEARCH")
+    ("pacific real estate", "----PACIFIC synonyms:(REALEST) - PROXIMITY SEARCH")
 ])
 def test_multi_word_synonyms(client, jwt, app, criteria, seed):
     verify_synonym_match(client, jwt,
@@ -402,9 +398,9 @@ def test_strips_and_variations(client, jwt, app, criteria, seed):
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
-    ('TESTING AND TRYING', 'TESTINGAND TRYING'),
-    ('TESTING AND TRYING', 'TESTING ANDTRYING'),
-    ('TESTING AND TRYING', 'TESTINGANDTRYING'),
+    ('TESTING RUNNING TRYING', 'TESTINGRUNNING TRYING'),
+    ('TESTING RUNNING TRYING', 'TESTING RUNNINGTRYING'),
+    ('TESTING RUNNING TRYING', 'TESTINGRUNNINGTRYING'),
 ])
 def test_compound_concat(client, jwt, app, criteria, seed):
     seed_database_with(client, jwt, seed)
@@ -458,13 +454,13 @@ def test_exact_word_order_stack_title_with_wilcards(client, jwt, app):
 @integration_synonym_api
 @integration_solr
 @pytest.mark.parametrize("criteria, seed", [
-    ('TJ´S BACKCOUNTRY ADVENTURES.', '----TJC 2 B 4 S BACKCOUNTRY ADVENTURES - PROXIMITY SEARCH'),
-    ('HOUSE BÜBÜ DA WOLF.', '----HOUSE BC 39 CBC 39 C DA WOLF - PROXIMITY SEARCH'),
-    ('DIAMANTÉ DIAMOND SETTING', '----DIAMANTC 389 DIAMOND SETTING - PROXIMITY SEARCH'),
-    ('MICHELLE¿S BEAR ESSENTIALS.', '----MICHELLEC 2 BFS BEAR ESSENTIALS - PROXIMITY SEARCH'),
-    ('TEST àâçèéêëîïôöùûü BEAR.', '----TEST C 380 C 382 C 387C388C389C38AC38BC38EC38FC394C396C399C39BC39CBEAR - PROXIMITY SEARCH'),
-    ('TEST ÀÂÇÈÉÊËÎÏÔÖÙÛÜS BEAR.', '----TEST C 380 C 382 C 387C388C389C38AC38BC38EC38FC394C396C399C39BC39CSBEAR - PROXIMITY SEARCH'),
-    ('TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR.', '----TEST C 2 B 0 C 2A3C3B7C2A5C2B7C2A9C2A7C2B6C2BCC2BDC2BEC2A2C2A6C2ABC2AAC2A1C2B9C2B2C2B3C2BBC2BFC2ACC2B1C2A4C2AEC397BEAR - PROXIMITY SEARCH'),
+    ('TJ´S BACKCOUNTRY ADVENTURES.', '----TJC2B4S BACKCOUNTRY ADVENTURES - PROXIMITY SEARCH'),
+    ('HOUSE BÜBÜ DA WOLF.', '----HOUSE BC39CBC39C DA WOLF - PROXIMITY SEARCH'),
+    ('DIAMANTÉ DIAMOND SETTING', '----DIAMANTC389 DIAMOND SETTING - PROXIMITY SEARCH'),
+    ('MICHELLE¿S BEAR ESSENTIALS.', '----MICHELLEC2BFS BEAR ESSENTIALS - PROXIMITY SEARCH'),
+    ('TEST àâçèéêëîïôöùûü BEAR.', '----TEST C380C382C387C388C389C38AC38BC38EC38FC394C396C399C39BC39C BEAR - PROXIMITY SEARCH'),
+    ('TEST ÀÂÇÈÉÊËÎÏÔÖÙÛÜS BEAR.', '----TEST C380C382C387C388C389C38AC38BC38EC38FC394C396C399C39BC39CS BEAR - PROXIMITY SEARCH'),
+    ('TEST °£÷¥·©§¶¼½`¾¢!¦«ª¡¹²³»¿¬±¤®× BEAR.', '----TEST C2B0C2A3C3B7C2A5C2B7C2A9C2A7C2B6C2BCC2BD`C2BEC2A2C2A6C2ABC2AAC2A1C2B9C2B2C2B3C2BBC2BFC2ACC2B1C2A4C2AEC397 BEAR - PROXIMITY SEARCH'),
 ])
 def test_bypass_nonascii_characters(client, jwt, app, criteria, seed):
     verify_synonym_match(client,
@@ -494,14 +490,14 @@ def test_strips_stop_words(client, jwt, app, criteria, seed):
     ('TESTING ORDER DEVELOPMENT SYNONYMS', ['----TESTING ORDER DEVELOPMENT SYNONYMS - PROXIMITY SEARCH',
                                                   'TESTING ORDER DEVELOPMENT SYNONYMS',
                                                   'TESTING ORDER CONSTRUCTION SYNONYMS',
-                                                  'TESTING ORDER STRUCTURE SYNONYMS',
+                                                  'TESTING ORDER LAND SYNONYMS',
                                                   ]),
 ])
 def test_order(client, jwt, app, query, ordered_list):
     #  for loop didn't work for seeding so manual
     seed_database_with(client, jwt, 'TESTING ORDER CONSTRUCTION SYNONYMS', id='1', source='2')
     seed_database_with(client, jwt, 'TESTING ORDER DEVELOPMENT SYNONYMS', id='2', source='4', clear=False)
-    seed_database_with(client, jwt, 'TESTING ORDER STRUCTURE SYNONYMS', id='3', source='3', clear=False)
+    seed_database_with(client, jwt, 'TESTING ORDER LAND SYNONYMS', id='3', source='3', clear=False)
     verify_order(client, jwt, query=query, expected_order=ordered_list)
 
 @integration_synonym_api
@@ -512,9 +508,9 @@ def test_order(client, jwt, app, query, ordered_list):
     ('CONSULTING', ['CONSULT']),
     ('CONSTRUCTION DEVELOPMENT', ['CONSTRUCT', 'DEVELOP']),
     ('CONSULTING CONSTRUCTION DEVELOPMENT', ['CONSULT', 'CONSTRUCT', 'DEVELOP']),
-    ('PROPERTY', ['PROPERTY', 'PROPERTI']),
+    ('PROPERTY', ['PROPERTI','PROPERT']),
     ('PROPERTIES', ['PROPERTI']),
-    ('MANAGEMENT PROPERTY', ['PROPERTY','MANAG','PROPERTI']),
+    ('MANAGEMENT PROPERTY', ['MANAG','PROPERTI','PROPERT']),
 ])
 def test_stems(client, jwt, app, query, stems):
     verify_stems(client, jwt, query=query, stems=stems)
@@ -525,9 +521,32 @@ def test_stems(client, jwt, app, query, stems):
 @pytest.mark.parametrize("query, expected_list", [
     ('PACIFIC FASTFOOD', ['PACIFIC TAKEOUT', 'PACIFIC CONCESSION']),
 ])
-def test_synonyms_match_on_all_synonym_lists_(client, jwt, app, query, expected_list):
+def test_synonyms_match_on_all_synonym_lists(client, jwt, app, query, expected_list):
     #  some synonyms are part of multiple lists so check that they return matches on both
     seed_database_with(client, jwt, 'PACIFIC TAKEOUT', id='1', source='2')
     seed_database_with(client, jwt, 'PACIFIC CONCESSION', id='2', source='2', clear=False)
+    verify_synonym_match(client, jwt, query=query, expected_list=expected_list)
+
+@integration_postgres_solr
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query, expected_list", [
+    ('TRUCKING', ['BARGE', 'TRANSPORT', 'EXPRESS']),
+])
+def test_stems_of_synonyms_match_on_synonyms_list(client, jwt, app, query, expected_list):
+    # i.e. 'trucking' is not in the synonym list but stems to 'truck', which is in the list
+    seed_database_with(client, jwt, 'BARGE', id='1', source='2')
+    seed_database_with(client, jwt, 'EXPRESS', id='2', source='2', clear=False)
+    seed_database_with(client, jwt, 'TRANSPORT', id='3', source='2', clear=False)
+    verify_synonym_match(client, jwt, query=query, expected_list=expected_list)
+
+@integration_postgres_solr
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query, expected_list", [
+    ('5TH TESTZZZ', ['----5TH - PROXIMITY SEARCH', 'FIFTH ZZZZZ']),
+])
+def test_number_synonyms(client, jwt, app, query, expected_list):
+    seed_database_with(client, jwt, 'FIFTH ZZZZZ', id='1', source='2')
     verify_synonym_match(client, jwt, query=query, expected_list=expected_list)
 

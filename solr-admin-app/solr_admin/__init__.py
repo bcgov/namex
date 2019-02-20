@@ -1,4 +1,3 @@
-
 import os
 
 import flask
@@ -25,10 +24,6 @@ from solr_admin.views import decision_reason_view
 from solr_admin.views import synonym_audit_view
 from solr_admin.views import restricted_word_condition_audit_view
 from solr_admin.views import decision_reason_audit_view
-
-
-
-
 
 # Create admin site
 def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):

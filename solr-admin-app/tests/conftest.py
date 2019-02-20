@@ -106,21 +106,21 @@ def clean_db():
     db = SQLAlchemy(app)
 
     synonyms_db = engine_from_config({'sqlalchemy.url': app.config['SQLALCHEMY_BINDS']['synonyms']})
-    Synonym.metadata.drop_all(bind=synonyms_db)
-    Synonym.metadata.create_all(bind=synonyms_db, tables=[Synonym.metadata.tables['synonym']])
-    SynonymAudit.metadata.create_all(bind=synonyms_db, tables=[SynonymAudit.metadata.tables['synonym_audit']])
+    #Synonym.metadata.drop_all(bind=synonyms_db)
+    #Synonym.metadata.create_all(bind=synonyms_db, tables=[Synonym.metadata.tables['synonym']])
+    #SynonymAudit.metadata.create_all(bind=synonyms_db, tables=[SynonymAudit.metadata.tables['synonym_audit']])
 
     namex_db = engine_from_config({'sqlalchemy.url': app.config['SQLALCHEMY_DATABASE_URI']})
-    RestrictedCondition.metadata.drop_all(bind=namex_db)
-    RestrictedCondition.metadata.create_all(bind=namex_db, tables=[RestrictedCondition.metadata.tables['restricted_condition']])
-    RestrictedWord.metadata.create_all(bind=namex_db, tables=[RestrictedWord.metadata.tables['restricted_word']])
-    RestrictedWordCondition.metadata.create_all(bind=namex_db, tables=[RestrictedWordCondition.metadata.tables['restricted_word_condition']])
+    #RestrictedCondition.metadata.drop_all(bind=namex_db)
+    #RestrictedCondition.metadata.create_all(bind=namex_db, tables=[RestrictedCondition.metadata.tables['restricted_condition']])
+    #RestrictedWord.metadata.create_all(bind=namex_db, tables=[RestrictedWord.metadata.tables['restricted_word']])
+    #RestrictedWordCondition.metadata.create_all(bind=namex_db, tables=[RestrictedWordCondition.metadata.tables['restricted_word_condition']])
 
-    DecisionReason.metadata.create_all(bind=namex_db, tables=[DecisionReason.metadata.tables['decision_reason']])
-    DecisionReasonAudit.metadata.create_all(bind=namex_db, tables=[DecisionReasonAudit.metadata.tables['decision_reason_audit']])
+    #DecisionReason.metadata.create_all(bind=namex_db, tables=[DecisionReason.metadata.tables['decision_reason']])
+    #DecisionReasonAudit.metadata.create_all(bind=namex_db, tables=[DecisionReasonAudit.metadata.tables['decision_reason_audit']])
 
-    VirtualWordCondition.metadata.create_all(bind=namex_db, tables=[VirtualWordCondition.metadata.tables['virtual_word_condition']])
-    RestrictedConditionAudit.metadata.create_all(bind=namex_db, tables=[RestrictedConditionAudit.metadata.tables['restricted_condition_audit']])
+    #VirtualWordCondition.metadata.create_all(bind=namex_db, tables=[VirtualWordCondition.metadata.tables['virtual_word_condition']])
+    #RestrictedConditionAudit.metadata.create_all(bind=namex_db, tables=[RestrictedConditionAudit.metadata.tables['restricted_condition_audit']])
 
     return db
 

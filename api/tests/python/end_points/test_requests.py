@@ -1,6 +1,10 @@
 from flask import jsonify
 from flask import json
+
 from namex.models import User
+
+from tests.python import integration_oracle_namesdb
+
 
 token_header = {
                 "alg": "RS256",
@@ -211,6 +215,7 @@ def test_put_nr_view_only(client, jwt, app):
     assert expected_response == rv.data
 
 
+@integration_oracle_namesdb
 def test_add_new_name_to_nr(client, jwt, app):
 
     # add NR to database
@@ -249,6 +254,7 @@ def test_add_new_name_to_nr(client, jwt, app):
     assert len(data['names']) == 2
 
 
+@integration_oracle_namesdb
 def test_remove_name_from_nr(client, jwt, app):
 
     # add NR to database

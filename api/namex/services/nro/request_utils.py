@@ -210,7 +210,7 @@ def get_nr_header(session, nr_num):
         ' where nr_num = :nr'
     )
     sql_lu = (
-        'select last_update'
+        'select SYS_EXTRACT_UTC (cast(last_update as timestamp)) as last_update'
         ' from req_instance_max_event'
         ' where request_id = :id'
     )
@@ -254,7 +254,7 @@ def get_nr_submitter(session, request_id):
     # get the NR Submitter
     #############################
     sql = (
-        'select submitted_date,'
+        'select SYS_EXTRACT_UTC (cast(SUBMITTED_DATE as timestamp)) as SUBMITTED_DATE,'
         ' submitter'
         ' from submitter_vw'
         ' where request_id = :req_id'
@@ -308,7 +308,7 @@ def get_exam_comments(session, request_id):
         'select examiner_IDIR,'
         ' examiner_comment,'
         ' state_comment,'
-        ' event_timestamp'
+        ' SYS_EXTRACT_UTC (cast(event_timestamp as timestamp)) as event_timestamp'
         ' from examiner_comments_vw'
         ' where request_id= :req_id'
     )
@@ -326,15 +326,17 @@ def get_exam_comments(session, request_id):
 def get_nwpta(session, request_id):
     # get the NR NWPTA Partner information
     #############################
-    sql = 'select partner_name_type_cd,' \
-          ' partner_name_number,' \
-          ' partner_jurisdiction_type_cd,' \
-          ' partner_name_date,' \
-          ' partner_name,' \
-          ' last_update_id' \
-          ' from partner_name_system_vw pns' \
-          ' where end_event_id IS NULL' \
-          ' and pns.request_id= :req_id'
+    sql = (
+        ' select partner_name_type_cd,' 
+        ' partner_name_number,' 
+        ' partner_jurisdiction_type_cd,' 
+        '  SYS_EXTRACT_UTC (cast(partner_name_date as timestamp)) as partner_name_date,' 
+        ' partner_name,' 
+        ' last_update_id' 
+        ' from partner_name_system_vw pns' 
+        ' where end_event_id IS NULL' 
+        ' and pns.request_id= :req_id'
+    )
 
     result = session.execute(sql, req_id=request_id)
     col_names = [row[0] for row in session.description]
@@ -353,12 +355,14 @@ def get_names(session, request_id):
     To support reset functionality - keep decision data in Namex but clear it in NRO - this
     function will not overwrite name decision data if the reset flag is true.
     """
-    sql = 'select choice_number,' \
-          ' name,' \
-          ' designation,' \
-          ' name_state_type_cd' \
-          ' from names_vw' \
-          ' where request_id = :req_id'
+    sql = (
+        'select choice_number,'
+        ' name,'
+        ' designation,'
+        ' name_state_type_cd'
+        ' from names_vw'
+        ' where request_id = :req_id'
+    )
     result = session.execute(sql, req_id=request_id)
     col_names = [row[0] for row in session.description]
     names = []

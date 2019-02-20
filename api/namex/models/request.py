@@ -25,7 +25,7 @@ class Request(db.Model):
 
     # core fields
     id = db.Column(db.Integer, primary_key=True)
-    submittedDate = db.Column('submitted_date', db.DateTime, default=datetime.utcnow, index=True)
+    submittedDate = db.Column('submitted_date', db.DateTime(timezone=True), default=datetime.utcnow, index=True)
     lastUpdate = db.Column('last_update', db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     nrNum = db.Column('nr_num', db.String(10), unique=True)
@@ -53,7 +53,7 @@ class Request(db.Model):
     requestId = db.Column('request_id', db.Integer)
     previousRequestId = db.Column('previous_request_id', db.Integer)
     submitCount = db.Column('submit_count', db.Integer)
-    nroLastUpdate = db.Column('nro_last_update', db.DateTime)
+    nroLastUpdate = db.Column('nro_last_update', db.DateTime(timezone=True))
 
     # Relationship State
     stateCd = db.Column('state_cd', db.String(40), db.ForeignKey('states.cd'), index=True)
