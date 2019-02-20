@@ -687,9 +687,7 @@
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.PorterStemFilterFactory"/>
-        <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="1" generateNumberParts="0"
-            splitOnCaseChange="0" generateWordParts="0" catenateAll="1" catenateWords="1"/>
+        <filter class="solr.SnowballPorterFilterFactory" protected="protected_syns.txt" language="English"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
       </analyzer>
@@ -697,10 +695,10 @@
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" protected="protected_syns.txt" language="English"/>
 		<filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select synonyms_text from synonym where enabled = true" ignoreMissingDatabase="true"
+            sql="select stems_text from synonym where enabled = true" ignoreMissingDatabase="true"
             ignoreCase="true" expand="true"/>
-        <filter class="solr.PorterStemFilterFactory"/>
         <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="1" generateNumberParts="0" splitOnCaseChange="0" generateWordParts="0" catenateAll="1" catenateWords="1"/>
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
@@ -851,7 +849,6 @@
                 ignoreCase="true"
                 words="lang/stopwords_en.txt"
         />
-        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
       </analyzer>
@@ -880,7 +877,6 @@
                 ignoreCase="true"
                 words="lang/stopwords_en.txt"
         />
-        <filter class="solr.WordDelimiterGraphFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
       </analyzer>
