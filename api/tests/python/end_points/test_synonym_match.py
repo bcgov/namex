@@ -103,8 +103,8 @@ def verify(data, expected=None, not_expected=None):
 
     assert verified
 
-def verify_synonym_match(client, jwt, query, expected_list=None, not_expected_list=None):
-    data = search_synonym_match(client, jwt, query)
+def verify_synonym_match(client, jwt, query, expected_list=None, not_expected_list=None, exact_phrase=''):
+    data = search_synonym_match(client, jwt, query, exact_phrase)
     if expected_list:
         if expected_list is []:
             verify(data, [])
@@ -133,10 +133,10 @@ def verify_stems(client, jwt, query, stems):
         print('Expected: ', expected)
         assert actual.upper() == expected.upper()
 
-def search_synonym_match(client, jwt, query):
+def search_synonym_match(client, jwt, query, exact_phrase=''):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
-    url = '/api/v1/requests/synonymbucket/' + query
+    url = '/api/v1/requests/synonymbucket/' + query + exact_phrase
     print(url)
     rv = client.get(url, headers=headers)
 
@@ -526,6 +526,21 @@ def test_synonyms_match_on_all_synonym_lists(client, jwt, app, query, expected_l
     seed_database_with(client, jwt, 'PACIFIC TAKEOUT', id='1', source='2')
     seed_database_with(client, jwt, 'PACIFIC CONCESSION', id='2', source='2', clear=False)
     verify_synonym_match(client, jwt, query=query, expected_list=expected_list)
+
+@integration_postgres_solr
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query, expected_list, not_expected_list", [
+    ('ON THE BALL RIGGING', ['ON THE BALL RIGGING'], None),
+    ('ON THE BALL RIGGING', None, ['BALL RIGGING']),
+    ('ON THE BALL RIGGING', ['ON THE BALL TEST NO SYNONYM'], None),
+])
+def test_search_exact_phrase(client, jwt, app, query, expected_list, not_expected_list):
+    #  some synonyms are part of multiple lists so check that they return matches on both
+    seed_database_with(client, jwt, 'ON THE BALL RIGGING', id='1', source='2')
+    seed_database_with(client, jwt, 'BALL RIGGING', id='2', source='2', clear=False)
+    seed_database_with(client, jwt, 'ON THE BALL TEST NO SYNONYM', id='3', source='2', clear=False)
+    verify_synonym_match(client, jwt, query=query, expected_list=expected_list, not_expected_list=not_expected_list, exact_phrase='ON THE')
 
 @integration_postgres_solr
 @integration_synonym_api

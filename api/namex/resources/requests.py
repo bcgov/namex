@@ -986,7 +986,7 @@ class RequestsAnalysis(Resource):
         return jsonify(results), 200
 
 @cors_preflight("GET")
-@api.route('/synonymbucket/<string:name>', methods=['GET','OPTIONS'])
+@api.route('/synonymbucket/<string:name>/<string:advanced_search>', methods=['GET','OPTIONS'])
 class SynonymBucket(Resource):
     START = 0
     ROWS = 1000
@@ -994,11 +994,12 @@ class SynonymBucket(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    def get(name, *args, **kwargs):
+    def get(name, advanced_search, *args, **kwargs):
         start = request.args.get('start', SynonymBucket.START)
         rows = request.args.get('rows', SynonymBucket.ROWS)
-
-        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='synonym', start=start, rows=rows)
+        print(advanced_search)
+        exact_phrase = '' if advanced_search == '*' else advanced_search
+        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='synonym', exact_phrase=exact_phrase, start=start, rows=rows)
         if code:
             return jsonify(message=msg), code
         return jsonify(results), 200
