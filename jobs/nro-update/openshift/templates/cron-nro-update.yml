@@ -78,6 +78,19 @@ objects:
                       secretKeyRef:
                         key: password
                         name: ora-names-secrets
+            - name: jaeger-agent
+                image: jaegertracing/jaeger-agent
+                ports:
+                  - containerPort: 5775
+                    protocol: UDP
+                  - containerPort: 5778
+                    protocol: TCP
+                  - containerPort: 6831
+                    protocol: UDP
+                  - containerPort: 6832
+                    protocol: UDP
+                command:
+                  - "--collector.host-port=jaeger-collector.l4ygcl-tools.svc:14267"
             restartPolicy: "Never"
             concurrencyPolicy: "Forbid"
 parameters: [
