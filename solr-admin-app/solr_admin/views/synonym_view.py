@@ -30,7 +30,7 @@ class SynonymView(SecuredView):
 
     # For some reason this needs to be initialized, but we will override it in is_accessible.
     column_editable_list = ['category', 'synonyms_text', 'comment']
-    form_columns = ['category', 'synonyms_text', 'comment']
+    form_columns = ['category', 'synonyms_text', 'stems_text', 'comment']
 
     # Allow the user to filter on the category column.
     column_filters = ['category', 'synonyms_text', 'comment' ]
@@ -52,6 +52,7 @@ class SynonymView(SecuredView):
         model.synonyms_text = _alphabetize_csv(model.synonyms_text)
         _validate_synonyms_text(model.synonyms_text)
 
+
     # After saving the data create the audit log (we need to wait for a synonym.id value when creating)
     def after_model_change(self, form, model, is_created):
         if is_created:
@@ -61,6 +62,7 @@ class SynonymView(SecuredView):
 
         model.stems_text = get_stems(model.synonyms_text)
         self.session.commit()
+        solr.reload_solr_cores()
 
     # After deleting the data create the audit log.
     def after_model_delete(self, model):
