@@ -19,6 +19,9 @@ class SynonymView(SecuredView):
     # We're unlikely to do multiple deletes, so just get rid of the checkboxes and the drop down for delete.
     action_disallowed_list = ['delete']
 
+    # list of model columns
+    column_list = ('category', 'synonyms_text', 'stems_text', 'comment', 'enabled')
+
     # Allow export as a CSV file.
     can_export = True
 
@@ -30,7 +33,9 @@ class SynonymView(SecuredView):
 
     # For some reason this needs to be initialized, but we will override it in is_accessible.
     column_editable_list = ['category', 'synonyms_text', 'comment']
-    form_columns = ['category', 'synonyms_text', 'stems_text', 'comment']
+
+    # List of visible columns
+    form_columns = ['category', 'synonyms_text', 'comment']
 
     # Allow the user to filter on the category column.
     column_filters = ['category', 'synonyms_text', 'comment' ]
