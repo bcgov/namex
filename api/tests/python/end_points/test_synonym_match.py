@@ -567,3 +567,13 @@ def test_synonym_clause_stemmed(client, jwt, app, query, ordered_list):
     seed_database_with(client, jwt, 'PACIFIC DEVELOPMENT', id='1', source='2')
     verify_order(client, jwt, query=query, expected_order=ordered_list)
 
+@integration_postgres_solr
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query, expected_list", [
+    ('KM CONTRACTING', ['K & M CONSTRUCTION']),
+])
+def test_number_synonyms(client, jwt, app, query, expected_list):
+    seed_database_with(client, jwt, 'K & M CONSTRUCTION', id='1', source='2')
+    verify_synonym_match(client, jwt, query=query, expected_list=expected_list)
+

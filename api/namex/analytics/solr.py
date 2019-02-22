@@ -296,8 +296,8 @@ class SolrQueries:
                                                 passed_names.append(name['name_info']['name'])
 
                             no_duplicates = []
-                            duplicate = False
                             for ordered in ordered_names:
+                                duplicate = False
                                 for sorted in sorted_names:
                                     if ordered['name_info']['name'] == sorted['name_info']['name']:
                                         duplicate = True
