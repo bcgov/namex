@@ -38,7 +38,7 @@ class SynonymView(SecuredView):
     form_columns = ['category', 'synonyms_text', 'comment']
 
     # Allow the user to filter on the category column.
-    column_filters = ['category', 'synonyms_text', 'comment' ]
+    column_filters = ['category', 'synonyms_text', 'stems_text', 'comment' ]
 
     # Search within the synonyms_text.
     column_searchable_list = ['category', 'synonyms_text', 'comment']
