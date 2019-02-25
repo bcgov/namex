@@ -16,7 +16,7 @@ class RestrictedConditionAudit(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100))
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column('timestamp', db.DateTime(timezone=True))
     action = db.Column(db.String(10))
     cnd_id = db.Column(db.Integer)
     consenting_body = db.Column(db.VARCHAR(195))
