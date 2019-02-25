@@ -3,7 +3,7 @@ import flask_restplus
 
 from . import synonyms
 from . import probes
-
+from .. import solr-admin-app.solr_admin
 
 __all__ = ['api']
 
