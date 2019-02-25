@@ -43,7 +43,7 @@ def upgrade():
         table_name='requests',
         column_name='submitted_date',
         type_=sa.TIMESTAMP(timezone=True),
-        postgresql_using="date_trunc('day', (submitted_date::timestamp || 'PST')::timestamptz)"
+        postgresql_using="(submitted_date::timestamp || 'PST')::timestamptz"
     )
 
 
