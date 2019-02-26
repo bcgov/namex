@@ -229,6 +229,7 @@ class SolrQueries:
                     else:
                         for item in result['response']['docs']:
                             if item['name'] not in seen_ordered_names:
+                                seen_ordered_names.append(item['name'])
                                 ordered_names.append({'name_info': item, 'stems': []})
 
                     if len(missed_names) > 0:
@@ -316,9 +317,8 @@ class SolrQueries:
                         final_names_list += ordered_names
                     else:
                         for item in ordered_names:
-                            if item['name_info']['name'] not in seen_ordered_names:
-                                final_names_list.append(item)
-                                seen_ordered_names.append(item['name_info']['name'])
+                            final_names_list.append(item)
+                            seen_ordered_names.append(item['name_info']['name'])
 
                     seen_names += seen_ordered_names.copy()
                     seen_ordered_names.clear()
