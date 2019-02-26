@@ -11,7 +11,7 @@ from namex.models import Request, Name, State, User
 
 expiry_date_test_data = [
     ('using epoch utc',            # test descriptive name
-     datetime.utcfromtimestamp(0), # start date - time
+     datetime(1970, 1, 1, 00, 00, tzinfo=timezone('US/Pacific',)), # start date - time
      20,                           # days to add
      23,                           # hour to set the final date time to
      59,                           # minute to set the final date time to
@@ -23,9 +23,10 @@ expiry_date_test_data = [
      datetime(2001, 8, 5, 9, 00, tzinfo=timezone('US/Pacific',)), 20, 23, 59, 'US/Pacific', datetime(2001, 8, 25, 23, 59)),
 ]
 
+
 @pytest.mark.parametrize("test_name, start_date, days, hours, mins, tz, ,expected_date", expiry_date_test_data)
 def test_create_expiry_date(test_name, start_date, days, hours, mins, tz, expected_date):
-
+    print(start_date)
     ced = create_expiry_date(start_date, expires_in_days=days, expiry_hour=hours, expiry_min=mins, tz=timezone(tz))
 
     assert ced.replace(tzinfo=None) == expected_date
@@ -33,10 +34,11 @@ def test_create_expiry_date(test_name, start_date, days, hours, mins, tz, expect
 
 
 datapump_test_data = [
-    (datetime.utcfromtimestamp(0), datetime(1970, 2, 26, 23, 59)),
+    (datetime(1970, 1, 1, 00, 00, tzinfo=timezone('US/Pacific',)), datetime(1970, 2, 26, 23, 59)),
     (datetime(2001, 8, 5,  9, 00, tzinfo=timezone('US/Pacific',)), datetime(2001, 9, 30, 23, 59)),
     (datetime(2001, 8, 5, 19, 00, tzinfo=timezone('US/Pacific',)), datetime(2001, 9, 30, 23, 59)),
 ]
+
 
 # TODO Add more tests for the various use-cases.
 @pytest.mark.parametrize("start_date, expected_date", datapump_test_data)
