@@ -107,7 +107,7 @@ def test_datapump_nr_requires_consent_flag(app, mocker,consent_flag,state_cd):
     nr.nrNum = 'NR 0000001'
     nr.stateCd = state_cd
     nr.consentFlag = consent_flag
-    nr.lastUpdate = datetime.utcfromtimestamp(0)
+    nr.lastUpdate = datetime(1970, 1, 1, 00, 00, tzinfo=timezone('US/Pacific',))
 
     # requires the username
     user = User('idir/bob','bob','last','idir','localhost')
