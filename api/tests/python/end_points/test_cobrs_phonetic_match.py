@@ -122,7 +122,7 @@ def verify_match(client, jwt, query, expected_list=[], not_expected_list=None):
 def search_cobrs_phonetic_match(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
-    url = '/api/v1/requests/cobrsphonetics/' + query
+    url = '/api/v1/requests/cobrsphonetics/' + query + '/*'
     print(url)
     rv = client.get(url, headers=headers)
 

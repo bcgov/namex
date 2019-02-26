@@ -137,6 +137,7 @@
     <field name="cobrs_phonetic" type="cobrs_phonetic" multiValued="false" indexed="true" stored="true"/>
     <field name="txt_starts_with" type="txt_starts_with" multiValued="false" indexed="true" stored="false"/>
     <field name="name_no_synonyms" type="name_no_synonyms" multiValued="false" indexed="true" stored="false"/>
+    <field name="contains_exact_phrase" type="contains_exact_phrase" multiValued="false" indexed="true" stored="true"/>
 
     <!-- Only enabled in the "schemaless" data-driven example (assuming the client
          does not know what fields may be searched) because it's very expensive to index everything twice. -->
@@ -984,6 +985,21 @@
         </analyzer>
     </fieldType>
 
+    <fieldType name="contains_exact_phrase" class="solr.TextField" positionIncrementGap="100" multiValued="false">
+      <analyzer>
+        <!--<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\'][N|n])" replacement="" />-->
+        <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\!\@\#\%\^&amp;\(\)\{\}\[\]\+\-\|\\\?\/\.\,\_\']*" replacement="" />
+        <!--<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="([\s]{2,})" replacement=" " />-->
+        <!--<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2$3 " />-->
+        <!--<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z])\W|$" replacement=" $1$2 " />-->
+        <!--<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z]{1})\W([a-z|A-Z][a-z|A-Z])\W|$" replacement=" $1$2 " />-->
+        <!--<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^|\W([a-z|A-Z][a-z|A-Z])\W([a-z|A-Z])\W|$" replacement=" $1$2 " />-->
+        <!--<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\s" replacement="" />-->
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>F
+      </analyzer>
+    </fieldType>
+
     <!-- some examples for different languages (generally ordered by ISO code) -->
 
     <!-- Arabic -->
@@ -1418,4 +1434,5 @@
     <copyField source="name" dest="dblmetaphone_name"/>
     <copyField source="name" dest="txt_starts_with"/>
     <copyField source="name" dest="name_no_synonyms"/>
+    <copyField source="name" dest="contains_exact_phrase"/>
 </schema>
