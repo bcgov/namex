@@ -54,8 +54,11 @@ def clean_database(client, jwt):
 
     assert r.status_code == 200
 
-def seed_database_with(client, jwt, name, id='1', source='2'):
-    clean_database(client, jwt)
+
+def seed_database_with(client, jwt, name, id='1', source='2', clean=True):
+    if clean:
+        clean_database(client, jwt)
+
     url = SOLR_URL + '/solr/possible.conflicts/update?commit=true'
     headers = {'content-type': 'application/json'}
     data = '[{"source":"' + source + '", "name":"' + name + '", "id":"'+ id +'"}]'
@@ -119,7 +122,7 @@ def verify_match(client, jwt, query, expected_list=[], not_expected_list=None):
 def search_cobrs_phonetic_match(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
-    url = '/api/v1/requests/cobrsphonetics/' + query
+    url = '/api/v1/requests/cobrsphonetics/' + query + '/*'
     print(url)
     rv = client.get(url, headers=headers)
 
@@ -221,3 +224,15 @@ def test_stack_ignores_wildcards(client, jwt, app):
         not_expected_list=['----TESTING* @WILDCARDS']
     )
 
+
+@integration_synonym_api
+@integration_solr
+def test_stack_contains_synonyms(client, jwt, app):
+    seed_database_with(client, jwt, 'PACIFIC LUMBER PRODUCTS LTD.', id='1')
+    seed_database_with(client, jwt, 'PACIFIC FOREST PRODUCTS LTD.', id='2', clean=False)
+
+    verify_match(client, jwt,
+                 query='PACIFIK LUMBER',
+                 expected_list=['----PACIFIK LUMBER', 'PACIFIC LUMBER PRODUCTS LTD.', '----PACIFIK synonyms:(LUMBER)',
+                                'PACIFIC FOREST PRODUCTS LTD.']
+                 )

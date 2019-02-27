@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f4078534-fd78-48a1-a4df-7721aeaec1c2",
+		"_postman_id": "b864d9f1-c26e-4fe0-8b04-a73629fae8a8",
 		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -747,6 +747,107 @@
 								"api",
 								"v1",
 								"documents:restricted_words"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "conflict-search",
+			"item": [
+				{
+					"name": "synonym_bucket_exactphrase",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "83bbced6-bf73-4814-b326-079cef0b8d46",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "53d9f6ae-6779-4a7f-9b05-615b9891d03c",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 10000;",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it('should contain the parsed JSON keys', () => {",
+									"    response.body.should.be.an('object').with.keys(['highlighting', 'names', 'response']);",
+									"});",
+									"",
+									"it('should match against a JSON Schema', () => {",
+									"    // For more information about JSON Schema, see https://spacetelescope.github.io/understanding-json-schema/basics.html",
+									"    response.body.should.have.schema({",
+									"        type: 'object',",
+									"        required: ['names', 'highlighting', 'response']",
+									"    });",
+									"});",
+									"",
+									"it('should only return names that contain \\'on the\\'', () => {",
+									"   var results = response.body.names",
+									"   for (var i=0;i<results.length;i++) {",
+									"       name_info = results[i].name_info",
+									"       if (name_info.id) name_info.name.toUpperCase().should.include('ON THE')",
+									"       ",
+									"   }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/synonymbucket/on the ball/on the",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"synonymbucket",
+								"on the ball",
+								"on the"
 							]
 						}
 					},

@@ -54,7 +54,8 @@ class SolrQueries:
             '&start={start}&rows={rows}'
             '&fl=source,id,name,score'
             '&sort=score%20desc,txt_starts_with%20asc'
-            '{synonyms_clause}',
+            '{synonyms_clause}'
+            '{exact_phrase_clause}',
         OLD_SYN_CONFLICTS:
             '/solr/possible.conflicts/select?'
             'hl.fl=name'
@@ -67,7 +68,7 @@ class SolrQueries:
             '&start={start}&rows={rows}'
             '&fl=source,id,name,score'
             '&sort=score%20desc,txt_starts_with%20asc'
-            '{synonyms_clause}{name_copy_clause}',
+            '{synonyms_clause}{exact_phrase_clause}{name_copy_clause}',
         COBRS_PHONETIC_CONFLICTS:
             '/solr/possible.conflicts/select?'
             '&q=cobrs_phonetic:{start_str}'
@@ -119,7 +120,7 @@ class SolrQueries:
     }
 
     @classmethod
-    def get_conflict_results(cls, name, bucket, start=0, rows=100):
+    def get_conflict_results(cls, name, bucket, exact_phrase, start=0, rows=100):
         solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
         if not solr_base_url:
             current_app.logger.error('SOLR: SOLR_BASE_URL is not set')
@@ -147,7 +148,7 @@ class SolrQueries:
 
         synonyms_for_word = cls.get_synonyms_for_words(name_tokens['stemmed_words'])
         if bucket == 'synonym':
-            connections = cls.get_synonym_results(solr_base_url, name, prox_search_strs, old_alg_search_strs, name_tokens, start, rows)
+            connections = cls.get_synonym_results(solr_base_url, name, prox_search_strs, old_alg_search_strs, name_tokens, exact_phrase, start, rows)
 
         elif bucket == 'cobrs_phonetic':
             connections = cls.get_cobrs_phonetic_results(solr_base_url, prox_search_strs, name_tokens, start, rows)
@@ -229,6 +230,7 @@ class SolrQueries:
                     else:
                         for item in result['response']['docs']:
                             if item['name'] not in seen_ordered_names:
+                                seen_ordered_names.append(item['name'])
                                 ordered_names.append({'name_info': item, 'stems': []})
 
                     if len(missed_names) > 0:
@@ -296,8 +298,8 @@ class SolrQueries:
                                                 passed_names.append(name['name_info']['name'])
 
                             no_duplicates = []
-                            duplicate = False
                             for ordered in ordered_names:
+                                duplicate = False
                                 for sorted in sorted_names:
                                     if ordered['name_info']['name'] == sorted['name_info']['name']:
                                         duplicate = True
@@ -316,9 +318,8 @@ class SolrQueries:
                         final_names_list += ordered_names
                     else:
                         for item in ordered_names:
-                            if item['name_info']['name'] not in seen_ordered_names:
-                                final_names_list.append(item)
-                                seen_ordered_names.append(item['name_info']['name'])
+                            final_names_list.append(item)
+                            seen_ordered_names.append(item['name_info']['name'])
 
                     seen_names += seen_ordered_names.copy()
                     seen_ordered_names.clear()
@@ -339,7 +340,7 @@ class SolrQueries:
             return None, 'Internal server error', 500
 
     @classmethod
-    def get_synonym_results(cls, solr_base_url, name, prox_search_strs, old_alg_search_strs, name_tokens, start=0, rows=100):
+    def get_synonym_results(cls, solr_base_url, name, prox_search_strs, old_alg_search_strs, name_tokens, exact_phrase, start=0, rows=100):
 
         try:
             connections = []
@@ -347,8 +348,8 @@ class SolrQueries:
             for prox_search_tuple, old_alg_search in zip(prox_search_strs, old_alg_search_strs):
 
                 old_alg_search_str = old_alg_search[:-2].replace(' ', '%20') + '*'  # [:-2] takes off the last '\ '
-
-                synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1], prox_search_tuple[2], name_tokens)
+                synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1], prox_search_tuple[2], name_tokens) if exact_phrase == '' else ''
+                exact_phrase_clause = '&fq=contains_exact_phrase:' + '\"' + parse.quote(exact_phrase).replace('%2A','') + '\"' if exact_phrase != '' else ''
 
                 if name.find('*') == -1:
                     for name in prox_search_tuple[0]:
@@ -358,6 +359,7 @@ class SolrQueries:
                             rows=rows,
                             start_str='\"' + parse.quote(prox_search_str).replace('%2A', '') + '\"~{}'.format(prox_search_tuple[3]),
                             synonyms_clause=synonyms_clause,
+                            exact_phrase_clause=exact_phrase_clause,
                         )
                         current_app.logger.debug('Query: ' + query)
                         connections.append((json.load(request.urlopen(query)),
@@ -370,6 +372,7 @@ class SolrQueries:
                     rows=rows,
                     start_str=parse.quote(old_alg_search_str).replace('%2A', '*').replace('%5C%2520', '\\%20'),
                     synonyms_clause=synonyms_clause,
+                    exact_phrase_clause=exact_phrase_clause,
                     name_copy_clause=cls._get_name_copy_clause(name)
                 )
                 current_app.logger.debug('Query: ' + query)
