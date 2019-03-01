@@ -27,7 +27,6 @@ def test_get_last_modified_timestamp(app):
 
 @integration_oracle_namesdb
 def test_set_status_2_h(app):
-
     nro.set_request_status_to_h('NR 5970035', 'anyname')
 
 
