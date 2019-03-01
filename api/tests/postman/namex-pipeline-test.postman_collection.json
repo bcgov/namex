@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b864d9f1-c26e-4fe0-8b04-a73629fae8a8",
+		"_postman_id": "c7d80c36-e84c-480c-b1bf-e622e01f88be",
 		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -848,6 +848,778 @@
 								"synonymbucket",
 								"on the ball",
 								"on the"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "add/delete name choices",
+			"item": [
+				{
+					"name": "requests/NR # change state to inprogress",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "36e019ae-a7c4-4599-8631-564ad3d11ef0",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "346c9a5d-ee8f-48cd-9b21-bad29baf9ecb",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should contain \\'message\\' confirming patch', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"    jsonData.message.should.include('- patched');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"state\": \"INPROGRESS\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - add name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"if (response.status == 200) {",
+									"    it(\"Should return the required fields for an NR\", () => {",
+									"        response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    });",
+									"    ",
+									"    it(\"Should return updated changes in the body\", () => {",
+									"        for (var i=0; i<response.body.names.length; i++) {",
+									"            if (response.body.names[i].choice == 1) ",
+									"                response.body.names[i].name.should.include(\"STRANGWAY & SONS ACCOUNTING SERVICES TESTING\");",
+									"            else if (response.body.names[i].choice == 2)",
+									"                response.body.names[i].name.should.be(\"TEST NAME CHOICE 2 ADD\");",
+									"            else",
+									"                response.body.names[i].name.should.be(\"TEST NAME CHOICE 3 ADD\");",
+									"        }",
+									"    });",
+									"    ",
+									"} else {",
+									"    it(\"Should return the required fields for an error changing_nro\", () => {",
+									"       response.body.should.be.an('object').with.keys(['errors']);",
+									"       response.body.errors[0].should.be.an('object').with.keys(['code','message','type']);",
+									"       response.body.errors[0].message[0].should.be.an('object').with.keys(['code','message','type']);",
+									"    });",
+									"    it(\"Should have the correct message for not changing NRO\", () => {",
+									"       response.body.errors[0].message[0].type.should.include('warn');",
+									"       response.body.errors[0].message[0].code.should.include('unable_to_update_request_changes_in_NRO');",
+									"    });",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"additionalInfo\": \"This is additional info entered by the applicant.\",\n    \"applicants\": {\n        \"addrLine1\": \"zzz1571 ABBOTT ST\",\n        \"addrLine2\": null,\n        \"addrLine3\": null,\n        \"city\": \"zzzVictoria\",\n        \"clientFirstName\": \"qqqGerald\",\n        \"clientLastName\": \"qqqSmith\",\n        \"contact\": \"zzzJeffrey Hall\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"lorna.trent@gov.bc.ca\",\n        \"faxNumber\": \"250-638-9694\",\n        \"firstName\": \"zzzLorna\",\n        \"lastName\": \"zzzTrent\",\n        \"middleName\": null,\n        \"partyId\": 1051,\n        \"phoneNumber\": \"250-635-7342\",\n        \"postalCd\": \"V9E 4S3\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"hasBeenReset\": false,\n    \"id\": 1051,\n    \"lastUpdate\": \"Thu, 20 Sep 2018 23:02:17 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"STRANGWAY & SONS ACCOUNTING SERVICES TESTING\",\n            \"state\": \"NE\"\n        },\n\t\t{\n\t\t\t\"choice\": 2,\n\t\t\t\"comment\": null,\n\t\t\t\"conflict1\": \"\",\n\t\t\t\"conflict1_num\": \"\",\n\t\t\t\"conflict2\": \"\",\n\t\t\t\"conflict2_num\": \"\",\n\t\t\t\"conflict3\": \"\",\n\t\t\t\"conflict3_num\": \"\",\n\t\t\t\"consumptionDate\": null,\n\t\t\t\"decision_text\": \"\",\n\t\t\t\"name\": \"TEST NAME CHOICE 2 ADD\",\n\t\t\t\"state\": \"NE\"\n\t\t},\n\t\t{\n\t\t\t\"choice\": 3,\n\t\t\t\"comment\": null,\n\t\t\t\"conflict1\": \"\",\n\t\t\t\"conflict1_num\": \"\",\n\t\t\t\"conflict2\": \"\",\n\t\t\t\"conflict2_num\": \"\",\n\t\t\t\"conflict3\": \"\",\n\t\t\t\"conflict3_num\": \"\",\n\t\t\t\"consumptionDate\": null,\n\t\t\t\"decision_text\": \"\",\n\t\t\t\"name\": \"TEST NAME CHOICE 3 ADD\",\n\t\t\t\"state\": \"NE\"\n\t\t}\n\t],\n    \"natureBusinessInfo\": \"Corporate Accounting Firm\",\n    \"nrNum\": \"NR 2943527\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"Y\",\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 10:27:55 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"postman\",\n    \"xproJurisdiction\": \"NEW BRUNSWICK\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR - check name add",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c1429a8d-6bf6-485e-a78f-3401419da30d",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
+									"});",
+									"",
+									"for (var i=0; i<response.body.names.length; i++) {",
+									"    if (response.body.names[i].choice == 1) ",
+									"        tests['Changed name choice 1'] = response.body.names[i].name === \"STRANGWAY & SONS ACCOUNTING SERVICES TESTING\";",
+									"    else if (response.body.names[i].choice == 2)",
+									"        tests['Added name choice 2'] = response.body.names[i].name === \"TEST NAME CHOICE 2 ADD\";",
+									"    else",
+									"        tests['Added name choice 3'] = response.body.names[i].name === \"TEST NAME CHOICE 3 ADD\";",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3e5719a3-cbda-4b7f-85fd-7bc70b5f58c2",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - put NR #- reset test data to original state",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "482ae5d8-3c7d-48bb-8875-bb9a386ef4f2",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 8000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(8000);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"if (response.status == 200) {",
+									"    it(\"Should return the required fields for an NR\", () => {",
+									"        response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum','expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr','previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId','xproJurisdiction']);",
+									"    });",
+									"    ",
+									"    for (var i=0; i<response.body.names.length; i++) {",
+									"        if (response.body.names[i].choice == 1) ",
+									"            tests['Changed name choice 1'] = response.body.names[i].name === \"STRANGWAY & SONS ACCOUNTING SERVICES\";",
+									"        else if (response.body.names[i].choice == 2)",
+									"            tests['Added name choice 2'] = response.body.names[i].name === \"\";",
+									"        else",
+									"            tests['Added name choice 3'] = response.body.names[i].name === \"\";",
+									"    }",
+									"",
+									"} else {",
+									"    it(\"Should return the required fields for an error changing_nro\", () => {",
+									"       response.body.should.be.an('object').with.keys(['errors']);",
+									"       response.body.errors[0].should.be.an('object').with.keys(['code','message','type']);",
+									"       response.body.errors[0].message[0].should.be.an('object').with.keys(['code','message','type']);",
+									"    });",
+									"    it(\"Should have the correct message for not changing NRO\", () => {",
+									"        response.body.errors[0].message[0].type.should.include('warn');",
+									"        response.body.errors[0].message[0].code.should.include('unable_to_update_request_changes_in_NRO');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"additionalInfo\": \"This is additional info entered by the applicant.\",\n    \"applicants\": {\n        \"addrLine1\": \"zzz1571 ABBOTT ST\",\n        \"addrLine2\": null,\n        \"addrLine3\": null,\n        \"city\": \"zzzVictoria\",\n        \"clientFirstName\": \"qqqGerald\",\n        \"clientLastName\": \"qqqSmith\",\n        \"contact\": \"zzzJeffrey Hall\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"lorna.trent@gov.bc.ca\",\n        \"faxNumber\": \"250-638-9694\",\n        \"firstName\": \"zzzLorna\",\n        \"lastName\": \"zzzTrent\",\n        \"middleName\": null,\n        \"partyId\": 1051,\n        \"phoneNumber\": \"250-635-7342\",\n        \"postalCd\": \"V9E 4S3\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"hasBeenReset\": false,\n    \"id\": 1051,\n    \"lastUpdate\": \"Thu, 20 Sep 2018 23:02:17 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"STRANGWAY & SONS ACCOUNTING SERVICES\",\n            \"state\": \"NE\"\n        },\n\t\t{\n\t\t\t\"choice\": 2,\n\t\t\t\"comment\": null,\n\t\t\t\"conflict1\": \"\",\n\t\t\t\"conflict1_num\": \"\",\n\t\t\t\"conflict2\": \"\",\n\t\t\t\"conflict2_num\": \"\",\n\t\t\t\"conflict3\": \"\",\n\t\t\t\"conflict3_num\": \"\",\n\t\t\t\"consumptionDate\": null,\n\t\t\t\"decision_text\": \"\",\n\t\t\t\"name\": \"\",\n\t\t\t\"state\": \"NE\"\n\t\t},\n\t\t{\n\t\t\t\"choice\": 3,\n\t\t\t\"comment\": null,\n\t\t\t\"conflict1\": \"\",\n\t\t\t\"conflict1_num\": \"\",\n\t\t\t\"conflict2\": \"\",\n\t\t\t\"conflict2_num\": \"\",\n\t\t\t\"conflict3\": \"\",\n\t\t\t\"conflict3_num\": \"\",\n\t\t\t\"consumptionDate\": null,\n\t\t\t\"decision_text\": \"\",\n\t\t\t\"name\": \"\",\n\t\t\t\"state\": \"NE\"\n\t\t}\n\t],\n    \"natureBusinessInfo\": \"Corporate Accounting Firm\",\n    \"nrNum\": \"NR 2943527\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"Y\",\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 10:27:55 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"postman\",\n    \"xproJurisdiction\": \"NEW BRUNSWICK\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR - check values reset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c1429a8d-6bf6-485e-a78f-3401419da30d",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
+									"});",
+									"",
+									"for (var i=0; i<response.body.names.length; i++) {",
+									"    if (response.body.names[i].choice == 1) ",
+									"        tests['Changed back name choice 1'] = response.body.names[i].name === \"STRANGWAY & SONS ACCOUNTING SERVICES\";",
+									"    else if (response.body.names[i].choice == 2)",
+									"        tests['Deleted name choice 2'] = response.body.names[i].name === \"\";",
+									"    else",
+									"        tests['Deleted name choice 3'] = response.body.names[i].name === \"\";",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3e5719a3-cbda-4b7f-85fd-7bc70b5f58c2",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - try deleting name choice 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should be an unsuccessful response', () => {",
+									"    response.ok.should.be.false;            // 2XX",
+									"    response.error.should.be.true;          // 4XX or 5XX",
+									"    response.clientError.should.be.true;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.statusType.should.equal(4);",
+									"    response.should.have.status(400);",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return an error message\", () => {",
+									"   response.body.should.be.an('object').with.keys(['message']);",
+									"   response.body.message.should.include('Data does not include a name choice 1');",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"additionalInfo\": \"This is additional info entered by the applicant.\",\n    \"applicants\": {\n        \"addrLine1\": \"zzz1571 ABBOTT ST\",\n        \"addrLine2\": null,\n        \"addrLine3\": null,\n        \"city\": \"zzzVictoria\",\n        \"clientFirstName\": \"qqqGerald\",\n        \"clientLastName\": \"qqqSmith\",\n        \"contact\": \"zzzJeffrey Hall\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"lorna.trent@gov.bc.ca\",\n        \"faxNumber\": \"250-638-9694\",\n        \"firstName\": \"zzzLorna\",\n        \"lastName\": \"zzzTrent\",\n        \"middleName\": null,\n        \"partyId\": 1051,\n        \"phoneNumber\": \"250-635-7342\",\n        \"postalCd\": \"V9E 4S3\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"hasBeenReset\": false,\n    \"id\": 1051,\n    \"lastUpdate\": \"Thu, 20 Sep 2018 23:02:17 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"\",\n            \"state\": \"NE\"\n        },\n\t\t{\n\t\t\t\"choice\": 2,\n\t\t\t\"comment\": null,\n\t\t\t\"conflict1\": \"\",\n\t\t\t\"conflict1_num\": \"\",\n\t\t\t\"conflict2\": \"\",\n\t\t\t\"conflict2_num\": \"\",\n\t\t\t\"conflict3\": \"\",\n\t\t\t\"conflict3_num\": \"\",\n\t\t\t\"consumptionDate\": null,\n\t\t\t\"decision_text\": \"\",\n\t\t\t\"name\": \"Should not get added\",\n\t\t\t\"state\": \"NE\"\n\t\t},\n\t\t{\n\t\t\t\"choice\": 3,\n\t\t\t\"comment\": null,\n\t\t\t\"conflict1\": \"\",\n\t\t\t\"conflict1_num\": \"\",\n\t\t\t\"conflict2\": \"\",\n\t\t\t\"conflict2_num\": \"\",\n\t\t\t\"conflict3\": \"\",\n\t\t\t\"conflict3_num\": \"\",\n\t\t\t\"consumptionDate\": null,\n\t\t\t\"decision_text\": \"\",\n\t\t\t\"name\": \"Should not get added\",\n\t\t\t\"state\": \"NE\"\n\t\t}\n\t],\n    \"natureBusinessInfo\": \"Corporate Accounting Firm\",\n    \"nrNum\": \"NR 2943527\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"Y\",\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 10:27:55 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"postman\",\n    \"xproJurisdiction\": \"NEW BRUNSWICK\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/requests - try adding name3 without name2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63511ee5-c76d-46c6-b98d-76384b834a99",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should be an unsuccessful response', () => {",
+									"    response.ok.should.be.false;            // 2XX",
+									"    response.error.should.be.true;          // 4XX or 5XX",
+									"    response.clientError.should.be.true;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.statusType.should.equal(4);",
+									"    response.should.have.status(400);",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return an error message\", () => {",
+									"   response.body.should.be.an('object').with.keys(['message']);",
+									"   response.body.message.should.include('Data contains a name choice 3 without a name choice 2');",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f8801a4b-3dcb-414e-a1f2-8f32e35abfaf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"additionalInfo\": \"This is additional info entered by the applicant.\",\n    \"applicants\": {\n        \"addrLine1\": \"zzz1571 ABBOTT ST\",\n        \"addrLine2\": null,\n        \"addrLine3\": null,\n        \"city\": \"zzzVictoria\",\n        \"clientFirstName\": \"qqqGerald\",\n        \"clientLastName\": \"qqqSmith\",\n        \"contact\": \"zzzJeffrey Hall\",\n        \"countryTypeCd\": \"CA\",\n        \"declineNotificationInd\": \"N\",\n        \"emailAddress\": \"lorna.trent@gov.bc.ca\",\n        \"faxNumber\": \"250-638-9694\",\n        \"firstName\": \"zzzLorna\",\n        \"lastName\": \"zzzTrent\",\n        \"middleName\": null,\n        \"partyId\": 1051,\n        \"phoneNumber\": \"250-635-7342\",\n        \"postalCd\": \"V9E 4S3\",\n        \"stateProvinceCd\": \"BC\"\n    },\n    \"comments\": [],\n    \"consentFlag\": null,\n    \"corpNum\": null,\n    \"expirationDate\": null,\n    \"furnished\": \"N\",\n    \"hasBeenReset\": false,\n    \"id\": 1051,\n    \"lastUpdate\": \"Thu, 20 Sep 2018 23:02:17 GMT\",\n    \"names\": [\n        {\n            \"choice\": 1,\n            \"comment\": null,\n            \"conflict1\": null,\n            \"conflict1_num\": null,\n            \"conflict2\": null,\n            \"conflict2_num\": null,\n            \"conflict3\": null,\n            \"conflict3_num\": null,\n            \"consumptionDate\": null,\n            \"decision_text\": null,\n            \"name\": \"STRANGWAY & SONS ACCOUNTING SERVICES\",\n            \"state\": \"NE\"\n        },\n\t\t{\n\t\t\t\"choice\": 2,\n\t\t\t\"comment\": null,\n\t\t\t\"conflict1\": \"\",\n\t\t\t\"conflict1_num\": \"\",\n\t\t\t\"conflict2\": \"\",\n\t\t\t\"conflict2_num\": \"\",\n\t\t\t\"conflict3\": \"\",\n\t\t\t\"conflict3_num\": \"\",\n\t\t\t\"consumptionDate\": null,\n\t\t\t\"decision_text\": \"\",\n\t\t\t\"name\": \"\",\n\t\t\t\"state\": \"NE\"\n\t\t},\n\t\t{\n\t\t\t\"choice\": 3,\n\t\t\t\"comment\": null,\n\t\t\t\"conflict1\": \"\",\n\t\t\t\"conflict1_num\": \"\",\n\t\t\t\"conflict2\": \"\",\n\t\t\t\"conflict2_num\": \"\",\n\t\t\t\"conflict3\": \"\",\n\t\t\t\"conflict3_num\": \"\",\n\t\t\t\"consumptionDate\": null,\n\t\t\t\"decision_text\": \"\",\n\t\t\t\"name\": \"Should not get added\",\n\t\t\t\"state\": \"NE\"\n\t\t}\n\t],\n    \"natureBusinessInfo\": \"Corporate Accounting Firm\",\n    \"nrNum\": \"NR 2943527\",\n    \"nwpta\": [],\n    \"previousNr\": null,\n    \"priorityCd\": \"Y\",\n\t\"priorityDate\": \"Fri, 07 Dec 2018 11:26:51 GMT\",\n    \"requestTypeCd\": \"XCR\",\n    \"state\": \"INPROGRESS\",\n    \"submitCount\": 1,\n    \"submittedDate\": \"Thu, 20 Sep 2018 10:27:55 GMT\",\n    \"submitter_userid\": \"\",\n    \"userId\": \"postman\",\n    \"xproJurisdiction\": \"NEW BRUNSWICK\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR - check no values were changed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c1429a8d-6bf6-485e-a78f-3401419da30d",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
+									"});",
+									"",
+									"for (var i=0; i<response.body.names.length; i++) {",
+									"    if (response.body.names[i].choice == 1) ",
+									"        tests['Changed back name choice 1'] = response.body.names[i].name === \"STRANGWAY & SONS ACCOUNTING SERVICES\";",
+									"    else if (response.body.names[i].choice == 2)",
+									"        tests['Deleted name choice 2'] = response.body.names[i].name === \"\";",
+									"    else",
+									"        tests['Deleted name choice 3'] = response.body.names[i].name === \"\";",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3e5719a3-cbda-4b7f-85fd-7bc70b5f58c2",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR # change state to hold",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "36e019ae-a7c4-4599-8631-564ad3d11ef0",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "346c9a5d-ee8f-48cd-9b21-bad29baf9ecb",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"tests[\"Response time is acceptable\"] = responseTime < 8000;",
+									"",
+									"it('Should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('Should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"it('Should contain \\'message\\' confirming patch', () => {",
+									"    response.body.should.be.an('object').with.keys(['message']);",
+									"    jsonData.message.should.include('- patched');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"state\": \"HOLD\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}"
 							]
 						}
 					},
