@@ -829,20 +829,6 @@ def test_leading_vowel_not_match_consonant(solr, client, jwt, app):
 
 @integration_synonym_api
 @integration_solr
-def test_leading_vowel_not_match_consonant(solr, client, jwt, app):
-    clean_database(solr)
-    seed_database_with(solr, 'HELENAH WU & CO. INC.', id='1')
-    seed_database_with(solr, 'A BETTER WAY HERBALS LTD.', id='2')
-    verify_results(client, jwt,
-       query='EH',
-       expected=[
-           {'name': '----EH'}
-       ]
-    )
-
-
-@integration_synonym_api
-@integration_solr
 def test_unusual_result(solr, client, jwt, app):
     clean_database(solr)
     seed_database_with(solr, 'DOUBLE J AVIATION LTD.', id='1')
@@ -852,7 +838,6 @@ def test_unusual_result(solr, client, jwt, app):
            {'name': '----TABLE'}
        ]
     )
-
 
 @integration_synonym_api
 @integration_solr
