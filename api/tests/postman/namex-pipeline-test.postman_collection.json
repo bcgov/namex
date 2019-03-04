@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c7d80c36-e84c-480c-b1bf-e622e01f88be",
+		"_postman_id": "b798a1bf-af85-45a3-a8b0-6d30d6609005",
 		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -969,9 +969,9 @@
 									"            if (response.body.names[i].choice == 1) ",
 									"                response.body.names[i].name.should.include(\"STRANGWAY & SONS ACCOUNTING SERVICES TESTING\");",
 									"            else if (response.body.names[i].choice == 2)",
-									"                response.body.names[i].name.should.be(\"TEST NAME CHOICE 2 ADD\");",
+									"                response.body.names[i].name.should.include(\"TEST NAME CHOICE 2 ADD\");",
 									"            else",
-									"                response.body.names[i].name.should.be(\"TEST NAME CHOICE 3 ADD\");",
+									"                response.body.names[i].name.should.include(\"TEST NAME CHOICE 3 ADD\");",
 									"        }",
 									"    });",
 									"    ",
