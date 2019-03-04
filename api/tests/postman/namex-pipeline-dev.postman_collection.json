@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "db393b63-7df8-46a7-bac1-beac126a91be",
+		"_postman_id": "3a6b88e0-e19b-432c-838c-58954eb6ba67",
 		"name": "namex-pipeline-dev",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -969,9 +969,9 @@
 									"            if (response.body.names[i].choice == 1) ",
 									"                response.body.names[i].name.should.include(\"A C C DIAMONDS LTD. LIMITED TESTING\");",
 									"            else if (response.body.names[i].choice == 2)",
-									"                response.body.names[i].name.should.be(\"TEST NAME CHOICE 2 ADD\");",
+									"                response.body.names[i].name.should.include(\"TEST NAME CHOICE 2 ADD\");",
 									"            else",
-									"                response.body.names[i].name.should.be(\"TEST NAME CHOICE 3 ADD\");",
+									"                response.body.names[i].name.should.include(\"TEST NAME CHOICE 3 ADD\");",
 									"        }",
 									"    });",
 									"    ",
