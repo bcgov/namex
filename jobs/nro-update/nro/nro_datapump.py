@@ -26,7 +26,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
         'comment': None,
     }
 
-    # initialize array of derived values to use in the stored proc
+    # initialize array of derived values to use in the stored func
     nro_names = [
         {'state': None, 'decision': None, 'conflict1': None, 'conflict2': None, 'conflict3': None},
         {'state': None, 'decision': None, 'conflict1': None, 'conflict2': None, 'conflict3': None},
@@ -74,8 +74,9 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
                                      nro_examiner_name(nr.activeUser.username)
                                      ))
 
-    # # Call the name_examination procedure to save complete decision data for a single NR
-    ora_cursor.callproc("NRO_DATAPUMP_PKG.name_examination",
+    # Call the name_examination function to save complete decision data for a single NR
+    ret = ora_cursor.callfunc("NRO_DATAPUMP_PKG.name_examination_func",
+                        str,
                         [nr.nrNum,  # p_nr_number
                          'A' if (nr.stateCd in [State.APPROVED, State.CONDITIONAL]) else 'R',  # p_status
                          expiry_date.strftime('%Y%m%d'),  # p_expiry_date
@@ -85,7 +86,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
                          nro_names[1]['decision'],  # p_choice2
                          nro_names[2]['decision'],  # p_choice3
                          examiner_comment['comment'],  # p_exam_comment
-                         '',  # p_add_info - not used in proc anymore
+                         '',  # p_add_info - not used in func anymore
                          nro_names[0]['conflict1'],  # p_confname1A
                          nro_names[0]['conflict2'],  # p_confname1B
                          nro_names[0]['conflict3'],  # p_confname1C
@@ -97,6 +98,9 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
                          nro_names[2]['conflict3'],  # p_confname3C
                          ]
                         )
+    if ret is not None:
+        current_app.logger.error('name_examination_func failed, return message: {}'.format(ret))
+
     current_app.logger.debug('finished sending {} to NRO'.format(nr.nrNum))
     # mark that we've set the record in NRO - which assumes we have legally furnished this to the client.
     # and record the expiry date we sent to NRO

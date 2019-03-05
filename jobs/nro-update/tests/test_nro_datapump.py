@@ -1,17 +1,15 @@
 from datetime import datetime
 
 import pytest
-import pytest_mock
 from pytz import timezone
-import pytz
 
 from nro.nro_datapump import nro_data_pump_update, create_expiry_date
 from namex.models import Request, Name, State, User
-
+from flask import current_app
 
 expiry_date_test_data = [
     ('using epoch utc',            # test descriptive name
-     datetime.utcfromtimestamp(0), # start date - time
+     datetime(1970, 1, 1, 00, 00, tzinfo=timezone('US/Pacific', )),  # start date - time
      20,                           # days to add
      23,                           # hour to set the final date time to
      59,                           # minute to set the final date time to
@@ -33,7 +31,7 @@ def test_create_expiry_date(test_name, start_date, days, hours, mins, tz, expect
 
 
 datapump_test_data = [
-    (datetime.utcfromtimestamp(0), datetime(1970, 2, 26, 23, 59)),
+    (datetime(1970, 1, 1, 00, 00, tzinfo=timezone('US/Pacific', )), datetime(1970, 2, 26, 23, 59)),
     (datetime(2001, 8, 5,  9, 00, tzinfo=timezone('US/Pacific',)), datetime(2001, 9, 30, 23, 59)),
     (datetime(2001, 8, 5, 19, 00, tzinfo=timezone('US/Pacific',)), datetime(2001, 9, 30, 23, 59)),
 ]
@@ -67,26 +65,27 @@ def test_datapump(app, mocker, start_date, expected_date):
     # make the real call
     nro_data_pump_update(nr, ora_cursor=oc, expires_days=56)
 
-    oc.callproc.assert_called_with('NRO_DATAPUMP_PKG.name_examination', #package.proc_name
-                                   ['NR 0000001',                  # p_nr_number
-                                    'R',                           # p_status
-                                    expected_date.strftime('%Y%m%d'), # p_expiry_date (length=8)
-                                    'N',                           # p_consent_flag
-                                    'bob',                         # p_examiner_id (anything length <=7)
+    oc.callfunc.assert_called_with('NRO_DATAPUMP_PKG.name_examination_func',  # package.func_name
+                                   str,
+                                   ['NR 0000001',  # p_nr_number
+                                    'R',  # p_status
+                                    expected_date.strftime('%Y%m%d'),  # p_expiry_date (length=8)
+                                    'N',  # p_consent_flag
+                                    'bob',  # p_examiner_id (anything length <=7)
                                     'R****No Distinctive Term 1',  # p_choice1
                                     'R****No Distinctive Term 2',  # p_choice2
                                     'R****No Distinctive Term 3',  # p_choice3
-                                    None,                          # p_exam_comment
-                                    '',                            # p_add_info - not used in proc anymore
-                                    None,                          # p_confname1A
-                                    None,                          # p_confname1B
-                                    None,                          # p_confname1C
-                                    None,                          # p_confname2A
-                                    None,                          # p_confname2B
-                                    None,                          # p_confname2C
-                                    None,                          # p_confname3A
-                                    None,                          # p_confname3B
-                                    None])                         # p_confname3C
+                                    None,  # p_exam_comment
+                                    '',  # p_add_info - not used in func anymore
+                                    None,  #
+                                    None,  # p_confname1B
+                                    None,  # p_confname1C
+                                    None,  # p_confname2A
+                                    None,  # p_confname2B
+                                    None,  # p_confname2C
+                                    None,  # p_confname3A
+                                    None,  # p_confname3B
+                                    None])  # p_confname3C
 
 
 # testdata pattern is ({consent_flag}, {state_cd})
@@ -105,7 +104,7 @@ def test_datapump_nr_requires_consent_flag(app, mocker,consent_flag,state_cd):
     nr.nrNum = 'NR 0000001'
     nr.stateCd = state_cd
     nr.consentFlag = consent_flag
-    nr.lastUpdate = datetime.utcfromtimestamp(0)
+    nr.lastUpdate = datetime(1970, 1, 1, 00, 00, tzinfo=timezone('US/Pacific', ))
 
     # requires the username
     user = User('idir/bob','bob','last','idir','localhost')
@@ -125,7 +124,8 @@ def test_datapump_nr_requires_consent_flag(app, mocker,consent_flag,state_cd):
     # make the real call
     nro_data_pump_update(nr, ora_cursor=oc, expires_days=60)
 
-    oc.callproc.assert_called_with('NRO_DATAPUMP_PKG.name_examination', #package.proc_name
+    oc.callfunc.assert_called_with('NRO_DATAPUMP_PKG.name_examination_func', #package.func_name
+                                   str,
                                    ['NR 0000001',                  # p_nr_number
                                     'A',                           # p_status
                                     '19700302',                    # p_expiry_date (length=8)
@@ -135,7 +135,7 @@ def test_datapump_nr_requires_consent_flag(app, mocker,consent_flag,state_cd):
                                     None,                          # p_choice2
                                     None,                          # p_choice3
                                     None,                          # p_exam_comment
-                                    '',                            # p_add_info - not used in proc anymore
+                                    '',                            # p_add_info - not used in func anymore
                                     None,                          # p_confname1A
                                     None,                          # p_confname1B
                                     None,                          # p_confname1C
