@@ -224,6 +224,34 @@ def test_stack_ignores_wildcards(client, jwt, app):
         not_expected_list=['----TESTING* @WILDCARDS']
     )
 
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('JMACK', 'J-MAC'),
+    ('JMACK', 'j-mac'),
+    ('JMAK', 'J-MAC'),
+    ('JMAK', 'j-mac'),
+    ('JMC', 'J-MAC'),
+    ('JMC', 'j-mac'),
+])
+def test_all_macs_are_equal(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('EMPACK', 'EMPAK'),
+])
+def test_ck_and_k(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
 
 @integration_synonym_api
 @integration_solr
