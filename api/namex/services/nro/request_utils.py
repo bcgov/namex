@@ -120,6 +120,8 @@ def add_names(nr, nr_names):
 
                 name.name = n['name']
                 name.designation = n['designation']
+                name.consumptionDate = n['consumption_date']
+                name.corpNum = n['corp_num']
 
                 # if this NR hasn't recently been reset, set name and NR states as well
                 if not nr.hasBeenReset:
@@ -145,6 +147,8 @@ def add_names(nr, nr_names):
             name.choice = n['choice_number']
             name.name = n['name']
             name.designation = n['designation']
+            name.consumptionDate = n['consumption_date']
+            name.corpNum = n['corp_num']
 
             if nr.stateCd in ['COMPLETED', State.REJECTED] and name.state == Name.APPROVED:
                 nr.stateCd = State.APPROVED
@@ -359,7 +363,9 @@ def get_names(session, request_id):
         'select choice_number,'
         ' name,'
         ' designation,'
-        ' name_state_type_cd'
+        ' name_state_type_cd,' 
+        ' consumption_date,' 
+        ' corp_num' 
         ' from names_vw'
         ' where request_id = :req_id'
     )

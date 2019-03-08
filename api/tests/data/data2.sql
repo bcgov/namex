@@ -8,16 +8,16 @@ values
 ;
 
 insert into names
-(id,name,state,choice,consumption_date,remote_name_id,nr_id)
-values( nextval('names_id_seq'), 'my good company', 'NE', 1, null, null, (select id from requests where nr_num='NR 0000022'))
+(id,name,state,choice,consumption_date, corp_num, remote_name_id,nr_id)
+values( nextval('names_id_seq'), 'my good company', 'NE', 1, null, null, null, (select id from requests where nr_num='NR 0000022'))
 ;
 insert into names
-(id,name,state,choice,consumption_date,remote_name_id,nr_id)
-values( nextval('names_id_seq'), 'my better company', 'NE', 2, null, null, (select id from requests where nr_num='NR 0000022'))
+(id,name,state,choice,consumption_date, corp_num, remote_name_id,nr_id)
+values( nextval('names_id_seq'), 'my better company', 'NE', 2, null, null, null, (select id from requests where nr_num='NR 0000022'))
 ;
 insert into names
-(id,name,state,choice,consumption_date,remote_name_id,nr_id)
-values( nextval('names_id_seq'), 'my best company', 'NE', 3, null, null, (select id from requests where nr_num='NR 0000022'))
+(id,name,state,choice,consumption_date, corp_num, remote_name_id,nr_id)
+values( nextval('names_id_seq'), 'my best company', 'NE', 3, null, null, null, (select id from requests where nr_num='NR 0000022'))
 ;
 
 
