@@ -80,7 +80,6 @@ def upgrade():
     sa.Column('state', sa.String(length=15), nullable=True),
     sa.Column('choice', sa.Integer(), nullable=True),
     sa.Column('consumption_date', sa.DateTime(), nullable=True),	
-	sa.Column('corp_num', sa.String(length=10), nullable=True),
     sa.Column('remote_name_id', sa.BigInteger(), nullable=True),
     sa.Column('nr_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['nr_id'], ['requests.id'], ),
