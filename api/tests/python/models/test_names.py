@@ -18,7 +18,7 @@ def test_name_create(session):
 def test_name_schema():
     """Start with a blank database."""
     name_json = {"name": "my good company", "state": "NE", "conflict1": "conflict1", "conflict2": "conflict2",
-                 "conflict3": "conflict3", "consumptionDate": None, "corpNum": None, "designation": "LLC",
+                 "conflict3": "conflict3", "designation": "LLC",
                  "conflict1_num": "NR 0000001", "decision_text": "my descision", "conflict3_num": "NR 0000003",
                  "conflict2_num": "NR 0000002", "choice": 1}
 
@@ -40,7 +40,7 @@ def test_name_schema_db_update(session):
     # setup
     test_name = "my good company"
     name_json = {"name": "my good company", "state": "NE", "conflict1": "conflict1", "conflict2": "conflict2",
-                 "conflict3": "conflict3", "consumptionDate": None, "corpNum": "S1234567", "designation": "LLC",
+                 "conflict3": "conflict3", "designation": "LLC",
                  "conflict1_num": "NR 0000001", "decision_text": "my descision", "conflict3_num": "NR 0000003",
                  "conflict2_num": "NR 0000002", "choice": 1}
     name_schema = NameSchema()
@@ -65,7 +65,7 @@ def test_name_schema_db_query_update(session):
     # setup
     test_name = "my good company"
     name_json = {"name": test_name, "state": "NE", "conflict1": "conflict1", "conflict2": "conflict2",
-                 "conflict3": "conflict3", "consumptionDate": None, "corpNum": "S1234567", "designation": "LLC",
+                 "conflict3": "conflict3", "designation": "LLC",
                  "conflict1_num": "NR 0000001", "decision_text": "my descision", "conflict3_num": "NR 0000003",
                  "conflict2_num": "NR 0000002", "choice": 1}
     name_schema = NameSchema()

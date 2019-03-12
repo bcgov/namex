@@ -42,8 +42,6 @@ class Name(db.Model):
             "name": self.name,
             "choice": self.choice,
             "state": self.state,
-            "consumptionDate": self.consumptionDate,
-            "corpNum": self.corpNum,
             "conflict1": self.conflict1,
             "conflict2": self.conflict2,
             "conflict3": self.conflict3,
@@ -73,7 +71,7 @@ class Name(db.Model):
 class NameSchema(ma.ModelSchema):
     class Meta:
         model = Name
-        fields = ('name', 'state', 'choice', 'designation', 'consumptionDate', 'corpNum', 'conflict1', 'conflict2',
+        fields = ('name', 'state', 'choice', 'designation', 'conflict1', 'conflict2',
                   'conflict3', 'conflict1_num', 'conflict2_num', 'conflict3_num', 'decision_text')
     name = fields.String(
         required=True,
