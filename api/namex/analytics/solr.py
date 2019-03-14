@@ -235,7 +235,7 @@ class SolrQueries:
 
                     if len(missed_names) > 0:
                         current_app.logger.debug('In {} stack UNSORTED results: {}'.format(previous_stack_title, missed_names))
-                        for missed in missed_names:
+                        for missed in missed_names.copy():
                             for item in result['response']['docs']:
                                 if missed == item['name']:
                                     ordered_names.append({'name_info': item, 'stems': []})
