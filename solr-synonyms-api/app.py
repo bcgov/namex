@@ -12,4 +12,7 @@ application = synonyms.create_application()
 if __name__ == '__main__':
     application.run(host='0.0.0.0', port=8080, debug=True)
     
+<<<<<<< HEAD
 
+=======
+>>>>>>> eaa64fc879dc34071e45a2ca9ab67747a387106d
