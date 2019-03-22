@@ -166,19 +166,23 @@ class NROServices(object):
                 # set the fqpn if the schema is required, which is set y the deployer/configurator
                 # if the environment variable is missing from the Flask Config, then skip setting it.
                 if current_app.config.get('NRO_SCHEMA'):
-                    proc_name = '{}.nro_datapump_pkg.name_examination'.format(current_app.config.get('NRO_SCHEMA'))
+                    func_name = '{}.nro_datapump_pkg.name_examination_func'.format(current_app.config.get('NRO_SCHEMA'))
                 else:
-                    proc_name = 'nro_datapump_pkg.name_examination'
+                    func_name = 'nro_datapump_pkg.name_examination_func'
 
-                proc_vars = [nr_num,           # p_nr_number
+                func_vars = [nr_num,           # p_nr_number
                             'H',               # p_status
                             '',               # p_expiry_date - mandatory, but ignored by the proc
                             '',               # p_consent_flag- mandatory, but ignored by the proc
                             nro_examiner_name(examiner_username), # p_examiner_id
                             ]
 
-                # Call the name_examination procedure to save complete decision data for a single NR
-                cursor.callproc(proc_name, proc_vars)
+                # Call the name_examination function to save complete decision data for a single NR
+                # and get a return if all data was saved
+                ret = cursor.callfunc(func_name, str, func_vars)
+                if ret is not None:
+                    current_app.logger.error('name_examination_func failed, return message: {}'.format(ret))
+                    raise NROServicesError({"code": "unable_to_set_state", "description": ret}, 500)
 
                 con.commit()
 

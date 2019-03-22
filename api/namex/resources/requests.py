@@ -480,7 +480,7 @@ class Request(Resource):
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
 
-        except (Exception) as err:
+        except Exception as err:
             current_app.logger.debug(err.with_traceback(None))
             return jsonify(message='Internal server error'), 500
 
@@ -525,6 +525,15 @@ class Request(Resource):
 
         if not services.name_request.valid_state_transition(user, nrd, state):
             return jsonify(message='you are not authorized to make these changes'), 401
+
+        name_choice_exists = {1: False, 2: False, 3: False}
+        for name in json_input.get('names', None):
+            if name['name'] and name['name'] is not '':
+                name_choice_exists[name['choice']] = True
+        if not name_choice_exists[1]:
+            return jsonify(message='Data does not include a name choice 1'), 400
+        if not name_choice_exists[2] and name_choice_exists[3]:
+            return jsonify(message='Data contains a name choice 3 without a name choice 2'), 400
 
         try:
             existing_nr = RequestDAO.get_inprogress(user)

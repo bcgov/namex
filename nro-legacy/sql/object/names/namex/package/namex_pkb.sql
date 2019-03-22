@@ -63,7 +63,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
 			IF (row_state_type_cd IN ('C', 'D')
 			    AND 
 			    row_transaction_type_cd IN 
-			         ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL', 'MODIF', 'CORRT', 'UPDPR')
+			         ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL', 'MODIF', 'CORRT', 'UPDPR', 'CONSUME')
 			   )
 			  -- (row_state_type_cd = 'COMPLETED' and row_transaction_type_cd = 'EXTEND')
 			THEN

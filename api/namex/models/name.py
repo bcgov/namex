@@ -13,6 +13,7 @@ class Name(db.Model):
     choice = db.Column(db.Integer)
     designation = db.Column(db.String(50), default=None)
     consumptionDate = db.Column('consumption_date', db.DateTime(timezone=True))
+    corpNum = db.Column('corp_num', db.String(10), default=None)
     remoteNameId = db.Column('remote_name_id', db.BigInteger)
 
     # decision info
@@ -41,7 +42,6 @@ class Name(db.Model):
             "name": self.name,
             "choice": self.choice,
             "state": self.state,
-            "consumptionDate": self.consumptionDate,
             "conflict1": self.conflict1,
             "conflict2": self.conflict2,
             "conflict3": self.conflict3,
@@ -71,8 +71,8 @@ class Name(db.Model):
 class NameSchema(ma.ModelSchema):
     class Meta:
         model = Name
-        fields = ('name', 'state', 'choice', 'designation', 'consumptionDate', 'conflict1', 'conflict2', 'conflict3',
-                  'conflict1_num', 'conflict2_num', 'conflict3_num', 'decision_text')
+        fields = ('name', 'state', 'choice', 'designation', 'conflict1', 'conflict2',
+                  'conflict3', 'conflict1_num', 'conflict2_num', 'conflict3_num', 'decision_text')
     name = fields.String(
         required=True,
         error_messages={'required': {'message': 'name is a required field'}}
