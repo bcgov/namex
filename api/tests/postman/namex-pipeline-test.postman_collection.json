@@ -1,10 +1,6 @@
 {
 	"info": {
-<<<<<<< HEAD
-		"_postman_id": "b798a1bf-af85-45a3-a8b0-6d30d6609005",
-=======
 		"_postman_id": "de9cf465-eea9-4e5a-9700-783aaf578939",
->>>>>>> 30aff96... bug fixed with tests
 		"name": "namex-pipeline-test",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -2556,18 +2552,17 @@
 							"listen": "prerequest",
 							"script": {
 								"id": "5e5e7102-694d-4200-a50b-5401e06d4ad1",
-								"type": "text/javascript",
 								"exec": [
 									"",
 									""
-								]
+								],
+								"type": "text/javascript"
 							}
 						},
 						{
 							"listen": "test",
 							"script": {
 								"id": "7703b49f-0606-4672-bc0a-d7c71ded236f",
-								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -2591,7 +2586,6 @@
 									"    response.text.should.include(\"name\");",
 									"    response.text.should.include(\"state\");",
 									"    response.text.should.include(\"choice\");",
-									"    response.text.should.include(\"consumptionDate\");",
 									"    response.text.should.include(\"decision_text\");",
 									"    response.text.should.include(\"conflict1\");",
 									"    response.text.should.include(\"conflict2\");",
@@ -2615,7 +2609,8 @@
 									"    if (bodyJSON[i]==\"\") bodyJSON[i]=null;",
 									"    pm.environment.set(i,bodyJSON[i]);",
 									"}"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -2776,7 +2771,6 @@
 									"    response.text.should.include(\"name\");",
 									"    response.text.should.include(\"state\");",
 									"    response.text.should.include(\"choice\");",
-									"    response.text.should.include(\"consumptionDate\");",
 									"    response.text.should.include(\"decision_text\");",
 									"    response.text.should.include(\"conflict1\");",
 									"    response.text.should.include(\"conflict2\");",
@@ -5464,7 +5458,6 @@
 									"    response.text.should.include(\"name\");",
 									"    response.text.should.include(\"state\");",
 									"    response.text.should.include(\"choice\");",
-									"    response.text.should.include(\"consumptionDate\");",
 									"    response.text.should.include(\"decision_text\");",
 									"    response.text.should.include(\"conflict1\");",
 									"    response.text.should.include(\"conflict2\");",
@@ -5641,7 +5634,6 @@
 									"    response.text.should.include(\"name\");",
 									"    response.text.should.include(\"state\");",
 									"    response.text.should.include(\"choice\");",
-									"    response.text.should.include(\"consumptionDate\");",
 									"    response.text.should.include(\"decision_text\");",
 									"    response.text.should.include(\"conflict1\");",
 									"    response.text.should.include(\"conflict2\");",
