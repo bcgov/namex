@@ -849,3 +849,21 @@ def test_stack_ignores_wildcards(client, jwt, app):
             {'name': '----TESTING'}
         ]
     )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query", [
+    ('T.H.E.'),
+    ('COMPANY'),
+    ('ASSN'),
+    ('THAT'),
+    ('LIMITED CORP.'),
+])
+def test_query_stripped_to_empty_string(solr,client, jwt, query):
+    clean_database(solr)
+    seed_database_with(solr, 'JM Van Damme inc', id='1')
+    seed_database_with(solr, 'SOME RANDOM NAME', id='2')
+    verify_results(client, jwt,
+        query=query,
+        expected=[{'name':'----*'}]
+    )

@@ -136,7 +136,6 @@ class SolrQueries:
         else:
             list_name_split,name = cls.combine_multi_word_synonyms(name, solr_base_url)
             list_name_split = [x.upper() for x in list_name_split]
-
         stemmed_words = cls.word_pre_processing(list_name_split, 'stems', solr_base_url)['stems']
         stemmed_name = ''
         for stem in stemmed_words:
@@ -344,6 +343,10 @@ class SolrQueries:
 
         try:
             connections = []
+            if name == '':
+                name = '*'
+                prox_search_strs.append((['*'],'','',1))
+                old_alg_search_strs.append('*')
 
             for prox_search_tuple, old_alg_search in zip(prox_search_strs, old_alg_search_strs):
 
@@ -384,17 +387,47 @@ class SolrQueries:
 
         except Exception as err:
             current_app.logger.error(err, query)
-            return None, 'Internal server error', 500
+            return None, 'SOLR query error', 500
 
     @classmethod
     def get_cobrs_phonetic_results(cls, solr_base_url, search_strs, name_tokens, start=0, rows=100):
         try:
-            connections = []
-            for str_tuple in search_strs:
-                synonyms_clause = cls._get_synonyms_clause(str_tuple[1], str_tuple[2], name_tokens)
-                for name in str_tuple[0]:
-                    start_str = name
-                    query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
+            if search_strs == []:
+                connections = [({'response':{'numFound':0,'docs':[]},'responseHeader':{'params':{'q':'*'}}},'----*')]
+            else:
+                connections = []
+                for str_tuple in search_strs:
+                    synonyms_clause = cls._get_synonyms_clause(str_tuple[1], str_tuple[2], name_tokens)
+                    for name in str_tuple[0]:
+                        start_str = name
+                        query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
+                            start=start,
+                            rows=rows,
+                            start_str='\"' + parse.quote(start_str).replace('%2A', '') + '\"~{}'.format(str_tuple[3]),
+                            synonyms_clause=synonyms_clause,
+                            exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[3]),
+                        )
+                        current_app.logger.debug('Query: ' + query)
+                        result = json.load(request.urlopen(query))
+                        connections.append((result, '----' + start_str.replace('*','').replace('@','') +
+                                            synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
+            return connections
+
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'SOLR query error', 500
+
+    @classmethod
+    def get_phonetic_results(cls, solr_base_url, name, search_strs, name_tokens, start=0, rows=100):
+        try:
+            if search_strs == []:
+                connections = [({'response':{'numFound':0,'docs':[]},'responseHeader':{'params':{'q':'*'}}},'----*')]
+            else:
+                connections = []
+                for str_tuple in search_strs:
+                    synonyms_clause = cls._get_synonyms_clause(str_tuple[1], str_tuple[2], name_tokens)
+                    start_str = str_tuple[0]
+                    query = solr_base_url + SolrQueries.queries['phonconflicts'].format(
                         start=start,
                         rows=rows,
                         start_str='\"' + parse.quote(start_str).replace('%2A', '') + '\"~{}'.format(str_tuple[3]),
@@ -403,44 +436,15 @@ class SolrQueries:
                     )
                     current_app.logger.debug('Query: ' + query)
                     result = json.load(request.urlopen(query))
-
+                    docs = result['response']['docs']
+                    result['response']['docs'] = cls.post_treatment(docs, start_str)
                     connections.append((result, '----' + start_str.replace('*','').replace('@','') +
                                         synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
-
             return connections
 
         except Exception as err:
             current_app.logger.error(err, query)
-            return None, 'Internal server error', 500
-
-    @classmethod
-    def get_phonetic_results(cls, solr_base_url, name, search_strs, name_tokens, start=0, rows=100):
-        try:
-            connections = []
-            for str_tuple in search_strs:
-                synonyms_clause = cls._get_synonyms_clause(str_tuple[1], str_tuple[2], name_tokens)
-                start_str = str_tuple[0]
-                query = solr_base_url + SolrQueries.queries['phonconflicts'].format(
-                    start=start,
-                    rows=rows,
-                    start_str='\"' + parse.quote(start_str).replace('%2A', '') + '\"~{}'.format(str_tuple[3]),
-                    synonyms_clause=synonyms_clause,
-                    exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[3]),
-                )
-                current_app.logger.debug('Query: ' + query)
-                result = json.load(request.urlopen(query))
-
-                docs = result['response']['docs']
-                result['response']['docs'] = cls.post_treatment(docs, start_str)
-
-                connections.append((result, '----' + start_str.replace('*','').replace('@','') +
-                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
-
-            return connections
-
-        except Exception as err:
-            current_app.logger.error(err, query)
-            return None, 'Internal server error', 500
+            return None, 'SOLR query error', 500
 
     @classmethod
     def get_results(cls, query_type, name, start=0, rows=10):
@@ -930,7 +934,7 @@ class SolrQueries:
         for item in list_of_words:
             words_to_process += ' ' + item
 
-        return_dict = {}
+        return_dict = {'stems':[]}
         if words_to_process != '':
             query = solr_base_url + \
                     '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={words}&analysis.fieldname=name' \
