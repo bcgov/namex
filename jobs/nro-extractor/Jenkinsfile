@@ -295,10 +295,7 @@ if (!run_pipeline) {
                 echo ">>> Tag ${IMAGE_HASH} with ${DEV_TAG_NAME}"
                 openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: DEV_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: "${IMAGE_HASH}"
 
-                sleep 10
-
-                openshiftVerifyDeployment depCfg: DEV_DEPLOYMENT_NAME, namespace: DEV_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
-                echo ">>>> Deployment Complete"
+                echo ">>>> Tag to dev Complete"
 
             } catch (Exception e) {
                 echo "error during dev deploy: ${e}"
@@ -320,7 +317,7 @@ if (!run_pipeline) {
             // send msg to slack
             attachment = [:]
             attachment.fallback = "See build log for more details"
-            attachment.title = "NRO-EXTRACTOR successfully deployed to DEV :rocket:"
+            attachment.title = "NRO-EXTRACTOR latest image running in DEV :rocket:"
             attachment.color = "#00FF00" // Lime Green
             notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
         }
@@ -442,10 +439,7 @@ if (!run_pipeline) {
                     echo ">>> Tag ${IMAGE_HASH} with ${TST_TAG_NAME}"
                     openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: TST_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: "${IMAGE_HASH}"
 
-                    sleep 5
-
-                    openshiftVerifyDeployment depCfg: TST_DEPLOYMENT_NAME, namespace: TST_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
-                    echo ">>>> Deployment Complete"
+                    echo ">>>> Image tag complete"
 
                 } catch (Exception e) {
                     echo "error during test deploy: ${e}"
@@ -467,7 +461,7 @@ if (!run_pipeline) {
                 //send msg to slack
                 def attachment = [:]
                 attachment.fallback = "See build log for more details"
-                attachment.title = "NRO-EXTRACTOR successfully DEPLOYED to TEST :rocket: :rocket:"
+                attachment.title = "NRO-EXTRACTOR successfully tagged image for TEST :rocket: :rocket:"
                 attachment.color = "#00FF00" // Lime Green
                 notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
             }
@@ -583,11 +577,6 @@ if (!run_pipeline) {
                     echo ">>> Tag ${IMAGE_HASH} with ${PROD_TAG_NAME}"
                     openshiftTag destStream: IMAGE_RUNTIME_NAME, verbose: 'false', destTag: PROD_TAG_NAME, srcStream: IMAGE_RUNTIME_NAME, srcTag: "${IMAGE_HASH}"
 
-                    sleep 5
-
-                    openshiftVerifyDeployment depCfg: PROD_DEPLOYMENT_NAME, namespace: PROD_NS, replicaCount: 1, verbose: 'false', verifyReplicaCount: 'false'
-                    echo ">>>> Deployment Complete"
-
                 } catch (Exception e) {
                     echo "error during prod deploy: ${e}"
                     // send msg to slack
@@ -607,7 +596,7 @@ if (!run_pipeline) {
 
                 def attachment = [:]
                 attachment.fallback = "See build log for more details"
-                attachment.title = "NRO-EXTRACTOR-PROD DEPLOYED :tada::rocket::tada:"
+                attachment.title = "NRO-EXTRACTOR successfully tagged image for PROD :tada::rocket::tada:"
                 attachment.color = "#00FF00" // Lime Green
                 notifySlack("nro-extractor-${BUILD_ID}", "#name-examination", "https://hooks.slack.com/services/${SLACK_TOKEN}", [attachment])
             }
