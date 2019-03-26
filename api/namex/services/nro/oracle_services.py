@@ -469,6 +469,8 @@ class NROServices(object):
             add_nwpta(nr, nr_nwpta)
             current_app.logger.debug('completed nwpta for {}'.format(nr.nrNum))
         if nr_names:
+            current_app.logger.debug('nr_names data into add_names():')
+            current_app.logger.debug(nr_names)
             add_names(nr, nr_names)
             current_app.logger.debug('completed names for {}'.format(nr.nrNum))
 
