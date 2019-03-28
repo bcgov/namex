@@ -74,12 +74,11 @@ def verify(data, expected=[], not_expected=None):
 
     verified = False
     print(data['names'])
-
+    print('EXPECTED ', expected)
+    print('NOT EXPECTED ', not_expected)
     for result in data['names']:
         name = result['name_info']
         print('ACTUAL ', name['name'])
-        print('EXPECTED ', expected)
-        print('NOT EXPECTED ', not_expected)
 
         if expected == []:
         # check that the name is the title of a query sent (no real names were returned from solr)
@@ -129,14 +128,14 @@ def search_cobrs_phonetic_match(client, jwt, query):
     assert rv.status_code == 200
     return json.loads(rv.data)
 
-@pytest.mark.skip(reason="frontend handles empty string for now")
 @integration_synonym_api
 @integration_solr
-def test_resist_empty(client, jwt, app):
+def test_resist_empty(client, jwt):
     seed_database_with(client, jwt, 'JM Van Damme inc')
+    seed_database_with(client, jwt, 'SOME RANDOM NAME', clean=False)
     verify_match(client, jwt,
-        query='',
-        expected_list=[]
+        query='*',
+        expected_list=None
     )
 
 @integration_synonym_api
@@ -264,3 +263,20 @@ def test_stack_contains_synonyms(client, jwt, app):
                  expected_list=['----PACIFIK LUMBER', 'PACIFIC LUMBER PRODUCTS LTD.', '----PACIFIK synonyms:(LUMBER)',
                                 'PACIFIC FOREST PRODUCTS LTD.']
                  )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query", [
+    ('T.H.E.'),
+    ('COMPANY'),
+    ('ASSN'),
+    ('THAT'),
+    ('LIMITED CORP.'),
+])
+def test_query_stripped_to_empty_string(client, jwt, query):
+    seed_database_with(client, jwt, 'JM Van Damme inc')
+    seed_database_with(client, jwt, 'SOME RANDOM NAME',id='2', source='2', clean=False)
+    verify_match(client, jwt,
+        query=query,
+        expected_list=None
+    )
