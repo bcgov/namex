@@ -1024,6 +1024,7 @@ class CobrsPhoneticBucket(Resource):
     def get(name, advanced_search, *args, **kwargs):
         start = request.args.get('start', CobrsPhoneticBucket.START)
         rows = request.args.get('rows', CobrsPhoneticBucket.ROWS)
+        name = '' if name == '*' else name
         exact_phrase = '' if advanced_search == '*' else advanced_search
         results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='cobrs_phonetic', exact_phrase=exact_phrase, start=start, rows=rows)
         if code:
@@ -1042,6 +1043,7 @@ class PhoneticBucket(Resource):
     def get(name, advanced_search,*args, **kwargs):
         start = request.args.get('start', PhoneticBucket.START)
         rows = request.args.get('rows', PhoneticBucket.ROWS)
+        name = '' if name == '*' else name
         exact_phrase = '' if advanced_search == '*' else advanced_search
         results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='phonetic', exact_phrase=exact_phrase, start=start, rows=rows)
         if code:

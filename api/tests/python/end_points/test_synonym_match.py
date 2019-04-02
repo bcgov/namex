@@ -152,14 +152,14 @@ def test_find_with_first_word(client, jwt):
     )
 
 
-@pytest.mark.skip(reason="frontend handles empty string for now")
 @integration_synonym_api
 @integration_solr
 def test_resist_empty(client, jwt):
     seed_database_with(client, jwt, 'JM Van Damme inc')
+    seed_database_with(client, jwt, 'SOME RANDOM NAME',id='2', source='2', clear=False)
     verify_synonym_match(client, jwt,
-        query='',
-        expected_list=[]
+        query='*',
+        expected_list=['----* - EXACT WORD ORDER', 'JM Van Damme inc', 'SOME RANDOM NAME']
     )
 
 
@@ -603,3 +603,20 @@ def test_full_resultset_returned(client, jwt, query, expected_list):
     seed_database_with(client, jwt, 'FOUND MISSED LIVING PROXIMITY1', id='3', source='2', clear=False)
     seed_database_with(client, jwt, 'LIVING MISSED FOUND PROXIMITY2', id='4', source='2', clear=False)
     verify_synonym_match(client, jwt, query=query, expected_list=expected_list)
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query", [
+    ('T.H.E.'),
+    ('COMPANY'),
+    ('ASSN'),
+    ('THAT'),
+    ('LIMITED CORP.'),
+])
+def test_query_stripped_to_empty_string(client, jwt, query):
+    seed_database_with(client, jwt, 'JM Van Damme inc')
+    seed_database_with(client, jwt, 'SOME RANDOM NAME',id='2', source='2', clear=False)
+    verify_synonym_match(client, jwt,
+        query=query,
+        expected_list=['----* - EXACT WORD ORDER', 'JM Van Damme inc', 'SOME RANDOM NAME']
+    )

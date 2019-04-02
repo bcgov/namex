@@ -241,7 +241,7 @@ def test_add_new_name_to_nr(client, jwt, app):
     data = json.loads(rv.data)
     assert len(data['names']) == 1
 
-    new_name = data['names'][0]
+    new_name = data['names'][0].copy()
     new_name['name'] = 'Name 2'
     new_name['choice'] = 2
     data['names'].append(new_name)
