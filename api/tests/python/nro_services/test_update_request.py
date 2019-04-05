@@ -43,16 +43,7 @@ class FakeName:
 def test_preserves_previous_request_id(app):
     con = nro.connection
     cursor = con.cursor()
-    cursor.execute("""
-        declare exist number;
-        begin
-            select count(1) into exist from user_tables where table_name='REQUEST';
-            if exist = 1 then
-                execute immediate 'drop table request';
-            end if;
-        end;        
-    """)
-    cursor.execute('create table request (request_id varchar(10), previous_request_id varchar(10))')
+
     cursor.execute("insert into request(request_id, previous_request_id) values('42', '99')")
     _update_request(cursor, FakeRequest(), None, {
         'is_changed__request': False,
