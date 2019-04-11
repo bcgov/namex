@@ -10,9 +10,7 @@ SELECT
     CASE WHEN
         state_cd IN ('APPROVED', 'CONDITIONAL') AND
         expiration_date > NOW() - INTERVAL '1 day' AND
-        consumption_date IS NULL AND
-        request_type_cd NOT IN ('CEM', 'CFR', 'CLL', 'CLP', 'FR', 'LIB', 'LL', 'LP', 'NON', 'PAR', 'RLY', 'TMY',
-                                'XCLL', 'XCLP', 'XLL', 'XLP')
+        consumption_date IS NULL
     THEN
         'ACTIVE'
     ELSE
@@ -20,7 +18,10 @@ SELECT
     END AS state,
     last_update AS last_modified
 FROM
-    requests LEFT JOIN names ON requests.id = names.nr_id AND state IN ('APPROVED', 'CONDITION');
+    requests LEFT JOIN names ON requests.id = names.nr_id WHERE
+    state IN ('APPROVED', 'CONDITION') AND
+    request_type_cd NOT IN ('CEM', 'CFR', 'CLL', 'CLP', 'FR', 'LIB', 'LL', 'LP', 'NON', 'PAR', 'RLY', 'TMY', 'XCLL',
+                            'XCLP', 'XLL', 'XLP');
 
 COMMIT;
 
