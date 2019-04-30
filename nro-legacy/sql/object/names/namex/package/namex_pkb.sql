@@ -46,7 +46,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
             -- If we don't care about it, mark it as ignored.
             status := STATUS_IGNORED;
 
-            -- get the current state, if it's not 'C' or 'D' we're done
+            -- get the current state, if it's not 'C', 'D', or 'COMPLETED' we're done
             BEGIN
                 SELECT state_type_cd 
                 INTO row_state_type_cd 
