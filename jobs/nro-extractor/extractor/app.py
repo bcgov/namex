@@ -113,7 +113,13 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
             ))
 
             if nr and (nr.stateCd != State.DRAFT):
-                if action != 'X':
+
+                # do NOT ignore updates of completed NRs, since those are CONSUME transactions -
+                # the only kind that gets into the namex_feeder table for completed NRs
+                if nr.stateCd in State.COMPLETED_STATE and action == 'U':
+                    pass
+
+                elif action != 'X':
                     success = update_feeder_row(ora_con
                                                 ,id=row['id']
                                                 ,status='C'
