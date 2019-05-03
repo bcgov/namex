@@ -37,7 +37,7 @@ import groovy.json.JsonOutput
         )
     ])
     {    
-        node (py3njs_label) {
+        node () {
         
             stage('Checkout') {
                 
