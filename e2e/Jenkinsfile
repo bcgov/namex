@@ -29,16 +29,15 @@ import groovy.json.JsonOutput
     podTemplate(label: py3njs_label, name: py3njs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
         containerTemplate(
             name: 'jnlp',
-            image: 'uqlibrary/docker-nightwatch',
+            image: '172.50.0.2:5000/openshift/jenkins-slave-py3nodejs',
             resourceRequestCpu: '500m',
             resourceLimitCpu: '1000m',
             resourceRequestMemory: '1Gi',
-            resourceLimitMemory: '2Gi',
-           
+            resourceLimitMemory: '2Gi'
         )
     ])
-    
-    node (py3njs_label) {
+    {    
+        node (py3njs_label) {
         
         stage('Checkout') {
             
@@ -58,4 +57,4 @@ import groovy.json.JsonOutput
                     '''
                
             }
-    }
+    }}
