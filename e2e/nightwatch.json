@@ -20,7 +20,7 @@
 		"selenium_host": "localhost",
 		"webdriver" : {
 			"start_process": true,
-			"server_path": "chromedriver.exe",
+			"server_path": "node_modules/chromedriver/lib/chromedriver/chromedriver",
 			"host": "localhost",
 			"port": 9515
 		},
