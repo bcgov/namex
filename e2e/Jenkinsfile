@@ -39,12 +39,12 @@ import groovy.json.JsonOutput
     {    
         node (py3njs_label) {
         
-        stage('Checkout') {
-            
-                echo "checking out source"
-                echo "Build: ${BUILD_ID}"
-                checkout scm              
-        }
+            stage('Checkout') {
+                
+                    echo "checking out source"
+                    echo "Build: ${BUILD_ID}"
+                    checkout scm              
+            }
 
             stage ('Running Unit Test') {
                 echo "Running tests "
@@ -57,4 +57,5 @@ import groovy.json.JsonOutput
                     '''
                
             }
-    }}
+    }
+}
