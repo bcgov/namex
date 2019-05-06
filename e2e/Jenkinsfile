@@ -56,7 +56,9 @@ import groovy.json.JsonOutput
                     sh '''
                          npm install nightwatch
                          npm install chromedriver
-                         ./node_modules/.bin/nightwatch -c ./workspace/servicebc-ne-tools/servicebc-ne-tools-e2e-pipeline/e2e/nightwatch.json -e chrome ./workspace/servicebc-ne-tools/servicebc-ne-tools-e2e-pipeline/e2e/specs/namex-smoke-test
+                         ls -lart e2e
+                         ls -lart 
+                         ./node_modules/.bin/nightwatch -c ./e2e/nightwatch.json -e chrome ./e2e/specs/namex-smoke-test
                     '''
 
                 pause 600
