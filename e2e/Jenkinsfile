@@ -34,7 +34,7 @@ import groovy.json.JsonOutput
             resourceLimitCpu: '1000m',
             resourceRequestMemory: '1Gi',
             resourceLimitMemory: '2Gi',
-            workingDir: '/',
+            workingDir: '/tmp',
             command: '',
             args: '${computer.jnlpmac} ${computer.name}',
             envVars: []
