@@ -34,7 +34,7 @@ import groovy.json.JsonOutput
             resourceLimitCpu: '1000m',
             resourceRequestMemory: '1Gi',
             resourceLimitMemory: '2Gi',
-            workingDir: '/tmp',
+            workingDir: '/',
             command: '',
             args: '${computer.jnlpmac} ${computer.name}',
             envVars: []
@@ -54,11 +54,11 @@ import groovy.json.JsonOutput
                 echo "Running tests "
                 
                     sh '''
+                         cd e2e
                          npm install nightwatch
                          npm install chromedriver
-                         ls -lart e2e
-                         ls -lart 
-                         ./node_modules/.bin/nightwatch -c ./e2e/nightwatch.json -e chrome ./e2e/specs/namex-smoke-test
+                         ls -lart node_modules/.bin 
+                         ./node_modules/.bin/nightwatch -c ./nightwatch.json -e chrome ./specs/namex-smoke-test
                     '''
 
                 pause 600
