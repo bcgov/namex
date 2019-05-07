@@ -26,7 +26,6 @@
 			"desiredCapabilities": {
 				"browserName": "chrome",
 				"chromeOptions": {
-					"binary": "path",
 					"args": [
 						"headless",
             "no-sandbox",
