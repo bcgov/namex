@@ -1,0 +1,13 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "./node_modules/nightwatch/bin/nightwatch -e chrome -t ./specs/namex-smoke-test"
+  },
+  "dependencies": {
+    "nightwatch": "^1.0.19",
+    "chromedriver": "latest",
+    "chromium": "latest"
+  }
+}
