@@ -2,7 +2,6 @@
   "src_folders" : ["./specs"],
   "output_folder" : "./reports",
   "custom_commands_path" : "./custom-commands",
-  "custom_assertions_path" : "./custom-assertions",
   "page_objects_path" : "./page-objects",
   "globals_path" : "globals.js",
 
