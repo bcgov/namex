@@ -59,9 +59,10 @@ import groovy.json.JsonOutput
                          npm install chromedriver
                          
                     '''
+            }
 
-                pause 6000
-               
+            stage ("Sleep to allow rsh time") {
+                sleep 3000
             }
     }
 }
