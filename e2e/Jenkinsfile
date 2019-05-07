@@ -58,6 +58,7 @@ import groovy.json.JsonOutput
                          npm install nightwatch
                          npm install chromedriver
                          
+                         node ./node_modules/nightwatch/bin/nightwatch -e chrome ./specs/namex-smoke-test
                     '''
             }
 

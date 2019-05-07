@@ -1,10 +1,10 @@
 {
-  "src_folders" : ["tests/e2e/specs"],
-  "output_folder" : "tests/e2e/reports",
-  "custom_commands_path" : "custom-commands",
-  "custom_assertions_path" : "custom-assertions",
-  "page_objects_path" : "page-objects",
-  "globals_path" : "tests/e2e/globals.js",
+  "src_folders" : ["./specs"],
+  "output_folder" : "./reports",
+  "custom_commands_path" : "./custom-commands",
+  "custom_assertions_path" : "./custom-assertions",
+  "page_objects_path" : "./page-objects",
+  "globals_path" : "globals.js",
 
   "test_settings" : {
     "default" : {
@@ -20,7 +20,7 @@
 		"selenium_host": "localhost",
 		"webdriver" : {
 			"start_process": true,
-			"server_path": "node_modules/chromedriver/lib/chromedriver/chromedriver",
+			"server_path": "./node_modules/chromedriver/lib/chromedriver/chromedriver",
 			"host": "localhost",
 			"port": 9515
 		},
