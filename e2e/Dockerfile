@@ -35,14 +35,8 @@ RUN npm i -g npm@latest yarn@latest nsp@latest nodemon@latest  && \
     rm -rf ~/.npm && \
     node -v && \
     npm -v
-RUN npm install --save-dev nightwatch
-RUN npm install --save-dev selenium-server
-RUN npm install chromium
-RUN mkdir -p /node_modules/chromedriver/lib/
-RUN curl -O https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
-RUN unzip chromedriver_linux64.zip
-RUN chmod +x chromedriver
-RUN cp chromedriver /node_modules/chromedriver/lib/
+RUN sudo yum install libX11.so.6
+
 EXPOSE 8080
 
 USER 1001
