@@ -25,11 +25,11 @@ import groovy.json.JsonOutput
 // pipeline
 
 //node/pod needs environment setup for testing
-    def py3njs_label = "jenkins-py3nodejs-${UUID.randomUUID().toString()}"
-    podTemplate(label: py3njs_label, name: py3njs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+    def e2e_label = "e2e-pod${UUID.randomUUID().toString()}"
+    podTemplate(label: e2e_label, name: e2e_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
         containerTemplate(
             name: 'jnlp',
-            image: '172.50.0.2:5000/openshift/jenkins-slave-py3nodejs',
+            image: 'docker-registry.default.svc:5000/servicebc-ne-tools/e2e-pod',
             resourceRequestCpu: '500m',
             resourceLimitCpu: '1000m',
             resourceRequestMemory: '1Gi',
@@ -55,7 +55,7 @@ import groovy.json.JsonOutput
                 
                     sh '''
                          cd e2e
-                         npm install
+                         npm run test
                                                  
                     '''
             }

@@ -29,8 +29,7 @@
 					"binary": "./node_modules/chromium/lib/chromium/chrome-linux/chrome",
 					"args": [
 						"headless",
-            "no-sandbox",
-            "disable-gpu"
+            			"disable-gpu"
 					]
 				}
 			}
