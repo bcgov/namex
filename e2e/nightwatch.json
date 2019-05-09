@@ -19,18 +19,17 @@
 				"NROPath": "https://test.bcregistrynames.gov.bc.ca/login.jsp",
 				"NamexPath": "https://namex-test.pathfinder.gov.bc.ca"
 			},
-			"desiredCapabilities": {
-				"browserName": "firefox",
-				"acceptInsecureCerts": true	
-                                    "moz:firefoxOptions": {
-                                        "args": ["-headless"]
-                                }                           
-
+			 "FirefoxHeadless": {
+                     "desiredCapabilities": {
+                    "browserName": "firefox",
+                    "acceptInsecureCerts": true,
+                     "moz:firefoxOptions": {
+                     "args": ["--headless"]
 			}
 		}
 
-
-
+			 }
+		}
 
 
 	}
