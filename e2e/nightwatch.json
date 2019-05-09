@@ -4,6 +4,9 @@
 	"custom_commands_path": "./custom-commands",
 	"page_objects_path": "./page-objects",
 	"globals_path": "globals.js",
+	"webdriver" : {
+    "start_process": true
+  },
 
 	"test_settings": {
 		"default": {
