@@ -64,9 +64,9 @@ import groovy.json.JsonOutput
                          rm -rf chromedriver_linux64.zip
                          chmod +x chromedriver
                          mv chromedriver ./node_modules/chromedriver/lib/
-                         curl -v -O http://mirror.centos.org/centos/7/os/x86_64/Packages/libX11-1.6.5-2.el7.i686.rpm
-                         rpm -i libX11-1.6.5-2.el7.i686.rpm
-                         rm -rf libX11-1.6.5-2.el7.i686.rpm
+                        # curl -v -O http://mirror.centos.org/centos/7/os/x86_64/Packages/libX11-1.6.5-2.el7.i686.rpm
+                         #rpm -i libX11-1.6.5-2.el7.i686.rpm
+                         #rm -rf libX11-1.6.5-2.el7.i686.rpm
                          npm run test
                                                  
                     '''
