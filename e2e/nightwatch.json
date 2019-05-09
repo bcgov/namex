@@ -10,7 +10,7 @@
 		"server_path": "./node_modules/geckodriver/bin/geckodriver",
 		"port": 4444,
 		"cli_args": [
-			"--log", "debug"
+			"webdriver.gecko.driver" : "",
 		]
 	},
 	"test_settings": {
