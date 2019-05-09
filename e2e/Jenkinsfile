@@ -55,7 +55,7 @@ import groovy.json.JsonOutput
                 
                     sh '''
                          cd e2e
-                         npm install nightwatch
+                        npm install --save-dev nightwatch
                         # npm install chromium
                         # npm install selenium-standalone
                          npm install geckodriver
