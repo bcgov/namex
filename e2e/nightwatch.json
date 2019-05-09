@@ -11,7 +11,6 @@
 		"port": 4444,
 		"cli_args": [
 			"--log", "debug"
-			"webdriver.gecko.driver" : "./bin/geckodriver"
 		]
 	},
 	"test_settings": {
