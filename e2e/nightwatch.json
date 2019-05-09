@@ -22,10 +22,12 @@
 			"desiredCapabilities": {
 				"browserName": "firefox",
 				"acceptInsecureCerts": true
-				"chromeOptions" : {
-                                 "args" : ["--headless"]
-    }
-}
+				"alwaysMatch": {
+                                    "moz:firefoxOptions": {
+                                        "args": ["-headless"]
+                                    }
+                                }                           
+
 			}
 		}
 
