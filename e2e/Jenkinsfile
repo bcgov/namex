@@ -56,7 +56,9 @@ import groovy.json.JsonOutput
                     sh '''
                          cd e2e
                          npm install nightwatch
-                         npm install
+                         npm install chromium
+                         npm install selenium-server
+                         mkdir -p ./node_modules/chromedriver/lib/
                          curl -v -O https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
                          unzip chromedriver_linux64.zip
                          chmod +x chromedriver
