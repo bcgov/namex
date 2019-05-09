@@ -35,7 +35,7 @@
         "host": "localhost",
         "server_path": "./node_modules/selenium-standalone/bin/selenium-standalone",
         "cli_args": {
-          "webdriver.gecko.driver": "./node_modules/geckodriver/bin/geckodriver",
+          "webdriver.gecko.driver": "./node_modules/geckodriver/bin/geckodriver"
           
         }
       }
