@@ -69,7 +69,7 @@ import groovy.json.JsonOutput
                         # curl -v -O http://mirror.centos.org/centos/7/os/x86_64/Packages/libX11-1.6.5-2.el7.i686.rpm
                          #rpm -i libX11-1.6.5-2.el7.i686.rpm
                          #rm -rf libX11-1.6.5-2.el7.i686.rpm
-                         
+                         npm run test
                                                  
                     '''
             }
