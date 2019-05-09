@@ -59,7 +59,7 @@ import groovy.json.JsonOutput
                         # npm install chromium
                         # npm install selenium-server
                         curl -v -O https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
-                        yum -y install google-chrome-stable_current_x86_64.rpm
+                       rpm -i  google-chrome-stable_current_x86_64.rpm
                         rm -rf google-chrome-stable_current_x86_64.rpm
                        #  mkdir -p ./node_modules/chromedriver/lib/
                         # curl -v -O https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
