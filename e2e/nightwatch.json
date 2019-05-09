@@ -22,6 +22,10 @@
 			"desiredCapabilities": {
 				"browserName": "firefox",
 				"acceptInsecureCerts": true
+				"chromeOptions" : {
+                                 "args" : ["--headless"]
+    }
+}
 			}
 		}
 
