@@ -58,7 +58,7 @@ import groovy.json.JsonOutput
                         npm install --save-dev nightwatch
                         # npm install chromium
                         # npm install selenium-standalone
-                         npm install geckodriver
+                         npm install --save-dev geckodriver
                          npm install firefox
                        #   mkdir -p ./node_modules/chromedriver/lib/
                        # curl -v -O https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
