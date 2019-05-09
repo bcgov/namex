@@ -35,7 +35,6 @@ RUN npm i -g npm@latest yarn@latest nsp@latest nodemon@latest  && \
     rm -rf ~/.npm && \
     node -v && \
     npm -v
-RUN sudo yum install libX11.so.6
 
 EXPOSE 8080
 

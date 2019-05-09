@@ -4,45 +4,30 @@
 	"custom_commands_path": "./custom-commands",
 	"page_objects_path": "./page-objects",
 	"globals_path": "globals.js",
-	"webdriver" : {
-    "start_process": true
-  },
 
+	"webdriver": {
+		"start_process": true,
+		"server_path": "./node_modules/geckodriver/bin/geckodriver",
+		"port": 4444,
+		"cli_args": [
+			"--log", "debug"
+		]
+	},
 	"test_settings": {
 		"default": {
 			"globals": {
 				"NROPath": "https://test.bcregistrynames.gov.bc.ca/login.jsp",
 				"NamexPath": "https://namex-test.pathfinder.gov.bc.ca"
+			},
+			"desiredCapabilities": {
+				"browserName": "firefox",
+				"acceptInsecureCerts": true
 			}
-		},
-
-		"webdriver": {
-        "server_path": "./node_modules/geckodriver/bin/geckodriver",
-        "port": 4444,
-        "cli_args": [
-          "--log", "debug"
-        ]
-      },
-	 "desiredCapabilities" : {
-        "browserName" : "firefox",
-        "acceptInsecureCerts" : true
-      }
-		
+		}
 
 
-	},
-	
-    "selenium_server" : {
-      "selenium" : {
-        "start_process": true,
-        "host": "localhost",
-        "server_path": "./node_modules/selenium-standalone/bin/selenium-standalone",
-        "cli_args": {
-          "webdriver.gecko.driver": "./node_modules/geckodriver/bin/geckodriver"
-          
-        }
-      }
 
-	
-}
+
+
+	}
 }
