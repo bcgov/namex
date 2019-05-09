@@ -57,7 +57,7 @@ import groovy.json.JsonOutput
                          cd e2e
                          npm install nightwatch
                         # npm install chromium
-                         npm install selenium-server
+                         npm install selenium-standalone
                          npm install geckodriver
                          npm install firefox
                        #   mkdir -p ./node_modules/chromedriver/lib/
