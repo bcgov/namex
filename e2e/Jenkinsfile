@@ -56,15 +56,16 @@ import groovy.json.JsonOutput
                     sh '''
                          cd e2e
                          npm install nightwatch
-                         npm install chromium
+                        # npm install chromium
                          npm install selenium-server
-                       
-                          mkdir -p ./node_modules/chromedriver/lib/
-                        curl -v -O https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
-                        unzip chromedriver_linux64.zip
-                        rm -rf chromedriver_linux64.zip
-                        chmod +x chromedriver
-                         cp chromedriver ./node_modules/chromedriver/lib/
+                         npm install geckodriver
+                         npm install firefox
+                       #   mkdir -p ./node_modules/chromedriver/lib/
+                       # curl -v -O https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
+                       # unzip chromedriver_linux64.zip
+                      #  rm -rf chromedriver_linux64.zip
+                       # chmod +x chromedriver
+                        # cp chromedriver ./node_modules/chromedriver/lib/
                         # curl -v -O http://mirror.centos.org/centos/7/os/x86_64/Packages/libX11-1.6.5-2.el7.i686.rpm
                          #rpm -i libX11-1.6.5-2.el7.i686.rpm
                          #rm -rf libX11-1.6.5-2.el7.i686.rpm
