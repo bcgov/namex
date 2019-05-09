@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "./node_modules/nightwatch/bin/nightwatch -e firefox -t ./specs/namex-smoke-test"
+    "test": "./node_modules/nightwatch/bin/nightwatch -e webdriver -t ./specs/namex-smoke-test"
   },
   "dependencies": {
     "nightwatch": "^1.0.19",
