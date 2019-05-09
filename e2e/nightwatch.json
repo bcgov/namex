@@ -13,24 +13,33 @@
 			}
 		},
 
-		"firefox": {
-			"silent": true,
-			"selenium_port": 9515,
-			"selenium_host": "localhost",
-			"webdriver": {
-				"start_process": true,
-				"server_path": "./node_modules/geckodriver/bin/geckodriver",
-				"host": "localhost",
-				"port": 9515
-			},
-			"desiredCapabilities": {
-				"browserName": "firefox"
-				
-				
-			}
-
-		}
+		"webdriver": {
+        "server_path": "./node_modules/geckodriver/bin/geckodriver",
+        "port": 4444,
+        "cli_args": [
+          "--log", "debug"
+        ]
+      },
+	 "desiredCapabilities" : {
+        "browserName" : "firefox",
+        "acceptInsecureCerts" : true
+      }
+		
 
 
-	}
+	},
+	
+    "selenium_server" : {
+      "selenium" : {
+        "start_process": true,
+        "host": "localhost",
+        "server_path": "./node_modules/selenium-standalone/bin/selenium-standalone",
+        "cli_args": {
+          "webdriver.gecko.driver": "./node_modules/geckodriver/bin/geckodriver",
+          
+        }
+      }
+
+	
+}
 }
