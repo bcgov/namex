@@ -35,6 +35,7 @@ RUN npm i -g npm@latest yarn@latest nsp@latest nodemon@latest  && \
     rm -rf ~/.npm && \
     node -v && \
     npm -v \
+    yum -y install firefox
     ls 
 
 EXPOSE 8080
