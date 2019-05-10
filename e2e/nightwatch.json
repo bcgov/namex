@@ -24,6 +24,7 @@
 				"browserName": "firefox",
 				"acceptInsecureCerts": true,
 				"moz:firefoxOptions": {
+					"binary": "/usr/bin/firefox",
 					"args": ["--headless"]
 				}
 			}

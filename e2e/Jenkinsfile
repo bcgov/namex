@@ -59,7 +59,6 @@ import groovy.json.JsonOutput
                         # npm install chromium
                         # npm install selenium-standalone
                          npm install --save-dev geckodriver
-                        # npm install --save-dev firefox
                        #   mkdir -p ./node_modules/chromedriver/lib/
                        # curl -v -O https://chromedriver.storage.googleapis.com/74.0.3729.6/chromedriver_linux64.zip
                        # unzip chromedriver_linux64.zip
@@ -75,7 +74,7 @@ import groovy.json.JsonOutput
             }
 
             stage ("Sleep to allow rsh time") {
-                sleep 500
+                sleep 3000
             }
     }
 }
