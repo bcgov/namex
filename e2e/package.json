@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "nightwatch": "^1.0.19",
-    "chromedriver": "latest",
-    "chromium": "1.x.x"
+    "geckodriver": "latest",
+    "chromedriver": "latest"
   }
 }
