@@ -7,7 +7,7 @@
 
 	"webdriver": {
 		"start_process": true,
-		"server_path": "./node_modules/geckodriver/bin/geckodriver",
+		"server_path": "./node_modules/geckodriver/geckodriver",
 		"port": 4444,
 		"cli_args": [
 			"--log", "debug"
@@ -24,7 +24,7 @@
 				"browserName": "firefox",
 				"acceptInsecureCerts": true,
 				"moz:firefoxOptions": {
-					"binary": "/usr/bin/firefox",
+					"binary": "/bin/firefox",
 					"args": ["--headless"]
 				}
 			}
