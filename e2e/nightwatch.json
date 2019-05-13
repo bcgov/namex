@@ -49,7 +49,7 @@
         "selenium" : {
           "start_process": true,
           "host": "localhost",
-          "server_path": "./bin/selenium-server-standalone-3.10.0.jar",
+          "server_path": "./node_modules/.bin/selenium-server-standalone-3.10.0.jar",
           "cli_args": {
             "webdriver.gecko.driver": "./node_modules/.bin/geckodriver",
             "webdriver.chrome.driver": "./node_modules/.bin/chromedriver"
