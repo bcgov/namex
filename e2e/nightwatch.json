@@ -1,52 +1,64 @@
 {
-    "src_folders": ["./specs"],
-    "output_folder": "./reports",
-    "custom_commands_path": "./custom-commands",
-    "custom_assertions_path": "",
-    "page_objects_path": "./page-objects",
-    "globals_path": "globals.js",
-    "selenium": {
-      "start_process": true,
-      "server_path": "./node_modules/.bin/selenium-server-standalone-3.141.59.jar",
-      "start_session": true,
-      "log_path": "log/",
-      "host": "127.0.0.1",
-      "port": 4444,
-      "cli_args": {
-        "webdriver.chrome.driver": "./node_modules/.bin/chromedriver""
-      }
+    "src_folders" : ["./specs"],
+    "custom_commands_path" : "./custom-commands",
+    "custom_assertions_path" : "./examples/custom-assertions",
+    "page_objects_path" : "./page-objects",
+    "globals_path" : "globals.js",
+  
+    "webdriver" : {
+      "start_process": true
     },
+  
     "test_settings" : {
         "default": {
 			"globals": {
 				"NROPath": "https://test.bcregistrynames.gov.bc.ca/login.jsp",
 				"NamexPath": "https://namex-test.pathfinder.gov.bc.ca"
 			},
-
-        "chrome": {
-            "launch_url": "http://localhost",
-            "selenium_port": 4444,
-            "selenium_host": "localhost",
-            "silent": true,
-            "screenshots": {
-              "enabled": false,
-              "path": "screenshots/Chrome/"
-            },
-            "desiredCapabilities": {
-              "browserName": "chrome",
-              "chromeOptions": {
-                "args": [
-                  "disable-web-security",
-                 "ignore-certificate-errors",
-                 "--test-type"
-                ]
-              }
-            }
-          },
+      "default" : {
+        "webdriver": {
+          "server_path": "./node_modules/.bin/geckodriver",
+          "port": 4444,
+          "cli_args": [
+            "--log", "debug"
+          ]
+        },
+        "filter": ["./specs"],
+        "desiredCapabilities" : {
+          "browserName" : "firefox",
+          "acceptInsecureCerts" : true
+        }
+      },
   
-      "edge" : {
-        "desiredCapabilities": {
-          "browserName": "MicrosoftEdge"
+      "chrome" : {
+        "webdriver": {
+          "port": 9515,
+          "server_path": "./node_modules/.bin/chromedriver",
+          "cli_args": [
+            "--verbose"
+          ]
+        },
+  
+        "desiredCapabilities" : {
+          "browserName" : "chrome",
+          "loggingPrefs": {"driver": "INFO", "server": "OFF", "browser": "INFO"}
+        }
+      },
+  
+      "selenium_server" : {
+        "selenium" : {
+          "start_process": true,
+          "host": "localhost",
+          "server_path": "./bin/selenium-server-standalone-3.10.0.jar",
+          "cli_args": {
+            "webdriver.gecko.driver": "./node_modules/.bin/geckodriver",
+            "webdriver.chrome.driver": "./node_modules/.bin/chromedriver"
+          }
+        },
+  
+        "desiredCapabilities" : {
+          "browserName" : "firefox",
+          "acceptSslCerts": true
         }
       }
     }
