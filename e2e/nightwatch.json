@@ -1,37 +1,53 @@
 {
-	"src_folders": ["./specs"],
-	"output_folder": "./reports",
-	"custom_commands_path": "./custom-commands",
-	"page_objects_path": "./page-objects",
-	"globals_path": "globals.js",
-
-	"webdriver": {
-		"start_process": true,
-		"server_path": "./node_modules/.bin/geckodriver",
-		"port": 4444,
-		"cli_args": [
-			"--log", "debug"
-		]
-	},
-	"test_settings": {
-		"default": {
+    "src_folders": ["./specs"],
+    "output_folder": "./reports",
+    "custom_commands_path": "./custom-commands",
+    "custom_assertions_path": "",
+    "page_objects_path": "./page-objects",
+    "globals_path": "globals.js",
+    "selenium": {
+      "start_process": true,
+      "server_path": "lib/drivers/selenium-server-standalone-3.141.59.jar",
+      "start_session": true,
+      "log_path": "log/",
+      "host": "127.0.0.1",
+      "port": 4444,
+      "cli_args": {
+        "webdriver.chrome.driver": "lib/drivers/chromedriver.exe"
+      }
+    },
+    "test_settings" : {
+        "default": {
 			"globals": {
 				"NROPath": "https://test.bcregistrynames.gov.bc.ca/login.jsp",
 				"NamexPath": "https://namex-test.pathfinder.gov.bc.ca"
 			},
 
-			"desiredCapabilities": {
-				"browserName": "firefox",
-				"acceptInsecureCerts": true,
-				"Moz:firefoxOptions": {
-					"binary": "/bin/firefox",
-					"args": ["--headless"]
-				}
-			}
-
-
-		}
-
-
-	}
-}
+        "chrome": {
+            "launch_url": "http://localhost",
+            "selenium_port": 4444,
+            "selenium_host": "localhost",
+            "silent": true,
+            "screenshots": {
+              "enabled": false,
+              "path": "screenshots/Chrome/"
+            },
+            "desiredCapabilities": {
+              "browserName": "chrome",
+              "chromeOptions": {
+                "args": [
+                  "disable-web-security",
+                 "ignore-certificate-errors",
+                 "--test-type"
+                ]
+              }
+            }
+          },
+  
+      "edge" : {
+        "desiredCapabilities": {
+          "browserName": "MicrosoftEdge"
+        }
+      }
+    }
+  }
