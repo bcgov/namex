@@ -51,6 +51,7 @@ import groovy.json.JsonOutput
                     sh '''
                          cd e2e
                          npm install
+                         npm install --save-dev nightwatch
                          npm node nightwatch -e chrome -t ./specs/namex-smoke-test
                     '''
             }
