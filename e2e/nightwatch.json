@@ -8,7 +8,7 @@
 	"webdriver": {
 		"start_process": true,
 		"server_path": "./node_modules/.bin/chromedriver",
-		"port": 4444,
+		"port": 9515,
 		"cli_args": [
 			"--log", "debug"
 		]
