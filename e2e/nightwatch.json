@@ -6,7 +6,7 @@
 	"globals_path": "globals.js",
 
 	"webdriver": {
-		"start_process": true,
+		"start_process": false,
 		"server_path": "./node_modules/.bin/geckodriver",
 		"port": 4444,
 		"cli_args": [
