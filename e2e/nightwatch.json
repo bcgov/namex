@@ -22,14 +22,16 @@
 
 			"desiredCapabilities": {
 				"browserName": "chrome",
+				"javascriptEnabled": true,
+				"acceptSslCerts": true,
 				"acceptInsecureCerts": true,
 				"chromeOptions": {
 					"args": [
 						"disable-gpu",
 						"no-sandbox",
 						"headless",
-						"verbose"
-			
+						"verbose",
+						"ignore-certificate-errors"
 					]
 				}
 			}
