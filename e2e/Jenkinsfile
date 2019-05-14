@@ -56,5 +56,9 @@ import groovy.json.JsonOutput
                          npm install
                     '''
             }
+
+            stage ("Sleep to allow rsh time") {
+                sleep 3000
+            }
     }
 }
