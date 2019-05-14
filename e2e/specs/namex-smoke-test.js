@@ -4,14 +4,13 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#j_username', function(){
-                console.log(process.env.IDIRCredU);
-            })
-            .setValue('#j_username', browser.globals.IDIRCredU)
-            .setValue('#j_password', browser.globals.IDIRCredP)
-            .click('input[name="submit"]')
-            .waitForElementVisible('input[name="_eventId_submission"]')
-            .click('input[name="_eventId_submission"]');
+            .waitForElementVisible('#user')
+            .setValue('#user', browser.globals.IDIRCredU)
+            .setValue('#password', browser.globals.IDIRCredP)
+            .click('input[name="btnSubmit"]')
+            .waitForElementVisible('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            .click('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            .click('img[src="images/step3.gif"]');
     },
 
     'Step 2: NRO - Applicant Info': function (browser) {
@@ -177,12 +176,9 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#j_username')
-            .setValue('#j_username', browser.globals.IDIRCredU)
-            .setValue('#j_password', browser.globals.IDIRCredP)
-            .click('input[name="submit"]')
-            .waitForElementVisible('input[name="_eventId_monitor"]')
-            .click('input[name="_eventId_monitor"]')
+            .waitForElementVisible('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            .click('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            .click('img[src="images/step4.gif"]')
             .waitForElementVisible('#nameRequestNum')
             .setValue('#nameRequestNum', browser.globals.smokeTestNR.NR_num)
             .click('img[alt="Get Name Requests"]')
@@ -224,12 +220,9 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#j_username')
-            .setValue('#j_username', browser.globals.IDIRCredU)
-            .setValue('#j_password', browser.globals.IDIRCredP)
-            .click('input[name="submit"]')
-            .waitForElementVisible('input[name="_eventId_monitor"]')
-            .click('input[name="_eventId_monitor"]')
+            .waitForElementVisible('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            .click('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            .click('img[src="images/step4.gif"]')
             .waitForElementVisible('#nameRequestNum')
             .setValue('#nameRequestNum', browser.globals.smokeTestNR.NR_num)
             .click('img[alt="Get Name Requests"]')
