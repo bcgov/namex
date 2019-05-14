@@ -4,7 +4,9 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#j_username')
+            .waitForElementVisible('#j_username', function(){
+                console.log(process.env.IDIRCredU);
+            })
             .setValue('#j_username', browser.globals.IDIRCredU)
             .setValue('#j_password', browser.globals.IDIRCredP)
             .click('input[name="submit"]')
