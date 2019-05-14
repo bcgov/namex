@@ -2,11 +2,9 @@ module.exports = {
     
     'Step 1: Navigate to staff NRO and log in': function (browser) {
         browser
-            .url(browser.globals.NROPath, function(){
-                console.log(browser.globals.NROPath);
-            })
+            .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#user')
+            .waitForElementVisible('#user', 10000)
             .setValue('#user', browser.globals.IDIRCredU)
             .setValue('#password', browser.globals.IDIRCredP)
             .click('input[name="btnSubmit"]')
