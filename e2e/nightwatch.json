@@ -7,7 +7,7 @@
 
 	"webdriver": {
 		"start_process": true,
-		"server_path": "./node_modules/.bin/geckodriver",
+		"server_path": "./node_modules/chromedriver/lib/chromedriver/chromedriver",
 		"port": 4444,
 		"cli_args": [
 			"--log", "debug"
@@ -21,11 +21,9 @@
 			},
 
 			"desiredCapabilities": {
-				"browserName": "firefox",
-				"acceptInsecureCerts": true,
-				"Moz:firefoxOptions": {
-					"binary": "/bin/firefox",
-					"args": ["--headless"]
+				"browserName": "chrome",
+				"chromeOptions": {
+					"args": ["headless"]
 				}
 			}
 		}
