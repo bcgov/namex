@@ -1,43 +1,49 @@
-FROM centos:centos7
+FROM registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7
 
-LABEL name="e2e-image" \ 
-			description="Google Chrome/Firefox Headless in a container with nodejs based on BDDStack"
-
-ARG NODE_MAJOR_VERSION=10
-ARG NODE_VERSION=v10.13.0
-
+EXPOSE 8080
 
 ENV PATH=$HOME/.local/bin/:$PATH \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8
+   
+ENV SUMMARY="Jenkins slave with chrome and firefox installed for use with functional/BDD tests that use BDDStack." \
+    DESCRIPTION="Jenkins pipeline slave with chrome and firefox for testing application with headless browser. (aka 'BDDStack')"
 
+LABEL summary="$SUMMARY" \
+      description="$DESCRIPTION" \
+      io.k8s.description="$DESCRIPTION" \
+      io.k8s.display-name="Jenkins-Pipeline-BDDStack" \
+      io.openshift.expose-services="8080:http" \
+      io.openshift.tags="builder,jenkins-jnlp-chrome,jenkins-jnlp-firefox,jenkins-jnlp" \
+      release="1"
 
-# Fetch stock nodejs and install
-RUN mkdir -p /opt && \
-    pushd /opt && \
-    curl -sL https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz | tar -Jx && \
-    rm -f node-${NODE_VERSION}-linux-x64.tar.xz
+# NOTES:
+# We need to call 2 (!) yum commands before being able to enable repositories properly
+# This is a workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1479388
+# Chrome install info: https://access.redhat.com/discussions/917293
+RUN yum repolist > /dev/null && \
+    yum install -y yum-utils && \
+    yum-config-manager --disable \* &> /dev/null && \
+    yum-config-manager --enable rhel-server-rhscl-7-rpms && \
+    yum-config-manager --enable rhel-7-server-rpms && \
+    yum-config-manager --enable rhel-7-server-optional-rpms && \
+    yum-config-manager --enable rhel-7-server-fastrack-rpms && \
+    UNINSTALL_PKGS="java-1.8.0-openjdk-headless.i686" &&\
+    INSTALL_PKGS="redhat-lsb libXScrnSaver gdk-pixbuf2 xorg-x11-server-Xvfb wget bzip2" && \
+    yum remove -y $UNINSTALL_PKGS &&\
+    yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
+    yum clean all -y && \
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
+    yum -y localinstall google-chrome-stable_current_x86_64.rpm && \
+    rm google-chrome-stable_current_x86_64.rpm && \
+    wget -O firefox-latest.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US" && \
+    tar -xvjf firefox-latest.tar.bz2 && \
+    mv firefox /opt/firefox65 && \
+    ln -s /opt/firefox65/firefox-bin /usr/bin/firefox && \
+    if [ ! -d /home/jenkins/.pki ] ; then mkdir /home/jenkins/.pki; fi && \
+    chmod 777 /home/jenkins/.pki
 
-RUN yum -y update; yum clean all
-RUN yum -y install epel-release
-RUN yum -y install wget nano Xvfb  xorg-x11-xauth java-1.8.0-openjdk git; yum clean all
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
-RUN yum -y localinstall google-chrome-stable_current_x86_64.rpm; yum clean all
-RUN rm google-chrome-stable_current_x86_64.rpm
-RUN yum -y install firefox; yum clean all
-
-
-# Update environment variables
-ENV NODE_HOME=/opt/node-${NODE_VERSION}-linux-x64 \
-    PATH=$PATH:/opt/node-${NODE_VERSION}-linux-x64/bin
-
-# Update the version of `npm` that came with the packages above
-# and install a few additional tools.
-RUN npm i -g npm@latest yarn@latest nsp@latest nodemon@latest  && \
-    rm -rf ~/.npm && \
-    node -v && \
-    npm -v
-
-EXPOSE 8080
+ENV OPENSHIFT_JENKINS_JVM_ARCH=x86_64
 
 USER 1001
