@@ -23,7 +23,12 @@
 			"desiredCapabilities": {
 				"browserName": "chrome",
 				"chromeOptions": {
-					"args": ["headless"]
+					"args": [
+						"disable-gpu",
+						"no-sandbox",
+						"headless",
+						"verbose"
+					]
 				}
 			}
 		}
