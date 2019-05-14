@@ -29,7 +29,7 @@ RUN yum repolist > /dev/null && \
     yum-config-manager --enable rhel-7-server-optional-rpms && \
     yum-config-manager --enable rhel-7-server-fastrack-rpms && \
     UNINSTALL_PKGS="java-1.8.0-openjdk-headless.i686" &&\
-    INSTALL_PKGS="redhat-lsb libXScrnSaver gdk-pixbuf2 xorg-x11-server-Xvfb wget bzip2" && \
+    INSTALL_PKGS="redhat-lsb libXScrnSaver gdk-pixbuf2 xorg-x11-server-Xvfb wget bzip2 rh-nodejs6 rh-nodejs6-nodejs-nodemon" && \
     yum remove -y $UNINSTALL_PKGS &&\
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     rpm -V $INSTALL_PKGS && \
