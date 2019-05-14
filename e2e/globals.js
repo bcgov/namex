@@ -12,6 +12,10 @@ module.exports = {
         NR_num: ''
     },
 
+    IDIRCredU = process.env.IDIRCredU,
+
+    IDIRCredP = process.env.IDIRCredP,
+
     extractorTimeOut : 1000,
 
     exactMatch : 'AIR PACIFIC LIMITED',

@@ -32,7 +32,10 @@ import groovy.json.JsonOutput
             workingDir: '',
             command: '',
             args: '${computer.jnlpmac} ${computer.name}',
-            envVars: []
+            envVars: [
+                secretEnvVar(key: 'IDIRCredU', secretName: 'e2e-secret', secretKey: 'IDIRCredU'),
+                secretEnvVar(key: 'IDIRCredP', secretName: 'e2e-secret', secretKey: 'IDIRCredP')
+            ]
         )
     ])
     {    
