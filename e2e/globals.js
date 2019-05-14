@@ -12,9 +12,9 @@ module.exports = {
         NR_num: ''
     },
 
-    IDIRCredU = process.env.IDIRCredU,
+    IDIRCredU : process.env.IDIRCredU,
 
-    IDIRCredP = process.env.IDIRCredP,
+    IDIRCredP : process.env.IDIRCredP,
 
     extractorTimeOut : 1000,
 
