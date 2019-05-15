@@ -4,13 +4,14 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#user')
-            .setValue('#user', browser.globals.IDIRCredU)
-            .setValue('#password', browser.globals.IDIRCredP)
-            .click('input[name="btnSubmit"]')
-            .waitForElementVisible('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
-            .click('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
-            .click('img[src="images/step3.gif"]');
+            .waitForElementVisible('img[alt="Google"]');
+            // .waitForElementVisible('#user')
+            // .setValue('#user', browser.globals.IDIRCredU)
+            // .setValue('#password', browser.globals.IDIRCredP)
+            // .click('input[name="btnSubmit"]')
+            // .waitForElementVisible('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            // .click('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            // .click('img[src="images/step3.gif"]');
     },
 
     'Step 2: NRO - Applicant Info': function (browser) {
