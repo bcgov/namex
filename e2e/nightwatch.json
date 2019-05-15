@@ -29,7 +29,6 @@
 					"args": [
 						"disable-gpu",
 						"no-sandbox",
-						"headless",
 						"verbose",
 						"ignore-certificate-errors"
 					]

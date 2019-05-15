@@ -4,7 +4,7 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#user', 10000)
+            .waitForElementVisible('#user')
             .setValue('#user', browser.globals.IDIRCredU)
             .setValue('#password', browser.globals.IDIRCredP)
             .click('input[name="btnSubmit"]')
