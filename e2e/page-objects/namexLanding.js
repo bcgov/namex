@@ -1,18 +1,19 @@
 var loginCommands = {
 
 	login: function () {
-		return this.waitForElementNotVisible('@loading_overlay', 5000)
-			.waitForElementVisible('@login_button', 5000)
+		return this.waitForElementNotVisible('@loading_overlay')
+			.waitForElementVisible('@login_button')
 			.click('@login_button')
-			.waitForElementVisible('@keycloak_logo', 5000)
-			.setValue('@keycloak_username', 'names-examiner')
-			.setValue('@keycloak_password', 'WhatEver1')
-			.click('@keycloak_login_button')
-			.waitForElementVisible('@app_container', 5000);
+			.waitForElementVisible('@idir_button')
+			.click('@idir_button')
+			.waitForElementVisible('@siteminder_user')
+			.setValue('@siteminder_user', browser.globals.IDIRCredU)
+			.setValue('@siteminder_pw', browser.globals.IDIRCredP)
+			.click('@siteminder_continue_button');
 
 	},
 	checkIfLandingPageIsUp: function () {
-		return this.waitForElementVisible('@app_container', 5000)
+		return this.waitForElementVisible('@app_container')
 			.assert.containsText('@missing_auth_h2', 'Your authorization is missing or has expired. Please login.')
 	}
 };
@@ -25,11 +26,11 @@ module.exports = {
 	elements: {
 		missing_auth_h2: 'h2',
 		login_button: '#header-login-button',
+		idir_button: '#zocial-idir',
 		loading_overlay: '#loading-overlay',
-		keycloak_logo: '#kc-logo-wrapper',
-		keycloak_username: '#username',
-		keycloak_password: '#password',
-		keycloak_login_button: '#kc-login',
+		siteminder_user: '#user',
+		siteminder_pw: '#password',
+		siteminder_continue_button: 'input[value="Continue"]',
 		app_container: '#app'
 	}
 };
