@@ -8,6 +8,6 @@
   "dependencies": {
     "nightwatch": "^1.0.19",
     "geckodriver": "latest",
-    "chromedriver": "2.40"
+    "chromedriver": "2.46"
   }
 }
