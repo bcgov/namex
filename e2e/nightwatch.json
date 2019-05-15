@@ -16,7 +16,7 @@
 	"test_settings": {
 		"default": {
 			"globals": {
-				"NROPath": "https://www.google.ca/",
+				"NROPath": "https://test.bcregistryallservices.gov.bc.ca/sofi/login/login.htm",
 				"NamexPath": "https://namex-test.pathfinder.gov.bc.ca"
 			},
 
