@@ -3,7 +3,9 @@ module.exports = {
     'Step 1: Navigate to staff NRO and log in': function (browser) {
         browser
             .url(browser.globals.NROPath)
-            .title()
+            .title(function(result){
+                console.log(result.value);
+            })
             .source(function(result){
                 console.log(result.value);
             })
