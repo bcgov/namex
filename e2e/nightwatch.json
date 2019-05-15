@@ -31,7 +31,8 @@
 						"no-sandbox",
 						"headless",
 						"verbose",
-						"ignore-certificate-errors"
+						"ignore-certificate-errors",
+						"enable-features=NetworkService,NetworkServiceInProcess"
 					]
 				}
 			}
