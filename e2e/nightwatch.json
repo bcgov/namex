@@ -18,7 +18,7 @@
 	"test_settings": {
 		"default": {
 			"globals": {
-				"NROPath": "https://logontest7.gov.bc.ca/clp-cgi/int/logon.cgi?flags=1000:1,0&TYPE=33554433&REALMOID=06-c38d8eae-dbeb-4a03-948f-46d7880afd31&GUID=&SMAUTHREASON=0&METHOD=GET&SMAGENTNAME=$SM$FQHwWYG90q7sLT7bh5ahuEkVo%2f892351oEkR%2b2XOaMiLAJFi3Jwu8umqdPelEZ0RYCGR%2fsQGG3bfhRuIItjDpKM8QTbWG9mB&TARGET=$SM$https%3a%2f%2ftest%2ebcregistryallservices%2egov%2ebc%2eca%2fsofi%2flogin%2flogin%2ehtm",
+				"NROPath": "https://test.bcregistryallservices.gov.bc.ca/sofi/login/login.htm",
 				"NamexPath": "https://namex-test.pathfinder.gov.bc.ca"
 			},
 

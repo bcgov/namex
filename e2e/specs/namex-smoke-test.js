@@ -4,6 +4,8 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
+            .waitForElementVisible('title')
+            .click('a')
             .waitForElementVisible('#user')
             .setValue('#user', browser.globals.IDIRCredU)
             .setValue('#password', browser.globals.IDIRCredP)
