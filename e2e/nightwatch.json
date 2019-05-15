@@ -10,7 +10,9 @@
 		"server_path": "./node_modules/chromedriver/lib/chromedriver/chromedriver",
 		"port": 9515,
 		"cli_args": [
-			"--log", "debug"
+			"--log", 
+			"--debug",
+			"--enable-features=NetworkService,NetworkServiceInProcess"
 		]
 	},
 	"test_settings": {
@@ -31,8 +33,7 @@
 						"no-sandbox",
 						"headless",
 						"verbose",
-						"ignore-certificate-errors",
-						"enable-features=NetworkService,NetworkServiceInProcess"
+						"ignore-certificate-errors"
 					]
 				}
 			}
