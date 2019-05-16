@@ -7,7 +7,8 @@ var loginCommands = {
 			.waitForElementVisible('@keycloak_logo')
 			.setValue('@keycloak_username', KeycloakCredU)
 			.setValue('@keycloak_password', KeycloakCredP)
-			.click('@keycloak_login_button');
+			.click('@keycloak_login_button')
+			.waitForElementVisible('#app');
 
 	},
 	checkIfLandingPageIsUp: function () {
