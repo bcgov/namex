@@ -1,15 +1,13 @@
 var loginCommands = {
 
-	login: function (IDIRCredU, IDIRCredP) {
+	login: function (KeycloakCredU, KeycloakCredP) {
 		return this.waitForElementNotVisible('@loading_overlay')
 			.waitForElementVisible('@login_button')
 			.click('@login_button')
-			.waitForElementVisible('@idir_button')
-			.click('@idir_button')
-			.waitForElementVisible('@siteminder_user')
-			.setValue('@siteminder_user', IDIRCredU)
-			.setValue('@siteminder_pw', IDIRCredP)
-			.click('@siteminder_continue_button');
+			.waitForElementVisible('@keycloak_logo')
+			.setValue('@keycloak_username', KeycloakCredU)
+			.setValue('@keycloak_password', KeycloakCredP)
+			.click('@keycloak_login_button');
 
 	},
 	checkIfLandingPageIsUp: function () {
@@ -31,6 +29,10 @@ module.exports = {
 		siteminder_user: '#user',
 		siteminder_pw: '#password',
 		siteminder_continue_button: 'input[value="Continue"]',
-		app_container: '#app'
+		app_container: '#app',
+		keycloak_logo: '#kc-logo-wrapper',
+		keycloak_username: '#username',
+		keycloak_password: '#password',
+		keycloak_login_button: '#kc-login'
 	}
 };

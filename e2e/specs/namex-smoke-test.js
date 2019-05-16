@@ -73,7 +73,7 @@ module.exports = {
 
         nonAuthPage
             .checkIfLandingPageIsUp()
-            .login(browser.globals.IDIRCredU, browser.globals.IDIRCredP);
+            .login(browser.globals.KeycloakCredP, browser.globals.KeycloakCredU);
     },
 
     'Step 8:  NameX - wait for extractor to run': function (browser) {
@@ -184,25 +184,25 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
-            .click('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            .waitForElementVisible('img[src="images/step4.gif"]')
             .click('img[src="images/step4.gif"]')
             .waitForElementVisible('#nameRequestNum')
             .setValue('#nameRequestNum', browser.globals.smokeTestNR.NR_num)
-            .click('img[alt="Get Name Requests"]')
-            .waitForElementVisible('#monitorStatusAuthAction');
+            .setValue('#contactNumber', '5555555555')
+            .click('img[alt="Get Name Request"]')
+            .waitForElementVisible('#monitorStatusAnon');
 
-        browser.expect.element('#monitorStatusAuthAction > h3:nth-child(10)').text.to.contain(browser.globals.smokeTestNR.NR_num);
-        browser.expect.element('#monitorStatusAuthAction > table:nth-child(14) > tbody > tr:nth-child(1) > td.displayTableRight').text.to.contain('EDIT');
+        browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(9) > td > h3').text.to.contain(browser.globals.smokeTestNR.NR_num);
+        browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(14) > td:nth-child(2)').text.to.contain('EDIT');
 
         browser
             .click('input[name="_eventId_veiwDetails"]')
             .waitForElementVisible('#applicantInfo');
 
-        browser.expect.element('#applicantInfo > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2) > td:nth-child(3)').text.to.contain('EDIT');
-        browser.expect.element('#applicantInfo > table > tbody > tr:nth-child(19) > td > table > tbody > tr:nth-child(2) > td:nth-child(3)').text.to.contain('Rejected');
-        browser.expect.element('#applicantInfo > table > tbody > tr:nth-child(19) > td > table > tbody > tr:nth-child(8) > td:nth-child(3)').text.to.contain('Rejected');
-        browser.expect.element('#applicantInfo > table > tbody > tr:nth-child(19) > td > table > tbody > tr:nth-child(14) > td:nth-child(3)').text.to.contain('Rejected');
+        browser.expect.element('#applicantInfo > table > tbody > tr:nth-child(17) > td > table > tbody > tr:nth-child(2) > td:nth-child(3)').text.to.contain('EDIT');
+        browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(14) > td:nth-child(2)').text.to.contain('Rejected');
+        browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(20) > td:nth-child(2)').text.to.contain('Rejected');
+        browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(26) > td:nth-child(2)').text.to.contain('Rejected');
     },
 
     'Step 18: Namex - log back into NameX': function (browser) {
@@ -228,15 +228,15 @@ module.exports = {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
-            .click('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
+            .waitForElementVisible('img[src="images/step4.gif"]')
             .click('img[src="images/step4.gif"]')
             .waitForElementVisible('#nameRequestNum')
             .setValue('#nameRequestNum', browser.globals.smokeTestNR.NR_num)
-            .click('img[alt="Get Name Requests"]')
-            .waitForElementVisible('#monitorStatusAuthAction');
-
-        browser.expect.element('#monitorStatusAuthAction > table:nth-child(12) > tbody > tr:nth-child(1) > td.displayTableCentreRight').text.to.contain('Cancelled');
+            .setValue('#contactNumber', '5555555555')
+            .click('img[alt="Get Name Request"]')
+            .waitForElementVisible('#monitorStatusAnon');
+            
+        browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(11) > td:nth-child(2) > h3').text.to.contain('Cancelled');
 
         browser.end();
 
