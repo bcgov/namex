@@ -33,8 +33,12 @@ import groovy.json.JsonOutput
             command: '',
             args: '${computer.jnlpmac} ${computer.name}',
             envVars: [
-                secretEnvVar(key: 'IDIRCredU', secretName: 'e2e-secret', secretKey: 'IDIRCredU'),
-                secretEnvVar(key: 'IDIRCredP', secretName: 'e2e-secret', secretKey: 'IDIRCredP')
+                secretEnvVar(key: 'IDIRCredU', secretName: 'e2e-secrets', secretKey: 'IDIRCredU'),
+                secretEnvVar(key: 'IDIRCredP', secretName: 'e2e-secrets', secretKey: 'IDIRCredP'),
+                secretEnvVar(key: 'KeycloakCredU', secretName: 'e2e-secrets', secretKey: 'KeycloakCredU'),
+                secretEnvVar(key: 'KeycloakCredP', secretName: 'e2e-secrets', secretKey: 'KeycloakCredP'),                
+                secretEnvVar(key: 'TestCC', secretName: 'e2e-secrets', secretKey: 'TestCC'),
+                secretEnvVar(key: 'TestCVD', secretName: 'e2e-secrets', secretKey: 'TestCVD')
             ]
         )
     ])

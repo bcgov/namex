@@ -1,14 +1,14 @@
 var loginCommands = {
 
-	login: function () {
+	login: function (IDIRCredU, IDIRCredP) {
 		return this.waitForElementNotVisible('@loading_overlay')
 			.waitForElementVisible('@login_button')
 			.click('@login_button')
 			.waitForElementVisible('@idir_button')
 			.click('@idir_button')
 			.waitForElementVisible('@siteminder_user')
-			.setValue('@siteminder_user', browser.globals.IDIRCredU)
-			.setValue('@siteminder_pw', browser.globals.IDIRCredP)
+			.setValue('@siteminder_user', IDIRCredU)
+			.setValue('@siteminder_pw', IDIRCredP)
 			.click('@siteminder_continue_button');
 
 	},

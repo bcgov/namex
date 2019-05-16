@@ -16,6 +16,14 @@ module.exports = {
 
     IDIRCredP : process.env.IDIRCredP,
 
+    KeycloakCredP : process.env.KeycloakCredP,
+
+    KeycloakCredU : process.env.KeycloakCredU,
+
+    TestCC : process.env.TestCC,
+
+    TestCVD : process.env.TestCVD,
+
     extractorTimeOut : 1000,
 
     exactMatch : 'AIR PACIFIC LIMITED',

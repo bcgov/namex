@@ -10,14 +10,13 @@
 		"server_path": "./node_modules/chromedriver/lib/chromedriver/chromedriver",
 		"port": 9515,
 		"cli_args": [
-			"--log", 
-			"--debug"
+			"--verbose"
 		]
 	},
 	"test_settings": {
 		"default": {
 			"globals": {
-				"NROPath": "https://test.bcregistryallservices.gov.bc.ca/sofi/login/login.htm",
+				"NROPath": "https://test.bcregistrynames.gov.bc.ca/nro/",
 				"NamexPath": "https://namex-test.pathfinder.gov.bc.ca"
 			},
 
@@ -32,7 +31,8 @@
 						"no-sandbox",
 						"headless",
 						"verbose",
-						"ignore-certificate-errors"
+						"ignore-certificate-errors",
+						"window-size=1920,1080"
 					]
 				}
 			}

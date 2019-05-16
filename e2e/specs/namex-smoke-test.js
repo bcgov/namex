@@ -1,62 +1,67 @@
 module.exports = {
-    
-    'Step 1: Navigate to staff NRO and log in': function (browser) {
+
+    'Step 1: Navigate to public NRO': function (browser) {
         browser
             .url(browser.globals.NROPath)
             .maximizeWindow()
-            .waitForElementVisible('#user')
-            .setValue('#user', browser.globals.IDIRCredU)
-            .setValue('#password', browser.globals.IDIRCredP)
-            .source(function(result){
-                console.log(result.value);
-            })
-            .click('input[name="btnSubmit"]')
-            .waitForElementVisible('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
-            .click('#tabContainer_tablist_dijit_layout_ContentPane_0 > span.tabLabel')
-            .click('img[src="images/step3.gif"]');
+            .waitForElementVisible('img[src="images/step3.gif"]')
+            .click('img[src="images/step3.gif"]')
+            .waitForElementVisible('input[name="_eventId_next"]')
+            .click('input[name="_eventId_next"]');
+
     },
 
     'Step 2: NRO - Applicant Info': function (browser) {
         browser
-            .waitForElementVisible('input[name="party.lastName"]')
-            .setValue('input[name="party.lastName"]', 'TEST')
-            .setValue('input[name="party.firstName"]', 'TEST')
-            .click('#notifyMethod3')
-            .setValue('input[name="address.addrLine1"]', 'TEST 940 Blanshard Street')
-            .setValue('input[name="address.city"]', 'TEST Victoria')
-            .setValue('input[name="address.postalCd"]', 'V8W 2H3')
-            .setValue('input[name="party.phoneNumber"]', '5555555555');
+            .waitForElementVisible('input[name="lastName"]')
+            .setValue('input[name="lastName"]', 'TEST')
+            .setValue('input[name="firstName"]', 'TEST')
+            .click('#notifyMethod2')
+            .setValue('input[name="address1"]', 'TEST 940 Blanshard Street')
+            .setValue('input[name="city"]', 'TEST Victoria')
+            .setValue('input[name="postalCode"]', 'V8W 2H3')
+            .setValue('input[name="phoneNum"]', '5555555555')
+            .click('img[alt="Next"]');
     },
 
-    'Step 3: NRO - Select NR Type and Nature of Business': function (browser) {
+    'Step 3: NRO - Select NR Type': function (browser) {
         browser
-            .setValue('#requestType', 'General Partnership/Sole Proprietorship/DBA - Registration')
-            .moveToElement('textarea[name="requestInstance.natureOfBusinessInfo"]', 10, 10)
-            .setValue('textarea[name="requestInstance.natureOfBusinessInfo"]', 'TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST ')
-            .moveToElement('textarea[name="requestInstance.additionalInfo"]', 10, 10)
-            .setValue('textarea[name="requestInstance.additionalInfo"]', 'TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST ');
+            .waitForElementVisible('#requestType1')
+            .click('#requestType1')
+            .click('img[alt="Next"]');
     },
 
     'Step 4: NRO - Enter Name Choices': function (browser) {
         browser
-            .moveToElement('input[name="nameChoice1.name_1"]', 10, 10)
-            .waitForElementVisible('input[name="nameChoice1.name_1"]')
-            .setValue('input[name="nameChoice1.name_1"]', 'ZZZZZZZ 1 TEST NAME DO NOT EXAMINE')
-            .setValue('input[name="nameChoice2.name_1"]', 'ZZZZZZZ 2 TEST NAME DO NOT EXAMINE')
-            .setValue('input[name="nameChoice3.name_1"]', 'ZZZZZZZ 3 TEST NAME DO NOT EXAMINE')
+            .waitForElementVisible('input[name="nameOneText"]')
+            .setValue('input[name="nameOneText"]', 'ZZZZZZZ 1 TEST NAME DO NOT EXAMINE')
+            .setValue('input[name="nameTwoText"]', 'ZZZZZZZ 2 TEST NAME DO NOT EXAMINE')
+            .setValue('input[name="nameThreeText"]', 'ZZZZZZZ 3 TEST NAME DO NOT EXAMINE')
+            .setValue('#natureOfBusiness', 'TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST ')
+            .setValue('#additionalInformation', 'TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST ')
             .click('img[alt="Next"]');
     },
 
-    'Step 5: NRO - Staff Payment No Fee': function (browser) {
+    'Step 5: NRO - Confirmation Screen': function (browser) {
         browser
-            .waitForElementVisible('#noFee1')
-            .click('#noFee1')
-            .click('input[name="_eventId_next"]');
+            .waitForElementVisible('input[name="cardHolderName"]')
+            .setValue('input[name="cardHolderName"]', 'TEST')
+            .setValue('input[name="phoneNumber"]', '5555555555')
+            .click('#agree1')
+            .click('#publicPay');
+    },
+
+    'Step 6: NRO - Beanstream CC page': function (browser) {
+        browser
+            .waitForElementVisible('input[name="trnCardNumber"]')
+            .setValue('input[name="trnCardNumber"]', browser.globals.TestCC)
+            .setValue('input[name="trnCardCvd"]', browser.globals.TestCVD)
+            .click('input[name="submitButton"]');
     },
 
     'Step 6: NRO - Receipt Screen': function (browser) {
         browser.waitForElementVisible('#content');
-        browser.getText("#command > p:nth-child(8) > strong", function (result) {
+        browser.getText("#command > table > tbody > tr:nth-child(7) > td > strong", function (result) {
             browser.globals.smokeTestNR.NR_num = result.value;
         });
     },
@@ -68,7 +73,7 @@ module.exports = {
 
         nonAuthPage
             .checkIfLandingPageIsUp()
-            .login();
+            .login(browser.globals.IDIRCredU, browser.globals.IDIRCredP);
     },
 
     'Step 8:  NameX - wait for extractor to run': function (browser) {
