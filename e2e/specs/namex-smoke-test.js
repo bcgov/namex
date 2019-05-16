@@ -11,7 +11,7 @@ module.exports = {
             })
             .session(function(session){
                 console.log(session.sessionId);
-            })
+            });
             // .maximizeWindow()
             // .waitForElementVisible('title')
             // .click('a')
@@ -113,7 +113,7 @@ module.exports = {
                 browser.assert.equal(xhrs[1].method, "GET");
                 browser.assert.equal(xhrs[1].status, "success");
                 browser.assert.equal(xhrs[1].httpResponseCode, 200);
-            })
+            });
 
         browser.expect.element('#firstName1').to.have.css('background-color').which.equals('rgba(255, 255, 255, 1)');
 
@@ -167,7 +167,7 @@ module.exports = {
             .clickThenWaitForSolrSearch('#examine-reject-distinctive-button', browser)
             .waitForElementVisible('@decision_button')
             .click('@reject_distinctive_button')
-            .waitForElementVisible('@reopen_button')
+            .waitForElementVisible('@reopen_button');
     },
 
     'Step 16: NameX - Confirm Client Notification is complete': function (browser) {
