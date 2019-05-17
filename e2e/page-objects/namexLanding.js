@@ -3,8 +3,7 @@ var loginCommands = {
 	login: function () {
 		return this.waitForElementNotVisible('@loading_overlay')
 			.waitForElementVisible('@login_button')
-			.click('@login_button')
-			.waitForElementVisible('#app');
+			.click('@login_button');
 
 	},
 	checkIfLandingPageIsUp: function () {

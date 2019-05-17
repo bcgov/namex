@@ -25,9 +25,6 @@ module.exports = {
                 };
                 browser.setCookie(cookie);
 
-            })
-            .getCookies(function (response) {
-                console.log(response.value);
             });
     },
 
