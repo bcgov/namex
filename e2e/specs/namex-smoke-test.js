@@ -95,13 +95,31 @@ module.exports = {
     },
 
     'Step 7: Navigate to NameX landing page then log in': function (browser) {
-        var nonAuthPage = browser.page.namexLanding().navigate();
+        var options = {
+            method: 'POST',
+            uri: browser.globals.keycloakAuthURL,
+            body: browser.globals.keycloakAuthBody,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        };
 
-        browser.maximizeWindow();
+        browser.apiPost(options, function (response) {
+            var jsonResp = response.toJSON();
+            var access_token = JSON.parse(jsonResp.body);
+            browser.globals.token = access_token.access_token;
+        });
 
-        nonAuthPage
-            .checkIfLandingPageIsUp()
-            .login();
+        browser
+            .url(browser.globals.NamexPath, function () {
+                var cookie = {
+                    'name': 'tester',
+                    'value': browser.globals.token
+                };
+                browser.setCookie(cookie);
+
+            })
+            .click('#header-login-button');
     },
 
     'Step 8:  NameX - wait for extractor to run': function (browser) {
