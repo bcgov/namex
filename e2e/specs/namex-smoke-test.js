@@ -119,8 +119,17 @@ module.exports = {
                 browser.setCookie(cookie);
 
             })
+            .click('#header-login-button')
+            .pause(3000)
+            .source(function(result){
+                console.log(result.value);
+            })
             .url(browser.globals.NamexPath)
-            .click('#header-login-button');
+            .click('#header-login-button')
+            .pause(3000)
+            .source(function(result){
+                console.log(result.value);
+            });
     },
 
     'Step 8:  NameX - wait for extractor to run': function (browser) {
