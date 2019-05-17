@@ -1,13 +1,9 @@
 var loginCommands = {
 
-	login: function (KeycloakCredU, KeycloakCredP) {
+	login: function () {
 		return this.waitForElementNotVisible('@loading_overlay')
 			.waitForElementVisible('@login_button')
 			.click('@login_button')
-			.waitForElementVisible('@keycloak_logo')
-			.setValue('@keycloak_username', KeycloakCredU)
-			.setValue('@keycloak_password', KeycloakCredP)
-			.click('@keycloak_login_button')
 			.waitForElementVisible('#app');
 
 	},

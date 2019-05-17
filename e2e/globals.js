@@ -24,6 +24,12 @@ module.exports = {
 
     TestCVD : process.env.TestCVD,
 
+    keycloakAuthURL : process.env.keycloakAuthURL,
+
+    keycloakAuthBody : process.env.keycloakAuthBody,
+
+    token : '',
+
     extractorTimeOut : 1000,
 
     exactMatch : 'AIR PACIFIC LIMITED',
