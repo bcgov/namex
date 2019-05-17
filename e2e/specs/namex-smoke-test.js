@@ -119,6 +119,7 @@ module.exports = {
                 browser.setCookie(cookie);
 
             })
+            .url(browser.globals.NamexPath)
             .click('#header-login-button');
     },
 
