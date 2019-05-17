@@ -111,18 +111,13 @@ module.exports = {
         });
 
         browser
-            .url(browser.globals.NamexPath, function () {
+            .url(browser.globals.keycloakAuthURL, function () {
                 var cookie = {
-                    'name': 'tester',
+                    'name': 'KEYCLOAK_IDENTITY',
                     'value': browser.globals.token
                 };
                 browser.setCookie(cookie);
 
-            })
-            .click('#header-login-button')
-            .pause(3000)
-            .source(function(result){
-                console.log(result.value);
             })
             .url(browser.globals.NamexPath)
             .click('#header-login-button')
