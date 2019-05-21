@@ -293,3 +293,92 @@ def test_remove_name_from_nr(client, jwt, app):
     data = json.loads(rv.data)
     assert 200 == rv.status_code
     assert len(data['names']) == 1
+
+    def test_add_new_comment_to_nr(client, jwt, app):
+        from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User
+
+    #add a user for the comment
+    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+    user.save_to_db()
+
+    nr = RequestDAO()
+    nr.nrNum = 'NR 0000002'
+    nr.stateCd = State.INPROGRESS
+    nr.requestId = 1460775
+    name1 = NameDAO()
+    name1.choice = 1
+    name1.name = 'TEST NAME ONE'
+    nr.names = [name1]
+    nr.save_to_db()
+
+    comment1 = CommentDAO()
+    comment1.comment = 'This is the first Comment'
+    comment1.nr_id = nr.id
+    comment1.examinerId = nr.userId
+    nr.comments = [comment1]
+    nr.save_to_db()
+
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    # get the resource so we have a template for the request:
+    rv = client.get('/api/v1/requests/NR%200000002', headers=headers)
+    assert rv.status_code == 200
+    # assert we're starting with just one name:
+    data = json.loads(rv.data)
+    assert len(data['comments']) == 1
+
+    new_comment = {"comment": "The 13th comment entered by the user."}
+
+    rv = client.post('/api/v1/requests/NR%200000002/comments', data=json.dumps(new_comment), headers=headers)
+
+    assert b'"comment": "The 13th comment entered by the user."' in rv.data
+    assert 200 == rv.status_code
+
+
+def test_comment_where_no_nr(client, jwt, app):
+    from namex.models import User
+    #add a user for the comment
+    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+    user.save_to_db()
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    new_comment = {"comment": "The 13th comment entered by the user."}
+
+    rv = client.post('/api/v1/requests/NR%200000002/comments', data=json.dumps(new_comment), headers=headers)
+    assert 404 == rv.status_code
+
+def test_comment_where_no_user(client, jwt, app):
+    from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User
+
+    nr = RequestDAO()
+    nr.nrNum = 'NR 0000002'
+    nr.stateCd = State.INPROGRESS
+    nr.requestId = 1460775
+    name1 = NameDAO()
+    name1.choice = 1
+    name1.name = 'TEST NAME ONE'
+    nr.names = [name1]
+    nr.save_to_db()
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    new_comment = {"comment": "The 13th comment entered by the user."}
+    rv = client.post('/api/v1/requests/NR%200000002/comments', data=json.dumps(new_comment), headers=headers)
+    assert 404 == rv.status_code
+
+def test_comment_where_no_comment(client, jwt, app):
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+    new_comment= None
+    rv = client.post('/api/v1/requests/NR%200000002/comments', data=json.dumps(new_comment), headers=headers)
+    assert 400 == rv.status_code
