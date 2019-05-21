@@ -16,7 +16,7 @@
 	"test_settings": {
 		"default": {
 			"globals": {
-				"NROPath": "https://test.bcregistrynames.gov.bc.ca/nro/",
+				"NROPath": "https://test.bcregistrynames.gov.bc.ca",
 				"NamexPath": "https://namex-test.pathfinder.gov.bc.ca"
 			},
 
