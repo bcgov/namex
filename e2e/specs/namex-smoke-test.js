@@ -131,7 +131,7 @@ module.exports = {
             .searchNR(browser.globals.smokeTestNR.NR_num, browser)
             .waitForAttribute('#search-table > tbody > tr', 'class', function (result) {
                 return result !== 'b-table-empty-row';
-            }, 240000);
+            }, 360000);
     },
 
     'Step 9:  NameX - Load NR': function (browser) {
@@ -225,7 +225,7 @@ module.exports = {
             .searchNR(browser.globals.smokeTestNR.NR_num, browser)
             .waitForText('#search-table > tbody > tr > td:nth-child(7)', function (result) {
                 return result === 'Notified';
-            }, 240000)
+            },360000)
             .assert.containsText('@first_row_result_NR', browser.globals.smokeTestNR.NR_num)
             .assert.containsText('@first_row_result_notification', 'Notified');
     },
