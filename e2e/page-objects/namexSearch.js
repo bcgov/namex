@@ -5,11 +5,19 @@ var searchCommands = {
 
     },
     searchNR: function (NR_num, browser) {
+        var NRColumnValue;
         browser.expect.element(this.elements.loading_overlay.selector).to.have.css('display').which.equals('none').before(5000);
-        
+
         this.waitForElementVisible('@NR_column')
-            .clearValue('@NR_column')
-            .setValue('@NR_column', NR_num)
+            .getText('@NR_column', function (result) {
+                NRColumnValue = result.value;
+            })
+            .perform(function () {
+                if (NRColumnValue == '') {
+                    browser.setValue('@NR_column', NR_num);
+                }
+
+            })
             .setValue('@status_column', 'ALL');
 
         browser.expect.element(this.elements.loading_overlay.selector).to.have.css('display').which.equals('none').before(5000);
