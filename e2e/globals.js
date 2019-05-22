@@ -1,5 +1,5 @@
 module.exports = {
-	waitForConditionTimeout : 5000,
+	waitForConditionTimeout : 10000,
 	
 	throwOnMultipleElementsReturned : true,
 	
