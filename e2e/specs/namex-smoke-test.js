@@ -181,6 +181,7 @@ module.exports = {
 
         examinePage.completeManualSearch(browser.globals.conditionExample, browser)
             .click('@condition_recipe_step')
+            .waitForElementVisible('@condition_result')
             .assert.containsText('@condition_result', browser.globals.conditionExample);
     },
 
@@ -188,6 +189,7 @@ module.exports = {
         var examinePage = browser.page.namexExamination();
         examinePage
             .click('@trademark_recipe_step')
+            .waitForElementVisible('@trademark_result')
             .assert.containsText('@trademark_result', browser.globals.trademarkResult);
     },
 
@@ -197,6 +199,7 @@ module.exports = {
         examinePage
             .completeManualSearch(browser.globals.historyExample, browser)
             .click('@history_recipe_step')
+            .waitForElementVisible('@history_result')
             .assert.containsText('@history_result', browser.globals.historyExample);
     },
 
