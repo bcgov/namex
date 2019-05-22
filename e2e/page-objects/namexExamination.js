@@ -1,11 +1,12 @@
 var examineCommands = {
 	clickThenWaitForSolrSearch: function (elementToClick, browser) {
-		return this.waitForXHR('@slowest_solr_search_XHR', 5000, function browserTrigger() {
-			browser.click(elementToClick);
-		}, function testCallback(xhrs) {
-			browser.assert.equal(xhrs[0].status, "success");
-			browser.assert.equal(xhrs[0].httpResponseCode, 200);
-		});
+		return this.waitForElementNotVisible('#loading-overlay')
+			.waitForXHR('@slowest_solr_search_XHR', 5000, function browserTrigger() {
+				browser.click(elementToClick);
+			}, function testCallback(xhrs) {
+				browser.assert.equal(xhrs[0].status, "success");
+				browser.assert.equal(xhrs[0].httpResponseCode, 200);
+			});
 	},
 	loadNRandWait: function (NR_num, browser) {
 		return this.waitForElementVisible('@header_load_NR_textbox')
@@ -16,6 +17,7 @@ var examineCommands = {
 	loadNRnoWait: function (NR_num) {
 		return this.waitForElementVisible('@header_load_NR_textbox')
 			.setValue('@header_load_NR_textbox', NR_num)
+			.waitForElementNotVisible('#loading-overlay')
 			.click('@header_load_NR_button');
 	},
 	editNR: function () {
