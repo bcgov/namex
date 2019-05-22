@@ -14,7 +14,7 @@ var searchCommands = {
             })
             .perform(function () {
                 if (NRColumnValue == '') {
-                    browser.setValue('@NR_column', NR_num);
+                    browser.setValue(this.elements.NR_column.selector, NR_num);
                 }
 
             })
