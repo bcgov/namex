@@ -243,13 +243,7 @@ module.exports = {
             .waitForElementVisible('#monitorStatusAnon');
 
         browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(9) > td > h3').text.to.contain(browser.globals.smokeTestNR.NR_num);
-        browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(14) > td:nth-child(2)').text.to.contain('EDIT');
-
-        browser
-            .click('input[name="_eventId_veiwDetails"]')
-            .waitForElementVisible('#applicantInfo');
-
-        browser.expect.element('#applicantInfo > table > tbody > tr:nth-child(17) > td > table > tbody > tr:nth-child(2) > td:nth-child(3)').text.to.contain('EDIT');
+        browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(15) > td:nth-child(2)').text.to.contain('EDIT');
         browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(14) > td:nth-child(2)').text.to.contain('Rejected');
         browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(20) > td:nth-child(2)').text.to.contain('Rejected');
         browser.expect.element('#monitorStatusAnon > table > tbody > tr:nth-child(26) > td:nth-child(2)').text.to.contain('Rejected');
