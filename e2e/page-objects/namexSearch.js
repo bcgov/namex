@@ -11,6 +11,12 @@ var searchCommands = {
             .setValue('@status_column', 'ALL');
 
         browser.expect.element(this.elements.loading_overlay.selector).to.have.css('display').which.equals('none').before(5000);
+        browser.expect.element(this.elements.NR_column.selector).text.to.equal(NR_num).before(5000);
+        browser.expect.element(this.elements.status_column.selector).text.to.equal('ALL').before(5000);
+
+        this.click('@NR_column');
+        browser.keys(browser.Keys.ENTER);
+        browser.expect.element(this.elements.first_row_result_NR.selector).text.to.contain(NR_num).before(5000);
 
         this.click('@NR_column');
         return this.waitForXHR('@search_XHR', 1000, function browserTrigger() {
