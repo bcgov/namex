@@ -120,11 +120,7 @@ module.exports = {
 
             })
             .url(browser.globals.NamexPath)
-            .click('#header-login-button')
-            .pause(3000)
-            .source(function(result){
-                console.log(result.value);
-            });
+            .click('#header-login-button');
     },
 
     'Step 8:  NameX - wait for extractor to run': function (browser) {

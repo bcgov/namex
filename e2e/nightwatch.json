@@ -9,9 +9,7 @@
 		"start_process": true,
 		"server_path": "./node_modules/chromedriver/lib/chromedriver/chromedriver",
 		"port": 9515,
-		"cli_args": [
-			"--verbose"
-		]
+		"cli_args": []
 	},
 	"test_settings": {
 		"default": {
@@ -30,7 +28,6 @@
 						"disable-gpu",
 						"no-sandbox",
 						"headless",
-						"verbose",
 						"ignore-certificate-errors",
 						"window-size=1920,1080"
 					]
