@@ -13,7 +13,7 @@ var searchCommands = {
                 NRColumnValue = result.value;
             })
             .perform(function () {
-                if (NRColumnValue == '') {
+                if (NRColumnValue != NR_num) {
                     browser.setValue('#search-filter-nr-number', NR_num);
                 }
 
