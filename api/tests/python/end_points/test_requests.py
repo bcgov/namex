@@ -294,7 +294,7 @@ def test_remove_name_from_nr(client, jwt, app):
     assert 200 == rv.status_code
     assert len(data['names']) == 1
 
-    def test_add_new_comment_to_nr(client, jwt, app):
+def test_add_new_comment_to_nr(client, jwt, app):
         from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User
 
     #add a user for the comment
