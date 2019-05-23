@@ -1,4 +1,32 @@
 module.exports = {
+    before: function (browser) {
+        var options = {
+            method: 'POST',
+            uri: browser.globals.keycloakAuthURL,
+            body: browser.globals.keycloakAuthBody,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        };
+
+        browser.apiPost(options, function (response) {
+            var jsonResp = response.toJSON();
+            var access_token = JSON.parse(jsonResp.body);
+            browser.globals.token = access_token.access_token;
+        });
+
+
+
+        browser
+            .url(browser.globals.NamexPath, function () {
+                var cookie = {
+                    'name': 'tester',
+                    'value': browser.globals.token
+                };
+                browser.setCookie(cookie);
+
+            });
+    },
 
     'Step 1: Navigate to public NRO': function (browser) {
         browser
