@@ -295,7 +295,7 @@ def test_remove_name_from_nr(client, jwt, app):
     assert len(data['names']) == 1
 
 def test_add_new_comment_to_nr(client, jwt, app):
-        from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User
+    from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User
 
     #add a user for the comment
     user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
