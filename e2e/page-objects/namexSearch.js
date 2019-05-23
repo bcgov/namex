@@ -9,7 +9,7 @@ var searchCommands = {
         browser.expect.element(this.elements.loading_overlay.selector).to.have.css('display').which.equals('none').before(5000);
 
         this.waitForElementVisible('@NR_column')
-            .getText('@NR_column', function (result) {
+            .getValue('@NR_column', function (result) {
                 NRColumnValue = result.value;
             })
             .perform(function () {
