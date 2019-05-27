@@ -1242,3 +1242,70 @@ class Stats(Resource):
             'nameRequests': request_search_schemas.dump(requests)[0]
         }
         return jsonify(rep)
+
+@cors_preflight("POST")
+@api.route('/<string:nr>/comments', methods=["POST",'OPTIONS'])
+class NRComment(Resource):
+
+    @staticmethod
+    def common(nr):
+        """:returns: object, code, msg
+        """
+        if not RequestDAO.validNRFormat(nr):
+            return None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
+
+        nrd = RequestDAO.find_by_nr(nr)
+        if not nrd:
+            return None, jsonify({"message": "{nr} not found".format(nr=nr)}), 404
+
+
+        return nrd, None, 200
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
+    def post(nr,*args, **kwargs):
+        json_data = request.get_json()
+
+        if not json_data:
+            return jsonify({'message': 'No input data provided'}), 400
+
+        nrd, msg, code = NRComment.common(nr)
+
+        if not nrd:
+            return msg, code
+
+        errors = name_comment_schema.validate(json_data, partial=False)
+        if errors:
+            return jsonify(errors), 400
+
+        # find NR
+        try:
+            nrd = RequestDAO.find_by_nr(nr)
+            if not nrd:
+                return jsonify({"message": "Request:{} not found".format(nr)}), 404
+
+        except NoResultFound as nrf:
+            # not an error we need to track in the log
+            return jsonify({"message": "Request:{} not found".format(nr)}), 404
+        except Exception as err:
+            current_app.logger.error("Error when trying to post a comment NR:{0} Err:{1}".format(nr, err))
+            return jsonify({"message": "NR had an internal error"}), 404
+
+        nr_id = nrd.id
+        user = User.find_by_jwtToken(g.jwt_oidc_token_info)
+        if user is None:
+            return jsonify({'message': 'No User'}), 404
+
+        if json_data.get('comment') is None:
+            return jsonify({"message": "No comment supplied"}),400
+
+        comment_instance = Comment()
+        comment_instance.examinerId = user.id
+        comment_instance.nrId = nr_id
+        comment_instance.comment = convert_to_ascii(json_data.get('comment'))
+
+        comment_instance.save_to_db()
+
+        EventRecorder.record(user, Event.POST, nrd, json_data)
+        return jsonify(comment_instance.as_dict()), 200
