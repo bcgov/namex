@@ -226,6 +226,7 @@ def test_ys_and_is(solr, client, jwt, app):
        ]
     )
 
+
 @integration_synonym_api
 @integration_solr
 def test_cs_and_ks(solr, client, jwt, app):
@@ -852,7 +853,6 @@ def test_unusual_result(solr, client, jwt, app):
        ]
     )
 
-
 @integration_synonym_api
 @integration_solr
 def test_stack_ignores_wildcards(client, jwt, app):
@@ -862,7 +862,6 @@ def test_stack_ignores_wildcards(client, jwt, app):
             {'name': '----TESTING WILDCARDS'},
             {'name': '----TESTING'}
         ]
-
     )
 
 @integration_synonym_api
@@ -882,4 +881,3 @@ def test_query_stripped_to_empty_string(solr,client, jwt, query):
         query=query,
         expected=[{'name':'----*'}]
     )
-
