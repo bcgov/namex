@@ -3274,6 +3274,93 @@
 					"response": []
 				},
 				{
+					"name": "requests/NR # Check Consume",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e0bef7a3-35e9-48d2-8981-d5feb34020fd",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should return updated changes by previous PUT\", () => {",
+									"   response.body.names[0].name.should.include(\"ALL IN ONE RESIDENTIAL CONTRACTING LIMITED\");",
+									"   response.body.names[0].state.should.include(\"APPROVED\");",
+									"    response.body.names[0].consumptionDate.should.include(\"Thu, 30 May 2019 00:00:00 GMT\");",
+									"    response.body.names[0].corpNum.should.include(\"0870633\");",
+									"    ",
+									"});"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3e5719a3-cbda-4b7f-85fd-7bc70b5f58c2",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/NR 6374775",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"NR 6374775"
+							]
+						},
+						"description": null
+					},
+					"response": []
+				},
+				{
 					"name": "/requests - put NR # - test RESET - prep data - set to furnished",
 					"event": [
 						{

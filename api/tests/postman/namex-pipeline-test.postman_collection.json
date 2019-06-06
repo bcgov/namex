@@ -3296,7 +3296,216 @@
 					},
 					"response": [
 						{
-							"id": "8e1fdb9a-2f38-465c-83a7-17e93bdb7af8",
+							"id": "0166404f-de1c-49c3-8c24-10d506d82191",
+							"name": "requests/NR 8765456",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/api/v1/requests/{{NR}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"requests",
+										"{{NR}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "API",
+									"value": "NameX/0.1.0c-52fce9d6a1",
+									"name": "API",
+									"description": "Custom header"
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "OPTIONS, GET, PATCH, DELETE, HEAD, PUT",
+									"name": "Access-Control-Allow-Methods",
+									"description": "Specifies the method or methods allowed when accessing the resource. This is used in response to a preflight request."
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*",
+									"name": "Access-Control-Allow-Origin",
+									"description": "Specifies a URI that may access the resource. For requests without credentials, the server may specify '*' as a wildcard, thereby allowing any origin to access the resource."
+								},
+								{
+									"key": "Access-Control-Max-Age",
+									"value": "21600",
+									"name": "Access-Control-Max-Age",
+									"description": "Indicates how long the results of a preflight request can be cached in seconds."
+								},
+								{
+									"key": "Content-Length",
+									"value": "1220",
+									"name": "Content-Length",
+									"description": "The length of the response body in octets (8-bit bytes)"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "The mime type of this content"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Sep 2018 18:52:58 GMT",
+									"name": "Date",
+									"description": "The date and time that the message was sent"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0",
+									"name": "Server",
+									"description": "A name for the server"
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"httpOnly": true,
+									"domain": "namex-test.pathfinder.gov.bc.ca",
+									"path": "/",
+									"secure": true,
+									"value": "19b4bf0232e0f6e715f716edb00602f2",
+									"key": "ec365a05f3d85d3ec598426ef7b6cafd"
+								},
+								{
+									"expires": "Invalid Date",
+									"httpOnly": true,
+									"domain": "namex-test.pathfinder.gov.bc.ca",
+									"path": "/",
+									"secure": true,
+									"value": "587fa0a2f9529358f8d403d42a87f609",
+									"key": "c165f6a7a26b80e301ee5dc918200995"
+								},
+								{
+									"expires": "Invalid Date",
+									"httpOnly": true,
+									"domain": "namex-test.pathfinder.gov.bc.ca",
+									"path": "/",
+									"secure": true,
+									"value": "52d3e953733dbe28bf5d647e6cf826ff",
+									"key": "66b4122bf113aa071842836217a2ff25"
+								},
+								{
+									"expires": "Invalid Date",
+									"httpOnly": true,
+									"domain": "namex-test.pathfinder.gov.bc.ca",
+									"path": "/",
+									"secure": false,
+									"value": "eyJvaWRjX2NzcmZfdG9rZW4iOiIzaWxvd0JlTTliYWJwQWRrM0w5N2J5U2ctcGdBNVp6TCJ9.DnB7Kg.-wrOO9KiH15AYCEVeLXSjiR2KNg",
+									"key": "session"
+								}
+							],
+							"body": "{\"additionalInfo\":\"NATURE OF BUS: ELECTRICAL/COMPUTER ENG CONSULTING INCORPORATED IN OREGON AS WAVE DYNAMICS, INC.\",\"applicants\":\"\",\"comments\":[],\"consentFlag\":null,\"corpNum\":null,\"expirationDate\":null,\"furnished\":\"N\",\"id\":28163,\"lastUpdate\":\"Wed, 12 Sep 2018 21:44:22 GMT\",\"names\":[{\"choice\":2,\"comment\":null,\"conflict1\":null,\"conflict1_num\":null,\"conflict2\":null,\"conflict2_num\":null,\"conflict3\":null,\"conflict3_num\":null,\"consumptionDate\":null,\"decision_text\":null,\"name\":\"WAVE DYNAMICS CONSULTING, INC.\",\"state\":\"NE\"},{\"choice\":3,\"comment\":null,\"conflict1\":\"\",\"conflict1_num\":\"\",\"conflict2\":\"\",\"conflict2_num\":\"\",\"conflict3\":\"\",\"conflict3_num\":\"\",\"consumptionDate\":null,\"decision_text\":\"\",\"name\":\"test2\",\"state\":\"NE\"},{\"choice\":1,\"comment\":null,\"conflict1\":null,\"conflict1_num\":null,\"conflict2\":null,\"conflict2_num\":null,\"conflict3\":null,\"conflict3_num\":null,\"consumptionDate\":null,\"decision_text\":null,\"name\":\"WAVE DYNAMICS, INC.\",\"state\":\"NE\"}],\"natureBusinessInfo\":null,\"nrNum\":\"NR 8765456\",\"nwpta\":[],\"previousNr\":null,\"priorityCd\":\"N\",\"requestTypeCd\":\"XCR\",\"state\":\"HOLD\",\"submitCount\":1,\"submittedDate\":\"Thu, 20 Apr 2006 11:56:22 GMT\",\"submitter_userid\":\"\",\"userId\":\"kial-ex\",\"xproJurisdiction\":\"OREGON, USA\"}\n"
+						}
+					]
+				},
+				{
+					"name": "requests/NR # Check Consumed",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "262230a7-feab-4c42-a075-bd3638472c07",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "a68e1957-5b7a-4941-af16-f9a3ef64b63d",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should return updated changes by previous PUT\", () => {",
+									"    response.body.names[0].name.should.include(\"CLEAN R US INC.\");",
+									"    response.body.names[0].state.should.include(\"APPROVED\");",
+									"    response.body.names[0].consumptionDate.should.include(\"Thu, 30 May 2019 00:00:00 GMT\");",
+									"    response.body.names[0].corpNum.should.include(\"0870633\");",
+									"    ",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/NR 5557437",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"NR 5557437"
+							]
+						},
+						"description": null
+					},
+					"response": [
+						{
+							"id": "937293ae-5304-4a0e-ab8f-5764a9b47c77",
 							"name": "requests/NR 8765456",
 							"originalRequest": {
 								"method": "GET",
