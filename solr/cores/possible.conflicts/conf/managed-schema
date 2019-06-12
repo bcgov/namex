@@ -1437,3 +1437,4 @@
     <copyField source="name" dest="name_no_synonyms"/>
     <copyField source="name" dest="contains_exact_phrase"/>
 </schema>
+
