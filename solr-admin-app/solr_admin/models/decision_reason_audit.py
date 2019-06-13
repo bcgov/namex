@@ -15,7 +15,7 @@ class DecisionReasonAudit(db.Model):
     __tablename__ = 'decision_reason_audit'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(100))
+    username = db.Column(db.String(100))   
     timestamp = db.Column('timestamp', db.DateTime(timezone=True))
     action = db.Column(db.String(10))
     dr_id = db.Column(db.Integer)

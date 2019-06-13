@@ -1,13 +1,14 @@
 {
 	"info": {
-		"_postman_id": "91cb1d1e-6b53-4f2e-8c1f-bdb3abdd51a3",
 		"name": "namex-pipeline-dev",
+		"_postman_id": "a0832b46-5014-4f95-8b81-9b236ae94679",
 		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "setup",
+			"description": null,
 			"item": [
 				{
 					"name": "Install Postman BDD Copy",
@@ -64,6 +65,7 @@
 		},
 		{
 			"name": "authenticate",
+			"description": null,
 			"item": [
 				{
 					"name": "authenticate",
@@ -110,7 +112,8 @@
 								"openid-connect",
 								"token"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				}
@@ -118,6 +121,7 @@
 		},
 		{
 			"name": "ops",
+			"description": null,
 			"item": [
 				{
 					"name": "healthz",
@@ -162,7 +166,8 @@
 								"nr-ops",
 								"healthz"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -209,7 +214,8 @@
 								"nr-ops",
 								"readyz"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -281,7 +287,8 @@
 								"requests",
 								"echo"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				}
@@ -289,6 +296,7 @@
 		},
 		{
 			"name": "analysis",
+			"description": null,
 			"item": [
 				{
 					"name": "conflicts",
@@ -384,7 +392,8 @@
 									"value": "35"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -482,7 +491,8 @@
 									"value": "32"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -580,7 +590,8 @@
 									"value": "32"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -657,7 +668,8 @@
 								"1",
 								"restricted_words"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -748,7 +760,8 @@
 								"v1",
 								"documents:restricted_words"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				}
@@ -756,6 +769,7 @@
 		},
 		{
 			"name": "conflict-search",
+			"description": null,
 			"item": [
 				{
 					"name": "synonym_bucket_exactphrase",
@@ -849,7 +863,8 @@
 								"on the ball",
 								"on the"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -936,7 +951,8 @@
 								"t.h.e",
 								"*"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1023,7 +1039,8 @@
 								"t.h.e",
 								"*"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1110,7 +1127,8 @@
 								"t.h.e",
 								"*"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1197,7 +1215,8 @@
 								"*",
 								"*"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1284,7 +1303,8 @@
 								"*",
 								"*"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1371,7 +1391,8 @@
 								"*",
 								"*"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				}
@@ -1379,6 +1400,7 @@
 		},
 		{
 			"name": "add/delete name choices",
+			"description": null,
 			"item": [
 				{
 					"name": "requests/NR # change state to inprogress",
@@ -1454,7 +1476,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1551,7 +1574,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1638,7 +1662,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1723,7 +1748,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1810,7 +1836,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1894,7 +1921,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -1978,7 +2006,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2065,7 +2094,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2143,7 +2173,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				}
@@ -2151,6 +2182,7 @@
 		},
 		{
 			"name": "requests+names",
+			"description": null,
 			"item": [
 				{
 					"name": "requests/queues/@me/oldest",
@@ -2221,7 +2253,8 @@
 								"@me",
 								"oldest"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2278,7 +2311,8 @@
 								"@me",
 								"oldest"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2361,7 +2395,8 @@
 								"requests",
 								"{{queued_nr}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2439,7 +2474,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2521,7 +2557,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2619,7 +2656,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2706,7 +2744,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2794,7 +2833,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2881,7 +2921,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -2961,7 +3002,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3054,7 +3096,95 @@
 								"requests",
 								"{{NR}}"
 							]
+						},
+						"description": null
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR #/comments",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "20d5933f-5e04-4d20-8592-0b91e3290e7c",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "002d5d6c-2b58-4b49-b2a1-22e3f550a328",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR Comment\", () => {",
+									"    response.body.should.be.an('object').with.keys(['comment','examiner','id','timestamp']);",
+									"});",
+									"    ",
+									"it(\"Should return updated changes in the body\", () => {",
+									"   response.body.comment.should.include(\"The 13th comment entered by the user.\");",
+									"   response.body.examiner.should.include(\"postman\");",
+									"   response.body.id > 0;",
+									"   response.body.timestamp.length > 0;",
+									"});"
+								]
+							}
 						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"comment\":\"The 13th comment entered by the user.\"}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/{{NR}}/comments",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"{{NR}}",
+								"comments"
+							]
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3138,7 +3268,95 @@
 								"requests",
 								"{{NR}}"
 							]
+						},
+						"description": null
+					},
+					"response": []
+				},
+				{
+					"name": "requests/NR # Check Consume",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e0bef7a3-35e9-48d2-8981-d5feb34020fd",
+								"type": "text/javascript",
+								"exec": [
+									"eval(globals.postmanBDD);",
+									"",
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"it('should be an success response', () => {",
+									"    response.ok.should.be.true;            // 2XX",
+									"    response.error.should.be.false;          // 4XX or 5XX",
+									"    response.clientError.should.be.false;    // 4XX",
+									"    response.serverError.should.be.false;   // 5XX",
+									"    response.should.have.status(200);",
+									"    response.statusType.should.equal(2);",
+									"});",
+									"",
+									"it('should return JSON', () => {",
+									"    response.should.be.json;",
+									"    response.should.have.header('Content-Type', 'application/json');",
+									"    response.type.should.equal('application/json');",
+									"});",
+									"",
+									"it('should contain the un-parsed JSON text', () => {",
+									"    response.text.should.be.a('string').with.length.above(10);",
+									"});",
+									"",
+									"it(\"Should return the required fields for an NR\", () => {",
+									"    response.body.should.be.an('object').with.keys(['additionalInfo','applicants','comments','consentFlag','corpNum', 'expirationDate','furnished','hasBeenReset','id','lastUpdate','names','natureBusinessInfo','nrNum','nwpta','previousNr', 'previousRequestId','previousStateCd', 'priorityCd','priorityDate','requestTypeCd','state','submitCount','submittedDate','submitter_userid','userId', 'xproJurisdiction']);",
+									"});",
+									"",
+									"it(\"Should return updated changes by previous PUT\", () => {",
+									"   response.body.names[0].name.should.include(\"ALL IN ONE RESIDENTIAL CONTRACTING LIMITED\");",
+									"   response.body.names[0].state.should.include(\"APPROVED\");",
+									"    response.body.names[0].consumptionDate.should.include(\"Thu, 30 May 2019 00:00:00 GMT\");",
+									"    response.body.names[0].corpNum.should.include(\"0870633\");",
+									"    ",
+									"});"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3e5719a3-cbda-4b7f-85fd-7bc70b5f58c2",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/requests/NR 6374775",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"requests",
+								"NR 6374775"
+							]
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3222,7 +3440,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3309,7 +3528,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3388,7 +3608,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3467,7 +3688,8 @@
 								"requests",
 								"NR%206879307"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3536,7 +3758,8 @@
 								"requests",
 								"NR%206879307"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				}
@@ -3544,6 +3767,7 @@
 		},
 		{
 			"name": "request-search",
+			"description": null,
 			"item": [
 				{
 					"name": "/requests - no params",
@@ -3637,7 +3861,8 @@
 								"v1",
 								"requests"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3763,7 +3988,8 @@
 									"value": "10"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3879,7 +4105,8 @@
 									"value": "10"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -3994,7 +4221,8 @@
 									"value": "10"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -4109,7 +4337,8 @@
 									"value": "10"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -4224,7 +4453,8 @@
 									"value": "10"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -4339,7 +4569,8 @@
 									"value": "10"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -4454,7 +4685,8 @@
 									"value": "10"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -4565,7 +4797,8 @@
 									"value": "COMPLETED"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -4677,7 +4910,8 @@
 									"value": "Not Notified"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -4789,7 +5023,8 @@
 									"value": "Notified"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -4904,7 +5139,8 @@
 									"value": "30 days"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -5019,7 +5255,8 @@
 									"value": "2 days"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -5129,7 +5366,8 @@
 									"value": "Priority"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -5247,7 +5485,8 @@
 									"value": "priorityCd:desc,submittedDate:asc"
 								}
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				}
@@ -5255,6 +5494,7 @@
 		},
 		{
 			"name": "namex-roles editor can edit",
+			"description": "Making sure that an editor user can edit an NR.",
 			"item": [
 				{
 					"name": "requests/NR # change state to inprogress for editor",
@@ -5331,7 +5571,8 @@
 								"requests",
 								"{{NR}}"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -5414,7 +5655,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -5513,7 +5755,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -5601,7 +5844,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -5690,7 +5934,8 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				},
@@ -5778,12 +6023,12 @@
 								"names",
 								"1"
 							]
-						}
+						},
+						"description": null
 					},
 					"response": []
 				}
 			],
-			"description": "Making sure that an editor user can edit an NR.",
 			"event": [
 				{
 					"listen": "prerequest",
