@@ -363,16 +363,17 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
             # create new partner_name_system record
             oracle_cursor.execute("""
             INSERT INTO partner_name_system(partner_name_system_id, request_id, start_event_id, 
-                          partner_name_type_cd, partner_name_number, partner_jurisdiction_type_cd, 
+                          partner_name_type_cd, partner_name_number, partner_name, partner_jurisdiction_type_cd, 
                           partner_name_date, last_update_id)
             VALUES (partner_name_system_seq.nextval, :request_id, :event_id, :partner_name_type_cd, 
-                          :partner_name_number, :partner_jurisdiction_type_cd, :partner_name_date, 
+                          :partner_name_number, :partner_name, :partner_jurisdiction_type_cd, :partner_name_date, 
                           'namex')
             """,
                                   request_id=nr.requestId,
                                   event_id=event_id,
                                   partner_name_type_cd=nwpta.partnerNameTypeCd,
                                   partner_name_number=nwpta.partnerNameNumber,
+                                  partner_name=nwpta.partnerName,
                                   partner_jurisdiction_type_cd=nwpta.partnerJurisdictionTypeCd,
                                   partner_name_date=nwpta.partnerNameDate
                                   )
