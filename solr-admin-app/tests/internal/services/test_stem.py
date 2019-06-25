@@ -30,3 +30,12 @@ def test_stem_several_worlds():
     stems = get_stems(synonym_list)
 
     assert_that(stems, equal_to('construct, develop'))
+
+def test_stem_solr_crash():
+    os.environ.__delitem__('SOLR_URL')
+    os.environ.__setitem__('SOLR_URL','')
+
+    synonym_list = 'construction, constructing, development'
+    stems = get_stems(synonym_list)
+
+    assert_that(stems, equal_to('construction, constructing, development'))

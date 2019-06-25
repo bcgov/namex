@@ -4,12 +4,16 @@ from urllib import request
 
 
 def get_stems(synonym_list):
-    response = json.load(request.urlopen(get_stems_url(synonym_list)))
-    stems = extract_stems(response)
-    stems_without_duplicates = list(set(stems))
-    stems_without_duplicates.sort()
+    try:
+        response = json.load(request.urlopen(get_stems_url(synonym_list)))
+        stems = extract_stems(response)
+        stems_without_duplicates = list(set(stems))
+        stems_without_duplicates.sort()
 
-    return ', '.join(stems_without_duplicates)
+        return ', '.join(stems_without_duplicates)
+
+    except:
+        return synonym_list
 
 
 def extract_stems(response):
