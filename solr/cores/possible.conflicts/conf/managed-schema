@@ -127,6 +127,9 @@
         termVectors="true"/>
     <field name="state_type_cd" type="string" multiValued="false" indexed="true" required="false" stored="true"
         termVectors="true"/>
+	<field name="start_date" type="pdate" docValues="true" multiValued="false" indexed="false" required="false"
+        stored="true"/>
+	<field name="jurisdiction" type="string" multiValued="false" indexed="false" required="false" stored="true"/>
     <field name="source" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
     <field name="name_copy" type="text_name_copy" multiValued="false" indexed="true" stored="true"/>
     <field name="name_with_synonyms" type="text_name_singular_synonyms" multiValued="false" indexed="true"

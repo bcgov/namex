@@ -2,14 +2,22 @@
 
 DROP VIEW NAMEX.SOLR_DATAIMPORT_CONFLICTS_VW;
 
-CREATE OR REPLACE FORCE VIEW namex.solr_dataimport_conflicts_vw (ID, NAME, state_type_cd, SOURCE)
+CREATE OR REPLACE FORCE VIEW namex.solr_dataimport_conflicts_vw (id, name, state_type_cd, source, start_date, jurisdiction)
 AS
-    SELECT r.nr_num AS ID, ni.NAME, ns.name_state_type_cd AS state_type_cd, 'NR' AS SOURCE
-      FROM request r INNER JOIN request_instance ri ON ri.request_id = r.request_id
+    SELECT r.nr_num AS id, ni.NAME, ns.name_state_type_cd AS state_type_cd, 'NR' AS source, e.EVENT_TIMESTAMP AS start_date,
+	case 
+		when ri.xpro_jurisdiction is not null
+ 		 then  ri.xpro_jurisdiction
+  		else 'BC'
+	end AS jurisdiction
+      FROM request r 
+           INNER JOIN request_instance ri ON ri.request_id = r.request_id
            INNER JOIN NAME n ON n.request_id = r.request_id
            INNER JOIN name_instance ni ON ni.name_id = n.name_id
            INNER JOIN name_state ns ON ns.name_id = ni.name_id
            INNER JOIN request_state rs ON rs.request_id = r.request_id
+           INNER JOIN transaction t ON t.request_id = r.request_id
+           INNER JOIN event e ON e.event_id = t.event_id
      WHERE ri.end_event_id IS NULL
        AND ni.end_event_id IS NULL
        AND ns.end_event_id IS NULL
@@ -18,6 +26,7 @@ AS
        AND ns.name_state_type_cd IN ('A', 'C')
        AND ni.consumption_date IS NULL
        AND TRUNC (ri.expiration_date) >= TRUNC (SYSDATE)
+       AND t.transaction_type_cd = 'NRREQ'
        AND ri.request_type_cd NOT IN
                ('CEM', 'CFR', 'CLL', 'CLP', 'FR', 'LIB', 'LL', 'LP', 'NON', 'PAR', 'RLY', 'TMY',
                 'XCLL', 'XCLP', 'XLL', 'XLP');
