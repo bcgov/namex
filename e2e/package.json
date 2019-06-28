@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "./node_modules/nightwatch/bin/nightwatch -t ./specs/namex-smoke-test"
+    "test": "./node_modules/nightwatch/bin/nightwatch -e chrome,firefox -t ./specs/namex-smoke-test"
   },
   "dependencies": {
-    "nightwatch": "1.0.19",
+    "nightwatch": "1.1.11",
     "geckodriver": "latest",
     "chromedriver": "2.46",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "dotenv": "8.0.0"
   }
 }
