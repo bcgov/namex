@@ -32,4 +32,4 @@ AS
        AND ni.end_event_id IS NULL
        AND ns.end_event_id IS NULL
        AND ns.name_state_type_cd IN ('A', 'R', 'C')
-       AND t.transaction_type_cd = 'NRREQ';
+       AND t.transaction_type_cd IN ('NRREQ', 'RESUBMIT');
