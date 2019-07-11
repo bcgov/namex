@@ -32,8 +32,8 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                     '\"name\": \"' || REPLACE(REPLACE(view_row.name, '\', '\\\\'), '"', '\\\"') || '\", ' ||
                     '\"state_type_cd\": \"' || view_row.state_type_cd || '\", ' ||
                     '\"source\": \"' || view_row.source || '\", ' ||
- 		    '\"start_date\": \"' || view_row.start_date || '\", ' ||
-		    '\"jurisdiction\": \"' || view_row.jurisdiction || '\" ' ||
+					'\"start_date\": \"' || to_char(view_row.start_date,'YYYY-MM-DD"T"HH24:MI:SS"Z"') || '\", ' ||
+					'\"jurisdiction\": \"' || view_row.jurisdiction || '\" ' ||
                     '} }, ';
         END IF;
 
