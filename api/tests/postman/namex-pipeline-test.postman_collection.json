@@ -314,7 +314,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "53d9f6ae-6779-4a7f-9b05-615b9891d03c",
+								"id": "4b954239-fbca-4d8c-b836-5eee504bb4a8",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -350,6 +350,9 @@
 									"        type: 'object',",
 									"        required: ['names', 'highlighting', 'response']",
 									"    });",
+									"});",
+									"it(\"Should return the required fields for a Conflict Row\", () => {",
+									"    response.body.names[0].should.be.an('object').with.keys(['id','jurisdiction', 'name', 'score','source','start_date']);",
 									"});",
 									""
 								]
@@ -385,11 +388,13 @@
 							"query": [
 								{
 									"key": "start",
-									"value": "3"
+									"value": "3",
+									"equals": true
 								},
 								{
 									"key": "rows",
-									"value": "35"
+									"value": "35",
+									"equals": true
 								}
 							]
 						},
@@ -413,7 +418,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b9e1eabe-cf5b-4d1f-b451-4859541cd9bf",
+								"id": "942a0248-973a-4f21-8c33-bfcadc48b515",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -450,6 +455,9 @@
 									"        required: ['names', 'highlighting', 'response']",
 									"    });",
 									"});",
+									"it(\"Should return the required fields for a Name History Row\", () => {",
+									"    response.body.names[0].should.be.an('object').with.keys(['jurisdiction', 'name', 'name_state_type_cd', 'nr_num','score','start_date','submit_count']);",
+									"});",
 									""
 								]
 							}
@@ -484,11 +492,13 @@
 							"query": [
 								{
 									"key": "start",
-									"value": "1"
+									"value": "1",
+									"equals": true
 								},
 								{
 									"key": "rows",
-									"value": "32"
+									"value": "32",
+									"equals": true
 								}
 							]
 						},
@@ -3296,7 +3306,7 @@
 					},
 					"response": [
 						{
-							"id": "0166404f-de1c-49c3-8c24-10d506d82191",
+							"id": "8055718f-0772-45e9-b581-02a23ab6a4d9",
 							"name": "requests/NR 8765456",
 							"originalRequest": {
 								"method": "GET",
@@ -3505,7 +3515,7 @@
 					},
 					"response": [
 						{
-							"id": "937293ae-5304-4a0e-ab8f-5764a9b47c77",
+							"id": "c66b6396-c83d-4cc4-b289-1812a6ca7ba2",
 							"name": "requests/NR 8765456",
 							"originalRequest": {
 								"method": "GET",
