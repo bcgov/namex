@@ -52,7 +52,7 @@ class SolrQueries:
             '&q=name:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
-            '&fl=source,id,name,score'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
             '{synonyms_clause}'
             '{exact_phrase_clause}',
@@ -66,7 +66,7 @@ class SolrQueries:
             '&q=txt_starts_with:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
-            '&fl=source,id,name,score'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
             '{synonyms_clause}{exact_phrase_clause}{name_copy_clause}',
         COBRS_PHONETIC_CONFLICTS:
@@ -97,12 +97,12 @@ class SolrQueries:
             '&qf=name_compressed^6%20name_with_synonyms'
             '&wt=json'
             '&start={start}&rows={rows}'
-            '&fl=source,id,name,score'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc'
             '{synonyms_clause}{name_copy_clause}',
         HISTORY:
             '/solr/names/select?sow=false&df=name_exact_match&wt=json&&rows={rows}&q={name}'
-            '&fl=nr_num,name,score,submit_count,name_state_type_cd',
+            '&fl=nr_num,name,score,submit_count,name_state_type_cd,start_date,jurisdiction',
         TRADEMARKS:
             '/solr/trademarks/select?'
             'defType=edismax'

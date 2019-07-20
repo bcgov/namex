@@ -39,7 +39,9 @@ class Histories(Resource):
               'id':doc['id'],
               'name_state_type_cd':doc['name_state_type_cd'],
               'submit_count':doc['submit_count'],
-              'nr_num':doc['nr_num']
+              'nr_num':doc['nr_num'],
+              'start_date':doc['start_date'],
+              'jurisdiction':doc['jurisdiction']
               } for doc in docs]
 
         results = {'names': names}
