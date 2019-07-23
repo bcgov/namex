@@ -418,7 +418,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "942a0248-973a-4f21-8c33-bfcadc48b515",
+								"id": "1a9b5db9-9753-47bb-a4b1-a070bbcd021d",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -457,8 +457,7 @@
 									"});",
 									"it(\"Should return the required fields for a Name History Row\", () => {",
 									"    response.body.names[0].should.be.an('object').with.keys(['jurisdiction', 'name', 'name_state_type_cd', 'nr_num','score','start_date','submit_count']);",
-									"});",
-									""
+									"});"
 								]
 							}
 						}
@@ -3306,7 +3305,7 @@
 					},
 					"response": [
 						{
-							"id": "8055718f-0772-45e9-b581-02a23ab6a4d9",
+							"id": "4ba43391-ff03-4b2b-b851-8cd78e26b89a",
 							"name": "requests/NR 8765456",
 							"originalRequest": {
 								"method": "GET",
@@ -3444,7 +3443,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a68e1957-5b7a-4941-af16-f9a3ef64b63d",
+								"id": "c1552acb-256d-4b12-8ad7-7b8da53d4bf3",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -3479,8 +3478,8 @@
 									"it(\"Should return updated changes by previous PUT\", () => {",
 									"    response.body.names[0].name.should.include(\"CLEAN R US INC.\");",
 									"    response.body.names[0].state.should.include(\"APPROVED\");",
-									"    response.body.names[0].consumptionDate.should.include(\"Thu, 30 May 2019 00:00:00 GMT\");",
-									"    response.body.names[0].corpNum.should.include(\"0870633\");",
+									"    response.body.names[0].consumptionDate.should.include(\"Thu, 06 Jun 2019 00:00:00 GMT\");",
+									"    response.body.names[0].corpNum.should.include(\"0878047\");",
 									"    ",
 									"});"
 								]
@@ -3515,7 +3514,7 @@
 					},
 					"response": [
 						{
-							"id": "c66b6396-c83d-4cc4-b289-1812a6ca7ba2",
+							"id": "ecceda0f-e714-4177-a478-103a67561766",
 							"name": "requests/NR 8765456",
 							"originalRequest": {
 								"method": "GET",
