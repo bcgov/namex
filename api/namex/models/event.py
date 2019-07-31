@@ -40,7 +40,7 @@ class Event(db.Model):
     VALID_ACTIONS=[GET, PUT, PATCH, POST, DELETE]
 
     def json(self):
-        return {"eventDate": self.eventDate, "action": self.action, "jsonData": self.event_json),
+        return {"eventDate": self.eventDate, "action": self.action, "jsonData": self.eventJson,
                 "requestId": self.nrId, "userId": self.userId }
 
     def save_to_db(self):
