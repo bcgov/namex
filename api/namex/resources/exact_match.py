@@ -31,6 +31,6 @@ class ExactMatch(Resource):
         connection = urllib.request.urlopen(url)
         answer = json.loads(connection.read())
         docs = answer['response']['docs']
-        names =[{ 'name':doc['name'], 'id':doc['id'], 'source':doc['source'] } for doc in docs ]
+        names =[{ 'name':doc['name'], 'id':doc['id'], 'source':doc['source'], 'start_date':doc['start_date'], 'jurisdiction':doc['jurisdiction'] } for doc in docs ]
 
         return jsonify({ 'names':names })

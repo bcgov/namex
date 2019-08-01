@@ -305,16 +305,17 @@
 							"listen": "prerequest",
 							"script": {
 								"id": "83bbced6-bf73-4814-b326-079cef0b8d46",
+								"type": "text/javascript",
 								"exec": [
 									""
-								],
-								"type": "text/javascript"
+								]
 							}
 						},
 						{
 							"listen": "test",
 							"script": {
-								"id": "53d9f6ae-6779-4a7f-9b05-615b9891d03c",
+								"id": "f1525c80-0a8b-40e7-af29-59c54e1b5cb1",
+								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
 									"",
@@ -350,9 +351,11 @@
 									"        required: ['names', 'highlighting', 'response']",
 									"    });",
 									"});",
+									"it(\"Should return the required fields for a Conflict Row\", () => {",
+									"    response.body.names[0].should.be.an('object').with.keys(['id','jurisdiction', 'name', 'score','source','start_date']);",
+									"});",
 									""
-								],
-								"type": "text/javascript"
+								]
 							}
 						}
 					],
@@ -385,11 +388,13 @@
 							"query": [
 								{
 									"key": "start",
-									"value": "0"
+									"value": "0",
+									"equals": true
 								},
 								{
 									"key": "rows",
-									"value": "35"
+									"value": "35",
+									"equals": true
 								}
 							]
 						},
@@ -413,7 +418,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b9e1eabe-cf5b-4d1f-b451-4859541cd9bf",
+								"id": "8628fd3d-aae9-4f24-8a14-ac9b6b9b73ce",
 								"type": "text/javascript",
 								"exec": [
 									"eval(globals.postmanBDD);",
@@ -450,7 +455,9 @@
 									"        required: ['names', 'highlighting', 'response']",
 									"    });",
 									"});",
-									""
+									"it(\"Should return the required fields for a Name History Row\", () => {",
+									"    response.body.names[0].should.be.an('object').with.keys(['jurisdiction', 'name', 'name_state_type_cd', 'nr_num','score','start_date','submit_count']);",
+									"});"
 								]
 							}
 						}
@@ -484,11 +491,13 @@
 							"query": [
 								{
 									"key": "start",
-									"value": "1"
+									"value": "1",
+									"equals": true
 								},
 								{
 									"key": "rows",
-									"value": "32"
+									"value": "32",
+									"equals": true
 								}
 							]
 						},

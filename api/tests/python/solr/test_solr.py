@@ -51,7 +51,7 @@ def test_get_results_query_to_solr(mocker, monkeypatch, name, compresed_name, es
             + '%20OR%20' \
             + escaped_name \
             + '&qf=name_compressed^6%20name_with_synonyms&wt=json' \
-              '&start=0&rows=10&fl=source,id,name,score&sort=score%20desc' \
+              '&start=0&rows=10&fl=source,id,name,score,start_date,jurisdiction&sort=score%20desc' \
               '&fq=name_with_synonyms:(' \
             + synonym_tokens.upper() \
             + ')'

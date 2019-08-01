@@ -1,4 +1,4 @@
-import cx_Oracle
+import cx_Oracle, datetime
 from namex import nro
 from namex.models import User
 from tests.python import integration_oracle_namesdb, integration_oracle_local_namesdb
@@ -7,7 +7,10 @@ from namex.services.nro.change_nr import \
     _update_request, \
     _get_event_id, \
     _create_nro_transaction, \
-    _update_nro_request_state
+    _update_nro_request_state, \
+    _update_nro_partner_name_system
+
+
 
 
 @integration_oracle_namesdb
@@ -25,17 +28,43 @@ class NamesList:
     def all(self):
         return iter(self.mynames)
 
+class PartnerList:
+    mypartners = []
+    def addPartnerNS(self, partnerNS):
+        self.mypartners = partnerNS
+
+    def all(self):
+        return iter(self.mypartners)
 
 class FakeRequest:
     requestId = '42'
     previousRequestId = '15'
     names = NamesList();
 
-
 class FakeName:
     nameId = '42'
     name = ''
     choice = 1
+
+class FakeNwpta_AB:
+    partnerJurisdictionTypeCd  = 'AB'
+    partnerNameTypeCd = 'AS'
+    partnerNameNumber = '111111'
+    partnerName='ASSUMED COMPANY NAME-AB'
+    partnerNameDate = datetime.datetime.strptime('30072019','%d%m%Y').date()
+
+class FakeNwpta_SK:
+    partnerJurisdictionTypeCd = 'SK'
+    partnerNameTypeCd = 'AS'
+    partnerNameNumber = '111111'
+    partnerName = 'ASSUMED COMPANY NAME-SK'
+    partnerNameDate = datetime.datetime.strptime('30072019', '%d%m%Y').date()
+
+class FakeRequestNwpta:
+    requestId = '42'
+    nrNum = 'NR XXXXXXX'
+    partnerNS = PartnerList();
+
 
 
 @integration_oracle_namesdb
@@ -272,3 +301,111 @@ def test_update_nro_add_new_name_choice(app):
     assert result
     assert len(result) == 2
     assert result[0][0] != 'Fake name'
+
+@integration_oracle_namesdb
+def test_update_nro_nwpta_ab(app):
+    """
+    Ensure the changed ab nwpta data is updated in nro
+    """
+    con = nro.connection
+    cursor = con.cursor()
+
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+
+   #Set upo request
+    cursor.execute("insert into request(request_id, nr_num) values(42, 'NR XXXXXXX')")
+
+    #tds that it is valid
+    cursor.execute("select nr_num from request where request_id = 42")
+    (nr_num,) = cursor.fetchone()
+    assert nr_num == 'NR XXXXXXX'
+
+    eid = _get_event_id(cursor)
+
+    # Setup Base AB record
+    cursor.execute("""insert into partner_name_system
+                        (partner_name_system_id, request_id, start_event_id,PARTNER_NAME_TYPE_CD, PARTNER_JURISDICTION_TYPE_CD) 
+                  values(partner_name_system_seq.nextval, 42, :event, 'CO', 'AB')""",event=eid)
+
+    # test AB
+    change_flags = {
+        'is_changed__nwpta_ab': True,
+        'is_changed__nwpta_sk': False,
+
+    }
+
+    fake_request = FakeRequestNwpta()
+    fake_nwpta_ab = FakeNwpta_AB()
+    nwpta = PartnerList()
+    nwpta.addPartnerNS([fake_nwpta_ab])
+    fake_request.partnerNS = nwpta
+    _update_nro_partner_name_system(cursor, fake_request, eid, change_flags)
+
+    cursor.execute("""
+           select pns.*
+           from partner_name_system pns
+           where  pns.partner_jurisdiction_type_cd = 'AB' 
+           and pns.request_id = {} 
+           and pns.partner_name_type_cd = 'AS'
+           and pns.end_event_id is null"""
+                   .format(fake_request.requestId))
+
+    result = list(cursor.fetchall())
+
+    assert len(result) == 1
+    assert result[0][4] == 'AS'
+    assert result[0][8] == 'ASSUMED COMPANY NAME-AB'
+
+@integration_oracle_namesdb
+def test_update_nro_nwpta_sk(app):
+    """
+    Ensure the changed ab nwpta data is updated in nro
+    """
+    con = nro.connection
+    cursor = con.cursor()
+
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+
+   #Set upo request
+    cursor.execute("insert into request(request_id, nr_num) values(42, 'NR XXXXXXX')")
+
+    #tds that it is valid
+    cursor.execute("select nr_num from request where request_id = 42")
+    (nr_num,) = cursor.fetchone()
+    assert nr_num == 'NR XXXXXXX'
+
+    eid = _get_event_id(cursor)
+
+    # Setup Base AB record
+    cursor.execute("""insert into partner_name_system
+                        (partner_name_system_id, request_id, start_event_id,PARTNER_NAME_TYPE_CD, PARTNER_JURISDICTION_TYPE_CD) 
+                  values(partner_name_system_seq.nextval, 42, :event, 'CO', 'SK')""",event=eid)
+
+    # test AB
+    change_flags = {
+        'is_changed__nwpta_ab': False,
+        'is_changed__nwpta_sk': True,
+
+    }
+
+    fake_request = FakeRequestNwpta()
+    fake_nwpta_sk = FakeNwpta_SK()
+    nwpta = PartnerList()
+    nwpta.addPartnerNS([fake_nwpta_sk])
+    fake_request.partnerNS = nwpta
+    _update_nro_partner_name_system(cursor, fake_request, eid, change_flags)
+
+    cursor.execute("""
+           select pns.*
+           from partner_name_system pns
+           where  pns.partner_jurisdiction_type_cd = 'SK' 
+           and pns.request_id = {} 
+           and pns.partner_name_type_cd = 'AS'
+           and pns.end_event_id is null"""
+                   .format(fake_request.requestId))
+
+    result = list(cursor.fetchall())
+
+    assert len(result) == 1
+    assert result[0][4] == 'AS'
+    assert result[0][8] == 'ASSUMED COMPANY NAME-SK'
