@@ -26,7 +26,7 @@ class EventRecorder(object):
         event = models.Event(
             eventDate = datetime.utcnow(),
             action = action,
-            eventJson = json.dumps(data_dict).encode('utf8'),
+            eventJson = json.dumps(data_dict),
             nrId = nr.id,
             stateCd = nr.stateCd,
             userId = user.id
