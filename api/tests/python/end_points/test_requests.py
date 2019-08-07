@@ -295,7 +295,9 @@ def test_remove_name_from_nr(client, jwt, app):
     assert len(data['names']) == 1
 
 def test_add_new_comment_to_nr(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User
+    from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User, \
+    Event as EventDAO
+    from sqlalchemy import desc
 
     #add a user for the comment
     user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
@@ -336,6 +338,11 @@ def test_add_new_comment_to_nr(client, jwt, app):
 
     assert b'"comment": "The 13th comment entered by the user."' in rv.data
     assert 200 == rv.status_code
+
+    event_results = EventDAO.query.filter_by(nrId=nr.id).order_by(EventDAO.eventDate.desc()).first_or_404()
+    assert event_results.action == 'post'
+    assert event_results.eventJson[0:11] == '{"comment":'
+
 
 
 def test_comment_where_no_nr(client, jwt, app):
