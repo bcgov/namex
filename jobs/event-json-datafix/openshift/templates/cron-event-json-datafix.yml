@@ -12,7 +12,7 @@ objects:
   metadata:
     name: "event-json-datafix"
   spec:
-    schedule: "* 23 * * *"
+    schedule: "* 01 * * *"
     suspend: false
     jobTemplate:
       spec:

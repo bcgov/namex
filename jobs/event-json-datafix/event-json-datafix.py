@@ -20,11 +20,10 @@ def create_app(config=Config):
 
     return app
 
-
 app = create_app(Config)
 start_time = datetime.utcnow()
 row_count = 0
-MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '100')
+MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '10000')
 
 try:
 
@@ -37,11 +36,9 @@ try:
         x = bytearray.fromhex(event_compressed_json)
         z = zlib.decompress(x)
         json_str =  z.decode('utf8')
-        escaped_json_str = json_str.replace("'", "''")
-        new_text = escaped_json_str.replace(":Final ",". Final ")
-        new_text1 = new_text.replace("Fax #:","Fax ")
+        new_text = json_str.replace(":Final ",". Final ").replace("Fax #:","Fax ").replace("'", "''").replace(":TMA","TMA").replace(" #:NR", "NR ")
 
-        json_list = json.loads(new_text1)
+        json_list = json.loads(new_text)
 
         formatted_json = json.dumps(json_list)
 
