@@ -8,7 +8,7 @@ from datetime import datetime
 from .request import Request
 from sqlalchemy.orm import backref
 from sqlalchemy.dialects.postgresql import JSONB
-import bz2
+
 
 
 class Event(db.Model):
