@@ -15,7 +15,7 @@ from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
 
 
-from namex.models import Event as EventDAO, Request as RequestDAO,  User
+from namex.models import Event as EventDAO, Request as RequestDAO, User
 
 import datetime
 from datetime import datetime as dt
@@ -53,6 +53,9 @@ class Events(Resource):
 
             e_dict = e.json()
             user_action = ""
+            user_name = ""
+
+            user = User.query.filter_by(id=e_dict['userId']).first().json()
 
             if e_dict["action"] == "update_from_nro":
                 user_action = "Select from Draft Queue"
@@ -83,9 +86,10 @@ class Events(Resource):
                 user_action = "Updated NRO"
             if e_dict["action"] == "post" and "comment" in e_dict["jsonData"]:
                 user_action = "Staff Comment"
-            #store the previous row
+
             e_dict_previous = e_dict
             e_dict["user_action"] = user_action
+            e_dict["user_name"] = user["username"]
 
             i=i+1
             e_txn_history[i] = {}
