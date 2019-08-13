@@ -43,7 +43,7 @@ class Events(Resource):
         if not "id" in event:
             return jsonify({"message": "No events for NR:{} not found".format(nr)}), 404
 
-        event_results = EventDAO.query.filter_by(nrId=request_id).order_by("id").all()
+        event_results = EventDAO.query.filter_by(nrId=request_id).order_by("id").limit(3)
 
         e_dict_previous = dict()
         e_txn_history = dict()
@@ -57,7 +57,7 @@ class Events(Resource):
 
             user = User.query.filter_by(id=e_dict['userId']).first().json()
 
-            if e_dict["action"] == "update_from_nro":
+            if e_dict["action"] == "update_from_nro" and e_dict["stateCd"] == "DRAFT":
                 user_action = "Select from Draft Queue"
             if e_dict["action"] == "patch" and  e_dict["stateCd"] == "INPROGRESS":
                 user_action = "Load NR"
