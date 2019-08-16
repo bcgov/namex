@@ -43,7 +43,7 @@ class Events(Resource):
         if not "id" in event:
             return jsonify({"message": "No events for NR:{} not found".format(nr)}), 404
 
-        event_results = EventDAO.query.filter_by(nrId=request_id).order_by("id").limit(3)
+        event_results = EventDAO.query.filter_by(nrId=request_id).order_by("id").all()
 
         e_dict_previous = dict()
         e_txn_history = dict()
@@ -65,6 +65,8 @@ class Events(Resource):
                 user_action = "Hold Request"
             if e_dict["action"] == "marked_on_hold" and e_dict["stateCd"] == "HOLD":
                 user_action = "Marked on Hold"
+            if e_dict["action"] == "put" and e_dict["stateCd"] == "DRAFT":
+                user_action = "Edit NR Details"
             if e_dict["action"] == "put" and e_dict["stateCd"] == "INPROGRESS" and  "additional" in e_dict["jsonData"]:
                 if not e_dict_previous or (e_dict_previous["stateCd"] == "HOLD" or e_dict_previous["stateCd"] == "DRAFT" or e_dict_previous["stateCd"] == "INPROGRESS"):
                     user_action = "Edit NR Details"
