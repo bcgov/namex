@@ -57,8 +57,10 @@ class Events(Resource):
 
             user = User.query.filter_by(id=e_dict['userId']).first().json()
 
-            if e_dict["action"] == "update_from_nro" and e_dict["stateCd"] == "DRAFT":
-                user_action = "Select from Draft Queue"
+            if e_dict["action"] == "update_from_nro" and ( e_dict["stateCd"] == "INPROGRESS" or e_dict["stateCd"] == "DRAFT"):
+                user_action =  "Get NR Details from NRO"
+            if e_dict["action"] == "get" and e_dict["stateCd"] == "INPROGRESS":
+                user_action = "Get Next NR"
             if e_dict["action"] == "patch" and  e_dict["stateCd"] == "INPROGRESS":
                 user_action = "Load NR"
             if e_dict["action"] == "patch" and e_dict["stateCd"] == "HOLD":
@@ -77,7 +79,6 @@ class Events(Resource):
                         user_action = "Re-Open"
             if e_dict["action"] == "put" and (e_dict["stateCd"] == "APPROVED" or e_dict["stateCd"] == "REJECTED" or e_dict["stateCd"] == "CONDITIONAL"):
                 user_action = "Edit NR Details after Completion"
-
             if e_dict["action"] == "put" and e_dict["stateCd"] == "INPROGRESS" and  "additional" not in e_dict["jsonData"] and '"state": "NE"' not in  e_dict["jsonData"]:
                 user_action = "Complete the Name Choice"
             if e_dict["action"] == "patch" and (e_dict["stateCd"]== "APPROVED" or e_dict["stateCd"] == "REJECTED" or e_dict["stateCd"] == "CONDITIONAL"):
@@ -88,6 +89,16 @@ class Events(Resource):
                 user_action = "Updated NRO"
             if e_dict["action"] == "post" and "comment" in e_dict["jsonData"]:
                 user_action = "Staff Comment"
+            if  e_dict["stateCd"] == "CANCELLED" and (e_dict["action"] == "post" or e_dict["action"] == "update_from_nro"):
+                user_action = "Cancelled in NRO"
+            if e_dict["stateCd"] == "CANCELLED" and (e_dict["action"] == "patch" or e_dict["action"] == "put"):
+                user_action = "Cancelled in Namex"
+            if e_dict["stateCd"] == "EXPIRED" and e_dict["action"] == "post":
+                user_action = "Expired by NRO"
+            if e_dict["stateCd"] == "HISTORICAL" and e_dict["action"] == "post":
+                user_action = "Set to Historical by NRO(Migration)"
+            if e_dict["stateCd"]=="COMPLETED" and (e_dict["action"] == "post" or e_dict["action"] == "update_from_nro"):
+                user_action = "Migrated by NRO"
 
             e_dict_previous = e_dict
             e_dict["user_action"] = user_action
