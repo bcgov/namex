@@ -30,8 +30,6 @@ class Events(Resource):
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def get(nr):
-        # return jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
-        #return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
         nrd = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json()
         request_id = 0
         if "id" in nrd:
@@ -70,7 +68,7 @@ class Events(Resource):
             if e_dict["action"] == "put" and e_dict["stateCd"] == "DRAFT":
                 user_action = "Edit NR Details"
             if e_dict["action"] == "put" and e_dict["stateCd"] == "INPROGRESS" and  "additional" in e_dict["jsonData"]:
-                if not e_dict_previous or (e_dict_previous["stateCd"] == "HOLD" or e_dict_previous["stateCd"] == "DRAFT" or e_dict_previous["stateCd"] == "INPROGRESS"):
+                if len(e_dict_previous) == 0 or (e_dict_previous["stateCd"] == "HOLD" or e_dict_previous["stateCd"] == "DRAFT" or e_dict_previous["stateCd"] == "INPROGRESS"):
                     user_action = "Edit NR Details"
                 if e_dict_previous and e_dict_previous["stateCd"] == "APPROVED" or e_dict_previous["stateCd"]=="REJECTED" or e_dict_previous["stateCd"] == "CONDITIONAL":
                     if '"furnished": "Y"' in e_dict["jsonData"]:
@@ -107,6 +105,9 @@ class Events(Resource):
             i=i+1
             e_txn_history[i] = {}
             e_txn_history[i] = e_dict
+
+        if i==0:
+            return jsonify({"message": "No valid events for NR:{} not found".format(nr)}), 404
 
         rep = {'response': {'count':i},
                'transactions': e_txn_history
