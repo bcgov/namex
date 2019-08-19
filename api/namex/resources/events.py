@@ -107,7 +107,7 @@ class Events(Resource):
             e_txn_history[i] = e_dict
 
         if i==0:
-            return jsonify({"message": "No valid events for NR:{} not found".format(nr)}), 404
+            return jsonify({"message": "No valid events for NR:{} found".format(nr)}), 404
 
         rep = {'response': {'count':i},
                'transactions': e_txn_history
