@@ -74,6 +74,7 @@ class SolrQueries:
             '&q=cobrs_phonetic:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
             '&fq=-{exact_name}'
             '{synonyms_clause}',
@@ -82,6 +83,7 @@ class SolrQueries:
             '&q=dblmetaphone_name:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
             '&fq=-{exact_name}'
             '{synonyms_clause}',
