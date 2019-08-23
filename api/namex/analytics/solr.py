@@ -74,6 +74,7 @@ class SolrQueries:
             '&q=cobrs_phonetic:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
             '&fq=-{exact_name}'
             '{synonyms_clause}',
@@ -82,6 +83,7 @@ class SolrQueries:
             '&q=dblmetaphone_name:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
             '&fq=-{exact_name}'
             '{synonyms_clause}',
@@ -1087,5 +1089,4 @@ class SolrQueries:
     @classmethod
     def keep_candidate(cls, candidate, name, names):
         if len([doc['id'] for doc in names if doc['id'] == candidate['id']]) == 0:
-            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
-
+            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source'], 'jurisdiction': candidate['jurisdiction'],'start_date': candidate['start_date'] })
