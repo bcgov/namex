@@ -1089,4 +1089,6 @@ class SolrQueries:
     @classmethod
     def keep_candidate(cls, candidate, name, names):
         if len([doc['id'] for doc in names if doc['id'] == candidate['id']]) == 0:
-            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source'], 'jurisdiction': candidate['jurisdiction'],'start_date': candidate['start_date'] })
+            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source'],
+                          'jurisdiction': candidate.get('jurisdiction', ''),
+                          'start_date': candidate.get('start_date', '')})
