@@ -71,7 +71,7 @@ def verify(data, expected):
     print("Expected: ", expected)
 
     # remove the search divider(s): ----<query term>
-    actual = [{ 'name':doc['name'] } for doc in data['names']]
+    actual = [{ 'name':doc['name_info']['name'] } for doc in data['names']]
 
     print("Actual: ", actual)
 
@@ -88,7 +88,7 @@ def verify_results(client, jwt, query, expected):
 def search(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
-    url = '/api/v1/requests/phonetics/' + urllib.parse.quote(query)
+    url = '/api/v1/requests/phonetics/' + urllib.parse.quote(query) + '/*'
     print(url)
     rv = client.get(url, headers=headers)
 
@@ -737,7 +737,7 @@ def test_ignore_exact_match_keep_phonetic(solr, client, jwt, app):
        expected=[
            {'name': '----BLUEPRINT BEAUTY'},
            {'name': 'BLUEPRINT BEAUTEE'},
-           {'name': '----BLUEPRINT synonyms:(beauty)'}
+           {'name': '----BLUEPRINT synonyms:(BEAUTI)'}
        ]
     )
 
@@ -848,4 +848,22 @@ def test_stack_ignores_wildcards(client, jwt, app):
             {'name': '----TESTING WILDCARDS'},
             {'name': '----TESTING'}
         ]
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query", [
+    ('T.H.E.'),
+    ('COMPANY'),
+    ('ASSN'),
+    ('THAT'),
+    ('LIMITED CORP.'),
+])
+def test_query_stripped_to_empty_string(solr,client, jwt, query):
+    clean_database(solr)
+    seed_database_with(solr, 'JM Van Damme inc', id='1')
+    seed_database_with(solr, 'SOME RANDOM NAME', id='2')
+    verify_results(client, jwt,
+        query=query,
+        expected=[{'name':'----*'}]
     )

@@ -113,7 +113,13 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
             ))
 
             if nr and (nr.stateCd != State.DRAFT):
-                if action != 'X':
+
+                # do NOT ignore updates of completed NRs, since those are CONSUME transactions -
+                # the only kind that gets into the namex_feeder table for completed NRs
+                if nr.stateCd in State.COMPLETED_STATE and action == 'U':
+                    pass
+
+                elif action != 'X':
                     success = update_feeder_row(ora_con
                                                 ,id=row['id']
                                                 ,status='C'
@@ -126,6 +132,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
 
                 namex_db.session.add(nr)
                 EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, {}, save_to_session=True)
+                current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
 
                 success = update_feeder_row(ora_con
                                             , id=row['id']
@@ -135,7 +142,9 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
 
                 if success:
                     ora_con.commit()
+                    current_app.logger.debug('Oracle commit done')
                     namex_db.session.commit()
+                    current_app.logger.debug('Postgresql commit done')
                 else:
                     raise Exception()
 

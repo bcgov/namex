@@ -54,8 +54,11 @@ def clean_database(client, jwt):
 
     assert r.status_code == 200
 
-def seed_database_with(client, jwt, name, id='1', source='2'):
-    clean_database(client, jwt)
+
+def seed_database_with(client, jwt, name, id='1', source='2', clean=True):
+    if clean:
+        clean_database(client, jwt)
+
     url = SOLR_URL + '/solr/possible.conflicts/update?commit=true'
     headers = {'content-type': 'application/json'}
     data = '[{"source":"' + source + '", "name":"' + name + '", "id":"'+ id +'"}]'
@@ -71,11 +74,11 @@ def verify(data, expected=[], not_expected=None):
 
     verified = False
     print(data['names'])
-
-    for name in data['names']:
+    print('EXPECTED ', expected)
+    print('NOT EXPECTED ', not_expected)
+    for result in data['names']:
+        name = result['name_info']
         print('ACTUAL ', name['name'])
-        print('EXPECTED ', expected)
-        print('NOT EXPECTED ', not_expected)
 
         if expected == []:
         # check that the name is the title of a query sent (no real names were returned from solr)
@@ -104,9 +107,7 @@ def verify(data, expected=[], not_expected=None):
 def verify_match(client, jwt, query, expected_list=[], not_expected_list=None):
     data = search_cobrs_phonetic_match(client, jwt, query)
     if expected_list == [] or expected_list:
-        print('here 1')
         if expected_list == []:
-            print('here 2')
             verify(data, [])
         else:
             for expected in expected_list:
@@ -120,21 +121,21 @@ def verify_match(client, jwt, query, expected_list=[], not_expected_list=None):
 def search_cobrs_phonetic_match(client, jwt, query):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
-    url = '/api/v1/requests/cobrsphonetics/' + query
+    url = '/api/v1/requests/cobrsphonetics/' + query + '/*'
     print(url)
     rv = client.get(url, headers=headers)
 
     assert rv.status_code == 200
     return json.loads(rv.data)
 
-@pytest.mark.skip(reason="frontend handles empty string for now")
 @integration_synonym_api
 @integration_solr
-def test_resist_empty(client, jwt, app):
+def test_resist_empty(client, jwt):
     seed_database_with(client, jwt, 'JM Van Damme inc')
+    seed_database_with(client, jwt, 'SOME RANDOM NAME', clean=False)
     verify_match(client, jwt,
-        query='',
-        expected_list=[]
+        query='*',
+        expected_list=None
     )
 
 @integration_synonym_api
@@ -159,10 +160,10 @@ def test_designation_removal(client, jwt, app):
 @integration_synonym_api
 @integration_solr
 def test_duplicated_letters(client, jwt, app):
-    seed_database_with(client, jwt, 'Damme Trucking Inc')
+    seed_database_with(client, jwt, 'Damme Trukking Inc')
     verify_match(client, jwt,
-       query='Dame Trucking Inc',
-       expected_list=['Damme Trucking Inc']
+       query='Dame Truccing Inc',
+       expected_list=['Damme Trukking Inc']
     )
 
 @integration_synonym_api
@@ -222,3 +223,60 @@ def test_stack_ignores_wildcards(client, jwt, app):
         not_expected_list=['----TESTING* @WILDCARDS']
     )
 
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('JMACK', 'J-MAC'),
+    ('JMACK', 'j-mac'),
+    ('JMAK', 'J-MAC'),
+    ('JMAK', 'j-mac'),
+    ('JMC', 'J-MAC'),
+    ('JMC', 'j-mac'),
+])
+def test_all_macs_are_equal(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("criteria, seed", [
+    ('EMPACK', 'EMPAK'),
+])
+def test_ck_and_k(client, jwt, app, criteria, seed):
+    seed_database_with(client, jwt, seed)
+    verify_match(client, jwt,
+        query=criteria,
+        expected_list=[seed]
+    )
+
+@integration_synonym_api
+@integration_solr
+def test_stack_contains_synonyms(client, jwt, app):
+    seed_database_with(client, jwt, 'PACIFIC LUMBER PRODUCTS LTD.', id='1')
+    seed_database_with(client, jwt, 'PACIFIC FOREST PRODUCTS LTD.', id='2', clean=False)
+
+    verify_match(client, jwt,
+                 query='PACIFIK LUMBER',
+                 expected_list=['----PACIFIK LUMBER', 'PACIFIC LUMBER PRODUCTS LTD.', '----PACIFIK synonyms:(LUMBER)',
+                                'PACIFIC FOREST PRODUCTS LTD.']
+                 )
+
+@integration_synonym_api
+@integration_solr
+@pytest.mark.parametrize("query", [
+    ('T.H.E.'),
+    ('COMPANY'),
+    ('ASSN'),
+    ('THAT'),
+    ('LIMITED CORP.'),
+])
+def test_query_stripped_to_empty_string(client, jwt, query):
+    seed_database_with(client, jwt, 'JM Van Damme inc')
+    seed_database_with(client, jwt, 'SOME RANDOM NAME',id='2', source='2', clean=False)
+    verify_match(client, jwt,
+        query=query,
+        expected_list=None
+    )

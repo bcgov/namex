@@ -6,6 +6,7 @@
 *.exe
 *.o
 *.so
+*.pyc
 
 # Packages #
 ############
@@ -103,3 +104,7 @@ solr/cores/.DS_Store
 **/cores/**/data/index
 **/cores/**/data/tlog
 **/cores/**/core.properties
+
+solr-admin-app/keycloak
+keycloak_client_info
+solr-admin-app/tests/solr/lib/conf

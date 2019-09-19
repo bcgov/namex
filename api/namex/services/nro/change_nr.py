@@ -4,7 +4,7 @@
    the following pattern:
 
    create new event of type 'SYST'
-   create new transaction of type 'ADMIN'
+   create new transaction of type 'ADMIN' or 'CORRT'
    using STAFF_IDIR of 'namex'
 
    Each main segment has its own function call to facilitate testing,
@@ -13,9 +13,11 @@
 """
 
 from flask import current_app
-from .utils import generate_compressed_name
+from .utils import generate_compressed_name, nro_examiner_name
+from namex.models import State
 
-def update_nr (nr, ora_cursor, change_flags):
+
+def update_nr(nr, ora_cursor, change_flags):
     """Update the Name Request in NRO
     :raises Exception: what ever error we get, let our caller handle, this is here in case we want to wrap it - future
     """
@@ -23,13 +25,15 @@ def update_nr (nr, ora_cursor, change_flags):
     eid = _get_event_id(ora_cursor)
     current_app.logger.debug('got to update_nr() for NR:{}'.format(nr.nrNum))
     current_app.logger.debug('event ID for NR Details edit:{}'.format(eid))
-    _create_nro_transaction(ora_cursor, nr, eid)
+    _create_nro_transaction(ora_cursor, nr, eid, transaction_type='CORRT')
+    _update_nro_request_state(ora_cursor, nr, eid, change_flags)
     _update_request(ora_cursor, nr, eid, change_flags)
     _update_nro_names(ora_cursor, nr, eid, change_flags)
     _update_nro_address(ora_cursor, nr, eid, change_flags)
     _update_nro_partner_name_system(ora_cursor, nr, eid, change_flags)
 
     current_app.logger.debug('got to the end of update_nr()')
+
 
 def _get_event_id(oracle_cursor):  # -> (int)
     """gets the event_id to be used for updating the NR history
@@ -52,15 +56,58 @@ def _get_event_id(oracle_cursor):  # -> (int)
     return event_id
 
 
-def _create_nro_transaction(oracle_cursor, nr, event_id):
+def _create_nro_transaction(oracle_cursor, nr, event_id, transaction_type='ADMIN'):
 
     oracle_cursor.execute("""
     INSERT INTO transaction (transaction_id, request_id, transaction_type_cd, event_id, staff_idir)
-      VALUES (transaction_seq.nextval, :request_id, 'ADMIN', :event_id, 'namex')
+      VALUES (transaction_seq.nextval, :request_id, :transaction_type, :event_id, 'namex')
     """,
                           request_id=nr.requestId,
+                          transaction_type=transaction_type,
                           event_id=event_id
                           )
+    current_app.logger.debug('transaction record created')
+
+
+def _update_nro_request_state(oracle_cursor, nr, event_id, change_flags):
+    """ Update the current request state. Can be used to set to any state except H. Mainly used to
+        set to Draft after edits pre-examination.
+
+        Only handles setting NR to following states in NRO:
+            D (Draft)
+    """
+
+    if 'is_changed__request_state' in change_flags.keys() and change_flags['is_changed__request_state']:
+
+        new_state = None
+        if nr.stateCd == State.DRAFT:
+            new_state = 'D'
+        else:
+            return
+
+        # set the end event for the existing record
+        oracle_cursor.execute("""
+        UPDATE request_state
+        SET end_event_id = :event_id
+        WHERE request_id = :request_id
+        AND end_event_id IS NULL
+        """,
+                       event_id=event_id,
+                       request_id=nr.requestId)
+
+        # create new request_state record
+        oracle_cursor.execute("""
+        INSERT INTO request_state (request_state_id, request_id, state_type_cd, 
+            start_event_id, end_event_id, examiner_idir, examiner_comment, state_comment, 
+            batch_id)
+        VALUES (request_state_seq.nextval, :request_id, :state, :event_id, NULL, 
+                  :examiner_id, NULL, NULL, NULL)
+        """,
+                       request_id=nr.requestId,
+                       state=new_state,
+                       event_id=event_id,
+                       examiner_id=nro_examiner_name(nr.activeUser.username)
+                       )
 
 
 def _update_request(oracle_cursor, nr, event_id, change_flags):
@@ -124,14 +171,15 @@ def _update_request(oracle_cursor, nr, event_id, change_flags):
 
 def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
     """find the current name instance, set it's end_event_id to event_id
-       create a new name_instance and set it start_event_id to event_id
+       if the name was deleted, nothing more needs to be done.
+       otherwise, create a new name_instance and set its start_event_id to event_id
     """
 
     for name in nr.names.all():
 
-        if  (name.choice == 1 and change_flags['is_changed__name1']) or \
-            (name.choice == 2 and change_flags['is_changed__name2']) or \
-            (name.choice == 3 and change_flags['is_changed__name3']):
+        if (name.choice == 1 and change_flags['is_changed__name1']) or \
+           (name.choice == 2 and change_flags['is_changed__name2']) or \
+           (name.choice == 3 and change_flags['is_changed__name3']):
 
             oracle_cursor.execute("""
             SELECT ni.name_instance_id, ni.name_id
@@ -181,15 +229,18 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
                                       name_id=n_id,
                                       start_event=event_id)
 
-            oracle_cursor.execute("""
-            INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name)
-            VALUES (name_instance_seq.nextval, :name_id, :choice, :name, :event_id, :search_name)
-            """,
-                                  name_id=n_id,
-                                  choice=name.choice,
-                                  name=name.name,
-                                  event_id=event_id,
-                                  search_name=generate_compressed_name(name.name))
+            # If the new name is not blank, do this:
+            if name.name:
+                oracle_cursor.execute("""
+                INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name)
+                VALUES (name_instance_seq.nextval, :name_id, :choice, :name, :event_id, :search_name)
+                """,
+                                      name_id=n_id,
+                                      choice=name.choice,
+                                      name=name.name,
+                                      event_id=event_id,
+                                      search_name=generate_compressed_name(name.name))
+
 
 def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
     """find the current address (request_party), set it's end_event_id to event_id
@@ -226,7 +277,6 @@ def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
         """,
                               event_id=event_id,
                               party_id=rp_id)
-
 
         if change_flags['is_changed__address']:
             # get next address ID
@@ -274,6 +324,7 @@ def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
                               decline_notification_ind=applicantInfo.declineNotificationInd
                               )
 
+
 def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
     """find the current NWPTA record(s) (a.k.a. Partner Name System), set end_event_id to event_id
        create new partner_name_system record(s) and set start_event_id to event_id
@@ -281,8 +332,8 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
 
     for nwpta in nr.partnerNS.all():
 
-        if  (nwpta.partnerJurisdictionTypeCd == 'AB' and change_flags['is_changed__nwpta_ab']) or \
-            (nwpta.partnerJurisdictionTypeCd == 'SK' and change_flags['is_changed__nwpta_sk']):
+        if (nwpta.partnerJurisdictionTypeCd == 'AB' and change_flags['is_changed__nwpta_ab']) or \
+           (nwpta.partnerJurisdictionTypeCd == 'SK' and change_flags['is_changed__nwpta_sk']):
 
             # confirm that there is a record for this partner jurisdiction, and get record ID
             # - failure of this triggers error in logs, and needs to be addressed due to mismatch
@@ -300,7 +351,6 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
             row = oracle_cursor.fetchone()
             ps_id = int(row[0])
 
-
             # set the end event for the existing record
             oracle_cursor.execute("""
             UPDATE partner_name_system
@@ -313,16 +363,17 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
             # create new partner_name_system record
             oracle_cursor.execute("""
             INSERT INTO partner_name_system(partner_name_system_id, request_id, start_event_id, 
-                          partner_name_type_cd, partner_name_number, partner_jurisdiction_type_cd, 
+                          partner_name_type_cd, partner_name_number, partner_name, partner_jurisdiction_type_cd, 
                           partner_name_date, last_update_id)
             VALUES (partner_name_system_seq.nextval, :request_id, :event_id, :partner_name_type_cd, 
-                          :partner_name_number, :partner_jurisdiction_type_cd, :partner_name_date, 
+                          :partner_name_number, :partner_name, :partner_jurisdiction_type_cd, :partner_name_date, 
                           'namex')
             """,
                                   request_id=nr.requestId,
                                   event_id=event_id,
                                   partner_name_type_cd=nwpta.partnerNameTypeCd,
                                   partner_name_number=nwpta.partnerNameNumber,
+                                  partner_name=nwpta.partnerName,
                                   partner_jurisdiction_type_cd=nwpta.partnerJurisdictionTypeCd,
                                   partner_name_date=nwpta.partnerNameDate
                                   )

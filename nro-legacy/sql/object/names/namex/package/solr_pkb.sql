@@ -33,7 +33,9 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                     '\"id\": \"' || view_row.id || '\", ' ||
                     '\"name\": \"' || REPLACE(REPLACE(view_row.name, '\', '\\\\'), '"', '\\\"') || '\", ' ||
                     '\"state_type_cd\": \"' || view_row.state_type_cd || '\", ' ||
-                    '\"source\": \"' || view_row.source || '\" ' ||
+                    '\"source\": \"' || view_row.source || '\", ' ||
+					'\"start_date\": \"' || to_char(view_row.start_date,'YYYY-MM-DD"T"HH24:MI:SS"Z"') || '\", ' ||
+					'\"jurisdiction\": \"' || view_row.jurisdiction || '\" ' ||
                     '} }, ';
         END IF;
 
@@ -71,20 +73,15 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
                 FETCH view_rows INTO view_row;
                 EXIT WHEN view_rows%NOTFOUND;
 
-                -- Quick and dirty: do this by hand in 11. 12 has JSON stuff.
+               -- Quick and dirty: do this by hand in 11. 12 has JSON stuff.
                 content := content || '\"add\": {\"doc\": {' ||
                         '\"id\": \"' || view_row.id || '\", ' ||
-                        '\"name_instance_id\": \"' || view_row.name_instance_id || '\", ' ||
-                        '\"choice_number\": \"' || view_row.choice_number || '\", ' ||
-                        '\"corp_num\": \"' || view_row.corp_num || '\", ' ||
                         '\"name\": \"' || REPLACE(REPLACE(view_row.name, '\', '\\\\'), '"', '\\\"') || '\", ' ||
                         '\"nr_num\": \"' || view_row.nr_num || '\", ' ||
-                        '\"request_id\": \"' || view_row.request_id || '\", ' ||
                         '\"submit_count\": \"' || view_row.submit_count || '\", ' ||
-                        '\"request_type_cd\": \"' || view_row.request_type_cd || '\", ' ||
-                        '\"name_id\": \"' || view_row.name_id || '\", ' ||
-                        '\"start_event_id\": \"' || view_row.start_event_id || '\", ' ||
-                        '\"name_state_type_cd\": \"' || view_row.name_state_type_cd || '\" ' ||
+                        '\"name_state_type_cd\": \"' || view_row.name_state_type_cd || '\", ' ||
+                        '\"start_date\": \"' || to_char(view_row.start_date,'YYYY-MM-DD"T"HH24:MI:SS"Z"') || '\", ' ||
+                         '\"jurisdiction\": \"' || view_row.jurisdiction || '\" ' ||
                         '} }, ';
             END LOOP;
             CLOSE view_rows;

@@ -50,21 +50,25 @@ class NROServices(object):
         # setting threaded =True wraps the underlying calls in a Mutex
         # so we don't have to that here
 
+
+        def InitSession(conn, requestedTag):
+            cursor = conn.cursor()
+            cursor.execute("alter session set TIME_ZONE = 'America/Vancouver'")
+
         return cx_Oracle.SessionPool(user=current_app.config.get('NRO_USER'),
-                                  password=current_app.config.get('NRO_PASSWORD'),
-                                  dsn='{0}:{1}/{2}'.format(current_app.config.get('NRO_HOST'),
-                                                           current_app.config.get('NRO_PORT'),
-                                                           current_app.config.get('NRO_DB_NAME')
-                                                           ),
-                                  min=1,
-                                  max=10,
-                                  increment=1,
-                                  connectiontype=cx_Oracle.Connection,
-                                  threaded=True,
-                                  getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,
-                                  waitTimeout=1500,
-                                  timeout=3600
-                                  )
+                                     password=current_app.config.get('NRO_PASSWORD'),
+                                     dsn='{0}:{1}/{2}'.format(current_app.config.get('NRO_HOST'),
+                                                              current_app.config.get('NRO_PORT'),
+                                                              current_app.config.get('NRO_DB_NAME')),
+                                     min=1,
+                                     max=10,
+                                     increment=1,
+                                     connectiontype=cx_Oracle.Connection,
+                                     threaded=True,
+                                     getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,
+                                     waitTimeout=1500,
+                                     timeout=3600,
+                                     sessionCallback=InitSession)
 
     @property
     def connection(self):
@@ -94,7 +98,7 @@ class NROServices(object):
             cursor = self.connection.cursor()
 
             cursor.execute("""
-                SELECT last_update
+                SELECT SYS_EXTRACT_UTC (cast(last_update as timestamp)) as last_update
                 FROM req_instance_max_event
                 WHERE request_id = :req_id"""
                 ,req_id=nro_request_id)
@@ -162,19 +166,23 @@ class NROServices(object):
                 # set the fqpn if the schema is required, which is set y the deployer/configurator
                 # if the environment variable is missing from the Flask Config, then skip setting it.
                 if current_app.config.get('NRO_SCHEMA'):
-                    proc_name = '{}.nro_datapump_pkg.name_examination'.format(current_app.config.get('NRO_SCHEMA'))
+                    func_name = '{}.nro_datapump_pkg.name_examination_func'.format(current_app.config.get('NRO_SCHEMA'))
                 else:
-                    proc_name = 'nro_datapump_pkg.name_examination'
+                    func_name = 'nro_datapump_pkg.name_examination_func'
 
-                proc_vars = [nr_num,           # p_nr_number
+                func_vars = [nr_num,           # p_nr_number
                             'H',               # p_status
                             '',               # p_expiry_date - mandatory, but ignored by the proc
                             '',               # p_consent_flag- mandatory, but ignored by the proc
                             nro_examiner_name(examiner_username), # p_examiner_id
                             ]
 
-                # Call the name_examination procedure to save complete decision data for a single NR
-                cursor.callproc(proc_name, proc_vars)
+                # Call the name_examination function to save complete decision data for a single NR
+                # and get a return if all data was saved
+                ret = cursor.callfunc(func_name, str, func_vars)
+                if ret is not None:
+                    current_app.logger.error('name_examination_func failed, return message: {}'.format(ret))
+                    raise NROServicesError({"code": "unable_to_set_state", "description": ret}, 500)
 
                 con.commit()
 
@@ -349,7 +357,7 @@ class NROServices(object):
                 event_id = _get_event_id(cursor)
                 current_app.logger.debug('got to cancel_nr() for NR:{}'.format(nr.nrNum))
                 current_app.logger.debug('event ID for NR:{}'.format(event_id))
-                _create_nro_transaction(cursor, nr, event_id)
+                _create_nro_transaction(cursor, nr, event_id, 'CANCL')
 
                 # get request_state record, with all fields
                 cursor.execute("""
@@ -461,7 +469,10 @@ class NROServices(object):
             add_nwpta(nr, nr_nwpta)
             current_app.logger.debug('completed nwpta for {}'.format(nr.nrNum))
         if nr_names:
+            current_app.logger.debug('nr_names data into add_names():')
+            current_app.logger.debug(nr_names)
             add_names(nr, nr_names)
             current_app.logger.debug('completed names for {}'.format(nr.nrNum))
 
         return nr
+

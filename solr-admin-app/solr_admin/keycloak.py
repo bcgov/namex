@@ -20,15 +20,27 @@ class Keycloak(object):
             Keycloak._oidc = flask_oidc.OpenIDConnect(application)
 
     '''
+    Determines whether or not the user is logged in
+    '''
+    def is_logged_in(self) -> bool:
+        return self._oidc.user_loggedin
+
+    '''
     Determines whether or not the user is authorized to use the application. True if the user is logged in.
     '''
     def has_access(self) -> bool:
-        logged_in = self._oidc.user_loggedin
+        token = self._oidc.get_access_token()
+        if not token:
+            return False
 
-        if logged_in:
-            logging.info('logged in as %s', self.get_username())
+        token_info = self._oidc._get_token_info(token)
+        if not token_info['realm_access']:
+            return False
 
-        return logged_in
+        roles_ = token_info['realm_access']['roles']
+        access = 'names_manager' in roles_
+
+        return access
 
     '''
     Gets the redirect URL that is used to transfer the browser to the identity provider.

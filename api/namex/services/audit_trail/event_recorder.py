@@ -2,7 +2,7 @@ from flask import current_app
 from namex import models
 from datetime import datetime
 import json
-import zlib
+
 
 
 class EventRecorder(object):
@@ -26,7 +26,7 @@ class EventRecorder(object):
         event = models.Event(
             eventDate = datetime.utcnow(),
             action = action,
-            jsonZip = zlib.compress(json.dumps(data_dict).encode('utf8')),
+            eventJson = json.dumps(data_dict),
             nrId = nr.id,
             stateCd = nr.stateCd,
             userId = user.id

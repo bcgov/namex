@@ -55,6 +55,12 @@ class Config(object):
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
     JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
     JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
+    JWT_OIDC_CACHING_ENABLED = os.getenv('JWT_OIDC_CACHING_ENABLED')
+    try:
+        JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT'))
+    except:
+        JWT_OIDC_JWKS_CACHE_TIMEOUT = 300
+
 
     TESTING = False,
     DEBUG = False
@@ -73,7 +79,7 @@ class TestConfig(Config):
     DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD','')
     DB_NAME = os.getenv('DATABASE_TEST_NAME','')
     DB_HOST = os.getenv('DATABASE_TEST_HOST','')
-    DB_PORT = os.getenv('DATABASE_PORT','5432')
+    DB_PORT = os.getenv('DATABASE_TEST_PORT','5432')
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
          user=DB_USER,
          password=DB_PASSWORD,

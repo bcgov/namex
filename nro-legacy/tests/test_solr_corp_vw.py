@@ -89,7 +89,16 @@ def test_view():
     seed_corp_name('A0038332', '19','CO', 'RED-L HOSE DISTRIBUTORS LTD.')
     seed_corp_name('A0041224', '20', 'CO','571266 SASKATCHEWAN INC.')
 
-    #ensure these XPRO CO rows do not appear in the view
+    #ensure these XPRO CO rows  are not included in the view
+    result = Postgres().select(extract_select())
+    assert_that(len(result),equal_to(9))
+
+    #seed expired Assumed Names are not included in the view
+    seed_corp_expired_name('A0037274','21','30', 'AS','ROBEV VENTURES LTD.')
+    seed_corp_expired_name('A0038332', '22','31','AS', 'RED-L HOSE DISTRIBUTORS LTD.')
+    seed_corp_expired_name('A0041224', '23','32','AS','571266 SASKATCHEWAN INC.')
+
+    #ensure expired names do not
     result = Postgres().select(extract_select())
     assert_that(len(result),equal_to(9))
 

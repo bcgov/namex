@@ -40,7 +40,7 @@ def test_get_results_query_to_solr(mocker, monkeypatch, name, compresed_name, es
     monkeypatch.setattr(current_app.config, 'get', mock_env)
 
     # patch out the call to the solr synonyms API
-    def mock_synonym(name_token):
+    def mock_synonym(name_token, stemmed_name=''):
         return True
     monkeypatch.setattr(SolrQueries, '_synonyms_exist', mock_synonym)
 
@@ -51,9 +51,9 @@ def test_get_results_query_to_solr(mocker, monkeypatch, name, compresed_name, es
             + '%20OR%20' \
             + escaped_name \
             + '&qf=name_compressed^6%20name_with_synonyms&wt=json' \
-              '&start=0&rows=10&fl=source,id,name,score&sort=score%20desc' \
+              '&start=0&rows=10&fl=source,id,name,score,start_date,jurisdiction&sort=score%20desc' \
               '&fq=name_with_synonyms:(' \
-            + synonym_tokens \
+            + synonym_tokens.upper() \
             + ')'
 
     #
@@ -75,12 +75,12 @@ solr_get_synonym_test_data = [
 @pytest.mark.parametrize("name, expected", solr_get_synonym_test_data)
 def test_solr__get_synonyms_clause(monkeypatch, name, expected):
 
-    def mock_solr__synonyms_exist(token):
+    def mock_solr__synonyms_exist(token, col='synonyms_text'):
         return True
     monkeypatch.setattr(SolrQueries, '_synonyms_exist', mock_solr__synonyms_exist)
 
-    syn = SolrQueries._get_synonyms_clause(name)
+    syn = SolrQueries._get_synonyms_clause(name, '')
 
-    print (syn)
+    print(syn)
 
-    assert SYNONYMS_PREFIX+'(' + expected + ')' == syn
+    assert (SYNONYMS_PREFIX+'(' + expected + ')').upper() == syn.upper()

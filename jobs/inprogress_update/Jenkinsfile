@@ -131,7 +131,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
     }
     try {
         timeout(time: 1, unit: 'DAYS') {
-            input message: "Run inprogress-update-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
+            input message: "Run inprogress-update-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
         }
     } catch (Exception e) {
         run_pipeline = false;
@@ -306,7 +306,7 @@ if (!run_pipeline) {
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy inprogress-update to test?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
+                input message: "Deploy inprogress-update to test?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
@@ -383,7 +383,7 @@ if (!run_pipeline) {
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy inprogress-update to prod?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-edit,waltermoar-admin'
+                input message: "Deploy inprogress-update to prod?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;

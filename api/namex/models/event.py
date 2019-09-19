@@ -7,7 +7,8 @@ from marshmallow import Schema, fields, post_load
 from datetime import datetime
 from .request import Request
 from sqlalchemy.orm import backref
-import bz2
+from sqlalchemy.dialects.postgresql import JSONB
+
 
 
 class Event(db.Model):
@@ -16,7 +17,8 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     eventDate = db.Column('event_dt', db.DateTime(timezone=True), default=datetime.utcnow)
     action = db.Column(db.String(1000))
-    jsonZip = db.Column('json_zip', db.LargeBinary)
+    jsonZip = db.Column('json_zip', db.Text)
+    eventJson =  db.Column('event_json', JSONB)
 
     # relationships
     stateCd = db.Column('state_cd', db.String(20),  db.ForeignKey('states.cd'))
@@ -38,8 +40,8 @@ class Event(db.Model):
     VALID_ACTIONS=[GET, PUT, PATCH, POST, DELETE]
 
     def json(self):
-        return {"eventDate": self.eventDate, "action": self.action, "jsonData": bz2.decompress(self.jsonZip),
-                "requestId": self.nrId, "userId": self.userId }
+        return {"id": self.id, "eventDate": self.eventDate, "action": self.action, "stateCd": self. stateCd, "jsonData": self.eventJson,
+                "requestId": self.nrId, "userId": self.userId}
 
     def save_to_db(self):
         db.session.add(self)

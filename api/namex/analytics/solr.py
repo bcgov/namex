@@ -1,5 +1,4 @@
 import json
-import re
 import string
 from typing import List
 
@@ -53,9 +52,10 @@ class SolrQueries:
             '&q=name:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
-            '&fl=source,id,name,score'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
-            '{synonyms_clause}',
+            '{synonyms_clause}'
+            '{exact_phrase_clause}',
         OLD_SYN_CONFLICTS:
             '/solr/possible.conflicts/select?'
             'hl.fl=name'
@@ -66,14 +66,15 @@ class SolrQueries:
             '&q=txt_starts_with:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
-            '&fl=source,id,name,score'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
-            '{synonyms_clause}{name_copy_clause}',
+            '{synonyms_clause}{exact_phrase_clause}{name_copy_clause}',
         COBRS_PHONETIC_CONFLICTS:
             '/solr/possible.conflicts/select?'
             '&q=cobrs_phonetic:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
             '&fq=-{exact_name}'
             '{synonyms_clause}',
@@ -82,6 +83,7 @@ class SolrQueries:
             '&q=dblmetaphone_name:{start_str}'
             '&wt=json'
             '&start={start}&rows={rows}'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc,txt_starts_with%20asc'
             '&fq=-{exact_name}'
             '{synonyms_clause}',
@@ -97,12 +99,12 @@ class SolrQueries:
             '&qf=name_compressed^6%20name_with_synonyms'
             '&wt=json'
             '&start={start}&rows={rows}'
-            '&fl=source,id,name,score'
+            '&fl=source,id,name,score,start_date,jurisdiction'
             '&sort=score%20desc'
             '{synonyms_clause}{name_copy_clause}',
         HISTORY:
             '/solr/names/select?sow=false&df=name_exact_match&wt=json&&rows={rows}&q={name}'
-            '&fl=nr_num,name,score,submit_count,name_state_type_cd',
+            '&fl=nr_num,name,score,submit_count,name_state_type_cd,start_date,jurisdiction',
         TRADEMARKS:
             '/solr/trademarks/select?'
             'defType=edismax'
@@ -120,115 +122,214 @@ class SolrQueries:
     }
 
     @classmethod
-    def get_conflict_results(cls, name, bucket, start=0, rows=100):
+    def get_conflict_results(cls, name, bucket, exact_phrase, start=0, rows=100):
         solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
         if not solr_base_url:
             current_app.logger.error('SOLR: SOLR_BASE_URL is not set')
 
             return None, 'Internal server error', 500
 
-        # TODO: these should be loaded from somewhere.
-        designations = [
-            'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited',
-            'limited liability co.', 'limited liability company', 'limited liability partnership', 'limitee', 'llc',
-            'llp', 'ltd.', 'ltee', 'sencrl', 'societe a responsabilite limitee',
-            'societe en nom collectif a responsabilite limitee', 'srl', 'ulc', 'unlimited liability company']
+        # handle non-ascii chars in name
+        name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
+        name = cls.remove_stopwords_designations(name)
 
-        # remove designations if they are at the end of the name
-        for designation in designations:
-            index = name.upper().find(' ' + designation.upper())
-            # checks if there is a designation AND if that designation is at the end of the string
-            if index != -1 and (index + len(designation) + 1) is len(name):
-                name = name[:index]
-                break
+        if name.find('*') != -1:
+            list_name_split = name.split()
+        else:
+            list_name_split,name = cls.combine_multi_word_synonyms(name, solr_base_url)
+            list_name_split = [x.upper() for x in list_name_split]
+        stemmed_words = cls.word_pre_processing(list_name_split, 'stems', solr_base_url)['stems']
+        stemmed_name = ''
+        for stem in stemmed_words:
+            stemmed_name += ' ' + stem
+        stemmed_name = stemmed_name.strip().upper()
 
-        name = name.upper().replace(' AND ',' ').replace('&',' ').replace('+',' ')
-        list_name_split = name.split()
+        name_tokens = {'full_words':list_name_split, 'stemmed_words':stemmed_words}
+        prox_search_strs,old_alg_search_strs,phon_search_strs = cls.build_solr_search_strs(name, stemmed_name, name_tokens)
 
-        def replace_nth(string, deleted_substr, added_substr, n):
-            nth_index = [m.start() for m in re.finditer(deleted_substr, string)][n - 1]
-            before = string[:nth_index]
-            after = string[nth_index:]
-            after = after.replace(deleted_substr, added_substr, 1)
-            newString = before + after
-            return newString
-
-        num_terms = 0
-        prox_combined_terms = ''
-        prox_search_strs = []
-        phon_search_strs = []
-        old_alg_combined_terms = ''
-        old_alg_search_strs = []
-        for term in list_name_split:
-            num_terms += 1
-
-            prox_combined_terms += term + ' '
-            prox_compounded_words = [prox_combined_terms.strip()]
-
-            if num_terms > 2:
-                prox_compounded_words.append(prox_combined_terms.replace(' ',''))
-
-            # concat for compound versions of combined terms
-            combined_terms_list = prox_combined_terms.split()
-
-            n = 1
-            while n < len(combined_terms_list):
-                compunded_name = replace_nth(prox_combined_terms, ' ', '', n)
-                prox_compounded_words.append(compunded_name)
-                n += 1
-
-            prox_search_strs.insert(0, (prox_compounded_words, name[len(prox_combined_terms):], num_terms))
-            phon_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], num_terms))
-            old_alg_combined_terms += term + '\ '
-            old_alg_search_strs.insert(0, old_alg_combined_terms)
-
+        synonyms_for_word = cls.get_synonyms_for_words(name_tokens['stemmed_words'])
         if bucket == 'synonym':
-            connections = cls.get_synonym_results(solr_base_url, name, prox_search_strs, old_alg_search_strs, start, rows)
+            connections = cls.get_synonym_results(solr_base_url, name, prox_search_strs, old_alg_search_strs, name_tokens, exact_phrase, start, rows)
 
         elif bucket == 'cobrs_phonetic':
-            connections = cls.get_cobrs_phonetic_results(solr_base_url, prox_search_strs, start, rows)
+            connections = cls.get_cobrs_phonetic_results(solr_base_url, prox_search_strs, name_tokens, start, rows)
 
         # bucket == 'phonetic'
         else:
-            connections = cls.get_phonetic_results(solr_base_url, name, phon_search_strs)
+            connections = cls.get_phonetic_results(solr_base_url, name, phon_search_strs, name_tokens)
 
         try:
             solr = {'response':{'numFound': 0,
-                                'start': None,
+                                'start': start,
+                                'rows': rows,
                                 'maxScore': 0.0,
                                 'docs': []},
                     'highlighting': []}
 
-            # seen_names used to keep track of duplicates
             seen_names = []
+            passed_names = []
             previous_stack_title = ''
+            stem_count = len(stemmed_words) * 2 + 1
+            count = -1
             for connection in connections:
+                seen_ordered_names = seen_names.copy()
+
                 result = connection[0]
                 solr['response']['numFound'] += result['response']['numFound']
-                solr['response']['start'] = result['response']['start']
-
-                if previous_stack_title.replace(' ','') != connection[1].replace(' ',''):
-                    solr['response']['docs'].append({'name': connection[1]})
-                    previous_stack_title = connection[1]
+                result_name = parse.unquote(connection[1])
+                if previous_stack_title.replace(' ','') != result_name.replace(' ',''):
+                    stack_title_info = {'name_info': {'name':result_name}, 'stems': stemmed_words[:int(stem_count/2)]}
+                    for word in list_name_split[:int(stem_count/2)]:
+                        for stem in stemmed_words[:int(stem_count/2)]:
+                            if stem in word:
+                                break
+                            elif stem[:-1] in word:
+                                stack_title_info['stems'] += [stem[:-1]]
+                    solr['response']['docs'].append(stack_title_info)
+                    stem_count -= 1
+                    previous_stack_title = result_name
 
                 if len(result['response']['docs']) > 0:
+                    ordered_names = []
+                    missed_names = []
+                    # if there is a bracket in the stack title then there is a 'synonyms:(...)' clause
+                    if 'synonyms:(' in result_name:
+                        synonyms = result_name[result_name.find('(') + 1:result_name.find(')')]
+                        synonyms = [x.strip() for x in synonyms.split(',')]
+                        for synonym in synonyms:
+                            if synonym.upper() in synonyms_for_word:
+                                for word in synonyms_for_word[synonym.upper()]:
+                                    for item in result['response']['docs']:
+                                        processed_name = cls.name_pre_processing(item['name']).upper()
+                                        if item['name'] not in seen_ordered_names and item['name'] not in missed_names:
+                                            missed_names.append(item['name'])
+                                        if item['name'] not in seen_ordered_names:
 
-                    # add non duplicates
-                    non_duplicate_names = []
-                    for name in result['response']['docs']:
-                        if name['name'] in seen_names:
-                            pass
-                        else:
-                            seen_names.append(name['name'])
-                            non_duplicate_names.append(name)
+                                            if word.upper() in processed_name.upper():
+                                                seen_ordered_names.append(item['name'])
+                                                ordered_names.append({'name_info': item, 'stems': [word.upper()]})
+                                                missed_names.remove(item['name'])
 
-                    solr['response']['docs'] += non_duplicate_names
+                                            elif word.upper()[:-1] in processed_name.upper() and len(word) > 4:
+                                                seen_ordered_names.append(item['name'])
+                                                ordered_names.append({'name_info': item, 'stems': [word.upper()[:-1]]})
+                                                missed_names.remove(item['name'])
+
+                                    # # in case a name has more than one synonym in it
+                                    # for ordered in ordered_names:
+                                    #     if word.upper() in cls.name_pre_processing(ordered['name_info']['name'].upper()):
+                                    #         for stem in ordered['stems']:
+                                    #             # i.e. don't want to add 'dev' if 'develop' is added as a stem
+                                    #             if word not in stem:
+                                    #                 ordered['stems'].append(word.upper())
+                                    #     elif word.upper()[:-1] in cls.name_pre_processing(ordered['name_info']['name'].upper()) and len(word) > 4:
+                                    #         for stem in ordered['stems']:
+                                    #             # i.e. don't want to add 'dev' if 'develop' is added as a stem
+                                    #             if word not in stem:
+                                    #                 ordered['stems'].append(word.upper()[:-1])
+
+                    else:
+                        for item in result['response']['docs']:
+                            if item['name'] not in seen_ordered_names:
+                                seen_ordered_names.append(item['name'])
+                                ordered_names.append({'name_info': item, 'stems': []})
+
+                    if len(missed_names) > 0:
+                        current_app.logger.debug('In {} stack UNSORTED results: {}'.format(previous_stack_title, missed_names))
+                        for missed in missed_names.copy():
+                            for item in result['response']['docs']:
+                                if missed == item['name']:
+                                    ordered_names.append({'name_info': item, 'stems': []})
+                                    missed_names.remove(missed)
+                                    break
+
+                        if len(missed_names) > 0:
+                            # should never get here
+                            current_app.logger.error('In {} stack MISSED results: {}'.format(previous_stack_title, missed_names))
+
+                    final_names_list = []
+
+                    # order based on alphabetization of swapped in synonyms
+                    if bucket == 'synonym':
+
+                        pivot_list = []
+                        for key in name_tokens['stemmed_words']:
+                            pivot_list.insert(0,key.upper())
+                        seen_for_pivot = []
+                        if '*' not in connection[1]:
+                            count += 1
+                        for pivot in pivot_list[count:]:
+                            sorted_names = []
+                            if pivot in synonyms_for_word:
+                                for synonym in synonyms_for_word[pivot]:
+                                    for name in ordered_names:
+                                        if name['name_info']['name'] in seen_for_pivot:
+                                            pass
+                                        else:
+                                            processed_name = cls.name_pre_processing(name['name_info']['name'])
+
+                                            if ' ' + synonym.upper() in ' ' + processed_name.upper():
+                                                stem = [synonym.upper()]
+                                                if stem[0] not in name['stems']:
+                                                    sorted_names.append({'name_info': name['name_info'], 'stems': stem + name['stems'].copy()})
+                                                else:
+                                                    sorted_names.append({'name_info': name['name_info'], 'stems': name['stems']})
+
+                                                seen_for_pivot.append(name['name_info']['name'])
+                                                if name['name_info']['name'] in passed_names:
+                                                    passed_names.remove(name['name_info']['name'])
+
+                                            elif ' ' + synonym.upper()[:-1] in ' ' + processed_name.upper() and len(synonym) > 4:
+                                                stem = [synonym.upper()[:-1]]
+                                                stack_title_info = solr['response']['docs'].pop()
+                                                if stem[0] not in name['stems']:
+                                                    sorted_names.append({'name_info': name['name_info'],'stems': stem + name['stems'].copy()})
+                                                    if stem[0] not in stack_title_info['stems'] and synonym.upper() in stack_title_info['stems']:
+                                                        stack_title_info['stems'] += stem
+                                                else:
+                                                    sorted_names.append(
+                                                        {'name_info': name['name_info'], 'stems': name['stems']})
+                                                solr['response']['docs'].append(stack_title_info)
+
+                                                seen_for_pivot.append(name['name_info']['name'])
+                                                if name['name_info']['name'] in passed_names:
+                                                    passed_names.remove(name['name_info']['name'])
+
+                                            elif name['name_info']['name'] not in passed_names:
+                                                passed_names.append(name['name_info']['name'])
+
+                            no_duplicates = []
+                            for ordered in ordered_names:
+                                duplicate = False
+                                for sorted in sorted_names:
+                                    if ordered['name_info']['name'] == sorted['name_info']['name']:
+                                        duplicate = True
+                                if not duplicate:
+                                    no_duplicates.append(ordered)
+
+                            ordered_names = sorted_names.copy() + no_duplicates.copy()
+
+                            for seen in seen_for_pivot:
+                                if seen not in seen_ordered_names:
+                                    seen_ordered_names.append(seen)
+
+                            seen_for_pivot.clear()
+                            sorted_names.clear()
+
+                        final_names_list += ordered_names
+                    else:
+                        for item in ordered_names:
+                            final_names_list.append(item)
+                            seen_ordered_names.append(item['name_info']['name'])
+
+                    seen_names += seen_ordered_names.copy()
+                    seen_ordered_names.clear()
+
+                    solr['response']['docs'] += final_names_list
 
             results = {"response": {"numFound": solr['response']['numFound'],
-                                    "start": solr['response']['start'],
-                                    # "rows": solr['responseHeader']['params']['rows'],
                                     "maxScore": solr['response']['maxScore'],
-                                    # "name": solr['responseHeader']['params']['q']
+                                    "name": result['responseHeader']['params']['q']
                                     },
                        'names': solr['response']['docs'],
                        'highlighting': solr['highlighting']}
@@ -240,38 +341,43 @@ class SolrQueries:
             return None, 'Internal server error', 500
 
     @classmethod
-    def get_synonym_results(cls, solr_base_url, name, prox_search_strs, old_alg_search_strs, start=0, rows=100):
+    def get_synonym_results(cls, solr_base_url, name, prox_search_strs, old_alg_search_strs, name_tokens, exact_phrase, start=0, rows=100):
 
         try:
             connections = []
+            if name == '':
+                name = '*'
+                prox_search_strs.append((['*'],'','',1))
+                old_alg_search_strs.append('*')
 
             for prox_search_tuple, old_alg_search in zip(prox_search_strs, old_alg_search_strs):
 
                 old_alg_search_str = old_alg_search[:-2].replace(' ', '%20') + '*'  # [:-2] takes off the last '\ '
+                synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1], prox_search_tuple[2], name_tokens) if exact_phrase == '' else ''
+                exact_phrase_clause = '&fq=contains_exact_phrase:' + '\"' + parse.quote(exact_phrase).replace('%2A','') + '\"' if exact_phrase != '' else ''
 
-                synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1])
+                if name.find('*') == -1:
+                    for name in prox_search_tuple[0]:
+                        prox_search_str = name
+                        query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
+                            start=start,
+                            rows=rows,
+                            start_str='\"' + parse.quote(prox_search_str).replace('%2A', '') + '\"~{}'.format(prox_search_tuple[3]),
+                            synonyms_clause=synonyms_clause,
+                            exact_phrase_clause=exact_phrase_clause,
+                        )
+                        current_app.logger.debug('Query: ' + query)
+                        connections.append((json.load(request.urlopen(query)),
+                                            '----' + prox_search_str.replace('\\', '').replace('*','').replace('@','')
+                                            + synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')
+                                            + ' - PROXIMITY SEARCH'))
 
-                for name in prox_search_tuple[0]:
-                    prox_search_str = name
-                    ### Proximity (name:) search query
-                    query = solr_base_url + SolrQueries.queries['proxsynconflicts'].format(
-                        start=start,
-                        rows=rows,
-                        start_str='\"' + prox_search_str.replace(' ', '%20') + '\"~{}'.format(prox_search_tuple[2]),
-                        synonyms_clause=synonyms_clause,
-                    )
-                    current_app.logger.debug('Query: ' + query)
-                    connections.append((json.load(request.urlopen(query)),
-                                        '----' + prox_search_str.replace('\\', '').replace('*','').replace('@','')
-                                        + synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')
-                                        + ' - PROXIMITY SEARCH'))
-
-                ### Old (txt_starts_with:) search query
                 query = solr_base_url + SolrQueries.queries['oldsynconflicts'].format(
                     start=start,
                     rows=rows,
-                    start_str=old_alg_search_str,
+                    start_str=parse.quote(old_alg_search_str).replace('%2A', '*').replace('%5C%2520', '\\%20'),
                     synonyms_clause=synonyms_clause,
+                    exact_phrase_clause=exact_phrase_clause,
                     name_copy_clause=cls._get_name_copy_clause(name)
                 )
                 current_app.logger.debug('Query: ' + query)
@@ -279,68 +385,68 @@ class SolrQueries:
                                     old_alg_search_str.replace('\\', '').replace('%20', ' ').replace('**','*') +
                                     synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
                                     ' - EXACT WORD ORDER'))
-
             return connections
 
         except Exception as err:
             current_app.logger.error(err, query)
-            return None, 'Internal server error', 500
+            return None, 'SOLR query error', 500
 
     @classmethod
-    def get_cobrs_phonetic_results(cls, solr_base_url, search_strs, start=0, rows=100):
+    def get_cobrs_phonetic_results(cls, solr_base_url, search_strs, name_tokens, start=0, rows=100):
         try:
-            connections = []
-            for str_tuple in search_strs:
-                synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
-                for name in str_tuple[0]:
-                    start_str = name
-                    query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
+            if search_strs == []:
+                connections = [({'response':{'numFound':0,'docs':[]},'responseHeader':{'params':{'q':'*'}}},'----*')]
+            else:
+                connections = []
+                for str_tuple in search_strs:
+                    synonyms_clause = cls._get_synonyms_clause(str_tuple[1], str_tuple[2], name_tokens)
+                    for name in str_tuple[0]:
+                        start_str = name
+                        query = solr_base_url + SolrQueries.queries['cobrsphonconflicts'].format(
+                            start=start,
+                            rows=rows,
+                            start_str='\"' + parse.quote(start_str).replace('%2A', '') + '\"~{}'.format(str_tuple[3]),
+                            synonyms_clause=synonyms_clause,
+                            exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[3]),
+                        )
+                        current_app.logger.debug('Query: ' + query)
+                        result = json.load(request.urlopen(query))
+                        connections.append((result, '----' + start_str.replace('*','').replace('@','') +
+                                            synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
+            return connections
+
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'SOLR query error', 500
+
+    @classmethod
+    def get_phonetic_results(cls, solr_base_url, name, search_strs, name_tokens, start=0, rows=100):
+        try:
+            if search_strs == []:
+                connections = [({'response':{'numFound':0,'docs':[]},'responseHeader':{'params':{'q':'*'}}},'----*')]
+            else:
+                connections = []
+                for str_tuple in search_strs:
+                    synonyms_clause = cls._get_synonyms_clause(str_tuple[1], str_tuple[2], name_tokens)
+                    start_str = str_tuple[0]
+                    query = solr_base_url + SolrQueries.queries['phonconflicts'].format(
                         start=start,
                         rows=rows,
-                        start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                        start_str='\"' + parse.quote(start_str).replace('%2A', '') + '\"~{}'.format(str_tuple[3]),
                         synonyms_clause=synonyms_clause,
-                        exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
+                        exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[3]),
                     )
                     current_app.logger.debug('Query: ' + query)
                     result = json.load(request.urlopen(query))
-
+                    docs = result['response']['docs']
+                    result['response']['docs'] = cls.post_treatment(docs, start_str)
                     connections.append((result, '----' + start_str.replace('*','').replace('@','') +
                                         synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
-
             return connections
 
         except Exception as err:
             current_app.logger.error(err, query)
-            return None, 'Internal server error', 500
-
-    @classmethod
-    def get_phonetic_results(cls, solr_base_url, name, search_strs, start=0, rows=100000):
-        try:
-            connections = []
-            for str_tuple in search_strs:
-                synonyms_clause = cls._get_synonyms_clause(str_tuple[1])
-                start_str = str_tuple[0]
-                query = solr_base_url + SolrQueries.queries['phonconflicts'].format(
-                    start=start,
-                    rows=rows,
-                    start_str='\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
-                    synonyms_clause=synonyms_clause,
-                    exact_name='name_no_synonyms:\"' + start_str.replace(' ', '%20') + '\"~{}'.format(str_tuple[2]),
-                )
-                current_app.logger.debug('Query: ' + query)
-                result = json.load(request.urlopen(query))
-
-                docs = result['response']['docs']
-                result['response']['docs'] = cls.post_treatment(docs, start_str)
-
-                connections.append((result, '----' + start_str.replace('*','').replace('@','') +
-                                    synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
-
-            return connections
-
-        except Exception as err:
-            current_app.logger.error(err, query)
-            return None, 'Internal server error', 500
+            return None, 'SOLR query error', 500
 
     @classmethod
     def get_results(cls, query_type, name, start=0, rows=10):
@@ -362,7 +468,7 @@ class SolrQueries:
                 rows=rows,
                 name=cls._get_parsed_name(name),
                 compressed_name=cls._compress_name(name),
-                synonyms_clause=cls._get_synonyms_clause(name),
+                synonyms_clause=cls._get_synonyms_clause(name, ''),
                 name_copy_clause=cls._get_name_copy_clause(name)
             )
             current_app.logger.debug('Query: ' + query)
@@ -398,10 +504,10 @@ class SolrQueries:
 
         # TODO: these should be loaded from somewhere.
         designations = [
-            'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited', 'limited liability co.',
-            'limited liability company', 'limited liability partnership', 'limitee', 'llc', 'llp', 'ltd.', 'ltee',
+            'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited liability co.',
+            'limited liability company', 'limited liability partnership', 'limited partnership','limitee', 'llc', 'llp', 'ltd.', 'ltee',
             'sencrl', 'societe a responsabilite limitee', 'societe en nom collectif a responsabilite limitee', 'srl',
-            'ulc', 'unlimited liability company']
+            'ulc', 'unlimited liability company', 'limited',]
 
         # Match the designation with whitespace before and either followed by whitespace or end of line.
         for designation in designations:
@@ -452,7 +558,6 @@ class SolrQueries:
         if start_token <= idx:
             tokens.append(line[start_token:])
         return tokens
-
 
     @classmethod
     def _parse_for_synonym_candidates(cls, tokens: List[str]) -> List[str]:
@@ -536,13 +641,14 @@ class SolrQueries:
 
     # Call the synonyms API for the given token.
     @classmethod
-    def _synonyms_exist(cls, token):
+    def _synonyms_exist(cls, token, col):
         solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
         if not solr_synonyms_api_url:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
-        query = solr_synonyms_api_url + '/' + parse.quote(token)
+        query = solr_synonyms_api_url + '/' + col + '/' + parse.quote(token)
+        current_app.logger.debug('Query: ' + query)
 
         try:
             connection = request.urlopen(query)
@@ -556,14 +662,41 @@ class SolrQueries:
 
         return connection.status == 200
 
+    # Call the synonyms API for list of synonyms matching the given token.
+    @classmethod
+    def _get_synonym_list(cls, token):
+        solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
+        if not solr_synonyms_api_url:
+            raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
+
+        # If the web service call fails, the caller will catch and then return a 500 for us.
+        query = solr_synonyms_api_url + '/' + 'stems_text' + '/' + parse.quote(token)
+        current_app.logger.debug('Query: ' + query)
+        try:
+            connection = request.urlopen(query)
+        except HTTPError as http_error:
+            # Expected when the token does not have synonyms.
+            if http_error.code == 404:
+                return []
+
+            # Not sure what it is, pass it up.
+            raise http_error
+
+        results = json.load(connection)
+        synonym_list = []
+        # in case a token is part of multiple synonym lists
+        for synonyms in results[1]:
+            synonym_list += synonyms.split(',')
+
+        return synonym_list
+
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod
-    def _get_synonyms_clause(cls, name):
-        name = re.sub(' +', ' ', name)
+    def _get_synonyms_clause(cls, name, stemmed_name, name_tokens={'full_words':[], 'stemmed_words':[]}):
+        # name = re.sub(' +', ' ', name)
         current_app.logger.debug('getting synonyms for: {}'.format(name))
         clause = ''
         synonyms = []
-
         if name:
             tokens = cls._tokenize(name.lower(), [string.digits,
                                                   string.whitespace,
@@ -572,8 +705,23 @@ class SolrQueries:
                                                   string.ascii_lowercase])
             candidates = cls._parse_for_synonym_candidates(tokens)
             for token in candidates:
-                if cls._synonyms_exist(token):
-                    synonyms.append(token)
+                for full, stem in zip(name_tokens['full_words'],name_tokens['stemmed_words']):
+                    if token.upper() == full.upper():
+                        token = stem
+                        break
+                if cls._synonyms_exist(token, 'synonyms_text'):
+                    synonyms.append(token.upper())
+
+        if stemmed_name:
+            tokens = cls._tokenize(stemmed_name.lower(), [string.digits,
+                                                  string.whitespace,
+                                                  RESERVED_CHARACTERS,
+                                                  string.punctuation,
+                                                  string.ascii_lowercase])
+            candidates = cls._parse_for_synonym_candidates(tokens)
+            for token in candidates:
+                if cls._synonyms_exist(token, 'stems_text') and token.upper() not in synonyms:
+                    synonyms.append(token.upper())
 
         if synonyms:
             clause = SYNONYMS_PREFIX + '(' + parse.quote(' '.join(synonyms)) + ')'
@@ -639,6 +787,250 @@ class SolrQueries:
         return clause
 
     @classmethod
+    def remove_stopwords_designations(cls, name):
+        # TODO: these should be loaded from somewhere.
+        designations = [
+            'corp.', 'corp', 'corporation', 'inc.', 'inc', 'incorporated', 'incorporee', 'l.l.c.', 'llc', 'limited partnership',
+            'limited liability co.', 'limited liability co','limited liability company', 'limited liability partnership', 'limitee',
+            'llp', 'ltd.', 'ltd', 'ltee', 'sencrl', 'societe a responsabilite limitee',
+            'societe en nom collectif a responsabilite limitee', 'limited', 'srl', 'ulc', 'unlimited liability company']
+
+        stop_words = []
+        try:
+            with open('stopwords.txt') as stop_words_file:
+                stop_words = []
+                for line in stop_words_file.readlines():
+                    if line.find('#') == -1:
+                        stop_words.append(line.strip('\n').strip())
+        except Exception as err:
+            current_app.logger.error(err)
+
+        # remove designations if they are at the end of the name
+        for designation in designations:
+            index = name.upper().find(' ' + designation.upper())
+            # checks if there is a designation AND if that designation is at the end of the string
+            if index != -1 and (index + len(designation) + 1) is len(name):
+                name = name[:index]
+                break
+
+        for stop_word in stop_words:
+            name = ' ' + name + ' '
+            name = name.upper().replace(' ' + stop_word.upper() + ' ', ' ').strip()
+
+        # # handle non-ascii chars in name
+        # name = ''.join([i if ord(i) < 128 else parse.quote(i) for i in name])
+        name = name.upper().replace(' AND ', ' ').replace('&', ' ').replace('+', ' ')
+        return name
+
+    @classmethod
+    def combine_multi_word_synonyms(cls, name, solr_base_url):
+
+        max_len = len(name.split()) * 2
+        query = solr_base_url + \
+                '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={name}&analysis.fieldname=name' \
+                '&wt=json&indent=true'.format(name=parse.quote(name.strip()).replace('%2A', ''))
+        current_app.logger.debug('Query: ' + query)
+
+        processed_words = json.load(request.urlopen(query))
+
+        count = 0
+        for item in processed_words['analysis']['field_names']['name']['index']:
+            if item == 'org.apache.lucene.analysis.synonym.SynonymGraphFilter':
+                count += 1
+                break
+            count += 1
+
+        name = ''
+        word_count = 0
+        for text in processed_words['analysis']['field_names']['name']['index'][count]:
+            if word_count < max_len:
+                name += text['text'] + ' '
+            else:
+                name += text['text']
+            word_count += 1
+        name = parse.unquote(name)
+        processed_list = name.split()
+
+        return processed_list,name.strip()
+
+    @classmethod
+    def build_solr_search_strs(cls, name, stemmed_name, name_tokens):
+        def replace_nth(string, deleted_substr, added_substr, n):
+            nth_index = [m.start() for m in re.finditer(deleted_substr, string)][n - 1]
+            before = string[:nth_index]
+            after = string[nth_index:]
+            after = after.replace(deleted_substr, added_substr, 1)
+            newString = before + after
+            return newString
+
+        num_terms = 0
+        prox_combined_terms = ''
+        prox_stemmed_combined_terms = ''
+        prox_search_strs = []
+        phon_search_strs = []
+        old_alg_combined_terms = ''
+        old_alg_search_strs = []
+        full_words = name_tokens['full_words']
+        stemmed_words = name_tokens['stemmed_words']
+
+        for index in range(len(full_words)):
+            term = full_words[index]
+            try:
+                stemmed_term = stemmed_words[index]
+            except IndexError as err:
+                stemmed_term = ''
+            num_terms += 1
+
+            prox_combined_terms += term + ' '
+            prox_stemmed_combined_terms += stemmed_term + ' '
+            prox_compounded_words = [prox_combined_terms.strip()]
+
+            if num_terms > 2:
+                prox_compounded_words.append(prox_combined_terms.replace(' ',''))
+
+            # concat for compound versions of combined terms
+            combined_terms_list = prox_combined_terms.split()
+
+            n = 1
+            while n < len(combined_terms_list):
+                compunded_name = replace_nth(prox_combined_terms, ' ', '', n)
+                prox_compounded_words.append(compunded_name)
+                n += 1
+            prox_search_strs.insert(0, (prox_compounded_words, name[len(prox_combined_terms):], stemmed_name[len(prox_stemmed_combined_terms):], num_terms))
+            phon_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], stemmed_name[len(prox_stemmed_combined_terms):], num_terms))
+            old_alg_combined_terms += term + '\ '
+            old_alg_search_strs.insert(0, old_alg_combined_terms)
+
+        return prox_search_strs, old_alg_search_strs, phon_search_strs
+
+    @classmethod
+    def get_synonyms_for_words(cls, list_name_split):
+        # get synonym list for each word in the name
+        list_name_split = [wrd.replace('*','').upper() for wrd in list_name_split]
+        synonyms_for_word = {}
+        for word in list_name_split:
+            synonyms_for_word[word] = [x.upper().strip() for x in cls._get_synonym_list(word)]
+
+            if synonyms_for_word[word]:
+                synonyms_for_word[word].remove(word)
+                synonyms_for_word[word].sort()
+
+                for synonym in synonyms_for_word[word]:
+                    temp_list = synonyms_for_word[word].copy()
+                    temp_list.remove(synonym)
+                    swaps = [s for s in temp_list if synonym in s]
+                    swaps.reverse()
+                    for swap in swaps:
+                        synonyms_for_word[word].remove(swap)
+                        index = synonyms_for_word[word].index(synonym)
+                        synonyms_for_word[word].insert(index, swap)
+
+            synonyms_for_word[word].insert(0, word)
+
+        return synonyms_for_word
+
+    @classmethod
+    def word_pre_processing(cls, list_of_words, type, solr_base_url):
+        list_of_words = [w.replace('*', '') for w in list_of_words]
+        words_to_process = ''
+        for item in list_of_words:
+            words_to_process += ' ' + item
+
+        return_dict = {'stems':[]}
+        if words_to_process != '':
+            query = solr_base_url + \
+                    '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={words}&analysis.fieldname=name' \
+                    '&wt=json&indent=true'.format(words=parse.quote(words_to_process.strip()))
+            current_app.logger.debug('Query: ' + query)
+
+            processed_words = json.load(request.urlopen(query))
+
+            count = 0
+
+            if type == 'synonyms':
+                for item in processed_words['analysis']['field_names']['name']['index']:
+                    if item == 'org.apache.lucene.analysis.core.FlattenGraphFilter':
+                        count += 1
+                        break
+                    count += 1
+
+                processed_list = []
+                for text in processed_words['analysis']['field_names']['name']['index'][count]:
+                    processed_list.append(text['text'])
+
+                for original, processed in zip(list_of_words, processed_list):
+                    return_dict[original] = processed
+
+            # type == 'stems'
+            else:
+                for item in processed_words['analysis']['field_names']['name']['index']:
+                    if item == 'org.apache.lucene.analysis.snowball.SnowballFilter':
+                        count += 1
+                        break
+                    count += 1
+
+                processed_list = []
+                for text in processed_words['analysis']['field_names']['name']['index'][count]:
+                    processed_list.append(text['text'].upper())
+
+                # removal_list = []
+                # for item in list_of_words:
+                #     stem_in_name = False
+                #     for processed_synonym in processed_list:
+                #         if processed_synonym.upper() in item.upper():
+                #             stem_in_name = True
+                #             break
+                #         elif processed_synonym.upper()[:-1] in item.upper():
+                #             removal_list.append(processed_synonym)
+                #     if not stem_in_name:
+                #         processed_list.insert(0, item)
+                # for processed in processed_list:
+                #     if processed in removal_list:
+                #         processed_list.remove(processed)
+                return_dict['stems'] = processed_list
+        return return_dict
+
+    @classmethod
+    def name_pre_processing(cls, name):
+        processed_name = (' ' + name.lower() + ' ') \
+            .replace('!', '') \
+            .replace('@', '') \
+            .replace('#', '') \
+            .replace('%', '') \
+            .replace('&', '') \
+            .replace('\\', '') \
+            .replace('/', '') \
+            .replace('{', '') \
+            .replace('}', '') \
+            .replace('[', '') \
+            .replace(']', '') \
+            .replace(')', '') \
+            .replace('(', '') \
+            .replace('+', '') \
+            .replace('-', '') \
+            .replace('|', '') \
+            .replace('?', '') \
+            .replace('.', '') \
+            .replace(',', '') \
+            .replace('_', '') \
+            .replace('\'n', '') \
+            .replace('\'', '') \
+            .replace('\"', '') \
+            .replace(' $ ', 'dollar') \
+            .replace('$', 's') \
+            .replace(' ¢ ', 'cent') \
+            .replace('¢', 'c') \
+            .replace('britishcolumbia', 'bc') \
+            .replace('britishcolumbias', 'bc') \
+            .replace('britishcolumbian', 'bc') \
+            .replace('britishcolumbians', 'bc') \
+            .replace('british columbia', 'bc') \
+            .replace('british columbias', 'bc') \
+            .replace('british columbian', 'bc') \
+            .replace('british columbians', 'bc')
+        return processed_name.strip()
+
+    @classmethod
     def post_treatment(cls, docs, query_name):
         query_name = query_name.upper()
         names = []
@@ -697,5 +1089,6 @@ class SolrQueries:
     @classmethod
     def keep_candidate(cls, candidate, name, names):
         if len([doc['id'] for doc in names if doc['id'] == candidate['id']]) == 0:
-            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source']})
-
+            names.append({'name': name, 'id': candidate['id'], 'source': candidate['source'],
+                          'jurisdiction': candidate.get('jurisdiction', ''),
+                          'start_date': candidate.get('start_date', '')})

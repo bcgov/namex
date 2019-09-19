@@ -25,7 +25,7 @@ class Request(db.Model):
 
     # core fields
     id = db.Column(db.Integer, primary_key=True)
-    submittedDate = db.Column('submitted_date', db.DateTime, default=datetime.utcnow, index=True)
+    submittedDate = db.Column('submitted_date', db.DateTime(timezone=True), default=datetime.utcnow, index=True)
     lastUpdate = db.Column('last_update', db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     nrNum = db.Column('nr_num', db.String(10), unique=True)
@@ -42,6 +42,10 @@ class Request(db.Model):
     #legacy sync tracking
     furnished = db.Column('furnished', db.String(1), default='N', index=True)
 
+    # Flag to indicate this NR has been reset. Cleared upon submission, so it is only true after
+    # reset before subsequent examination is complete.
+    hasBeenReset = db.Column('has_been_reset', db.Boolean, default=False)
+
     # parent keys
     userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'), index=True)
 
@@ -49,7 +53,7 @@ class Request(db.Model):
     requestId = db.Column('request_id', db.Integer)
     previousRequestId = db.Column('previous_request_id', db.Integer)
     submitCount = db.Column('submit_count', db.Integer)
-    nroLastUpdate = db.Column('nro_last_update', db.DateTime)
+    nroLastUpdate = db.Column('nro_last_update', db.DateTime(timezone=True))
 
     # Relationship State
     stateCd = db.Column('state_cd', db.String(40), db.ForeignKey('states.cd'), index=True)
@@ -65,7 +69,7 @@ class Request(db.Model):
     # Relationships - Applicants
     applicants = db.relationship('Applicant', lazy='dynamic')
     # Relationships - Examiner Comments
-    comments = db.relationship('Comment', lazy='dynamic')
+    comments = db.relationship('Comment', lazy='dynamic', order_by="Comment.timestamp")
     # Relationships - Examiner Comments
     partnerNS = db.relationship('PartnerNameSystem', lazy='dynamic')
 
@@ -104,6 +108,7 @@ class Request(db.Model):
                 'additionalInfo' : self.additionalInfo,
                 'natureBusinessInfo' : self.natureBusinessInfo,
                 'furnished': self.furnished if (self.furnished is not None) else 'N',
+                'hasBeenReset': self.hasBeenReset,
                 'previousRequestId': self.previousRequestId,
                 'previousNr': previousNr,
                 'submitCount': self.submitCount,
@@ -226,6 +231,7 @@ class RequestsHeaderSchema(ma.ModelSchema):
                  ,'corpNum'
                  ,'expirationDate'
                  ,'furnished'
+                 ,'hasBeenReset'
                  ,'id'
                  ,'natureBusinessInfo'
                  ,'nrNum'

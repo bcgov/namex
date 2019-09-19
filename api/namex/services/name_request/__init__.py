@@ -48,7 +48,7 @@ def valid_state_transition(user, nr, new_state):
 
     # NR is in a final state, but maybe the user wants to pull it back for corrections
     if nr.stateCd in State.COMPLETED_STATE:
-        if not jwt.validate_roles([User.APPROVER]):
+        if not jwt.validate_roles([User.APPROVER]) and not jwt.validate_roles([User.EDITOR]):
             return False
             # return jsonify({"message": "Only Names Examiners can alter completed Requests"}), 401
 

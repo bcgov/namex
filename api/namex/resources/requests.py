@@ -321,8 +321,9 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
     def get(nr):
+
         # return jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
         return jsonify(RequestDAO.query.filter_by(nrNum =nr.upper()).first_or_404().json())
 
@@ -342,7 +343,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_roles([User.APPROVER, User.EDITOR])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def patch(nr, *args, **kwargs):
         """  Patches the NR. Currently only handles STATE (with optional comment) and Previous State.
 
@@ -410,6 +411,26 @@ class Request(Resource):
                 if nrd.stateCd == State.DRAFT:
                     warnings = nro.move_control_of_request_from_nro(nrd, user)
 
+                # if we're changing to DRAFT, update NRO status to "D" in NRO
+                if state == State.DRAFT:
+                    change_flags = {
+                        'is_changed__request': False,
+                        'is_changed__previous_request': False,
+                        'is_changed__applicant': False,
+                        'is_changed__address': False,
+                        'is_changed__name1': False,
+                        'is_changed__name2': False,
+                        'is_changed__name3': False,
+                        'is_changed__nwpta_ab': False,
+                        'is_changed__nwpta_sk': False,
+                        'is_changed__request_state': True,
+                    }
+
+                    warnings = nro.change_nr(nrd, change_flags)
+                    if warnings:
+                        MessageServices.add_message(MessageServices.ERROR,
+                                                    'change_request_in_NRO', warnings)
+
                 nrd.stateCd = state
                 nrd.userId = user.id
 
@@ -422,6 +443,11 @@ class Request(Resource):
                         and nrd.stateCd == State.INPROGRESS):
                     # set / reset the furnished flag to N
                     nrd.furnished = 'N'
+
+                # if we're changing to a completed or cancelled state, clear reset flag on NR record
+                if state in State.COMPLETED_STATE + [State.CANCELLED]:
+                    nrd.hasBeenReset = False
+
 
                 ### COMMENTS ###
                 # we only add new comments, we do not change existing comments
@@ -454,7 +480,7 @@ class Request(Resource):
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
 
-        except (Exception) as err:
+        except Exception as err:
             current_app.logger.debug(err.with_traceback(None))
             return jsonify(message='Internal server error'), 500
 
@@ -464,7 +490,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_roles([User.APPROVER, User.EDITOR])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def put(nr, *args, **kwargs):
 
         # do the cheap check first before the more expensive ones
@@ -499,6 +525,15 @@ class Request(Resource):
 
         if not services.name_request.valid_state_transition(user, nrd, state):
             return jsonify(message='you are not authorized to make these changes'), 401
+
+        name_choice_exists = {1: False, 2: False, 3: False}
+        for name in json_input.get('names', None):
+            if name['name'] and name['name'] is not '':
+                name_choice_exists[name['choice']] = True
+        if not name_choice_exists[1]:
+            return jsonify(message='Data does not include a name choice 1'), 400
+        if not name_choice_exists[2] and name_choice_exists[3]:
+            return jsonify(message='Data contains a name choice 3 without a name choice 2'), 400
 
         try:
             existing_nr = RequestDAO.get_inprogress(user)
@@ -558,6 +593,13 @@ class Request(Resource):
             nrd.stateCd = state
             nrd.userId = user.id
 
+            if reset:
+                # set the flag indicating that the NR has been reset
+                nrd.hasBeenReset = True
+
+                # add a generated comment re. this NR being reset
+                json_input['comments'].append({'comment': 'This NR was RESET.'})
+
             try:
                 previousNr = json_input['previousNr']
                 nrd.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
@@ -566,15 +608,22 @@ class Request(Resource):
             except KeyError:
                 nrd.previousRequestId = None
 
+            # if we're changing to a completed or cancelled state, clear reset flag on NR record
+            if state in State.COMPLETED_STATE + [State.CANCELLED]:
+                nrd.hasBeenReset = False
+
+
             # check if any of the Oracle db fields have changed, so we can send them back
             is_changed__request = False
             is_changed__previous_request = False
+            is_changed__request_state = False
             if nrd.requestTypeCd != orig_nrd['requestTypeCd']: is_changed__request = True
             if nrd.expirationDate != orig_nrd['expirationDate']: is_changed__request = True
             if nrd.xproJurisdiction != orig_nrd['xproJurisdiction']: is_changed__request = True
             if nrd.additionalInfo != orig_nrd['additionalInfo']: is_changed__request = True
             if nrd.natureBusinessInfo != orig_nrd['natureBusinessInfo']: is_changed__request = True
             if nrd.previousRequestId != orig_nrd['previousRequestId']: is_changed__previous_request = True
+            if nrd.stateCd != orig_nrd['state']: is_changed__request_state = True
 
             ### END request header ###
 
@@ -647,6 +696,7 @@ class Request(Resource):
             is_changed__name1 = False
             is_changed__name2 = False
             is_changed__name3 = False
+            deleted_names = [False] * 3
 
             if len(nrd.names.all()) == 0:
                 new_name_choice = Name()
@@ -722,12 +772,17 @@ class Request(Resource):
                                                                     .format(orig_name['name'], nrd_name.name)})
                             if nrd_name.choice == 2:
                                 is_changed__name2 = True
+                                if not nrd_name.name:
+                                    deleted_names[nrd_name.choice - 1] = True
                                 json_input['comments'].append({'comment': 'Name choice 2 changed from {0} to {1}'\
                                                                     .format(orig_name['name'], nrd_name.name)})
                             if nrd_name.choice == 3:
                                 is_changed__name3 = True
+                                if not nrd_name.name:
+                                    deleted_names[nrd_name.choice - 1] = True
                                 json_input['comments'].append({'comment': 'Name choice 3 changed from {0} to {1}'\
                                                                     .format(orig_name['name'], nrd_name.name)})
+
 
             ### END names ###
 
@@ -798,14 +853,33 @@ class Request(Resource):
 
 
             # update oracle if this nr was reset
+            # - first set status to H via name_examination proc, which handles clearing all necessary data and states
+            # - then set status to D so it's back in draft in NRO for customer to understand status
             if reset:
-                nrd.expirationDate = None
-                current_app.logger.debug('set state to h')
+                current_app.logger.debug('set state to h for RESET')
                 try:
                     nro.set_request_status_to_h(nr, user.username)
                 except (NROServicesError, Exception) as err:
                     MessageServices.add_message('error', 'reset_request_in_NRO', err)
-                    # flash(err.error, 'error')
+
+                nrd.expirationDate = None
+                is_changed__request = True
+
+                change_flags = {
+                    'is_changed__request': is_changed__request,
+                    'is_changed__previous_request': False,
+                    'is_changed__applicant': False,
+                    'is_changed__address': False,
+                    'is_changed__name1': False,
+                    'is_changed__name2': False,
+                    'is_changed__name3': False,
+                    'is_changed__nwpta_ab': False,
+                    'is_changed__nwpta_sk': False,
+                    'is_changed__request_state': is_changed__request_state,
+                }
+                warnings = nro.change_nr(nrd, change_flags)
+                if warnings:
+                    MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
 
             ### Update NR Details in NRO (not for reset)
             else:
@@ -820,6 +894,7 @@ class Request(Resource):
                         'is_changed__name3': is_changed__name3,
                         'is_changed__nwpta_ab': is_changed__nwpta_ab,
                         'is_changed__nwpta_sk': is_changed__nwpta_sk,
+                        'is_changed__request_state': is_changed__request_state,
                     }
 
                     # if any data has changed from an NR Details edit, update it in Oracle
@@ -827,6 +902,11 @@ class Request(Resource):
                         warnings = nro.change_nr(nrd, change_flags)
                         if warnings:
                             MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
+                        else:
+                            ### now it's safe to delete any names that were blanked out
+                            for nrd_name in nrd.names:
+                                if deleted_names[nrd_name.choice - 1]:
+                                    nrd_name.delete_from_db()
 
                 except (NROServicesError, Exception) as err:
                     MessageServices.add_message('error', 'change_request_in_NRO', err)
@@ -915,42 +995,44 @@ class RequestsAnalysis(Resource):
         return jsonify(results), 200
 
 @cors_preflight("GET")
-@api.route('/synonymbucket/<string:name>', methods=['GET','OPTIONS'])
+@api.route('/synonymbucket/<string:name>/<string:advanced_search>', methods=['GET','OPTIONS'])
 class SynonymBucket(Resource):
     START = 0
-    ROWS = 100
+    ROWS = 1000
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    def get(name, *args, **kwargs):
+    def get(name, advanced_search, *args, **kwargs):
         start = request.args.get('start', SynonymBucket.START)
         rows = request.args.get('rows', SynonymBucket.ROWS)
-
-        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='synonym', start=start, rows=rows)
+        exact_phrase = '' if advanced_search == '*' else advanced_search
+        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='synonym', exact_phrase=exact_phrase, start=start, rows=rows)
         if code:
             return jsonify(message=msg), code
         return jsonify(results), 200
 
 @cors_preflight("GET")
-@api.route('/cobrsphonetics/<string:name>', methods=['GET','OPTIONS'])
+@api.route('/cobrsphonetics/<string:name>/<string:advanced_search>', methods=['GET','OPTIONS'])
 class CobrsPhoneticBucket(Resource):
     START = 0
-    ROWS = 100
+    ROWS = 500
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    def get(name, *args, **kwargs):
+    def get(name, advanced_search, *args, **kwargs):
         start = request.args.get('start', CobrsPhoneticBucket.START)
         rows = request.args.get('rows', CobrsPhoneticBucket.ROWS)
-        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='cobrs_phonetic', start=start, rows=rows)
+        name = '' if name == '*' else name
+        exact_phrase = '' if advanced_search == '*' else advanced_search
+        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='cobrs_phonetic', exact_phrase=exact_phrase, start=start, rows=rows)
         if code:
             return jsonify(message=msg), code
         return jsonify(results), 200
 
 @cors_preflight("GET")
-@api.route('/phonetics/<string:name>', methods=['GET','OPTIONS'])
+@api.route('/phonetics/<string:name>/<string:advanced_search>', methods=['GET','OPTIONS'])
 class PhoneticBucket(Resource):
     START = 0
     ROWS = 100000
@@ -958,10 +1040,12 @@ class PhoneticBucket(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    def get(name, *args, **kwargs):
+    def get(name, advanced_search,*args, **kwargs):
         start = request.args.get('start', PhoneticBucket.START)
         rows = request.args.get('rows', PhoneticBucket.ROWS)
-        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='phonetic', start=start, rows=rows)
+        name = '' if name == '*' else name
+        exact_phrase = '' if advanced_search == '*' else advanced_search
+        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='phonetic', exact_phrase=exact_phrase, start=start, rows=rows)
         if code:
             return jsonify(message=msg), code
         return jsonify(results), 200
@@ -1088,7 +1172,7 @@ class DecisionReasons(Resource):
 class SyncNR(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.requires_roles([User.APPROVER, User.EDITOR])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def get(nr):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
@@ -1158,3 +1242,70 @@ class Stats(Resource):
             'nameRequests': request_search_schemas.dump(requests)[0]
         }
         return jsonify(rep)
+
+@cors_preflight("POST")
+@api.route('/<string:nr>/comments', methods=["POST",'OPTIONS'])
+class NRComment(Resource):
+
+    @staticmethod
+    def common(nr):
+        """:returns: object, code, msg
+        """
+        if not RequestDAO.validNRFormat(nr):
+            return None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
+
+        nrd = RequestDAO.find_by_nr(nr)
+        if not nrd:
+            return None, jsonify({"message": "{nr} not found".format(nr=nr)}), 404
+
+
+        return nrd, None, 200
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
+    def post(nr,*args, **kwargs):
+        json_data = request.get_json()
+
+        if not json_data:
+            return jsonify({'message': 'No input data provided'}), 400
+
+        nrd, msg, code = NRComment.common(nr)
+
+        if not nrd:
+            return msg, code
+
+        errors = name_comment_schema.validate(json_data, partial=False)
+        if errors:
+            return jsonify(errors), 400
+
+        # find NR
+        try:
+            nrd = RequestDAO.find_by_nr(nr)
+            if not nrd:
+                return jsonify({"message": "Request:{} not found".format(nr)}), 404
+
+        except NoResultFound as nrf:
+            # not an error we need to track in the log
+            return jsonify({"message": "Request:{} not found".format(nr)}), 404
+        except Exception as err:
+            current_app.logger.error("Error when trying to post a comment NR:{0} Err:{1}".format(nr, err))
+            return jsonify({"message": "NR had an internal error"}), 404
+
+        nr_id = nrd.id
+        user = User.find_by_jwtToken(g.jwt_oidc_token_info)
+        if user is None:
+            return jsonify({'message': 'No User'}), 404
+
+        if json_data.get('comment') is None:
+            return jsonify({"message": "No comment supplied"}),400
+
+        comment_instance = Comment()
+        comment_instance.examinerId = user.id
+        comment_instance.nrId = nr_id
+        comment_instance.comment = convert_to_ascii(json_data.get('comment'))
+
+        comment_instance.save_to_db()
+
+        EventRecorder.record(user, Event.POST, nrd, json_data)
+        return jsonify(comment_instance.as_dict()), 200

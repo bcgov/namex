@@ -269,29 +269,41 @@ def test_add_nwpta(app, request, session, pns):
 
 names_test_data = [
     ([
-        {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
     ], False),
     ([
-        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
-        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
     ], False),
     ([
-        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
-        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
-        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
     ], False),
     ([
-         {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+         {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
      ], True),
     ([
-         {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
-         {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+         {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
      ], True),
     ([
-         {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
-         {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
-         {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE'},
+         {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
      ], True),
+    ([
+         {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+     ], ['APPROVED', ]),
+    ([
+         {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+         {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+     ], ['APPROVED', ]),
+    ([
+         {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+         {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+         {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+     ], ['APPROVED', ]),
 ]
 
 
@@ -323,6 +335,140 @@ def test_add_names(app, request, session, test_names, previous_names):
 
     for name in names:
         name_found = False
+        for tn in test_names:
+            if tn['name'] == name.name:
+                name_found = True
+                continue
+
+        assert name_found
+
+names_test_after_reset_data = [
+    ([
+        {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+    ], [
+        {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ], ['APPROVED',]),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ], [
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ], ['APPROVED', 'NE']),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+    ], [
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ], ['REJECTED', 'REJECTED', 'APPROVED']),
+]
+
+
+@pytest.mark.parametrize("previous_names, test_names, expected_states", names_test_after_reset_data)
+def test_add_names_after_reset(app, request, session, previous_names, test_names, expected_states):
+
+    # imports for just this test
+    from namex.services.nro.request_utils import add_names
+
+    # SETUP
+    # create an NR
+    nr = Request()
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+
+    if previous_names:
+        add_names(nr, previous_names)
+
+    nr.hasBeenReset = True
+
+    session.add(nr)
+    session.commit()
+
+    # Test
+    add_names(nr, test_names)
+    session.add(nr)
+    session.commit()
+
+    names = nr.names.all()
+
+    assert len(test_names) == len(names)
+
+    for name in names:
+        name_found = False
+        decision_data_intact = False
+        for tn in test_names:
+            if tn['name'] == name.name:
+                name_found = True
+                if name.state == expected_states[tn['choice_number']-1]:
+                    decision_data_intact = True
+                continue
+
+        assert name_found
+        assert decision_data_intact
+
+names_test_with_changes_data = [
+    ([
+        {'choice_number': 1, 'name': 'name corp', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ], [
+        {'choice_number': 1, 'name': 'name corp new', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ]),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ], [
+        {'choice_number': 1, 'name': 'name corp1 new', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2 new', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ]),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ], [
+        {'choice_number': 1, 'name': 'name corp1 new', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2 new', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 3, 'name': 'name corp3 new', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+    ]),
+    ([
+        {'choice_number': 1, 'name': 'name corp1', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 3, 'name': 'name corp3', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+     ], [
+        {'choice_number': 1, 'name': 'name corp1 new', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+        {'choice_number': 2, 'name': 'name corp2 new', 'designation': 'ltd', 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+     ]),
+]
+
+@pytest.mark.parametrize("previous_names, test_names", names_test_with_changes_data)
+def test_add_names_with_changes(app, request, session, previous_names, test_names):
+
+    # imports for just this test
+    from namex.services.nro.request_utils import add_names
+
+    # SETUP
+    # create an NR
+    nr = Request()
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+
+    if previous_names:
+        add_names(nr, previous_names)
+
+    session.add(nr)
+    session.commit()
+
+    # Test
+    add_names(nr, test_names)
+    session.add(nr)
+    session.commit()
+
+    names = nr.names.all()
+
+    assert len(test_names) == len(names)
+
+    for name in names:
+        name_found = False
+        decision_data_intact = False
         for tn in test_names:
             if tn['name'] == name.name:
                 name_found = True
@@ -423,97 +569,97 @@ def test_update_nr_header_with_mutating_priority(freeze_datetime_utcnow, test_na
 
 nr_state_testdata = [
     ('HISTORICAL',
-     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'}],
+     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'}],
      'HISTORICAL'
      ),
     ('H',
-     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'}],
+     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'}],
      'HOLD'
      ),
     ('D',
-     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'}],
+     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'}],
      'DRAFT'
      ),
     ('C',
-     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'}],
+     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'}],
      'CANCELLED'
      ),
     ('E',
-     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'}],
+     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'}],
      'EXPIRED'
      ),
     ('COMPLETED',
-     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'}],
+     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'}],
      State.APPROVED
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
      ],
      State.APPROVED
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
      ],
      State.APPROVED
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None},
      ],
      State.APPROVED
      ),
     ('COMPLETED',
-     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R'}],
+     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None}],
      State.REJECTED
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None},
      ],
      State.REJECTED
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'NE'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None},
      ],
      State.REJECTED
      ),
     ('COMPLETED',
-     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C'}],
+     [{'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C', 'consumption_date': None, 'corp_num': None}],
      State.CONDITIONAL
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'NE'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'NE', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C', 'consumption_date': None, 'corp_num': None},
      ],
      State.CONDITIONAL
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C', 'consumption_date': None, 'corp_num': None},
      ],
      State.CONDITIONAL
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'R', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C', 'consumption_date': None, 'corp_num': None},
      ],
      State.CONDITIONAL
      ),
     ('COMPLETED',
      [
-         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C'},
-         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A'},
+         {'choice_number': 1, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'C', 'consumption_date': None, 'corp_num': None},
+         {'choice_number': 2, 'name': 'PROCINE ENTERPRISES LTD', 'designation': None, 'name_state_type_cd': 'A', 'consumption_date': '01-SEP-08 11:11:11', 'corp_num': 'S1234567'},
      ],
      State.CONDITIONAL
      ),

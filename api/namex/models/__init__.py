@@ -18,3 +18,4 @@ from .user import User, UserSchema
 from .state import State, StateSchema
 from .decision_reason import DecisionReason
 from .nro_sync_tables import NRONamesSyncJob, NRONamesSyncJobDetail, NRONamesSyncJobStatus
+from .admin_tables import DecisionReasonAudit, RestrictedConditionAudit, VirtualWordCondition

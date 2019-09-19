@@ -193,7 +193,7 @@ class Methods(Resource):
         incorp_ho_addr_id_sql = '\'' + str(incorp_ho_addr_id) + '\''
         incorp_ho_addr_sql = text("select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
                                   "from bc_registries.address_vw "
-                                  "where addr_id= {};".format(incorp_ho_addr_id_sql))
+                                  "where addr_id= {} AND addr_id IS NOT NULL;".format(incorp_ho_addr_id_sql))
         incorp_head_office_obj = db.engine.execute(incorp_ho_addr_sql)
 
         incorp_attorneys_obj = db.engine.execute(incorp_attorneys_sql)
@@ -210,7 +210,7 @@ class Methods(Resource):
         incorp_reg_addr_sql = text(
             "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
             "from bc_registries.address_vw "
-            "where addr_id= {};".format(incorp_reg_addr_id_sql))
+            "where addr_id= {} AND addr_id IS NOT NULL;".format(incorp_reg_addr_id_sql))
         incorp_registered_addr_obj = db.engine.execute(incorp_reg_addr_sql)
         try:
             incorp_rec_addr_id = incorp_addr_ids[1][0]
@@ -221,7 +221,7 @@ class Methods(Resource):
             incorp_rec_addr_sql = text(
                 "select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, province, country_typ_cd, postal_cd "
                 "from bc_registries.address_vw "
-                "where addr_id= {};".format(incorp_rec_addr_id_sql))
+                "where addr_id= {} AND addr_id IS NOT NULL;".format(incorp_rec_addr_id_sql))
             incorp_records_addr_obj = db.engine.execute(incorp_rec_addr_sql)
 
         return incorp_registered_addr_obj,incorp_records_addr_obj
