@@ -342,7 +342,7 @@ class SolrQueries:
 
     @classmethod
     def get_synonym_results(cls, solr_base_url, name, prox_search_strs, old_alg_search_strs, name_tokens, exact_phrase, start=0, rows=100):
-
+        query = ''
         try:
             connections = []
             if name == '':
