@@ -1,0 +1,13 @@
+jupyter
+psycopg2-binary
+SQLAlchemy
+ipython-sql
+simplejson
+pandas
+matplotlib
+spacy
+papermill
+schedule
+
+
+
