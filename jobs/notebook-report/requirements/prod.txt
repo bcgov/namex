@@ -10,7 +10,6 @@ schedule
 
 psycopg2-binary
 python-dotenv
-dotenv
 
 Flask
 Flask-SQLAlchemy

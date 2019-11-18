@@ -166,4 +166,4 @@ if __name__ == '__main__':
             os.mkdir(directory)
 
     processNotebooks("daily")
-    processNotebooks("sixMonth", days=[1, 15], months=[1, 7, 11])
+    processNotebooks("sixMonth", days=[1, 18], months=[1, 7, 11])
