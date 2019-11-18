@@ -1,5 +1,4 @@
 jupyter
-psycopg2-binary
 SQLAlchemy
 ipython-sql
 simplejson
@@ -8,6 +7,15 @@ matplotlib
 spacy
 papermill
 schedule
+
+psycopg2-binary
+python-dotenv
+dotenv
+
+Flask
+Flask-SQLAlchemy
+
+git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
 
 
 

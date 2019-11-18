@@ -46,11 +46,11 @@ def job_result_set(ora_con, max_rows):
         SELECT ID, NR_NUM, STATUS, ACTION, SEND_COUNT, SEND_TIME, ERROR_MSG
          FROM (
             SELECT *
-            FROM namex.namex_feeder
+            FROM namex.namex_feeder_temp
             WHERE status in ('E', 'P')
             ORDER BY id
             )
-            where rownum <= :max_rows
+            where rownum <= :max_rows AND SUBSTR(nr_num, 10, 1) = '0'
         """
                                 , max_rows=max_rows
                                 )
@@ -65,7 +65,7 @@ def update_feeder_row(ora_con, id, status, send_count, error_message):
         ora_cursor = ora_con.cursor()
 
         result_set = ora_cursor.execute("""
-            update NAMEX.NAMEX_FEEDER set
+            update NAMEX.NAMEX_FEEDER_TEMP set
             STATUS = :status
             ,SEND_COUNT = :send_count
             ,SEND_TIME = sysdate
