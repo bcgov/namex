@@ -120,6 +120,10 @@
                                     {
                                         "name": "DATABASE_PORT",
                                         "value": "5432"
+                                    },
+                                    {
+                                        "name": "APP_FILE",
+                                        "value": "notebookreport.py"
                                     }
                                 ],
                                 "resources": {},                                
