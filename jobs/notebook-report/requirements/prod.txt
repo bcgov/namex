@@ -1,5 +1,6 @@
 jupyter
 SQLAlchemy
+psycopg2-binary
 ipython-sql
 simplejson
 pandas
