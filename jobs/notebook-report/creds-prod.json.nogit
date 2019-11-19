@@ -1,6 +1,7 @@
 {
-"username": "readonly",
-"hostname": "localhost",
-"port_num": "54323",
+"username": "userHQH",
+"password": "cOsEhpcJeigX2Its",
+"hostname": "postgresql-prod",
+"port_num": "5432",
 "db_name": "namex"
 }
