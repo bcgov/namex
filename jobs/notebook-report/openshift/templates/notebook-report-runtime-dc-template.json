@@ -44,7 +44,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "servicebc-ne-tools",
-                                "name": "notebook-report-runtime:dev"
+                                "name": "notebook-report-runtime:latest"
                             }
                         }
                     },

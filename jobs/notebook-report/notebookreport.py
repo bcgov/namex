@@ -15,12 +15,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from flask import Flask, g, current_app
-from namex.utils.logging import setup_logging
-from config import Config
-from app import create_app, db
+# from namex.utils.logging import setup_logging
+# from config import Config
+# from app import create_app, db
 
-setup_logging() # important to do this first
-app = create_app(Config)
+# setup_logging() # important to do this first
+# app = create_app(Config)
 
 # Notebook Scheduler
 # ---------------------------------------

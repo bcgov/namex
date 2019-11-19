@@ -26,10 +26,10 @@
                 "source": {
                     "type": "Git",
                     "git": {
-                        "uri": "https://github.com/bcgov/namex.git",
+                        "uri": "https://github.com/stevenc987/namex.git",
                         "ref": "master"
                     },
-                    "contextDir": "/notebook-report"
+                    "contextDir": "jobs/notebook-report"
                 },
                 "strategy": {
                     "type": "JenkinsPipeline",
