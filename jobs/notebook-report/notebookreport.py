@@ -14,14 +14,6 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from flask import Flask, g, current_app
-# from namex.utils.logging import setup_logging
-# from config import Config
-# from app import create_app, db
-
-# setup_logging() # important to do this first
-# app = create_app(Config)
-
 # Notebook Scheduler
 # ---------------------------------------
 # This script helps with the automated processing of Jupyter Notebooks via papermill (https://github.com/nteract/papermill/)
@@ -166,4 +158,4 @@ if __name__ == '__main__':
             os.mkdir(directory)
 
     processNotebooks("daily")
-    processNotebooks("sixMonth", days=[1, 18], months=[1, 7, 11])
+    processNotebooks("sixMonth", days=[1, 19], months=[1, 7, 11])
