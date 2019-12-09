@@ -13,7 +13,7 @@ objects:
     name: "notebook-report"
   spec:
     concurrencyPolicy: "Forbid"
-    schedule: "17 * * * *"
+    schedule: "10 8 * * *"
     suspend: false
     jobTemplate:
       spec:
@@ -52,17 +52,17 @@ objects:
                   - name: SENDER_EMAIL
                     value: 'namex@noreply.github.com'
                   - name: ERROR_EMAIL_RECIPIENTS
-                    value: '[steven.chen@gov.bc.ca, sbc_itoperationssupport@gov.bc.ca]'
+                    value: '[sbc_itoperationssupport@gov.bc.ca, steven.chen@gov.bc.ca]'
                   - name: REPORT_RECIPIENTS
-                    value: '[steven.chen@gov.bc.ca, stevenc987@gmail.com]'
+                    value: '[Debbie.Blyth@gov.bc.ca, Sinead.OCallaghan@gov.bc.ca]'
                   - name: EMAIL_SMTP
                     value: 'apps.smtp.gov.bc.ca'  
                   - name: ENVIRONMENT
                     value: '${ENV_TAG}'  
                   - name: SIX_MONTH_REPORT_DATES
-                    value: '[1, 9]'
+                    value: '[1]'
                   - name: SIX_MONTH_REPORT_MONTHS
-                    value: '[1, 7, 12]'
+                    value: '[1, 7]'
             restartPolicy: "Never"
             concurrencyPolicy: "Forbid"
 parameters: [
@@ -71,6 +71,6 @@ parameters: [
           "displayName": "ENV_TAG",
           "description": "the tag for the environment that the job image runs from.",
           "required": true,
-          "value": "dev"
+          "value": "prod"
         },        
 ]

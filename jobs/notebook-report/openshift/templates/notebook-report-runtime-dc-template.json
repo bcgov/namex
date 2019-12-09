@@ -126,11 +126,11 @@
                                     },
                                     {
                                         "name": "ERROR_EMAIL_RECIPIENTS",
-                                        "value": "[steven.chen@gov.bc.ca, stevenc987@gmail.com]"
+                                        "value": "[sbc_itoperationssupport@gov.bc.ca, steven.chen@gov.bc.ca]"
                                     },
                                     {
                                         "name": "REPORT_RECIPIENTS",
-                                        "value": "[steven.chen@gov.bc.ca, stevenc987@gmail.com]"
+                                        "value": "[Debbie.Blyth@gov.bc.ca, Sinead.OCallaghan@gov.bc.ca]"
                                     }
                                 ],
                                 "resources": {},                                

@@ -26,7 +26,7 @@
                 "source": {
                     "type": "Git",
                     "git": {
-                        "uri": "https://github.com/stevenc987/namex",
+                        "uri": "https://github.com/bcgov/namex",
                         "ref": "master"
                     },
                     "contextDir": "jobs/notebook-report"
