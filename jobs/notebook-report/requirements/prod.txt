@@ -10,6 +10,7 @@ papermill
 schedule
 
 Flask
+pytest
 python-dotenv
 marshmallow==2.20.5
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api

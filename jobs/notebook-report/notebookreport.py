@@ -15,6 +15,9 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from namex.utils.logging import setup_logging
+from flask import Flask, g, current_app
+from config import Config
+from namex import db
 
 setup_logging()  # important to do this first
 
@@ -24,6 +27,16 @@ setup_logging()  # important to do this first
 # papermill (https://github.com/nteract/papermill/)
 
 snapshotDir = 'snapshots'
+
+
+def create_app(config=Config):
+    app = Flask(__name__)
+    app.config.from_object(config)
+    db.init_app(app)
+    app.app_context().push()
+    current_app.logger.debug('created the Flask App and pushed the App Context')
+
+    return app
 
 
 def findfiles(directory, pattern):
@@ -75,6 +88,7 @@ def send_email(subject, filename, emailtype, errormessage):
 
 
 def processnotebooks(notebookdirectory, days=[], months=[]):
+    status = False
     now = datetime.now()
 
     # For six months tasks or monthly tasks, we only run on the specified days and month
@@ -120,22 +134,24 @@ def processnotebooks(notebookdirectory, days=[], months=[]):
                     parameters=dict(snapshotDir=rundir + os.sep)
                 )
 
-                if notebookdirectory == 'daily':
+                if notebookdirectory == 'daily' or notebookdirectory == '../daily':
                     subject = "NameX Daily Stats for " + date + ext
                     filename = 'daily_totals_' + date + '.csv'
-                elif notebookdirectory == 'sixMonth':
+                elif notebookdirectory == 'sixMonth' or notebookdirectory == '../sixMonth':
                     subject = "NameX Six Months Stats till " + date + ext
                     filename = 'six_month_totals_till_' + date + '.csv'
                 # send email to receivers and remove files/directories which we don't want to keep
                 send_email(subject, filename, "", "")
                 os.remove(filename)
                 shutil.rmtree(os.path.join(notebookdirectory, snapshotDir), ignore_errors=True)
+                status = True
             except Exception:
                 # If any errors occur with the notebook processing they will be logged to the log file
                 logging.exception("Error processing notebook")
                 subject = "NameX Jupyter Notebook Error Notification on " + date + ext
                 filename = ''
                 send_email(subject, filename, "ERROR", traceback.format_exc())
+        return status
 
 
 if __name__ == '__main__':
