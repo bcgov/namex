@@ -97,7 +97,7 @@ def processnotebooks(notebookdirectory, days=[], months=[]):
             or (len(months) == 0 and len(days) > 0 and now.day in days) \
             or (len(months) == 0 and len(days) == 0):
 
-        logging.info('Processing ' + notebookdirectory)
+        logging.info('Processing: ' + notebookdirectory)
 
         # Each time a notebook is processed a snapshot is saved to a snapshot sub-directory
         # This checks the sub-directory exists and creates it if not
