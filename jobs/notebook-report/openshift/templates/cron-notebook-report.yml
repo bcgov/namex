@@ -13,7 +13,7 @@ objects:
     name: "notebook-report"
   spec:
     concurrencyPolicy: "Forbid"
-    schedule: "10 8 * * *"
+    schedule: "30 7 * * 2-6"
     suspend: false
     jobTemplate:
       spec:
@@ -57,6 +57,10 @@ objects:
                     value: '[Debbie.Blyth@gov.bc.ca, Sinead.OCallaghan@gov.bc.ca, steven.chen@gov.bc.ca]'
                   - name: EMAIL_SMTP
                     value: 'apps.smtp.gov.bc.ca'  
+                  - name: RETRY_TIMES
+                    value: '5'  
+                  - name: RETRY_INTERVAL
+                    value: '600'                      
                   - name: ENVIRONMENT
                     value: '${ENV_TAG}'  
                   - name: SIX_MONTH_REPORT_DATES
