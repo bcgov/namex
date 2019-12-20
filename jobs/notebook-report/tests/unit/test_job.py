@@ -15,14 +15,11 @@ def test_connection_failed():
                                       database=os.getenv('FAKE_PG_DB_NAME', ''))
 
         cursor = connection.cursor()
-        print(connection.get_dsn_parameters(), "\n")
-
         status = True
-    except (Exception, psycopg2.Error) as error:
-        print ("Error while connecting to PostgreSQL", error)
+    except Exception:
         status = False
-
-    assert status == False
+    finally:
+        assert status == False
 
 
 def test_connection_succeed():
@@ -33,17 +30,12 @@ def test_connection_succeed():
                                       host=os.getenv('PG_HOST', ''),
                                       port=os.getenv('PG_PORT', '5432'),
                                       database=os.getenv('PG_DB_NAME', ''))
-
         cursor = connection.cursor()
-        # Print PostgreSQL Connection properties
-        print(connection.get_dsn_parameters(), "\n")
-
         status = True
-    except (Exception, psycopg2.Error) as error:
-        print ("Error while connecting to PostgreSQL", error)
+    except Exception:
         status = False
-
-    assert status == True
+    finally:
+        assert status == True
 
 
 def test_daily_notebook_report():
@@ -54,17 +46,18 @@ def test_daily_notebook_report():
 
 test_six_month_data = [
     ("../sixMonth",
-    "[1, 12]",
+    "[1, 16]",
     "[1, 7, 12]"),
 ]
 
+
 @pytest.mark.parametrize("report_type, report_days_list, report_months_list", test_six_month_data)
 def test_six_month_notebook_report(report_type, report_days_list, report_months_list):
-
-    status = processnotebooks(report_type, days=ast.literal_eval(report_days_list),
-                     months=ast.literal_eval(report_months_list))
+    test_days = ast.literal_eval(report_days_list)
+    test_months = ast.literal_eval(report_months_list)
+    status = processnotebooks(report_type, days=test_days,
+                     months=test_months)
 
     assert status == True
-
 
 
