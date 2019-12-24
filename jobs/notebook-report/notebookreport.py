@@ -2,7 +2,8 @@ import os
 import sys
 import ast
 import time
-import email, smtplib
+import smtplib
+import email
 import traceback
 import argparse
 import fnmatch
@@ -185,12 +186,16 @@ def processnotebooks(notebookdirectory, days=[], months=[]):
 
 if __name__ == '__main__':
     start_time = datetime.utcnow()
+    weekno = datetime.now().weekday()
+
     # Check if the subfolders for notebooks exist, and create them if they don't
     # for directory in ['daily', 'sixMonth']:
     for directory in ['daily', 'sixMonth']:
         if not os.path.isdir(directory):
             os.mkdir(directory)
-        processnotebooks(directory)
+        # We don't need to run 'daily' report on Monday (index is 0) and Sunday (index is 6)
+        if((weekno != 0 and weekno != 6) and directory == 'daily') or directory == 'sixMonth':
+            processnotebooks(directory)
 
     end_time = datetime.utcnow()
     logging.info("job - jupyter notebook report completed in: {}".format(end_time - start_time))
