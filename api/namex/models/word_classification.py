@@ -1,16 +1,12 @@
 """"word classification classifies all words in a name approved by an exmainer to be used for auto-approval
 
 """
-from . import db
-from namex.exceptions import BusinessException
-from marshmallow import Schema, fields, post_load
+from . import db, ma
 from datetime import datetime
-from .request import Request
 from sqlalchemy.orm import backref
 
 
-
-class word_classification(db.Model):
+class WordClassification(db.Model):
     __tablename__ = 'word_classification'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -47,3 +43,7 @@ class word_classification(db.Model):
 
     def delete_from_db(self):
         raise BusinessException()
+
+class WordClassificationSchema(ma.ModelSchema):
+        class Meta:
+            model = WordClassification
