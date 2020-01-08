@@ -13,7 +13,7 @@ from sqlalchemy.orm import backref
 class word_classification(db.Model):
     __tablename__ = 'word_classification'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     classification = db.Column('word_classification',db.String(4),default='NONE',nullable=False,index=True)
     word = db.Column('word', db.String(1024), nullable=False, index=True)
     lastNameUsed = db.Column('last_name_used',db.String(1024))
