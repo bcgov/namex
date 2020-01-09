@@ -16,11 +16,11 @@ class WordClassification(db.Model):
     lastPrepName = db.Column('last_prep_name',db.String(1024))
     frequency = db.Column('frequency', db.BIGINT)
     approvedBy = db.Column('approved_by', db.Integer, db.ForeignKey('users.id'))
-    approvedDate = db.Column('approved_dt', db.DateTime(timezone=True), default=datetime.utcnow)
-    startDate = db.Column('start_dt', db.DateTime(timezone=True), default=datetime.utcnow)
-    endDate = db.Column('end_dt', db.DateTime(timezone=True), default=datetime.utcnow)
+    approvedDate = db.Column('approved_dt', db.DateTime(timezone=True))
+    startDate = db.Column('start_dt', db.DateTime(timezone=True))
+    endDate = db.Column('end_dt', db.DateTime(timezone=True))
     lastUpdatedBy = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    lastUpdateDate =  db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow)
+    lastUpdateDate =  db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approvedBy])
@@ -41,8 +41,6 @@ class WordClassification(db.Model):
     def save_to_session(self):
         db.session.add(self)
 
-    def delete_from_db(self):
-        raise BusinessException()
 
 class WordClassificationSchema(ma.ModelSchema):
         class Meta:
