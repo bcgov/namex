@@ -46,7 +46,7 @@ def test_daily_notebook_report():
 
 test_six_month_data = [
     ("../sixMonth",
-    "[1, 16]",
+    "[1, 30]",
     "[1, 7, 12]"),
 ]
 
