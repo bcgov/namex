@@ -41,3 +41,49 @@ def test_get_analysis(client, jwt, app):
     route = API_BASE_URI + ENDPOINT_PATH
     response = client.get(route, headers=headers)
     print(response)
+
+
+# Test each of the response strategies
+# API Returns
+# Requires addition of distinctive word
+# Requires addition of descriptive word
+# Name Contains a Word To Avoid
+# Designation Mismatch
+# Too Many Words
+# Name Requires Consent
+# Contains Unclassifiable Word
+# Conflicts with the Corporate Database
+def test_valid_response(client, jwt, app):
+    pass
+
+
+def test_add_distinctive_word_response(client, jwt, app):
+    pass
+
+
+def test_add_descriptive_word_response(client, jwt, app):
+    pass
+
+
+def test_contains_words_to_avoid_response(client, jwt, app):
+    pass
+
+
+def test_designation_mismatch_response(client, jwt, app):
+    pass
+
+
+def test_too_many_words_response(client, jwt, app):
+    pass
+
+
+def test_name_requires_consent_response(client, jwt, app):
+    pass
+
+
+def test_contains_unclassifiable_word_response(client, jwt, app):
+    pass
+
+
+def test_corporate_name_conflict_response(client, jwt, app):
+    pass
