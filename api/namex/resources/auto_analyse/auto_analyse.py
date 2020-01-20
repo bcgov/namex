@@ -52,6 +52,17 @@ class NameAnalysis(Resource):
 
         # Go get stuff from the db
 
+        # These are the options:
+        # API Returns
+        # Requires addition of distinctive word
+        # Requires addition of descriptive word
+        # Name Contains a Word To Avoid
+        # Designation Mismatch
+        # Too Many Words
+        # Name Requires Consent
+        # Contains Unclassifiable Word
+        # Conflicts with the Corporate Database
+
         issue = NameAnalysisIssue(
             consentingBody=ConsentingBody(
                 name='Test Body',
