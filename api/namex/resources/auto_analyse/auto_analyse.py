@@ -2,23 +2,40 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-import jsonpickle
 
 from flask import request, make_response, jsonify, g, current_app, get_flashed_messages
 from flask_restplus import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
+
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
-from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import func, text
-from sqlalchemy.inspection import inspect
+#from sqlalchemy.dialects import postgresql
+#from sqlalchemy.orm.exc import NoResultFound
+#from sqlalchemy import func, text
+#from sqlalchemy.inspection import inspect
 
-from namex import jwt, nro, services
+#from namex import jwt, nro, services
 
 # Import DTOs
-from namex.resources.auto_analyse import ConsentingBody, NameAction, DescriptiveWord, Conflict, NameAnalysisIssue, NameAnalysisResponse
+from namex.resources.auto_analyse import \
+    ConsentingBody, \
+    NameAction, \
+    DescriptiveWord, \
+    Conflict, \
+    NameAnalysisIssue, \
+    NameAnalysisResponse
+
+from namex.resources.auto_analyse.analysis_strategies import \
+    ValidNameResponseStrategy, \
+    AddDistinciveWordResponseStrategy, \
+    AddDescriptiveWordResponseStrategy, \
+    ContainsWordsToAvoidResponseStrategy, \
+    DesignationMismatchResponseStrategy, \
+    TooManyWordsResponseStrategy, \
+    NameRequiresConsentResponseStrategy, \
+    ContainsUnclassifiableWordResponseStrategy, \
+    CorporateNameConflictResponseStrategy
 
 setup_logging() ## important to do this first
 
@@ -54,43 +71,25 @@ class NameAnalysis(Resource):
 
         # These are the options:
         # API Returns
+        strategy = ValidNameResponseStrategy()
         # Requires addition of distinctive word
+        strategy = AddDistinciveWordResponseStrategy()
         # Requires addition of descriptive word
+        strategy = AddDescriptiveWordResponseStrategy()
         # Name Contains a Word To Avoid
+        strategy = ContainsWordsToAvoidResponseStrategy()
         # Designation Mismatch
+        strategy = DesignationMismatchResponseStrategy()
         # Too Many Words
+        strategy = TooManyWordsResponseStrategy()
         # Name Requires Consent
+        strategy = NameRequiresConsentResponseStrategy()
         # Contains Unclassifiable Word
+        strategy = ContainsUnclassifiableWordResponseStrategy()
         # Conflicts with the Corporate Database
+        strategy = CorporateNameConflictResponseStrategy()
 
-        issue = NameAnalysisIssue(
-            consentingBody=ConsentingBody(
-                name='Test Body',
-                email='test@example.com'
-            ),
-            designations=None,
-            descriptiveWords=None,
-            issueType=None,
-            word=None,
-            wordIndex=None,
-            showExaminationButton=None,
-            conflicts=None,
-            options=None,
-            nameActions=None
-        )
-
-        issue.nameActions = []
-        nameAction = NameAction(
-            type='Test',
-            position='start',
-            message='Ipsum lorem dolor'
-        )
-        issue.nameActions.append(nameAction)
-
-        payload = NameAnalysisResponse(
-            status='Test',
-            issues=[issue]
-        ).to_json()
+        payload = strategy.build_response().to_json()
 
         response = make_response(payload, 200)
         return response
