@@ -24,7 +24,7 @@ class WordClassification(db.Model):
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approvedBy])
-    updater = db.relationship('User',backref=backref('user_word_updater', uselist=False), foreign_keys=[lastUpdatedBy])
+    updater = db.relationship('User', backref=backref('user_word_updater', uselist=False), foreign_keys=[lastUpdatedBy])
 
     def json(self):
         return {"id": self.id, "classification": self.classification, "word": self.word,
