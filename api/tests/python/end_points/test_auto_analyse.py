@@ -33,6 +33,12 @@ claims = {
 API_BASE_URI = '/api/v1/'
 ENDPOINT_PATH = 'name-analysis'
 
+# params = {
+#   name,
+#   location, one of: [‘bc’, ‘ca’, ‘us’, or ‘it’],
+#   entity_type: abbreviation. convention not finalized yet.
+#   request_type, one of: [‘new’, ‘existing’, ‘continuation’]
+# }
 def test_get_analysis(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
