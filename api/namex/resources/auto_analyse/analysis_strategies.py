@@ -9,6 +9,10 @@ from namex.resources.auto_analyse import \
 
 
 class AnalysisResponseStrategy:
+    strategy_name = 'Analysis Response Strategy'
+    issue_type = 'Issue'
+    status_text = ''
+
     def __init__(self):
         pass
 
@@ -61,54 +65,81 @@ class AnalysisResponseStrategy:
 
 
 class ValidNameResponseStrategy(AnalysisResponseStrategy):
+    issue_type = None
+    status_text = 'Approved'
+
     def create_issue(self):
         issue = super(ValidNameResponseStrategy, self).create_new_issue()
         return issue
 
 
-class AddDistinciveWordResponseStrategy(AnalysisResponseStrategy):
+class AddDistinctiveWordResponseStrategy(AnalysisResponseStrategy):
+    issue_type = 'add_distinctive'
+    status_text = 'Further Action Required'
+
     def create_issue(self):
-        issue = super(AddDistinciveWordResponseStrategy, self).create_new_issue()
+        issue = super(AddDistinctiveWordResponseStrategy, self).create_new_issue()
         return issue
 
 
 class AddDescriptiveWordResponseStrategy(AnalysisResponseStrategy):
+    issue_type = 'add_descriptive'
+    status_text = 'Further Action Required'
+
     def create_issue(self):
         issue = super(AddDescriptiveWordResponseStrategy, self).create_new_issue()
         return issue
 
 
 class ContainsWordsToAvoidResponseStrategy(AnalysisResponseStrategy):
+    issue_type = 'word_to_avoid'
+    status_text = 'Further Action Required'
+
     def create_issue(self):
         issue = super(ContainsWordsToAvoidResponseStrategy, self).create_new_issue()
         return issue
 
 
 class DesignationMismatchResponseStrategy(AnalysisResponseStrategy):
+    issue_type = 'designation_mismatch'
+    status_text = 'Further Action Required'
+
     def create_issue(self):
         issue = super(DesignationMismatchResponseStrategy, self).create_new_issue()
         return issue
 
 
 class TooManyWordsResponseStrategy(AnalysisResponseStrategy):
+    issue_type = 'excess_words'
+    status_text = 'Further Action Required'
+
     def create_issue(self):
         issue = super(TooManyWordsResponseStrategy, self).create_new_issue()
         return issue
 
 
 class NameRequiresConsentResponseStrategy(AnalysisResponseStrategy):
+    issue_type = 'consent_required'
+    status_text = 'May be Approved With Consent'
+
     def create_issue(self):
         issue = super(NameRequiresConsentResponseStrategy, self).create_new_issue()
         return issue
 
 
 class ContainsUnclassifiableWordResponseStrategy(AnalysisResponseStrategy):
+    issue_type = 'unclassified_word'
+    status_text = 'Further Action Required'
+
     def create_issue(self):
         issue = super(ContainsUnclassifiableWordResponseStrategy, self).create_new_issue()
         return issue
 
 
 class CorporateNameConflictResponseStrategy(AnalysisResponseStrategy):
+    issue_type = 'corp_conflict'
+    status_text = 'Further Action Required'
+
     def create_issue(self):
         issue = super(CorporateNameConflictResponseStrategy, self).create_new_issue()
         return issue
