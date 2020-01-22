@@ -28,16 +28,16 @@ objects:
               - -c
               - cd /opt/app-root/src; ./run.sh
               env:
-                  - name: PG_READONLY_USER
+                  - name: PG_USER
                     valueFrom:
                       secretKeyRef:
                         key: database-user
-                        name: postgresql-readonly-${ENV_TAG}
-                  - name: PG_READONLY_PASSWORD
+                        name: postgresql-${ENV_TAG}
+                  - name: PG_PASSWORD
                     valueFrom:
                       secretKeyRef:
                         key: database-password
-                        name: postgresql-readonly-${ENV_TAG}
+                        name: postgresql-${ENV_TAG}
                   - name: PG_DB_NAME
                     valueFrom:
                       secretKeyRef:
