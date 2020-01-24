@@ -15,7 +15,7 @@ class AnalysisResponseStrategy:
     issue_type = 'Issue'
     status_text = ''
 
-    def __init__(self):
+    def __init__(self, analysis_result):
         pass
 
     @staticmethod
