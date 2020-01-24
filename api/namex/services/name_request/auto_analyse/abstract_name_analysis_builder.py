@@ -1,6 +1,7 @@
 class ProcedureResult:
     def __init__(self, **kwargs):
-        self.is_valid = kwargs['is_valid'] or False
+        self.is_valid = kwargs.get('is_valid', False)
+        self.result_code = kwargs.get('result_code', None)
 
 
 class AbstractNameAnalysisBuilder:
@@ -26,15 +27,15 @@ class AbstractNameAnalysisBuilder:
         return self._name
 
     def set_dicts(self, **kwargs):
-        self._synonyms = kwargs['synonyms']
-        self._substitutions = kwargs['substitutions']
+        self._synonyms = kwargs.get('synonyms')
+        self._substitutions = kwargs.get('substitutions')
 
-        self._stop_words = kwargs['stop_words']
-        self._designated_end_words = kwargs['designated_end_words']
-        self._designated_any_words = kwargs['designated_any_words']
+        self._stop_words = kwargs.get('stop_words')
+        self._designated_end_words = kwargs.get('designated_end_words')
+        self._designated_any_words = kwargs.get('designated_any_words')
 
-        self._in_province_conflicts = kwargs['in_province_conflicts']
-        self._all_conflicts = kwargs['all_conflicts']
+        self._in_province_conflicts = kwargs.get('in_province_conflicts')
+        self._all_conflicts = kwargs.get('all_conflicts')
 
     def __init__(self, director):
         # Store a reference to the director, we will need to access methods on the director instance to do things
@@ -81,27 +82,21 @@ class AbstractNameAnalysisBuilder:
     @return ProcedureResult
     '''
     def check_name_is_well_formed(self, list_desc, list_dist, company_name):
-        result = ProcedureResult()
-        result.is_valid = True
-        return result
+        return ProcedureResult(is_valid=True)
 
     '''
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
     def check_words_to_avoid(self):
-        result = ProcedureResult()
-        result.is_valid = True
-        return result
+        return ProcedureResult(is_valid=True)
 
     '''
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
     def search_conflicts(self, list_dist, list_desc):
-        result = ProcedureResult()
-        result.is_valid = True
-        return result
+        return ProcedureResult(is_valid=True)
 
     # Default handler - this method should be overridden in extending Builder classes
     # def _search_conflicts_success(self):
@@ -120,18 +115,14 @@ class AbstractNameAnalysisBuilder:
     @return ProcedureResult
     '''
     def check_words_requiring_consent(self):
-        result = ProcedureResult()
-        result.is_valid = True
-        return result
+        return ProcedureResult(is_valid=True)
 
     '''
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
     def check_designation(self):
-        result = ProcedureResult()
-        result.is_valid = True
-        return result
+        return ProcedureResult(is_valid=True)
 
     # Just a wrapped call to the director's getClassification
     # The director's getClassification could be linked to WordClassificationService

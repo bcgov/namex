@@ -28,8 +28,7 @@ class NameAnalysisDirector:
     _in_province_conflicts = []
     _all_conflicts = []
 
-    def __init__(self, builder):
-        self.use_builder(builder)
+    def __init__(self):
         self._word_classification_api = WordClassificationApiClient()
         self._synonyms_api = SynonymsApiClient()
         self._solr_api = SolrApiClient()
@@ -38,6 +37,14 @@ class NameAnalysisDirector:
         self._builder = builder if builder else None
         if self._builder:
             self.prepare_data()
+
+    # Just a wrapped call to the builder's set_name method
+    def set_name(self, name):
+        self._builder.set_name(name)
+
+    # Just a wrapped call to the builder's get_name method
+    def get_name(self):
+        return self._builder.get_name()
 
     # Prepare any data required by the analysis builder
     def prepare_data(self):
@@ -57,34 +64,39 @@ class NameAnalysisDirector:
         self._synonyms = synonyms
         self._substitutions = substitutions
 
-        self._stop_words = stop_words['synonyms_text'][0].split(',')
-        self._designated_end_words = designated_end_words['synonyms_text'][0].split(',')
-        self._designated_any_words = designated_any_words['synonyms_text'][0].split(',')
+        self._stop_words = stop_words  # stop_words['synonyms_text'][0].split(',')
+        self._designated_end_words = designated_end_words  # designated_end_words['synonyms_text'][0].split(',')
+        self._designated_any_words = designated_any_words  # designated_any_words['synonyms_text'][0].split(',')
 
         self._in_province_conflicts = in_province_conflicts
         self._all_conflicts = all_conflicts
 
         self._builder.set_dicts(
-            _synonyms=synonyms,
-            _substitutions=substitutions,
-            _stop_words=stop_words['synonyms_text'][0].split(','),
-            _designated_end_words=designated_end_words['synonyms_text'][0].split(','),
-            _designated_any_words=designated_any_words['synonyms_text'][0].split(','),
-            _in_province_conflicts=in_province_conflicts,
-            _all_conflicts=all_conflicts
+            synonyms=self._synonyms,
+            substitutions=self._substitutions,
+            stop_words=self._stop_words,
+            designated_end_words=self._designated_end_words,
+            designated_any_words=self._designated_any_words,
+            in_province_conflicts=self._in_province_conflicts,
+            all_conflicts=self._all_conflicts
         )
 
     # This is the main execution call for the class
     def execute_analysis(self):
-        self.preprocess_name()
-        self._builder.do_analysis()
+        # TODO: Turn preprocess_name back on
+        # self.preprocess_name()
+        return self._builder.do_analysis()
 
     # Get the company's designation if it's in the name
     def get_name_designation(self):
         pass
 
-    def preprocess_name(self, row):
-        words = row.lower()
+    def preprocess_name(self):
+        if not self.get_name():
+            return  # TODO: Should we throw an error or something?
+
+        words = self.get_name().lower()
+
         words = ' '.join([word for word in words.split(" ") if word not in self._stop_words])
         # TODO: clean_name_words mostly applies regex substitutions...
         #  but are we moving the regex out of the app and into the database?

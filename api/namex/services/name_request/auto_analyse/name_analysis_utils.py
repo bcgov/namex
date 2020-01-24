@@ -1,4 +1,3 @@
-import pandas as pd
 import re
 
 
@@ -20,19 +19,20 @@ def dataframe_to_list(df):
 
 
 def clean_name_words(text, dsg_any, dsg_end):
-    desig_end = '|'.join(dsg_end) + ")$"
-    desig_any = "(" + '|'.join(dsg_any) + ")|"
+    text = text  # TODO: Enable this stuff again
+    # desig_end = '|'.join(dsg_end) + ")$"
+    # desig_any = "(" + '|'.join(dsg_any) + ")|"
 
-    text = re.sub(r'( |-)+',
-                  ' ',
-                  re.sub(
-                      r"\.COM|" + desig_any + "(?<=[a-zA-Z])\'[A-Z]|[^a-zA-Z0-9 -]+|\s(?=&)|(?<!\w\w)(?:\s+|-)(?!\w\w)|\s(" + desig_end,
-                      '',
-                      text,
-                      0,
-                      re.IGNORECASE),
-                  0,
-                  re.IGNORECASE)
+    # text = re.sub(r'( |-)+',
+    #               ' ',
+    #               re.sub(
+    #                   r"\.COM|" + desig_any + "(?<=[a-zA-Z])\'[A-Z]|[^a-zA-Z0-9 -]+|\s(?=&)|(?<!\w\w)(?:\s+|-)(?!\w\w)|\s(" + desig_end,
+    #                   '',
+    #                   text,
+    #                   0,
+    #                   re.IGNORECASE),
+    #               0,
+    #               re.IGNORECASE)
 
     return text
 

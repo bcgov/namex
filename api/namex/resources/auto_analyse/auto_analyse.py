@@ -50,21 +50,22 @@ class NameAnalysis(Resource):
         # any
         name = request.args.get('name')
         # one of ['bc', 'ca', 'intl']
-        location = request.args.get('location')
+        # location = request.args.get('location')
         # what are the entity types?
-        entity_type = request.args.get('entityType')
+        # entity_type = request.args.get('entityType')
         # one of ['new', 'existing', 'continuation'
-        request_type = request.args.get('requestType')
+        # request_type = request.args.get('requestType')
 
         # Do our service stuff
-        # TODO: How to invoke services? Per call or singleton?
         service = AutoAnalyseService()
         builder = NameAnalysisBuilder(service)
 
         # Register and initialize the desired builder
         service.use_builder(builder)
+        service.set_name(name)
+
         # Execute analysis using the supplied builder
-        result = service.execute_analysis()
+        analysis = service.execute_analysis()
 
         # Execute analysis returns a response strategy code
         def response_strategies(strategy):
@@ -79,11 +80,11 @@ class NameAnalysis(Resource):
                 AnalysisResultCodes.DESIGNATION_MISMATCH: DesignationMismatchResponseStrategy,
                 AnalysisResultCodes.CORPORATE_CONFLICT: CorporateNameConflictResponseStrategy
             }
-            return strategies.get(strategy, 'Invalid response strategy')
+            return strategies.get(strategy, ValidNameResponseStrategy)
 
-        response_strategy = None
-        if callable(response_strategies(result.status)):
-            response_strategy = response_strategies(result.status)(result.issues)
+        response_strategy = response_strategies(analysis.result_code)
+        if callable(response_strategy):
+            response_strategy = response_strategy(analysis)
 
         payload = response_strategy.build_response().to_json()
 

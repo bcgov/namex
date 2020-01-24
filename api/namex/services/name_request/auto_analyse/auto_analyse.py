@@ -27,7 +27,7 @@ class AutoAnalyseService(NameAnalysisDirector):
     _builder = None  # TODO: Is there a way to 'duck-type' this, or IoC this?
     _d = d  # Just used for perf
 
-    def __init__(self, builder):
-        super(AutoAnalyseService, self).__init__(builder)
+    def __init__(self):
+        super(AutoAnalyseService, self).__init__()
 
 

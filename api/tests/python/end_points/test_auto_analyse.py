@@ -31,7 +31,7 @@ claims = {
          }
 
 API_BASE_URI = '/api/v1/'
-ENDPOINT_PATH = 'name-analysis'
+ENDPOINT_PATH = 'name-analysis?name=My%20Test%20String'
 
 # params = {
 #   name,
