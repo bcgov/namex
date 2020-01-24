@@ -1,5 +1,7 @@
-from namex.services.name_request.auto_analyse.abstract_name_analysis_builder \
+from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
+
+from ..auto_analyse import AnalysisResultCodes
 
 
 '''
@@ -34,6 +36,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_name_is_well_formed(self):
         result = ProcedureResult()
         result.is_valid = True
+
+        success = True
+        if not success:
+            result.is_valid = False
+            # TODO: Return one of the following:
+            # AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+            # AnalysisResultCodes.TOO_MANY_WORDS
+            # AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+            # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+
         return result
 
     '''
@@ -43,6 +55,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_words_to_avoid(self):
         result = ProcedureResult()
         result.is_valid = True
+
+        success = True
+        if not success:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.WORD_TO_AVOID
+
         return result
 
     '''
@@ -52,6 +70,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def search_conflicts(self):
         result = ProcedureResult()
         result.is_valid = True
+
+        success = True
+        if not success:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+
         return result
 
     '''
@@ -61,6 +85,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_words_requiring_consent(self):
         result = ProcedureResult()
         result.is_valid = True
+
+        success = True
+        if not success:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
+
         return result
 
     '''
@@ -70,5 +100,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_designation(self):
         result = ProcedureResult()
         result.is_valid = True
+
+        success = True
+        if not success:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
+
         return result
 
