@@ -1,0 +1,144 @@
+class ProcedureResult:
+    def __init__(self, **kwargs):
+        self.is_valid = kwargs['is_valid'] or False
+
+
+class AbstractNameAnalysisBuilder:
+    _director = None
+
+    # Properties specific to this director implementation
+    # TODO: Are these arrays or dicts?
+    _synonyms = []
+    _substitutions = []
+    _stop_words = []
+    _designated_end_words = []
+    _designated_any_words = []
+
+    _in_province_conflicts = []
+    _all_conflicts = []
+
+    _name = ''
+
+    def set_name(self, name):
+        self._name = name
+
+    def get_name(self):
+        return self._name
+
+    def set_dicts(self, **kwargs):
+        self._synonyms = kwargs['synonyms']
+        self._substitutions = kwargs['substitutions']
+
+        self._stop_words = kwargs['stop_words']
+        self._designated_end_words = kwargs['designated_end_words']
+        self._designated_any_words = kwargs['designated_any_words']
+
+        self._in_province_conflicts = kwargs['in_province_conflicts']
+        self._all_conflicts = kwargs['all_conflicts']
+
+    def __init__(self, director):
+        # Store a reference to the director, we will need to access methods on the director instance to do things
+        # like updating the classifications table
+        self._director = director
+
+    '''
+    This method is NOT abstract and should NEVER be overridden
+    @return ProcedureResult
+    '''
+    def execute_analysis(self):
+        return self.do_analysis()
+
+    '''
+    This method can be overridden in extending Builder classes if a different process is desired
+    @return ProcedureResult
+    '''
+    def do_analysis(self):
+        check_name_is_well_formed = self.check_name_is_well_formed()
+        check_words_to_avoid = self.check_words_to_avoid()
+        check_conflicts = self.search_conflicts()
+        check_words_requiring_consent = self.check_words_requiring_consent()
+        check_designation_mismatch = self.check_designation()
+
+        if not check_name_is_well_formed.is_valid:
+            return check_name_is_well_formed
+
+        if not check_words_to_avoid.is_valid:
+            return check_words_to_avoid
+
+        if not check_conflicts.is_valid:
+            return check_conflicts
+
+        if not check_words_requiring_consent.is_valid:
+            return check_words_requiring_consent
+
+        if not check_designation_mismatch.is_valid:
+            return check_designation_mismatch
+
+        return ProcedureResult(is_valid=True)
+
+    '''
+    Check to see if a provided name is valid
+    @return ProcedureResult
+    '''
+    def check_name_is_well_formed(self, list_desc, list_dist, company_name):
+        result = ProcedureResult()
+        result.is_valid = True
+        return result
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+    def check_words_to_avoid(self):
+        result = ProcedureResult()
+        result.is_valid = True
+        return result
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+    def search_conflicts(self, list_dist, list_desc):
+        result = ProcedureResult()
+        result.is_valid = True
+        return result
+
+    # Default handler - this method should be overridden in extending Builder classes
+    # def _search_conflicts_success(self):
+    #    pass
+
+    # Default handler - this method should be overridden in extending Builder classes
+    # def _search_conflicts_validate_error(self):
+    #    pass
+
+    # Default handler - this method should be overridden in extending Builder classes
+    # def _search_conflicts_error(self):
+    #    pass
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+    def check_words_requiring_consent(self):
+        result = ProcedureResult()
+        result.is_valid = True
+        return result
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+    def check_designation(self):
+        result = ProcedureResult()
+        result.is_valid = True
+        return result
+
+    # Just a wrapped call to the director's getClassification
+    # The director's getClassification could be linked to WordClassificationService
+    def get_word_classification(self, word):
+        return self._director.get_word_classification(word)
+
+    # Just a wrapped call to the director's updateClassification
+    # The director's updateClassification could be linked to WordClassificationService
+    def update_word_classification(self):
+        return self._director.update_word_classification()

@@ -10,25 +10,9 @@ from flask_jwt_oidc import AuthError
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
-#from sqlalchemy.dialects import postgresql
-#from sqlalchemy.orm.exc import NoResultFound
-#from sqlalchemy import func, text
-#from sqlalchemy.inspection import inspect
-
-#from namex import jwt, nro, services
-
-# Import DTOs
-from namex.resources.auto_analyse import \
-    ConsentingBody, \
-    NameAction, \
-    DescriptiveWord, \
-    Conflict, \
-    NameAnalysisIssue, \
-    NameAnalysisResponse
-
 from namex.resources.auto_analyse.analysis_strategies import \
     ValidNameResponseStrategy, \
-    AddDistinciveWordResponseStrategy, \
+    AddDistinctiveWordResponseStrategy, \
     AddDescriptiveWordResponseStrategy, \
     ContainsWordsToAvoidResponseStrategy, \
     DesignationMismatchResponseStrategy, \
@@ -37,7 +21,12 @@ from namex.resources.auto_analyse.analysis_strategies import \
     ContainsUnclassifiableWordResponseStrategy, \
     CorporateNameConflictResponseStrategy
 
-setup_logging() ## important to do this first
+from namex.services.name_request.auto_analyse import AnalysisResultCodes
+
+from namex.services.name_request.name_analysis_builder_v1.name_analysis_builder import NameAnalysisBuilder
+from namex.services.name_request.auto_analyse.auto_analyse import AutoAnalyseService
+
+setup_logging()  # It's important to do this first
 
 # Register a local namespace for the requests
 api = Namespace('nameAnalysis', description='Name Analysis - Core API for analysing a Name')
@@ -55,41 +44,48 @@ def handle_auth_error(ex):
 class NameAnalysis(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    #@jwt.requires_auth
-    #@api.expect()
+    # @jwt.requires_auth
+    # @api.expect()
     def get():
         # any
         name = request.args.get('name')
         # one of ['bc', 'ca', 'intl']
         location = request.args.get('location')
         # what are the entity types?
-        entityType = request.args.get('entityType')
+        entity_type = request.args.get('entityType')
         # one of ['new', 'existing', 'continuation'
-        requestType = request.args.get('requestType')
+        request_type = request.args.get('requestType')
 
-        # Go get stuff from the db
+        # Do our service stuff
+        # TODO: How to invoke services? Per call or singleton?
+        service = AutoAnalyseService()
+        builder = NameAnalysisBuilder(service)
 
-        # These are the options:
-        # API Returns
-        strategy = ValidNameResponseStrategy()
-        # Requires addition of distinctive word
-        strategy = AddDistinciveWordResponseStrategy()
-        # Requires addition of descriptive word
-        strategy = AddDescriptiveWordResponseStrategy()
-        # Name Contains a Word To Avoid
-        strategy = ContainsWordsToAvoidResponseStrategy()
-        # Designation Mismatch
-        strategy = DesignationMismatchResponseStrategy()
-        # Too Many Words
-        strategy = TooManyWordsResponseStrategy()
-        # Name Requires Consent
-        strategy = NameRequiresConsentResponseStrategy()
-        # Contains Unclassifiable Word
-        strategy = ContainsUnclassifiableWordResponseStrategy()
-        # Conflicts with the Corporate Database
-        strategy = CorporateNameConflictResponseStrategy()
+        # Register and initialize the desired builder
+        service.use_builder(builder)
+        # Execute analysis using the supplied builder
+        result = service.execute_analysis()
 
-        payload = strategy.build_response().to_json()
+        # Execute analysis returns a response strategy code
+        def response_strategies(strategy):
+            strategies = {
+                AnalysisResultCodes.VALID_NAME: ValidNameResponseStrategy,
+                AnalysisResultCodes.ADD_DISTINCTIVE_WORD: AddDistinctiveWordResponseStrategy,
+                AnalysisResultCodes.ADD_DESCRIPTIVE_WORD: AddDescriptiveWordResponseStrategy,
+                AnalysisResultCodes.TOO_MANY_WORDS: TooManyWordsResponseStrategy,
+                AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD: ContainsUnclassifiableWordResponseStrategy,
+                AnalysisResultCodes.WORD_TO_AVOID: ContainsWordsToAvoidResponseStrategy,
+                AnalysisResultCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentResponseStrategy,
+                AnalysisResultCodes.DESIGNATION_MISMATCH: DesignationMismatchResponseStrategy,
+                AnalysisResultCodes.CORPORATE_CONFLICT: CorporateNameConflictResponseStrategy
+            }
+            return strategies.get(strategy, 'Invalid response strategy')
+
+        response_strategy = None
+        if callable(response_strategies(result.status)):
+            response_strategy = response_strategies(result.status)(result.issues)
+
+        payload = response_strategy.build_response().to_json()
 
         response = make_response(payload, 200)
         return response

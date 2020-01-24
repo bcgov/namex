@@ -1,3 +1,5 @@
+from namex.services.name_request.auto_analyse import AnalysisResultCodes
+
 # Import DTOs
 from namex.resources.auto_analyse import \
     ConsentingBody, \
@@ -65,7 +67,7 @@ class AnalysisResponseStrategy:
 
 
 class ValidNameResponseStrategy(AnalysisResponseStrategy):
-    issue_type = None
+    issue_type = AnalysisResultCodes.VALID_NAME
     status_text = 'Approved'
 
     def create_issue(self):
@@ -74,7 +76,7 @@ class ValidNameResponseStrategy(AnalysisResponseStrategy):
 
 
 class AddDistinctiveWordResponseStrategy(AnalysisResponseStrategy):
-    issue_type = 'add_distinctive'
+    issue_type = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
     status_text = 'Further Action Required'
 
     def create_issue(self):
@@ -83,7 +85,7 @@ class AddDistinctiveWordResponseStrategy(AnalysisResponseStrategy):
 
 
 class AddDescriptiveWordResponseStrategy(AnalysisResponseStrategy):
-    issue_type = 'add_descriptive'
+    issue_type = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
     status_text = 'Further Action Required'
 
     def create_issue(self):
@@ -92,7 +94,7 @@ class AddDescriptiveWordResponseStrategy(AnalysisResponseStrategy):
 
 
 class ContainsWordsToAvoidResponseStrategy(AnalysisResponseStrategy):
-    issue_type = 'word_to_avoid'
+    issue_type = AnalysisResultCodes.WORD_TO_AVOID
     status_text = 'Further Action Required'
 
     def create_issue(self):
@@ -101,7 +103,7 @@ class ContainsWordsToAvoidResponseStrategy(AnalysisResponseStrategy):
 
 
 class DesignationMismatchResponseStrategy(AnalysisResponseStrategy):
-    issue_type = 'designation_mismatch'
+    issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
     status_text = 'Further Action Required'
 
     def create_issue(self):
@@ -110,7 +112,7 @@ class DesignationMismatchResponseStrategy(AnalysisResponseStrategy):
 
 
 class TooManyWordsResponseStrategy(AnalysisResponseStrategy):
-    issue_type = 'excess_words'
+    issue_type = AnalysisResultCodes.TOO_MANY_WORDS
     status_text = 'Further Action Required'
 
     def create_issue(self):
@@ -119,7 +121,7 @@ class TooManyWordsResponseStrategy(AnalysisResponseStrategy):
 
 
 class NameRequiresConsentResponseStrategy(AnalysisResponseStrategy):
-    issue_type = 'consent_required'
+    issue_type = AnalysisResultCodes.NAME_REQUIRES_CONSENT
     status_text = 'May be Approved With Consent'
 
     def create_issue(self):
@@ -128,7 +130,7 @@ class NameRequiresConsentResponseStrategy(AnalysisResponseStrategy):
 
 
 class ContainsUnclassifiableWordResponseStrategy(AnalysisResponseStrategy):
-    issue_type = 'unclassified_word'
+    issue_type = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
     status_text = 'Further Action Required'
 
     def create_issue(self):
@@ -137,7 +139,7 @@ class ContainsUnclassifiableWordResponseStrategy(AnalysisResponseStrategy):
 
 
 class CorporateNameConflictResponseStrategy(AnalysisResponseStrategy):
-    issue_type = 'corp_conflict'
+    issue_type = AnalysisResultCodes.CORPORATE_CONFLICT
     status_text = 'Further Action Required'
 
     def create_issue(self):
