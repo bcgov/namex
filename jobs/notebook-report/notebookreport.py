@@ -193,7 +193,8 @@ if __name__ == '__main__':
     for directory in ['daily', 'sixMonth']:
         if not os.path.isdir(directory):
             os.mkdir(directory)
-        # We don't need to run 'daily' report on Monday (index is 0) and Sunday (index is 6)
+        # We don't need to run 'daily' report on Monday (index is 0) for Sunday's data or Sunday (index is 6)
+        # for Saturday's data
         if((weekno != 0 and weekno != 6) and directory == 'daily') or directory == 'sixMonth':
             processnotebooks(directory)
 
