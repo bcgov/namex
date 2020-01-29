@@ -134,6 +134,10 @@ def test_new_bc_cr_valid_response(client, jwt, app):
     if isinstance(payload.issues, list):
         assert_issues_count_is(0, payload.issues)
 
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
 
 def test_new_bc_ul_valid_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
