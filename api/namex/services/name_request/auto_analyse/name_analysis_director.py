@@ -19,8 +19,8 @@ class NameAnalysisDirector:
 
     # Properties specific to this director implementation
     # TODO: Are these arrays or dicts?
-    _synonyms = []
-    _substitutions = []
+    _synonyms = {}
+    _substitutions = {}
     _stop_words = []
     _designated_end_words = []
     _designated_any_words = []
