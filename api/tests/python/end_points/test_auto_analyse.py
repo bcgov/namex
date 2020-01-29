@@ -31,21 +31,23 @@ claims = {
          }
 
 API_BASE_URI = '/api/v1/'
-ENDPOINT_PATH = 'name-analysis?name=My%20Test%20String'
-
+ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
 # params = {
 #   name,
 #   location, one of: [‘bc’, ‘ca’, ‘us’, or ‘it’],
 #   entity_type: abbreviation. convention not finalized yet.
 #   request_type, one of: [‘new’, ‘existing’, ‘continuation’]
 # }
-def test_get_analysis(client, jwt, app):
+
+
+def test_get_analysis_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    route = API_BASE_URI + ENDPOINT_PATH
-    response = client.get(route, headers=headers)
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
     print(response)
 
 
@@ -59,37 +61,102 @@ def test_get_analysis(client, jwt, app):
 # Name Requires Consent
 # Contains Unclassifiable Word
 # Conflicts with the Corporate Database
-def test_valid_response(client, jwt, app):
-    pass
 
 
-def test_add_distinctive_word_response(client, jwt, app):
-    pass
+def test_valid_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
 
 
-def test_add_descriptive_word_response(client, jwt, app):
-    pass
+def test_add_distinctive_word_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
 
 
-def test_contains_words_to_avoid_response(client, jwt, app):
-    pass
+def test_add_descriptive_word_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
 
 
-def test_designation_mismatch_response(client, jwt, app):
-    pass
+def test_contains_words_to_avoid_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
 
 
-def test_too_many_words_response(client, jwt, app):
-    pass
+def test_designation_mismatch_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
 
 
-def test_name_requires_consent_response(client, jwt, app):
-    pass
+def test_too_many_words_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
 
 
-def test_contains_unclassifiable_word_response(client, jwt, app):
-    pass
+def test_name_requires_consent_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
 
 
-def test_corporate_name_conflict_response(client, jwt, app):
-    pass
+def test_contains_unclassifiable_word_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
+
+
+def test_corporate_name_conflict_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    query = '?name=My%20Test%20String'
+    path = ENDPOINT_PATH + query
+    response = client.get(path, headers=headers)
+    print(response)
