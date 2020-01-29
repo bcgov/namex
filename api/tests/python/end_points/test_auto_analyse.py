@@ -1,6 +1,8 @@
 from flask import jsonify
 from flask import json
 
+from urllib.parse import quote_plus
+
 from namex.models import User
 
 from tests.python import integration_oracle_namesdb
@@ -45,8 +47,16 @@ def test_get_analysis_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -68,8 +78,16 @@ def test_valid_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -79,8 +97,16 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -90,8 +116,16 @@ def test_add_descriptive_word_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -101,8 +135,16 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -112,8 +154,16 @@ def test_designation_mismatch_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -123,8 +173,16 @@ def test_too_many_words_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -134,8 +192,16 @@ def test_name_requires_consent_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -145,8 +211,16 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
 
@@ -156,7 +230,15 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    query = '?name=My%20Test%20String'
-    path = ENDPOINT_PATH + query
+    test_params = {
+        'name': 'My Test String',
+        'location': 'BC',
+        'entity_type': 'whatev',
+        'request_type': 'new'
+    }
+
+    query = '&'.join("{!s}={!r}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+    path = ENDPOINT_PATH + '?' + query
+    print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     print(response)
