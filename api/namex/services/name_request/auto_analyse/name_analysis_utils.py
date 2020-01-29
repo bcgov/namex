@@ -19,7 +19,7 @@ def dataframe_to_list(df):
     return list_dist, list_desc, list_none
 
 
-def clean_name_words(text, dsg_any, dsg_end, subs_list, stop_words):
+def clean_name_words(text, stop_words, dsg_any, dsg_end, subs_list):
     words = text.lower()
     words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
     # words = remove_french(words)
@@ -29,12 +29,12 @@ def clean_name_words(text, dsg_any, dsg_end, subs_list, stop_words):
     return [x.upper() for x in tokens if x]
 
 
-def regex_transform(text, dsg_any, dsg_end, subs_list, stop_words):
-    desig_end = '((lot)+\s+\d+|\d*|' + '|'.join(dsg_end) + ')'
+def regex_transform(text, stop_words, dsg_any, dsg_end, subs_list):
+    desig_end = '((lot)+\s+\d+|\d*|' + '|'.join(map(str, dsg_end)) + ')'
     desig_any = "(" + '|'.join(dsg_any) + ")"
     # prefixes = '|'.join(prefixes_list)
 
-    exceptions_ws = substitution_list(re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE),subs_list, stop_words)
+    exceptions_ws = substitution_list(re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE), subs_list, stop_words)
     exceptions_ws.extend(['null'])
 
     exception_ws_rx = '|'.join(map(re.escape, exceptions_ws))
@@ -91,11 +91,10 @@ def regex_transform(text, dsg_any, dsg_end, subs_list, stop_words):
                       re.IGNORECASE),
                   0,
                   re.IGNORECASE)
-    print("text in regexTransform: ", text)
     return text
 
 
-def substitution_list(text, subs_list, stop_words):
+def substitution_list(text, stop_words, subs_list):
     subs_list = [['accelerate', ' xlr8', ' xlreight'],
                  ['access', ' axis', ' axys'],
                  ['cosi', ' cosy', ' cozi', ' cozy'],
@@ -127,12 +126,11 @@ def substitution_list(text, subs_list, stop_words):
 
     subs_list = list(dict.fromkeys([x for x in regex if x]))
 
-    print("text in substitution_list: ",[w for w in subs_list if re.match(num_regex, w)])
     # Just alphanumeric word substitutions
     return [w for w in subs_list if re.match(num_regex, w)]
 
 
-def remove_french(text,french_desig_list):
+def remove_french(text, french_desig_list):
     compound = re.findall(r'[^/]+(?://[^/]*)*', text)
     if len(compound) == 2:
         fr = [x for x in compound[1].split(" ") if x]
