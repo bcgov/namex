@@ -7,6 +7,8 @@ from flask import request, make_response, jsonify, g, current_app, get_flashed_m
 from flask_restplus import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
+from urllib.parse import unquote_plus
+
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
@@ -48,13 +50,13 @@ class NameAnalysis(Resource):
     # @api.expect()
     def get():
         # any
-        name = request.args.get('name')
+        name = unquote_plus(request.args.get('name')) if request.args.get('name') else None
         # one of ['bc', 'ca', 'intl']
-        # location = request.args.get('location')
+        location = unquote_plus(request.args.get('location')) if request.args.get('location') else None
         # what are the entity types?
-        # entity_type = request.args.get('entityType')
+        entity_type = unquote_plus(request.args.get('entity_type')) if request.args.get('entity_type') else None
         # one of ['new', 'existing', 'continuation'
-        # request_type = request.args.get('requestType')
+        request_type = unquote_plus(request.args.get('request_type')) if request.args.get('request_type') else None
 
         # Do our service stuff
         service = AutoAnalyseService()
@@ -63,6 +65,9 @@ class NameAnalysis(Resource):
         # Register and initialize the desired builder
         service.use_builder(builder)
         service.set_name(name)
+        # service.set_location(name)
+        # service.set_entity_type(name)
+        # service.set_request_type(name)
 
         # Execute analysis using the supplied builder
         analysis = service.execute_analysis()
