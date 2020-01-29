@@ -270,6 +270,10 @@ def test_new_bc_dba_valid_response(client, jwt, app):
     if isinstance(payload.issues, list):
         assert_issues_count_is(0, payload.issues)
 
+def test_too_many_words_request_response(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
 def test_new_bc_gp_valid_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
