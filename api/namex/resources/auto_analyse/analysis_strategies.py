@@ -1,69 +1,15 @@
 from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
+# Import response base
+from .analysis_response_strategy import AnalysisResponseStrategy
+
 # Import DTOs
-from namex.resources.auto_analyse import \
-    ConsentingBody, \
-    NameAction, \
-    DescriptiveWord, \
-    Conflict, \
-    NameAnalysisIssue, \
-    NameAnalysisResponse
-
-
-class AnalysisResponseStrategy:
-    strategy_name = 'Analysis Response Strategy'
-    issue_type = 'Issue'
-    status_text = ''
-
-    def __init__(self, analysis_result):
-        pass
-
-    @staticmethod
-    def create_new_issue():
-        issue = NameAnalysisIssue(
-            consentingBody=ConsentingBody(
-                name='Test Body',
-                email='test@example.com'
-            ),
-            designations=None,
-            descriptiveWords=None,
-            issueType=None,
-            word=None,
-            wordIndex=None,
-            showExaminationButton=None,
-            conflicts=None,
-            options=None,
-            nameActions=None
-        )
-
-        issue.nameActions = []
-
-        name_action = NameAction(
-            type='Test',
-            position='start',
-            message='Ipsum lorem dolor'
-        )
-
-        issue.nameActions.append(name_action)
-
-        return issue
-
-    def create_issue(self):
-        # TODO: This MUST be implemented...
-        pass
-
-    @staticmethod
-    def prepare_payload(issue):
-        payload = NameAnalysisResponse(
-            status='Test',
-            issues=[issue]
-        )
-        return payload
-
-    def build_response(self):
-        issue = self.create_issue()
-        response = self.prepare_payload(issue)
-        return response
+from .response_objects.name_analysis_issue import NameAnalysisIssue
+from .response_objects.name_analysis_response import NameAnalysisResponse
+from .response_objects.name_action import NameAction
+from .response_objects.consenting_body import ConsentingBody
+from .response_objects.conflict import Conflict
+from .response_objects.descriptive_word import DescriptiveWord
 
 
 class ValidNameResponseStrategy(AnalysisResponseStrategy):
