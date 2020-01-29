@@ -48,9 +48,9 @@ def test_get_analysis_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS LTD.',
         'location': 'BC',
-        'entity_type': 'whatev',
+        'entity_type': 'SOLPROP',
         'request_type': 'new'
     }
 
@@ -79,9 +79,9 @@ def test_valid_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'MOUNTAIN NEW FOOD GROWERS LTD.',
         'location': 'BC',
-        'entity_type': 'whatev',
+        'entity_type': 'SOLPROP',
         'request_type': 'new'
     }
 
@@ -98,9 +98,9 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'FOOD GROWERS LTD.',
         'location': 'BC',
-        'entity_type': 'whatev',
+        'entity_type': 'SOLPROP',
         'request_type': 'new'
     }
 
@@ -117,9 +117,9 @@ def test_add_descriptive_word_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'MOUNTAIN VIEW LTD.',
         'location': 'BC',
-        'entity_type': 'whatev',
+        'entity_type': 'SOLPROP',
         'request_type': 'new'
     }
 
@@ -136,9 +136,9 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'MOUNTAIN VIEW FOOD PROVINCIAL LTD.',
         'location': 'BC',
-        'entity_type': 'whatev',
+        'entity_type': 'SOLPROP',
         'request_type': 'new'
     }
 
@@ -174,7 +174,7 @@ def test_too_many_words_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS INTERNATIONAL LTD.',
         'location': 'BC',
         'entity_type': 'whatev',
         'request_type': 'new'
@@ -193,7 +193,7 @@ def test_name_requires_consent_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'VANCOUVER PORT FOOD GROWERS LTD.',
         'location': 'BC',
         'entity_type': 'whatev',
         'request_type': 'new'
@@ -212,7 +212,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'UNCLASSIFIED MOUNTAIN FOOD GROWERS LTD.',
         'location': 'BC',
         'entity_type': 'whatev',
         'request_type': 'new'
@@ -231,7 +231,7 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS LTD.',
         'location': 'BC',
         'entity_type': 'whatev',
         'request_type': 'new'

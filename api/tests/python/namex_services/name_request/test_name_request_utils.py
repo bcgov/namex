@@ -36,20 +36,16 @@ french_desig_list = ["societe a responsabilite limitee", "societe en nom collect
 
 
 def test_remove_french(client, jwt, app):
-    assert (remove_french(text, french_desig_list) ,'W & M 074 VENTURES INC.')
-    print("result test_remove_french: ", remove_french(text, french_desig_list))
+    assert_that(remove_french(text, french_desig_list) ,'W & M 074 VENTURES INC.')
 
 
 def test_substitution_list(client, jwt, app):
-    assert(substitution_list(text, subs_list, stop_words), [])
-    print("result test_substitution_list: ",substitution_list(text, subs_list, stop_words))
+    assert_that(len(substitution_list(text, stop_words, subs_list)), equal_to(0))
 
 
 def test_regex_transform(client, jwt, app):
-    assert(regex_transform(text, dsg_any, dsg_end, subs_list, stop_words), 'WM 074 VENTURES')
-    print("test_regex_transform: ",regex_transform(text, dsg_any, dsg_end, subs_list, stop_words))
+    assert_that(regex_transform(text, stop_words, dsg_any, dsg_end, subs_list), 'WM 074 VENTURES')
 
 
 def test_clean_name_words(client, jwt, app):
-    assert(clean_name_words(text, stop_words, dsg_any, dsg_end), 'WM 074 VENTURES')
-    print("test_clean_name_words: ",clean_name_words(text, stop_words, dsg_any, dsg_end))
+    assert_that(clean_name_words(text, stop_words, dsg_any, dsg_end, subs_list), 'WM 074 VENTURES')
