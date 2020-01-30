@@ -1,3 +1,9 @@
+import itertools
+
+import pandas as pd
+
+from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
+    build_query_descriptive
 from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
@@ -33,7 +39,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-    def check_name_is_well_formed(self):
+    def check_name_is_well_formed(self, list_desc, list_dist, name):
+        '''
         result = ProcedureResult()
         result.is_valid = True
 
@@ -47,7 +54,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
 
         return result
-
+        '''
+        success = False
+        if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
+                (list_dist + list_desc) == name):
+            success = True
+        return success
     '''
     Override the abstract / base class method
     @return ProcedureResult
@@ -65,9 +77,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
+    list_dist= ['MOUNTAIN', 'VIEW']
+    list_desc= ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
-    def search_conflicts(self):
+    def search_conflicts(self, list_dist, list_desc):
+        '''
         result = ProcedureResult()
         result.is_valid = True
 
@@ -77,6 +92,54 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
 
         return result
+        '''
+        # dist_substitution_list:  [['mount', 'mountain', 'mt', 'mtn'], ['view', 'vu']]
+        # desc_substitution_list: [['food, restaurant, bar'],['growers']]
+
+        distinctive = ' '.join(map(str, list_dist)).replace(',', ' ').upper().strip()
+
+        # This section depends on Synonyms API to get the substitution list:
+        # For w_dist in list_dist:
+        #    substitution_list= get_substitution_list(w_dist)
+        #    If not substitution_list:
+        #       dist_list.append(w_dist)
+        #    else:
+        #       dist_list.extend(substitution_list)
+
+        #  dist_substitution_list= [w_dist if not get_substitution_list(w_dist) else get_substitution_list(w_dist) for w_dist in list_dist]
+        #  Next line to be removed hard-coded dist_list response when having API results:
+        dist_substitution_list = [['mount', 'mountain', 'mt', 'mtn'], ['view', 'vu']]
+
+        # All possible permutations of elements in dist_list
+        # [('mount', 'view'), ('mount', 'vu'), ('mountain', 'view'), ('mountain', 'vu'), ('mt', 'view'), ('mt', 'vu'), ('mtn', 'view'), ('mtn', 'vu')]
+        dist_all_permutations = list(itertools.product(*dist_substitution_list))
+
+        query = build_query_distinctive(dist_all_permutations)
+
+        print("Distinctive query: ", query)
+
+        # This section depends on Synonyms API to get the substitution list:
+        # for w_desc in list_desc:
+        #    substitution_list= get_substitution_list(w_desc)
+        #    If not substitution_list:
+        #       desc_substitution_list.append(w_desc)
+        #    else:
+        #       desc_substitution_list.extend(substitution_list)
+
+        #  desc_substitution_list= [w_desc if not get_substitution_list(w_desc) else get_substitution_list(w_desc) for w_desc in list_desc]
+
+        desc_substitution_list:  ['bar', 'bistro', 'breakfast', 'buffet', 'cabaret', 'cafe', 'cantina', 'cappuccino', 'chai', 'coffee', 'commissary', 'cuisine', \
+                                  'deli', 'dhaba', 'dine', 'diner', 'dining', 'eat', 'eater', 'eats', 'edible', 'espresso', 'expresso', 'food', 'galley', \
+                                  'gastropub', 'grill', 'java', 'kitchen', 'latte', 'lounge', 'pizza', 'pizzeria', 'pub', 'publichouse', 'restaurant', 'roast', \
+                                  'sandwich', 'snack', 'snax', 'socialhouse', 'steak', 'sub', 'sushi', 'takeout', 'taphouse', 'taverna', 'tea', 'tiffin', \
+                                  'trattoria', 'treat', 'treatery', 'convenience', 'food', 'grocer', 'grocery', 'market', 'mart', 'shop', 'store', 'variety', \
+                                  'growers']
+
+        query = build_query_descriptive(desc_substitution_list, query)
+
+        matches = pd.read_sql_query(query, cnx)
+
+        return matches
 
     '''
     Override the abstract / base class method
