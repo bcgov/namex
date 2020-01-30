@@ -1,9 +1,16 @@
 from namex.services.name_request.auto_analyse.name_analysis_utils import \
-    read_data_frame, dataframe_to_list, clean_name_words, regex_transform, substitution_list, remove_french
+    data_frame_to_list, clean_name_words, regex_transform, substitution_list, remove_french
 
 from hamcrest import *
+import pandas as pd
 
 text = 'W & M 074 VENTURES INC.'
+
+name = ['WM', '074', 'VENTURES']
+list_dist = ['WM', '074']
+list_desc = ['VENTURES']
+list_none = []
+
 
 stop_words = ['an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', \
               'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', \
@@ -24,19 +31,18 @@ subs_list = [['accelerate', ' xlr8', ' xlreight'], ['access', ' axis', ' axys'],
 french_desig_list = ["societe a responsabilite limitee", "societe en nom collectif a responsabilite limitee", \
                      "limitee", "ltee", "ltee.", "incorporee", "slr", "sencrl"]
 
-
-# def test_read_data_frame(client, jwt, app):
-#    read_data_frame()
-#    pass
+data = [['WM', 'Distinctive', 12], ['079', 'Distinctive', 3], ['VENTURES', 'Descriptive', 1000]]
+df = pd.DataFrame(data, columns=['word', 'word_classification', 'frequency'])
 
 
-# def test_dataframe_to_list(client, jwt, app):
-# dataframe_to_list()
-#    pass
+def test_data_frame_to_list(client, jwt, app):
+    assert_that(data_frame_to_list(df), list_dist)
+    assert_that(data_frame_to_list(df), list_desc)
+    assert_that(data_frame_to_list(df), list_none)
 
 
 def test_remove_french(client, jwt, app):
-    assert_that(remove_french(text, french_desig_list) ,'W & M 074 VENTURES INC.')
+    assert_that(remove_french(text, french_desig_list), 'W & M 074 VENTURES INC.')
 
 
 def test_substitution_list(client, jwt, app):
