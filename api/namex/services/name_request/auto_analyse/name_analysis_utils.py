@@ -1,12 +1,8 @@
 import re
+import pandas as pd
 
 
-def read_data_frame(file):
-    df = pd.read_csv(file, usecols=['category', 'enabled', 'synonyms_text', 'stems_text'])
-    return df.loc[(df['enabled'].astype(str).str.lower() == 'true')]
-
-
-def dataframe_to_list(df):
+def data_frame_to_list(df):
     df_dist = df.loc[df.classification == 'Distinctive']
     df_desc = df.loc[df.classification == 'Descriptive']
     df_none = df.loc[df.classification == 'None']
@@ -51,8 +47,6 @@ def regex_transform(text, stop_words, dsg_any, dsg_end, subs_list):
                                     '',
                                     re.sub(r'[&/-]',
                                            ' ',
-                                           # re.sub(r'(?<=[0-9])\s+(?=(?:ST|[RN]D|TH)(?: +[^\W\d_]|$))',
-                                           #       '',
                                            ws_rx.sub(lambda x: x.group(1) or " ",
                                                      re.sub(r'\b(\d+(ST|[RN]D|TH))(\w+)\b',
                                                             r'\1 \3',
@@ -61,16 +55,12 @@ def regex_transform(text, stop_words, dsg_any, dsg_end, subs_list):
                                                                    re.sub(
                                                                        r'(?<=[a-zA-Z])\'[Ss]|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &/-]+',
                                                                        ' ',
-                                                                       # re.sub(r'\b('+prefixes+')([ &\/.-])([A-Za-z]+)',
-                                                                       #       r'\1\3',
                                                                        re.sub(
                                                                            r'\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b' + desig_any + '\b|\s' + desig_end + '(?=(\s' + desig_end + ')*$)',
                                                                            '',
                                                                            text,
                                                                            0,
                                                                            re.IGNORECASE),
-                                                                       # 0,
-                                                                       # re.IGNORECASE),
                                                                        0,
                                                                        re.IGNORECASE),
                                                                    0,
@@ -78,8 +68,6 @@ def regex_transform(text, stop_words, dsg_any, dsg_end, subs_list):
                                                             0,
                                                             re.IGNORECASE),
                                                      ),
-                                           # 0,
-                                           # re.IGNORECASE),
                                            0,
                                            re.IGNORECASE),
                                     0,
@@ -128,6 +116,33 @@ def substitution_list(text, stop_words, subs_list):
 
     # Just alphanumeric word substitutions
     return [w for w in subs_list if re.match(num_regex, w)]
+
+
+def get_substitution_list(word):
+    #   This section depends on Synonyms API to get the substitution list:
+    return []
+
+
+def build_query_distinctive(dist_all_permutations):
+    query = "select n.name " + \
+            "from requests r, names n " + \
+            "where r.id = n.nr_id and " + \
+            "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
+            "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
+            "n.state IN ('APPROVED','CONDITION') and " + \
+            "lower(n.name) similar to " + "'"
+    permutations= '|'.join(dist_all_permutations)
+    query += "(" + permutations + ")%%" + "'"
+
+    return query
+
+
+def build_query_descriptive(desc_substitution_list, query):
+    query += " and lower(n.name) similar to "
+    substitutions=' ?| '.join(desc_substitution_list)
+    query += "( " + substitutions + " ?)%%" + "'"
+
+    return query
 
 
 def remove_french(text, french_desig_list):
