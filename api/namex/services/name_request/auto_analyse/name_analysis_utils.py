@@ -1,5 +1,4 @@
 import re
-import pandas as pd
 
 
 def read_data_frame(file):
@@ -107,6 +106,7 @@ def substitution_list(text, stop_words, subs_list):
 
     words = ' '.join([word for index, word in enumerate(text.split(" ")) if index == 0 or word not in stop_words])
     words = re.sub(r"[^a-zA-Z0-9 -\']+", ' ', words, 0, re.IGNORECASE)
+
     words_list = words.split(" ")
 
     # Flat list of lists
