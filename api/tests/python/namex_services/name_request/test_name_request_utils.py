@@ -19,6 +19,12 @@ list_dist = []
 list_desc = []
 list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 
+name = ['WM', '074', 'VENTURES']
+list_dist = ['WM', '074']
+list_desc = ['VENTURES']
+list_none = []
+
+
 stop_words = ['an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', \
               'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', \
               'such', 'that', 'the', 'their', 'then', 'there', 'these', \
