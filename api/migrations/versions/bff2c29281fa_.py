@@ -24,7 +24,7 @@ def upgrade():
     sa.Column('synonyms_text', sa.String(length=1000), nullable=False),
     sa.Column('stems_text', sa.String(length=1000), nullable=False),
     sa.Column('comment', sa.String(length=1000), nullable=True),
-    sa.Column('enabled', sa.Boolean(), nullable=True),
+    sa.Column('enabled', sa.Boolean(), nullable=True, default=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('synonyms_text')
     )
