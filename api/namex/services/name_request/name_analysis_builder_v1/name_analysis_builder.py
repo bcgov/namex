@@ -1,6 +1,7 @@
 import itertools
 
 import pandas as pd
+from sqlalchemy import create_engine
 
 from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
     build_query_descriptive
@@ -8,7 +9,6 @@ from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisResultCodes
-
 
 '''
 Sample builder
@@ -34,11 +34,27 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     _distinctive_words = []
     _descriptive_words = []
 
+    POSTGRES_ADDRESS = 'localhost'
+    POSTGRES_PORT = '5432'
+    POSTGRES_USERNAME = 'postgres'
+    POSTGRES_PASSWORD = 'BVict31C'
+    POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
+    POSTGRES_DBNAME_DATA = 'namex-local-dev'
+
+    postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                            password=POSTGRES_PASSWORD,
+                                                                                            ipaddress=POSTGRES_ADDRESS,
+                                                                                            port=POSTGRES_PORT,
+                                                                                            dbname=POSTGRES_DBNAME_DATA))
+
+    cnx = create_engine(postgres_str)
+
     '''
     Check to see if a provided name is valid
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_name_is_well_formed(self, list_desc, list_dist, name):
         '''
         result = ProcedureResult()
@@ -60,10 +76,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 (list_dist + list_desc) == name):
             success = True
         return success
+
     '''
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_words_to_avoid(self):
         result = ProcedureResult()
         result.is_valid = True
@@ -81,18 +99,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     list_desc= ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
-    def search_conflicts(self, list_dist, list_desc):
-        '''
+
+    def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
         result = ProcedureResult()
         result.is_valid = True
-
         success = True
-        if not success:
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
 
-        return result
-        '''
         # dist_substitution_list:  [['mount', 'mountain', 'mt', 'mtn'], ['view', 'vu']]
         # desc_substitution_list: [['food, restaurant, bar'],['growers']]
 
@@ -128,18 +140,27 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         #  desc_substitution_list= [w_desc if not get_substitution_list(w_desc) else get_substitution_list(w_desc) for w_desc in list_desc]
 
-        desc_substitution_list:  ['bar', 'bistro', 'breakfast', 'buffet', 'cabaret', 'cafe', 'cantina', 'cappuccino', 'chai', 'coffee', 'commissary', 'cuisine', \
-                                  'deli', 'dhaba', 'dine', 'diner', 'dining', 'eat', 'eater', 'eats', 'edible', 'espresso', 'expresso', 'food', 'galley', \
-                                  'gastropub', 'grill', 'java', 'kitchen', 'latte', 'lounge', 'pizza', 'pizzeria', 'pub', 'publichouse', 'restaurant', 'roast', \
-                                  'sandwich', 'snack', 'snax', 'socialhouse', 'steak', 'sub', 'sushi', 'takeout', 'taphouse', 'taverna', 'tea', 'tiffin', \
-                                  'trattoria', 'treat', 'treatery', 'convenience', 'food', 'grocer', 'grocery', 'market', 'mart', 'shop', 'store', 'variety', \
+        desc_substitution_list = ['bar', 'bistro', 'breakfast', 'buffet', 'cabaret', 'cafe', 'cantina', 'cappuccino',
+                                  'chai', 'coffee', 'commissary', 'cuisine', \
+                                  'deli', 'dhaba', 'dine', 'diner', 'dining', 'eat', 'eater', 'eats', 'edible',
+                                  'espresso', 'expresso', 'food', 'galley', \
+                                  'gastropub', 'grill', 'java', 'kitchen', 'latte', 'lounge', 'pizza', 'pizzeria',
+                                  'pub', 'publichouse', 'restaurant', 'roast', \
+                                  'sandwich', 'snack', 'snax', 'socialhouse', 'steak', 'sub', 'sushi', 'takeout',
+                                  'taphouse', 'taverna', 'tea', 'tiffin', \
+                                  'trattoria', 'treat', 'treatery', 'convenience', 'food', 'grocer', 'grocery',
+                                  'market', 'mart', 'shop', 'store', 'variety', \
                                   'growers']
 
         query = build_query_descriptive(desc_substitution_list, query)
 
         matches = pd.read_sql_query(query, cnx)
 
-        return matches
+        if matches.values.tolist():
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+
+        return result
 
     '''
     Override the abstract / base class method
@@ -160,6 +181,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_designation(self):
         result = ProcedureResult()
         result.is_valid = True
@@ -170,4 +192,3 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
 
         return result
-

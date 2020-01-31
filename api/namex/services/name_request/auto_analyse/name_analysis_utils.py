@@ -131,7 +131,7 @@ def build_query_distinctive(dist_all_permutations):
             "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
             "n.state IN ('APPROVED','CONDITION') and " + \
             "lower(n.name) similar to " + "'"
-    permutations= '|'.join(dist_all_permutations)
+    permutations = "|".join("%s %s" % tup for tup in dist_all_permutations)
     query += "(" + permutations + ")%%" + "'"
 
     return query
@@ -139,8 +139,8 @@ def build_query_distinctive(dist_all_permutations):
 
 def build_query_descriptive(desc_substitution_list, query):
     query += " and lower(n.name) similar to "
-    substitutions=' ?| '.join(desc_substitution_list)
-    query += "( " + substitutions + " ?)%%" + "'"
+    substitutions = ' ?| '.join(map(str, desc_substitution_list))
+    query += "'" + "%%( " + substitutions + " ?)%%" + "'"
 
     return query
 
