@@ -96,6 +96,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 (list_dist + list_desc) == name):
             success = True
         return success
+
     '''
     Override the abstract / base class method
     @return ProcedureResult
@@ -167,8 +168,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
 
-        return result
-        '''
         # dist_substitution_list:  [['mount', 'mountain', 'mt', 'mtn'], ['view', 'vu']]
         # desc_substitution_list: [['food, restaurant, bar'],['growers']]
 
@@ -204,18 +203,27 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         #  desc_substitution_list= [w_desc if not get_substitution_list(w_desc) else get_substitution_list(w_desc) for w_desc in list_desc]
 
-        desc_substitution_list:  ['bar', 'bistro', 'breakfast', 'buffet', 'cabaret', 'cafe', 'cantina', 'cappuccino', 'chai', 'coffee', 'commissary', 'cuisine', \
-                                  'deli', 'dhaba', 'dine', 'diner', 'dining', 'eat', 'eater', 'eats', 'edible', 'espresso', 'expresso', 'food', 'galley', \
-                                  'gastropub', 'grill', 'java', 'kitchen', 'latte', 'lounge', 'pizza', 'pizzeria', 'pub', 'publichouse', 'restaurant', 'roast', \
-                                  'sandwich', 'snack', 'snax', 'socialhouse', 'steak', 'sub', 'sushi', 'takeout', 'taphouse', 'taverna', 'tea', 'tiffin', \
-                                  'trattoria', 'treat', 'treatery', 'convenience', 'food', 'grocer', 'grocery', 'market', 'mart', 'shop', 'store', 'variety', \
+        desc_substitution_list = ['bar', 'bistro', 'breakfast', 'buffet', 'cabaret', 'cafe', 'cantina', 'cappuccino',
+                                  'chai', 'coffee', 'commissary', 'cuisine', \
+                                  'deli', 'dhaba', 'dine', 'diner', 'dining', 'eat', 'eater', 'eats', 'edible',
+                                  'espresso', 'expresso', 'food', 'galley', \
+                                  'gastropub', 'grill', 'java', 'kitchen', 'latte', 'lounge', 'pizza', 'pizzeria',
+                                  'pub', 'publichouse', 'restaurant', 'roast', \
+                                  'sandwich', 'snack', 'snax', 'socialhouse', 'steak', 'sub', 'sushi', 'takeout',
+                                  'taphouse', 'taverna', 'tea', 'tiffin', \
+                                  'trattoria', 'treat', 'treatery', 'convenience', 'food', 'grocer', 'grocery',
+                                  'market', 'mart', 'shop', 'store', 'variety', \
                                   'growers']
 
         query = build_query_descriptive(desc_substitution_list, query)
 
         matches = pd.read_sql_query(query, cnx)
 
-        return matches
+        if matches.values.tolist():
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+
+        return result
 
     '''
     Override the abstract / base class method
