@@ -43,7 +43,7 @@ ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
 #   request_type, one of: [‘new’, ‘existing’, ‘continuation’]
 # }
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_get_analysis_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -76,7 +76,7 @@ def test_get_analysis_request_response(client, jwt, app):
 # Contains Unclassifiable Word
 # Conflicts with the Corporate Database
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_valid_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -95,7 +95,7 @@ def test_valid_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     print(response)
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_add_distinctive_word_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -114,7 +114,7 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     print(response)
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -133,7 +133,7 @@ def test_add_descriptive_word_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     print(response)
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_contains_words_to_avoid_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -152,7 +152,7 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     print(response)
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_designation_mismatch_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -171,7 +171,7 @@ def test_designation_mismatch_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     print(response)
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_too_many_words_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -190,7 +190,7 @@ def test_too_many_words_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     print(response)
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_name_requires_consent_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -209,7 +209,7 @@ def test_name_requires_consent_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     print(response)
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_contains_unclassifiable_word_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -228,7 +228,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     print(response)
 
-@pytest.mark.xfail(raises=ValueError)
+# @pytest.mark.xfail(raises=ValueError)
 def test_corporate_name_conflict_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
