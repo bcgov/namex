@@ -71,20 +71,14 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
             all_conflicts=self._all_conflicts
         )
 
-    '''
-    This is the main execution call for the class
-    @:return ProcedureResult[]
-    '''
+    # This is the main execution call for the class
     def execute_analysis(self):
         builder = self._builder
 
-        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
-
-        results = []
+        check_conflicts = builder.search_conflicts()
 
         if not check_conflicts.is_valid:
-            results.append(check_conflicts)
-            return results
+            return check_conflicts
 
         return ProcedureResult(is_valid=True)
 

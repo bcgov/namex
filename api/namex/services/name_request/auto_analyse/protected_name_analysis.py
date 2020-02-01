@@ -71,41 +71,33 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             all_conflicts=self._all_conflicts
         )
 
-    '''
-    This is the main execution call for the class
-    @:return ProcedureResult[]
-    '''
+    # This is the main execution call for the class
     def execute_analysis(self):
         builder = self._builder
 
-        check_name_is_well_formed = builder.check_name_is_well_formed(builder.get_list_dist(), builder.get_list_desc(), builder.get_list_name())
+        check_name_is_well_formed = builder.check_name_is_well_formed()
         check_words_to_avoid = builder.check_words_to_avoid()
-        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
+        check_conflicts = builder.search_conflicts()
         check_words_requiring_consent = builder.check_words_requiring_consent()
         check_designation_mismatch = builder.check_designation()
 
-        results = []
-
         if not check_name_is_well_formed.is_valid:
-            results.append(check_name_is_well_formed)
-            return results
-            #  Do not continue
+            return check_name_is_well_formed
 
         if not check_words_to_avoid.is_valid:
-            results.append(check_words_to_avoid)
-            return results
-            #  Do not continue
+            return check_words_to_avoid
 
-        # Return any combination of these checks
         if not check_conflicts.is_valid:
-            results.append(check_conflicts)
+            return check_conflicts
 
         if not check_words_requiring_consent.is_valid:
-            results.append(check_words_requiring_consent)
+            return check_words_requiring_consent
 
         if not check_designation_mismatch.is_valid:
-            results.append(check_designation_mismatch)
+            return check_designation_mismatch
 
-        results.append(ProcedureResult(is_valid=True))
+        return ProcedureResult(is_valid=True)
 
-        return results
+
+
+
