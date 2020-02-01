@@ -10,9 +10,10 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
     __metaclass__ = abc.ABCMeta
 
-    @property
-    def director(self):
-        return self._director
+    _name = ''
+    _list_name_words = []
+    _list_dist_words = []
+    _list_desc_words = []
 
     @director.setter
     def director(self, director):
@@ -22,9 +23,27 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     def name_processing_service(self):
         return self._name_processing_service
 
-    @name_processing_service.setter
-    def name_processing_service(self, svc):
-        self._name_processing_service = svc
+    def set_list_name(self, list_words):
+        self._list_name_words = list_words
+
+    def get_list_name(self):
+        return self._list_name_words
+
+    def set_list_dist(self, list_words):
+        self._list_dist_words = list_words
+
+    def get_list_dict(self):
+        return self._list_dist_words
+
+    def set_list_desc(self, list_words):
+        self._list_desc_words = list_words
+
+    def get_list_desc(self):
+        return self._list_desc_words
+
+    def set_dicts(self, **kwargs):
+        self._synonyms = kwargs.get('synonyms')
+        self._substitutions = kwargs.get('substitutions')
 
     @property
     def word_classification_service(self):
@@ -42,9 +61,16 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     def word_condition_service(self, svc):
         self._word_condition_service = svc
 
-    @property
-    def synonym_service(self):
-        return self._synonym_service
+    '''
+    This method can be overridden in extending Builder classes if a different process is desired
+    @return ProcedureResult
+    '''
+    def do_analysis(self):
+        check_name_is_well_formed = self.check_name_is_well_formed(self.get_list_dict(), self.get_list_desc(), self.get_list_name())
+        check_words_to_avoid = self.check_words_to_avoid()
+        check_conflicts = self.search_conflicts(self.get_list_dict(), self.get_list_desc())
+        check_words_requiring_consent = self.check_words_requiring_consent()
+        check_designation_mismatch = self.check_designation()
 
     @synonym_service.setter
     def synonym_service(self, svc):
@@ -76,9 +102,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     Check to see if a provided name is valid
     @return ProcedureResult
     '''
-
-    @abc.abstractmethod
-    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
+    def check_name_is_well_formed(self, list_dist, list_desc, company_name):
         return ProcedureResult(is_valid=True)
 
     '''
