@@ -14,12 +14,12 @@ from namex.utils.logging import setup_logging
 
 from ..auto_analyse.analysis_response import AnalysisResponse
 
-from namex.services.name_request.auto_analyse import AnalysisRequestActions
+from namex.services.name_request.auto_analyse import \
+    ValidLocations, AnalysisResultCodes, AnalysisRequestActions, \
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from namex.constants import \
-    ValidLocations, BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
-
-from namex.services.name_request.name_analysis_builder_v2.name_analysis_builder import NameAnalysisBuilder
+from namex.services.name_request.name_analysis_builder_v1.name_analysis_builder import NameAnalysisBuilder
+from namex.services.name_request.auto_analyse.auto_analyse import AutoAnalyseService
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.services.name_request.auto_analyse.unprotected_name_analysis import UnprotectedNameAnalysisService
 
@@ -39,52 +39,67 @@ def handle_auth_error(ex):
 # TODO: Determine whether to throw an Error or Validation
 def validate_name_request(location, entity_type, request_action):
     # Raise error if location is invalid
-    if location not in ValidLocations.list():
+    if location not in ValidLocations:
         raise ValueError('Invalid location provided')
 
     # Raise error if request_action is invalid
-    if request_action not in AnalysisRequestActions.list():
-        raise ValueError('Invalid request action provided')
+    if request_action not in AnalysisRequestActions:
+        raise ValueError('Invalid location provided')
 
     # Throw any errors related to invalid entity_type or request_action for a location
-    if location == ValidLocations.CA_BC.value:
+    if location == ValidLocations.CA_BC:
         is_protected = False
         is_unprotected = False
 
         # Determine what request actions are valid
-        valid_request_actions = ()
+        valid_request_actions = None
 
-        if entity_type in BCProtectedNameEntityTypes.list():
+        if entity_type in BCProtectedNameEntityTypes:
             is_protected = True
-            valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.AML.value)
-
-        elif entity_type in BCUnprotectedNameEntityTypes.list():
+            valid_request_actions = (AnalysisRequestActions.NEW, AnalysisRequestActions.AML)
+        elif entity_type in BCUnprotectedNameEntityTypes:
             is_unprotected = True
-            valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value)
+            valid_request_actions = (AnalysisRequestActions.NEW, AnalysisRequestActions.DBA)
 
         if is_protected and is_unprotected:
             raise ValueError('An entity name cannot be both protected and unprotected')
 
-        if is_protected and entity_type not in BCProtectedNameEntityTypes.list():
+        if is_protected and entity_type not in BCProtectedNameEntityTypes:
             raise ValueError('Invalid entity_type provided for a protected BC entity name')
 
-        if is_unprotected and entity_type not in BCUnprotectedNameEntityTypes.list():
+        if is_unprotected and entity_type not in BCUnprotectedNameEntityTypes:
             raise ValueError('Invalid entity_type provided for an unprotected BC entity name')
 
         if request_action not in valid_request_actions:
             raise Exception('Operation not currently supported')
 
-    elif location in (ValidLocations.CA_NOT_BC.list(), ValidLocations.INTL.list()):
+    elif location in (ValidLocations.CA_NOT_BC, ValidLocations.INTL):
         # If XPRO, nothing is protected (for now anyway)
-        valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value)
+        valid_request_actions = (AnalysisRequestActions.NEW, AnalysisRequestActions.DBA)
 
-        if entity_type not in XproUnprotectedNameEntityTypes.list():
+        if entity_type not in XproUnprotectedNameEntityTypes:
             raise ValueError('Invalid entity_type provided for an XPRO entity')
 
         if request_action not in valid_request_actions:
             raise Exception('Operation not currently supported')
 
     return True
+
+
+# Execute analysis returns a response strategy code
+def response_strategies(strategy):
+    strategies = {
+        AnalysisResultCodes.VALID_NAME: ValidNameResponseStrategy,
+        AnalysisResultCodes.ADD_DISTINCTIVE_WORD: AddDistinctiveWordResponseStrategy,
+        AnalysisResultCodes.ADD_DESCRIPTIVE_WORD: AddDescriptiveWordResponseStrategy,
+        AnalysisResultCodes.TOO_MANY_WORDS: TooManyWordsResponseStrategy,
+        AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD: ContainsUnclassifiableWordResponseStrategy,
+        AnalysisResultCodes.WORD_TO_AVOID: ContainsWordsToAvoidResponseStrategy,
+        AnalysisResultCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentResponseStrategy,
+        AnalysisResultCodes.DESIGNATION_MISMATCH: DesignationMismatchResponseStrategy,
+        AnalysisResultCodes.CORPORATE_CONFLICT: CorporateNameConflictResponseStrategy
+    }
+    return strategies.get(strategy, ValidNameResponseStrategy)
 
 
 @cors_preflight("GET")
@@ -115,7 +130,7 @@ class NameAnalysis(Resource):
           XCR = 'XPRO_CORPORATION'
           XUL = 'XPRO_UNLIMITED_LIABILITY_COMPANY'
           XCP = 'XPRO_COOPERATIVE'
-          XLC = 'XPRO_LIMITED_LIABILITY_COMPANY'
+          LLC = 'XPRO_LIMITED_LIABILITY_COMPANY'
           XLP = 'XPRO_LIMITED_PARTNERSHIP'
           XLL = 'XPRO_LIMITED_LIABILITY_PARTNERSHIP'
 
@@ -146,12 +161,11 @@ class NameAnalysis(Resource):
         # 'request_type': 'A request action code'  # TODO: Leave this as request_type for now...
     })
     def get():
-        name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None
-        location = unquote_plus(request.args.get('location').strip()) if request.args.get('location') else None
-        entity_type = unquote_plus(request.args.get('entity_type').strip()) if request.args.get('entity_type') else None
+        name = unquote_plus(request.args.get('name')) if request.args.get('name') else None
+        location = unquote_plus(request.args.get('location')) if request.args.get('location') else None
+        entity_type = unquote_plus(request.args.get('entity_type')) if request.args.get('entity_type') else None
         # TODO: Let's not call var request_type because it's ambiguous - change to request_action on frontend too
-        request_action = unquote_plus(request.args.get('request_action').strip()) if request.args.get('request_action') else None  # TODO: Use request_action not request_type, this needs to be updated on the front end!!!
-        # request_action = unquote_plus(request.args.get('request_type').strip()) if request.args.get('request_type') else None  # TODO: Leave this as request_type for now...
+        request_action = unquote_plus(request.args.get('request_type')) if request.args.get('request_type') else None
 
         # Do our service stuff
         # Instantiate an appropriate service and register a builder for that service (subclasses of NameAnalysisDirector)
@@ -169,17 +183,17 @@ class NameAnalysis(Resource):
             return  # TODO: Return invalid response! What is it?
 
         try:
-            if location == ValidLocations.CA_BC.value and entity_type in BCProtectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.AML.value):
+            if location == ValidLocations.CA_BC and entity_type in BCProtectedNameEntityTypes and request_action in (AnalysisRequestActions.NEW, AnalysisRequestActions.AML):
                 # Use ProtectedNameAnalysisService
                 service = ProtectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
 
-            elif location == ValidLocations.CA_BC.value and entity_type in BCUnprotectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value):
+            elif location == ValidLocations.CA_BC and entity_type in BCUnprotectedNameEntityTypes and request_action in AnalysisRequestActions.NEW:
                 # Use UnprotectedNameAnalysisService
                 service = UnprotectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
 
-            elif location in (ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value) and entity_type in XproUnprotectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value):
+            elif location in (ValidLocations.CA_NOT_BC, ValidLocations.INTL) and entity_type in XproUnprotectedNameEntityTypes and request_action in (AnalysisRequestActions.NEW, AnalysisRequestActions.DBA):
                 # Use UnprotectedNameAnalysisService
                 service = UnprotectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
@@ -193,21 +207,35 @@ class NameAnalysis(Resource):
                 raise ValueError('Invalid builder provided')
 
             # Register and initialize the builder
-            service.use_builder(builder)  # Required step! TODO: Enforce this!
-            service.set_entity_type(entity_type)  # Required step! TODO: Enforce this!
-            service.set_name(name)  # Required step! TODO: Enforce this!
+            service.use_builder(builder)
+            service.set_name(name)
+            # TODO: These are not implemented yet!
+            # service.set_location(name)
+            # service.set_entity_type(name)
+            # service.set_request_type(name)
 
         except Exception as error:
             print('Error initializing NameAnalysisService: ' + repr(error))
-            raise
 
-        # Perform the name analysis - execute analysis using the supplied builder
-        # @:return an array of ProcedureResult[]
-        analysis = service.execute_analysis()
+        # Perform the name analysis
+        analysis = None
 
-        # Build the appropriate response for the analysis result
-        analysis_response = AnalysisResponse(entity_type, analysis)
-        payload = analysis_response.build_response().to_json()
+        try:
+            # Execute analysis using the supplied builder
+            analysis = service.execute_analysis()
+
+            if not analysis:
+                raise ValueError('NameAnalysisService did not return a result')
+
+        except Exception as error:
+            print('Error executing name analysis: ' + repr(error))
+
+        # Apply the appropriate response for the analysis result
+        response_strategy = response_strategies(analysis.result_code)
+        if callable(response_strategy):
+            response_strategy = response_strategy(analysis)
+
+        payload = response_strategy.build_response().to_json()
 
         response = make_response(payload, 200)
         return response

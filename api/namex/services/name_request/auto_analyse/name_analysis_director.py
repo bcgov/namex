@@ -219,9 +219,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     @:return ProcedureResult[]
     '''
     def execute_analysis(self):
-        try:
-            # Execute analysis using the supplied builder
-            builder = self.builder
+        # TODO: Turn preprocess_name back on
+        # self.preprocess_name()
+        return self._builder.execute_analysis()
 
             list_name = self.name_tokens
             list_dist, list_desc, list_none = self.word_classification_tokens
