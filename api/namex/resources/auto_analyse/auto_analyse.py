@@ -52,11 +52,11 @@ def validate_name_request(location, entity_type, request_action):
         raise ValueError('Invalid location provided')
 
     # Raise error if request_action is invalid
-    if request_action not in AnalysisRequestActions:
+    if request_action not in AnalysisRequestActions.list():
         raise ValueError('Invalid location provided')
 
     # Throw any errors related to invalid entity_type or request_action for a location
-    if location == ValidLocations.CA_BC.list():
+    if location == ValidLocations.CA_BC.value:
         is_protected = False
         is_unprotected = False
 
@@ -66,9 +66,9 @@ def validate_name_request(location, entity_type, request_action):
         if entity_type in BCProtectedNameEntityTypes.list():
             is_protected = True
 
-        elif entity_type in BCUnprotectedNameEntityTypes:
+        elif entity_type in BCUnprotectedNameEntityTypes.list():
             is_unprotected = True
-            valid_request_actions = (AnalysisRequestActions.NEW, AnalysisRequestActions.DBA)
+            valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value)
 
         if is_protected and is_unprotected:
             raise ValueError('An entity name cannot be both protected and unprotected')
@@ -84,7 +84,7 @@ def validate_name_request(location, entity_type, request_action):
 
     elif location in (ValidLocations.CA_NOT_BC.list(), ValidLocations.INTL.list()):
         # If XPRO, nothing is protected (for now anyway)
-        valid_request_actions = (AnalysisRequestActions.NEW, AnalysisRequestActions.DBA)
+        valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value)
 
         if entity_type not in XproUnprotectedNameEntityTypes.list():
             raise ValueError('Invalid entity_type provided for an XPRO entity')
@@ -185,17 +185,17 @@ class NameAnalysis(Resource):
             return  # TODO: Return invalid response! What is it?
 
         try:
-            if location == ValidLocations.CA_BC and entity_type in BCProtectedNameEntityTypes and request_action in (AnalysisRequestActions.NEW, AnalysisRequestActions.AML):
+            if location == ValidLocations.CA_BC.value and entity_type in BCProtectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.AML.value):
                 # Use ProtectedNameAnalysisService
                 service = ProtectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
 
-            elif location == ValidLocations.CA_BC and entity_type in BCUnprotectedNameEntityTypes and request_action in AnalysisRequestActions.NEW:
+            elif location == ValidLocations.CA_BC.value and entity_type in BCUnprotectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value):
                 # Use UnprotectedNameAnalysisService
                 service = UnprotectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
 
-            elif location in (ValidLocations.CA_NOT_BC, ValidLocations.INTL) and entity_type in XproUnprotectedNameEntityTypes and request_action in (AnalysisRequestActions.NEW, AnalysisRequestActions.DBA):
+            elif location in (ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value) and entity_type in XproUnprotectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value):
                 # Use UnprotectedNameAnalysisService
                 service = UnprotectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
