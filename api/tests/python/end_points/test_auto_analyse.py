@@ -10,7 +10,6 @@ from namex.models import User
 
 from tests.python import integration_oracle_namesdb
 
-
 token_header = {
     "alg": "RS256",
     "typ": "JWT",
