@@ -39,7 +39,7 @@ def handle_auth_error(ex):
 # TODO: Determine whether to throw an Error or Validation
 def validate_name_request(location, entity_type, request_action):
     # Raise error if location is invalid
-    if location not in ValidLocations:
+    if location not in ValidLocations.list():
         raise ValueError('Invalid location provided')
 
     # Raise error if request_action is invalid
@@ -47,16 +47,16 @@ def validate_name_request(location, entity_type, request_action):
         raise ValueError('Invalid location provided')
 
     # Throw any errors related to invalid entity_type or request_action for a location
-    if location == ValidLocations.CA_BC:
+    if location == ValidLocations.CA_BC.list():
         is_protected = False
         is_unprotected = False
 
         # Determine what request actions are valid
         valid_request_actions = None
 
-        if entity_type in BCProtectedNameEntityTypes:
+        if entity_type in BCProtectedNameEntityTypes.list():
             is_protected = True
-            valid_request_actions = (AnalysisRequestActions.NEW, AnalysisRequestActions.AML)
+
         elif entity_type in BCUnprotectedNameEntityTypes:
             is_unprotected = True
             valid_request_actions = (AnalysisRequestActions.NEW, AnalysisRequestActions.DBA)
@@ -64,20 +64,20 @@ def validate_name_request(location, entity_type, request_action):
         if is_protected and is_unprotected:
             raise ValueError('An entity name cannot be both protected and unprotected')
 
-        if is_protected and entity_type not in BCProtectedNameEntityTypes:
+        if is_protected and entity_type not in BCProtectedNameEntityTypes.list():
             raise ValueError('Invalid entity_type provided for a protected BC entity name')
 
-        if is_unprotected and entity_type not in BCUnprotectedNameEntityTypes:
+        if is_unprotected and entity_type not in BCUnprotectedNameEntityTypes.list():
             raise ValueError('Invalid entity_type provided for an unprotected BC entity name')
 
         if request_action not in valid_request_actions:
             raise Exception('Operation not currently supported')
 
-    elif location in (ValidLocations.CA_NOT_BC, ValidLocations.INTL):
+    elif location in (ValidLocations.CA_NOT_BC.list(), ValidLocations.INTL.list()):
         # If XPRO, nothing is protected (for now anyway)
         valid_request_actions = (AnalysisRequestActions.NEW, AnalysisRequestActions.DBA)
 
-        if entity_type not in XproUnprotectedNameEntityTypes:
+        if entity_type not in XproUnprotectedNameEntityTypes.list():
             raise ValueError('Invalid entity_type provided for an XPRO entity')
 
         if request_action not in valid_request_actions:
@@ -161,11 +161,11 @@ class NameAnalysis(Resource):
         # 'request_type': 'A request action code'  # TODO: Leave this as request_type for now...
     })
     def get():
-        name = unquote_plus(request.args.get('name')) if request.args.get('name') else None
-        location = unquote_plus(request.args.get('location')) if request.args.get('location') else None
-        entity_type = unquote_plus(request.args.get('entity_type')) if request.args.get('entity_type') else None
+        name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None
+        location = unquote_plus(request.args.get('location').strip()) if request.args.get('location') else None
+        entity_type = unquote_plus(request.args.get('entity_type').strip()) if request.args.get('entity_type') else None
         # TODO: Let's not call var request_type because it's ambiguous - change to request_action on frontend too
-        request_action = unquote_plus(request.args.get('request_type')) if request.args.get('request_type') else None
+        request_action = unquote_plus(request.args.get('request_type').strip()) if request.args.get('request_type') else None
 
         # Do our service stuff
         # Instantiate an appropriate service and register a builder for that service (subclasses of NameAnalysisDirector)
