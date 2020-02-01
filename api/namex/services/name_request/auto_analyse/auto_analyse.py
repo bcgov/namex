@@ -1,3 +1,5 @@
+# !!!!! DEPRECATED !!!! This is just in here so it's easier to merge, we'll delete when we are done
+
 from datetime import (datetime)
 
 from .name_analysis_director import NameAnalysisDirector
@@ -29,5 +31,7 @@ class AutoAnalyseService(NameAnalysisDirector):
 
     def __init__(self):
         super(AutoAnalyseService, self).__init__()
+
+
 
 
