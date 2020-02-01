@@ -38,7 +38,7 @@ class AbstractNameAnalysisBuilder:
     def set_list_dist(self, list_words):
         self._list_dist_words = list_words
 
-    def get_list_dist(self):
+    def get_list_dict(self):
         return self._list_dist_words
 
     def set_list_desc(self, list_words):
@@ -75,7 +75,28 @@ class AbstractNameAnalysisBuilder:
     @return ProcedureResult
     '''
     def do_analysis(self):
-        raise NotImplementedError('Can not perform name analysis, do_analysis is not implemented!')
+        check_name_is_well_formed = self.check_name_is_well_formed(self.get_list_dict(), self.get_list_desc(), self.get_list_name())
+        check_words_to_avoid = self.check_words_to_avoid()
+        check_conflicts = self.search_conflicts(self.get_list_dict(), self.get_list_desc())
+        check_words_requiring_consent = self.check_words_requiring_consent()
+        check_designation_mismatch = self.check_designation()
+
+        if not check_name_is_well_formed.is_valid:
+            return check_name_is_well_formed
+
+        if not check_words_to_avoid.is_valid:
+            return check_words_to_avoid
+
+        if not check_conflicts.is_valid:
+            return check_conflicts
+
+        if not check_words_requiring_consent.is_valid:
+            return check_words_requiring_consent
+
+        if not check_designation_mismatch.is_valid:
+            return check_designation_mismatch
+
+        return ProcedureResult(is_valid=True)
 
     '''
     Check to see if a provided name is valid
