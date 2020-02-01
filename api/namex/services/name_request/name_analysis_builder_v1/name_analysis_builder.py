@@ -37,9 +37,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = 'BVict31C'
+    POSTGRES_PASSWORD = ''
     POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
-    POSTGRES_DBNAME_DATA = 'namex-local-dev'
+    POSTGRES_DBNAME_DATA = 'namex-local'
 
     postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                             password=POSTGRES_PASSWORD,
@@ -58,7 +58,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_name_is_well_formed(self, list_desc, list_dist, list_none, name):
 
         result = ProcedureResult()
-        result.is_valid = True
+        result.is_valid = False
 
         # if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
         #        (list_dist + list_desc) == name):
@@ -100,9 +100,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        success = True
-        if not success:
-            result.is_valid = False
+        if not result.is_valid:
             result.result_code = AnalysisResultCodes.WORD_TO_AVOID
 
         return result
@@ -175,8 +173,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        success = True
-        if not success:
+        if not result.is_valid:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
 
@@ -191,8 +188,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        success = True
-        if not success:
+        if not result.is_valid:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
 
