@@ -85,7 +85,7 @@ class NameAnalysisDirector:
     def execute_analysis(self):
         # TODO: Turn preprocess_name back on
         # self.preprocess_name()
-        return self._builder.do_analysis()
+        return self._builder.execute_analysis()
 
     # Get the company's designation if it's in the name
     def get_name_designation(self):
