@@ -19,12 +19,33 @@ class AbstractNameAnalysisBuilder:
     _all_conflicts = []
 
     _name = ''
+    _list_name_words = []
+    _list_dist_words = []
+    _list_desc_words = []
 
     def set_name(self, name):
         self._name = name
 
     def get_name(self):
         return self._name
+
+    def set_list_name(self, list_words):
+        self._list_name_words = list_words
+
+    def get_list_name(self):
+        return self._list_name_words
+
+    def set_list_dist(self, list_words):
+        self._list_dist_words = list_words
+
+    def get_list_dict(self):
+        return self._list_dist_words
+
+    def set_list_desc(self, list_words):
+        self._list_desc_words = list_words
+
+    def get_list_desc(self):
+        return self._list_desc_words
 
     def set_dicts(self, **kwargs):
         self._synonyms = kwargs.get('synonyms')
@@ -54,9 +75,9 @@ class AbstractNameAnalysisBuilder:
     @return ProcedureResult
     '''
     def do_analysis(self):
-        check_name_is_well_formed = self.check_name_is_well_formed()
+        check_name_is_well_formed = self.check_name_is_well_formed(self.get_list_dict(), self.get_list_desc(), self.get_list_name())
         check_words_to_avoid = self.check_words_to_avoid()
-        check_conflicts = self.search_conflicts()
+        check_conflicts = self.search_conflicts(self.get_list_dict(), self.get_list_desc())
         check_words_requiring_consent = self.check_words_requiring_consent()
         check_designation_mismatch = self.check_designation()
 
@@ -81,7 +102,7 @@ class AbstractNameAnalysisBuilder:
     Check to see if a provided name is valid
     @return ProcedureResult
     '''
-    def check_name_is_well_formed(self, list_desc, list_dist, company_name):
+    def check_name_is_well_formed(self, list_dist, list_desc, company_name):
         return ProcedureResult(is_valid=True)
 
     '''

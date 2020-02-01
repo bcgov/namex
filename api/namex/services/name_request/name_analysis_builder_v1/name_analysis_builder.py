@@ -37,9 +37,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = 'BVict31C'
+    POSTGRES_PASSWORD = ''
     POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
-    POSTGRES_DBNAME_DATA = 'namex-local-dev'
+    POSTGRES_DBNAME_DATA = 'namex-local'
 
     postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                             password=POSTGRES_PASSWORD,
@@ -55,27 +55,19 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_name_is_well_formed(self, list_desc, list_dist, name):
-        '''
+    def check_name_is_well_formed(self, list_dist, list_desc, name):
         result = ProcedureResult()
-        result.is_valid = True
+        result.is_valid = False
 
-        success = True
-        if not success:
-            result.is_valid = False
-            # TODO: Return one of the following:
-            # AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            # AnalysisResultCodes.TOO_MANY_WORDS
-            # AnalysisResultCodes.ADD_DISTINCTIVE_WORD
-            # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+        if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and ((list_dist + list_desc) == name):
+            result.is_valid = True
+
+        if not result.is_valid:
+            result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
 
         return result
-        '''
-        success = False
-        if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
-                (list_dist + list_desc) == name):
-            success = True
-        return success
+
+
 
     '''
     Override the abstract / base class method
@@ -86,9 +78,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        success = True
-        if not success:
-            result.is_valid = False
+        if not result.is_valid:
             result.result_code = AnalysisResultCodes.WORD_TO_AVOID
 
         return result
@@ -103,7 +93,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
         result = ProcedureResult()
         result.is_valid = True
-        success = True
 
         # dist_substitution_list:  [['mount', 'mountain', 'mt', 'mtn'], ['view', 'vu']]
         # desc_substitution_list: [['food, restaurant, bar'],['growers']]
@@ -170,8 +159,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        success = True
-        if not success:
+        if not result.is_valid:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
 
@@ -186,8 +174,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        success = True
-        if not success:
+        if not result.is_valid:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
 
