@@ -75,7 +75,7 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
     def execute_analysis(self):
         builder = self._builder
 
-        check_conflicts = builder.search_conflicts()
+        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
 
         if not check_conflicts.is_valid:
             return check_conflicts

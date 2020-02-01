@@ -38,7 +38,7 @@ class AbstractNameAnalysisBuilder:
     def set_list_dist(self, list_words):
         self._list_dist_words = list_words
 
-    def get_list_dict(self):
+    def get_list_dist(self):
         return self._list_dist_words
 
     def set_list_desc(self, list_words):
@@ -75,9 +75,9 @@ class AbstractNameAnalysisBuilder:
     @return ProcedureResult
     '''
     def do_analysis(self):
-        check_name_is_well_formed = self.check_name_is_well_formed(self.get_list_dict(), self.get_list_desc(), self.get_list_name())
+        check_name_is_well_formed = self.check_name_is_well_formed(self.get_list_dist(), self.get_list_desc(), self.get_list_name())
         check_words_to_avoid = self.check_words_to_avoid()
-        check_conflicts = self.search_conflicts(self.get_list_dict(), self.get_list_desc())
+        check_conflicts = self.search_conflicts(self.get_list_dist(), self.get_list_desc())
         check_words_requiring_consent = self.check_words_requiring_consent()
         check_designation_mismatch = self.check_designation()
 
