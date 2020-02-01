@@ -37,14 +37,6 @@ class AnalysisRequestActions(str, Enum):
     REH = 'REH'  # Restore from historical business
     REN = 'REN'  # Restore by starting a new business
 
-    @classmethod
-    def list(cls):
-        values = []
-        for item in cls:
-            values.append(item.value)
-
-        return values
-
 
 class AnalysisResponseCodes(str, Enum):
     # TODO: Not the best idea to have a cased constant, but this is what is used on the frontend, we can change it later
