@@ -56,6 +56,7 @@ def validate_name_request(location, entity_type, request_action):
 
         if entity_type in BCProtectedNameEntityTypes.list():
             is_protected = True
+            valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.AML.value)
 
         elif entity_type in BCUnprotectedNameEntityTypes.list():
             is_unprotected = True
