@@ -1,3 +1,4 @@
+from flask import json
 import jsonpickle
 
 
@@ -7,4 +8,4 @@ class Serializable(object):
         return jsonpickle.encode(self)
 
     def to_json(self):
-        return jsonpickle.encode(self, unpicklable=False, warn=True)
+        return jsonpickle.encode(self)

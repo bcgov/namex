@@ -11,6 +11,7 @@ from namex.services.name_request.auto_analyse import AnalysisRequestActions, Ana
 
 from tests.python import integration_oracle_namesdb
 
+
 token_header = {
     "alg": "RS256",
     "typ": "JWT",
@@ -65,9 +66,7 @@ def test_get_analysis_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    assert isinstance(payload.status, str) is True
-    assert isinstance(payload.issues, list) is True
+    print(jsonpickle.decode(response.data))
 
 
 # Test each of the response strategies
@@ -100,7 +99,7 @@ def test_new_bc_cr_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_ul_valid_response(client, jwt, app):
@@ -119,7 +118,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_cp_valid_response(client, jwt, app):
@@ -138,7 +137,7 @@ def test_new_bc_cp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_bc_valid_response(client, jwt, app):
@@ -157,7 +156,7 @@ def test_new_bc_bc_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_cc_valid_response(client, jwt, app):
@@ -176,7 +175,7 @@ def test_new_bc_cc_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_fr_valid_response(client, jwt, app):
@@ -195,10 +194,7 @@ def test_new_bc_fr_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_dba_valid_response(client, jwt, app):
@@ -217,7 +213,7 @@ def test_new_bc_dba_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_gp_valid_response(client, jwt, app):
@@ -236,7 +232,7 @@ def test_new_bc_gp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_lp_valid_response(client, jwt, app):
@@ -255,7 +251,7 @@ def test_new_bc_lp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_ll_valid_response(client, jwt, app):
@@ -274,7 +270,7 @@ def test_new_bc_ll_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xcr_valid_response(client, jwt, app):
@@ -293,7 +289,7 @@ def test_new_xpro_xcr_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xul_valid_response(client, jwt, app):
@@ -312,7 +308,7 @@ def test_new_xpro_xul_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xcp_valid_response(client, jwt, app):
@@ -331,7 +327,7 @@ def test_new_xpro_xcp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xlc_valid_response(client, jwt, app):
@@ -350,7 +346,7 @@ def test_new_xpro_xlc_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xlp_valid_response(client, jwt, app):
@@ -369,7 +365,7 @@ def test_new_xpro_xlp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xll_valid_response(client, jwt, app):
@@ -388,7 +384,7 @@ def test_new_xpro_xll_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 # IN THIS SECTION TEST VARIOUS ERROR RESPONSES
 
@@ -410,14 +406,7 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        if payload.issues.__len__() > 0:
-            print('\n' + 'Issue types:' + '\n')
-            for issue in payload.issues:
-                print('\n' + issue.issueType.value + '\n')
-        assert payload.issues.__len__() == 0
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -437,10 +426,7 @@ def test_add_descriptive_word_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -460,10 +446,7 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -483,10 +466,7 @@ def test_designation_mismatch_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -506,10 +486,7 @@ def test_too_many_words_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -529,10 +506,7 @@ def test_name_requires_consent_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -552,10 +526,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -575,163 +546,4 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
-
-
-def test_new_bc_ll_valid_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS LLP.',
-        'location': 'BC',
-        'entity_type': 'LL',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
-
-
-def test_new_xpro_xcr_valid_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR LTD.
-        'location': 'CA',
-        'entity_type': 'XCR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
-
-
-def test_new_xpro_xul_valid_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS ULC.',
-        'location': 'CA',
-        'entity_type': 'XUL',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
-
-
-def test_new_xpro_xcp_valid_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS COOP',
-        'location': 'CA',
-        'entity_type': 'XCP',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
-
-
-def test_new_xpro_xlc_valid_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS LLC.',  # CHECK FOR DESIGNATION
-        'location': 'CA',
-        'entity_type': 'XLC',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
-
-
-def test_new_xpro_xlp_valid_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS LP.',  # CHECK FOR DESIGNATION
-        'location': 'CA',
-        'entity_type': 'XLC',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
-
-
-def test_new_xpro_xll_valid_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS LLP.',
-        'location': 'CA',
-        'entity_type': 'XLL',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
-
-# IN THIS SECTION TEST VARIOUS ERROR RESPONSES
+    print(jsonpickle.decode(response.data))
