@@ -23,7 +23,7 @@ class AnalysisResponseStrategy:
     @classmethod
     def prepare_payload(cls, issue):
         payload = NameAnalysisResponse(
-            status='Test',
+            status=cls.status_text,
             issues=[issue]
         )
         return payload

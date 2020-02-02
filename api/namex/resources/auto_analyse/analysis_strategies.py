@@ -6,7 +6,7 @@ from .analysis_response_strategy import AnalysisResponseStrategy
 # Import DTOs
 from .response_objects.name_analysis_issue import NameAnalysisIssue
 from .response_objects.name_analysis_response import NameAnalysisResponse
-from .response_objects.name_action import NameAction
+from .response_objects.name_action import NameAction, NameActions, WordPositions
 from .response_objects.consenting_body import ConsentingBody
 from .response_objects.conflict import Conflict
 from .response_objects.descriptive_word import DescriptiveWord
@@ -44,15 +44,24 @@ class AddDistinctiveWordResponseStrategy(AnalysisResponseStrategy):
         issueType=issue_type,
         word=None,
         wordIndex=None,
-        showExaminationButton=None,
+        showExaminationButton=False,
         conflicts=None,
         options=None,
-        nameActions=None
+        nameActions=[]
     )
 
     @classmethod
     def create_issue(cls):
         issue = cls.issue
+
+        issue.nameActions = [
+            NameAction(
+                type=NameActions.ADD_WORD_BRACKETS,
+                position=WordPositions.START,
+                message='Add a Word Here"'
+            )
+        ]
+
         return issue
 
 
@@ -62,19 +71,28 @@ class AddDescriptiveWordResponseStrategy(AnalysisResponseStrategy):
     issue = NameAnalysisIssue(
         consentingBody=None,
         designations=None,
-        descriptiveWords=None,
+        descriptiveWords=[],
         issueType=issue_type,
         word=None,
         wordIndex=None,
-        showExaminationButton=None,
+        showExaminationButton=False,
         conflicts=None,
         options=None,
-        nameActions=None
+        nameActions=[]
     )
 
     @classmethod
     def create_issue(cls):
         issue = cls.issue
+
+        issue.nameActions = [
+            NameAction(
+                type=NameActions.ADD_WORD_BRACKETS,
+                position=WordPositions.END,
+                message='Add a Business Category Word Here'
+            )
+        ]
+
         return issue
 
 
@@ -88,15 +106,22 @@ class ContainsWordsToAvoidResponseStrategy(AnalysisResponseStrategy):
         issueType=issue_type,
         word=None,
         wordIndex=None,
-        showExaminationButton=None,
+        showExaminationButton=False,
         conflicts=None,
         options=None,
-        nameActions=None
+        nameActions=[]
     )
 
     @classmethod
     def create_issue(cls):
         issue = cls.issue
+
+        issue.nameActions = [
+            NameAction(
+                type=NameActions.STRIKE
+            )
+        ]
+
         return issue
 
 
@@ -105,20 +130,27 @@ class DesignationMismatchResponseStrategy(AnalysisResponseStrategy):
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(
         consentingBody=None,
-        designations=None,
+        designations=[],
         descriptiveWords=None,
         issueType=issue_type,
         word=None,
         wordIndex=None,
-        showExaminationButton=None,
+        showExaminationButton=False,
         conflicts=None,
         options=None,
-        nameActions=None
+        nameActions=[]
     )
 
     @classmethod
     def create_issue(cls):
         issue = cls.issue
+
+        issue.nameActions = [
+            NameAction(
+                type=NameActions.STRIKE
+            )
+        ]
+
         return issue
 
 
@@ -132,7 +164,7 @@ class TooManyWordsResponseStrategy(AnalysisResponseStrategy):
         issueType=issue_type,
         word=None,
         wordIndex=None,
-        showExaminationButton=None,
+        showExaminationButton=True,
         conflicts=None,
         options=None,
         nameActions=None
@@ -149,7 +181,7 @@ class NameRequiresConsentResponseStrategy(AnalysisResponseStrategy):
     status_text = 'May be Approved With Consent'
     issue = NameAnalysisIssue(
         consentingBody=ConsentingBody(
-            name='Test Body',
+            name='Example Inc.',
             email='test@example.com'
         ),
         designations=None,
@@ -157,15 +189,22 @@ class NameRequiresConsentResponseStrategy(AnalysisResponseStrategy):
         issueType=issue_type,
         word=None,
         wordIndex=None,
-        showExaminationButton=None,
+        showExaminationButton=False,
         conflicts=None,
         options=None,
-        nameActions=None
+        nameActions=[]
     )
 
     @classmethod
     def create_issue(cls):
         issue = cls.issue
+
+        issue.nameActions = [
+            NameAction(
+                type=NameActions.HIGHLIGHT
+            )
+        ]
+
         return issue
 
 
@@ -179,15 +218,22 @@ class ContainsUnclassifiableWordResponseStrategy(AnalysisResponseStrategy):
         issueType=issue_type,
         word=None,
         wordIndex=None,
-        showExaminationButton=None,
+        showExaminationButton=True,
         conflicts=None,
         options=None,
-        nameActions=None
+        nameActions=[]
     )
 
     @classmethod
     def create_issue(cls):
         issue = cls.issue
+
+        issue.nameActions = [
+            NameAction(
+                type=NameActions.STRIKE
+            )
+        ]
+
         return issue
 
 
@@ -201,14 +247,35 @@ class CorporateNameConflictResponseStrategy(AnalysisResponseStrategy):
         issueType=issue_type,
         word=None,
         wordIndex=None,
-        showExaminationButton=None,
-        conflicts=None,
+        showExaminationButton=False,
+        conflicts=[],
         options=None,
-        nameActions=None
+        nameActions=[]
     )
 
     @classmethod
     def create_issue(cls):
         issue = cls.issue
+
+        issue.nameActions = [
+            NameAction(
+                type=NameActions.STRIKE
+            ),
+            NameAction(
+                type=NameActions.ADD_WORD_BRACKETS,
+                position=WordPositions.START,
+                message='Add a Word Here'
+            )
+        ]
+
+        # Create conflicts
+        conflict = Conflict(
+            name='Test Conflict',
+            date=''
+        )
+
+        issue.conflicts = []
+        issue.conflicts.append(conflict)
+
         return issue
 
