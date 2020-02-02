@@ -11,6 +11,7 @@ from namex.services.name_request.auto_analyse import AnalysisRequestActions, Ana
 
 # from tests.python import integration_oracle_namesdb
 
+
 token_header = {
     "alg": "RS256",
     "typ": "JWT",
