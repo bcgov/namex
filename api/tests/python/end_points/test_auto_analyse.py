@@ -4,10 +4,12 @@ from flask import json
 import pytest
 
 from urllib.parse import quote_plus
+import jsonpickle
 
 from namex.models import User
 
 from tests.python import integration_oracle_namesdb
+
 
 token_header = {
     "alg": "RS256",
@@ -63,7 +65,7 @@ def test_get_analysis_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 # Test each of the response strategies
@@ -96,7 +98,7 @@ def test_new_bc_cr_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_ul_valid_response(client, jwt, app):
@@ -115,7 +117,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_cp_valid_response(client, jwt, app):
@@ -134,7 +136,7 @@ def test_new_bc_cp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_bc_valid_response(client, jwt, app):
@@ -153,7 +155,7 @@ def test_new_bc_bc_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_cc_valid_response(client, jwt, app):
@@ -172,7 +174,7 @@ def test_new_bc_cc_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_fr_valid_response(client, jwt, app):
@@ -191,7 +193,7 @@ def test_new_bc_fr_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_dba_valid_response(client, jwt, app):
@@ -210,7 +212,7 @@ def test_new_bc_dba_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_gp_valid_response(client, jwt, app):
@@ -229,7 +231,7 @@ def test_new_bc_gp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_lp_valid_response(client, jwt, app):
@@ -248,7 +250,7 @@ def test_new_bc_lp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_bc_ll_valid_response(client, jwt, app):
@@ -267,7 +269,7 @@ def test_new_bc_ll_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xcr_valid_response(client, jwt, app):
@@ -286,7 +288,7 @@ def test_new_xpro_xcr_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xul_valid_response(client, jwt, app):
@@ -305,7 +307,7 @@ def test_new_xpro_xul_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xcp_valid_response(client, jwt, app):
@@ -324,7 +326,7 @@ def test_new_xpro_xcp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xlc_valid_response(client, jwt, app):
@@ -343,7 +345,7 @@ def test_new_xpro_xlc_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xlp_valid_response(client, jwt, app):
@@ -362,7 +364,7 @@ def test_new_xpro_xlp_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 def test_new_xpro_xll_valid_response(client, jwt, app):
@@ -381,7 +383,7 @@ def test_new_xpro_xll_valid_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 # IN THIS SECTION TEST VARIOUS ERROR RESPONSES
 
@@ -403,7 +405,7 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -423,7 +425,7 @@ def test_add_descriptive_word_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -443,7 +445,7 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -463,7 +465,7 @@ def test_designation_mismatch_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -483,7 +485,7 @@ def test_too_many_words_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -503,7 +505,7 @@ def test_name_requires_consent_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -523,7 +525,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -543,4 +545,4 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
-    print(response)
+    print(jsonpickle.decode(response.data))
