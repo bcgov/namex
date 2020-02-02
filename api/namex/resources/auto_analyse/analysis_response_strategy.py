@@ -11,46 +11,17 @@ class AnalysisResponseStrategy:
     strategy_name = 'Analysis Response Strategy'
     issue_type = 'Issue'
     status_text = ''
+    issue = None
 
     def __init__(self, analysis_result):
         pass
 
-    @staticmethod
-    def create_new_issue():
-        issue = NameAnalysisIssue(
-            consentingBody=ConsentingBody(
-                name='Test Body',
-                email='test@example.com'
-            ),
-            designations=None,
-            descriptiveWords=None,
-            issueType=None,
-            word=None,
-            wordIndex=None,
-            showExaminationButton=None,
-            conflicts=None,
-            options=None,
-            nameActions=None
-        )
+    @classmethod
+    def create_issue(cls):
+        return cls.issue
 
-        issue.nameActions = []
-
-        name_action = NameAction(
-            type='Test',
-            position='start',
-            message='Ipsum lorem dolor'
-        )
-
-        issue.nameActions.append(name_action)
-
-        return issue
-
-    # TODO: This is an ABSTRACT method and MUST be implemented in extending classes...
-    def create_issue(self):
-        pass
-
-    @staticmethod
-    def prepare_payload(issue):
+    @classmethod
+    def prepare_payload(cls, issue):
         payload = NameAnalysisResponse(
             status='Test',
             issues=[issue]
