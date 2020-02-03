@@ -31,12 +31,10 @@ def response_issues(strategy):
 
 
 class AnalysisResponse:
-    strategy_name = 'Analysis Response'
-    issue_type = 'Issue'
-    status_text = ''
-    issues = []
-
     def __init__(self, analysis_result):
+        self.status_text = ''
+        self.issues = []
+
         print(repr(analysis_result))
 
         for issue in analysis_result:
@@ -46,11 +44,10 @@ class AnalysisResponse:
                 if response_issue:
                     self.issues.append(response_issue.create_issue())
 
-    @classmethod
-    def prepare_payload(cls):
+    def prepare_payload(self):
         payload = NameAnalysisResponse(
-            status=cls.status_text,
-            issues=cls.issues
+            status=self.status_text,
+            issues=self.issues
         )
         return payload
 
