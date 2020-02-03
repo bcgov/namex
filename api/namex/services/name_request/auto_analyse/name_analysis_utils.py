@@ -29,20 +29,20 @@ def data_frame_to_list(df):
     return list_dist, list_desc, list_none
 
 
-def clean_name_words(text, stop_words, dsg_any, dsg_end, subs_list):
+def clean_name_words(text, stop_words, dsg_any, dsg_end, fr_designation_end_list, prefix_list):
     words = text.lower()
     words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
-    # words = remove_french(words)
-    tokens = regex_transform(words, dsg_any, dsg_end, subs_list, stop_words)
+    words = remove_french(words, fr_designation_end_list)
+    tokens = regex_transform(words, dsg_any, dsg_end, prefix_list)
     tokens = tokens.split()
 
     return [x.upper() for x in tokens if x]
 
 
-def regex_transform(text, stop_words, dsg_any, dsg_end, subs_list):
+def regex_transform(text, dsg_any, dsg_end, prefix_list):
     desig_end = '((lot)+\s+\d+|\d*|' + '|'.join(map(str, dsg_end)) + ')'
     desig_any = "(" + '|'.join(dsg_any) + ")"
-    # prefixes = '|'.join(prefixes_list)
+    prefixes = '|'.join(prefix_list)
 
     exceptions_ws = []
     for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
@@ -115,8 +115,8 @@ def is_substitution_word(word):
         'SELECT s.synonyms_text FROM synonym s where lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + 'and ' + \
         's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "'", cnx)
     if not df.empty:
-        return word
-    return None
+        return True
+    return False
 
 
 def get_substitution_list(word):
@@ -129,13 +129,67 @@ def get_substitution_list(word):
 
 
 def get_synonym_list(word):
-    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?!(sub|stop)$)' + "'"+ ' AND ' +\
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?!(sub|stop)$)' + "'" + ' AND ' +\
             's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
         return get_list_of_lists(df)
-    return get_list_of_lists(df)
+    return None
+
+
+def get_stop_word_list():
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=^stop)' + "'"
+    df = pd.read_sql_query(query, cnx)
+
+    if not df.empty:
+        return get_list_of_lists(df)
+    return None
+
+
+def get_prefix_list():
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=^prefix)' + "'"
+    df = pd.read_sql_query(query, cnx)
+
+    if not df.empty:
+        return get_list_of_lists(df)
+    return None
+
+
+def get_en_designation_any_list():
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=(english)?[/_ -]?designation[s]?[/_-]+any)' + "'"
+    df = pd.read_sql_query(query, cnx)
+
+    if not df.empty:
+        return get_list_of_lists(df)
+    return None
+
+
+def get_en_designation_end_list():
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=english[/_ -]+designation[s]?[/_-]+end)' + "'"
+    df = pd.read_sql_query(query, cnx)
+
+    if not df.empty:
+        return get_list_of_lists(df)
+    return None
+
+
+def get_fr_designation_end_list():
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=french[/_ -]+designation[s]?[/_-]+end)' + "'"
+    df = pd.read_sql_query(query, cnx)
+
+    if not df.empty:
+        return get_list_of_lists(df)
+    return None
+
+
+def get_stand_alone_list():
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=stand[/_ -]?alone)' + "'"
+    df = pd.read_sql_query(query, cnx)
+
+    if not df.empty:
+        return get_list_of_lists(df)
+    return None
 
 
 def build_query_distinctive(dist_all_permutations):
@@ -160,11 +214,11 @@ def build_query_descriptive(desc_substitution_list, query):
     return query
 
 
-def remove_french(text, french_desig_list):
+def remove_french(text, fr_designation_end_list):
     compound = re.findall(r'[^/]+(?://[^/]*)*', text)
     if len(compound) == 2:
         fr = [x for x in compound[1].split(" ") if x]
-        if any(item in french_desig_list for item in fr):
+        if any(item in fr_designation_end_list for item in fr):
             compound.pop()
             text = ' '.join(map(str, compound))
     return text
