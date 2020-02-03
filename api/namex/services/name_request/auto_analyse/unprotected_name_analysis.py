@@ -160,6 +160,8 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         # Return any combination of these checks
         check_conflicts = builder.search_exact_match(self.processed_name, self.name_tokens)
 
+        results = []
+
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
