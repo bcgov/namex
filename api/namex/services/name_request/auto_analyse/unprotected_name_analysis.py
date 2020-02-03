@@ -162,6 +162,8 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
+        results = []
+
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
