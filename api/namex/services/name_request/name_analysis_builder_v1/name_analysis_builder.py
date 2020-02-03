@@ -173,17 +173,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         distinctive = ' '.join(map(str, list_dist)).replace(',', ' ').upper().strip()
 
-        # This section depends on Synonyms API to get the substitution list:
-        # For w_dist in list_dist:
-        #    substitution_list= get_substitution_list(w_dist)
-        #    If not substitution_list:
-        #       dist_list.append(w_dist)
-        #    else:
-        #       dist_list.extend(substitution_list)
-
-        #  dist_substitution_list= [w_dist if not get_substitution_list(w_dist) else get_substitution_list(w_dist) for w_dist in list_dist]
-        #  Next line to be removed hard-coded dist_list response when having API results:
-        dist_substitution_list = [['mount', 'mountain', 'mt', 'mtn'], ['view', 'vu']]
+        dist_substitution_list = []
+        for w_dist in list_dist:
+            substitution_list = get_substitution_list(w_dist)
+            if substitution_list:
+                dist_substitution_list.append(substitution_list)
+            else:
+                dist_substitution_list.append(w_dist.lower())
 
         # All possible permutations of elements in dist_list
         # [('mount', 'view'), ('mount', 'vu'), ('mountain', 'view'), ('mountain', 'vu'), ('mt', 'view'), ('mt', 'vu'), ('mtn', 'view'), ('mtn', 'vu')]
@@ -191,31 +187,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         query = build_query_distinctive(dist_all_permutations)
 
-        print("Distinctive query: ", query)
+        desc_synonym_list = []
+        for w_desc in list_desc:
+            synonym_list = get_synonym_list(w_desc)
+            if synonym_list:
+                desc_synonym_list.extend(synonym_list)
+            else:
+                desc_synonym_list.extend([w_desc.lower()])
 
-        # This section depends on Synonyms API to get the substitution list:
-        # for w_desc in list_desc:
-        #    substitution_list= get_substitution_list(w_desc)
-        #    If not substitution_list:
-        #       desc_substitution_list.append(w_desc)
-        #    else:
-        #       desc_substitution_list.extend(substitution_list)
-
-        #  desc_substitution_list= [w_desc if not get_substitution_list(w_desc) else get_substitution_list(w_desc) for w_desc in list_desc]
-
-        desc_substitution_list = ['bar', 'bistro', 'breakfast', 'buffet', 'cabaret', 'cafe', 'cantina', 'cappuccino',
-                                  'chai', 'coffee', 'commissary', 'cuisine', \
-                                  'deli', 'dhaba', 'dine', 'diner', 'dining', 'eat', 'eater', 'eats', 'edible',
-                                  'espresso', 'expresso', 'food', 'galley', \
-                                  'gastropub', 'grill', 'java', 'kitchen', 'latte', 'lounge', 'pizza', 'pizzeria',
-                                  'pub', 'publichouse', 'restaurant', 'roast', \
-                                  'sandwich', 'snack', 'snax', 'socialhouse', 'steak', 'sub', 'sushi', 'takeout',
-                                  'taphouse', 'taverna', 'tea', 'tiffin', \
-                                  'trattoria', 'treat', 'treatery', 'convenience', 'food', 'grocer', 'grocery',
-                                  'market', 'mart', 'shop', 'store', 'variety', \
-                                  'growers']
-
-        query = build_query_descriptive(desc_substitution_list, query)
+        query = build_query_descriptive(desc_synonym_list, query)
 
         matches = pd.read_sql_query(query, cnx)
 
