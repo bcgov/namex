@@ -44,9 +44,6 @@ def regex_transform(text, stop_words, dsg_any, dsg_end, subs_list):
     desig_any = "(" + '|'.join(dsg_any) + ")"
     # prefixes = '|'.join(prefixes_list)
 
-    # exceptions_ws = substitution_list(re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE), subs_list, stop_words)
-    # exceptions_ws.extend(['null'])
-
     exceptions_ws = []
     for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
         if get_substitution_list(word):
