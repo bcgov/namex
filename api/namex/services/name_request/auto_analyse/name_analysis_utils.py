@@ -44,8 +44,16 @@ def regex_transform(text, stop_words, dsg_any, dsg_end, subs_list):
     desig_any = "(" + '|'.join(dsg_any) + ")"
     # prefixes = '|'.join(prefixes_list)
 
-    exceptions_ws = substitution_list(re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE), subs_list, stop_words)
-    exceptions_ws.extend(['null'])
+    # exceptions_ws = substitution_list(re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE), subs_list, stop_words)
+    # exceptions_ws.extend(['null'])
+
+    exceptions_ws = []
+    for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
+        if get_substitution_list(word):
+            exceptions_ws.extend(word)
+
+    if not exceptions_ws:
+        exceptions_ws.extend(['null'])
 
     exception_ws_rx = '|'.join(map(re.escape, exceptions_ws))
     ws_generic_rx = r'(?<=\d)(?=[^\d\s])|(?<=[^\d\s])(?=\d)'
@@ -94,43 +102,6 @@ def regex_transform(text, stop_words, dsg_any, dsg_end, subs_list):
                   0,
                   re.IGNORECASE)
     return text
-
-
-def substitution_list(text, stop_words, subs_list):
-    subs_list = [['accelerate', ' xlr8', ' xlreight'],
-                 ['access', ' axis', ' axys'],
-                 ['cosi', ' cosy', ' cozi', ' cozy'],
-                 ['acqua', ' acwa', ' aqua'],
-                 ['aerial', ' arial', ' ariel']]
-
-    sub_regex = []
-    regex = []
-    num_regex = ".*[0-9].*"
-
-    words = ' '.join([word for index, word in enumerate(text.split(" ")) if index == 0 or word not in stop_words])
-    words = re.sub(r"[^a-zA-Z0-9 -\']+", ' ', words, 0, re.IGNORECASE)
-
-    words_list = words.split(" ")
-
-    # Flat list of lists
-    subs_list = [item for sublist in subs_list for item in sublist]
-    subs_list = [x.strip(' ') for x in subs_list]
-
-    # If any word substitution is in the name string
-    for s in subs_list:
-        if s in words:
-            sub_regex.extend([s])
-
-    # If any word in name is in any word substitution
-    for w in words_list:
-        for r in sub_regex:
-            if w in r:
-                regex.extend([w])
-
-    subs_list = list(dict.fromkeys([x for x in regex if x]))
-
-    # Just alphanumeric word substitutions
-    return [w for w in subs_list if re.match(num_regex, w)]
 
 
 def get_list_of_lists(df):
