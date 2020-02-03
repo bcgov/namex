@@ -86,23 +86,6 @@ def validate_name_request(location, entity_type, request_action):
 
     return True
 
-
-# Execute analysis returns a response strategy code
-def response_strategies(strategy):
-    strategies = {
-        AnalysisResultCodes.VALID_NAME: ValidNameResponseStrategy,
-        AnalysisResultCodes.ADD_DISTINCTIVE_WORD: AddDistinctiveWordResponseStrategy,
-        AnalysisResultCodes.ADD_DESCRIPTIVE_WORD: AddDescriptiveWordResponseStrategy,
-        AnalysisResultCodes.TOO_MANY_WORDS: TooManyWordsResponseStrategy,
-        AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD: ContainsUnclassifiableWordResponseStrategy,
-        AnalysisResultCodes.WORD_TO_AVOID: ContainsWordsToAvoidResponseStrategy,
-        AnalysisResultCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentResponseStrategy,
-        AnalysisResultCodes.DESIGNATION_MISMATCH: DesignationMismatchResponseStrategy,
-        AnalysisResultCodes.CORPORATE_CONFLICT: CorporateNameConflictResponseStrategy
-    }
-    return strategies.get(strategy, ValidNameResponseStrategy)
-
-
 @cors_preflight("GET")
 @api.route('/', strict_slashes=False, methods=['GET', 'OPTIONS'])
 class NameAnalysis(Resource):
@@ -210,10 +193,6 @@ class NameAnalysis(Resource):
             # Register and initialize the builder
             service.use_builder(builder)
             service.set_name(name)
-            # TODO: These are not implemented yet!
-            # service.set_location(name)
-            # service.set_entity_type(name)
-            # service.set_request_type(name)
 
         except Exception as error:
             print('Error initializing NameAnalysisService: ' + repr(error))
@@ -231,12 +210,9 @@ class NameAnalysis(Resource):
         except Exception as error:
             print('Error executing name analysis: ' + repr(error))
 
-        # Apply the appropriate response for the analysis result
-        response_strategy = response_strategies(analysis.result_code)
-        if callable(response_strategy):
-            response_strategy = response_strategy(analysis)
-
-        payload = response_strategy.build_response().to_json()
+        # Build the appropriate response for the analysis result
+        analysis_response = AnalysisResponse(analysis)
+        payload = analysis_response.build_response().to_json()
 
         response = make_response(payload, 200)
         return response
