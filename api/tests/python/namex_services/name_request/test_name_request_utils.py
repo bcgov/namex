@@ -21,7 +21,7 @@ list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 
 name = ['WM', 'MOUNTAIN', 'VENTURES']
 
-subs_word = 'MOUNTAIN'
+substitution_word = '4mula'
 list_dist = ['WM', '4BY4']
 list_desc = ['VENTURES']
 list_none = []
@@ -297,7 +297,35 @@ def test_get_classification(client, jwt, app):
 
 
 def test_get_substitution_list(client, jwt, app):
-    assert_that(get_substitution_list(subs_word), ['mount', 'mountain', 'mt', 'mtn'])
+    assert_that(get_substitution_list(substitution_word), ['mount', 'mountain', 'mt', 'mtn'])
+
+
+def test_is_substitution_word(client, jwt, app):
+    assert_that(is_substitution_word(substitution_word), True)
+
+
+def test_get_stop_word_list(client, jwt, app):
+    assert_that(get_stop_word_list(), stop_words)
+
+
+def test_get_prefix_list(client, jwt, app):
+    assert_that(get_prefix_list(), prefix_list)
+
+
+def test_get_en_designation_any_list(client, jwt, app):
+    assert_that(get_en_designation_any_list(), en_designation_any_list)
+
+
+def test_get_en_designation_end_list(client, jwt, app):
+    assert_that(get_en_designation_end_list(), en_designation_end_list)
+
+
+def test_get_fr_designation_end_list(client, jwt, app):
+    assert_that(get_fr_designation_end_list(), fr_designation_end_list)
+
+
+def test_get_stand_alone_list(client, jwt, app):
+    assert_that(get_stand_alone_list(), stand_alone_list)
 
 
 def test_regex_transform(client, jwt, app):
