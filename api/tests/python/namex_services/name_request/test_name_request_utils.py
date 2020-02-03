@@ -1,10 +1,11 @@
 from namex.services.name_request.auto_analyse.name_analysis_utils import \
-    data_frame_to_list, clean_name_words, regex_transform, substitution_list, remove_french, get_substitution_list
+    data_frame_to_list, clean_name_words, regex_transform, remove_french, get_substitution_list
 
 from hamcrest import *
 import pandas as pd
 
-text = 'W & M MOUNTAIN VENTURES INC.'
+text = 'WM 4MULA VENTURES INC.'
+#text = 'W & M MOUNTAIN VENTURES INC.'
 
 name = ['WM', 'MOUNTAIN', 'VENTURES']
 
@@ -47,16 +48,12 @@ def test_remove_french(client, jwt, app):
     assert_that(remove_french(text, french_desig_list), 'W & M 074 VENTURES INC.')
 
 
-def test_substitution_list(client, jwt, app):
-    assert_that(len(substitution_list(text, stop_words, subs_list)), equal_to(0))
-
-
 def test_get_substitution_list(client, jwt, app):
     assert_that(get_substitution_list(subs_word), ['mount', 'mountain', 'mt', 'mtn'])
 
 
 def test_regex_transform(client, jwt, app):
-    assert_that(regex_transform(text, stop_words, dsg_any, dsg_end, subs_list), 'WM 074 VENTURES')
+    assert_that(regex_transform(text, stop_words, dsg_any, dsg_end, subs_list), 'WM 4MULA VENTURES')
 
 
 def test_clean_name_words(client, jwt, app):

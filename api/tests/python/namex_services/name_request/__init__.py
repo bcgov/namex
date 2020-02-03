@@ -1,5 +1,5 @@
 from namex.services.name_request.auto_analyse.name_analysis_utils import \
-    data_frame_to_list, clean_name_words, regex_transform, substitution_list, remove_french
+    data_frame_to_list, clean_name_words, regex_transform, remove_french
 
 from hamcrest import *
 text = 'W & M 074 VENTURES INC.'
