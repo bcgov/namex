@@ -19,11 +19,12 @@ list_dist = []
 list_desc = []
 list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 
-name = ['WM', '074', 'VENTURES']
-list_dist = ['WM', '074']
+name = ['WM', 'MOUNTAIN', 'VENTURES']
+
+subs_word = 'MOUNTAIN'
+list_dist = ['WM', '4BY4']
 list_desc = ['VENTURES']
 list_none = []
-
 
 stop_words = ['an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', \
               'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', \
@@ -232,6 +233,7 @@ def test_data_frame_to_list(client, jwt, app):
     assert_that(data_frame_to_list(df), list_dist)
     assert_that(data_frame_to_list(df), list_desc)
     assert_that(data_frame_to_list(df), list_none)
+'''
 
 
 def test_get_list_of_lists(client, jwt, app):
@@ -292,6 +294,10 @@ def test_get_words_requiring_consent(client, jwt, app):
 
 def test_get_classification(client, jwt, app):
     assert_that(get_classification(word), 'none')
+
+
+def test_get_substitution_list(client, jwt, app):
+    assert_that(get_substitution_list(subs_word), ['mount', 'mountain', 'mt', 'mtn'])
 
 
 def test_regex_transform(client, jwt, app):
