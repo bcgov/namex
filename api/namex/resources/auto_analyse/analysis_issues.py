@@ -1,8 +1,5 @@
 from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
-# Import response base
-from .analysis_response_strategy import AnalysisResponseStrategy
-
 # Import DTOs
 from .response_objects.name_analysis_issue import NameAnalysisIssue
 from .response_objects.name_analysis_response import NameAnalysisResponse
@@ -12,7 +9,20 @@ from .response_objects.conflict import Conflict
 from .response_objects.descriptive_word import DescriptiveWord
 
 
-class ValidNameResponseStrategy(AnalysisResponseStrategy):
+class AnalysisResponseIssue:
+    issue_type = 'Issue'
+    status_text = ''
+    issue = None
+
+    def __init__(self, analysis_result):
+        pass
+
+    @classmethod
+    def create_issue(cls):
+        return cls.issue
+
+
+class ValidName(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.VALID_NAME
     status_text = 'Approved'
     issue = NameAnalysisIssue(
@@ -34,7 +44,7 @@ class ValidNameResponseStrategy(AnalysisResponseStrategy):
         return issue
 
 
-class AddDistinctiveWordResponseStrategy(AnalysisResponseStrategy):
+class AddDistinctiveWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(
@@ -65,7 +75,7 @@ class AddDistinctiveWordResponseStrategy(AnalysisResponseStrategy):
         return issue
 
 
-class AddDescriptiveWordResponseStrategy(AnalysisResponseStrategy):
+class AddDescriptiveWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(
@@ -96,7 +106,7 @@ class AddDescriptiveWordResponseStrategy(AnalysisResponseStrategy):
         return issue
 
 
-class ContainsWordsToAvoidResponseStrategy(AnalysisResponseStrategy):
+class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.WORD_TO_AVOID
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(
@@ -125,7 +135,7 @@ class ContainsWordsToAvoidResponseStrategy(AnalysisResponseStrategy):
         return issue
 
 
-class DesignationMismatchResponseStrategy(AnalysisResponseStrategy):
+class DesignationMismatchIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(
@@ -154,7 +164,7 @@ class DesignationMismatchResponseStrategy(AnalysisResponseStrategy):
         return issue
 
 
-class TooManyWordsResponseStrategy(AnalysisResponseStrategy):
+class TooManyWordsIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.TOO_MANY_WORDS
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(
@@ -176,7 +186,7 @@ class TooManyWordsResponseStrategy(AnalysisResponseStrategy):
         return issue
 
 
-class NameRequiresConsentResponseStrategy(AnalysisResponseStrategy):
+class NameRequiresConsentIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.NAME_REQUIRES_CONSENT
     status_text = 'May be Approved With Consent'
     issue = NameAnalysisIssue(
@@ -208,7 +218,7 @@ class NameRequiresConsentResponseStrategy(AnalysisResponseStrategy):
         return issue
 
 
-class ContainsUnclassifiableWordResponseStrategy(AnalysisResponseStrategy):
+class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(
@@ -237,7 +247,7 @@ class ContainsUnclassifiableWordResponseStrategy(AnalysisResponseStrategy):
         return issue
 
 
-class CorporateNameConflictResponseStrategy(AnalysisResponseStrategy):
+class CorporateNameConflictIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.CORPORATE_CONFLICT
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(

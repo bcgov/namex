@@ -72,6 +72,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         )
 
     # This is the main execution call for the class
+    '''
+    @:return ProcedureResult[]
+    '''
     def execute_analysis(self):
         builder = self._builder
 
@@ -81,23 +84,23 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         check_words_requiring_consent = builder.check_words_requiring_consent()
         check_designation_mismatch = builder.check_designation()
 
+        results = []
+
         if not check_name_is_well_formed.is_valid:
-            return check_name_is_well_formed
+            results.append(check_name_is_well_formed)
 
         if not check_words_to_avoid.is_valid:
-            return check_words_to_avoid
+            results.append(check_words_to_avoid)
 
         if not check_conflicts.is_valid:
-            return check_conflicts
+            results.append(check_conflicts)
 
         if not check_words_requiring_consent.is_valid:
-            return check_words_requiring_consent
+            results.append(check_words_requiring_consent)
 
         if not check_designation_mismatch.is_valid:
-            return check_designation_mismatch
+            results.append(check_designation_mismatch)
 
-        return ProcedureResult(is_valid=True)
+        results.append(ProcedureResult(is_valid=True))
 
-
-
-
+        return results
