@@ -16,41 +16,6 @@ stop_w = 'Stop Words'
 MAX_LIMIT = 4
 
 
-# TODO: Confirm that this is correct!
-class ValidLocations(Enum):
-    CA_BC = 'BC'
-    CA_NOT_BC = 'CA'
-    # CA = 'CA',
-    INTL = 'INTL'
-
-    @classmethod
-    def list(cls):
-        values = []
-        for item in cls:
-            values.append(item.value)
-
-        return values
-
-
-class AnalysisRequestActions(Enum):
-    NEW = 'NEW'  # Start a new business (NAME PROTECTION)
-    AML = 'AML'  # Amalgamate (NAME PROTECTION, BC ONLY)
-    DBA = 'DBA'  # Get a new trade name (NO NAME PROTECTION)
-    CHG = 'CHG'  # Change your name (it's coming stub it out)
-    MVE = 'MVE'  # Move your business
-    CNV = 'CNV'  # Convert to another structure
-    REH = 'REH'  # Restore from historical business
-    REN = 'REN'  # Restore by starting a new business
-
-    @classmethod
-    def list(cls):
-        values = []
-        for item in cls:
-            values.append(item.value)
-
-        return values
-
-
 class AnalysisResultCodes(Enum):
     VALID_NAME = 'auto_approved'
 
