@@ -174,6 +174,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         distinctive = ' '.join(map(str, list_dist)).replace(',', ' ').upper().strip()
 
         dist_substitution_list = []
+
         for w_dist in list_dist:
             substitution_list = get_substitution_list(w_dist)
             if substitution_list:
@@ -182,26 +183,36 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 dist_substitution_list.append(w_dist.lower())
 
         # All possible permutations of elements in dist_list
-        # [('mount', 'view'), ('mount', 'vu'), ('mountain', 'view'), ('mountain', 'vu'), ('mt', 'view'), ('mt', 'vu'), ('mtn', 'view'), ('mtn', 'vu')]
-        dist_all_permutations = list(itertools.product(*dist_substitution_list))
+        # [('mount', 'view'), ('mount', 'vu'), ('mountain', 'view'), ('mountain', 'vu'), ('mt', 'view'), ('mt', 'vu'), ('mtn', 'view'),
+        #  ('mtn', 'vu')]
+        if dist_substitution_list:
+            dist_all_permutations = list(itertools.product(*dist_substitution_list))
+            query = build_query_distinctive(dist_all_permutations)
 
-        query = build_query_distinctive(dist_all_permutations)
+            desc_synonym_list = []
+            for w_desc in list_desc:
+                synonym_list = get_synonym_list(w_desc)
+                if synonym_list:
+                    desc_synonym_list.extend(synonym_list)
+                else:
+                    desc_synonym_list.extend([w_desc.lower()])
 
-        desc_synonym_list = []
-        for w_desc in list_desc:
-            synonym_list = get_synonym_list(w_desc)
-            if synonym_list:
-                desc_synonym_list.extend(synonym_list)
+            if desc_synonym_list:
+                query = build_query_descriptive(desc_synonym_list, query)
+                matches = pd.read_sql_query(query, cnx)
+
+                if matches.values.tolist():
+                    result.is_valid = False
+                    result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+                else:
+                    result.is_valid = True
+                    result.result_code = AnalysisResultCodes.VALID_NAME
             else:
-                desc_synonym_list.extend([w_desc.lower()])
-
-        query = build_query_descriptive(desc_synonym_list, query)
-
-        matches = pd.read_sql_query(query, cnx)
-
-        if matches.values.tolist():
+                result.is_valid = False
+                result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+        else:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+            result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
 
         return result
 
