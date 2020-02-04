@@ -90,12 +90,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
 
         return result
-        '''
-        success = False
-        if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
-                (list_dist + list_desc) == name):
-            success = True
-        return success
 
     '''
     Override the abstract / base class method
