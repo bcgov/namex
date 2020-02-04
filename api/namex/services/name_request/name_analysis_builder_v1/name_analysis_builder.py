@@ -8,7 +8,7 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import build_q
 from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
-from ..auto_analyse import AnalysisResultCodes
+from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT
 
 '''
 Sample builder
@@ -55,27 +55,41 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_name_is_well_formed(self, list_desc, list_dist, name):
-        '''
+    def check_name_is_well_formed(self, list_desc, list_dist, list_none, name):
+
         result = ProcedureResult()
         result.is_valid = True
 
-        success = True
-        if not success:
+        # if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
+        #        (list_dist + list_desc) == name):
+        #    success = True
+
+        # Return one of the following:
+        # AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+        # AnalysisResultCodes.TOO_MANY_WORDS
+        # AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+        # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+
+        if len(list_none) > 0:
             result.is_valid = False
-            # TODO: Return one of the following:
-            # AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            # AnalysisResultCodes.TOO_MANY_WORDS
-            # AnalysisResultCodes.ADD_DISTINCTIVE_WORD
-            # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+        elif len(list_dist) < 1:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+        elif len(list_desc) < 1:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+        elif len(name) > MAX_LIMIT:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
+        elif list_desc == list_dist:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+        elif list_dist + list_desc != name:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
 
         return result
-        '''
-        success = False
-        if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
-                (list_dist + list_desc) == name):
-            success = True
-        return success
 
     '''
     Override the abstract / base class method
