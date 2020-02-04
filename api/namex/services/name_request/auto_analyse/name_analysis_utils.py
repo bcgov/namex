@@ -204,9 +204,10 @@ def get_classification(word):
     query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
     df = pd.read_sql_query(query, cnx_wc)
 
-    if not df.empty:
-        return df['word_classification'].values.tolist()
-    return []
+    if not df.empty and df.count == 1:
+        return df['word_classification'].str.lower()
+
+    return 'both'
 
 
 def build_query_distinctive(dist_all_permutations):

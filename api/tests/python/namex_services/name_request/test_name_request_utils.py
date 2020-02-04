@@ -88,7 +88,7 @@ def test_get_stand_alone_list(client, jwt, app):
 
 
 def test_get_classification(client, jwt, app):
-    assert_that(get_classification(word), ['Distinctive'])
+    assert_that(get_classification(word), 'distinctive')
 
 
 def test_regex_transform(client, jwt, app):
