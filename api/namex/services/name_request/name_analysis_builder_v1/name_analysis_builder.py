@@ -92,7 +92,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
         result = ProcedureResult()
-        result.is_valid = True
+        result.is_valid = False
 
         # dist_substitution_list:  [['mount', 'mountain', 'mt', 'mtn'], ['view', 'vu']]
         # desc_substitution_list: [['food, restaurant, bar'],['growers']]
