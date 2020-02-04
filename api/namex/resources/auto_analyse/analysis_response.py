@@ -15,8 +15,8 @@ from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
 
 # Execute analysis returns a response strategy code
-def response_issues(strategy):
-    strategies = {
+def response_issues(issue_code):
+    issue_types = {
         AnalysisResultCodes.VALID_NAME: ValidName,
         AnalysisResultCodes.ADD_DISTINCTIVE_WORD: AddDistinctiveWordIssue,
         AnalysisResultCodes.ADD_DESCRIPTIVE_WORD: AddDescriptiveWordIssue,
@@ -27,7 +27,8 @@ def response_issues(strategy):
         AnalysisResultCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
         AnalysisResultCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue
     }
-    return strategies.get(strategy, ValidName)
+
+    return issue_types.get(issue_code, ValidName)
 
 
 class AnalysisResponse:
@@ -38,11 +39,13 @@ class AnalysisResponse:
         print(repr(analysis_result))
 
         for issue in analysis_result:
-            issue_builder = response_issues(issue.result_code)
-            if callable(issue_builder):
-                response_issue = issue_builder(issue)
-                if response_issue:
-                    self.issues.append(response_issue.create_issue())
+            if callable(response_issues(issue.result_code)):
+                issue_builder = response_issues(issue.result_code)
+                response_issue = issue_builder.create_issue()
+                if response_issue and response_issue.issueType is not AnalysisResultCodes.VALID_NAME:
+                    self.issues.append(response_issue)
+                else:
+                    pass
 
     def prepare_payload(self):
         payload = NameAnalysisResponse(
