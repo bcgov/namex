@@ -55,19 +55,41 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_name_is_well_formed(self, list_dist, list_desc, name):
+    def check_name_is_well_formed(self, list_desc, list_dist, list_none, name):
+
         result = ProcedureResult()
         result.is_valid = False
 
-        if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and ((list_dist + list_desc) == name):
-            result.is_valid = True
+        # if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
+        #        (list_dist + list_desc) == name):
+        #    success = True
 
-        if not result.is_valid:
-            result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
+        # Return one of the following:
+        # AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+        # AnalysisResultCodes.TOO_MANY_WORDS
+        # AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+        # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+
+        if len(list_none) > 0:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+        elif len(list_dist) < 1:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+        elif len(list_desc) < 1:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+        elif len(name) > MAX_LIMIT:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
+        elif list_desc == list_dist:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+        elif list_dist + list_desc != name:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
 
         return result
-
-
 
     '''
     Override the abstract / base class method
