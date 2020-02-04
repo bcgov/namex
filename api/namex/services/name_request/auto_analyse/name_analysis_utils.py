@@ -7,6 +7,7 @@ POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
 POSTGRES_PASSWORD = 'BVict31C'
 POSTGRES_DBNAME = 'local-sandbox-dev'
+POSTGRES_DBNAME_WC = 'namex-local-dev'
 
 postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                         password=POSTGRES_PASSWORD,
@@ -14,7 +15,14 @@ postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'
                                                                                         port=POSTGRES_PORT,
                                                                                         dbname=POSTGRES_DBNAME))
 
+postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                           password=POSTGRES_PASSWORD,
+                                                                                           ipaddress=POSTGRES_ADDRESS,
+                                                                                           port=POSTGRES_PORT,
+                                                                                           dbname=POSTGRES_DBNAME_WC))
+
 cnx = create_engine(postgres_str)
+cnx_wc = create_engine(postgres_wc_str)
 
 
 def data_frame_to_list(df):
@@ -120,8 +128,8 @@ def is_substitution_word(word):
 
 
 def get_substitution_list(word):
-    query= 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + ' AND ' + \
-           's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + ' AND ' + \
+            's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
     df = pd.read_sql_query(query, cnx)
     if not df.empty:
         return get_list_of_lists(df)
@@ -129,7 +137,7 @@ def get_substitution_list(word):
 
 
 def get_synonym_list(word):
-    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?!(sub|stop)$)' + "'" + ' AND ' +\
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?!(sub|stop)$)' + "'" + ' AND ' + \
             's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
     df = pd.read_sql_query(query, cnx)
 
@@ -190,6 +198,15 @@ def get_stand_alone_list():
     if not df.empty:
         return get_list_of_lists(df)
     return None
+
+
+def get_classification(word):
+    query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
+    df = pd.read_sql_query(query, cnx_wc)
+
+    if not df.empty:
+        return df['word_classification'].values.tolist()
+    return []
 
 
 def build_query_distinctive(dist_all_permutations):
