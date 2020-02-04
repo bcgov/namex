@@ -171,3 +171,31 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
 
         return result
+
+    '''
+    Override the abstract / base class method
+    @return ProcedureResult
+    '''
+    def do_analysis(self):
+        check_name_is_well_formed = self.check_name_is_well_formed()
+        check_words_to_avoid = self.check_words_to_avoid()
+        check_conflicts = self.search_conflicts()
+        check_words_requiring_consent = self.check_words_requiring_consent()
+        check_designation_mismatch = self.check_designation()
+
+        if not check_name_is_well_formed.is_valid:
+            return check_name_is_well_formed
+
+        if not check_words_to_avoid.is_valid:
+            return check_words_to_avoid
+
+        if not check_conflicts.is_valid:
+            return check_conflicts
+
+        if not check_words_requiring_consent.is_valid:
+            return check_words_requiring_consent
+
+        if not check_designation_mismatch.is_valid:
+            return check_designation_mismatch
+
+        return ProcedureResult(is_valid=True)
