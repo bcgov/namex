@@ -7,8 +7,9 @@ from urllib.parse import quote_plus
 import jsonpickle
 
 from namex.models import User
+from namex.services.name_request.auto_analyse import AnalysisRequestActions, AnalysisResultCodes
 
-from tests.python import integration_oracle_namesdb
+# from tests.python import integration_oracle_namesdb
 
 token_header = {
     "alg": "RS256",
@@ -61,6 +62,10 @@ def assert_issues_count_is_gt(count, issues):
     for issue in issues:
         print('- ' + issue.issueType.value + '\n')
     assert issues.__len__() > count
+
+@pytest.mark.skip
+def assert_issue_type_is_one_of(types, issue):
+    assert issue.issueType in types
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -481,6 +486,10 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
+        for issue in payload.issues:
+            assert_issue_type_is_one_of([
+                AnalysisResultCodes.ADD_DISTINCTIVE_WORD,
+            ], issue)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -504,6 +513,10 @@ def test_add_descriptive_word_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
+        for issue in payload.issues:
+            assert_issue_type_is_one_of([
+                AnalysisResultCodes.ADD_DESCRIPTIVE_WORD,
+            ], issue)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -527,6 +540,10 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
+        for issue in payload.issues:
+            assert_issue_type_is_one_of([
+                AnalysisResultCodes.WORD_TO_AVOID,
+            ], issue)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -550,6 +567,10 @@ def test_designation_mismatch_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
+        for issue in payload.issues:
+            assert_issue_type_is_one_of([
+                AnalysisResultCodes.DESIGNATION_MISMATCH,
+            ], issue)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -573,6 +594,10 @@ def test_too_many_words_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
+        for issue in payload.issues:
+            assert_issue_type_is_one_of([
+                AnalysisResultCodes.TOO_MANY_WORDS,
+            ], issue)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -596,6 +621,10 @@ def test_name_requires_consent_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
+        for issue in payload.issues:
+            assert_issue_type_is_one_of([
+                AnalysisResultCodes.NAME_REQUIRES_CONSENT,
+            ], issue)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -619,6 +648,10 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
+        for issue in payload.issues:
+            assert_issue_type_is_one_of([
+                AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD,
+            ], issue)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -642,3 +675,7 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
+        for issue in payload.issues:
+            assert_issue_type_is_one_of([
+                AnalysisResultCodes.CORPORATE_CONFLICT,
+            ], issue)

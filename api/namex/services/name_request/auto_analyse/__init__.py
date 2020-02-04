@@ -53,14 +53,19 @@ class AnalysisRequestActions(Enum):
 
 class AnalysisResultCodes(Enum):
     VALID_NAME = 'auto_approved'
-    ADD_DISTINCTIVE_WORD = 'add_distinctive'
-    ADD_DESCRIPTIVE_WORD = 'add_descriptive'
+
+    ADD_DISTINCTIVE_WORD = 'add_distinctive'  # Well formed
+    ADD_DESCRIPTIVE_WORD = 'add_descriptive'  # Well formed
+    TOO_MANY_WORDS = 'excess_words'  # Well formed
+    # Stop if error with Well Formed
+    CONTAINS_UNCLASSIFIABLE_WORD = 'unclassified_word'  # To examiner
+    # Stop if error
+    CORPORATE_CONFLICT = 'corp_conflict'
+    # Stop if error
+    # TODO: What about these other guys?
     WORD_TO_AVOID = 'word_to_avoid'
     DESIGNATION_MISMATCH = 'designation_mismatch'
-    TOO_MANY_WORDS = 'excess_words'
     NAME_REQUIRES_CONSENT = 'consent_required'
-    CONTAINS_UNCLASSIFIABLE_WORD = 'unclassified_word'
-    CORPORATE_CONFLICT = 'corp_conflict'
 
     @classmethod
     def list(cls):
