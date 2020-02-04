@@ -14,7 +14,7 @@ class AnalysisResponseIssue:
     status_text = ''
     issue = None
 
-    def __init__(self, analysis_result):
+    def __init__(self):
         pass
 
     @classmethod
