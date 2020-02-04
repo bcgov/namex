@@ -46,6 +46,24 @@ ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
 # }
 
 
+@pytest.mark.skip
+def assert_issues_count_is(count, issues):
+    if issues.__len__() > count:
+        print('\n' + 'Issue types:' + '\n')
+        for issue in issues:
+            print('- ' + issue.issueType.value + '\n')
+    assert issues.__len__() == count
+
+
+@pytest.mark.skip
+def assert_issues_count_is_gt(count, issues):
+
+    print('\n' + 'Issue types:' + '\n')
+    for issue in issues:
+        print('- ' + issue.issueType.value + '\n')
+    assert issues.__len__() > count
+
+
 # @pytest.mark.xfail(raises=ValueError)
 def test_get_analysis_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
@@ -68,7 +86,7 @@ def test_get_analysis_request_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 # Test each of the response strategies
@@ -104,7 +122,7 @@ def test_new_bc_cr_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_bc_ul_valid_response(client, jwt, app):
@@ -126,6 +144,10 @@ def test_new_bc_ul_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
+        if payload.issues.__len__() > 0:
+            print('\n' + 'Issue types:' + '\n')
+            for issue in payload.issues:
+                print('\n' + issue.issueType + '\n')
         assert payload.issues.__len__() == 0
 
 
@@ -148,7 +170,7 @@ def test_new_bc_cp_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_bc_bc_valid_response(client, jwt, app):
@@ -170,7 +192,7 @@ def test_new_bc_bc_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_bc_cc_valid_response(client, jwt, app):
@@ -192,7 +214,7 @@ def test_new_bc_cc_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_bc_fr_valid_response(client, jwt, app):
@@ -214,7 +236,7 @@ def test_new_bc_fr_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_bc_dba_valid_response(client, jwt, app):
@@ -236,7 +258,7 @@ def test_new_bc_dba_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_bc_gp_valid_response(client, jwt, app):
@@ -258,7 +280,7 @@ def test_new_bc_gp_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_bc_lp_valid_response(client, jwt, app):
@@ -280,7 +302,7 @@ def test_new_bc_lp_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_bc_ll_valid_response(client, jwt, app):
@@ -302,7 +324,7 @@ def test_new_bc_ll_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_xpro_xcr_valid_response(client, jwt, app):
@@ -324,7 +346,7 @@ def test_new_xpro_xcr_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_xpro_xul_valid_response(client, jwt, app):
@@ -346,7 +368,7 @@ def test_new_xpro_xul_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_xpro_xcp_valid_response(client, jwt, app):
@@ -368,7 +390,7 @@ def test_new_xpro_xcp_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_xpro_xlc_valid_response(client, jwt, app):
@@ -390,7 +412,7 @@ def test_new_xpro_xlc_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_xpro_xlp_valid_response(client, jwt, app):
@@ -412,7 +434,7 @@ def test_new_xpro_xlp_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 
 def test_new_xpro_xll_valid_response(client, jwt, app):
@@ -434,7 +456,7 @@ def test_new_xpro_xll_valid_response(client, jwt, app):
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() == 0
+        assert_issues_count_is(0, payload.issues)
 
 # IN THIS SECTION TEST VARIOUS ERROR RESPONSES
 
@@ -457,8 +479,9 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
+    print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() > 0
+        assert_issues_count_is_gt(0, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -479,8 +502,9 @@ def test_add_descriptive_word_request_response(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
+    print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() > 0
+        assert_issues_count_is_gt(0, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -501,8 +525,9 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
+    print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() > 0
+        assert_issues_count_is_gt(0, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -523,8 +548,9 @@ def test_designation_mismatch_request_response(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
+    print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() > 0
+        assert_issues_count_is_gt(0, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -545,8 +571,9 @@ def test_too_many_words_request_response(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
+    print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() > 0
+        assert_issues_count_is_gt(0, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -567,8 +594,9 @@ def test_name_requires_consent_request_response(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
+    print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() > 0
+        assert_issues_count_is_gt(0, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -589,8 +617,9 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
+    print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() > 0
+        assert_issues_count_is_gt(0, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -611,5 +640,6 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
+    print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
-        assert payload.issues.__len__() > 0
+        assert_issues_count_is_gt(0, payload.issues)
