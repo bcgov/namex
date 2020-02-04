@@ -233,7 +233,6 @@ def test_data_frame_to_list(client, jwt, app):
     assert_that(data_frame_to_list(df), list_dist)
     assert_that(data_frame_to_list(df), list_desc)
     assert_that(data_frame_to_list(df), list_none)
-'''
 
 
 def test_get_list_of_lists(client, jwt, app):
@@ -329,7 +328,7 @@ def test_get_stand_alone_list(client, jwt, app):
 
 
 def test_get_classification(client, jwt, app):
-    assert_that(get_classification(word), 'distinctive')
+    assert_that(get_classification(word), 'none')
 
 
 def test_regex_transform(client, jwt, app):
