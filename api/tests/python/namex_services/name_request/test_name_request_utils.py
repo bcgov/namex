@@ -328,6 +328,10 @@ def test_get_stand_alone_list(client, jwt, app):
     assert_that(get_stand_alone_list(), stand_alone_list)
 
 
+def test_get_classification(client, jwt, app):
+    assert_that(get_classification(word), ['Distinctive'])
+
+
 def test_regex_transform(client, jwt, app):
     assert_that(regex_transform(text, en_designation_any_list, en_designation_end_list, prefix_list), 'WM H VENTURES')
 
