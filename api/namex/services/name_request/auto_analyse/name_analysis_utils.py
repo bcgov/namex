@@ -26,9 +26,9 @@ cnx_wc = create_engine(postgres_wc_str)
 
 
 def data_frame_to_list(df):
-    df_dist = df.loc[df.classification == 'Distinctive']
-    df_desc = df.loc[df.classification == 'Descriptive']
-    df_none = df.loc[df.classification == 'None']
+    df_dist = df.loc[df.word_classification == 'distinctive']
+    df_desc = df.loc[df.word_classification == 'descriptive']
+    df_none = df.loc[df.word_classification == 'none']
 
     list_dist = list(df_dist.word)
     list_desc = list(df_desc.word)
@@ -207,7 +207,7 @@ def get_classification(word):
     if not df.empty and df.count == 1:
         return df['word_classification'].str.lower()
 
-    return 'both'
+    return 'none'
 
 
 def build_query_distinctive(dist_all_permutations):
