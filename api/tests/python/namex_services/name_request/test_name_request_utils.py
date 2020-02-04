@@ -6,16 +6,16 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import \
 from hamcrest import *
 import pandas as pd
 
-text = 'WM 4MULA VENTURES INC.'
+text = 'WM H20 VENTURES INC'
 # text = 'W & M MOUNTAIN VENTURES INC.'
 word = 'MOUNTAIN'
 
 name = ['WM', 'MOUNTAIN', 'VENTURES']
 
 substitution_word = '4mula'
-list_dist = ['WM', '4BY4']
-list_desc = ['VENTURES']
-list_none = []
+list_dist = []
+list_desc = []
+list_none = ['MOUNTAIN','VIEW','FOOD','GROWERS']
 
 stop_words = ['an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', \
               'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', \
@@ -40,15 +40,14 @@ prefix_list = ['un', 're', 'in', 'dis', 'en', 'non', 'in', 'over', 'mis', 'sub',
                'ex', 'homo', 'hyper', 'mal', 'micro', 'multi', 'para', 'poly', 'post', 'pro', 'retro', 'tele', \
                'therm', 'trans', 'uni']
 
-data = [['WM', 'Distinctive', 12], ['079', 'Distinctive', 3], ['VENTURES', 'Descriptive', 1000]]
+data = [['WM', 'distinctive', 12], ['079', 'distinctive', 3], ['VENTURES', 'descriptive', 1000]]
 df = pd.DataFrame(data, columns=['word', 'word_classification', 'frequency'])
 
-'''
+
 def test_data_frame_to_list(client, jwt, app):
     assert_that(data_frame_to_list(df), list_dist)
     assert_that(data_frame_to_list(df), list_desc)
     assert_that(data_frame_to_list(df), list_none)
-'''
 
 
 def test_remove_french(client, jwt, app):
@@ -88,11 +87,11 @@ def test_get_stand_alone_list(client, jwt, app):
 
 
 def test_get_classification(client, jwt, app):
-    assert_that(get_classification(word), 'distinctive')
+    assert_that(get_classification(word), 'none')
 
 
 def test_regex_transform(client, jwt, app):
-    assert_that(regex_transform(text, en_designation_any_list, en_designation_end_list, prefix_list), 'WM 4MULA VENTURES')
+    assert_that(regex_transform(text, en_designation_any_list, en_designation_end_list, prefix_list), 'WM H VENTURES')
 
 
 def test_clean_name_words(client, jwt, app):
