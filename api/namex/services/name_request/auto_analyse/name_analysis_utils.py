@@ -37,19 +37,19 @@ def data_frame_to_list(df):
     return list_dist, list_desc, list_none
 
 
-def clean_name_words(text, stop_words, dsg_any, dsg_end, fr_designation_end_list, prefix_list):
+def clean_name_words(text, stop_words, designation_any, designation_end, fr_designation_end_list, prefix_list):
     words = text.lower()
     words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
     words = remove_french(words, fr_designation_end_list)
-    tokens = regex_transform(words, dsg_any, dsg_end, prefix_list)
+    tokens = regex_transform(words, designation_any, designation_end, prefix_list)
     tokens = tokens.split()
 
     return [x.upper() for x in tokens if x]
 
 
-def regex_transform(text, dsg_any, dsg_end, prefix_list):
-    desig_end = '((lot)+\s+\d+|\d*|' + '|'.join(map(str, dsg_end)) + ')'
-    desig_any = "(" + '|'.join(dsg_any) + ")"
+def regex_transform(text, designation_any, designation_end, prefix_list):
+    designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
+    designation_any_regex = "(" + '|'.join(designation_any) + ")"
     prefixes = '|'.join(prefix_list)
 
     exceptions_ws = []
@@ -84,7 +84,7 @@ def regex_transform(text, dsg_any, dsg_end, prefix_list):
                                                                        r'(?<=[a-zA-Z])\'[Ss]|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &/-]+',
                                                                        ' ',
                                                                        re.sub(
-                                                                           r'\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b' + desig_any + '\b|\s' + desig_end + '(?=(\s' + desig_end + ')*$)',
+                                                                           r'\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b' + designation_any_regex + '\\b|\\s' + designation_end_regex + '(?=(\\s' + designation_end_regex + ')*$)',
                                                                            '',
                                                                            text,
                                                                            0,
@@ -235,8 +235,8 @@ def build_query_descriptive(desc_substitution_list, query):
 def remove_french(text, fr_designation_end_list):
     compound = re.findall(r'[^/]+(?://[^/]*)*', text)
     if len(compound) == 2:
-        fr = [x for x in compound[1].split(" ") if x]
-        if any(item in fr_designation_end_list for item in fr):
+        fr_list_text = [x.lower() for x in compound[1].split(" ") if x]
+        if any(item in fr_designation_end_list for item in fr_list_text):
             compound.pop()
             text = ' '.join(map(str, compound))
     return text
