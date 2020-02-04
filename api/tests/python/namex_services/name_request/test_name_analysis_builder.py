@@ -19,7 +19,7 @@ service.set_name(name)
 
 
 def test_check_name_is_well_formed(client, jwt, app):
-    assert_that(builder.check_name_is_well_formed(list_dist, list_desc, name))
+    assert_that(builder.check_name_is_well_formed(list_desc, list_dist, list_none, name), False)
 
 
 def test_search_conflicts(client, jwt, app):
