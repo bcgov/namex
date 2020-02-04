@@ -12,6 +12,9 @@ dsg_end = 'Designations_end'
 dsg_any = 'Designations_any'
 stop_w = 'Stop Words'
 
+# Limit number of words to analyse
+MAX_LIMIT = 4
+
 
 # TODO: Confirm that this is correct!
 class ValidLocations(Enum):
