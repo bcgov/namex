@@ -1,13 +1,14 @@
 from namex.services.name_request.auto_analyse.name_analysis_utils import \
     data_frame_to_list, clean_name_words, regex_transform, remove_french, get_substitution_list, get_stop_word_list, \
     get_prefix_list, get_en_designation_any_list, get_en_designation_end_list, get_fr_designation_end_list, \
-    get_stand_alone_list, is_substitution_word
+    get_stand_alone_list, is_substitution_word, get_classification
 
 from hamcrest import *
 import pandas as pd
 
 text = 'WM 4MULA VENTURES INC.'
 # text = 'W & M MOUNTAIN VENTURES INC.'
+word = 'MOUNTAIN'
 
 name = ['WM', 'MOUNTAIN', 'VENTURES']
 
@@ -84,6 +85,10 @@ def test_get_fr_designation_end_list(client, jwt, app):
 
 def test_get_stand_alone_list(client, jwt, app):
     assert_that(get_stand_alone_list(), stand_alone_list)
+
+
+def test_get_classification(client, jwt, app):
+    assert_that(get_classification(word), ['Distinctive'])
 
 
 def test_regex_transform(client, jwt, app):
