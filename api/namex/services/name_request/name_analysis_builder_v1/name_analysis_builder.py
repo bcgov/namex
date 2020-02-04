@@ -8,7 +8,7 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import build_q
 from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
-from ..auto_analyse import AnalysisResultCodes
+from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT
 
 '''
 Sample builder
