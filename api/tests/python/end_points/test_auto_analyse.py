@@ -86,7 +86,7 @@ def test_get_analysis_request_response(client, jwt, app):
     test_params = {
         'name': 'MOUNTAIN VIEW FOOD GROWERS LTD.',
         'location': 'BC',
-        'entity_type': 'FR',
+        'entity_type': 'CR',
         'request_type': 'NEW'
     }
 
@@ -321,7 +321,7 @@ def test_new_bc_ll_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'LL',
         'request_type': 'NEW'
@@ -365,7 +365,7 @@ def test_new_xpro_xul_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'CA',
         'entity_type': 'XUL',
         'request_type': 'NEW'
