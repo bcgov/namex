@@ -8,7 +8,7 @@ list_dist = ['MOUNTAIN', 'VIEW']
 list_desc = []
 list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 name = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
-user_input = 'MOUNTAIN VIEW FOOD GROWERS '
+user_input = 'MOUNTAIN VIEW FOOD GROWERS LTD.'
 
 # Do our service stuff
 service = AutoAnalyseService()
@@ -24,12 +24,8 @@ def test_check_name_is_well_formed(client, jwt, app):
 
 
 def test_check_words_to_avoid(client, jwt, app):
-    assert_that(builder.check_words_to_avoid(name_avoid), False)
+    assert_that(builder.check_words_to_avoid(name), True)
 
-
-def test_check_words_requiring_consent(client, jwt, app):
-    assert_that(builder.check_words_requiring_consent(name_consent), True)
-'''
 
 def test_search_conflicts(client, jwt, app):
     assert_that(builder.search_conflicts(list_dist, list_desc), True)
