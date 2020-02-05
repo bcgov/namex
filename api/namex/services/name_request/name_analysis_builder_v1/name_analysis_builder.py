@@ -226,8 +226,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             check_conflicts = self.search_conflicts(distinctive_list, descriptive_list)
 
             if not check_conflicts:
-                '''
+
                 check_words_requiring_consent = self.check_words_requiring_consent()
+                '''
                 check_designation_mismatch = self.check_designation()
         
                 if not check_name_is_well_formed.is_valid:
