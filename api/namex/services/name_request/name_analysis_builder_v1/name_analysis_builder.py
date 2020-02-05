@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
     build_query_descriptive, get_substitution_list, get_synonym_list, get_stop_word_list, get_en_designation_any_list, \
     get_en_designation_end_list, get_fr_designation_end_list, get_prefix_list, clean_name_words, get_classification, \
-    data_frame_to_list
+    data_frame_to_list, get_words_to_avoid
 from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
@@ -39,7 +39,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = ''
+    POSTGRES_PASSWORD = 'BVict31C'
     POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
     POSTGRES_DBNAME_DATA = 'namex-local-dev'
 
@@ -98,11 +98,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_to_avoid(self):
+    def check_words_to_avoid(self, preprocessed_name_list):
         result = ProcedureResult()
         result.is_valid = True
 
-        if not result.is_valid:
+        words_to_avoid_list = get_words_to_avoid()
+        preprocessed_name = ' '.join(map(str, preprocessed_name_list))
+
+        if any(words_to_avoid in preprocessed_name for words_to_avoid in words_to_avoid_list):
             result.result_code = AnalysisResultCodes.WORD_TO_AVOID
 
         return result
@@ -222,15 +225,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list, unclassified_list, \
                                                      preprocessed_name_list)
         if well_formed.is_valid:
-            # check_words_to_avoid = self.check_words_to_avoid()
+            check_words_to_avoid = self.check_words_to_avoid(preprocessed_name_list)
             check_conflicts = self.search_conflicts(distinctive_list, descriptive_list)
 
             if not check_conflicts:
 
                 check_words_requiring_consent = self.check_words_requiring_consent()
+
+                # check_designation_mismatch = self.check_designation()
                 '''
-                check_designation_mismatch = self.check_designation()
-        
                 if not check_name_is_well_formed.is_valid:
                     return check_name_is_well_formed
         
