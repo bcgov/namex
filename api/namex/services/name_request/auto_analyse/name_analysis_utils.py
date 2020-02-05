@@ -44,7 +44,7 @@ def clean_name_words(text, stop_words, designation_any, designation_end, fr_desi
     tokens = regex_transform(words, designation_any, designation_end, prefix_list)
     tokens = tokens.split()
 
-    return [x.upper() for x in tokens if x]
+    return [x.lower() for x in tokens if x]
 
 
 def regex_transform(text, designation_any, designation_end, prefix_list):
@@ -202,10 +202,10 @@ def get_stand_alone_list():
 
 def get_classification(word):
     query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
-    df = pd.read_sql_query(query, cnx_wc)
+    cf = pd.read_sql_query(query, cnx_wc)
 
-    if not df.empty and df.count == 1:
-        return df['word_classification'].str.lower()
+    if not cf.empty and len(cf) == 1:
+        return cf['word_classification'].to_string(index=False).lower()
 
     return 'none'
 

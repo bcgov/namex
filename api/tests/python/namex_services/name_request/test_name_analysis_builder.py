@@ -6,8 +6,9 @@ import pandas as pd
 
 list_dist = ['MOUNTAIN', 'VIEW']
 list_desc = []
-list_none = ['MOUNTAIN','VIEW','FOOD','GROWERS']
+list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 name = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
+user_input = 'MOUNTAIN VIEW FOOD GROWERS '
 
 # Do our service stuff
 service = AutoAnalyseService()
@@ -24,3 +25,7 @@ def test_check_name_is_well_formed(client, jwt, app):
 
 def test_search_conflicts(client, jwt, app):
     assert_that(builder.search_conflicts(list_dist, list_desc), True)
+
+
+def test_do_analysis(client, jwt, app):
+    assert_that(builder.do_analysis(user_input), True)
