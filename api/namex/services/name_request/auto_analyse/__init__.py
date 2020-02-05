@@ -26,6 +26,10 @@ class ProcedureResult:
         self.result_code = kwargs.get('result_code', None)
         self.values = kwargs.get('values', None)
 
+# Field dataframe
+field_synonyms = 'synonyms_text'
+field_special_words = 'rc_words'
+
 
 class AnalysisRequestActions(str, Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)

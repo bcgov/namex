@@ -4,7 +4,29 @@ import collections
 from sqlalchemy import create_engine
 from toolz import unique
 
-from namex.services.name_request.auto_analyse import DataFrameFields
+from namex.services.name_request.auto_analyse import field_synonyms, field_special_words
+
+POSTGRES_ADDRESS = 'localhost'
+POSTGRES_PORT = '5432'
+POSTGRES_USERNAME = 'postgres'
+POSTGRES_PASSWORD = 'BVict31C'
+POSTGRES_DBNAME = 'local-sandbox-dev'
+POSTGRES_DBNAME_WC = 'namex-local-dev'
+
+postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                        password=POSTGRES_PASSWORD,
+                                                                                        ipaddress=POSTGRES_ADDRESS,
+                                                                                        port=POSTGRES_PORT,
+                                                                                        dbname=POSTGRES_DBNAME))
+
+postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                           password=POSTGRES_PASSWORD,
+                                                                                           ipaddress=POSTGRES_ADDRESS,
+                                                                                           port=POSTGRES_PORT,
+                                                                                           dbname=POSTGRES_DBNAME_WC))
+
+cnx = create_engine(postgres_str)
+cnx_wc = create_engine(postgres_wc_str)
 
 
 # TODO: Fix caps and stuff...
@@ -92,11 +114,11 @@ def regex_transform(text, designation_any, designation_end, prefix_list):
     return text
 
 
-def get_list_of_lists(df):
+def get_list_of_lists(df, field):
     subs_list = []
-    subs_list = df['synonyms_text'].str.split(',').tolist()
+    subs_list = df[field].str.split(',').tolist()
     subs_list = [item for sublist in subs_list for item in sublist]
-    subs_list = [x.strip(' ') for x in subs_list]
+    subs_list = [x.strip() for x in subs_list]
 
     return subs_list
 
@@ -115,7 +137,7 @@ def get_substitution_list(word):
             's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
     df = pd.read_sql_query(query, cnx)
     if not df.empty:
-        return get_list_of_lists(df)
+        return get_list_of_lists(df, field_synonyms)
     return None
 
 
@@ -125,43 +147,43 @@ def get_synonym_list(word):
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df)
+        return get_list_of_lists(df, field_synonyms)
     return None
 
 
 def get_stop_word_list():
-    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=^stop)' + "'"
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^stop[_ -]+word[s]?' + "'"
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df)
+        return get_list_of_lists(df, field_synonyms)
     return None
 
 
 def get_prefix_list():
-    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=^prefix)' + "'"
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^prefix(es)?' + "'"
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df)
+        return get_list_of_lists(df, field_synonyms)
     return None
 
 
 def get_en_designation_any_list():
-    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=(english)?[/_ -]?designation[s]?[/_-]+any)' + "'"
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(english[_ -]+)?designation[s]?[_-]any' + "'"
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df)
+        return get_list_of_lists(df, field_synonyms)
     return None
 
 
 def get_en_designation_end_list():
-    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=english[/_ -]+designation[s]?[/_-]+end)' + "'"
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + 'english[_ -]+designation[s]?[_-]+end' + "'"
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df)
+        return get_list_of_lists(df, field_synonyms)
     return None
 
 
@@ -170,7 +192,7 @@ def get_fr_designation_end_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df)
+        return get_list_of_lists(df, field_synonyms)
     return None
 
 
@@ -179,7 +201,28 @@ def get_stand_alone_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df)
+        return get_list_of_lists(df, field_synonyms)
+    return None
+
+
+def get_words_to_avoid():
+    query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = false;'
+    df = pd.read_sql_query(query, cnx_wc)
+
+    if not df.empty:
+        words_to_avoid_list = get_list_of_lists(df, field_special_words)
+        return words_to_avoid_list
+    return None
+
+
+def get_words_requiring_consent():
+    query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = true and rc_consent_required = true'
+
+    df = pd.read_sql_query(query, cnx_wc)
+
+    if not df.empty:
+        return get_list_of_lists(df, field_special_words)
+
     return None
 
 
