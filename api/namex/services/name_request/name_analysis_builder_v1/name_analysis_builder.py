@@ -4,7 +4,9 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
-    build_query_descriptive, get_substitution_list, get_synonym_list
+    build_query_descriptive, get_substitution_list, get_synonym_list, get_stop_word_list, get_en_designation_any_list, \
+    get_en_designation_end_list, get_fr_designation_end_list, get_prefix_list, clean_name_words, get_classification, \
+    data_frame_to_list
 from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
@@ -39,7 +41,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_USERNAME = 'postgres'
     POSTGRES_PASSWORD = ''
     POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
-    POSTGRES_DBNAME_DATA = 'namex-local'
+    POSTGRES_DBNAME_DATA = 'namex-local-dev'
 
     postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                             password=POSTGRES_PASSWORD,
@@ -58,7 +60,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_name_is_well_formed(self, list_desc, list_dist, list_none, name):
 
         result = ProcedureResult()
-        result.is_valid = False
+        result.is_valid = True
 
         # if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
         #        (list_dist + list_desc) == name):
@@ -198,26 +200,54 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-    def do_analysis(self):
-        check_name_is_well_formed = self.check_name_is_well_formed()
-        check_words_to_avoid = self.check_words_to_avoid()
-        check_conflicts = self.search_conflicts()
-        check_words_requiring_consent = self.check_words_requiring_consent()
-        check_designation_mismatch = self.check_designation()
 
-        if not check_name_is_well_formed.is_valid:
-            return check_name_is_well_formed
+    def do_analysis(self, name):
+        stop_words = get_stop_word_list()
+        en_designation_any = get_en_designation_any_list()
+        en_designation_end = get_en_designation_end_list()
+        fr_designation_end = get_fr_designation_end_list()
+        prefixes = get_prefix_list()
+        cf = pd.DataFrame(columns=['word', 'word_classification'])
 
-        if not check_words_to_avoid.is_valid:
-            return check_words_to_avoid
+        preprocessed_name_list = clean_name_words(name, stop_words, en_designation_any, en_designation_end,
+                                                  fr_designation_end, prefixes)
 
-        if not check_conflicts.is_valid:
-            return check_conflicts
+        for word in preprocessed_name_list:
+            classification = get_classification(word)
+            new_row = {'word': word.lower().strip(), 'word_classification': classification.strip()}
+            cf = cf.append(new_row, ignore_index=True)
 
-        if not check_words_requiring_consent.is_valid:
-            return check_words_requiring_consent
+        distinctive_list, descriptive_list, unclassified_list = data_frame_to_list(cf)
 
-        if not check_designation_mismatch.is_valid:
-            return check_designation_mismatch
+        well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list, unclassified_list, \
+                                                     preprocessed_name_list)
+        if well_formed.is_valid:
+            # check_words_to_avoid = self.check_words_to_avoid()
+            check_conflicts = self.search_conflicts(distinctive_list, descriptive_list)
 
-        return ProcedureResult(is_valid=True)
+            if not check_conflicts:
+                '''
+                check_words_requiring_consent = self.check_words_requiring_consent()
+                check_designation_mismatch = self.check_designation()
+        
+                if not check_name_is_well_formed.is_valid:
+                    return check_name_is_well_formed
+        
+                if not check_words_to_avoid.is_valid:
+                    return check_words_to_avoid
+        
+                if not check_conflicts.is_valid:
+                    return check_conflicts
+        
+                if not check_words_requiring_consent.is_valid:
+                    return check_words_requiring_consent
+        
+                if not check_designation_mismatch.is_valid:
+                    return check_designation_mismatch
+                '''
+            else:
+                print("we got conflicts")
+        else:
+            print("Go to examiners")
+
+            return ProcedureResult(is_valid=True)
