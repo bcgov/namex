@@ -227,9 +227,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         distinctive_list, descriptive_list, unclassified_list = data_frame_to_list(cf)
 
-        well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list, unclassified_list, \
+        check_name_is_well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list, unclassified_list, \
                                                      preprocessed_name_list)
-        if well_formed.is_valid:
+        if check_name_is_well_formed.is_valid:
             preprocessed_name = ' '.join(map(str, preprocessed_name_list))
             check_words_to_avoid = self.check_words_to_avoid(preprocessed_name)
             check_conflicts = self.search_conflicts(distinctive_list, descriptive_list)
@@ -239,7 +239,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 check_words_requiring_consent = self.check_words_requiring_consent(preprocessed_name)
 
                 # check_designation_mismatch = self.check_designation()
-                '''
                 if not check_name_is_well_formed.is_valid:
                     return check_name_is_well_formed
         
@@ -252,9 +251,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 if not check_words_requiring_consent.is_valid:
                     return check_words_requiring_consent
         
-                if not check_designation_mismatch.is_valid:
-                    return check_designation_mismatch
-                '''
+                # if not check_designation_mismatch.is_valid:
+                #    return check_designation_mismatch
+
             else:
                 return result
         else:
