@@ -19,6 +19,10 @@ class DataFrameFields(Enum):
     DISTINCTIVE = 'DIST'
     UNCLASSIFIED = 'NONE'
 
+# Field dataframe
+field_synonyms = 'synonyms_text'
+field_special_words = 'rc_words'
+
 
 class ProcedureResult:
     def __init__(self, **kwargs):
