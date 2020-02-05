@@ -370,6 +370,14 @@ def test_get_stand_alone_list(client, jwt, app):
     assert_that(get_stand_alone_list(), stand_alone_list)
 
 
+def test_get_words_to_avoid(client, jwt, app):
+    assert_that(get_words_to_avoid(), words_to_avoid)
+
+
+def test_get_words_requiring_consent(client, jwt, app):
+    assert_that(get_words_requiring_consent(), words_require_consent)
+
+
 def test_get_classification(client, jwt, app):
     assert_that(get_classification(word), 'none')
 
