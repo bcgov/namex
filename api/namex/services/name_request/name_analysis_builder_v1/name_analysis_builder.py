@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
     build_query_descriptive, get_substitution_list, get_synonym_list, get_stop_word_list, get_en_designation_any_list, \
     get_en_designation_end_list, get_fr_designation_end_list, get_prefix_list, clean_name_words, get_classification, \
-    data_frame_to_list, get_words_to_avoid
+    data_frame_to_list, get_words_to_avoid, get_words_requiring_consent
 from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
@@ -98,14 +98,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_to_avoid(self, preprocessed_name_list):
+    def check_words_to_avoid(self, preprocessed_name):
         result = ProcedureResult()
         result.is_valid = True
 
         words_to_avoid_list = get_words_to_avoid()
-        preprocessed_name = ' '.join(map(str, preprocessed_name_list))
 
         if any(words_to_avoid in preprocessed_name for words_to_avoid in words_to_avoid_list):
+            result.is_valid = False
             result.result_code = AnalysisResultCodes.WORD_TO_AVOID
 
         return result
@@ -174,11 +174,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_requiring_consent(self):
+    def check_words_requiring_consent(self, preprocessed_name):
         result = ProcedureResult()
         result.is_valid = True
 
-        if not result.is_valid:
+        words_consent_list= get_words_requiring_consent()
+
+        if any(words_consent in preprocessed_name for words_consent in words_consent_list):
             result.is_valid = False
             result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
 
@@ -205,6 +207,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def do_analysis(self, name):
+        result = ProcedureResult()
+        result.is_valid = False
+
         stop_words = get_stop_word_list()
         en_designation_any = get_en_designation_any_list()
         en_designation_end = get_en_designation_end_list()
@@ -225,12 +230,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list, unclassified_list, \
                                                      preprocessed_name_list)
         if well_formed.is_valid:
-            check_words_to_avoid = self.check_words_to_avoid(preprocessed_name_list)
+            preprocessed_name = ' '.join(map(str, preprocessed_name_list))
+            check_words_to_avoid = self.check_words_to_avoid(preprocessed_name)
             check_conflicts = self.search_conflicts(distinctive_list, descriptive_list)
 
             if not check_conflicts:
 
-                check_words_requiring_consent = self.check_words_requiring_consent()
+                check_words_requiring_consent = self.check_words_requiring_consent(preprocessed_name)
 
                 # check_designation_mismatch = self.check_designation()
                 '''
@@ -250,8 +256,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     return check_designation_mismatch
                 '''
             else:
-                print("we got conflicts")
+                return result
         else:
-            print("Go to examiners")
+            return result
 
             return ProcedureResult(is_valid=True)
