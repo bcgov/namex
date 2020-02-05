@@ -90,16 +90,13 @@ def test_get_analysis_request_response(client, jwt, app):
         'request_type': 'NEW'
     }
 
-    # TODO: Obviously we can't be using strings with spaces but I don't know how to deal with this yet
-    # query = '&'.join("{!s}={}".format(k, v) for (k, v) in test_params.items())
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    assert isinstance(payload.status, str) is True
+    assert isinstance(payload.issues, list) is True
 
 
 # Test each of the response strategies
@@ -122,7 +119,7 @@ def test_new_bc_cr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'CR',
         'request_type': 'NEW'
@@ -144,7 +141,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'UL',
         'request_type': 'NEW'
@@ -160,7 +157,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
         if payload.issues.__len__() > 0:
             print('\n' + 'Issue types:' + '\n')
             for issue in payload.issues:
-                print('\n' + issue.issueType + '\n')
+                print('\n' + issue.issueType.value + '\n')
         assert payload.issues.__len__() == 0
 
 
@@ -170,7 +167,7 @@ def test_new_bc_cp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'CP',
         'request_type': 'NEW'
@@ -192,7 +189,7 @@ def test_new_bc_bc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'BC',
         'request_type': 'NEW'
@@ -214,7 +211,7 @@ def test_new_bc_cc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'CC',
         'request_type': 'NEW'
@@ -236,7 +233,7 @@ def test_new_bc_fr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'FR',
         'request_type': 'NEW'
@@ -258,7 +255,7 @@ def test_new_bc_dba_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'DBA',
         'request_type': 'NEW'
@@ -280,7 +277,7 @@ def test_new_bc_gp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'GP',
         'request_type': 'NEW'
@@ -302,7 +299,7 @@ def test_new_bc_lp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'LP',
         'request_type': 'NEW'
@@ -346,7 +343,7 @@ def test_new_xpro_xcr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'CA',
         'entity_type': 'XCR',
         'request_type': 'NEW'
@@ -390,7 +387,7 @@ def test_new_xpro_xcp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'CA',
         'entity_type': 'XCP',
         'request_type': 'NEW'
@@ -412,7 +409,7 @@ def test_new_xpro_xlc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'CA',
         'entity_type': 'XLC',
         'request_type': 'NEW'
@@ -434,7 +431,7 @@ def test_new_xpro_xlp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'CA',
         'entity_type': 'XLC',
         'request_type': 'NEW'
@@ -456,7 +453,7 @@ def test_new_xpro_xll_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'CA',
         'entity_type': 'XLL',
         'request_type': 'NEW'
@@ -481,7 +478,7 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'FOOD GROWERS LTD.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'FR',
         'request_type': 'NEW'
@@ -514,7 +511,7 @@ def test_add_descriptive_word_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN VIEW LTD.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'FR',
         'request_type': 'NEW'
@@ -547,7 +544,7 @@ def test_too_many_words_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS INTERNATIONAL LTD.',
+        'name': 'BOB\'S CARPENTRY AND HOME RENOVATIONS INC.',
         'location': 'BC',
         'entity_type': 'FR',
         'request_type': 'NEW'
@@ -580,9 +577,9 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN VIEW FOOD PROVINCIAL LTD.',
+        'name': 'BOB\'S BULLSHIT CARPENTRY INC.',
         'location': 'BC',
-        'entity_type': 'FR',
+        'entity_type': 'CR',
         'request_type': 'NEW'
     }
 
@@ -604,9 +601,9 @@ def test_designation_mismatch_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'My Test String',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
-        'entity_type': 'FR',
+        'entity_type': 'CR',
         'request_type': 'NEW'
     }
 
@@ -628,9 +625,9 @@ def test_name_requires_consent_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'VANCOUVER PORT FOOD GROWERS LTD.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
-        'entity_type': 'FR',
+        'entity_type': 'CR',
         'request_type': 'NEW'
     }
 
@@ -652,7 +649,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'UNCLASSIFIED MOUNTAIN FOOD GROWERS LTD.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'FR',
         'request_type': 'NEW'
@@ -676,7 +673,7 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS LTD.',
+        'name': 'BOB\'S CARPENTRY INC.',
         'location': 'BC',
         'entity_type': 'FR',
         'request_type': 'NEW'
