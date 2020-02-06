@@ -125,9 +125,9 @@ class BCProtectedNameEntityTypes(Enum):
 class BCUnprotectedNameEntityTypes(Enum):
     BC_SOLE_PROPRIETORSHIP = 'FR'
     BC_DOING_BUSINESS_AS = 'DBA'
-    BC_COOPERATIVE = 'GP'
-    BC_BC_BENEFIT_COMPANY = 'LP'
-    BC_CC_COMMUNITY_CONTRIBUTION_COMPANY = 'LL'
+    BC_GENERAL_PARTNERSHIP = 'GP'
+    BC_LIMITED_PARTNERSHIP = 'LP'
+    BC_LIMITED_LIABILITY_PARTNERSHIP = 'LL'
 
     @classmethod
     def list(cls):

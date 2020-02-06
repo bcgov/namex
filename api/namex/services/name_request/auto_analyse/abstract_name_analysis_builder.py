@@ -14,6 +14,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     _list_name_words = []
     _list_dist_words = []
     _list_desc_words = []
+    _list_none_words = []
 
     @director.setter
     def director(self, director):
@@ -40,6 +41,12 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
 
     def get_list_desc(self):
         return self._list_desc_words
+
+    def get_list_none(self):
+        return self._list_none_words
+
+    def set_list_none(self, list_words):
+        self._list_none_words = list_words
 
     def set_dicts(self, **kwargs):
         self._synonyms = kwargs.get('synonyms')
