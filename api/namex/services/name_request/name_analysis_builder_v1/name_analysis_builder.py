@@ -201,8 +201,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def do_analysis(self):
         builder = self
 
-        check_name_is_well_formed = builder.check_name_is_well_formed(builder.get_list_dist(), builder.get_list_desc(),
-                                                                      builder.get_list_name())
+        check_name_is_well_formed = builder.check_name_is_well_formed(builder.get_list_dist(), builder.get_list_desc(), builder.get_list_none(), builder.get_list_name())
         check_words_to_avoid = builder.check_words_to_avoid()
         check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
         check_words_requiring_consent = builder.check_words_requiring_consent()

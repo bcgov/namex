@@ -52,7 +52,7 @@ def validate_name_request(location, entity_type, request_action):
         is_unprotected = False
 
         # Determine what request actions are valid
-        valid_request_actions = None
+        valid_request_actions = ()
 
         if entity_type in BCProtectedNameEntityTypes.list():
             is_protected = True
@@ -114,7 +114,7 @@ class NameAnalysis(Resource):
           XCR = 'XPRO_CORPORATION'
           XUL = 'XPRO_UNLIMITED_LIABILITY_COMPANY'
           XCP = 'XPRO_COOPERATIVE'
-          LLC = 'XPRO_LIMITED_LIABILITY_COMPANY'
+          XLC = 'XPRO_LIMITED_LIABILITY_COMPANY'
           XLP = 'XPRO_LIMITED_PARTNERSHIP'
           XLL = 'XPRO_LIMITED_LIABILITY_PARTNERSHIP'
 
