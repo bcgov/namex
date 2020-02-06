@@ -617,6 +617,12 @@ def test_designation_mismatch_request_response(client, jwt, app):
         assert_issues_count_is_gt(0, payload.issues)
         assert_has_issue_type(AnalysisResultCodes.DESIGNATION_MISMATCH, payload.issues)
 
+    test_params = {
+        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'location': 'CA',
+        'entity_type': 'XLC',
+        'request_type': 'NEW'
+    }
 
 # @pytest.mark.xfail(raises=ValueError)
 def test_name_requires_consent_request_response(client, jwt, app):
@@ -641,6 +647,7 @@ def test_name_requires_consent_request_response(client, jwt, app):
         assert_issues_count_is_gt(0, payload.issues)
         assert_has_issue_type(AnalysisResultCodes.NAME_REQUIRES_CONSENT, payload.issues)
 
+# IN THIS SECTION TEST VARIOUS ERROR RESPONSES
 
 # @pytest.mark.xfail(raises=ValueError)
 def test_contains_unclassifiable_word_request_response(client, jwt, app):
