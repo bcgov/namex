@@ -23,6 +23,14 @@ class ValidLocations(Enum):
     # CA = 'CA',
     INTL = 'INTL'
 
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
+
 
 class AnalysisRequestActions(Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)
@@ -33,6 +41,14 @@ class AnalysisRequestActions(Enum):
     CNV = 'CNV'  # Convert to another structure
     REH = 'REH'  # Restore from historical business
     REN = 'REN'  # Restore by starting a new business
+
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
 
 
 class AnalysisResultCodes(Enum):
@@ -50,8 +66,14 @@ class AnalysisResultCodes(Enum):
     WORD_TO_AVOID = 'word_to_avoid'
     DESIGNATION_MISMATCH = 'designation_mismatch'
     NAME_REQUIRES_CONSENT = 'consent_required'
-    CONTAINS_UNCLASSIFIABLE_WORD = 'unclassified_word'
-    CORPORATE_CONFLICT = 'corp_conflict'
+
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
 
 
 # Not a 'todo', just a note for later - these probably correlate to some JSON schemas in the LEAR project
@@ -63,6 +85,14 @@ class BCProtectedNameEntityTypes(Enum):
     BC_BENEFIT_COMPANY = 'BC'
     BC_COMMUNITY_CONTRIBUTION_COMPANY = 'CC'
 
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
+
 
 class BCUnprotectedNameEntityTypes(Enum):
     BC_SOLE_PROPRIETORSHIP = 'FR'
@@ -70,6 +100,14 @@ class BCUnprotectedNameEntityTypes(Enum):
     BC_COOPERATIVE = 'GP'
     BC_BC_BENEFIT_COMPANY = 'LP'
     BC_CC_COMMUNITY_CONTRIBUTION_COMPANY = 'LL'
+
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
 
 
 class XproUnprotectedNameEntityTypes(Enum):
@@ -79,4 +117,12 @@ class XproUnprotectedNameEntityTypes(Enum):
     XPRO_LIMITED_LIABILITY_COMPANY = 'XLC'
     XPRO_LIMITED_PARTNERSHIP = 'XLP'
     XPRO_LIMITED_LIABILITY_PARTNERSHIP = 'XLL'
+
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
 
