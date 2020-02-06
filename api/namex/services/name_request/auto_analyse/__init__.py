@@ -26,6 +26,14 @@ class ProcedureResult:
         self.result_code = kwargs.get('result_code', None)
         self.values = kwargs.get('values', None)
 
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
+
 
 class AnalysisRequestActions(str, Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)
@@ -36,6 +44,14 @@ class AnalysisRequestActions(str, Enum):
     CNV = 'CNV'  # Convert to another structure
     REH = 'REH'  # Restore from historical business
     REN = 'REN'  # Restore by starting a new business
+
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
 
 
 class AnalysisResponseCodes(str, Enum):

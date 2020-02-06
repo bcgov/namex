@@ -167,8 +167,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
 
+        # Return any combination of these checks
         if not check_conflicts.is_valid:
-            return check_conflicts
+            results.append(check_conflicts)
 
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
@@ -177,7 +178,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         )  # This is incorrect
 
         if not check_words_requiring_consent.is_valid:
-            return check_words_requiring_consent
+            results.append(check_words_requiring_consent)
 
         # Set designations and run our check
         self._set_designations()
@@ -190,11 +191,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         )
 
         if not check_designation_mismatch.is_valid:
-            return check_designation_mismatch
-
-        return ProcedureResult(is_valid=True)
-
-
+            results.append(check_designation_mismatch)
 
         check_designation_misplaced = builder.check_designation_misplaced(
             self.get_original_name_tokenized(),
@@ -206,3 +203,4 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_designation_misplaced.is_valid:
             results.append(check_designation_misplaced)
 
+        return results

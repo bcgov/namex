@@ -9,7 +9,7 @@ import jsonpickle
 from namex.models import User
 from namex.services.name_request.auto_analyse import AnalysisRequestActions, AnalysisResultCodes
 
-from tests.python import integration_oracle_namesdb
+# from tests.python import integration_oracle_namesdb
 
 token_header = {
     "alg": "RS256",
