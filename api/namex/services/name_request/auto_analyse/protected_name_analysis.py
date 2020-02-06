@@ -71,8 +71,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             all_conflicts=self._all_conflicts
         )
 
-    # This is the main execution call for the class
     '''
+    This is the main execution call for the class
     @:return ProcedureResult[]
     '''
     def execute_analysis(self):
@@ -88,10 +88,15 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         if not check_name_is_well_formed.is_valid:
             results.append(check_name_is_well_formed)
+            return results
+            #  Do not continue
 
         if not check_words_to_avoid.is_valid:
             results.append(check_words_to_avoid)
+            return results
+            #  Do not continue
 
+        # Return any combination of these checks
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 

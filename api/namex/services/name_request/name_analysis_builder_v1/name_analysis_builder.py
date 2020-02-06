@@ -177,25 +177,37 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
     def do_analysis(self):
-        check_name_is_well_formed = self.check_name_is_well_formed()
-        check_words_to_avoid = self.check_words_to_avoid()
-        check_conflicts = self.search_conflicts()
-        check_words_requiring_consent = self.check_words_requiring_consent()
-        check_designation_mismatch = self.check_designation()
+        builder = self
+
+        check_name_is_well_formed = builder.check_name_is_well_formed(builder.get_list_dist(), builder.get_list_desc(),
+                                                                      builder.get_list_name())
+        check_words_to_avoid = builder.check_words_to_avoid()
+        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
+        check_words_requiring_consent = builder.check_words_requiring_consent()
+        check_designation_mismatch = builder.check_designation()
+
+        results = []
 
         if not check_name_is_well_formed.is_valid:
-            return check_name_is_well_formed
+            results.append(check_name_is_well_formed)
+            return results
+            #  Do not continue
 
         if not check_words_to_avoid.is_valid:
-            return check_words_to_avoid
+            results.append(check_words_to_avoid)
+            return results
+            #  Do not continue
 
+        # Return any combination of these checks
         if not check_conflicts.is_valid:
-            return check_conflicts
+            results.append(check_conflicts)
 
         if not check_words_requiring_consent.is_valid:
-            return check_words_requiring_consent
+            results.append(check_words_requiring_consent)
 
         if not check_designation_mismatch.is_valid:
-            return check_designation_mismatch
+            results.append(check_designation_mismatch)
 
-        return ProcedureResult(is_valid=True)
+        results.append(ProcedureResult(is_valid=True))
+
+        return results
