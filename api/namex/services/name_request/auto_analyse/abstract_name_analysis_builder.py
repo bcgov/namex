@@ -2,6 +2,7 @@ class ProcedureResult:
     def __init__(self, **kwargs):
         self.is_valid = kwargs.get('is_valid', False)
         self.result_code = kwargs.get('result_code', None)
+        self.values = kwargs.get('values', [])
 
 
 class AbstractNameAnalysisBuilder:

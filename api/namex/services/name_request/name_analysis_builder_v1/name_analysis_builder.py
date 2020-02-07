@@ -75,6 +75,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if len(list_none) > 0:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+            result.value = list_none
         elif len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
@@ -84,12 +85,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
-        elif list_desc == list_dist:
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-        elif list_dist + list_desc != name:
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
 
         return result
 
@@ -103,10 +98,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result.is_valid = True
 
         words_to_avoid_list = get_words_to_avoid()
+        words_to_avoid_list_response = []
 
-        if any(words_to_avoid in preprocessed_name for words_to_avoid in words_to_avoid_list):
+        for words_to_avoid in words_to_avoid_list:
+            if words_to_avoid in preprocessed_name:
+                words_to_avoid_list_response.append(words_to_avoid)
+
+        if words_to_avoid_list_response:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.WORD_TO_AVOID
+            result.values = words_to_avoid_list_response
 
         return result
 
@@ -154,18 +155,24 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 query = build_query_descriptive(desc_synonym_list, query)
                 matches = pd.read_sql_query(query, cnx)
 
-                if matches.values.tolist():
+                matches_response = matches.values.tolist()
+                if matches_response:
                     result.is_valid = False
                     result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+                    result.values = matches_response
                 else:
                     result.is_valid = True
                     result.result_code = AnalysisResultCodes.VALID_NAME
+                    result.values = []
             else:
                 result.is_valid = False
                 result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+                result.values = []
+
         else:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+            result.values = []
 
         return result
 
@@ -178,7 +185,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        words_consent_list= get_words_requiring_consent()
+        words_consent_list = get_words_requiring_consent()
 
         if any(words_consent in preprocessed_name for words_consent in words_consent_list):
             result.is_valid = False
@@ -191,9 +198,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_designation(self):
+    def check_designation(self, name, en_designation_any, en_designation_end):
         result = ProcedureResult()
         result.is_valid = True
+
+        all_designations = en_designation_any + en_designation_end
+
+        if any(x in str for x in all_designations):
+            print("found")
 
         if not result.is_valid:
             result.is_valid = False
@@ -227,8 +239,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         distinctive_list, descriptive_list, unclassified_list = data_frame_to_list(cf)
 
-        check_name_is_well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list, unclassified_list, \
-                                                     preprocessed_name_list)
+        check_name_is_well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list,
+                                                                   unclassified_list, \
+                                                                   preprocessed_name_list)
         if check_name_is_well_formed.is_valid:
             preprocessed_name = ' '.join(map(str, preprocessed_name_list))
             check_words_to_avoid = self.check_words_to_avoid(preprocessed_name)
@@ -241,16 +254,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 # check_designation_mismatch = self.check_designation()
                 if not check_name_is_well_formed.is_valid:
                     return check_name_is_well_formed
-        
+
                 if not check_words_to_avoid.is_valid:
                     return check_words_to_avoid
-        
+
                 if not check_conflicts.is_valid:
                     return check_conflicts
-        
+
                 if not check_words_requiring_consent.is_valid:
                     return check_words_requiring_consent
-        
+
                 # if not check_designation_mismatch.is_valid:
                 #    return check_designation_mismatch
 
