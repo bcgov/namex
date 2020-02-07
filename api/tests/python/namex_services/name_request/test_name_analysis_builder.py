@@ -25,7 +25,7 @@ builder = NameAnalysisBuilder(service)
 service.use_builder(builder)
 service.set_name(name)
 
-'''
+
 def test_check_name_is_well_formed(client, jwt, app):
     assert_that(builder.check_name_is_well_formed(list_desc, list_dist, list_none, name), False)
 
@@ -41,9 +41,11 @@ def test_check_words_requiring_consent(client, jwt, app):
 def test_search_conflicts(client, jwt, app):
     assert_that(builder.search_conflicts(list_dist, list_desc), True)
 
-'''
+
 def test_check_designation(client, jwt, app):
-    assert_that(builder.check_designation(user_input, entity_type_end_desig_user, entity_type_any_desig_user),[[],['UL']])
+    assert_that(builder.check_designation(user_input, entity_type_end_desig_user, entity_type_any_desig_user),
+                [[], ['UL']])
+
 
 #def test_check_designation(client, jwt, app):
 #    assert_that(builder.check_designation(user_input, entity_type_user),
