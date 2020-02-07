@@ -5,7 +5,7 @@ from namex.services.name_request.name_analysis_builder_v2.name_analysis_builder 
 import pandas as pd
 
 list_dist = ['MOUNTAIN', 'VIEW']
-list_desc = []
+list_desc = ['FOOD', 'GROWERS']
 list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 name = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 preprocessed_name_consent = 'MOUNTAIN SMILE FOOD GROWERS'
