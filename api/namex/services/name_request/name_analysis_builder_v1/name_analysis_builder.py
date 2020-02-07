@@ -64,7 +64,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_name_is_well_formed(self, list_desc, list_dist, list_none, name):
-
         result = ProcedureResult()
         result.is_valid = True
 

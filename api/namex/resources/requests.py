@@ -296,6 +296,7 @@ class Requests(Resource):
                }
 
         return jsonify(rep), 200
+        return jsonify(rep), 200
 
     # @api.errorhandler(AuthError)
     # def handle_auth_error(ex):

@@ -1,4 +1,4 @@
-class SolrApiClient:
+class SolrApi:
     @staticmethod
     def get_in_province_conflicts():
         return []

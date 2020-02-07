@@ -1,9 +1,9 @@
 from namex.services.name_request.auto_analyse.name_analysis_utils import clean_name_words
 
 # Import mock API clients
-from ..mock_api_clients.synonyms_api_client import SynonymsApiClient
-from ..mock_api_clients.solr_api_client import SolrApiClient
-from ..mock_api_clients.word_classification_api_client import WordClassificationApiClient
+from ..datasources.synonyms_api import SynonymsApi
+from ..datasources.solr_api import SolrApi
+from ..datasources.word_classification_api import WordClassificationApi
 
 
 '''
@@ -29,9 +29,9 @@ class NameAnalysisDirector:
     _all_conflicts = []
 
     def __init__(self):
-        self._word_classification_api = WordClassificationApiClient()
-        self._synonyms_api = SynonymsApiClient()
-        self._solr_api = SolrApiClient()
+        self._word_classification_api = WordClassificationApi()
+        self._synonyms_api = SynonymsApi()
+        self._solr_api = SolrApi()
 
     def use_builder(self, builder):
         self._builder = builder if builder else None
@@ -83,9 +83,7 @@ class NameAnalysisDirector:
 
     # This is the main execution call for the class
     def execute_analysis(self):
-        # TODO: Turn preprocess_name back on?
-        # self.preprocess_name()
-        return self._builder.execute_analysis()
+        raise NotImplementedError('execute_analysis must be implemented in extending classes')
 
     # Get the company's designation if it's in the name
     def get_name_designation(self):

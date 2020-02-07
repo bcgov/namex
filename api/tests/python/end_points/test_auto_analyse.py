@@ -119,7 +119,7 @@ def test_new_bc_cr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY INC.',  # OR [INCORPORATED, LTD]
+        'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR [INCORPORATED, LTD]
         'location': 'BC',
         'entity_type': 'CR',
         'request_type': 'NEW'
@@ -141,7 +141,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY ULC.',  # OR [UNLIMITED LIABILITY COMPANY]
+        'name': 'MOUNTAIN VIEW FOOD GROWERS ULC.',  # OR [UNLIMITED LIABILITY COMPANY]
         'location': 'BC',
         'entity_type': 'UL',
         'request_type': 'NEW'
@@ -167,7 +167,7 @@ def test_new_bc_cp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY COOP',  # []
+        'name': 'MOUNTAIN VIEW FOOD GROWERS COOP',  # []
         'location': 'BC',
         'entity_type': 'CP',
         'request_type': 'NEW'
@@ -189,7 +189,7 @@ def test_new_bc_bc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY INC.',  # OR [INCORPORATED, LTD]
+        'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR [INCORPORATED, LTD]
         'location': 'BC',
         'entity_type': 'BC',
         'request_type': 'NEW'
@@ -211,7 +211,7 @@ def test_new_bc_cc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY INC.',  # OR [INCORPORATED, LTD] ALSO REQ *CCC* INC OR COMMUNITY CONTRIBUTION COMPANY
+        'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR [INCORPORATED, LTD] ALSO REQ *CCC* INC OR COMMUNITY CONTRIBUTION COMPANY
         'location': 'BC',
         'entity_type': 'CC',
         'request_type': 'NEW'
@@ -233,7 +233,7 @@ def test_new_bc_fr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS',
         'location': 'BC',
         'entity_type': 'FR',
         'request_type': 'NEW'
@@ -255,7 +255,7 @@ def test_new_bc_dba_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS',
         'location': 'BC',
         'entity_type': 'DBA',
         'request_type': 'NEW'
@@ -277,7 +277,7 @@ def test_new_bc_gp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS',
         'location': 'BC',
         'entity_type': 'GP',
         'request_type': 'NEW'
@@ -299,7 +299,7 @@ def test_new_bc_lp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY LP.',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS LP.',
         'location': 'BC',
         'entity_type': 'LP',
         'request_type': 'NEW'
@@ -321,7 +321,7 @@ def test_new_bc_ll_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY LLP.',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS LLP.',
         'location': 'BC',
         'entity_type': 'LL',
         'request_type': 'NEW'
@@ -343,7 +343,7 @@ def test_new_xpro_xcr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY INC.',  # OR LTD.
+        'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR LTD.
         'location': 'CA',
         'entity_type': 'XCR',
         'request_type': 'NEW'
@@ -365,7 +365,7 @@ def test_new_xpro_xul_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY ULC.',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS ULC.',
         'location': 'CA',
         'entity_type': 'XUL',
         'request_type': 'NEW'
@@ -387,7 +387,7 @@ def test_new_xpro_xcp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY COOP',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS COOP',
         'location': 'CA',
         'entity_type': 'XCP',
         'request_type': 'NEW'
@@ -409,7 +409,7 @@ def test_new_xpro_xlc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY LLC.',  # CHECK FOR DESIGNATION
+        'name': 'MOUNTAIN VIEW FOOD GROWERS LLC.',  # CHECK FOR DESIGNATION
         'location': 'CA',
         'entity_type': 'XLC',
         'request_type': 'NEW'
@@ -431,7 +431,7 @@ def test_new_xpro_xlp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY LP.',  # CHECK FOR DESIGNATION
+        'name': 'MOUNTAIN VIEW FOOD GROWERS LP.',  # CHECK FOR DESIGNATION
         'location': 'CA',
         'entity_type': 'XLC',
         'request_type': 'NEW'
@@ -453,7 +453,7 @@ def test_new_xpro_xll_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'BOB\'S CARPENTRY LLP.',
+        'name': 'MOUNTAIN VIEW FOOD GROWERS LLP.',
         'location': 'CA',
         'entity_type': 'XLL',
         'request_type': 'NEW'
