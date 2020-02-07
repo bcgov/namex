@@ -1,4 +1,4 @@
-class SynonymsApiClient:
+class SynonymsApi:
     @staticmethod
     def get_synonyms():
         return []

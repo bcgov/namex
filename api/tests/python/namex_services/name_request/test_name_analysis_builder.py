@@ -6,7 +6,7 @@ import pandas as pd
 
 list_dist = ['MOUNTAIN', 'VIEW']
 list_desc = []
-list_none = ['MOUNTAIN','VIEW','FOOD','GROWERS']
+list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 name = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 
 # Do our service stuff
