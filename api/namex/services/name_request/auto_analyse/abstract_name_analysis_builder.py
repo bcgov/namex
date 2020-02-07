@@ -1,3 +1,6 @@
+from .name_analysis_utils import clean_name_words
+
+
 class ProcedureResult:
     def __init__(self, **kwargs):
         self.is_valid = kwargs.get('is_valid', False)
@@ -69,6 +72,28 @@ class AbstractNameAnalysisBuilder:
         # Store a reference to the director, we will need to access methods on the director instance to do things
         # like updating the classifications table
         self._director = director
+
+    def preprocess_name(self):
+        if not self.get_name():
+            return  # TODO: Should we throw an error or something?
+
+        words = self.get_name().lower()
+
+        words = ' '.join([word for word in words.split(" ") if word not in self._stop_words])
+        # TODO: clean_name_words mostly applies regex substitutions...
+        #  but are we moving the regex out of the app and into the database?
+        tokens = clean_name_words(words)
+
+        previous = tokens
+        for i in range(len(tokens)):
+            tokens = clean_name_words(tokens, self._designated_any_words, self._designated_end_words)
+            if previous == tokens:
+                break
+            else:
+                previous = tokens
+
+        tokens = tokens.split()
+        return [x.upper() for x in tokens if x]
 
     '''
     This method is NOT abstract and should NEVER be overridden
