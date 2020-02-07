@@ -361,23 +361,20 @@ def test_get_en_designation_any_list(client, jwt, app):
     assert_that(get_en_designation_any_list(), en_designation_any_list)
 
 
-def test_get_en_designation_end_list(client, jwt, app):
-    assert_that(get_en_designation_end_list(), en_designation_end_list)
+def test_get_en_designation_end_all_list(client, jwt, app):
+    assert_that(get_en_designation_end_all_list(), en_designation_end_list)
 
 
 def test_get_fr_designation_end_list(client, jwt, app):
     assert_that(get_fr_designation_end_list(), fr_designation_end_list)
-'''
 
 
 def test_get_designations_in_name(client, jwt, app):
-    assert_that(get_designations_in_name(name), designation_name_list)
+    assert_that(get_designations_in_name(user_input), designation_name_list)
 
 
-'''
 def test_get_stand_alone_list(client, jwt, app):
     assert_that(get_stand_alone_list(), stand_alone_list)
-'''
 
 
 def test_get_words_to_avoid(client, jwt, app):
