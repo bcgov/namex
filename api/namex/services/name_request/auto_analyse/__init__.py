@@ -15,6 +15,9 @@ stop_w = 'Stop Words'
 # Limit number of words to analyse
 MAX_LIMIT = 4
 
+field_synonyms = 'synonyms_text'
+field_special_words = 'rc_words'
+
 
 # TODO: Confirm that this is correct!
 class ValidLocations(Enum):
