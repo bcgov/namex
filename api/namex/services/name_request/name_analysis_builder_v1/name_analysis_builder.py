@@ -1,12 +1,18 @@
 import itertools
-
+import re
 import pandas as pd
 from sqlalchemy import create_engine
 
 from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
-    build_query_descriptive, get_substitution_list, get_synonym_list, get_stop_word_list, get_en_designation_any_list, \
-    get_en_designation_end_list, get_fr_designation_end_list, get_prefix_list, clean_name_words, get_classification, \
-    data_frame_to_list, get_words_to_avoid, get_words_requiring_consent
+    build_query_descriptive, get_substitution_list, get_synonym_list, get_stop_word_list, get_fr_designation_end_list, \
+    get_prefix_list, clean_name_words, get_classification, \
+    data_frame_to_list, get_words_to_avoid, get_words_requiring_consent, get_designations_in_name, \
+    get_en_LL_entity_type_end_designation, get_en_RLC_entity_type_end_designation, \
+    get_en_CR_entity_type_end_designation, get_en_BC_entity_type_end_designation, get_en_UL_entity_type_end_designation, \
+    get_en_CC_entity_type_end_designation, get_en_CC_entity_type_any_designation, \
+    get_en_XCP_entity_type_any_designation, get_en_CP_entity_type_any_designation, get_entity_type_by_value, \
+    get_entity_type_end_designation, get_entity_type_any_designation, get_en_designation_end_all_list, \
+    get_en_designation_any_all_list
 from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
@@ -198,18 +204,40 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_designation(self, name, en_designation_any, en_designation_end):
+    def check_designation(self, name, entity_type_end_desig_user, entity_type_any_desig_user):
         result = ProcedureResult()
         result.is_valid = True
 
-        all_designations = en_designation_any + en_designation_end
+        entity_end_designation_dict = {'RLC': get_en_RLC_entity_type_end_designation(),
+                                       'LL': get_en_LL_entity_type_end_designation(),
+                                       'CC': get_en_CC_entity_type_end_designation(),
+                                       'UL': get_en_UL_entity_type_end_designation(),
+                                       'BC': get_en_BC_entity_type_end_designation(),
+                                       'CR': get_en_CR_entity_type_end_designation()}
 
-        if any(x in str for x in all_designations):
-            print("found")
+        entity_any_designation_dict = {'CP': get_en_CP_entity_type_any_designation(),
+                                       'XCP': get_en_XCP_entity_type_any_designation(),
+                                       'CC': get_en_CC_entity_type_any_designation()}
 
-        if not result.is_valid:
+        all_designation_any_end_list = get_designations_in_name(name)
+
+        entity_type_end_designation = get_entity_type_end_designation(entity_end_designation_dict,
+                                                                      all_designation_any_end_list)
+        entity_type_any_designation = get_entity_type_any_designation(entity_any_designation_dict,
+                                                                      all_designation_any_end_list)
+        entity_type_end_designation = [item for sublist in entity_type_end_designation for item in sublist]
+        entity_type_any_designation = [item for sublist in entity_type_any_designation for item in sublist]
+
+        mismatch_entity_end_designation = list(set([entity_type_end_desig_user]) - set(entity_type_end_designation))
+        mismatch_entity_any_designation = list(set([entity_type_any_desig_user]) - set(entity_type_any_designation))
+
+        if mismatch_entity_any_designation or mismatch_entity_end_designation:
+            all_mismatch = list()
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
+            all_mismatch.append(mismatch_entity_any_designation)
+            all_mismatch.append(mismatch_entity_end_designation)
+            result.values = all_mismatch
 
         return result
 
@@ -223,8 +251,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result.is_valid = False
 
         stop_words = get_stop_word_list()
-        en_designation_any = get_en_designation_any_list()
-        en_designation_end = get_en_designation_end_list()
+        en_designation_any = get_en_designation_any_all_list()
+        en_designation_end = get_en_designation_end_all_list()
         fr_designation_end = get_fr_designation_end_list()
         prefixes = get_prefix_list()
         cf = pd.DataFrame(columns=['word', 'word_classification'])
