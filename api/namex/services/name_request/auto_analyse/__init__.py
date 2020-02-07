@@ -30,6 +30,9 @@ class ProcedureResult:
 field_synonyms = 'synonyms_text'
 field_special_words = 'rc_words'
 
+field_synonyms = 'synonyms_text'
+field_special_words = 'rc_words'
+
 
 class AnalysisRequestActions(str, Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)
