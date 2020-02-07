@@ -1,8 +1,9 @@
 from namex.models import Synonym
 
-from .mixins.get_synonyms_lists import GetSynonymsListsMixin
-from .mixins.get_designations_lists import GetDesignationsListsMixin
-from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
+# Import mock API clients
+from ..datasources.synonyms_api import SynonymsApi
+from ..datasources.solr_api import SolrApi
+from ..datasources.word_classification_api import WordClassificationApi
 
 from . import AnalysisIssueCodes
 
@@ -135,13 +136,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_as_submitted_tokenized
 
     def __init__(self):
-        self.synonym_service = SynonymService()
-        self.word_classification_service = WordClassificationService()
-        self.word_condition_service = VirtualWordConditionService()
-        self.name_processing_service = NameProcessingService()
-
-        self.builder = None
-        self.token_classifier = None
+        self._word_classification_api = WordClassificationApi()
+        self._synonyms_api = SynonymsApi()
+        self._solr_api = SolrApi()
 
         self.entity_type = None
 
@@ -219,9 +216,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     @:return ProcedureResult[]
     '''
     def execute_analysis(self):
-        # TODO: Turn preprocess_name back on
-        # self.preprocess_name()
-        return self._builder.execute_analysis()
+        raise NotImplementedError('execute_analysis must be implemented in extending classes')
 
             list_name = self.name_tokens
             list_dist, list_desc, list_none = self.word_classification_tokens
