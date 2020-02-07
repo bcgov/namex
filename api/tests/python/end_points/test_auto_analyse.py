@@ -7,8 +7,9 @@ from urllib.parse import quote_plus
 import jsonpickle
 
 from namex.models import User
+from namex.services.name_request.auto_analyse import AnalysisRequestActions, AnalysisResultCodes
 
-from tests.python import integration_oracle_namesdb
+# from tests.python import integration_oracle_namesdb
 
 token_header = {
     "alg": "RS256",
@@ -62,6 +63,19 @@ def assert_issues_count_is_gt(count, issues):
         print('- ' + issue.issueType.value + '\n')
     assert issues.__len__() > count
 
+@pytest.mark.skip
+def assert_issue_type_is_one_of(types, issue):
+    assert issue.issueType in types
+
+
+@pytest.mark.skip
+def assert_has_issue_type(issue_type, issues):
+    has_issue = False
+    for issue in issues:
+        has_issue = True if issue.issueType == issue_type and issue.issueType.value == issue_type.value else False
+
+    assert has_issue is True
+
 
 # @pytest.mark.xfail(raises=ValueError)
 def test_get_analysis_request_response(client, jwt, app):
@@ -72,20 +86,17 @@ def test_get_analysis_request_response(client, jwt, app):
     test_params = {
         'name': 'MOUNTAIN VIEW FOOD GROWERS LTD.',
         'location': 'BC',
-        'entity_type': 'FR',
+        'entity_type': 'CR',
         'request_type': 'NEW'
     }
 
-    # TODO: Obviously we can't be using strings with spaces but I don't know how to deal with this yet
-    # query = '&'.join("{!s}={}".format(k, v) for (k, v) in test_params.items())
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    assert isinstance(payload.status, str) is True
+    assert isinstance(payload.issues, list) is True
 
 
 # Test each of the response strategies
@@ -108,7 +119,7 @@ def test_new_bc_cr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',  # OR [INCORPORATED, LTD]
         'location': 'BC',
         'entity_type': 'CR',
         'request_type': 'NEW'
@@ -130,7 +141,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY ULC.',  # OR [UNLIMITED LIABILITY COMPANY]
         'location': 'BC',
         'entity_type': 'UL',
         'request_type': 'NEW'
@@ -146,7 +157,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
         if payload.issues.__len__() > 0:
             print('\n' + 'Issue types:' + '\n')
             for issue in payload.issues:
-                print('\n' + issue.issueType + '\n')
+                print('\n' + issue.issueType.value + '\n')
         assert payload.issues.__len__() == 0
 
 
@@ -156,7 +167,7 @@ def test_new_bc_cp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY COOP',  # []
         'location': 'BC',
         'entity_type': 'CP',
         'request_type': 'NEW'
@@ -178,7 +189,7 @@ def test_new_bc_bc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',  # OR [INCORPORATED, LTD]
         'location': 'BC',
         'entity_type': 'BC',
         'request_type': 'NEW'
@@ -200,7 +211,7 @@ def test_new_bc_cc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',  # OR [INCORPORATED, LTD] ALSO REQ *CCC* INC OR COMMUNITY CONTRIBUTION COMPANY
         'location': 'BC',
         'entity_type': 'CC',
         'request_type': 'NEW'
@@ -222,7 +233,7 @@ def test_new_bc_fr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY',
         'location': 'BC',
         'entity_type': 'FR',
         'request_type': 'NEW'
@@ -244,7 +255,7 @@ def test_new_bc_dba_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY',
         'location': 'BC',
         'entity_type': 'DBA',
         'request_type': 'NEW'
@@ -266,7 +277,7 @@ def test_new_bc_gp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY',
         'location': 'BC',
         'entity_type': 'GP',
         'request_type': 'NEW'
@@ -288,7 +299,7 @@ def test_new_bc_lp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY LP.',
         'location': 'BC',
         'entity_type': 'LP',
         'request_type': 'NEW'
@@ -310,7 +321,7 @@ def test_new_bc_ll_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY LLP.',
         'location': 'BC',
         'entity_type': 'LL',
         'request_type': 'NEW'
@@ -332,7 +343,7 @@ def test_new_xpro_xcr_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY INC.',  # OR LTD.
         'location': 'CA',
         'entity_type': 'XCR',
         'request_type': 'NEW'
@@ -354,7 +365,7 @@ def test_new_xpro_xul_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY ULC.',
         'location': 'CA',
         'entity_type': 'XUL',
         'request_type': 'NEW'
@@ -376,7 +387,7 @@ def test_new_xpro_xcp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY COOP',
         'location': 'CA',
         'entity_type': 'XCP',
         'request_type': 'NEW'
@@ -398,7 +409,7 @@ def test_new_xpro_xlc_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY LLC.',  # CHECK FOR DESIGNATION
         'location': 'CA',
         'entity_type': 'XLC',
         'request_type': 'NEW'
@@ -420,7 +431,7 @@ def test_new_xpro_xlp_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY LP.',  # CHECK FOR DESIGNATION
         'location': 'CA',
         'entity_type': 'XLC',
         'request_type': 'NEW'
@@ -442,7 +453,7 @@ def test_new_xpro_xll_valid_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN NEW FOOD GROWERS INC.',
+        'name': 'BOB\'S CARPENTRY LLP.',
         'location': 'CA',
         'entity_type': 'XLL',
         'request_type': 'NEW'
@@ -458,187 +469,3 @@ def test_new_xpro_xll_valid_response(client, jwt, app):
         assert_issues_count_is(0, payload.issues)
 
 # IN THIS SECTION TEST VARIOUS ERROR RESPONSES
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_add_distinctive_word_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'FOOD GROWERS LTD.',
-        'location': 'BC',
-        'entity_type': 'FR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_add_descriptive_word_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW LTD.',
-        'location': 'BC',
-        'entity_type': 'FR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_contains_words_to_avoid_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD PROVINCIAL LTD.',
-        'location': 'BC',
-        'entity_type': 'FR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_designation_mismatch_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'My Test String',
-        'location': 'BC',
-        'entity_type': 'FR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_too_many_words_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS INTERNATIONAL LTD.',
-        'location': 'BC',
-        'entity_type': 'FR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_name_requires_consent_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'VANCOUVER PORT FOOD GROWERS LTD.',
-        'location': 'BC',
-        'entity_type': 'FR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_contains_unclassifiable_word_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'UNCLASSIFIED MOUNTAIN FOOD GROWERS LTD.',
-        'location': 'BC',
-        'entity_type': 'FR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS LTD.',
-        'location': 'BC',
-        'entity_type': 'FR',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)

@@ -1,5 +1,9 @@
 from . import Serializable
 
+'''
+@:deprecated
+'''
+
 
 class DescriptiveWord(Serializable):
     def __init__(self, **kwargs):

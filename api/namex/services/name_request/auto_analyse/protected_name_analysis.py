@@ -71,14 +71,14 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             all_conflicts=self._all_conflicts
         )
 
-    # This is the main execution call for the class
     '''
+    This is the main execution call for the class
     @:return ProcedureResult[]
     '''
     def execute_analysis(self):
         builder = self._builder
 
-        check_name_is_well_formed = builder.check_name_is_well_formed(builder.get_list_dist(), builder.get_list_desc(), builder.get_list_name())
+        check_name_is_well_formed = builder.check_name_is_well_formed(builder.get_list_dist(), builder.get_list_desc(), builder.get_list_none(), builder.get_list_name())
         check_words_to_avoid = builder.check_words_to_avoid()
         check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
         check_words_requiring_consent = builder.check_words_requiring_consent()
@@ -86,12 +86,18 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
+        # TODO: Move unclassified word check out of check_name_is_well_formed, has to be separate to allow dealing with XPRO edge case WORK WITH ARTURO TOMORROW ON THIS
         if not check_name_is_well_formed.is_valid:
             results.append(check_name_is_well_formed)
+            return results
+            #  Do not continue
 
         if not check_words_to_avoid.is_valid:
             results.append(check_words_to_avoid)
+            return results
+            #  Do not continue
 
+        # Return any combination of these checks
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 

@@ -1,5 +1,5 @@
 import itertools
-import re
+
 import pandas as pd
 from sqlalchemy import create_engine
 
@@ -45,9 +45,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = 'BVict31C'
+    POSTGRES_PASSWORD = ''
     POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
-    POSTGRES_DBNAME_DATA = 'namex-local-dev'
+    POSTGRES_DBNAME_DATA = 'namex-local'
 
     postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                             password=POSTGRES_PASSWORD,
@@ -91,6 +91,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
+        elif list_desc == list_dist:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+        elif list_dist + list_desc != name:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
 
         return result
 
