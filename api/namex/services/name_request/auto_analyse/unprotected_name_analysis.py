@@ -78,7 +78,6 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
     def execute_analysis(self):
         builder = self._builder
 
-        # TODO: If XPRO then run unclassified word check too
         check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
 
         results = []
