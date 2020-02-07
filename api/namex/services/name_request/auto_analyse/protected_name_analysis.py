@@ -86,7 +86,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
-        # TODO: Move unclassified word check out of check_name_is_well_formed, has to be separate to allow dealing with XPRO edge case WORK WITH ARTURO TOMORROW ON THIS
         if not check_name_is_well_formed.is_valid:
             results.append(check_name_is_well_formed)
 
