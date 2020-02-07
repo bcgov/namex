@@ -45,7 +45,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = ''
+    POSTGRES_PASSWORD = 'BVict31C'
     POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
     POSTGRES_DBNAME_DATA = 'namex-local'
 
