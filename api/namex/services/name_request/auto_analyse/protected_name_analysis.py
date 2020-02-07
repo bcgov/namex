@@ -50,25 +50,14 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         in_province_conflicts = self._solr_api.get_in_province_conflicts()
         all_conflicts = self._solr_api.get_all_conflicts()
 
-        # Store query results to instance
-        self._synonyms = synonyms
-        self._substitutions = substitutions
-
-        self._stop_words = stop_words  # stop_words['synonyms_text'][0].split(',')
-        self._designated_end_words = designated_end_words  # designated_end_words['synonyms_text'][0].split(',')
-        self._designated_any_words = designated_any_words  # designated_any_words['synonyms_text'][0].split(',')
-
-        self._in_province_conflicts = in_province_conflicts
-        self._all_conflicts = all_conflicts
-
         self._builder.set_dicts(
-            synonyms=self._synonyms,
-            substitutions=self._substitutions,
-            stop_words=self._stop_words,
-            designated_end_words=self._designated_end_words,
-            designated_any_words=self._designated_any_words,
-            in_province_conflicts=self._in_province_conflicts,
-            all_conflicts=self._all_conflicts
+            synonyms=synonyms,
+            substitutions=substitutions,
+            stop_words=stop_words,
+            designated_end_words=designated_end_words,
+            designated_any_words=designated_any_words,
+            in_province_conflicts=in_province_conflicts,
+            all_conflicts=all_conflicts
         )
 
     # This is the main execution call for the class

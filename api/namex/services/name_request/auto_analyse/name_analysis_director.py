@@ -1,5 +1,3 @@
-from namex.models import Synonym
-
 # Import mock API clients
 from ..datasources.synonyms_api import SynonymsApi
 from ..datasources.solr_api import SolrApi
@@ -76,65 +74,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def entity_type(self):
         return self._entity_type
 
-    @entity_type.setter
-    def entity_type(self, entity_type):
-        self._entity_type = entity_type
-
-    @property
-    def name_tokens(self):
-        np_svc = self.name_processing_service
-        return self.name_processing_service.name_tokens if np_svc else ''
-
-    @property
-    def name_original_tokens(self):
-        np_svc = self.name_processing_service
-        return self.name_processing_service.name_original_tokens if np_svc else ''
-
-    @property
-    def token_classifier(self):
-        return self._token_classifier
-
-    @token_classifier.setter
-    def token_classifier(self, token_classifier):
-        self._token_classifier = token_classifier
-
-    @property
-    def word_classification_tokens(self):
-        return \
-            self.token_classifier.distinctive_word_tokens, \
-            self.token_classifier.descriptive_word_tokens, \
-            self.token_classifier.unclassified_word_tokens
-
-    @property
-    def processed_name(self):
-        np_svc = self.name_processing_service
-        return self.name_processing_service.processed_name if np_svc else ''
-
-    @property
-    def name_as_submitted(self):
-        np_svc = self.name_processing_service
-        return self.name_processing_service.name_as_submitted if np_svc else ''
-
-    '''
-    name_as_submitted_tokenized tokenize the original name and when there is a compound designation made of more than one
-    word, the term is counted as token. For instance, designations such as limited liability company is counted as one token.
-    '''
-    @property
-    def name_as_submitted_tokenized(self):
-        np_svc = self.name_processing_service
-        return self.name_processing_service.name_as_submitted_tokenized if np_svc else ''
-
-    '''
-    Just an alias for name_as_submitted
-    '''
-    @property
-    def original_name(self):
-        return self.name_as_submitted
-
-    @property
-    def original_name_tokenized(self):
-        return self.name_as_submitted_tokenized
-
     def __init__(self):
         self._word_classification_api = WordClassificationApi()
         self._synonyms_api = SynonymsApi()
@@ -201,12 +140,27 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     prepare_data is an abstract method and must be implemented in extending classes.
     '''
     def prepare_data(self):
-        # Query for whatever data we need to load up here
-        self.configure_builder()
+        # Query database for synonyms, substitutions and designations
+        synonyms = self._synonyms_api.get_synonyms()
+        substitutions = self._synonyms_api.get_substitutions()
 
-    def configure_builder(self):
-        # Do anything else required to configure the builder
-        pass
+        stop_words = self._synonyms_api.get_stop_words()
+        designated_end_words = self._synonyms_api.get_designated_end_words()
+        designated_any_words = self._synonyms_api.get_designated_any_words()
+
+        # Solr calls
+        in_province_conflicts = self._solr_api.get_in_province_conflicts()
+        all_conflicts = self._solr_api.get_all_conflicts()
+
+        self._builder.set_dicts(
+            synonyms=synonyms,
+            substitutions=substitutions,
+            stop_words=stop_words,
+            designated_end_words=designated_end_words,
+            designated_any_words=designated_any_words,
+            in_province_conflicts=in_province_conflicts,
+            all_conflicts=all_conflicts
+        )
 
     '''
     This is the main execution call that wraps name analysis checks. 
@@ -258,86 +212,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
             ]
 
-            issue_must_be_fixed = False
-            result_codes = list(map(lambda r: r.result_code, analysis))
-
-            for code in result_codes:
-                if code in issues_that_must_be_fixed:
-                    issue_must_be_fixed = True
-                    break
-
-            if issue_must_be_fixed:
-                return analysis
-                #  Name is not well formed - do not continue
-
-            # If the WORD_TO_AVOID check failed, the UNCLASSIFIED_WORD check
-            # will have failed too because words to avoid are never classified.
-            # Strip out the unclassified words errors involving the same name words.
-            list_avoid = []
-
-            has_words_to_avoid = self._has_analysis_issue_type(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
-            if has_words_to_avoid:
-                matched_words_to_avoid = self._get_analysis_issue_type_issues(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
-                for procedure_result in matched_words_to_avoid:
-                    list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
-
-                def remove_words_to_avoid(result):
-                    if result.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
-                        for word in list_avoid:
-                            result.values['list_none'].remove(word)
-                    return result
-
-                analysis = list(map(remove_words_to_avoid, analysis))
-
-            analysis_issues_sort_order = [
-                AnalysisIssueCodes.WORDS_TO_AVOID,
-                AnalysisIssueCodes.TOO_MANY_WORDS,
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
-                AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
-                AnalysisIssueCodes.CORPORATE_CONFLICT,
-                AnalysisIssueCodes.DESIGNATION_MISMATCH,
-                AnalysisIssueCodes.DESIGNATION_MISPLACED
-            ]
-
-            analysis = analysis + self.do_analysis()
-            analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
-
-            return analysis
-
-        except Exception as error:
-            print('Error executing name analysis: ' + repr(error))
-            raise
-
-    def sort_analysis_issues(self, analysis_issues, sort_order):
-        sorted_analysis_issues = []
-
-        while True:
-            issue_type = sort_order.pop(0)
-
-            # Serve unclassified words first if there are words that require consent in the name
-            matched_issues = self._has_analysis_issue_type(analysis_issues, issue_type)
-            if matched_issues:
-                consent_issues = self._extract_analysis_issues_by_type(analysis_issues, issue_type)
-                sorted_analysis_issues += consent_issues
-
-            if sort_order.__len__() == 0:
-                break
-
-        return sorted_analysis_issues
-
-    @classmethod
-    def _extract_analysis_issues_by_type(cls, analysis, issue_code):
-        word_issue_indexes = []
-        word_issues = []
-        for idx, issue in enumerate(analysis):
-            if issue.result_code == issue_code:
-                word_issue_indexes.append(idx)
-
-        for idx in word_issue_indexes:
-            issue = analysis.pop(idx)
-            word_issues.append(issue)
+    # Just a wrapped call to the API's getClassification
+    def get_word_classification(self, word):
+        return self._word_classification_api.get_word_classification(word)
 
         return word_issues
 

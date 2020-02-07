@@ -1,4 +1,10 @@
-import abc
+from .name_analysis_utils import clean_name_words
+
+
+class ProcedureResult:
+    def __init__(self, **kwargs):
+        self.is_valid = kwargs.get('is_valid', False)
+        self.result_code = kwargs.get('result_code', None)
 
 from . import ProcedureResult
 
@@ -64,9 +70,34 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     def word_condition_service(self):
         return self._word_condition_service
 
-    @word_condition_service.setter
-    def word_condition_service(self, svc):
-        self._word_condition_service = svc
+    def preprocess_name(self):
+        if not self.get_name():
+            return  # TODO: Should we throw an error or something?
+
+        words = self.get_name().lower()
+
+        words = ' '.join([word for word in words.split(" ") if word not in self._stop_words])
+        # TODO: clean_name_words mostly applies regex substitutions...
+        #  but are we moving the regex out of the app and into the database?
+        tokens = clean_name_words(words)
+
+        previous = tokens
+        for i in range(len(tokens)):
+            tokens = clean_name_words(tokens, self._designated_any_words, self._designated_end_words)
+            if previous == tokens:
+                break
+            else:
+                previous = tokens
+
+        tokens = tokens.split()
+        return [x.upper() for x in tokens if x]
+
+    '''
+    This method is NOT abstract and should NEVER be overridden
+    @return ProcedureResult
+    '''
+    def execute_analysis(self):
+        return self.do_analysis()
 
     '''
     This method can be overridden in extending Builder classes if a different process is desired
