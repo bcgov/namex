@@ -98,16 +98,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_to_avoid(self, preprocessed_name):
+    def check_words_to_avoid(self, name):
         result = ProcedureResult()
         result.is_valid = True
 
-        words_to_avoid_list = get_words_to_avoid()
+        all_words_to_avoid_list = get_words_to_avoid()
+        words_to_avoid_list = []
+
+        for words_to_avoid in all_words_to_avoid_list:
+            if words_to_avoid.lower() in name.lower():
+                words_to_avoid_list.append(words_to_avoid)
+
+        name_list = name.split()
         words_to_avoid_list_response = []
 
-        for words_to_avoid in words_to_avoid_list:
-            if words_to_avoid in preprocessed_name:
-                words_to_avoid_list_response.append(words_to_avoid)
+        for idx, token in enumerate(name_list):
+            if any(token in word for word in words_to_avoid_list):
+                words_to_avoid_list_response.append({idx: token})
 
         if words_to_avoid_list_response:
             result.is_valid = False
@@ -253,7 +260,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         check_words_requiring_consent = builder.check_words_requiring_consent()
         check_designation_mismatch = builder.check_designation()
 
-    def do_analysis(self, name):
+    def do_analysis(self, name, entity_type_end_desig_user, entity_type_any_desig_user):
         result = ProcedureResult()
         result.is_valid = False
 
@@ -278,13 +285,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                                    unclassified_list, \
                                                                    preprocessed_name_list)
         if check_name_is_well_formed.is_valid:
-            preprocessed_name = ' '.join(map(str, preprocessed_name_list))
-            check_words_to_avoid = self.check_words_to_avoid(preprocessed_name)
+            # preprocessed_name = ' '.join(map(str, preprocessed_name_list))
+            check_words_to_avoid = self.check_words_to_avoid(name)
             check_conflicts = self.search_conflicts(distinctive_list, descriptive_list)
 
             if not check_conflicts:
-
-                check_words_requiring_consent = self.check_words_requiring_consent(preprocessed_name)
+                check_words_requiring_consent = self.check_words_requiring_consent(name)
+                check_designation_mismatch = self.check_designation(name, entity_type_end_desig_user,
+                                                                    entity_type_any_desig_user)
 
                 # check_designation_mismatch = self.check_designation()
                 if not check_name_is_well_formed.is_valid:
@@ -299,8 +307,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 if not check_words_requiring_consent.is_valid:
                     return check_words_requiring_consent
 
-                # if not check_designation_mismatch.is_valid:
-                #    return check_designation_mismatch
+                if not check_designation_mismatch.is_valid:
+                    return check_designation_mismatch
 
             else:
                 return result
