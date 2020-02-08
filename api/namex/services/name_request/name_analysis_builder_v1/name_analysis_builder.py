@@ -78,9 +78,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
 
         if len(list_none) > 0:
+            unclassified_words_list_response = []
+            name_list = name.split()
+
+            for idx, token in enumerate(name_list):
+                if any(token in word for word in list_none):
+                    unclassified_words_list_response.append({idx: token})
+
             result.is_valid = False
             result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.value = list_none
+            result.value = unclassified_words_list_response
         elif len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
@@ -239,15 +246,28 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_requiring_consent(self, preprocessed_name):
+    def check_words_requiring_consent(self, name):
         result = ProcedureResult()
         result.is_valid = True
 
-        words_consent_list = get_words_requiring_consent()
+        all_words_consent_list = get_words_requiring_consent()
+        words_consent_list = []
 
-        if any(words_consent in preprocessed_name for words_consent in words_consent_list):
+        for words_consent in all_words_consent_list:
+            if words_consent.lower() in name.lower():
+                words_consent_list.append(words_consent)
+
+        name_list = name.split()
+        words_consent_list_response = []
+
+        for idx, token in enumerate(name_list):
+            if any(token in word for word in words_consent_list):
+                words_consent_list_response.append({idx: token})
+
+        if words_consent_list_response:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
+            result.result_code = AnalysisResultCodes.WORD_TO_AVOID
+            result.values = words_consent_list_response
 
         return result
 
