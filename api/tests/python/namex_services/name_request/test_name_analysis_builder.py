@@ -9,8 +9,8 @@ list_desc = ['FOOD', 'GROWERS']
 list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 name = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 preprocessed_name_consent = 'MOUNTAIN SMILE FOOD GROWERS'
-preprocessed_name_avoid = 'VSE VIEW FOOD GROWERS'
-user_input = 'MOUNTAIN COOPERATIVE VIEW LIMITED LIABILITY PARTNERSHIP'
+name_avoid = 'MOUNTAIN VSE FOOD GROWERS'
+user_input = 'MOUNTAIN VIEW COOPERATIVE FOOD'
 entity_type_end_desig_user = 'UL'
 entity_type_any_desig_user = 'CP'
 
@@ -28,7 +28,7 @@ def test_check_name_is_well_formed(client, jwt, app):
 
 
 def test_check_words_to_avoid(client, jwt, app):
-    assert_that(builder.check_words_to_avoid(preprocessed_name_avoid), False)
+    assert_that(builder.check_words_to_avoid(name_avoid), False)
 
 
 def test_check_words_requiring_consent(client, jwt, app):
@@ -45,4 +45,4 @@ def test_check_designation(client, jwt, app):
 
 
 def test_do_analysis(client, jwt, app):
-    assert_that(builder.do_analysis(user_input), True)
+    assert_that(builder.do_analysis(user_input,entity_type_end_desig_user, entity_type_any_desig_user), True)
