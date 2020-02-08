@@ -98,16 +98,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_to_avoid(self, preprocessed_name):
+    def check_words_to_avoid(self, name):
         result = ProcedureResult()
         result.is_valid = True
 
-        words_to_avoid_list = get_words_to_avoid()
+        all_words_to_avoid_list = get_words_to_avoid()
+        words_to_avoid_list = []
+
+        for words_to_avoid in all_words_to_avoid_list:
+            if words_to_avoid.lower() in name.lower():
+                words_to_avoid_list.append(words_to_avoid)
+
+        name_list = name.split()
         words_to_avoid_list_response = []
 
-        for words_to_avoid in words_to_avoid_list:
-            if words_to_avoid in preprocessed_name:
-                words_to_avoid_list_response.append(words_to_avoid)
+        for idx, token in enumerate(name_list):
+            if any(token in word for word in words_to_avoid_list):
+                words_to_avoid_list_response.append({idx: token})
 
         if words_to_avoid_list_response:
             result.is_valid = False
