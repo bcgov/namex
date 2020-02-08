@@ -10,7 +10,8 @@ list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 name = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 preprocessed_name_consent = 'MOUNTAIN SMILE FOOD GROWERS'
 name_avoid = 'MOUNTAIN VSE FOOD GROWERS'
-user_input = 'MOUNTAIN VIEW COOPERATIVE FOOD'
+name_consent = 'ROYAL BC MOUNTAIN FOOD GROWERS'
+user_input = 'MOUNTAIN ROYAL COOPERATIVE FOOD'
 entity_type_end_desig_user = 'UL'
 entity_type_any_desig_user = 'CP'
 
@@ -32,7 +33,7 @@ def test_check_words_to_avoid(client, jwt, app):
 
 
 def test_check_words_requiring_consent(client, jwt, app):
-    assert_that(builder.check_words_requiring_consent(preprocessed_name_consent), False)
+    assert_that(builder.check_words_requiring_consent(name_consent), True)
 
 
 def test_search_conflicts(client, jwt, app):
