@@ -1,4 +1,4 @@
-class SynonymsService:
+class SynonymService:
     @classmethod
     async def get_synonyms(cls):
         return []

@@ -1,5 +1,6 @@
 from . import db, ma
 
+
 # The class that corresponds to the database table for synonyms.
 class Synonym(db.Model):
     __tablename__ = 'synonym'

@@ -6,6 +6,7 @@ from datetime import datetime, date
 from sqlalchemy.orm import backref
 from sqlalchemy import or_
 
+
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
 

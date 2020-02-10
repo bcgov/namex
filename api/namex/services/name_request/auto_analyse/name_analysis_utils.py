@@ -8,7 +8,7 @@ POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
 POSTGRES_PASSWORD = 'BVict31C'
-POSTGRES_DBNAME = 'local-sandbox-dev'
+POSTGRES_DBNAME = 'namex-local'
 POSTGRES_DBNAME_WC = 'namex-local'
 
 postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,

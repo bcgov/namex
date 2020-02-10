@@ -1,9 +1,17 @@
+# TODO: Name pre-processing has been moved to its own service
 import pandas as pd
 
 # Import mock API clients
 from ..datasources.synonyms_api import SynonymsApi
 from ..datasources.solr_api import SolrApi
 from .name_analysis_utils import clean_name_words, data_frame_to_list
+
+from namex.services.synonyms.synonym \
+    import SynonymService
+
+from namex.services.name_processing.name_processing \
+    import NameProcessingService
+
 from namex.services.word_classification.word_classification \
     import WordClassificationService
 
@@ -14,10 +22,14 @@ This is the director for AutoAnalyseService.
 
 class NameAnalysisDirector:
     _builder = None  # Store a reference to the builder
-    _synonyms_api = None
-    _solr_api = None
+
+    # Services
+    _synonym_service = None
+    _solr_conflicts_service = None
+    _name_processing_service = None
     _word_classification_service = None
 
+    # Data
     _prefixes = []
     _synonyms = []
     _substitutions = []
@@ -25,6 +37,7 @@ class NameAnalysisDirector:
     _designated_end_words = []
     _designated_any_words = []
 
+    # Name + tokens
     _name_as_submitted = ''
     _preprocessed_name = ''
     _list_name_words = []
@@ -32,17 +45,25 @@ class NameAnalysisDirector:
     _list_desc_words = []
     _list_none_words = []
 
+    # Conflicts
     _in_province_conflicts = []
     _all_conflicts = []
 
     def __init__(self):
+        self._synonym_service = SynonymService()
+        self._name_processing_service = NameProcessingService()
         self._word_classification_service = WordClassificationService()
-        self._synonyms_api = SynonymsApi()
-        self._solr_api = SolrApi()
+
+        self._synonyms_service = SynonymsApi()
+        self._solr_conflicts_service = SolrApi()
 
     # Used by the builder to access the WordClassificationService instance
     def get_word_classification_service(self):
         return self._word_classification_service
+
+    # Used by the builder to access the NameProcessingService instance
+    def get_name_processing_service(self):
+        return self._name_processing_service
 
     def use_builder(self, builder):
         self._builder = builder if builder else None
@@ -146,16 +167,16 @@ class NameAnalysisDirector:
         #  - Designations and Stop words (boolean type) and Language (id type) should be separate columns or something
         #  - Right now you have to specify the column and col value to fetch a record... it only works for a single column
         #    We need something a little more powerful, maybe a simple query API endpoint in synonyms api?
-        self._synonyms = self._synonyms_api.get_synonyms()
-        self._substitutions = self._synonyms_api.get_substitutions()
+        self._synonyms = self._synonyms_service.get_synonyms()
+        self._substitutions = self._synonyms_service.get_substitutions()
 
-        self._stop_words = self._synonyms_api.get_stop_words()
-        self._designated_end_words = self._synonyms_api.get_designated_end_words()
-        self._designated_any_words = self._synonyms_api.get_designated_any_words()
+        self._stop_words = self._synonyms_service.get_stop_words()
+        self._designated_end_words = self._synonyms_service.get_designated_end_words()
+        self._designated_any_words = self._synonyms_service.get_designated_any_words()
 
         # Solr calls TODO: Are we still using solr conflict? Clarify...
-        self._in_province_conflicts = self._solr_api.get_in_province_conflicts()
-        self._all_conflicts = self._solr_api.get_all_conflicts()
+        self._in_province_conflicts = self._solr_conflicts_service.get_in_province_conflicts()
+        self._all_conflicts = self._solr_conflicts_service.get_all_conflicts()
 
         self._builder.set_dicts(
             synonyms=self._synonyms,

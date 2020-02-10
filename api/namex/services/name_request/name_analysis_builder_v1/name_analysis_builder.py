@@ -28,8 +28,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = 'BVict31C'
-    POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
+    POSTGRES_PASSWORD = ''
+    POSTGRES_DBNAME_SYNS = 'namex-local'
     POSTGRES_DBNAME_DATA = 'namex-local'
 
     postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
