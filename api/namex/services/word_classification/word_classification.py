@@ -2,6 +2,32 @@ from namex.models import db, WordClassification, WordClassificationSchema
 
 from .token_classifier import TokenClassifier
 
+import re
+import pandas as pd
+from sqlalchemy import create_engine
+
+POSTGRES_ADDRESS = 'localhost'
+POSTGRES_PORT = '5432'
+POSTGRES_USERNAME = 'postgres'
+POSTGRES_PASSWORD = 'BVict31C'
+POSTGRES_DBNAME = 'namex-local'
+POSTGRES_DBNAME_WC = 'namex-local'
+
+postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                        password=POSTGRES_PASSWORD,
+                                                                                        ipaddress=POSTGRES_ADDRESS,
+                                                                                        port=POSTGRES_PORT,
+                                                                                        dbname=POSTGRES_DBNAME))
+
+postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                           password=POSTGRES_PASSWORD,
+                                                                                           ipaddress=POSTGRES_ADDRESS,
+                                                                                           port=POSTGRES_PORT,
+                                                                                           dbname=POSTGRES_DBNAME_WC))
+
+cnx = create_engine(postgres_str)
+cnx_wc = create_engine(postgres_wc_str)
+
 
 class WordClassificationService:
     def __init__(self):
