@@ -1,4 +1,7 @@
+import abc
+
 from .name_analysis_utils import clean_name_words
+
 
 class ProcedureResult:
     def __init__(self, **kwargs):
@@ -8,6 +11,8 @@ class ProcedureResult:
 
 
 class AbstractNameAnalysisBuilder:
+    __metaclass__ = abc.ABCMeta
+
     _director = None
 
     # Properties specific to this director implementation
@@ -97,6 +102,7 @@ class AbstractNameAnalysisBuilder:
     Check to see if a provided name is valid
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, company_name):
         return ProcedureResult(is_valid=True)
 
@@ -104,6 +110,7 @@ class AbstractNameAnalysisBuilder:
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def check_words_to_avoid(self):
         return ProcedureResult(is_valid=True)
 
@@ -111,6 +118,7 @@ class AbstractNameAnalysisBuilder:
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def search_conflicts(self, list_dist, list_desc):
         return ProcedureResult(is_valid=True)
 
@@ -130,6 +138,7 @@ class AbstractNameAnalysisBuilder:
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def check_words_requiring_consent(self):
         return ProcedureResult(is_valid=True)
 
@@ -137,5 +146,6 @@ class AbstractNameAnalysisBuilder:
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def check_designation(self):
         return ProcedureResult(is_valid=True)

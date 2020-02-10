@@ -222,7 +222,7 @@ def get_entity_type_any_designation(entity_any_designation_dict, all_designation
         for designation_any in designation_any_list:
             entity_type_any_designation_name.append(get_entity_type_by_value(entity_any_designation_dict, designation_any))
 
-    return  entity_type_any_designation_name
+    return entity_type_any_designation_name
 
 
 def get_en_RLC_entity_type_end_designation():
