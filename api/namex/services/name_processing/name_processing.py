@@ -19,6 +19,7 @@ class NameProcessingService:
     _list_desc_words = []
     _list_none_words = []
 
+    # TODO: Add kwargs so we can provide data as params if we've already loaded up the lists that we need!
     def __init__(self):
         self._synonym_service = SynonymService()
         self.prepare_data()

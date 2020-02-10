@@ -4,6 +4,7 @@ import pandas as pd
 # Import mock API clients
 from ..datasources.synonyms_api import SynonymsApi
 from ..datasources.solr_api import SolrApi
+
 from .name_analysis_utils import clean_name_words, data_frame_to_list
 
 from namex.services.synonyms.synonym \
@@ -53,8 +54,6 @@ class NameAnalysisDirector:
         self._synonym_service = SynonymService()
         self._name_processing_service = NameProcessingService()
         self._word_classification_service = WordClassificationService()
-
-        self._synonyms_service = SynonymsApi()
         self._solr_conflicts_service = SolrApi()
 
     # Used by the builder to access the WordClassificationService instance
@@ -159,20 +158,12 @@ class NameAnalysisDirector:
     '''
     def prepare_data(self):
         # Query database for synonyms, substitutions and designations
-        # TODO: API client class is in place for getting these lists from the actual
-        #  synonyms api... the calls are firing off, but synonyms api doesn't have any methods to
-        #  return what we need and some model changes to synonyms may be required:
-        #  - Overloading category field with stuff like 'English Designations_end Stop' is not going to
-        #    fly in the long run...
-        #  - Designations and Stop words (boolean type) and Language (id type) should be separate columns or something
-        #  - Right now you have to specify the column and col value to fetch a record... it only works for a single column
-        #    We need something a little more powerful, maybe a simple query API endpoint in synonyms api?
-        self._synonyms = self._synonyms_service.get_synonyms()
-        self._substitutions = self._synonyms_service.get_substitutions()
+        self._synonyms = self._synonym_service.get_synonyms()
+        self._substitutions = self._synonym_service.get_substitutions()
 
-        self._stop_words = self._synonyms_service.get_stop_words()
-        self._designated_end_words = self._synonyms_service.get_designated_end_words()
-        self._designated_any_words = self._synonyms_service.get_designated_any_words()
+        self._stop_words = self._synonym_service.get_stop_words()
+        self._designated_end_words = self._synonym_service.get_designated_end_words()
+        self._designated_any_words = self._synonym_service.get_designated_any_words()
 
         # Solr calls TODO: Are we still using solr conflict? Clarify...
         self._in_province_conflicts = self._solr_conflicts_service.get_in_province_conflicts()
