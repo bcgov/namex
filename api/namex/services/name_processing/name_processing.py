@@ -77,6 +77,7 @@ class NameProcessingService(GetSynonymListsMixin):
         self.descriptive_word_tokens = None
         self.unclassified_word_tokens = None
 
+    # TODO: Add kwargs so we can provide data as params if we've already loaded up the lists that we need!
     def __init__(self):
         self._synonym_service = SynonymService()
         self.prepare_data()
