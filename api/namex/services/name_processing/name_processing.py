@@ -1,8 +1,11 @@
 from ..name_request.auto_analyse.name_analysis_utils import clean_name_words, data_frame_to_list
 
+from namex.services.synonyms.synonym \
+    import SynonymService
+
 
 class NameProcessingService:
-    _synonyms_api = None
+    _synonym_service = None
 
     _prefixes = []
     _stop_words = []
@@ -16,14 +19,18 @@ class NameProcessingService:
     _list_desc_words = []
     _list_none_words = []
 
+    def __init__(self):
+        self._synonym_service = SynonymService()
+        self.prepare_data()
+
     '''
-    Prepare any data required to process the name.
+    Prepare any data required to process the name. Called internally when creating a new instance of this class.
     '''
     def prepare_data(self):
         # Query database for word designations
-        self._stop_words = self._synonyms_api.get_stop_words()
-        self._designated_end_words = self._synonyms_api.get_designated_end_words()
-        self._designated_any_words = self._synonyms_api.get_designated_any_words()
+        self._stop_words = self._synonym_service.get_stop_words()
+        self._designated_end_words = self._synonym_service.get_designated_end_words()
+        self._designated_any_words = self._synonym_service.get_designated_any_words()
 
     '''
     Split a name string into classifiable tokens. Called internally whenever set_name is invoked.
