@@ -77,6 +77,10 @@ class NameProcessingService(GetSynonymListsMixin):
         self.descriptive_word_tokens = None
         self.unclassified_word_tokens = None
 
+    def __init__(self):
+        self._synonym_service = SynonymService()
+        self.prepare_data()
+
     '''
     Set and process a submitted name string using the process_name class method.
     '''
