@@ -1,20 +1,65 @@
-"""
-Word classification classifies all words in a name approved by an examiner to be used for auto-approval
-"""
+""""word classification classifies all words in a name approved by an exmainer to be used for auto-approval
 
+"""
 from . import db, ma
+from datetime import datetime, date
+from sqlalchemy.orm import backref
+from sqlalchemy import or_
 
+import re
 import pandas as pd
-from sqlalchemy import Column
-from sqlalchemy import and_
+from sqlalchemy import create_engine, Column
 
-from namex.services.name_request.auto_analyse import DataFrameFields
-from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
+from namex.services.name_request.auto_analyse import field_synonyms, field_special_words
+from namex.services.name_request.auto_analyse.name_analysis_utils import get_list_of_lists
+
+POSTGRES_ADDRESS = 'localhost'
+POSTGRES_PORT = '5432'
+POSTGRES_USERNAME = 'postgres'
+POSTGRES_PASSWORD = 'BVict31C'
+POSTGRES_DBNAME = 'namex-local'
+POSTGRES_DBNAME_WC = 'namex-local'
+
+postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                        password=POSTGRES_PASSWORD,
+                                                                                        ipaddress=POSTGRES_ADDRESS,
+                                                                                        port=POSTGRES_PORT,
+                                                                                        dbname=POSTGRES_DBNAME))
+
+postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                           password=POSTGRES_PASSWORD,
+                                                                                           ipaddress=POSTGRES_ADDRESS,
+                                                                                           port=POSTGRES_PORT,
+                                                                                           dbname=POSTGRES_DBNAME_WC))
+
+cnx = create_engine(postgres_str)
+cnx_wc = create_engine(postgres_wc_str)
+
+
+# TODO: This has been moved to VirtualWordCondition model!
+def get_words_to_avoid():
+    query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = false;'
+    df = pd.read_sql_query(query, cnx_wc)
+
+    if not df.empty:
+        words_to_avoid_list = get_list_of_lists(df, field_special_words)
+        return words_to_avoid_list
+    return None
+
+
+# TODO: This has been moved to VirtualWordCondition model!
+def get_words_requiring_consent():
+    query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = true and rc_consent_required = true'
+
+    df = pd.read_sql_query(query, cnx_wc)
+
+    if not df.empty:
+        return get_list_of_lists(df, field_special_words)
+
+    return None
+
 
 # TODO: Remove deprecated duplicate from admin_tables.py
-from ..criteria.virtual_word_condition.query_criteria import VirtualWordConditionCriteria
-
-
 class VirtualWordCondition(db.Model):
     __tablename__ = 'virtual_word_condition'
 
@@ -26,57 +71,3 @@ class VirtualWordCondition(db.Model):
     rc_instructions = Column(db.VARCHAR(1000))
     rc_consent_required = db.Column(db.Boolean(), default=False)
     rc_allow_use = db.Column(db.Boolean(), default=True)
-
-    # These queries were moved to SQLALchemy
-    '''
-    @classmethod
-    def get_words_to_avoid(cls):
-        query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = false;'
-        df = pd.read_sql_query(query, con=db.engine)
-
-        if not df.empty:
-            response = get_dataframe_list(df, DataFrameFields.FIELD_SPECIAL_WORDS.value)
-            response = get_flat_list(response)
-            return response
-        return None
-
-    @classmethod
-    def get_words_requiring_consent(cls):
-        query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = true and rc_consent_required = true'
-
-        df = pd.read_sql_query(query, con=db.engine)
-
-        if not df.empty:
-            response = get_dataframe_list(df, DataFrameFields.FIELD_SPECIAL_WORDS.value)
-            response = get_flat_list(response)
-            return response
-
-        return None
-
-    @classmethod
-    def get_word_special_use(cls):
-        query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_consent_required = false and rc_allow_use = true'
-
-        df = pd.read_sql_query(query, con=db.engine)
-
-        if not df.empty:
-            response = get_dataframe_list(df, DataFrameFields.FIELD_SPECIAL_WORDS.value)
-            response = get_flat_list(response)
-            return response
-
-        return None
-    '''
-    @classmethod
-    def find_by_criteria(cls, criteria=None):
-        VirtualWordConditionCriteria.is_valid_criteria(criteria)
-
-        query = cls.query.with_entities(*criteria.fields) \
-            .filter(and_(*criteria.filters))
-
-        # print(query.statement)
-        return query.all()
-
-
-class VirtualWordConditionSchema(ma.ModelSchema):
-    class Meta:
-        model = VirtualWordCondition

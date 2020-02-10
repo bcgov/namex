@@ -14,7 +14,7 @@ def _to_string(string):
 @deprecated
 '''
 
-'''
+
 class VirtualWordCondition(db.Model):
     __tablename__ = 'virtual_word_condition'
 
