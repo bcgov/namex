@@ -26,23 +26,6 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
-    # These properties are inherited from the parent
-    # The build director (eg. NameAnalysisDirector) populates these properties
-    # as part of its prepare_data
-    # _synonyms = []
-    # _substitutions = []
-    # _stop_words = []
-    # _designated_end_words = []
-    # _designated_any_words = []
-    #
-    # _in_province_conflicts = []
-    # _all_conflicts = []
-    #
-    # _name = ''
-
-    _distinctive_words = []
-    _descriptive_words = []
-
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
@@ -315,17 +298,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
     Override the abstract / base class method
     @return ProcedureResult
+    @deprecated The DIRECTOR CONTROLS THE BUILD PROCESS
     '''
-    def do_analysis(self):
-        builder = self
-
-        check_name_is_well_formed = builder.check_name_is_well_formed(builder.get_list_dist(), builder.get_list_desc(), builder.get_list_none(), builder.get_list_name())
-        check_words_to_avoid = builder.check_words_to_avoid()
-        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
-        check_words_requiring_consent = builder.check_words_requiring_consent()
-        check_designation_mismatch = builder.check_designation()
-
-    def do_analysis(self, name, entity_type_end_desig_user, entity_type_any_desig_user):
+    '''def do_analysis(self, name):
         result = ProcedureResult()
         result.is_valid = False
 
@@ -340,6 +315,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                   fr_designation_end, prefixes)
 
         for word in preprocessed_name_list:
+            # TODO: Get classification shouldn't be done here
             classification = get_classification(word)
             new_row = {'word': word.lower().strip(), 'word_classification': classification.strip()}
             cf = cf.append(new_row, ignore_index=True)
@@ -349,6 +325,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         check_name_is_well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list,
                                                                    unclassified_list, \
                                                                    preprocessed_name_list)
+        # TODO: The DIRECTOR CONTROLS THE BUILD PROCESS
         if check_name_is_well_formed.is_valid:
             # preprocessed_name = ' '.join(map(str, preprocessed_name_list))
             check_words_to_avoid = self.check_words_to_avoid(name)
@@ -380,4 +357,4 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         else:
             return result
 
-            return ProcedureResult(is_valid=True)
+            return ProcedureResult(is_valid=True)'''

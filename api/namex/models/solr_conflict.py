@@ -1,10 +1,5 @@
 from . import db, ma
 
-# TODO: I think I added this, it's not needed (Lucas)
-"""
-@deprecated
-"""
-
 
 class SolrConflict(db.Model):
     __tablename__ = 'solr_dataimport_conflicts_vw'

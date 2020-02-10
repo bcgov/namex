@@ -9,6 +9,13 @@ from http import HTTPStatus
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
+# from sqlalchemy.dialects import postgresql
+# from sqlalchemy.orm.exc import NoResultFound
+# from sqlalchemy import func, text
+# from sqlalchemy.inspection import inspect
+
+from namex import jwt
+
 from namex.services.word_classification.word_classification import WordClassificationService
 
 setup_logging() ## important to do this first
@@ -48,7 +55,6 @@ class WordClassification(Resource):
                 response = make_response(payload, HTTPStatus.OK)
             except Exception as error:
                 print('Error: ' + repr(error))
-                raise
         else:
             response = make_response(HTTPStatus.BAD_REQUEST)
 
@@ -75,7 +81,6 @@ class WordClassification(Resource):
                 response = make_response(payload, HTTPStatus.CREATED)
             except Exception as error:
                 print('Error: ' + repr(error))
-                raise
         else:
             response = make_response(HTTPStatus.BAD_REQUEST)
 
@@ -102,7 +107,6 @@ class WordClassification(Resource):
                 response = make_response(payload, HTTPStatus.OK)
             except Exception as error:
                 print('Error: ' + repr(error))
-                raise
         else:
             response = make_response(HTTPStatus.BAD_REQUEST)
 
@@ -129,7 +133,6 @@ class WordClassification(Resource):
                 response = make_response(payload, HTTPStatus.NO_CONTENT)
             except Exception as error:
                 print('Error: ' + repr(error))
-                raise
         else:
             response = make_response(HTTPStatus.BAD_REQUEST)
 

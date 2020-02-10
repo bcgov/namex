@@ -17,6 +17,3 @@ cx_Oracle
 pronouncing
 requests
 httpx
-toolz
-nltk
-werkzeug==0.16.1

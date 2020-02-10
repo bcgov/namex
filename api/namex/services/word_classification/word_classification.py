@@ -1,12 +1,12 @@
+from namex.exceptions import BusinessException
 from namex.models import db, WordClassification, WordClassificationSchema
-
-from .token_classifier import TokenClassifier
+# TODO: Import LEAR schemas?
+# from namex.schemas import ...
+# from namex.services import SVC_ROLE, STAFF_ROLE, authorized, queue
+# from . import queue
 
 
 class WordClassificationService:
-    def __init__(self):
-        pass
-
     def find_one(self, word=None):
         return WordClassification.find_word_classification(word)
 
@@ -25,7 +25,7 @@ class WordClassificationService:
             entity.startDate = word_classification['startDate']
             entity.endDate = word_classification['endDate']
             entity.lastUpdatedBy = word_classification['lastUpdatedBy']
-            entity.lastUpdatedDate = word_classification['lastUpdatedDate']
+            entity.lastUpdateDate = word_classification['lastUpdateDate']
             entity.save_to_db()
 
             return entity
@@ -46,7 +46,7 @@ class WordClassificationService:
             entity.startDate = word_classification['startDate']
             entity.endDate = word_classification['endDate']
             entity.lastUpdatedBy = word_classification['lastUpdatedBy']
-            entity.lastUpdatedDate = word_classification['lastUpdatedDate']
+            entity.lastUpdateDate = word_classification['lastUpdateDate']
             entity.save_to_db()
 
             return entity
@@ -65,12 +65,8 @@ class WordClassificationService:
         entity = self.find_one(word_classification.word) or None
 
         if entity:
+            # TODO: Delete
             pass
 
     def validate(self):
         return True
-
-    def classify_tokens(self, word_tokens):
-        token_classifier = TokenClassifier(self)
-        token_classifier.name_tokens = word_tokens
-        return token_classifier

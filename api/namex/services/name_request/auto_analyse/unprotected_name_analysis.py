@@ -36,35 +36,10 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
     def __init__(self):
         super(UnprotectedNameAnalysisService, self).__init__()
 
-    # Prepare any data required by the analysis builder
-    def prepare_data(self):
-        # Query database for synonyms, substitutions and designations
-        synonyms = self._synonyms_api.get_synonyms()
-        substitutions = self._synonyms_api.get_substitutions()
-
-        stop_words = self._synonyms_api.get_stop_words()
-        designated_end_words = self._synonyms_api.get_designated_end_words()
-        designated_any_words = self._synonyms_api.get_designated_any_words()
-
-        # Solr calls
-        in_province_conflicts = self._solr_api.get_in_province_conflicts()
-        all_conflicts = self._solr_api.get_all_conflicts()
-
-        self._builder.set_dicts(
-            synonyms=synonyms,
-            substitutions=substitutions,
-            stop_words=stop_words,
-            designated_end_words=designated_end_words,
-            designated_any_words=designated_any_words,
-            in_province_conflicts=in_province_conflicts,
-            all_conflicts=all_conflicts
-        )
-
-    # This is the main execution call for the class
     '''
     @:return ProcedureResult[]
     '''
-    def execute_analysis(self):
+    def do_analysis(self):
         builder = self._builder
 
         # TODO: If XPRO then run unclassified word check too

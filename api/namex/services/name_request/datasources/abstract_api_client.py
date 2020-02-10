@@ -15,24 +15,6 @@ class AbstractApiClient:
     _client = httpx.Client()
     _base_uri = ''
 
-    @classmethod
-    def handle_error(cls, resp, on_error=lambda x: None):
-        try:
-            on_error(resp)
-            raise ApiError('GET / {}'.format(resp.status_code))
-        except Exception as error:
-            raise ApiError(error)
-
-    @classmethod
-    def handle_success(cls, resp, on_success=lambda x: None):
-        try:
-            for item in resp.json()[1]:
-                print('Result: {}'.format(item))
-
-            return on_success(resp)
-        except Exception as error:
-            raise ApiError(error)
-
     '''
     async api
     '''
@@ -44,7 +26,6 @@ class AbstractApiClient:
                 return client.get(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
 
     @classmethod
     async def get_async(cls, path):
@@ -53,7 +34,6 @@ class AbstractApiClient:
                 return client.get(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
 
     @classmethod
     async def post_async(cls, path):
@@ -62,7 +42,6 @@ class AbstractApiClient:
                 return client.post(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
 
     @classmethod
     async def put_async(cls, path):
@@ -71,7 +50,6 @@ class AbstractApiClient:
                 return client.put(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
 
     @classmethod
     async def patch_async(cls, path):
@@ -80,7 +58,6 @@ class AbstractApiClient:
                 return client.patch(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
 
     @classmethod
     async def delete_async(cls, path):
@@ -89,7 +66,6 @@ class AbstractApiClient:
                 return client.delete(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
 
     '''
     sync api
@@ -102,7 +78,7 @@ class AbstractApiClient:
                 return client.options(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
+            raise error
 
     @classmethod
     def get(cls, path):
@@ -111,7 +87,7 @@ class AbstractApiClient:
                 return client.get(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
+            raise error
 
     @classmethod
     def post(cls, path):
@@ -120,7 +96,7 @@ class AbstractApiClient:
                 return client.post(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
+            raise error
 
     @classmethod
     def put(cls, path):
@@ -129,7 +105,7 @@ class AbstractApiClient:
                 return client.put(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
+            raise error
 
     @classmethod
     def patch(cls, path):
@@ -138,7 +114,7 @@ class AbstractApiClient:
                 return client.patch(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
+            raise error
 
     @classmethod
     def delete(cls, path):
@@ -147,4 +123,4 @@ class AbstractApiClient:
                 return client.delete(cls._base_uri + path)
         except Exception as error:
             print(error)
-            raise
+            raise error
