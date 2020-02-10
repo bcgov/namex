@@ -47,7 +47,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_name_is_well_formed(self, list_desc, list_dist, list_none, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -121,7 +120,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
            list_desc= ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
-
     def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
         result = ProcedureResult()
         result.is_valid = True
