@@ -168,6 +168,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
 
         # Return any combination of these checks
+        check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 

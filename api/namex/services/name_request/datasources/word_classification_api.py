@@ -1,3 +1,6 @@
+from namex.models import WordClassification, WordClassificationSchema
+
+
 class WordClassificationApi:
     @staticmethod
     def get_word_classification(word):
