@@ -10,6 +10,11 @@ def _to_string(string):
     return string
 
 
+'''
+@deprecated
+'''
+
+
 class VirtualWordCondition(db.Model):
     __tablename__ = 'virtual_word_condition'
 
