@@ -17,15 +17,21 @@ class AbstractApiClient:
 
     @classmethod
     def handle_error(cls, resp, on_error=lambda x: None):
-        on_error(resp)
-        raise ApiError('GET / {}'.format(resp.status_code))
+        try:
+            on_error(resp)
+            raise ApiError('GET / {}'.format(resp.status_code))
+        except Exception as error:
+            raise ApiError(error)
 
     @classmethod
     def handle_success(cls, resp, on_success=lambda x: None):
-        for item in resp.json()[1]:
-            print('Result: {}'.format(item))
+        try:
+            for item in resp.json()[1]:
+                print('Result: {}'.format(item))
 
-        on_success(resp)
+            return on_success(resp)
+        except Exception as error:
+            raise ApiError(error)
 
     '''
     async api
