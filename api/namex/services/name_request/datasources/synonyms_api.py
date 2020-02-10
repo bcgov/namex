@@ -18,113 +18,137 @@ class SynonymsApi(AbstractApiClient):
     '''
 
     @classmethod
-    async def get_synonyms_async(cls, on_success=lambda x: None, on_error=lambda x: None):
+    async def get_synonyms_async(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = await cls.get_async('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    async def get_substitutions_async(cls, on_success=lambda x: None, on_error=lambda x: None):
+    async def get_substitutions_async(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = await cls.get_async('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    async def get_stop_words_async(cls, on_success=lambda x: None, on_error=lambda x: None):
+    async def get_stop_words_async(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = await cls.get_async('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    async def get_designated_start_words_async(cls, on_success=lambda x: None, on_error=lambda x: None):
+    async def get_designated_start_words_async(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = await cls.get_async('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    async def get_designated_end_words_async(cls, on_success=lambda x: None, on_error=lambda x: None):
+    async def get_designated_end_words_async(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = await cls.get_async('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    async def get_designated_any_words_async(cls, on_success=lambda x: None, on_error=lambda x: None):
+    async def get_designated_any_words_async(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = await cls.get_async('/category/scuba')
         if resp.status_code != 200:
             raise ApiError('GET /any_words/ {}'.format(resp.status_code))
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
             
     '''
     sync api
     '''
 
     @classmethod
-    async def get_synonyms(cls, on_success=lambda x: None, on_error=lambda x: None):
+    async def get_synonyms(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = cls.get('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    def get_substitutions(cls, on_success=lambda x: None, on_error=lambda x: None):
+    def get_substitutions(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = cls.get('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    def get_stop_words(cls, on_success=lambda x: None, on_error=lambda x: None):
+    def get_stop_words(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = cls.get('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    def get_designated_start_words(cls, on_success=lambda x: None, on_error=lambda x: None):
+    def get_designated_start_words(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = cls.get('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    def get_designated_end_words(cls, on_success=lambda x: None, on_error=lambda x: None):
+    def get_designated_end_words(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = cls.get('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []
 
     @classmethod
-    def get_designated_any_words(cls, on_success=lambda x: None, on_error=lambda x: None):
+    def get_designated_any_words(cls, on_success=lambda x: [], on_error=lambda x: None):
         resp = cls.get('/category/scuba')
         if resp.status_code != 200:
             cls.handle_error(resp, on_error)
 
         if resp.status_code == 200:
-            cls.handle_success(resp, on_success)
+            return cls.handle_success(resp, on_success)
+
+        return []

@@ -49,6 +49,9 @@ class NameAnalysisDirector:
         if self._builder:
             self.prepare_data()
 
+    '''
+    Set and preprocess a submitted name string using the preprocess_name class method.
+    '''
     def set_name(self, name):
         # Process the name
         self._name_as_submitted = name  # Store the user's submitted name string
@@ -104,6 +107,8 @@ class NameAnalysisDirector:
         if not self._name_as_submitted:
             return  # TODO: Should we throw an error or something?
 
+        # Clean the provided name and tokenize the string
+        # Identify stop words, any words and end words an store the lists to our director instance
         self._list_name_words = clean_name_words(
             self._name_as_submitted,
             self._stop_words,
@@ -113,11 +118,14 @@ class NameAnalysisDirector:
             self._prefixes
         )
 
+        # Get the word classification for each word in the supplied name name
         for word in self._list_name_words:
-            # TODO: Get classification shouldn't be done here
             classification = wc_svc.find_one(word)
             new_row = {'word': word.lower().strip(), 'word_classification': classification.strip()}
             cf = cf.append(new_row, ignore_index=True)
+
+        # TODO: If we don't find a classification, we should be adding a record and return the unclassified word issue
+        # TODO: Related to the above, we will need to pre-populate a list of classified words
 
         # Store results to instance
         self._list_name_words, self._list_desc_words, self._list_none_words = data_frame_to_list(cf)
@@ -130,6 +138,14 @@ class NameAnalysisDirector:
     '''
     def prepare_data(self):
         # Query database for synonyms, substitutions and designations
+        # TODO: API client class is in place for getting these lists from the actual
+        #  synonyms api... the calls are firing off, but synonyms api doesn't have any methods to
+        #  return what we need and some model changes to synonyms may be required:
+        #  - Overloading category field with stuff like 'English Designations_end Stop' is not going to
+        #    fly in the long run...
+        #  - Designations and Stop words (boolean type) and Language (id type) should be separate columns or something
+        #  - Right now you have to specify the column and col value to fetch a record... it only works for a single column
+        #    We need something a little more powerful, maybe a simple query API endpoint in synonyms api?
         self._synonyms = self._synonyms_api.get_synonyms()
         self._substitutions = self._synonyms_api.get_substitutions()
 
@@ -137,7 +153,7 @@ class NameAnalysisDirector:
         self._designated_end_words = self._synonyms_api.get_designated_end_words()
         self._designated_any_words = self._synonyms_api.get_designated_any_words()
 
-        # Solr calls
+        # Solr calls TODO: Are we still using solr conflict? Clarify...
         self._in_province_conflicts = self._solr_api.get_in_province_conflicts()
         self._all_conflicts = self._solr_api.get_all_conflicts()
 
