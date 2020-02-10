@@ -1,6 +1,7 @@
 from datetime import (datetime)
 
 from .name_analysis_director import NameAnalysisDirector
+import pandas as pd
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -36,63 +37,31 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     def __init__(self):
         super(ProtectedNameAnalysisService, self).__init__()
 
-    # Prepare any data required by the analysis builder
-    def prepare_data(self):
-        # Query database for synonyms, substitutions and designations
-        synonyms = self._synonyms_api.get_synonyms()
-        substitutions = self._synonyms_api.get_substitutions()
-
-        stop_words = self._synonyms_api.get_stop_words()
-        designated_end_words = self._synonyms_api.get_designated_end_words()
-        designated_any_words = self._synonyms_api.get_designated_any_words()
-
-        # Solr calls
-        in_province_conflicts = self._solr_api.get_in_province_conflicts()
-        all_conflicts = self._solr_api.get_all_conflicts()
-
-        self._builder.set_dicts(
-            synonyms=synonyms,
-            substitutions=substitutions,
-            stop_words=stop_words,
-            designated_end_words=designated_end_words,
-            designated_any_words=designated_any_words,
-            in_province_conflicts=in_province_conflicts,
-            all_conflicts=all_conflicts
-        )
-
     '''
     This is the main execution call for the class
     @:return ProcedureResult[]
     '''
-    def execute_analysis(self):
+    def do_analysis(self):
         builder = self._builder
-
-        check_name_is_well_formed = builder.check_name_is_well_formed(builder.get_list_dist(), builder.get_list_desc(), builder.get_list_none(), builder.get_list_name())
-        check_words_to_avoid = builder.check_words_to_avoid()
-        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc())
-        check_words_requiring_consent = builder.check_words_requiring_consent()
-        check_designation_mismatch = builder.check_designation()
 
         results = []
 
-        # TODO: Move unclassified word check out of check_name_is_well_formed, has to be separate to allow dealing with XPRO edge case WORK WITH ARTURO TOMORROW ON THIS
-        if not check_name_is_well_formed.is_valid:
-            results.append(check_name_is_well_formed)
-            return results
-            #  Do not continue
-
+        check_words_to_avoid = builder.check_words_to_avoid(self.get_list_name())
         if not check_words_to_avoid.is_valid:
             results.append(check_words_to_avoid)
             return results
             #  Do not continue
 
         # Return any combination of these checks
+        check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
+        check_words_requiring_consent = builder.check_words_requiring_consent()
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
 
+        check_designation_mismatch = builder.check_designation()
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
 

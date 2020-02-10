@@ -86,6 +86,7 @@ def validate_name_request(location, entity_type, request_action):
 
     return True
 
+
 @cors_preflight("GET")
 @api.route('/', strict_slashes=False, methods=['GET', 'OPTIONS'])
 class NameAnalysis(Resource):

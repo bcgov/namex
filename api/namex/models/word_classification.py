@@ -43,5 +43,5 @@ class WordClassification(db.Model):
 
 
 class WordClassificationSchema(ma.ModelSchema):
-        class Meta:
-            model = WordClassification
+    class Meta:
+        model = WordClassification
