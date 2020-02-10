@@ -15,6 +15,18 @@ class AbstractApiClient:
     _client = httpx.Client()
     _base_uri = ''
 
+    @classmethod
+    def handle_error(cls, resp, on_error=lambda x: None):
+        on_error(resp)
+        raise ApiError('GET / {}'.format(resp.status_code))
+
+    @classmethod
+    def handle_success(cls, resp, on_success=lambda x: None):
+        for item in resp.json()[1]:
+            print('Result: {}'.format(item))
+
+        on_success(resp)
+
     '''
     async api
     '''
