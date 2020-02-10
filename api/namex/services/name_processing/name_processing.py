@@ -4,6 +4,7 @@ from namex.services.synonyms.synonym \
     import SynonymService
 
 
+# TODO: A mixin for some shared access methods wouldn't hurt...
 class NameProcessingService:
     _synonym_service = None
 
@@ -57,6 +58,18 @@ class NameProcessingService:
 
         # Store clean, preprocessed name to instance
         self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
+
+    '''
+    Set and preprocess a submitted name string using the preprocess_name class method.
+    '''
+    def set_name(self, name):
+        # Process the name
+        self._name_as_submitted = name  # Store the user's submitted name string
+        self.preprocess_name()
+
+    # API for extending implementations
+    def get_name(self):
+        return self._name_as_submitted
 
     def set_preprocessed_name(self, name):
         # Process the name

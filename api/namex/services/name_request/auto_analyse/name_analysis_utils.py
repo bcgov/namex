@@ -133,6 +133,7 @@ def get_flat_list(lst):
     # return subs_list
 
 
+# TODO: This has been moved to SynonymService!
 def is_substitution_word(word):
     df = pd.read_sql_query(
         'SELECT s.synonyms_text FROM synonym s where lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + 'and ' + \
@@ -142,6 +143,7 @@ def is_substitution_word(word):
     return False
 
 
+# TODO: This has been moved to SynonymService!
 def get_substitution_list(word):
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + ' AND ' + \
             's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
@@ -154,6 +156,7 @@ def get_substitution_list(word):
     return None
 
 
+# TODO: This has been moved to SynonymService!
 def get_synonym_list(word):
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?!(sub|stop)$)' + "'" + ' AND ' + \
             's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
@@ -166,6 +169,7 @@ def get_synonym_list(word):
     return None
 
 
+# TODO: This has been moved to SynonymService!
 def get_stop_word_list():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^stop[_ -]+word[s]?' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -177,6 +181,7 @@ def get_stop_word_list():
     return None
 
 
+# TODO: This has been moved to SynonymService!
 def get_prefix_list():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^prefix(es)?' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -188,6 +193,7 @@ def get_prefix_list():
     return None
 
 
+# TODO: This has been moved to SynonymService!
 def get_en_designation_any_all_list():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^(english[_ -]+)?designation[s]?[_-]any' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -199,6 +205,7 @@ def get_en_designation_any_all_list():
     return None
 
 
+# TODO: This has been moved to SynonymService!
 def get_en_designation_end_all_list():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^english[_ -]+designation[s]?[_-]+end' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -304,6 +311,8 @@ def get_entity_type_any_designation(entity_any_designation_dict, all_designation
     return entity_type_any_designation_name
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_RLC_entity_type_end_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^rlc.*(english[_ -]+)+designation[s]?[_-]end' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -315,6 +324,8 @@ def get_en_RLC_entity_type_end_designation():
     return None
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_LL_entity_type_end_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^ll.*(english[_ -]+)+designation[s]?[_-]end' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -326,6 +337,8 @@ def get_en_LL_entity_type_end_designation():
     return None
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_CC_entity_type_end_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^cc.*(english[_ -]+)+designation[s]?[_-]end' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -337,6 +350,8 @@ def get_en_CC_entity_type_end_designation():
     return None
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_UL_entity_type_end_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^ul.*(english[_ -]+)+designation[s]?[_-]end' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -348,6 +363,7 @@ def get_en_UL_entity_type_end_designation():
     return None
 
 
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_BC_entity_type_end_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^bc.*(english[_ -]+)+designation[s]?[_-]end' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -359,6 +375,8 @@ def get_en_BC_entity_type_end_designation():
     return None
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_CR_entity_type_end_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^cr.*(english[_ -]+)+designation[s]?[_-]end' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -370,6 +388,8 @@ def get_en_CR_entity_type_end_designation():
     return None
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_CP_entity_type_any_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^cp.*(english[_ -]+)+designation[s]?[_-]any' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -381,6 +401,8 @@ def get_en_CP_entity_type_any_designation():
     return None
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_XCP_entity_type_any_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^xcp.*(english[_ -]+)+designation[s]?[_-]any' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -392,6 +414,8 @@ def get_en_XCP_entity_type_any_designation():
     return None
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_en_CC_entity_type_any_designation():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^cc.*(english[_ -]+)+designation[s]?[_-]any' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -413,6 +437,8 @@ def get_entity_type_by_value(entity_type_dicts, designation):
     return entity_list
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_fr_designation_end_list():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=french[/_ -]+designation[s]?[/_-]+end)' + "'"
     df = pd.read_sql_query(query, cnx)
@@ -424,6 +450,8 @@ def get_fr_designation_end_list():
     return None
 
 
+# TODO: This has been moved to SynonymService!
+# TODO: These are ALL the same method, with a single different type... consolidate these functions!
 def get_stand_alone_list():
     query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=stand[/_ -]?alone)' + "'"
     df = pd.read_sql_query(query, cnx)
