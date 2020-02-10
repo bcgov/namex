@@ -27,23 +27,6 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
-    # These properties are inherited from the parent
-    # The build director (eg. NameAnalysisDirector) populates these properties
-    # as part of its prepare_data
-    # _synonyms = []
-    # _substitutions = []
-    # _stop_words = []
-    # _designated_end_words = []
-    # _designated_any_words = []
-    #
-    # _in_province_conflicts = []
-    # _all_conflicts = []
-    #
-    # _name = ''
-
-    _distinctive_words = []
-    _descriptive_words = []
-
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
