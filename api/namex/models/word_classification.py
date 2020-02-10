@@ -10,6 +10,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import backref
 
 
+
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
 
