@@ -301,12 +301,6 @@ def get_entity_type_any_designation(entity_any_designation_dict, all_designation
         entity_type_any_designation_name.extend(
             get_entity_type_by_value(entity_any_designation_dict, designation_any))
 
-    all_entity_types = [item for item, count in collections.Counter(entity_type_any_designation_name).items() if
-                        count > 1]
-
-    if all_entity_types:
-        return all_entity_types
-
     return entity_type_any_designation_name
 
 

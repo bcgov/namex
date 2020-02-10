@@ -1,10 +1,5 @@
 from . import db, ma
 
-# TODO: Was previously using this as a workaround for something I think it's safe to delete it now (Lucas)... but check first!
-"""
-@deprecated
-"""
-
 
 class Synonym(db.Model):
     __tablename__ = 'synonym'

@@ -46,7 +46,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_name_is_well_formed(self, list_desc, list_dist, list_none, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -88,8 +87,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
-    def check_words_to_avoid(self, name):
+    def check_words_to_avoid(self, preprocessed_name):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -120,7 +118,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
            list_desc= ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
-
     def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
         result = ProcedureResult()
         result.is_valid = False
@@ -183,8 +180,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
-    def check_words_requiring_consent(self, name):
+    def check_words_requiring_consent(self, preprocessed_name):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -213,8 +209,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
-    def check_designation(self, name, entity_type_user):
+    def check_designation(self, name, entity_type_end_desig_user, entity_type_any_desig_user):
         result = ProcedureResult()
         result.is_valid = True
 
