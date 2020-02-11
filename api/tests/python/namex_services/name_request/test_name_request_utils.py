@@ -372,7 +372,10 @@ def test_get_fr_designation_end_list(client, jwt, app):
 def test_get_designations_in_name(client, jwt, app):
     assert_that(get_designations_in_name(user_input), designation_name_list)
 
+def test_get_designation_by_entity_type(client, jwt, app):
+    assert_that(get_designation_by_entity_type(entity_type), entity_type_designation_list)
 
+'''
 def test_get_stand_alone_list(client, jwt, app):
     assert_that(get_stand_alone_list(), stand_alone_list)
 
