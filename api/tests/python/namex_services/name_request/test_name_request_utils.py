@@ -3,7 +3,7 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import \
     get_prefix_list, get_fr_designation_end_list, \
     get_stand_alone_list, get_words_to_avoid, is_substitution_word, get_classification, get_list_of_lists, \
     get_words_requiring_consent, get_designations_in_name, get_en_designation_any_all_list, \
-    get_en_designation_end_all_list
+    get_en_designation_end_all_list, get_designation_by_entity_type
 
 from hamcrest import *
 import pandas as pd
@@ -218,9 +218,13 @@ name = 'MOUNTAIN ASSOCIATION VIEW LIMITED PARTNERSHIP'
 designation_name_list = [['association'], ['limited partnership']]
 
 user_input = 'MOUNTAIN COOPERATIVE VIEW LIMITED LIABILITY PARTNERSHIP'
-designation_name_list = ['cooperative','limited liability partnership']
+designation_name_list = ['cooperative', 'limited liability partnership']
 
+entity_type = 'CC'
+entity_type_designation_list = [['ccc', 'community contribution company'],
+                                ['limited', 'ltd.', 'incorporated', 'inc.', 'corporation', 'corp']]
 
+'''
 def test_data_frame_to_list(client, jwt, app):
     assert_that(data_frame_to_list(df), list_dist)
     assert_that(data_frame_to_list(df), list_desc)
@@ -265,8 +269,12 @@ def test_get_fr_designation_end_list(client, jwt, app):
 
 def test_get_designations_in_name(client, jwt, app):
     assert_that(get_designations_in_name(user_input), designation_name_list)
+'''
 
+def test_get_designation_by_entity_type(client, jwt, app):
+    assert_that(get_designation_by_entity_type(entity_type), entity_type_designation_list)
 
+'''
 def test_get_stand_alone_list(client, jwt, app):
     assert_that(get_stand_alone_list(), stand_alone_list)
 
@@ -291,3 +299,4 @@ def test_clean_name_words(client, jwt, app):
     assert_that(
         clean_name_words(text, stop_words, en_designation_any_list, en_designation_end_list, fr_designation_end_list, \
                          prefix_list), 'WM 074 VENTURES')
+'''

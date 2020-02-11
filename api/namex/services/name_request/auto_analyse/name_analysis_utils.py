@@ -1,8 +1,10 @@
 import itertools
 import re
+import pandas as pd
 import collections
 from sqlalchemy import create_engine
 from toolz import unique
+
 
 from namex.services.name_request.auto_analyse import field_synonyms, field_special_words
 
@@ -114,13 +116,20 @@ def regex_transform(text, designation_any, designation_end, prefix_list):
     return text
 
 
-def get_list_of_lists(df, field):
-    subs_list = []
-    subs_list = df[field].str.split(',').tolist()
-    subs_list = [item for sublist in subs_list for item in sublist]
-    subs_list = [x.strip() for x in subs_list]
+def get_dataframe_list(df, field):
+    # subs_list = []
+    return df[field].str.split(',').tolist()
 
-    return subs_list
+    # subs_list = [item for sublist in subs_list for item in sublist]
+    # subs_list = [x.strip() for x in subs_list]
+
+    # return dataframe_list
+
+
+def get_flat_list(lst):
+    subs_list = [item for sublist in lst for item in sublist]
+    return [x.strip() for x in subs_list]
+    # return subs_list
 
 
 def is_substitution_word(word):
@@ -137,7 +146,10 @@ def get_substitution_list(word):
             's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
     df = pd.read_sql_query(query, cnx)
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        # return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -147,7 +159,9 @@ def get_synonym_list(word):
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -156,7 +170,9 @@ def get_stop_word_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -165,7 +181,9 @@ def get_prefix_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -174,7 +192,9 @@ def get_en_designation_any_all_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -183,36 +203,92 @@ def get_en_designation_end_all_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
-def get_designations_in_name(name):
-    en_designation_end_all_list = get_en_designation_end_all_list()
-    en_designation_any_all_list = get_en_designation_any_all_list()
+def get_designation_by_entity_type(entity_type):
+    query = 'SELECT s.category, s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^' + entity_type.lower() + '.*(english[_ -]+)+designation[s]?[_-]' + "'"
+    df = pd.read_sql_query(query, cnx)
 
-    designation_end_regex = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
-    designation_any_regex = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
-    regex = r'\b' + designation_any_regex + '(?=\s|$)|' + designation_end_regex + '(?=(\s' + designation_end_regex + ')*$)'
+    if not df.empty:
+        designation_value_list = {re.sub(r'.*(any).*|.*(end).*', r'\1\2', x[0], 0, re.IGNORECASE): ''.join(x[1:]).split(",") for x in df.itertuples(index=False)}
+        return designation_value_list
+
+    return None
+
+
+def get_designation_end_in_name(name):
+    en_designation_end_all_list = get_en_designation_end_all_list()
+    designation_end_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
+    designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
 
     # Returns list of tuples
-    found_designations = re.findall(regex, name.lower())
+    found_designation_end = re.findall(designation_end_regex, name.lower())
 
     # Getting list of lists where the first list contains designations of type "anywhere" and the second list contains designations of type "end".
     # [['association],['limited partnership']
-    designation_any_end_all_lists = [list(elem) for elem in found_designations]
-    designation_any_end_all_lists = ([list(filter(None, lst)) for lst in designation_any_end_all_lists])
+    designation_end_list=[list(elem) for elem in found_designation_end]
+    if any(isinstance(el, list) for el in designation_end_list):
+        designation_end_list=get_flat_list(designation_end_list)
+    designation_end_list = list(filter(None, designation_end_list))
+    designation_end_list = list(dict.fromkeys(designation_end_list))
 
-    return designation_any_end_all_lists
+    return designation_end_list
 
+
+def get_designation_any_in_name(name):
+    en_designation_any_all_list = get_en_designation_any_all_list()
+    designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
+    designation_any_regex= r'\b' + designation_any_rgx + '(?=\s)'
+
+    # Returns list of tuples
+    found_designation_any = re.findall(designation_any_regex, name.lower())
+
+    return found_designation_any
+
+
+def get_wrong_place_any_designations(name):
+    en_designation_any_all_list = get_en_designation_any_all_list()
+
+    designation_end_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
+    designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
+
+    # Returns list of tuples
+    found_designation_end = re.findall(designation_end_regex, name.lower())
+
+    # Getting list of lists where the first list contains designations of type "anywhere" and the second list contains designations of type "end".
+    # [['association],['limited partnership']
+    wrong_designation_end_list = [list(elem) for elem in found_designation_end]
+    if any(isinstance(el, list) for el in wrong_designation_end_list):
+        wrong_designation_end_list = get_flat_list(wrong_designation_end_list)
+    wrong_designation_end_list = list(filter(None, wrong_designation_end_list))
+    wrong_designation_end_list = list(dict.fromkeys(wrong_designation_end_list))
+
+    return wrong_designation_end_list
+
+
+def get_wrong_place_end_designations(name):
+    en_designation_end_all_list = get_en_designation_end_all_list()
+    designation_any_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
+    designation_any_regex= r'\b' + designation_any_rgx + '(?=\s)'
+
+    # Returns list of tuples
+    wrong_designation_any_list = re.findall(designation_any_regex, name.lower())
+
+    return wrong_designation_any_list
 
 def get_entity_type_end_designation(entity_end_designation_dict, all_designation_any_end_list):
     entity_type_end_designation_name = list()
+    for designation_end in all_designation_any_end_list:
+        entity_type_end_designation_name.extend(get_entity_type_by_value(entity_end_designation_dict, designation_end))
 
-    for designation_end_list in all_designation_any_end_list[1:]:
-        for designation_end in designation_end_list:
-            entity_type_end_designation_name.append(
-                get_entity_type_by_value(entity_end_designation_dict, designation_end))
+    all_entity_types = [item for item, count in collections.Counter(entity_type_end_designation_name).items() if count > 1]
+
+    if all_entity_types:
+        return all_entity_types
 
     return entity_type_end_designation_name
 
@@ -220,11 +296,17 @@ def get_entity_type_end_designation(entity_end_designation_dict, all_designation
 def get_entity_type_any_designation(entity_any_designation_dict, all_designation_any_end_list):
     entity_type_any_designation_name = list()
 
-    for designation_any_list in all_designation_any_end_list[:1]:
-        for designation_any in designation_any_list:
-            entity_type_any_designation_name.append(get_entity_type_by_value(entity_any_designation_dict, designation_any))
+    for designation_any in all_designation_any_end_list:
+        entity_type_any_designation_name.extend(
+            get_entity_type_by_value(entity_any_designation_dict, designation_any))
 
-    return  entity_type_any_designation_name
+    all_entity_types = [item for item, count in collections.Counter(entity_type_any_designation_name).items() if
+                        count > 1]
+
+    if all_entity_types:
+        return all_entity_types
+
+    return entity_type_any_designation_name
 
 
 def get_en_RLC_entity_type_end_designation():
@@ -232,7 +314,9 @@ def get_en_RLC_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -241,7 +325,9 @@ def get_en_LL_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -250,7 +336,9 @@ def get_en_CC_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -259,7 +347,9 @@ def get_en_UL_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -268,7 +358,9 @@ def get_en_BC_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -277,7 +369,9 @@ def get_en_CR_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -286,7 +380,9 @@ def get_en_CP_entity_type_any_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -295,7 +391,9 @@ def get_en_XCP_entity_type_any_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -304,7 +402,9 @@ def get_en_CC_entity_type_any_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -323,7 +423,9 @@ def get_fr_designation_end_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -332,7 +434,9 @@ def get_stand_alone_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        return get_list_of_lists(df, field_synonyms)
+        response = get_dataframe_list(df, field_synonyms)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -341,8 +445,9 @@ def get_words_to_avoid():
     df = pd.read_sql_query(query, cnx_wc)
 
     if not df.empty:
-        words_to_avoid_list = get_list_of_lists(df, field_special_words)
-        return words_to_avoid_list
+        response = get_dataframe_list(df, field_special_words)
+        response = get_flat_list(response)
+        return response
     return None
 
 
@@ -352,7 +457,9 @@ def get_words_requiring_consent():
     df = pd.read_sql_query(query, cnx_wc)
 
     if not df.empty:
-        return get_list_of_lists(df, field_special_words)
+        response = get_dataframe_list(df, field_special_words)
+        response = get_flat_list(response)
+        return response
 
     return None
 
