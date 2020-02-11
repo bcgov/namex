@@ -1,5 +1,3 @@
-from enum import Enum
-
 # Modes
 MODE_SYNS = 'Syns'
 MODE_SUBS = 'Subs'
@@ -9,9 +7,3 @@ MODE_STOP = 'Stop'
 dsg_end = 'Designations_end'
 dsg_any = 'Designations_any'
 stop_w = 'Stop Words'
-
-
-class DesignationPositionCodes(Enum):
-    START = 'start'
-    END = 'end'
-    ANY = 'any'

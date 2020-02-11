@@ -15,8 +15,10 @@ from namex.utils.logging import setup_logging
 from ..auto_analyse.analysis_response import AnalysisResponse
 
 from namex.services.name_request.auto_analyse import \
-    ValidLocations, AnalysisResultCodes, AnalysisRequestActions, \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
+    AnalysisResultCodes, AnalysisRequestActions
+
+from namex.constants import \
+    ValidLocations, BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
 from namex.services.name_request.name_analysis_builder_v1.name_analysis_builder import NameAnalysisBuilder
 from namex.services.name_request.auto_analyse.auto_analyse import AutoAnalyseService

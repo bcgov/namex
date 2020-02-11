@@ -22,10 +22,9 @@ class ValidLocations(Enum):
 class BCProtectedNameEntityTypes(Enum):
     BC_CORPORATION = 'CR'
     BC_UNLIMITED_LIABILITY_COMPANY = 'UL'
-    # TODO: Arturo why did you comment these out?
-    # BC_COOPERATIVE = 'CP'
-    # BC_BENEFIT_COMPANY = 'BC'
-    # BC_COMMUNITY_CONTRIBUTION_COMPANY = 'CC'
+    BC_COOPERATIVE = 'CP'
+    BC_BENEFIT_COMPANY = 'BC'
+    BC_COMMUNITY_CONTRIBUTION_COMPANY = 'CC'
 
     @classmethod
     def list(cls):
@@ -34,10 +33,6 @@ class BCProtectedNameEntityTypes(Enum):
             values.append(item.value)
 
         return values
-
-    @classmethod
-    def has_value(cls, value):
-        return value in cls._value2member_map_
 
 
 class BCUnprotectedNameEntityTypes(Enum):
@@ -55,17 +50,12 @@ class BCUnprotectedNameEntityTypes(Enum):
 
         return values
 
-    @classmethod
-    def has_value(cls, value):
-        return value in cls._value2member_map_
 
 class XproUnprotectedNameEntityTypes(Enum):
     XPRO_CORPORATION = 'XCR'
     XPRO_UNLIMITED_LIABILITY_COMPANY = 'XUL'
-    # TODO: Arturo, why is XCP now commented out?
-    # XPRO_COOPERATIVE = 'XCP'
-    # XPRO_LIMITED_LIABILITY_COMPANY = 'XLC'
-    XPRO_LIMITED_LIABILITY_COMPANY = 'RLC'  # TODO: Where is this code!
+    XPRO_COOPERATIVE = 'XCP'
+    XPRO_LIMITED_LIABILITY_COMPANY = 'XLC'
     XPRO_LIMITED_PARTNERSHIP = 'XLP'
     XPRO_LIMITED_LIABILITY_PARTNERSHIP = 'XLL'
 
@@ -76,7 +66,3 @@ class XproUnprotectedNameEntityTypes(Enum):
             values.append(item.value)
 
         return values
-
-    @classmethod
-    def has_value(cls, value):
-        return value in cls._value2member_map_
