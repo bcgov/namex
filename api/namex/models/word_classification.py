@@ -51,6 +51,7 @@ def get_classification(word):
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
 
+    # TODO: Why don't I see this in the word_classification table? I added an ID col to make this work...
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     classification = db.Column('word_classification',db.String(4),default='NONE',nullable=False,index=True)
     word = db.Column('word', db.String(1024), nullable=False, index=True)
@@ -62,7 +63,7 @@ class WordClassification(db.Model):
     start_dt = db.Column('start_dt', db.DateTime(timezone=True))
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    last_update_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
+    last_updated_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approved_by])
@@ -76,19 +77,13 @@ class WordClassification(db.Model):
                 "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
 
     # TODO: Fix this it's not working...
-    '''
-    Note: we convert to lower case as word text in the DB will be in all caps.
-    '''
     @classmethod
     def find_word_classification(cls, word):
-        results = db.session.query(cls.word, cls.classification) \
-            .filter(func.lower(cls.word) == func.lower(word)) \
-            .filter(cls.end_dt == None) \
-            .filter(cls.start_dt <= date.today()) \
-            .filter(cls.approved_dt <= date.today()).all()
-        print(word)
-        print(list(map(lambda x: x.classification, results)))
-        return results
+        # TODO: Can we return more than one result?
+        return cls.query.filter(WordClassification.word == word).first() #\
+                   #.filter(or_(cls.end_dt is None, datetime.date(cls.end_dt) > date.today()))\
+                   # .filter(datetime.date(cls.start_dt) <= date.today())\
+                   # .filter(cls.approved_dt) <= date.today().all()
 
     def save_to_db(self):
         db.session.add(self)

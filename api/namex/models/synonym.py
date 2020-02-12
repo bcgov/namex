@@ -1,5 +1,7 @@
 from . import db, ma
 
+from enum import Enum
+
 import pandas as pd
 from sqlalchemy import create_engine
 
@@ -27,6 +29,8 @@ postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbnam
 
 cnx = create_engine(postgres_str)
 cnx_wc = create_engine(postgres_wc_str)
+
+
 
 
 # The class that corresponds to the database table for synonyms.
@@ -76,18 +80,26 @@ class Synonym(db.Model):
         return False
 
     @classmethod
-    def get_substitution_list(cls, word):
-        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + ' AND ' + \
+    def get_substitution_list(cls, word=None):
+        if word:
+            query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + ' AND ' + \
                 's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
+        else:
+            query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'"
+
         df = pd.read_sql_query(query, cnx)
         if not df.empty:
             return get_list_of_lists(df, field_synonyms)
         return None
 
     @classmethod
-    def get_synonym_list(cls, word):
-        return cls.query_category("'" + '(?!(sub|stop)$)' + "'" + ' AND ' + \
-            's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")  # TODO: That semi colon doesn't look right in there... confirm!
+    def get_synonym_list(cls, word=None):
+        # TODO: That semi colon doesn't look right in there... confirm!
+        if word:
+            return cls.query_category("'" + '(?!(sub|stop)$)' + "'" + ' AND ' + \
+                's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")
+
+        return cls.query_category("'" + '(?!(sub|stop)$)' + "'")
 
     @classmethod
     def get_stop_word_list(cls):
@@ -131,18 +143,20 @@ class Synonym(db.Model):
         code_str = entity_type_code.value
         position_str = position_code.value
 
-        query = '^' + code_str + '.*(' + lang + '[_ -]+)+designation[s]?[_-]' + position_str + "'"
-        return cls.query_category(cls, query)
+        query = "'" + '^' + code_str.lower() + '.*(' + lang.lower() + '[_ -]+)+designation[s]?[_-]' + position_str.lower() + "'"
+        results = cls.query_category(query)
+        return results
 
     # TODO: Use real code types and complete this
     @classmethod
-    def get_entity_type_designations(cls, entity_type_code, position_codes, lang='english'):
-        code_str = entity_type_code.value
-        position_str = None
+    def get_entity_type_designations(cls, entity_type_codes, position_code, lang='english'):
+        designations = dict.fromkeys(map(lambda c: c.value, entity_type_codes), [])
 
-        for position_code in position_codes:
-            query = '^' + code_str + '.*(' + lang + '[_ -]+)+designation[s]?[_-]' + position_str + "'"
-            cls.query_category(cls, query)
+        for code in entity_type_codes:
+            code_str = code.value
+            designations[code_str] = cls.get_entity_type_designation(code, position_code, lang)
+
+        return designations
 
 
 class SynonymSchema(ma.ModelSchema):

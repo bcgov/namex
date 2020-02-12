@@ -2,11 +2,7 @@
 
 """
 from . import db, ma
-from datetime import datetime, date
-from sqlalchemy.orm import backref
-from sqlalchemy import or_
 
-import re
 import pandas as pd
 from sqlalchemy import create_engine, Column
 
@@ -71,3 +67,11 @@ class VirtualWordCondition(db.Model):
     rc_instructions = Column(db.VARCHAR(1000))
     rc_consent_required = db.Column(db.Boolean(), default=False)
     rc_allow_use = db.Column(db.Boolean(), default=True)
+
+    @classmethod
+    def get_words_to_avoid(cls):
+        return get_words_to_avoid()
+
+    @classmethod
+    def get_words_requiring_consent(cls):
+        return get_words_requiring_consent()
