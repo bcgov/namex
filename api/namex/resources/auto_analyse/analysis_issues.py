@@ -385,7 +385,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
     status_text = 'Further Action Required'
     issue = NameAnalysisIssue(
         issueType=issue_type,
-        line1=None,
+        line1="Too similar to an existing name.",
         line2=None,
         consentingBody=None,
         designations=None,
@@ -432,7 +432,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                 button='',
                 checkbox='',
                 heading='Option 1',
-                line1="Add a word to the beginning of the name that sets it apart like a person’s name or initials.",
+                line1="Add a word to the beginning of the name that sets it apart like a person's name or initials.",
                 line2="Or remove ${some-word} and replace it with a different word"
             ),
             Setup(
