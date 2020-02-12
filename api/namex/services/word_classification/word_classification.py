@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = 'BVict31C'
+POSTGRES_PASSWORD = ''
 POSTGRES_DBNAME = 'namex-local'
 POSTGRES_DBNAME_WC = 'namex-local'
 
