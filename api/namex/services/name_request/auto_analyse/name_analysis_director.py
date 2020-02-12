@@ -41,6 +41,7 @@ class NameAnalysisDirector:
     # Name + tokens
     _name_as_submitted = ''
     _preprocessed_name = ''
+    # _unclassifiable_words = []  # TODO: Or do we add these to list_none?
     _list_name_words = []
     _list_dist_words = []
     _list_desc_words = []
@@ -143,20 +144,24 @@ class NameAnalysisDirector:
             classification = wc_svc.find_one(word)
             if classification:
                 new_row = {'word': word.lower().strip(), 'word_classification': classification.strip()}
-                cf = cf.append(new_row, ignore_index=True)
+
             else:
                 #  No classification found
                 print('No word classification found for: ' + word)
-                pass
+                new_row = {'word': word.lower().strip(), 'word_classification': 'none'}
+
+            cf = cf.append(new_row, ignore_index=True)
 
         # TODO: If we don't find a classification, we should be adding a record and return the unclassified word issue
         # TODO: Related to the above, we will need to pre-populate a list of classified words
 
         # Store results to instance
-        self._list_name_words, self._list_desc_words, self._list_none_words = data_frame_to_list(cf)
+        # self._list_name_words, # TODO: data_frame_to_list used to return _list_name words... why did we move away from that?
+        self._list_dist_words, self._list_desc_words, self._list_none_words = data_frame_to_list(cf)
 
         # Store clean, preprocessed name to instance
         self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
+        self.set_builder_dicts()  # Update builder dicts
 
     '''
     Prepare any data required by the analysis builder.
@@ -174,6 +179,9 @@ class NameAnalysisDirector:
         self._in_province_conflicts = self._solr_conflicts_service.get_in_province_conflicts()
         self._all_conflicts = self._solr_conflicts_service.get_all_conflicts()
 
+        self.set_builder_dicts()
+
+    def set_builder_dicts(self):
         self._builder.set_dicts(
             synonyms=self._synonyms,
             substitutions=self._substitutions,
@@ -201,7 +209,9 @@ class NameAnalysisDirector:
             self.get_list_dist(),
             self.get_list_desc(),
             self.get_list_none(),
-            self.get_list_name()
+            # TODO: We've already split the name in the director (get_list_name) why are we using the string here?
+            # self.get_list_name()
+            self.get_preprocessed_name()
         )
 
         if not check_name_is_well_formed.is_valid:
