@@ -85,7 +85,7 @@
                                         "name": "PG_USER",
                                         "valueFrom": {
                                             "secretKeyRef": {
-                                                "name": "postgresql-test",
+                                                "name": "postgresql-${ENV_TAG}",
                                                 "key": "database-user"
                                             }
                                         }
@@ -94,7 +94,7 @@
                                         "name": "PG_PASSWORD",
                                         "valueFrom": {
                                             "secretKeyRef": {
-                                                "name": "postgresql-test",
+                                                "name": "postgresql-${ENV_TAG}",
                                                 "key": "database-password"
                                             }
                                         }

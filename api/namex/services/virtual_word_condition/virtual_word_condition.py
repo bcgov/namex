@@ -1,0 +1,2 @@
+class VirtualWordConditionService:
+    pass

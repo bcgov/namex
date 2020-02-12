@@ -1,3 +1,5 @@
+import abc
+
 from .name_analysis_utils import clean_name_words
 
 
@@ -9,6 +11,8 @@ class ProcedureResult:
 
 
 class AbstractNameAnalysisBuilder:
+    __metaclass__ = abc.ABCMeta
+
     _director = None
 
     # Properties specific to this director implementation
@@ -28,35 +32,12 @@ class AbstractNameAnalysisBuilder:
     _list_desc_words = []
     _list_none_words = []
 
-    def set_name(self, name):
-        self._name = name
-
-    def get_name(self):
-        return self._name
-
-    def set_list_name(self, list_words):
-        self._list_name_words = list_words
-
-    def get_list_name(self):
-        return self._list_name_words
-
-    def set_list_dist(self, list_words):
-        self._list_dist_words = list_words
-
-    def get_list_dist(self):
-        return self._list_dist_words
-
-    def set_list_desc(self, list_words):
-        self._list_desc_words = list_words
-
-    def get_list_desc(self):
-        return self._list_desc_words
-
-    def get_list_none(self):
-        return self._list_none_words
-
-    def set_list_none(self, list_words):
-        self._list_none_words = list_words
+    def set_name(self, **kwargs):
+        self._name = kwargs.get('name')
+        self._list_name_words = kwargs.get('list_name')
+        self._list_dist_words = kwargs.get('list_dist')
+        self._list_desc_words = kwargs.get('list_desc')
+        self._list_none_words = kwargs.get('list_none')
 
     def set_dicts(self, **kwargs):
         self._synonyms = kwargs.get('synonyms')
@@ -69,51 +50,59 @@ class AbstractNameAnalysisBuilder:
         self._in_province_conflicts = kwargs.get('in_province_conflicts')
         self._all_conflicts = kwargs.get('all_conflicts')
 
+    # API for extending implementations
+    def get_name(self):
+        return self._name
+
+    def get_list_name(self):
+        return self._list_name_words
+
+    def get_list_dist(self):
+        return self._list_dist_words
+
+    def get_list_desc(self):
+        return self._list_desc_words
+
+    def get_list_none(self):
+        return self._list_none_words
+
+    def get_synonyms(self):
+        return self._synonyms
+
+    def get_substitutions(self):
+        return self._substitutions
+
+    def get_stop_words(self):
+        return self._stop_words
+
+    def get_designated_end_words(self):
+        return self._designated_end_words
+
+    def get_designated_any_words(self):
+        return self._designated_any_words
+
     def __init__(self, director):
         # Store a reference to the director, we will need to access methods on the director instance to do things
         # like updating the classifications table
         self._director = director
+        self._word_classification_service = director.get_word_classification_service()
 
-    def preprocess_name(self):
-        if not self.get_name():
-            return  # TODO: Should we throw an error or something?
+    def get_word_classification_service(self):
+        return self._word_classification_service
 
-        words = self.get_name().lower()
+    # Just a wrapped call to the API's getClassification
+    def get_word_classification(self, word):
+        return self._word_classification_service.find_one(word)
 
-        words = ' '.join([word for word in words.split(" ") if word not in self._stop_words])
-        # TODO: clean_name_words mostly applies regex substitutions...
-        #  but are we moving the regex out of the app and into the database?
-        tokens = clean_name_words(words)
-
-        previous = tokens
-        for i in range(len(tokens)):
-            tokens = clean_name_words(tokens, self._designated_any_words, self._designated_end_words)
-            if previous == tokens:
-                break
-            else:
-                previous = tokens
-
-        tokens = tokens.split()
-        return [x.upper() for x in tokens if x]
-
-    '''
-    This method is NOT abstract and should NEVER be overridden
-    @return ProcedureResult
-    '''
-    def execute_analysis(self):
-        return self.do_analysis()
-
-    '''
-    This method can be overridden in extending Builder classes if a different process is desired
-    @return ProcedureResult
-    '''
-    def do_analysis(self):
-        raise NotImplementedError('Can not perform name analysis, do_analysis is not implemented!')
+    # Just a wrapped call to the API's updateClassification
+    def update_word_classification(self, word_classification):
+        return self._word_classification_service.update(word_classification)
 
     '''
     Check to see if a provided name is valid
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, company_name):
         return ProcedureResult(is_valid=True)
 
@@ -121,6 +110,7 @@ class AbstractNameAnalysisBuilder:
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def check_words_to_avoid(self):
         return ProcedureResult(is_valid=True)
 
@@ -128,6 +118,7 @@ class AbstractNameAnalysisBuilder:
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def search_conflicts(self, list_dist, list_desc):
         return ProcedureResult(is_valid=True)
 
@@ -147,6 +138,7 @@ class AbstractNameAnalysisBuilder:
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def check_words_requiring_consent(self):
         return ProcedureResult(is_valid=True)
 
@@ -154,15 +146,6 @@ class AbstractNameAnalysisBuilder:
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+    @abc.abstractmethod
     def check_designation(self):
         return ProcedureResult(is_valid=True)
-
-    # Just a wrapped call to the director's getClassification
-    # The director's getClassification could be linked to WordClassificationService
-    def get_word_classification(self, word):
-        return self._director.get_word_classification(word)
-
-    # Just a wrapped call to the director's updateClassification
-    # The director's updateClassification could be linked to WordClassificationService
-    def update_word_classification(self):
-        return self._director.update_word_classification()
