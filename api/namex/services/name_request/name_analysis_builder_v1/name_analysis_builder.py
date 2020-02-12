@@ -229,7 +229,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     @deprecated The DIRECTOR CONTROLS THE BUILD PROCESS
     '''
-    '''def do_analysis(self, name):
+    '''
+    def do_analysis(self, name):
         result = ProcedureResult()
         result.is_valid = False
 
@@ -285,4 +286,5 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         else:
             return result
 
-            return ProcedureResult(is_valid=True)'''
+            return ProcedureResult(is_valid=True)
+    '''

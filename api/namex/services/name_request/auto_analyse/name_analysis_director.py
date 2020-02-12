@@ -141,8 +141,13 @@ class NameAnalysisDirector:
         # Get the word classification for each word in the supplied name name
         for word in self._list_name_words:
             classification = wc_svc.find_one(word)
-            new_row = {'word': word.lower().strip(), 'word_classification': classification.strip()}
-            cf = cf.append(new_row, ignore_index=True)
+            if classification:
+                new_row = {'word': word.lower().strip(), 'word_classification': classification.strip()}
+                cf = cf.append(new_row, ignore_index=True)
+            else:
+                #  No classification found
+                print('No word classification found for: ' + word)
+                pass
 
         # TODO: If we don't find a classification, we should be adding a record and return the unclassified word issue
         # TODO: Related to the above, we will need to pre-populate a list of classified words

@@ -1,12 +1,6 @@
-from namex.exceptions import BusinessException
+# from namex.exceptions import BusinessException
 from namex.models import db, WordClassification, WordClassificationSchema
-# TODO: Import LEAR schemas?
-# from namex.schemas import ...
-# from namex.services import SVC_ROLE, STAFF_ROLE, authorized, queue
-# from . import queue
 
-import re
-import pandas as pd
 from sqlalchemy import create_engine
 
 POSTGRES_ADDRESS = 'localhost'
@@ -33,6 +27,9 @@ cnx_wc = create_engine(postgres_wc_str)
 
 
 class WordClassificationService:
+    def __init__(self):
+        pass
+
     def find_one(self, word=None):
         return WordClassification.find_word_classification(word)
 
