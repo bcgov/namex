@@ -20,6 +20,7 @@ class AbstractNameAnalysisBuilder:
 class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
     __metaclass__ = abc.ABCMeta
 
+    _entity_type = None
     _name = ''
     _list_name_words = []
     _list_dist_words = []
@@ -32,6 +33,14 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
         self._list_dist_words = kwargs.get('list_dist')
         self._list_desc_words = kwargs.get('list_desc')
         self._list_none_words = kwargs.get('list_none')
+
+    # TODO: Raise an exception if entity type is not set!!!
+    # TODO: Validate entity types against valid types
+    def get_entity_type(self):
+        return self._entity_type
+
+    def set_entity_type(self, entity_type):
+        self._entity_type = entity_type
 
     def set_dicts(self, **kwargs):
         self._synonyms = kwargs.get('synonyms')

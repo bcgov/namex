@@ -3,16 +3,11 @@ Virtual word classification classifies all words in a name approved by an examin
 """
 
 from . import db, ma
-
-import pandas as pd
-from datetime import datetime, date
-from sqlalchemy import func, or_
-from sqlalchemy.orm import backref
-
-
 import re
 import pandas as pd
-from sqlalchemy import create_engine
+from datetime import datetime, date
+from sqlalchemy import func, create_engine
+from sqlalchemy.orm import backref
 
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
@@ -63,7 +58,7 @@ class WordClassification(db.Model):
     start_dt = db.Column('start_dt', db.DateTime(timezone=True))
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    last_updated_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
+    last_updated_dt = db.Column('last_updated_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approved_by])
@@ -77,10 +72,14 @@ class WordClassification(db.Model):
                 "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
 
     # TODO: Fix this it's not working...
+    '''
+    Note: we convert to lower case as word text in the DB will be in all caps.
+    '''
     @classmethod
     def find_word_classification(cls, word):
         # TODO: Can we return more than one result?
-        return cls.query.filter(WordClassification.word == word).first() #\
+        print(cls.query.filter(func.lower(WordClassification.word) == func.lower(word)))
+        return cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).first() #\
                    #.filter(or_(cls.end_dt is None, datetime.date(cls.end_dt) > date.today()))\
                    # .filter(datetime.date(cls.start_dt) <= date.today())\
                    # .filter(cls.approved_dt) <= date.today().all()

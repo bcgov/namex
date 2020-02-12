@@ -43,7 +43,7 @@ ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
 #   name,
 #   location, one of: [‘bc’, ‘ca’, ‘us’, or ‘it’],
 #   entity_type: abbreviation. convention not finalized yet.
-#   request_type, one of: [‘new’, ‘existing’, ‘continuation’]
+#   request_action, one of: [‘new’, ‘existing’, ‘continuation’]
 # }
 
 
@@ -92,7 +92,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD BLOGGINS INC.',
         'location': 'BC',
         'entity_type': 'DBA',
-        'request_type': 'NEW'
+        'request_action': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -116,7 +116,7 @@ def test_too_many_words_request_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',
         'location': 'BC',
         'entity_type': 'DBA',
-        'request_type': 'NEW'
+        'request_action': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -149,7 +149,7 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',
         'location': 'BC',
         'entity_type': 'DBA',
-        'request_type': 'NEW'
+        'request_action': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -173,7 +173,7 @@ def test_designation_mismatch_request_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',
         'location': 'BC',
         'entity_type': 'DBA',
-        'request_type': 'NEW'
+        'request_action': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -197,7 +197,7 @@ def test_name_requires_consent_request_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',
         'location': 'BC',
         'entity_type': 'DBA',
-        'request_type': 'NEW'
+        'request_action': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -224,7 +224,7 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',
         'location': 'BC',
         'entity_type': 'DBA',
-        'request_type': 'NEW'
+        'request_action': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())

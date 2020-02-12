@@ -39,6 +39,7 @@ class NameAnalysisDirector:
     _designated_any_words = []
 
     # Name + tokens
+    _entity_type = None
     _name_as_submitted = ''
     _preprocessed_name = ''
     # _unclassifiable_words = []  # TODO: Or do we add these to list_none?
@@ -67,6 +68,14 @@ class NameAnalysisDirector:
 
     def use_builder(self, builder):
         self.builder = builder if builder else None
+
+    # TODO: Raise an exception if entity type is not set!!!
+    # TODO: Validate entity types against valid types
+    def get_entity_type(self):
+        return self._entity_type
+
+    def set_entity_type(self, entity_type):
+        self._entity_type = entity_type
 
     '''
     Set and preprocess a submitted name string using the preprocess_name class method.
@@ -139,9 +148,10 @@ class NameAnalysisDirector:
 
         # Get the word classification for each word in the supplied name name
         for word in self._list_name_words:
-            classification = wc_svc.find_one(word)
-            if classification:
-                new_row = {'word': word.lower().strip(), 'word_classification': classification.strip()}
+            word_classification = wc_svc.find_one(word)
+            if word_classification:
+                # TODO: Standardize casing!!! Lower everywhere is not a good long term solution :)
+                new_row = {'word': word.lower().strip(), 'word_classification': word_classification.classification.lower().strip()}
 
             else:
                 #  No classification found
@@ -159,7 +169,7 @@ class NameAnalysisDirector:
 
         # Store clean, preprocessed name to instance
         self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
-        self.set_builder_dicts()  # Update builder dicts
+        self.configure_builder()  # Update builder dicts
 
     '''
     Prepare any data required by the analysis builder.
@@ -177,9 +187,10 @@ class NameAnalysisDirector:
         self._in_province_conflicts = self._solr_conflicts_service.get_in_province_conflicts()
         self._all_conflicts = self._solr_conflicts_service.get_all_conflicts()
 
-        self.set_builder_dicts()
+        self.configure_builder()
 
-    def set_builder_dicts(self):
+    def configure_builder(self):
+        self._builder.set_entity_type(self._entity_type)
         self._builder.set_dicts(
             synonyms=self._synonyms,
             substitutions=self._substitutions,

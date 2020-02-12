@@ -45,7 +45,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
-        check_words_to_avoid = builder.check_words_to_avoid(self.get_list_name())
+        # TODO: Use the list_name array, don't use a string in the method!
+        # check_words_to_avoid = builder.check_words_to_avoid(self.get_list_name())  # This is correct
+        check_words_to_avoid = builder.check_words_to_avoid(self.get_preprocessed_name())  # This is incorrect
         if not check_words_to_avoid.is_valid:
             results.append(check_words_to_avoid)
 
@@ -54,13 +56,17 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
-        check_words_requiring_consent = builder.check_words_requiring_consent()
+        # TODO: Use the list_name array, don't use a string in the method!
+        # check_words_requiring_consent = builder.check_words_requiring_consent(self.get_list_name())  # This is correct
+        check_words_requiring_consent = builder.check_words_requiring_consent(self.get_preprocessed_name())  # This is incorrect
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
 
-        check_designation_mismatch = builder.check_designation()
-        if not check_designation_mismatch.is_valid:
-            results.append(check_designation_mismatch)
+        # TODO: Use the list_name array, don't use a string in the method!
+        # check_designation_mismatch = builder.check_designation(self.get_list_name(), self.get_entity_type())  # This is correct
+        check_designation_mismatch = builder.check_designation(self.get_preprocessed_name(), self.get_entity_type())  # This is incorrect
+        # if not check_designation_mismatch.is_valid:
+            # results.append(check_designation_mismatch)
 
         results.append(ProcedureResult(is_valid=True))
 
