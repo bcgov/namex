@@ -1,3 +1,5 @@
+import jsonpickle
+import json
 from enum import Enum
 
 # Limit number of words to analyse
@@ -42,26 +44,8 @@ class AnalysisRequestActions(str, Enum):
 
         return values
 
-class AnalysisRequestActions(Enum):
-    NEW = 'NEW'  # Start a new business (NAME PROTECTION)
-    AML = 'AML'  # Amalgamate (NAME PROTECTION, BC ONLY)
-    DBA = 'DBA'  # Get a new trade name (NO NAME PROTECTION)
-    CHG = 'CHG'  # Change your name (it's coming stub it out)
-    MVE = 'MVE'  # Move your business
-    CNV = 'CNV'  # Convert to another structure
-    REH = 'REH'  # Restore from historical business
-    REN = 'REN'  # Restore by starting a new business
 
-    @classmethod
-    def list(cls):
-        values = []
-        for item in cls:
-            values.append(item.value)
-
-        return values
-
-
-class AnalysisResultCodes(Enum):
+class AnalysisResultCodes(str, Enum):
     VALID_NAME = 'auto_approved'
     ADD_DISTINCTIVE_WORD = 'add_distinctive'
     ADD_DESCRIPTIVE_WORD = 'add_descriptive'
@@ -71,6 +55,10 @@ class AnalysisResultCodes(Enum):
     NAME_REQUIRES_CONSENT = 'consent_required'
     CONTAINS_UNCLASSIFIABLE_WORD = 'unclassified_word'
     CORPORATE_CONFLICT = 'corp_conflict'
+
+    def __getstate__(self):
+        pickled_state = str(self.value)
+        return pickled_state
 
     @classmethod
     def list(cls):
