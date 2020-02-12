@@ -1,3 +1,5 @@
+from datetime import date
+
 from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
 # Import DTOs
@@ -18,7 +20,7 @@ class AnalysisResponseIssue:
         pass
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         return cls.issue
 
 
@@ -39,7 +41,7 @@ class ValidName(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
         return issue
 
@@ -61,7 +63,7 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
 
         issue.nameActions = [
@@ -92,7 +94,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
 
         issue.nameActions = [
@@ -123,7 +125,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
 
         issue.nameActions = [
@@ -152,7 +154,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
 
         issue.nameActions = [
@@ -181,7 +183,7 @@ class TooManyWordsIssue(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
         return issue
 
@@ -206,7 +208,7 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
 
         issue.nameActions = [
@@ -235,7 +237,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
 
         issue.nameActions = [
@@ -264,7 +266,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
     )
 
     @classmethod
-    def create_issue(cls):
+    def create_issue(cls, procedure_result):
         issue = cls.issue
 
         issue.nameActions = [
@@ -279,13 +281,16 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         ]
 
         # Create conflicts
-        conflict = Conflict(
-            name='Test Conflict',
-            date=''
-        )
+        # TODO: Check if it is a list
+        if procedure_result.values:
+            issue.conflicts = []
 
-        issue.conflicts = []
-        issue.conflicts.append(conflict)
+            for value in procedure_result.values:
+                conflict = Conflict(
+                    name=value,
+                    date=date.today()
+                )
+
+                issue.conflicts.append(conflict)
 
         return issue
-
