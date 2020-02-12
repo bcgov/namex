@@ -1,3 +1,5 @@
+import jsonpickle
+import json
 from enum import Enum
 
 # Define service variables
@@ -9,7 +11,7 @@ field_synonyms = 'synonyms_text'
 field_special_words = 'rc_words'
 
 
-class AnalysisRequestActions(Enum):
+class AnalysisRequestActions(str, Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)
     AML = 'AML'  # Amalgamate (NAME PROTECTION, BC ONLY)
     DBA = 'DBA'  # Get a new trade name (NO NAME PROTECTION)
@@ -28,7 +30,7 @@ class AnalysisRequestActions(Enum):
         return values
 
 
-class AnalysisResultCodes(Enum):
+class AnalysisResultCodes(str, Enum):
     VALID_NAME = 'auto_approved'
 
     ADD_DISTINCTIVE_WORD = 'add_distinctive'  # Well formed
@@ -43,6 +45,10 @@ class AnalysisResultCodes(Enum):
     WORD_TO_AVOID = 'word_to_avoid'
     DESIGNATION_MISMATCH = 'designation_mismatch'
     NAME_REQUIRES_CONSENT = 'consent_required'
+
+    def __getstate__(self):
+        pickled_state = str(self.value)
+        return pickled_state
 
     @classmethod
     def list(cls):
