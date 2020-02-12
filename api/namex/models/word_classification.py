@@ -51,6 +51,7 @@ def get_classification(word):
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
 
+    # TODO: Why don't I see this in the word_classification table? I added an ID col to make this work...
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     classification = db.Column('word_classification',db.String(4),default='NONE',nullable=False,index=True)
     word = db.Column('word', db.String(1024), nullable=False, index=True)
