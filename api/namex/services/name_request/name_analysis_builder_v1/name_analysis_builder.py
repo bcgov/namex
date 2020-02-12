@@ -60,9 +60,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
 
         if len(list_none) > 0:
+            unclassified_words_list_response = []
+            name_list = name.split()
+
+            for idx, token in enumerate(name_list):
+                if any(token in word for word in list_none):
+                    unclassified_words_list_response.append({idx: token})
+
             result.is_valid = False
             result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.value = list_none
+            result.value = unclassified_words_list_response
         elif len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
@@ -72,12 +79,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
-        elif list_desc == list_dist:
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-        elif list_dist + list_desc != name:
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
 
         return result
 
@@ -89,12 +90,19 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        words_to_avoid_list = get_words_to_avoid()
+        all_words_to_avoid_list = get_words_to_avoid()
+        words_to_avoid_list = []
+
+        for words_to_avoid in all_words_to_avoid_list:
+            if words_to_avoid.lower() in name.lower():
+                words_to_avoid_list.append(words_to_avoid)
+
+        name_list = name.split()
         words_to_avoid_list_response = []
 
-        for words_to_avoid in words_to_avoid_list:
-            if words_to_avoid in preprocessed_name:
-                words_to_avoid_list_response.append(words_to_avoid)
+        for idx, token in enumerate(name_list):
+            if any(token in word for word in words_to_avoid_list):
+                words_to_avoid_list_response.append({idx: token})
 
         if words_to_avoid_list_response:
             result.is_valid = False
@@ -175,11 +183,24 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        words_consent_list = get_words_requiring_consent()
+        all_words_consent_list = get_words_requiring_consent()
+        words_consent_list = []
 
-        if any(words_consent in preprocessed_name for words_consent in words_consent_list):
+        for words_consent in all_words_consent_list:
+            if words_consent.lower() in name.lower():
+                words_consent_list.append(words_consent)
+
+        name_list = name.split()
+        words_consent_list_response = []
+
+        for idx, token in enumerate(name_list):
+            if any(token in word for word in words_consent_list):
+                words_consent_list_response.append({idx: token})
+
+        if words_consent_list_response:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
+            result.result_code = AnalysisResultCodes.WORD_TO_AVOID
+            result.values = words_consent_list_response
 
         return result
 
@@ -257,13 +278,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                                    preprocessed_name_list)
         # TODO: The DIRECTOR CONTROLS THE BUILD PROCESS
         if check_name_is_well_formed.is_valid:
-            preprocessed_name = ' '.join(map(str, preprocessed_name_list))
-            check_words_to_avoid = self.check_words_to_avoid(preprocessed_name)
+            # preprocessed_name = ' '.join(map(str, preprocessed_name_list))
+            check_words_to_avoid = self.check_words_to_avoid(name)
             check_conflicts = self.search_conflicts(distinctive_list, descriptive_list)
 
             if not check_conflicts:
-
-                check_words_requiring_consent = self.check_words_requiring_consent(preprocessed_name)
+                check_words_requiring_consent = self.check_words_requiring_consent(name)
+                check_designation_mismatch = self.check_designation(name, entity_type_end_desig_user,
+                                                                    entity_type_any_desig_user)
 
                 # check_designation_mismatch = self.check_designation()
                 if not check_name_is_well_formed.is_valid:
@@ -278,8 +300,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 if not check_words_requiring_consent.is_valid:
                     return check_words_requiring_consent
 
-                # if not check_designation_mismatch.is_valid:
-                #    return check_designation_mismatch
+                if not check_designation_mismatch.is_valid:
+                    return check_designation_mismatch
 
             else:
                 return result
