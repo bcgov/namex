@@ -2,8 +2,6 @@ from namex.models import db, WordClassification, WordClassificationSchema
 
 from .token_classifier import TokenClassifier
 
-import re
-import pandas as pd
 from sqlalchemy import create_engine
 
 POSTGRES_ADDRESS = 'localhost'
