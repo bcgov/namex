@@ -1,7 +1,7 @@
 from datetime import (datetime)
 
 from .name_analysis_director import NameAnalysisDirector
-import pandas as pd
+from . import ProcedureResult
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -22,12 +22,6 @@ Notes:
 '''
 
 d = datetime.now()  # Was just used for perf analysis
-
-
-class ProcedureResult:
-    def __init__(self, **kwargs):
-        self.is_valid = kwargs.get('is_valid', False)
-        self.result_code = kwargs.get('result_code', None)
 
 
 class ProtectedNameAnalysisService(NameAnalysisDirector):
