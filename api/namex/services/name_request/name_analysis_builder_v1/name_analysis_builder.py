@@ -51,6 +51,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
+        # TODO: Use the list_name arr on the class instance!
+        list_name = name.split()
+
         # if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
         #        (list_dist + list_desc) == name):
         #    success = True
@@ -64,9 +67,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if len(list_none) > 0:
             unclassified_words_list_response = []
             # TODO: We've already split the name in the director (get_list_name) why are we using the string here?
-            name_list = name.split()
+            list_name = name.split()
 
-            for idx, token in enumerate(name_list):
+            for idx, token in enumerate(list_name):
                 if any(token in word for word in list_none):
                     unclassified_words_list_response.append({idx: token})
 
@@ -79,7 +82,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(list_desc) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-        elif len(name) > MAX_LIMIT:
+        elif len(list_name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
 
@@ -101,10 +104,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             if words_to_avoid.lower() in name.lower():
                 words_to_avoid_list.append(words_to_avoid)
 
-        name_list = name.split()
+        list_name = name.split()
         words_to_avoid_list_response = []
 
-        for idx, token in enumerate(name_list):
+        for idx, token in enumerate(list_name):
             if any(token in word for word in words_to_avoid_list):
                 words_to_avoid_list_response.append({idx: token})
 
@@ -241,10 +244,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             if words_consent.lower() in name.lower():
                 words_consent_list.append(words_consent)
 
-        name_list = name.split()
+        list_name = name.split()
         words_consent_list_response = []
 
-        for idx, token in enumerate(name_list):
+        for idx, token in enumerate(list_name):
             if any(token in word for word in words_consent_list):
                 words_consent_list_response.append({idx: token})
 
@@ -314,16 +317,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         all_designations_user = designation_any_list_user + designation_end_list_user
         all_designations = designation_any_list + designation_end_list
 
-        name_list = name.lower().split()
+        list_name = name.lower().split()
         mismatch_entity_designation_list = []
         mismatch_wrong_designation_place = []
-        for idx, token in enumerate(name_list):
+        for idx, token in enumerate(list_name):
             if any(token in designation for designation in all_designations):
                 if token not in all_designations_user:
                     mismatch_entity_designation_list.append({idx: token.upper()})
 
         if wrong_designation_place:
-            for idx, token in enumerate(name_list):
+            for idx, token in enumerate(list_name):
                 if any(token in wrong_designation for wrong_designation in wrong_designation_place):
                     mismatch_wrong_designation_place.append({idx: token.upper()})
 

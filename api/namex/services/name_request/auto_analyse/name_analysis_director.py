@@ -114,6 +114,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted_tokenized if np_svc else ''
 
+    # TODO: Raise an exception if entity type is not set!!!
+    # TODO: Validate entity types against valid types
+    def get_entity_type(self):
+        return self._entity_type
+
+    def set_entity_type(self, entity_type):
+        self._entity_type = entity_type
+
     '''
     Just an alias for name_as_submitted
     '''
