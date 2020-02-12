@@ -6,7 +6,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 from namex.services.name_request.auto_analyse import field_synonyms, field_special_words
-from namex.services.name_request.auto_analyse.name_analysis_utils import get_list_of_lists
+from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
 
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
@@ -89,7 +89,9 @@ class Synonym(db.Model):
 
         df = pd.read_sql_query(query, cnx)
         if not df.empty:
-            return get_list_of_lists(df, field_synonyms)
+            response = get_dataframe_list(df, field_synonyms)
+            response = get_flat_list(response)
+            return response
         return None
 
     @classmethod
@@ -132,7 +134,9 @@ class Synonym(db.Model):
         df = pd.read_sql_query(query, cnx)
 
         if not df.empty:
-            return get_list_of_lists(df, field_synonyms)
+            response = get_dataframe_list(df, field_synonyms)
+            response = get_flat_list(response)
+            return response
         return None
 
     # TODO: Use real code types

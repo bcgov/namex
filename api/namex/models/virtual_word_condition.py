@@ -7,12 +7,12 @@ import pandas as pd
 from sqlalchemy import create_engine, Column
 
 from namex.services.name_request.auto_analyse import field_synonyms, field_special_words
-from namex.services.name_request.auto_analyse.name_analysis_utils import get_list_of_lists
+from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
 
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = 'BVict31C'
+POSTGRES_PASSWORD = ''
 POSTGRES_DBNAME = 'namex-local'
 POSTGRES_DBNAME_WC = 'namex-local'
 
@@ -32,25 +32,26 @@ cnx = create_engine(postgres_str)
 cnx_wc = create_engine(postgres_wc_str)
 
 
-# TODO: This has been moved to VirtualWordCondition model!
 def get_words_to_avoid():
     query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = false;'
     df = pd.read_sql_query(query, cnx_wc)
 
     if not df.empty:
-        words_to_avoid_list = get_list_of_lists(df, field_special_words)
-        return words_to_avoid_list
+        response = get_dataframe_list(df, field_special_words)
+        response = get_flat_list(response)
+        return response
     return None
 
 
-# TODO: This has been moved to VirtualWordCondition model!
 def get_words_requiring_consent():
     query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = true and rc_consent_required = true'
 
     df = pd.read_sql_query(query, cnx_wc)
 
     if not df.empty:
-        return get_list_of_lists(df, field_special_words)
+        response = get_dataframe_list(df, field_special_words)
+        response = get_flat_list(response)
+        return response
 
     return None
 
