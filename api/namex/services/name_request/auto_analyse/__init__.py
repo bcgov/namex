@@ -44,6 +44,13 @@ class ProcedureResult:
         return values
 
 
+class ProcedureResult:
+    def __init__(self, **kwargs):
+        self.is_valid = kwargs.get('is_valid', False)
+        self.result_code = kwargs.get('result_code', None)
+        self.data = kwargs.get('data', None)
+
+
 class AnalysisRequestActions(str, Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)
     AML = 'AML'  # Amalgamate (NAME PROTECTION, BC ONLY)
