@@ -39,10 +39,10 @@ class AnalysisResponse:
         print(repr(analysis_result))
 
         if analysis_result and len(analysis_result) > 0:
-            for issue in analysis_result:
-                if callable(response_issues(issue.result_code)):
-                    issue_builder = response_issues(issue.result_code)
-                    response_issue = issue_builder.create_issue()
+            for procedure_result in analysis_result:
+                if callable(response_issues(procedure_result.result_code)):
+                    issue_builder = response_issues(procedure_result.result_code)
+                    response_issue = issue_builder.create_issue(procedure_result)
                     if response_issue and response_issue.issueType is not AnalysisResultCodes.VALID_NAME:
                         self.issues.append(response_issue)
                     else:
