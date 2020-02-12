@@ -44,5 +44,6 @@ class NameAction(Serializable):
 
         self.type = kwargs['type'].value
         self.index = kwargs['index'].value if kwargs.get('index') else None
+        self.word = kwargs['word'].value if kwargs.get('word') else None
         self.position = kwargs['position'].value if kwargs.get('position') else None  # [start | end] (is there another?)
         self.message = kwargs['message'] if kwargs.get('message') else None  # <string> | None
