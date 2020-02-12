@@ -38,6 +38,10 @@ class NameAction(Serializable):
         if kwargs.get('position') and kwargs['position'].value not in WordPositions.list():
             raise TypeError('Invalid word position')
 
-        self.type = kwargs['type'].value  # Required!
+        # TODO: Make sure index is valid! Add validation.
+
+        self.type = kwargs['type'].value
+        self.index = kwargs['index'].value if kwargs.get('index') else None
+        self.word = kwargs['word'].value if kwargs.get('word') else None
         self.position = kwargs['position'].value if kwargs.get('position') else None  # [start | end] (is there another?)
         self.message = kwargs['message'] if kwargs.get('message') else None  # <string> | None
