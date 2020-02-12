@@ -140,12 +140,18 @@ class NameAnalysis(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.doc(params={
+        'name': 'A company / organization name string',
+        'location': 'A location code [BC|CA|INTL]',
+        'entity_type': 'An entity type code',
+        'request_action': 'A request action code'
+    })
     def get():
         name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None
         location = unquote_plus(request.args.get('location').strip()) if request.args.get('location') else None
         entity_type = unquote_plus(request.args.get('entity_type').strip()) if request.args.get('entity_type') else None
         # TODO: Let's not call var request_type because it's ambiguous - change to request_action on frontend too
-        request_action = unquote_plus(request.args.get('request_type').strip()) if request.args.get('request_type') else None
+        request_action = unquote_plus(request.args.get('request_action').strip()) if request.args.get('request_action') else None
 
         # Do our service stuff
         # Instantiate an appropriate service and register a builder for that service (subclasses of NameAnalysisDirector)
@@ -187,8 +193,9 @@ class NameAnalysis(Resource):
                 raise ValueError('Invalid builder provided')
 
             # Register and initialize the builder
-            service.use_builder(builder)
-            service.set_name(name)
+            service.use_builder(builder)  # Required step! TODO: Enforce this!
+            service.set_entity_type(entity_type)  # Required step! TODO: Enforce this!
+            service.set_name(name)  # Required step! TODO: Enforce this!
 
         except Exception as error:
             print('Error initializing NameAnalysisService: ' + repr(error))
