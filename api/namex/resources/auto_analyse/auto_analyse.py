@@ -143,7 +143,7 @@ class NameAnalysis(Resource):
     @api.doc(params={
         'name': 'A company / organization name string',
         'location': 'A location code [ BC | CA | INTL ]',
-        'entity_type': 'An entity type code [ CR, UL, CCC ]'
+        'entity_type': 'An entity type code [ CR, UL, CC ]',
         'request_action': 'A request action code'
     })
     def get():
