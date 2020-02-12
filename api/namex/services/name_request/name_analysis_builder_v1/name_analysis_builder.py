@@ -47,7 +47,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-    def check_name_is_well_formed(self, list_desc, list_dist, list_none, name):
+    def check_name_is_well_formed(self, list_dist, list_desc, list_none, name):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -63,6 +63,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if len(list_none) > 0:
             unclassified_words_list_response = []
+            # TODO: We've already split the name in the director (get_list_name) why are we using the string here?
             name_list = name.split()
 
             for idx, token in enumerate(name_list):
