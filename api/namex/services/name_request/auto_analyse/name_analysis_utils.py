@@ -30,6 +30,7 @@ cnx_wc = create_engine(postgres_wc_str)
 
 # TODO: Fix caps and stuff...
 def data_frame_to_list(df):
+
     df_dist = df.loc[df.word_classification == 'distinctive']
     df_desc = df.loc[df.word_classification == 'descriptive']
     df_none = df.loc[df.word_classification == 'none']
