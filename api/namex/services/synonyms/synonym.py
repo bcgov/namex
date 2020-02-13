@@ -40,11 +40,11 @@ class SynonymService:
     def get_designated_end_all_words(self):
         all_entity_types = AllEntityTypes.ALL.value
         end_words = self._model.get_entity_type_designations([AllEntityTypes.ALL], DesignationPositionCodes.END)
-        return end_words
+        return end_words.get(AllEntityTypes.ALL.value)
 
     def get_designated_any_all_words(self):
         any_words = self._model.get_entity_type_designations([AllEntityTypes.ALL], DesignationPositionCodes.ANY)
-        return any_words
+        return any_words.get(AllEntityTypes.ALL.value)
     '''
     stop_words = get_stop_word_list()
     en_designation_any = get_en_designation_any_all_list()
