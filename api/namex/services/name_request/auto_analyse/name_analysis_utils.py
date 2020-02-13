@@ -11,7 +11,7 @@ from namex.services.name_request.auto_analyse import DataFrameFields
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = 'BVict31C'
+POSTGRES_PASSWORD = ' '
 POSTGRES_DBNAME = 'namex-auto-analyse'
 #POSTGRES_DBNAME_WC = 'namex-local'
 
@@ -63,10 +63,10 @@ def regex_transform(text, designation_any, designation_end, prefix_list):
     exceptions_ws = []
     for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
         if get_substitution_list(word):
-            exceptions_ws.extend(word)
+            exceptions_ws.append(word)
 
     if not exceptions_ws:
-        exceptions_ws.extend(['null'])
+        exceptions_ws.append('null')
 
     exception_ws_rx = '|'.join(map(re.escape, exceptions_ws))
     ws_generic_rx = r'(?<=\d)(?=[^\d\s])|(?<=[^\d\s])(?=\d)'

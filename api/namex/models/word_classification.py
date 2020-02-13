@@ -78,8 +78,8 @@ class WordClassification(db.Model):
     @classmethod
     def find_word_classification(cls, word):
         # TODO: Can we return more than one result?
-        print(cls.query.filter(func.lower(WordClassification.word) == func.lower(word)))
-        return cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).first() #\
+        print(cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all())
+        return cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all() #\
                    #.filter(or_(cls.end_dt is None, datetime.date(cls.end_dt) > date.today()))\
                    # .filter(datetime.date(cls.start_dt) <= date.today())\
                    # .filter(cls.approved_dt) <= date.today().all()
