@@ -44,8 +44,7 @@ def data_frame_to_list(df):
     return list_dist, list_desc, list_none
 
 
-def clean_name_words(text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[],
-                     prefix_list=[]):
+def clean_name_words(text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[], prefix_list=[]):
     # TODO: Warn or something if params aren't set!
     words = text.lower()
     words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
