@@ -12,18 +12,12 @@ MAX_LIMIT = 4
 MAX_LIMIT = 4
 
 
-class ProcedureResult:
-    def __init__(self, **kwargs):
-        self.is_valid = kwargs.get('is_valid', False)
-        self.result_code = kwargs.get('result_code', None)
-        self.values = kwargs.get('values', None)
-
-# Field dataframe
-field_synonyms = 'synonyms_text'
-field_special_words = 'rc_words'
-
-field_synonyms = 'synonyms_text'
-field_special_words = 'rc_words'
+class DataFrameFields(Enum):
+    FIELD_SYNONYMS = 'synonyms_text'
+    FIELD_SPECIAL_WORDS = 'rc_words'
+    DESCRIPTIVE = 'DESC'
+    DISTINCTIVE = 'DIST'
+    UNCLASSIFIED = 'NONE'
 
 
 class ProcedureResult:
@@ -74,7 +68,3 @@ class AnalysisResultCodes(str, Enum):
             values.append(item.value)
 
         return values
-
-
-
-

@@ -151,7 +151,7 @@ class NameAnalysisDirector:
             word_classification = wc_svc.find_one(word)
             if word_classification:
                 # TODO: Standardize casing!!! Lower everywhere is not a good long term solution :)
-                new_row = {'word': word.lower().strip(), 'word_classification': word_classification.classification.lower().strip()}
+                new_row = {'word': word.lower().strip(), 'word_classification': word_classification.classification.strip()}
 
             else:
                 #  No classification found
@@ -180,8 +180,10 @@ class NameAnalysisDirector:
         self._substitutions = self._synonym_service.get_substitutions()
 
         self._stop_words = self._synonym_service.get_stop_words()
-        self._designated_end_words = self._synonym_service.get_designated_end_words()
-        self._designated_any_words = self._synonym_service.get_designated_any_words()
+        #self._designated_end_words = self._synonym_service.get_designated_end_words()
+        #self._designated_any_words = self._synonym_service.get_designated_any_words()
+        self._designated_end_words = self._synonym_service.get_designated_end_all_words()
+        self._designated_any_words = self._synonym_service.get_designated_end_all_words()
 
         # Solr calls TODO: Are we still using solr conflict? Clarify...
         self._in_province_conflicts = self._solr_conflicts_service.get_in_province_conflicts()

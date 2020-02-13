@@ -5,15 +5,16 @@ from enum import Enum
 import pandas as pd
 from sqlalchemy import create_engine
 
-from namex.services.name_request.auto_analyse import field_synonyms, field_special_words
 from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
+from ..services.name_request.auto_analyse import DataFrameFields
+from namex.constants import AllEntityTypes
 
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ''
-POSTGRES_DBNAME = 'namex-local'
-POSTGRES_DBNAME_WC = 'namex-local'
+POSTGRES_PASSWORD = ' '
+POSTGRES_DBNAME = 'namex-auto-analyse'
+# POSTGRES_DBNAME_WC = 'namex-local'
 
 postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                         password=POSTGRES_PASSWORD,
@@ -21,16 +22,16 @@ postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'
                                                                                         port=POSTGRES_PORT,
                                                                                         dbname=POSTGRES_DBNAME))
 
-postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                           password=POSTGRES_PASSWORD,
-                                                                                           ipaddress=POSTGRES_ADDRESS,
-                                                                                           port=POSTGRES_PORT,
-                                                                                           dbname=POSTGRES_DBNAME_WC))
+# postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+#                                                                                           password=POSTGRES_PASSWORD,
+#                                                                                           ipaddress=POSTGRES_ADDRESS,
+#                                                                                           port=POSTGRES_PORT,
+#                                                                                           dbname=POSTGRES_DBNAME_WC))
 
 cnx = create_engine(postgres_str)
-cnx_wc = create_engine(postgres_wc_str)
 
 
+# cnx_wc = create_engine(postgres_wc_str)
 
 
 # The class that corresponds to the database table for synonyms.
@@ -41,13 +42,13 @@ class Synonym(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category = db.Column(db.String(100))
     synonyms_text = db.Column(db.String(1000), unique=True, nullable=False)
-    stems_text = db.Column(db.String(1000),nullable=False)
+    stems_text = db.Column(db.String(1000), nullable=False)
     comment = db.Column(db.String(1000))
     enabled = db.Column(db.Boolean(), default=True)
 
     def json(self):
         return {"id": self.id, "category": self.category, "synonymsText": self.synonyms_text,
-                "stemsText": self.stems_text, "comment":self.comment, "enabled": self.enabled}
+                "stemsText": self.stems_text, "comment": self.comment, "enabled": self.enabled}
 
     @classmethod
     def find(cls, term, col):
@@ -83,13 +84,13 @@ class Synonym(db.Model):
     def get_substitution_list(cls, word=None):
         if word:
             query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + ' AND ' + \
-                's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
+                    's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
         else:
             query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'"
 
         df = pd.read_sql_query(query, cnx)
         if not df.empty:
-            response = get_dataframe_list(df, field_synonyms)
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
             response = get_flat_list(response)
             return response
         return None
@@ -99,7 +100,7 @@ class Synonym(db.Model):
         # TODO: That semi colon doesn't look right in there... confirm!
         if word:
             return cls.query_category("'" + '(?!(sub|stop)$)' + "'" + ' AND ' + \
-                's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")
+                                      's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")
 
         return cls.query_category("'" + '(?!(sub|stop)$)' + "'")
 
@@ -134,7 +135,7 @@ class Synonym(db.Model):
         df = pd.read_sql_query(query, cnx)
 
         if not df.empty:
-            response = get_dataframe_list(df, field_synonyms)
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
             response = get_flat_list(response)
             return response
         return None
@@ -146,8 +147,13 @@ class Synonym(db.Model):
     def get_entity_type_designation(cls, entity_type_code, position_code, lang='english'):
         code_str = entity_type_code.value
         position_str = position_code.value
+        query = ''
 
-        query = "'" + '^' + code_str.lower() + '.*(' + lang.lower() + '[_ -]+)+designation[s]?[_-]' + position_str.lower() + "'"
+        if code_str == AllEntityTypes.ALL.value:
+            query = "'" + '^' + lang.lower() + '[_ -]+designation[s]?[_-]+' + position_str.lower() + "'"
+        else:
+            query = "'" + '^' + code_str.lower() + '.*(' + lang.lower() + '[_ -]+)+designation[s]?[_-]' + position_str.lower() + "'"
+
         results = cls.query_category(query)
         return results
 

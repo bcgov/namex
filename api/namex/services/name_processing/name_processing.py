@@ -31,8 +31,10 @@ class NameProcessingService:
     def prepare_data(self):
         # Query database for word designations
         self._stop_words = self._synonym_service.get_stop_words()
-        self._designated_end_words = self._synonym_service.get_designated_end_words()
-        self._designated_any_words = self._synonym_service.get_designated_any_words()
+        #self._designated_end_words = self._synonym_service.get_designated_end_words()
+        #self._designated_any_words = self._synonym_service.get_designated_any_words()
+        self._designated_end_words = self._synonym_service.get_designated_end_all_words()
+        self._designated_any_words = self._synonym_service.get_designated_any_all_words()
 
     '''
     Split a name string into classifiable tokens. Called internally whenever set_name is invoked.

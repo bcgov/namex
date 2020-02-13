@@ -12,9 +12,9 @@ from sqlalchemy.orm import backref
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ''
-POSTGRES_DBNAME = 'namex-local'
-POSTGRES_DBNAME_WC = 'namex-local'
+POSTGRES_PASSWORD = 'BVict31C'
+POSTGRES_DBNAME = 'namex-auto-analyse'
+#POSTGRES_DBNAME_WC = 'namex-auto-analyse'
 
 postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                         password=POSTGRES_PASSWORD,
@@ -22,20 +22,20 @@ postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'
                                                                                         port=POSTGRES_PORT,
                                                                                         dbname=POSTGRES_DBNAME))
 
-postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                           password=POSTGRES_PASSWORD,
-                                                                                           ipaddress=POSTGRES_ADDRESS,
-                                                                                           port=POSTGRES_PORT,
-                                                                                           dbname=POSTGRES_DBNAME_WC))
+#postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+#                                                                                           password=POSTGRES_PASSWORD,
+#                                                                                           ipaddress=POSTGRES_ADDRESS,
+#                                                                                           port=POSTGRES_PORT,
+#                                                                                           dbname=POSTGRES_DBNAME_WC))
 
 cnx = create_engine(postgres_str)
-cnx_wc = create_engine(postgres_wc_str)
+#cnx_wc = create_engine(postgres_wc_str)
 
 
 # TODO: This has been moved to WordClassification model!
 def get_classification(word):
     query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
-    cf = pd.read_sql_query(query, cnx_wc)
+    cf = pd.read_sql_query(query, cnx)
 
     if not cf.empty and len(cf) == 1:
         return cf['word_classification'].to_string(index=False).lower()
@@ -58,7 +58,7 @@ class WordClassification(db.Model):
     start_dt = db.Column('start_dt', db.DateTime(timezone=True))
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    last_updated_dt = db.Column('last_updated_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
+    last_updated_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approved_by])
@@ -69,7 +69,7 @@ class WordClassification(db.Model):
                 "lastNameUsed": self. last_name_used, "lastPrepName": self.last_prep_name,
                 "frequency": self.frequency,"approvedDate": self.approved_dt,
                 "approvedBy": self.approved_by, "startDate": self.start_dt,
-                "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
+                "lastUpdatedBy": self.last_updated_by, "lastUpdateDate": self.last_update_dt}
 
     # TODO: Fix this it's not working...
     '''
