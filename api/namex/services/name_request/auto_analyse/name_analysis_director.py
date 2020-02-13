@@ -151,16 +151,14 @@ class NameAnalysisDirector:
         # Get the word classification for each word in the supplied name name
         for word in self._list_name_words:
             word_classification = wc_svc.find_one(word)
-            if word_classification:
-                # TODO: Standardize casing!!! Lower everywhere is not a good long term solution :)
-                new_row = {'word': word.lower().strip(), 'word_classification': word_classification.classification.strip()}
-
-            else:
-                #  No classification found
+            if not word_classification:
                 print('No word classification found for: ' + word)
                 new_row = {'word': word.lower().strip(), 'word_classification': 'none'}
-
-            cf = cf.append(new_row, ignore_index=True)
+            else:
+                for row in word_classification:
+                    new_row = {'word': word.lower().strip(),
+                               'word_classification': row.classification.strip()}
+                    cf = cf.append(new_row, ignore_index=True)
 
         # TODO: If we don't find a classification, we should be adding a record and return the unclassified word issue
         # TODO: Related to the above, we will need to pre-populate a list of classified words
