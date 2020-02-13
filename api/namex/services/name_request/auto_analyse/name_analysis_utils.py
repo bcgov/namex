@@ -9,7 +9,7 @@ from namex.services.name_request.auto_analyse import DataFrameFields
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ' '
+POSTGRES_PASSWORD = 'BVict31C'
 POSTGRES_DBNAME = 'namex-auto-analyse'
 #POSTGRES_DBNAME_WC = 'namex-local'
 
@@ -55,7 +55,7 @@ def clean_name_words(text, stop_words=[], designation_any=[], designation_end=[]
 
 def regex_transform(text, designation_any, designation_end, prefix_list):
     designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
-    designation_any_regex = "(" + '|'.join(designation_any.value.tolist()) + ")"
+    designation_any_regex = "(" + '|'.join(designation_any) + ")"
     prefixes = '|'.join(prefix_list)
 
     exceptions_ws = []
