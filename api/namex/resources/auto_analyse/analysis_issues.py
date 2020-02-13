@@ -316,7 +316,7 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
                 button="",
                 checkbox="",
                 heading="Option 1",
-                line1="You can remove or replace the word “Engineering” and try your search again.",
+                line1="You can remove or replace the word 'Engineering' and try your search again.",
                 line2=""
             ),
             Setup(
