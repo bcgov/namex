@@ -13,7 +13,7 @@ from .mixins.model import SynonymModelMixin
 - Methods like find, find_one, or find_by_criteria or iterate belong in models.
 """
 
-from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS
+from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes
 from . import DesignationPositionCodes
 
 

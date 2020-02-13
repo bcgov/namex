@@ -7,9 +7,9 @@ from sqlalchemy import create_engine
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ''
-POSTGRES_DBNAME = 'namex-local'
-POSTGRES_DBNAME_WC = 'namex-local'
+POSTGRES_PASSWORD = 'BVict31C'
+POSTGRES_DBNAME = 'namex-auto-analyse'
+#POSTGRES_DBNAME_WC = 'namex-local'
 
 postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                         password=POSTGRES_PASSWORD,
@@ -17,14 +17,14 @@ postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'
                                                                                         port=POSTGRES_PORT,
                                                                                         dbname=POSTGRES_DBNAME))
 
-postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                           password=POSTGRES_PASSWORD,
-                                                                                           ipaddress=POSTGRES_ADDRESS,
-                                                                                           port=POSTGRES_PORT,
-                                                                                           dbname=POSTGRES_DBNAME_WC))
+#postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+#                                                                                           password=POSTGRES_PASSWORD,
+#                                                                                           ipaddress=POSTGRES_ADDRESS,
+#                                                                                           port=POSTGRES_PORT,
+#                                                                                           dbname=POSTGRES_DBNAME_WC))
 
 cnx = create_engine(postgres_str)
-cnx_wc = create_engine(postgres_wc_str)
+#cnx_wc = create_engine(postgres_wc_str)
 
 
 class WordClassificationService:
