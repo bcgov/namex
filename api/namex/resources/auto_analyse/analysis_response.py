@@ -369,6 +369,13 @@ class AnalysisResponse:
             self.status_code = AnalysisResponseCodes.AUTO_APPROVED.value
             self.header = "Available"
 
+        # TODO: This is an incomplete implementation! Get returned status codes from ProcedureResult
+        status_code = "fa"
+
+        if status_code == "fa":
+            self.status_code = "fa"
+            self.heading = "Further Action Required"
+
     def prepare_payload(self):
         payload = NameAnalysisResponse(
             header=self.header,
