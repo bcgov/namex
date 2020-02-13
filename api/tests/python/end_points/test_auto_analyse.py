@@ -42,7 +42,7 @@ ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
 #   name,
 #   location, one of: [‘bc’, ‘ca’, ‘us’, or ‘it’],
 #   entity_type: abbreviation. convention not finalized yet.
-#   request_action, one of: [‘new’, ‘existing’, ‘continuation’]
+#   request_type, one of: [‘new’, ‘existing’, ‘continuation’]
 # }
 
 
@@ -74,7 +74,7 @@ def test_get_analysis_request_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS LTD.',
         'location': 'BC',
         'entity_type': 'CR',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     # TODO: Obviously we can't be using strings with spaces but I don't know how to deal with this yet
@@ -112,7 +112,7 @@ def test_new_bc_cr_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR [INCORPORATED, LTD]
         'location': 'BC',
         'entity_type': 'CR',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -134,7 +134,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS ULC.',  # OR [UNLIMITED LIABILITY COMPANY]
         'location': 'BC',
         'entity_type': 'UL',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -160,7 +160,7 @@ def test_new_bc_cp_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS COOP',  # []
         'location': 'BC',
         'entity_type': 'CP',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -182,7 +182,7 @@ def test_new_bc_bc_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR [INCORPORATED, LTD]
         'location': 'BC',
         'entity_type': 'BC',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -204,7 +204,7 @@ def test_new_bc_cc_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR [INCORPORATED, LTD] ALSO REQ *CCC* INC OR COMMUNITY CONTRIBUTION COMPANY
         'location': 'BC',
         'entity_type': 'CC',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -226,7 +226,7 @@ def test_new_bc_fr_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS',
         'location': 'BC',
         'entity_type': 'FR',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -248,7 +248,7 @@ def test_new_bc_dba_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS',
         'location': 'BC',
         'entity_type': 'DBA',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -270,7 +270,7 @@ def test_new_bc_gp_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS',
         'location': 'BC',
         'entity_type': 'GP',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -292,7 +292,7 @@ def test_new_bc_lp_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS LP.',
         'location': 'BC',
         'entity_type': 'LP',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -314,7 +314,7 @@ def test_new_bc_ll_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS LLP.',
         'location': 'BC',
         'entity_type': 'LL',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -336,7 +336,7 @@ def test_new_xpro_xcr_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',  # OR LTD.
         'location': 'CA',
         'entity_type': 'XCR',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -358,7 +358,7 @@ def test_new_xpro_xul_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS ULC.',
         'location': 'CA',
         'entity_type': 'XUL',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -380,7 +380,7 @@ def test_new_xpro_xcp_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS COOP',
         'location': 'CA',
         'entity_type': 'XCP',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -402,7 +402,7 @@ def test_new_xpro_xlc_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS LLC.',  # CHECK FOR DESIGNATION
         'location': 'CA',
         'entity_type': 'XLC',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -424,7 +424,7 @@ def test_new_xpro_xlp_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS LP.',  # CHECK FOR DESIGNATION
         'location': 'CA',
         'entity_type': 'XLC',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -446,7 +446,7 @@ def test_new_xpro_xll_valid_response(client, jwt, app):
         'name': 'MOUNTAIN VIEW FOOD GROWERS LLP.',
         'location': 'CA',
         'entity_type': 'XLL',
-        'request_action': 'NEW'
+        'request_type': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
