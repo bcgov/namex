@@ -339,25 +339,25 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = [
             Setup(
-                button='',
-                checkbox='',
-                heading='Option 1',
+                button="",
+                checkbox="",
+                heading="Option 1",
                 line1="You can remove or replace the word “Engineering” and try your search again.",
                 line2=""
             ),
             Setup(
-                button='examine',
-                checkbox='',
-                heading='Option 2',
+                button="examine",
+                checkbox="",
+                heading="Option 2",
                 line1="You can choose to submit this name for examination. Examination wait times are listed above.",
-                line2=''
+                line2=""
             ),
             Setup(
-                button='consent',
-                checkbox='',
-                heading='Option 3',
+                button="consent",
+                checkbox="",
+                heading="Option 3",
                 line1="This name can be auto-approved but you will be required to send confirmation of consent to the BC Business Registry.",
-                line2=''
+                line2=""
             )
         ]
 
@@ -707,25 +707,25 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = [
             Setup(
-                button='',
-                checkbox='',
-                heading='Option 1',
+                button="",
+                checkbox="",
+                heading="Option 1",
                 line1="Add a word to the beginning of the name that sets it apart like a person's name or initials.",
                 line2="Or remove ${some-word} and replace it with a different word"
             ),
             Setup(
-                button='examine',
-                checkbox='',
-                heading='Option 2',
+                button="examine",
+                checkbox="",
+                heading="Option 2",
                 line1="You can choose to submit this name for examination. Examination wait times are listed above.",
-                line2=''
+                line2=""
             ),
             Setup(
-                button='consent',
-                checkbox='',
-                heading='Option 3',
+                button="consent",
+                checkbox="",
+                heading="Option 3",
                 line1="If you are the registered owner of the existing name, it can be auto-approved but you are required to send confirmation of consent to the BC Business Registry.",
-                line2=''
+                line2=""
             )
         ]
 
