@@ -33,7 +33,8 @@ def response_issues(issue_code):
 
 class AnalysisResponse:
     def __init__(self, analysis_result):
-        self.status_text = ''
+        self.heading = ""
+        self.status_code = ""
         self.issues = []
 
         print(repr(analysis_result))
@@ -48,9 +49,17 @@ class AnalysisResponse:
                     else:
                         pass
 
+        # TODO: This is an incomplete implementation! Get returned status codes from ProcedureResult
+        status_code = "fa"
+
+        if status_code == "fa":
+            self.status_code = "fa"
+            self.heading = "Further Action Required"
+
     def prepare_payload(self):
         payload = NameAnalysisResponse(
-            status=self.status_text,
+            header=self.heading,
+            status=self.status_code,
             issues=self.issues
         )
         return payload

@@ -16,7 +16,7 @@ class AnalysisResponseIssue:
     issue_type = "Issue"  # Maybe get rid of this guy
     header = "Further Action Required"
     status_text = ""
-    status = ""  # This is a CODE [AV | FA | RC]
+    status = "fa"  # This is a CODE [AV | FA | RC]
     issue = None
 
     def __init__(self):
