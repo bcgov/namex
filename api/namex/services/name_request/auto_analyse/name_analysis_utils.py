@@ -4,14 +4,14 @@ import collections
 from sqlalchemy import create_engine
 
 
-from namex.services.name_request.auto_analyse import field_synonyms, field_special_words
+from namex.services.name_request.auto_analyse import DataFrameFields
 
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ''
-POSTGRES_DBNAME = 'namex-local'
-POSTGRES_DBNAME_WC = 'namex-local'
+POSTGRES_PASSWORD = ' '
+POSTGRES_DBNAME = 'namex-auto-analyse'
+#POSTGRES_DBNAME_WC = 'namex-local'
 
 postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
                                                                                         password=POSTGRES_PASSWORD,
@@ -19,21 +19,21 @@ postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'
                                                                                         port=POSTGRES_PORT,
                                                                                         dbname=POSTGRES_DBNAME))
 
-postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                           password=POSTGRES_PASSWORD,
-                                                                                           ipaddress=POSTGRES_ADDRESS,
-                                                                                           port=POSTGRES_PORT,
-                                                                                           dbname=POSTGRES_DBNAME_WC))
+#postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+#                                                                                           password=POSTGRES_PASSWORD,
+#                                                                                           ipaddress=POSTGRES_ADDRESS,
+#                                                                                           port=POSTGRES_PORT,
+#                                                                                           dbname=POSTGRES_DBNAME_WC))
 
 cnx = create_engine(postgres_str)
-cnx_wc = create_engine(postgres_wc_str)
+#cnx_wc = create_engine(postgres_wc_str)
 
 # TODO: Fix caps and stuff...
 def data_frame_to_list(df):
 
-    df_dist = df.loc[df.word_classification == 'distinctive']
-    df_desc = df.loc[df.word_classification == 'descriptive']
-    df_none = df.loc[df.word_classification == 'none']
+    df_dist = df.loc[df.word_classification == DataFrameFields.DISTINCTIVE.value]
+    df_desc = df.loc[df.word_classification == DataFrameFields.DESCRIPTIVE.value]
+    df_none = df.loc[df.word_classification == DataFrameFields.UNCLASSIFIED.value]
 
     list_dist = list(df_dist.word)
     list_desc = list(df_desc.word)
@@ -55,7 +55,7 @@ def clean_name_words(text, stop_words=[], designation_any=[], designation_end=[]
 
 def regex_transform(text, designation_any, designation_end, prefix_list):
     designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
-    designation_any_regex = "(" + '|'.join(designation_any) + ")"
+    designation_any_regex = "(" + '|'.join(designation_any.value.tolist()) + ")"
     prefixes = '|'.join(prefix_list)
 
     exceptions_ws = []
@@ -147,7 +147,7 @@ def get_substitution_list(word):
             's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
     df = pd.read_sql_query(query, cnx)
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -160,7 +160,7 @@ def get_synonym_list(word):
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -172,7 +172,7 @@ def get_stop_word_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -184,7 +184,7 @@ def get_prefix_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -196,7 +196,7 @@ def get_en_designation_any_all_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -208,7 +208,7 @@ def get_en_designation_end_all_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -321,7 +321,7 @@ def get_en_RLC_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -334,7 +334,7 @@ def get_en_LL_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -347,7 +347,7 @@ def get_en_CC_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -360,7 +360,7 @@ def get_en_UL_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -372,7 +372,7 @@ def get_en_BC_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -385,7 +385,7 @@ def get_en_CR_entity_type_end_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -398,7 +398,7 @@ def get_en_CP_entity_type_any_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -411,7 +411,7 @@ def get_en_XCP_entity_type_any_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -424,7 +424,7 @@ def get_en_CC_entity_type_any_designation():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -447,7 +447,7 @@ def get_fr_designation_end_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -460,7 +460,7 @@ def get_stand_alone_list():
     df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_synonyms)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -469,10 +469,10 @@ def get_stand_alone_list():
 # TODO: This has been moved to VirtualWordCondition model!
 def get_words_to_avoid():
     query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = false;'
-    df = pd.read_sql_query(query, cnx_wc)
+    df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_special_words)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SPECIAL_WORDS.value)
         response = get_flat_list(response)
         return response
     return None
@@ -482,10 +482,10 @@ def get_words_to_avoid():
 def get_words_requiring_consent():
     query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = true and rc_consent_required = true'
 
-    df = pd.read_sql_query(query, cnx_wc)
+    df = pd.read_sql_query(query, cnx)
 
     if not df.empty:
-        response = get_dataframe_list(df, field_special_words)
+        response = get_dataframe_list(df, DataFrameFields.FIELD_SPECIAL_WORDS.value)
         response = get_flat_list(response)
         return response
 
@@ -495,7 +495,7 @@ def get_words_requiring_consent():
 # TODO: This has been moved to WordClassification model!
 def get_classification(word):
     query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
-    cf = pd.read_sql_query(query, cnx_wc)
+    cf = pd.read_sql_query(query, cnx)
 
     if not cf.empty and len(cf) == 1:
         return cf['word_classification'].to_string(index=False).lower()

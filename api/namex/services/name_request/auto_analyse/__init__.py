@@ -7,8 +7,13 @@ from enum import Enum
 # Limit number of words to analyse
 MAX_LIMIT = 4
 
-field_synonyms = 'synonyms_text'
-field_special_words = 'rc_words'
+
+class DataFrameFields(Enum):
+    FIELD_SYNONYMS = 'synonyms_text'
+    FIELD_SPECIAL_WORDS = 'rc_words'
+    DESCRIPTIVE = 'DESC'
+    DISTINCTIVE = 'DIST'
+    UNCLASSIFIED = 'NONE'
 
 
 class ProcedureResult:
@@ -64,7 +69,3 @@ class AnalysisResultCodes(str, Enum):
             values.append(item.value)
 
         return values
-
-
-
-

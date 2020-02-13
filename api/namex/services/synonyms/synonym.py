@@ -1,6 +1,6 @@
 from namex.models import Synonym
 
-from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS
+from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes
 from . import DesignationPositionCodes
 
 
@@ -37,6 +37,14 @@ class SynonymService:
         any_words = self._model.get_entity_type_designations(ENTITY_TYPE_ANY_DESIGNATIONS, DesignationPositionCodes.ANY)
         return any_words
 
+    def get_designated_end_all_words(self):
+        all_entity_types = AllEntityTypes.ALL.value
+        end_words = self._model.get_entity_type_designations([AllEntityTypes.ALL], DesignationPositionCodes.END)
+        return end_words
+
+    def get_designated_any_all_words(self):
+        any_words = self._model.get_entity_type_designations([AllEntityTypes.ALL], DesignationPositionCodes.ANY)
+        return any_words
     '''
     stop_words = get_stop_word_list()
     en_designation_any = get_en_designation_any_all_list()
