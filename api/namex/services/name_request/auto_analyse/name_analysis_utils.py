@@ -58,7 +58,7 @@ def clean_name_words(text, stop_words=[], designation_any=[], designation_end=[]
 
 def regex_transform(text, designation_any, designation_end, prefix_list):
     designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
-    designation_any_regex = "(" + '|'.join(designation_any) + ")"
+    designation_any_regex = "(" + '|'.join(designation_any.value.tolist()) + ")"
     prefixes = '|'.join(prefix_list)
 
     exceptions_ws = []
