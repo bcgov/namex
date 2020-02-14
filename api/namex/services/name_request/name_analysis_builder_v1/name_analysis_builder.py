@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 
 from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
     build_query_descriptive, get_substitution_list, get_synonym_list, get_stop_word_list, get_fr_designation_end_list, \
-    get_prefix_list, clean_name_words, get_classification, \
+    get_prefix_list, clean_name_words, get_classification, words_distinctive_descriptive, \
     data_frame_to_list, get_words_to_avoid, get_words_requiring_consent, \
     get_en_LL_entity_type_end_designation, get_en_RLC_entity_type_end_designation, \
     get_en_CR_entity_type_end_designation, get_en_BC_entity_type_end_designation, get_en_UL_entity_type_end_designation, \
@@ -29,8 +29,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_ADDRESS = 'localhost'
     POSTGRES_PORT = '5432'
     POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = 'BVict31C'
-    #POSTGRES_DBNAME_SYNS = ''
+    POSTGRES_PASSWORD = ' '
+    # POSTGRES_DBNAME_SYNS = ''
     POSTGRES_DBNAME_DATA = 'namex-auto-analyse'
 
     postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
@@ -46,6 +46,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -123,6 +124,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
            list_desc= ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
+
     def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
         result = ProcedureResult()
         result.is_valid = False
@@ -215,6 +217,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_designation(self, name, entity_type_user):
         result = ProcedureResult()
         result.is_valid = True
@@ -261,7 +264,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             entity_type_end_designation = get_entity_type_end_designation(entity_end_designation_dict,
                                                                           designation_end_list)
         # All possible entity types found related to company name.
-        all_entity_types = [item for item, count in collections.Counter(entity_type_any_designation + entity_type_end_designation).items() if
+        all_entity_types = [item for item, count in
+                            collections.Counter(entity_type_any_designation + entity_type_end_designation).items() if
                             count > 1]
         if not all_entity_types:
             all_entity_types = entity_type_any_designation + entity_type_end_designation

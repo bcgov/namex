@@ -3,6 +3,8 @@ from datetime import (datetime)
 from .name_analysis_director import NameAnalysisDirector
 from . import ProcedureResult
 
+from .name_analysis_utils import words_distinctive_descriptive
+
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
 The response cases are as follows:
@@ -41,12 +43,17 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         results = []
 
         # TODO: Use the list_name array, don't use a string in the method!
-        # check_words_to_avoid = builder.check_words_to_avoid(self.get_list_name())  # This is correct
+        #check_words_to_avoid = builder.check_words_to_avoid(self.get_list_name())  # This is correct
         check_words_to_avoid = builder.check_words_to_avoid(self.get_preprocessed_name())  # This is incorrect
         if not check_words_to_avoid.is_valid:
             results.append(check_words_to_avoid)
             return results
             #  Do not continue
+
+        #Check if list_dist and list_desc are the same
+        if self.get_list_dist() == self.get_list_desc():
+            self._list_dist_words, self._list_desc_words = words_distinctive_descriptive(self.get_list_name())
+
 
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())
