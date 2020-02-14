@@ -13,6 +13,8 @@ from . import ProcedureResult
 from .name_analysis_utils import list_distinctive_descriptive_same, validate_distinctive_descriptive_lists, \
     list_distinctive_descriptive
 
+from .name_analysis_utils import words_distinctive_descriptive
+
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
 The response cases are as follows:
