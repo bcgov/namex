@@ -128,38 +128,67 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = False
 
-        # dist_substitution_list:  [['mount', 'mountain', 'mt', 'mtn'], ['view', 'vu']]
-        # desc_substitution_list: [['food, restaurant, bar'],['growers']]
-
         distinctive = ' '.join(map(str, list_dist)).replace(',', ' ').upper().strip()
 
-        dist_substitution_list = []
-
-        for w_dist in list_dist:
-            substitution_list = get_substitution_list(w_dist)
-            if substitution_list:
-                dist_substitution_list.append(substitution_list)
+        matches_response = []
+        for w_dist, w_desc in zip(list_dist, list_desc):
+            dist_substitution_tmp_list = []
+            dist_substitution_list = []
+            desc_synonym_list = []
+            dist_all_permutations = []
+            substitution_list = []
+            ##Get all word substitution for sublist element (distinctive)
+            if isinstance(w_dist, list):
+                for word in w_dist:
+                    substitution_list = get_substitution_list(word)
+                    if substitution_list:
+                        dist_substitution_tmp_list.append(substitution_list)
+                    else:
+                        dist_substitution_tmp_list.append(w_dist.lower())
+                dist_substitution_list.append(dist_substitution_tmp_list)
             else:
-                dist_substitution_list.append(w_dist.lower())
-
-        # All possible permutations of elements in dist_list
-        # [('mount', 'view'), ('mount', 'vu'), ('mountain', 'view'), ('mountain', 'vu'), ('mt', 'view'), ('mt', 'vu'), ('mtn', 'view'),
-        #  ('mtn', 'vu')]
-        if dist_substitution_list:
-            dist_all_permutations = list(itertools.product(*dist_substitution_list))
-            query = build_query_distinctive(dist_all_permutations)
+                substitution_list = get_substitution_list(w_dist)
+                if substitution_list:
+                    dist_substitution_list.append(substitution_list)
+                else:
+                    dist_substitution_list.append(w_dist.lower())
+            # Get all possible combinations for those words substitutions
+            for element in dist_substitution_list:
+                if len(element) > 1:
+                    dist_all_permutations.append(list(itertools.product(*element)))
+                else:
+                    dist_all_permutations.append([(item,) for sublist in element for item in sublist])
+            # Inject distinctive section in query
+            for element in dist_all_permutations:
+                l = len(element[0])
+                query = build_query_distinctive(element, l)
 
             desc_synonym_list = []
-            for w_desc in list_desc:
+            # Get the synonyms for for sublist element (descriptives)
+            if isinstance(w_desc, list):
+                desc_synonym_tmp_list = []
+                for word in w_desc:
+                    synonym_list = get_synonym_list(word)
+                    if synonym_list:
+                        desc_synonym_tmp_list.extend(synonym_list)
+                    else:
+                        desc_synonym_tmp_list.extend([word.lower()])
+                desc_synonym_list.append(desc_synonym_tmp_list)
+            else:
                 synonym_list = get_synonym_list(w_desc)
                 if synonym_list:
                     desc_synonym_list.extend(synonym_list)
                 else:
                     desc_synonym_list.extend([w_desc.lower()])
+            # Flatten list and remove duplicates
+            desc_synonym_list = [item for sublist in desc_synonym_list for item in sublist]
+            desc_synonym_list = list(dict.fromkeys(desc_synonym_list))
 
+            # Inject descriptive section into query, execute and add matches to list
             if desc_synonym_list:
                 query = build_query_descriptive(desc_synonym_list, query)
-                matches = pd.read_sql_query(query, cnx)
+                match = pd.read_sql_query(query, cnx)
+                matches_response.extend(match.values.tolist())
 
                 matches_response = [val.pop() for i, val in enumerate(matches.values.tolist())]
                 if matches_response:
@@ -177,7 +206,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         else:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+            result.values = matches_response
+        else:
+            result.is_valid = True
+            result.result_code = AnalysisResultCodes.VALID_NAME
             result.values = []
 
         return result
