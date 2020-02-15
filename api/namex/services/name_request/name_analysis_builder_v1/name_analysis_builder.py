@@ -187,7 +187,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             # Inject descriptive section into query, execute and add matches to list
             if desc_synonym_list:
                 query = build_query_descriptive(desc_synonym_list, query)
-                matches = pd.read_sql_query(query, cnx)
+                match = pd.read_sql_query(query, cnx)
+                matches_response.extend(match.values.tolist())
 
                 matches_response = [val.pop() for i, val in enumerate(matches.values.tolist())]
                 if matches_response:
