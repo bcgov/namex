@@ -156,7 +156,7 @@ def get_substitution_list(word):
 
 # TODO: This has been moved to Synonym model!
 def get_synonym_list(word):
-    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?!(sub|stop)$)' + "'" + ' AND ' + \
+    query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) !~* ' + "'" + '\w*(sub|stop)\s*$' + "'" + ' AND ' + \
             's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
     df = pd.read_sql_query(query, cnx)
 
@@ -508,7 +508,7 @@ def get_classification(word):
     return 'none'
 
 
-def build_query_distinctive(dist_all_permutations):
+def build_query_distinctive(dist_all_permutations,l):
     query = "select n.name " + \
             "from requests r, names n " + \
             "where r.id = n.nr_id and " + \
@@ -516,7 +516,11 @@ def build_query_distinctive(dist_all_permutations):
             "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
             "n.state IN ('APPROVED','CONDITION') and " + \
             "lower(n.name) similar to " + "'"
-    permutations = "|".join("%s %s" % tup for tup in dist_all_permutations)
+    st = ''
+    for s in range(l):
+        st += '%s '
+
+    permutations = "|".join(st % tup for tup in dist_all_permutations)
     query += "(" + permutations + ")%%" + "'"
 
     return query
