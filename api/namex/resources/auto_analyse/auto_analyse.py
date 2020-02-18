@@ -20,7 +20,7 @@ from namex.services.name_request.auto_analyse import \
 from namex.constants import \
     ValidLocations, BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from namex.services.name_request.name_analysis_builder_v1.name_analysis_builder import NameAnalysisBuilder
+from namex.services.name_request.name_analysis_builder_v2.name_analysis_builder import NameAnalysisBuilder
 from namex.services.name_request.auto_analyse.auto_analyse import AutoAnalyseService
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.services.name_request.auto_analyse.unprotected_name_analysis import UnprotectedNameAnalysisService

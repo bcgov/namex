@@ -1,7 +1,7 @@
 from hamcrest import *
 
 from namex.services.name_request.auto_analyse.auto_analyse import AutoAnalyseService
-from namex.services.name_request.name_analysis_builder_v1.name_analysis_builder import NameAnalysisBuilder
+from namex.services.name_request.name_analysis_builder_v2.name_analysis_builder import NameAnalysisBuilder
 import pandas as pd
 
 list_dist = ['MOUNTAIN', 'VIEW']
@@ -36,15 +36,15 @@ def test_check_words_to_avoid(client, jwt, app):
 
 def test_check_words_requiring_consent(client, jwt, app):
     assert_that(builder.check_words_requiring_consent(name_consent), True)
-
+'''
 
 def test_search_conflicts(client, jwt, app):
     assert_that(builder.search_conflicts(list_dist, list_desc), True)
-'''
 
-def test_check_designation(client, jwt, app):
-    assert_that(builder.check_designation(user_input, entity_type_user),
-                [[], ['UL']])
+
+#def test_check_designation(client, jwt, app):
+#    assert_that(builder.check_designation(user_input, entity_type_user),
+#                [[], ['UL']])
 
 '''
 def test_do_analysis(client, jwt, app):
