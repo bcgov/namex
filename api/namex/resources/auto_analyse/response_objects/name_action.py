@@ -46,7 +46,7 @@ class NameAction(Serializable):
         # TODO: Make sure index is valid! Add validation.
 
         self.type = kwargs['type'].value
-        self.index = kwargs['index'] if kwargs.get('index') > -1 else None  # Ensure positive index
+        self.index = kwargs['index'] if kwargs.get('index') and isinstance(kwargs['index'], int) else None  # Ensure positive index
         self.word = kwargs['word'] if kwargs.get('word') else None
         self.position = kwargs['position'].value if kwargs.get('position') else None  # [start | end] (is there another?)
         self.message = kwargs['message'] if kwargs.get('message') else None  # <string> | None
