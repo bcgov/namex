@@ -144,7 +144,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     if substitution_list:
                         dist_substitution_tmp_list.append(substitution_list)
                     else:
-                        dist_substitution_tmp_list.append(w_dist.lower())
+                        dist_substitution_tmp_list.append([word.lower()])
                 dist_substitution_list.append(dist_substitution_tmp_list)
             else:
                 substitution_list = get_substitution_list(w_dist)
