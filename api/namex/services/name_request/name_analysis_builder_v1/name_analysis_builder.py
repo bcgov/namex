@@ -161,7 +161,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 query = build_query_descriptive(desc_synonym_list, query)
                 matches = pd.read_sql_query(query, cnx)
 
-                matches_response = matches.values.tolist()
+                matches_response = [val.pop() for i, val in enumerate(matches.values.tolist())]
                 if matches_response:
                     result.is_valid = False
                     result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
