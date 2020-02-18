@@ -374,7 +374,7 @@ class AnalysisResponse:
 
         if status_code == "fa":
             self.status_code = "fa"
-            self.heading = "Further Action Required"
+            self.header = "Further Action Required"
 
     def prepare_payload(self):
         payload = NameAnalysisResponse(
