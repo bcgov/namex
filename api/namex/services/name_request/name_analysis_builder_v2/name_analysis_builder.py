@@ -1,14 +1,23 @@
 import itertools
-
+import pandas as pd
 import collections
+from sqlalchemy import create_engine
 
-from . import porter
-from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
+from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
+    build_query_descriptive, get_substitution_list, get_synonym_list, get_stop_word_list, get_fr_designation_end_list, \
+    get_prefix_list, clean_name_words, get_classification, words_distinctive_descriptive, \
+    data_frame_to_list, get_words_to_avoid, get_words_requiring_consent, \
+    get_en_LL_entity_type_end_designation, get_en_RLC_entity_type_end_designation, \
+    get_en_CR_entity_type_end_designation, get_en_BC_entity_type_end_designation, get_en_UL_entity_type_end_designation, \
+    get_en_CC_entity_type_end_designation, get_en_CC_entity_type_any_designation, \
+    get_en_XCP_entity_type_any_designation, get_en_CP_entity_type_any_designation, get_entity_type_by_value, \
+    get_entity_type_end_designation, get_entity_type_any_designation, get_en_designation_end_all_list, \
+    get_en_designation_any_all_list, get_designation_any_in_name, get_designation_end_in_name, \
+    get_designation_by_entity_type, get_wrong_place_end_designations, get_wrong_place_any_designations
+from ..auto_analyse.abstract_name_analysis_builder \
+    import AbstractNameAnalysisBuilder, ProcedureResult
 
-from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
-
-from namex.models.request import Request
+from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT
 
 '''
 Sample builder
@@ -17,232 +26,173 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
+    POSTGRES_ADDRESS = 'localhost'
+    POSTGRES_PORT = '5432'
+    POSTGRES_USERNAME = 'postgres'
+    POSTGRES_PASSWORD = ' '
+    # POSTGRES_DBNAME_SYNS = ''
+    POSTGRES_DBNAME_DATA = 'namex-auto-analyse'
+
+    postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
+                                                                                            password=POSTGRES_PASSWORD,
+                                                                                            ipaddress=POSTGRES_ADDRESS,
+                                                                                            port=POSTGRES_PORT,
+                                                                                            dbname=POSTGRES_DBNAME_DATA))
+
+    cnx = create_engine(postgres_str)
+
     '''
     Check to see if a provided name is valid
     Override the abstract / base class method
-    @return ProcedureResult[] An array of procedure results
-    '''
-
-    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
-        results = []
-        # TODO: We're doing two checks for name is well formed, that should probably not be the case
-
-        # list_name = ['victoria', 'abc', 'view', 'book']
-        # list_dist = ['victoria', 'book']
-        # list_desc = ['victoria', 'abc', 'view']
-        # Returns words in wrong classification following distinctive | descriptive: [{book:3}]
-        _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
-
-        # First, check to make sure the name doesn't have too many words
-        if len(list_name) > MAX_LIMIT:
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.TOO_MANY_WORDS
-
-            results.append(result)
-
-        # Next, we check for unclassified words
-        if len(list_none) > 0:
-            unclassified_words_list_response = []
-            for idx, token in enumerate(list_name):
-                if any(token in word for word in list_none):
-                    unclassified_words_list_response.append(token)
-
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.values = {
-                'list_name': list_name or [],
-                'list_none': unclassified_words_list_response
-            }
-
-            results.append(result)
-
-        # Now that too many words and unclassified words are handled, handle distinctive and descriptive issues
-        result = None
-
-        # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
-        # the original name should be passed to get the correct index when reporting issues to front end.
-
-        if len(list_name) == 0:
-            # If we have no words in our name, obviously we need to add a distinctive... this is kind of redundant as
-            # we shouldn't have a name with no words but we still need to handle the case in our API
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-            result.values = {
-                'list_name': [],
-                'list_dist': []
-            }
-        elif len(list_name) == 1:
-            # If there's only one word and it's distinctive, we need to add a descriptive word
-            if len(list_dist) == 1:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-                result.values = {
-                    'list_name': list_original_name or [],
-                    'list_dist': list_dist or []
-                }
-            else:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_name': list_original_name or [],
-                    'list_dist': list_dist or []
-                }
-        else:
-            if len(list_dist) == 0:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_name': list_original_name or [],
-                    'list_dist': []
-                }
-            elif len(list_desc) == 0:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-                result.values = {
-                    'list_name': list_original_name or [],
-                    'list_dist': list_dist or []
-                }
-                # elif collections.Counter(list_dist) == collections.Counter(list_desc):
-                # If there's more than one word and all words are both distinctive and descriptive ~~add another distinctive~~
-                # Then we find all possible combinations in search_conflicts
-                '''
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_name': list_name,
-                    'list_dist': []
-                }
-                '''
-
-        if result:
-            results.append(result)
-
-        return results
-
-    '''
-    Override the abstract / base class method.
-    
     @return ProcedureResult
     '''
 
-    def check_words_to_avoid(self, list_name, name):
+    def check_name_is_well_formed(self, list_dist, list_desc, list_none, name):
         result = ProcedureResult()
         result.is_valid = True
 
-        # TODO: Arturo plz check the word against the list, provide it as an input for word_condition_service.get_words_to_avoid()
-        all_words_to_avoid_list = self.word_condition_service.get_words_to_avoid()
+        # TODO: Use the list_name arr on the class instance!
+        list_name = name.split()
+
+        # if (len(list_desc) > 0 and len(list_dist) > 0) and (list_desc != list_dist) and (
+        #        (list_dist + list_desc) == name):
+        #    success = True
+
+        # Return one of the following:
+        # AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+        # AnalysisResultCodes.TOO_MANY_WORDS
+        # AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+        # AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+
+        if len(list_none) > 0:
+            unclassified_words_list_response = []
+            # TODO: We've already split the name in the director (get_list_name) why are we using the string here?
+            list_name = name.split()
+
+            for idx, token in enumerate(list_name):
+                if any(token in word for word in list_none):
+                    unclassified_words_list_response.append({idx: token})
+
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+            result.value = unclassified_words_list_response
+        elif len(list_dist) < 1:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+        elif len(list_desc) < 1:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+        elif len(list_name) > MAX_LIMIT:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
+
+        return result
+
+    '''
+    Override the abstract / base class method
+    @return ProcedureResult
+    '''
+
+    def check_words_to_avoid(self, name):
+        result = ProcedureResult()
+        result.is_valid = True
+
+        all_words_to_avoid_list = get_words_to_avoid()
         words_to_avoid_list = []
 
         for words_to_avoid in all_words_to_avoid_list:
             if words_to_avoid.lower() in name.lower():
-                words_to_avoid_list.append(words_to_avoid.lower())
+                words_to_avoid_list.append(words_to_avoid)
 
+        list_name = name.split()
         words_to_avoid_list_response = []
 
         for idx, token in enumerate(list_name):
             if any(token in word for word in words_to_avoid_list):
-                words_to_avoid_list_response.append(token)
+                words_to_avoid_list_response.append({idx: token})
 
         if words_to_avoid_list_response:
             result.is_valid = False
-            result.result_code = AnalysisIssueCodes.WORDS_TO_AVOID
-            result.values = {
-                'list_name': list_name,
-                'list_avoid': words_to_avoid_list_response
-            }
+            result.result_code = AnalysisResultCodes.WORD_TO_AVOID
+            result.values = words_to_avoid_list_response
 
         return result
 
     '''
     Override the abstract / base class method
-    Input: list_dist = ['MOUNTAIN', 'VIEW']
-           list_desc = ['FOOD', 'GROWERS']
+    Input: list_dist= ['MOUNTAIN', 'VIEW']
+           list_desc= ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
 
-    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name):
-        syn_svc = self.synonym_service
-
+    def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
         result = ProcedureResult()
         result.is_valid = False
-        matches_response = []  # Contains all the conflicts from database
-        most_similar_names = []
-        dict_highest_counter = {}
-        dict_highest_detail = {}
-        response = {}
+        matches_response = []
 
-        for w_dist, w_desc in zip(list_dist_words, list_desc_words):
+        for w_dist, w_desc in zip(list_dist, list_desc):
+            dist_substitution_tmp_list = []
             dist_substitution_list = []
             desc_synonym_list = []
             dist_all_permutations = []
+            substitution_list = []
 
-            dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(w_dist)
-            dist_substitution_list = dist_substitution_dict.values()
+            ##Get all word substitution for sublist element (distinctive)
+            if isinstance(w_dist, list):
+                for word in w_dist:
+                    substitution_list = get_substitution_list(word)
+                    if substitution_list:
+                        dist_substitution_tmp_list.append(substitution_list)
+                    else:
+                        dist_substitution_tmp_list.append(w_dist.lower())
+                dist_substitution_list.append(dist_substitution_tmp_list)
+            else:
+                substitution_list = get_substitution_list(w_dist)
+                if substitution_list:
+                    dist_substitution_list.append(substitution_list)
+                else:
+                    dist_substitution_list.append(w_dist.lower())
 
-            desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
-            desc_synonym_list = desc_synonym_dict.values()
+            # Get all possible combinations for those words substitutions
+            for element in dist_substitution_list:
+                if len(element) > 1:
+                    dist_all_permutations.append(list(itertools.product(*element)))
+                else:
+                    dist_all_permutations.append([(item,) for sublist in element for item in sublist])
 
             # Inject distinctive section in query
-            for dist in dist_substitution_list:
-                criteria = Request.get_general_query()
-                criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
-                # Inject descriptive section into query, execute and add matches to list
-                for desc in desc_synonym_list:
-                    matches = Request.get_query_distinctive_descriptive(desc, criteria)
-                    matches_response = list(dict.fromkeys(matches))
-                    dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
-                                                                                            dict_highest_detail,
-                                                                                            matches_response, w_dist,
-                                                                                            w_desc, list_name, name)
-        most_similar_names.extend(
-            list({k for k, v in
-                  sorted(dict_highest_counter.items(), key=lambda item: (-item[1], item[0]))[0:MAX_MATCHES_LIMIT]}))
+            for element in dist_all_permutations:
+                query = build_query_distinctive(element, len(element[0]))
 
-        for element in most_similar_names:
-            response.update({element: dict_highest_detail.get(element, {})})
+            # Get the synonyms for for sublist element (descriptives)
+            if isinstance(w_desc, list):
+                for word in w_desc:
+                    synonym_list = get_synonym_list(word)
+                    if synonym_list:
+                        desc_synonym_list.append(synonym_list)
+                    else:
+                        desc_synonym_list.append([word.lower()])
+            else:
+                synonym_list = get_synonym_list(w_desc)
+                if synonym_list:
+                    desc_synonym_list.append(synonym_list)
+                else:
+                    desc_synonym_list.append([w_desc.lower()])
 
-        if response:
+            # Inject descriptive section into query, execute and add matches to list
+            if desc_synonym_list:
+                query = build_query_descriptive(desc_synonym_list, query)
+                matches = pd.read_sql_query(query, cnx)
+                matches_response.extend([val.pop() for i, val in enumerate(matches.values.tolist())])
+
+        matches_response = list(dict.fromkeys(matches_response))
+        if matches_response:
             result.is_valid = False
-            result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
-            result.values = {
-                'list_name': list_name,
-                'list_dist': list_dist_words,
-                'list_desc': list_desc_words,
-                'list_conflicts': response
-            }
+            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+            result.values = matches_response
         else:
             result.is_valid = True
-            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
-            result.values = []
-        return result
-
-    def search_exact_match(self, preprocess_name, list_name):
-        result = ProcedureResult()
-        result.is_valid = False
-
-        criteria = Request.get_general_query()
-        exact_match = Request.get_query_exact_match(criteria, preprocess_name)
-
-        if exact_match:
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
-            result.values = {
-                'list_name': list_name,
-                'list_dist': None,
-                'list_desc': None,
-                'list_conflicts': exact_match
-            }
-        else:
-            result.is_valid = True
-            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
+            result.result_code = AnalysisResultCodes.VALID_NAME
             result.values = []
 
         return result
@@ -252,182 +202,180 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_requiring_consent(self, list_name, name):
+    def check_words_requiring_consent(self, name):
         result = ProcedureResult()
         result.is_valid = True
 
-        all_words_consent_list = self.word_condition_service.get_words_requiring_consent()
+        all_words_consent_list = get_words_requiring_consent()
         words_consent_list = []
 
         for words_consent in all_words_consent_list:
             if words_consent.lower() in name.lower():
-                words_consent_list.append(words_consent.lower())
+                words_consent_list.append(words_consent)
 
+        list_name = name.split()
         words_consent_list_response = []
 
         for idx, token in enumerate(list_name):
             if any(token in word for word in words_consent_list):
-                words_consent_list_response.append(token)
+                words_consent_list_response.append({idx: token})
 
         if words_consent_list_response:
             result.is_valid = False
-            result.result_code = AnalysisIssueCodes.NAME_REQUIRES_CONSENT
-            result.values = {
-                'list_name': list_name,
-                'list_consent': words_consent_list_response
-            }
+            result.result_code = AnalysisResultCodes.WORD_TO_AVOID
+            result.values = words_consent_list_response
 
         return result
 
     '''
     Override the abstract / base class method
-    list_name: original name tokenized
-    entity_type_user: Entity type typed u user in UI
-    all_designations: All Designations found in name (either misplaced or not)
-    all_designations_user: All designations for the entity type typed by the user. 
     @return ProcedureResult
     '''
 
-    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
+    def check_designation(self, name, entity_type_user):
         result = ProcedureResult()
         result.is_valid = True
 
+        entity_end_designation_dict = {'RLC': get_en_RLC_entity_type_end_designation(),
+                                       'LL': get_en_LL_entity_type_end_designation(),
+                                       'CC': get_en_CC_entity_type_end_designation(),
+                                       'UL': get_en_UL_entity_type_end_designation(),
+                                       'BC': get_en_BC_entity_type_end_designation(),
+                                       'CR': get_en_CR_entity_type_end_designation()}
+
+        entity_any_designation_dict = {'CP': get_en_CP_entity_type_any_designation(),
+                                       'XCP': get_en_XCP_entity_type_any_designation(),
+                                       'CC': get_en_CC_entity_type_any_designation()}
+
+        # Get all designations for entity_type as list of dictionaries key:[any|stop], value: designations
+        designations_entity_type_user = get_designation_by_entity_type(entity_type_user)
+        designation_any_list_user = list()
+        designation_end_list_user = list()
+
+        # Get designation_any_list_user and designation_end_list_user based on entity type typed by user
+        for k, v in designations_entity_type_user.items():
+            if k.lower() == 'any':
+                designation_any_list_user.extend(v)
+            else:
+                designation_end_list_user.extend(v)
+
+        # Get designation_any_list and designation_end_list based on company name typed by user
+        designation_any_list = get_designation_any_in_name(name)
+        designation_end_list = get_designation_end_in_name(name)
+
+        wrong_designation_any_list = get_wrong_place_any_designations(name)
+        wrong_designation_end_list = get_wrong_place_end_designations(name)
+
+        wrong_designation_place = wrong_designation_any_list + wrong_designation_end_list
+
+        # Get the entity type(s) for designations related to company name:
+        entity_type_any_designation = []
+        entity_type_end_designation = []
+        if designation_any_list:
+            entity_type_any_designation = get_entity_type_any_designation(entity_any_designation_dict,
+                                                                          designation_any_list)
+        if designation_end_list:
+            entity_type_end_designation = get_entity_type_end_designation(entity_end_designation_dict,
+                                                                          designation_end_list)
+        # All possible entity types found related to company name.
+        all_entity_types = [item for item, count in
+                            collections.Counter(entity_type_any_designation + entity_type_end_designation).items() if
+                            count > 1]
+        if not all_entity_types:
+            all_entity_types = entity_type_any_designation + entity_type_end_designation
+
+        all_designations_user = designation_any_list_user + designation_end_list_user
+        all_designations = designation_any_list + designation_end_list
+
+        list_name = name.lower().split()
         mismatch_entity_designation_list = []
+        mismatch_wrong_designation_place = []
         for idx, token in enumerate(list_name):
             if any(token in designation for designation in all_designations):
                 if token not in all_designations_user:
-                    mismatch_entity_designation_list.append(token.upper())
+                    mismatch_entity_designation_list.append({idx: token.upper()})
 
-        if mismatch_entity_designation_list:
+        if wrong_designation_place:
+            for idx, token in enumerate(list_name):
+                if any(token in wrong_designation for wrong_designation in wrong_designation_place):
+                    mismatch_wrong_designation_place.append({idx: token.upper()})
+
+        if mismatch_entity_designation_list or wrong_designation_place:
+            response = list()
+            response.append(mismatch_wrong_designation_place)
+            response.append(mismatch_entity_designation_list)
+            if mismatch_entity_designation_list:
+                response.append(list(map(str.upper, all_designations_user)))
+            else:
+                response.append(list())
             result.is_valid = False
-            result.result_code = AnalysisIssueCodes.DESIGNATION_MISMATCH
-            result.values = {
-                'list_name': list_name,
-                'incorrect_designations': mismatch_entity_designation_list,
-                'correct_designations': all_designations_user,
-            }
-
-        return result
-
-    '''
-        Override the abstract / base class method
-        misplaced_designation_any, misplaced_designation_end, misplaced_designation_all
-        @return ProcedureResult
-        '''
-
-    def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end,
-                                    misplaced_designation_all):
-        result = ProcedureResult()
-        result.is_valid = True
-
-        if misplaced_designation_all:
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.DESIGNATION_MISPLACED
-            result.values = {
-                'list_name': list_name,
-                'misplaced_any_designation': misplaced_designation_any,
-                'misplaced_end_designation': misplaced_designation_end,
-                'misplaced_all_designation': misplaced_designation_all
-            }
+            result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
+            result.values = response
 
         return result
 
     '''
     Override the abstract / base class method
     @return ProcedureResult
+    @deprecated The DIRECTOR CONTROLS THE BUILD PROCESS
     '''
-
-    def check_word_special_use(self, list_name, name):
+    '''
+    def do_analysis(self, name):
         result = ProcedureResult()
-        result.is_valid = True
+        result.is_valid = False
 
-        all_word_special_use_list = self.word_condition_service.get_word_special_use()
-        word_special_use_list = []
+        stop_words = get_stop_word_list()
+        en_designation_any = get_en_designation_any_all_list()
+        en_designation_end = get_en_designation_end_all_list()
+        fr_designation_end = get_fr_designation_end_list()
+        prefixes = get_prefix_list()
+        cf = pd.DataFrame(columns=['word', 'word_classification'])
 
-        for words_special in all_word_special_use_list:
-            if words_special.lower() in name.lower():
-                word_special_use_list.append(words_special.lower())
+        preprocessed_name_list = clean_name_words(name, stop_words, en_designation_any, en_designation_end,
+                                                  fr_designation_end, prefixes)
 
-        word_special_use_list_response = []
+        for word in preprocessed_name_list:
+            # TODO: Get classification shouldn't be done here
+            classification = get_classification(word)
+            new_row = {'word': word.lower().strip(), 'word_classification': classification.strip()}
+            cf = cf.append(new_row, ignore_index=True)
 
-        for idx, token in enumerate(list_name):
-            if any(token in word for word in word_special_use_list):
-                word_special_use_list_response.append(token)
+        distinctive_list, descriptive_list, unclassified_list = data_frame_to_list(cf)
 
-        if word_special_use_list_response:
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.WORD_SPECIAL_USE
-            result.values = {
-                'list_name': list_name,
-                'list_special': word_special_use_list_response
-            }
+        check_name_is_well_formed = self.check_name_is_well_formed(descriptive_list, distinctive_list,
+                                                                   unclassified_list, \
+                                                                   preprocessed_name_list)
+        # TODO: The DIRECTOR CONTROLS THE BUILD PROCESS
+        if check_name_is_well_formed.is_valid:
+            # preprocessed_name = ' '.join(map(str, preprocessed_name_list))
+            check_words_to_avoid = self.check_words_to_avoid(name)
+            check_conflicts = self.search_conflicts(distinctive_list, descriptive_list)
 
-        return result
+            if not check_conflicts:
+                check_words_requiring_consent = self.check_words_requiring_consent(name)
+                check_designation_mismatch = self.check_designation(name, entity_type_end_desig_user,
+                                                                    entity_type_any_desig_user)
 
-    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
-                               list_name, name):
-        syn_svc = self.synonym_service
+                # check_designation_mismatch = self.check_designation()
+                if not check_name_is_well_formed.is_valid:
+                    return check_name_is_well_formed
 
-        if matches:
-            dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_dist)
-            dist_substitution_list = dist_substitution_dict.values()
-            dist_substitution_list = [item for sublist in dist_substitution_list for item in sublist]
+                if not check_words_to_avoid.is_valid:
+                    return check_words_to_avoid
 
-            desc_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_desc, False)
-            desc_substitution_list = desc_substitution_dict.values()
-            desc_substitution_list = [item for sublist in desc_substitution_list for item in sublist]
+                if not check_conflicts.is_valid:
+                    return check_conflicts
 
-            all_substitutions = dist_substitution_list + desc_substitution_list
-            all_subs_stem = [porter.stem(substitution.lower()) for substitution in all_substitutions]
+                if not check_words_requiring_consent.is_valid:
+                    return check_words_requiring_consent
 
-            list_name_stem = [porter.stem(name.lower()) for name in list_name]
-            length_original = len(list_name)
+                if not check_designation_mismatch.is_valid:
+                    return check_designation_mismatch
 
-            dict_matches_counter = {}
-            dict_matches_words = {}
-            for match in matches:
-                match_list = match.split()
-                counter = 0
-                for idx, word in enumerate(match_list):
-                    # Compare in the same place
-                    if length_original == len(match_list) and word.lower() == list_name[idx]:
-                        counter += 1
-                    elif length_original == len(match_list) and porter.stem(word.lower()) == list_name_stem[idx]:
-                        counter += 0.95
-                    elif word.lower() in list_name:
-                        counter += 0.85
-                    elif porter.stem(word.lower()) in list_name_stem:
-                        counter += 0.75
-                    elif porter.stem(word.lower()) in all_subs_stem:
-                        counter += 0.7
-                similarity=counter / length_original
-                dict_matches_counter.update({match: similarity})
+            else:
+                return result
+        else:
+            return result
 
-            dict_matches_words.update(
-                self.get_details_most_similar(list(dict_matches_counter), dist_substitution_dict,
-                                              desc_substitution_dict))
-            # Get two highest scores (values) and shortest names (key)
-            dict_highest_counter.update({k: v for k, v in
-                                         sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
-                                         0:MAX_MATCHES_LIMIT]})
-
-            for k in dict_highest_counter.keys():
-                dict_highest_detail.update({k: dict_matches_words.get(k)})
-
-        return dict_highest_counter, dict_highest_detail
-
-    def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
-        dict_words_matches = {}
-        dict_detail_matches = {}
-        for name in list_response:
-            name_list = name.split()
-            for word in name_list:
-                dist_values = dist_substitution_dict.get(word.lower())
-                desc_values = desc_substitution_dict.get(word.lower())
-                if dist_values is not None:
-                    dict_words_matches.update({word.lower(): dist_values})
-                if desc_values is not None:
-                    dict_words_matches.update({word.lower(): desc_values})
-            dict_detail_matches.update({name: dict_words_matches})
-
-        return dict_detail_matches
+            return ProcedureResult(is_valid=True)
+    '''

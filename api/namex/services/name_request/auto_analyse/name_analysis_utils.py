@@ -10,7 +10,7 @@ from namex.services.name_request.auto_analyse import DataFrameFields
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ' '
+POSTGRES_PASSWORD = 'BVict31C'
 POSTGRES_DBNAME = 'namex-auto-analyse'
 # POSTGRES_DBNAME_WC = 'namex-local'
 
@@ -504,7 +504,7 @@ def get_classification(word):
     return 'none'
 
 
-def build_query_distinctive(dist_all_permutations,l):
+def build_query_distinctive(dist_all_permutations, l):
     query = "select n.name " + \
             "from requests r, names n " + \
             "where r.id = n.nr_id and " + \
@@ -523,9 +523,10 @@ def build_query_distinctive(dist_all_permutations,l):
 
 
 def build_query_descriptive(desc_substitution_list, query):
-    query += " and lower(n.name) similar to "
-    substitutions = ' ?| '.join(map(str, desc_substitution_list))
-    query += "'" + "%%( " + substitutions + " ?)%%" + "'"
+    for element in desc_substitution_list:
+        query += " and lower(n.name) similar to "
+        substitutions = ' ?| '.join(map(str, element))
+        query += "'" + "%%( " + substitutions + " ?)%%" + "'"
 
     return query
 

@@ -12,7 +12,7 @@ from sqlalchemy.orm import backref
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ' '
+POSTGRES_PASSWORD = 'BVict31C'
 POSTGRES_DBNAME = 'namex-auto-analyse'
 #POSTGRES_DBNAME_WC = 'namex-auto-analyse'
 

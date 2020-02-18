@@ -12,7 +12,7 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import get_dat
 POSTGRES_ADDRESS = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ' '
+POSTGRES_PASSWORD = 'BVict31C'
 POSTGRES_DBNAME = 'namex-auto-analyse'
 #POSTGRES_DBNAME_WC = 'namex-local'
 
