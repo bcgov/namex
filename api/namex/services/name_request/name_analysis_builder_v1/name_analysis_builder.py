@@ -188,8 +188,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             # Inject descriptive section into query, execute and add matches to list
             if desc_synonym_list:
                 query = build_query_descriptive(desc_synonym_list, query)
-                match = pd.read_sql_query(query, cnx)
-                matches_response.extend(match.values.tolist())
+                matches = pd.read_sql_query(query, cnx)
+
+                matches_response = [val.pop() for i, val in enumerate(matches.values.tolist())]
+                if matches_response:
+                    result.is_valid = False
+                    result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+                    result.values = matches_response
+                else:
+                    result.is_valid = True
+                    result.result_code = AnalysisResultCodes.VALID_NAME
+                    result.values = []
+            else:
+                result.is_valid = False
+                result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+                result.values = []
 
                 matches_response = [val.pop() for i, val in enumerate(matches.values.tolist())]
                 if matches_response:
