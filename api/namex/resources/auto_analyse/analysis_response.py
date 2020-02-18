@@ -33,7 +33,7 @@ def response_issues(issue_code):
 
 class AnalysisResponse:
     def __init__(self, analysis_result):
-        self.heading = ""
+        self.header = ""
         self.status_code = ""
         self.issues = []
 
@@ -44,7 +44,7 @@ class AnalysisResponse:
                 if callable(response_issues(procedure_result.result_code)):
                     issue_builder = response_issues(procedure_result.result_code)
                     response_issue = issue_builder.create_issue(procedure_result)
-                    if response_issue and response_issue.issueType is not AnalysisResultCodes.VALID_NAME:
+                    if response_issue and response_issue.issue_type is not AnalysisResultCodes.VALID_NAME:
                         self.issues.append(response_issue)
                     else:
                         pass
@@ -54,11 +54,11 @@ class AnalysisResponse:
 
         if status_code == "fa":
             self.status_code = "fa"
-            self.heading = "Further Action Required"
+            self.header = "Further Action Required"
 
     def prepare_payload(self):
         payload = NameAnalysisResponse(
-            header=self.heading,
+            header=self.header,
             status=self.status_code,
             issues=self.issues
         )
