@@ -34,20 +34,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     POSTGRES_DBNAME_SYNS = 'local-sandbox-dev'
     POSTGRES_DBNAME_DATA = 'namex-local-dev'
 
-    postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                            password=POSTGRES_PASSWORD,
-                                                                                            ipaddress=POSTGRES_ADDRESS,
-                                                                                            port=POSTGRES_PORT,
-                                                                                            dbname=POSTGRES_DBNAME_DATA))
-
-    cnx = create_engine(postgres_str)
 
     '''
     Check to see if a provided name is valid
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, name):
         result = ProcedureResult()
         result.is_valid = True
