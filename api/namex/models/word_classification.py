@@ -9,40 +9,6 @@ from datetime import datetime, date
 from sqlalchemy import func, create_engine
 from sqlalchemy.orm import backref
 
-POSTGRES_ADDRESS = 'localhost'
-POSTGRES_PORT = '5432'
-POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ' '
-POSTGRES_DBNAME = 'namex-auto-analyse'
-#POSTGRES_DBNAME_WC = 'namex-auto-analyse'
-
-postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                        password=POSTGRES_PASSWORD,
-                                                                                        ipaddress=POSTGRES_ADDRESS,
-                                                                                        port=POSTGRES_PORT,
-                                                                                        dbname=POSTGRES_DBNAME))
-
-#postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-#                                                                                           password=POSTGRES_PASSWORD,
-#                                                                                           ipaddress=POSTGRES_ADDRESS,
-#                                                                                           port=POSTGRES_PORT,
-#                                                                                           dbname=POSTGRES_DBNAME_WC))
-
-cnx = create_engine(postgres_str)
-#cnx_wc = create_engine(postgres_wc_str)
-
-
-# TODO: This has been moved to WordClassification model!
-def get_classification(word):
-    query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
-    cf = pd.read_sql_query(query, cnx)
-
-    if not cf.empty and len(cf) == 1:
-        return cf['word_classification'].to_string(index=False).lower()
-
-    return 'none'
-
-
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
 
@@ -80,9 +46,20 @@ class WordClassification(db.Model):
         # TODO: Can we return more than one result?
         print(cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all())
         return cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all() #\
-                   #.filter(or_(cls.end_dt is None, datetime.date(cls.end_dt) > date.today()))\
+                   # .filter(or_(cls.end_dt is None, datetime.date(cls.end_dt) > date.today()))\
                    # .filter(datetime.date(cls.start_dt) <= date.today())\
                    # .filter(cls.approved_dt) <= date.today().all()
+
+    # TODO: This has been moved to WordClassification model!
+    @classmethod
+    def get_classification(cls, word):
+        query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
+        cf = pd.read_sql_query(query, con=db.engine)
+
+        if not cf.empty and len(cf) == 1:
+            return cf['word_classification'].to_string(index=False).lower()
+
+        return 'none'
 
     def save_to_db(self):
         db.session.add(self)

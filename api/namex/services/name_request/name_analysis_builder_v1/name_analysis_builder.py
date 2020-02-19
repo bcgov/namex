@@ -26,27 +26,13 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
-    POSTGRES_ADDRESS = 'localhost'
-    POSTGRES_PORT = '5432'
-    POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = 'BVict31C'
-    # POSTGRES_DBNAME_SYNS = ''
-    POSTGRES_DBNAME_DATA = 'namex-auto-analyse'
 
-    postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                            password=POSTGRES_PASSWORD,
-                                                                                            ipaddress=POSTGRES_ADDRESS,
-                                                                                            port=POSTGRES_PORT,
-                                                                                            dbname=POSTGRES_DBNAME_DATA))
-
-    cnx = create_engine(postgres_str)
 
     '''
     Check to see if a provided name is valid
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -123,123 +109,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
            list_desc= ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
-    def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
-        result = ProcedureResult()
-        result.is_valid = False
-
-        distinctive = ' '.join(map(str, list_dist)).replace(',', ' ').upper().strip()
-
-        matches_response = []
-        for w_dist, w_desc in zip(list_dist, list_desc):
-            dist_substitution_tmp_list = []
-            dist_substitution_list = []
-            desc_synonym_list = []
-            dist_all_permutations = []
-            substitution_list = []
-            ##Get all word substitution for sublist element (distinctive)
-            if isinstance(w_dist, list):
-                for word in w_dist:
-                    substitution_list = get_substitution_list(word)
-                    if substitution_list:
-                        dist_substitution_tmp_list.append(substitution_list)
-                    else:
-                        dist_substitution_tmp_list.append(w_dist.lower())
-                dist_substitution_list.append(dist_substitution_tmp_list)
-            else:
-                substitution_list = get_substitution_list(w_dist)
-                if substitution_list:
-                    dist_substitution_list.append(substitution_list)
-                else:
-                    dist_substitution_list.append(w_dist.lower())
-            # Get all possible combinations for those words substitutions
-            for element in dist_substitution_list:
-                if len(element) > 1:
-                    dist_all_permutations.append(list(itertools.product(*element)))
-                else:
-                    dist_all_permutations.append([(item,) for sublist in element for item in sublist])
-            # Inject distinctive section in query
-            for element in dist_all_permutations:
-                l = len(element[0])
-                query = build_query_distinctive(element, l)
-
-            desc_synonym_list = []
-            # Get the synonyms for for sublist element (descriptives)
-            if isinstance(w_desc, list):
-                desc_synonym_tmp_list = []
-                for word in w_desc:
-                    synonym_list = get_synonym_list(word)
-                    if synonym_list:
-                        desc_synonym_tmp_list.extend(synonym_list)
-                    else:
-                        desc_synonym_tmp_list.extend([word.lower()])
-                desc_synonym_list.append(desc_synonym_tmp_list)
-            else:
-                synonym_list = get_synonym_list(w_desc)
-                if synonym_list:
-                    desc_synonym_list.extend(synonym_list)
-                else:
-                    desc_synonym_list.extend([w_desc.lower()])
-            # Flatten list and remove duplicates
-            desc_synonym_list = [item for sublist in desc_synonym_list for item in sublist]
-            desc_synonym_list = list(dict.fromkeys(desc_synonym_list))
-
-            # Inject descriptive section into query, execute and add matches to list
-            if desc_synonym_list:
-                query = build_query_descriptive(desc_synonym_list, query)
-                matches = pd.read_sql_query(query, cnx)
-
-                matches_response = [val.pop() for i, val in enumerate(matches.values.tolist())]
-                if matches_response:
-                    result.is_valid = False
-                    result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
-                    result.values = matches_response
-                else:
-                    result.is_valid = True
-                    result.result_code = AnalysisResultCodes.VALID_NAME
-                    result.values = []
-            else:
-                result.is_valid = False
-                result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-                result.values = []
-
-                matches_response = [val.pop() for i, val in enumerate(matches.values.tolist())]
-                if matches_response:
-                    result.is_valid = False
-                    result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
-                    result.values = matches_response
-                else:
-                    result.is_valid = True
-                    result.result_code = AnalysisResultCodes.VALID_NAME
-                    result.values = []
-            else:
-                result.is_valid = False
-                result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-                result.values = []
-
-                matches_response = [val.pop() for i, val in enumerate(matches.values.tolist())]
-                if matches_response:
-                    result.is_valid = False
-                    result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
-                    result.values = matches_response
-                else:
-                    result.is_valid = True
-                    result.result_code = AnalysisResultCodes.VALID_NAME
-                    result.values = []
-            else:
-                result.is_valid = False
-                result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-                result.values = []
-
-        else:
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
-            result.values = matches_response
-        else:
-            result.is_valid = True
-            result.result_code = AnalysisResultCodes.VALID_NAME
-            result.values = []
-
-        return result
+    def search_conflicts(self, list_dist, list_desc):
+        pass
 
     '''
     Override the abstract / base class method

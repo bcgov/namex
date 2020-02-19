@@ -1,4 +1,4 @@
-from ..name_request.auto_analyse.name_analysis_utils import clean_name_words, data_frame_to_list
+from ..name_request.auto_analyse.name_analysis_utils import remove_french, data_frame_to_list
 
 from namex.services.synonyms.synonym \
     import SynonymService
@@ -46,7 +46,7 @@ class NameProcessingService:
 
         # Clean the provided name and tokenize the string
         # Identify stop words, any words and end words an store the lists to our director instance
-        self._list_name_words = clean_name_words(
+        self._list_name_words = self.clean_name_words(
             self._name_as_submitted,
             self._stop_words,
             self._designated_any_words,
@@ -60,6 +60,16 @@ class NameProcessingService:
 
         # Store clean, preprocessed name to instance
         self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
+
+    def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[], prefix_list=[]):
+        # TODO: Warn or something if params aren't set!
+        words = text.lower()
+        words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
+        words = remove_french(words, fr_designation_end_list)
+        tokens = self._synonym_service.regex_transform(words, designation_any, designation_end, prefix_list)
+        tokens = tokens.split()
+
+        return [x.lower() for x in tokens if x]
 
     '''
     Set and preprocess a submitted name string using the preprocess_name class method.

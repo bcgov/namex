@@ -1,3 +1,4 @@
+import re
 from . import db, ma
 
 from enum import Enum
@@ -8,33 +9,6 @@ from sqlalchemy import create_engine
 from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
 from ..services.name_request.auto_analyse import DataFrameFields
 from namex.constants import AllEntityTypes
-
-POSTGRES_ADDRESS = 'localhost'
-POSTGRES_PORT = '5432'
-POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = ' '
-POSTGRES_DBNAME = 'namex-auto-analyse'
-# POSTGRES_DBNAME_WC = 'namex-local'
-POSTGRES_PASSWORD = 'BVict31C'
-POSTGRES_DBNAME = 'namex-auto-analyse'
-# POSTGRES_DBNAME_WC = 'namex-local'
-
-postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                        password=POSTGRES_PASSWORD,
-                                                                                        ipaddress=POSTGRES_ADDRESS,
-                                                                                        port=POSTGRES_PORT,
-                                                                                        dbname=POSTGRES_DBNAME))
-
-# postgres_wc_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-#                                                                                           password=POSTGRES_PASSWORD,
-#                                                                                           ipaddress=POSTGRES_ADDRESS,
-#                                                                                           port=POSTGRES_PORT,
-#                                                                                           dbname=POSTGRES_DBNAME_WC))
-
-cnx = create_engine(postgres_str)
-
-
-# cnx_wc = create_engine(postgres_wc_str)
 
 
 # The class that corresponds to the database table for synonyms.
@@ -52,6 +26,31 @@ class Synonym(db.Model):
     def json(self):
         return {"id": self.id, "category": self.category, "synonymsText": self.synonyms_text,
                 "stemsText": self.stems_text, "comment": self.comment, "enabled": self.enabled}
+
+    # TODO: Does this belong here?
+    @classmethod
+    def get_designation_by_entity_type(cls, entity_type):
+        query = 'SELECT s.category, s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^' + entity_type.lower() + '.*(english[_ -]+)+designation[s]?[_-]' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            designation_value_list = {
+                re.sub(r'.*(any).*|.*(end).*', r'\1\2', x[0], 0, re.IGNORECASE): ''.join(x[1:]).split(",") for x in
+                df.itertuples(index=False)}
+            return designation_value_list
+
+        return None
+
+    # TODO: Does this belong here?
+    @classmethod
+    def get_entity_type_by_value(cls, entity_type_dicts, designation):
+        entity_list = list()
+        entity__designation_end_list = entity_type_dicts.items()
+        print(entity__designation_end_list)
+        for entity_designation in entity__designation_end_list:
+            if any(designation in value for value in entity_designation[1]):
+                entity_list.append(entity_designation[0])
+        return entity_list
 
     @classmethod
     def find(cls, term, col):
@@ -78,7 +77,7 @@ class Synonym(db.Model):
     def is_substitution_word(cls, word):
         df = pd.read_sql_query(
             'SELECT s.synonyms_text FROM synonym s where lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + 'and ' + \
-            's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "'", cnx)
+            's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "'", con=db.engine)
         if not df.empty:
             return True
         return False
@@ -91,7 +90,7 @@ class Synonym(db.Model):
         else:
             query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'"
 
-        df = pd.read_sql_query(query, cnx)
+        df = pd.read_sql_query(query, con=db.engine)
         if not df.empty:
             response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
             response = get_flat_list(response)
@@ -100,28 +99,24 @@ class Synonym(db.Model):
 
     @classmethod
     def get_synonym_list(cls, word=None):
-        # TODO: That semi colon doesn't look right in there... confirm!
         if word:
-            return cls.query_category("'" + '(?!(sub|stop)$)' + "'" + ' AND ' + \
-                                      's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")
-
-        return cls.query_category("'" + '(?!(sub|stop)$)' + "'")
+            return cls.query_category('!~* ' + "'" + '\w*(sub|stop)\s*$' + "'" + ' AND ' + 's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")
 
     @classmethod
     def get_stop_word_list(cls):
-        return cls.query_category("'" + '^stop[_ -]+word[s]?' + "'")
+        return cls.query_category('~ ' + "'" + '^stop[_ -]+word[s]?' + "'")
 
     @classmethod
     def get_prefix_list(cls):
-        return cls.query_category("'" + '^prefix(es)?' + "'")
+        return cls.query_category('~ ' + "'" + '^prefix(es)?' + "'")
 
     @classmethod
     def get_en_designation_any_all_list(cls):
-        return cls.query_category("'" + '^(english[_ -]+)?designation[s]?[_-]any' + "'")
+        return cls.query_category('~ ' + "'" + '^(english[_ -]+)?designation[s]?[_-]any' + "'")
 
     @classmethod
     def get_en_designation_end_all_list(cls):
-        return cls.query_category("'" + '^english[_ -]+designation[s]?[_-]+end' + "'")
+        return cls.query_category('~ ' + "'" + '^english[_ -]+designation[s]?[_-]+end' + "'")
 
     @classmethod
     def get_fr_designation_end_list(cls):
@@ -129,13 +124,13 @@ class Synonym(db.Model):
 
     @classmethod
     def get_stand_alone_list(cls):
-        return cls.query_category("'" + '(?=stand[/_ -]?alone)' + "'")
+        return cls.query_category('~ ' + "'" + '(?=stand[/_ -]?alone)' + "'")
 
     @classmethod
     def query_category(cls, category_query):
         # TODO: Raise error if category not provided or None or empty
-        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + category_query
-        df = pd.read_sql_query(query, cnx)
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ' + category_query
+        df = pd.read_sql_query(query, con=db.engine)
 
         if not df.empty:
             response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
@@ -143,7 +138,7 @@ class Synonym(db.Model):
             return response
         return None
 
-    # TODO: Use real code types
+    # TODO: Use real code types and complete this, so we can get rid of all the permutations...
     #  This should be okay with a string like "'" + '^ll.*(english[_ -]+)+designation[s]?[_-]end' + "'"
     #  I haven't worked out the other possibilities that are still in this class...
     @classmethod
@@ -160,7 +155,7 @@ class Synonym(db.Model):
         results = cls.query_category(query)
         return results
 
-    # TODO: Use real code types and complete this
+    # TODO: Use real code types and complete this, so we can get rid of all the permutations
     @classmethod
     def get_entity_type_designations(cls, entity_type_codes, position_code, lang='english'):
         designations = dict.fromkeys(map(lambda c: c.value, entity_type_codes), [])
@@ -170,7 +165,131 @@ class Synonym(db.Model):
             designations[code_str] = cls.get_entity_type_designation(code, position_code, lang)
 
         return designations
+    
+    '''
+    TODO: All these following methods could be refactored into a single method, really...
+    '''
+    
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_CC_entity_type_end_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^cc.*(english[_ -]+)+designation[s]?[_-]end' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
 
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_UL_entity_type_end_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^ul.*(english[_ -]+)+designation[s]?[_-]end' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_BC_entity_type_end_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^bc.*(english[_ -]+)+designation[s]?[_-]end' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+    
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_CR_entity_type_end_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^cr.*(english[_ -]+)+designation[s]?[_-]end' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_CP_entity_type_any_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^cp.*(english[_ -]+)+designation[s]?[_-]any' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_XCP_entity_type_any_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^xcp.*(english[_ -]+)+designation[s]?[_-]any' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+    
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_CC_entity_type_any_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^cc.*(english[_ -]+)+designation[s]?[_-]any' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+    
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_fr_designation_end_list(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '(?=french[/_ -]+designation[s]?[/_-]+end)' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_RLC_entity_type_end_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^rlc.*(english[_ -]+)+designation[s]?[_-]end' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+
+    # TODO: These are ALL the same method, with a single different type... consolidate these functions!
+    @classmethod
+    def get_en_LL_entity_type_end_designation(cls):
+        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^ll.*(english[_ -]+)+designation[s]?[_-]end' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+    
 
 class SynonymSchema(ma.ModelSchema):
     class Meta:

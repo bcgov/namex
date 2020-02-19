@@ -3,17 +3,7 @@ import pandas as pd
 import collections
 from sqlalchemy import create_engine
 
-from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, \
-    build_query_descriptive, get_substitution_list, get_synonym_list, get_stop_word_list, get_fr_designation_end_list, \
-    get_prefix_list, clean_name_words, get_classification, words_distinctive_descriptive, \
-    data_frame_to_list, get_words_to_avoid, get_words_requiring_consent, \
-    get_en_LL_entity_type_end_designation, get_en_RLC_entity_type_end_designation, \
-    get_en_CR_entity_type_end_designation, get_en_BC_entity_type_end_designation, get_en_UL_entity_type_end_designation, \
-    get_en_CC_entity_type_end_designation, get_en_CC_entity_type_any_designation, \
-    get_en_XCP_entity_type_any_designation, get_en_CP_entity_type_any_designation, get_entity_type_by_value, \
-    get_entity_type_end_designation, get_entity_type_any_designation, get_en_designation_end_all_list, \
-    get_en_designation_any_all_list, get_designation_any_in_name, get_designation_end_in_name, \
-    get_designation_by_entity_type, get_wrong_place_end_designations, get_wrong_place_any_designations
+from namex.services.name_request.auto_analyse.name_analysis_utils import build_query_distinctive, build_query_descriptive
 from ..auto_analyse.abstract_name_analysis_builder \
     import AbstractNameAnalysisBuilder, ProcedureResult
 
@@ -26,27 +16,11 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
-    POSTGRES_ADDRESS = 'localhost'
-    POSTGRES_PORT = '5432'
-    POSTGRES_USERNAME = 'postgres'
-    POSTGRES_PASSWORD = 'BVict31C'
-    # POSTGRES_DBNAME_SYNS = ''
-    POSTGRES_DBNAME_DATA = 'namex-auto-analyse'
-
-    postgres_str = ('postgresql://{username}:{password}@{ipaddress}:{port}/{dbname}'.format(username=POSTGRES_USERNAME,
-                                                                                            password=POSTGRES_PASSWORD,
-                                                                                            ipaddress=POSTGRES_ADDRESS,
-                                                                                            port=POSTGRES_PORT,
-                                                                                            dbname=POSTGRES_DBNAME_DATA))
-
-    cnx = create_engine(postgres_str)
-
     '''
     Check to see if a provided name is valid
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -125,7 +99,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def search_conflicts(self, list_dist, list_desc, cnx=create_engine(postgres_str)):
+    def search_conflicts(self, list_dist, list_desc):
         result = ProcedureResult()
         result.is_valid = False
         matches_response = []
@@ -137,7 +111,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dist_all_permutations = []
             substitution_list = []
 
-            ##Get all word substitution for sublist element (distinctive)
+            # Get all word substitution for sublist element (distinctive)
             if isinstance(w_dist, list):
                 for word in w_dist:
                     substitution_list = get_substitution_list(word)
@@ -182,7 +156,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             # Inject descriptive section into query, execute and add matches to list
             if desc_synonym_list:
                 query = build_query_descriptive(desc_synonym_list, query)
-                matches = pd.read_sql_query(query, cnx)
+                # TODO: Remove cnx
+                matches = pd.read_sql_query(query, self.cnx)
                 matches_response.extend([val.pop() for i, val in enumerate(matches.values.tolist())])
 
         matches_response = list(dict.fromkeys(matches_response))
@@ -236,6 +211,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
+        # TODO: Arturo plz move this into service
+        #  Make a new method to wrap this stuff
         entity_end_designation_dict = {'RLC': get_en_RLC_entity_type_end_designation(),
                                        'LL': get_en_LL_entity_type_end_designation(),
                                        'CC': get_en_CC_entity_type_end_designation(),
@@ -247,11 +224,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                        'XCP': get_en_XCP_entity_type_any_designation(),
                                        'CC': get_en_CC_entity_type_any_designation()}
 
+
         # Get all designations for entity_type as list of dictionaries key:[any|stop], value: designations
         designations_entity_type_user = get_designation_by_entity_type(entity_type_user)
+
         designation_any_list_user = list()
         designation_end_list_user = list()
 
+        # TODO: We handle this entity kind of stuff in our resource endpoint, pass in as configuration to the director
+        # TODO: Review this
         # Get designation_any_list_user and designation_end_list_user based on entity type typed by user
         for k, v in designations_entity_type_user.items():
             if k.lower() == 'any':
@@ -259,6 +240,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             else:
                 designation_end_list_user.extend(v)
 
+        # TODO: This moves to the director, some of this data is already being populated
         # Get designation_any_list and designation_end_list based on company name typed by user
         designation_any_list = get_designation_any_in_name(name)
         designation_end_list = get_designation_end_in_name(name)
@@ -267,6 +249,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         wrong_designation_end_list = get_wrong_place_end_designations(name)
 
         wrong_designation_place = wrong_designation_any_list + wrong_designation_end_list
+
 
         # Get the entity type(s) for designations related to company name:
         entity_type_any_designation = []
@@ -277,6 +260,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if designation_end_list:
             entity_type_end_designation = get_entity_type_end_designation(entity_end_designation_dict,
                                                                           designation_end_list)
+        # TODO: END
         # All possible entity types found related to company name.
         all_entity_types = [item for item, count in
                             collections.Counter(entity_type_any_designation + entity_type_end_designation).items() if
