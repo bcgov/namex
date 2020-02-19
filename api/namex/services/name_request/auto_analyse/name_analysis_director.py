@@ -1,10 +1,6 @@
 # TODO: Name pre-processing has been moved to its own service
 import pandas as pd
 
-# Import mock API clients
-from ..datasources.synonyms_api import SynonymsApi
-from ..datasources.solr_api import SolrApi
-
 from .name_analysis_utils import clean_name_words, data_frame_to_list
 
 from namex.services.synonyms.synonym \
@@ -56,7 +52,7 @@ class NameAnalysisDirector:
         self._synonym_service = SynonymService()
         self._name_processing_service = NameProcessingService()
         self._word_classification_service = WordClassificationService()
-        self._solr_conflicts_service = SolrApi()
+        # self._solr_conflicts_service = SolrApi()
 
     # Used by the builder to access the WordClassificationService instance
     def get_word_classification_service(self):
@@ -186,8 +182,8 @@ class NameAnalysisDirector:
         self._designated_any_words = self._synonym_service.get_designated_end_all_words()
 
         # Solr calls TODO: Are we still using solr conflict? Clarify...
-        self._in_province_conflicts = self._solr_conflicts_service.get_in_province_conflicts()
-        self._all_conflicts = self._solr_conflicts_service.get_all_conflicts()
+        # self._in_province_conflicts = self._solr_conflicts_service.get_in_province_conflicts()
+        # self._all_conflicts = self._solr_conflicts_service.get_all_conflicts()
 
         self.configure_builder()
 

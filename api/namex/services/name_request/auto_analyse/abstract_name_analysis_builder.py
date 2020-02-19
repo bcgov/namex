@@ -1,10 +1,9 @@
 import abc
 
-from .name_analysis_utils import clean_name_words
 from . import ProcedureResult
 
 
-class AbstractNameAnalysisBuilder:
+class AbstractNameAnalysisBuilder():
     __metaclass__ = abc.ABCMeta
 
     _director = None
@@ -69,7 +68,7 @@ class AbstractNameAnalysisBuilder:
     def get_list_none(self):
         return self._list_none_words
 
-    def get_synonyms(self):
+    def desc_synonym_list(self):
         return self._synonyms
 
     def get_substitutions(self):
