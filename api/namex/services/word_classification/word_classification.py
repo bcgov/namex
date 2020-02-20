@@ -9,7 +9,7 @@ POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
 POSTGRES_PASSWORD = 'BVict31C'
 POSTGRES_DBNAME = 'namex-auto-analyse'
-#POSTGRES_DBNAME_WC = 'namex-local'
+
 
 class WordClassificationService:
     def __init__(self):

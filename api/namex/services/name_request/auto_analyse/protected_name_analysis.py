@@ -13,8 +13,6 @@ from . import ProcedureResult
 from .name_analysis_utils import list_distinctive_descriptive_same, validate_distinctive_descriptive_lists, \
     list_distinctive_descriptive
 
-from .name_analysis_utils import words_distinctive_descriptive
-
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
 The response cases are as follows:
@@ -169,10 +167,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
 
-        #Check if list_dist and list_desc are the same
+        # Check if list_dist and list_desc are the same
         if self.get_list_dist() == self.get_list_desc():
             self._list_dist_words, self._list_desc_words = words_distinctive_descriptive(self.get_list_name())
-
 
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())

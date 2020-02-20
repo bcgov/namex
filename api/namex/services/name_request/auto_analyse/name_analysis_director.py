@@ -198,10 +198,22 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
         self.configure_builder()
 
+    def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[],
+                         prefix_list=[]):
+        # TODO: Warn or something if params aren't set!
+        words = text.lower()
+        words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
+        words = remove_french(words, fr_designation_end_list)
+        tokens = self._synonym_service.regex_transform(words, designation_any, designation_end, prefix_list)
+        tokens = tokens.split()
+
+        return [x.lower() for x in tokens if x]
+
     '''
     Prepare any data required by the analysis builder.
     prepare_data is an abstract method and must be implemented in extending classes.
     '''
+
     def prepare_data(self):
         # Query for whatever data we need to load up here
         self.configure_builder()
@@ -217,6 +229,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     - If you don't want to check to see if a name is well formed first, override check_name_is_well_formed in the supplied builder.
     @:return ProcedureResult[]
     '''
+
     def execute_analysis(self):
         try:
             # Execute analysis using the supplied builder
