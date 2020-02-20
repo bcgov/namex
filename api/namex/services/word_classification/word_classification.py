@@ -8,7 +8,7 @@ POSTGRES_PORT = '5432'
 POSTGRES_USERNAME = 'postgres'
 POSTGRES_PASSWORD = 'BVict31C'
 POSTGRES_DBNAME = 'namex-auto-analyse'
-#POSTGRES_DBNAME_WC = 'namex-local'
+
 
 class WordClassificationService:
     def __init__(self):
@@ -32,7 +32,7 @@ class WordClassificationService:
             entity.startDate = word_classification['startDate']
             entity.endDate = word_classification['endDate']
             entity.lastUpdatedBy = word_classification['lastUpdatedBy']
-            entity.lastUpdateDate = word_classification['lastUpdateDate']
+            entity.lastUpdatedDate = word_classification['lastUpdatedDate']
             entity.save_to_db()
 
             return entity
@@ -53,7 +53,7 @@ class WordClassificationService:
             entity.startDate = word_classification['startDate']
             entity.endDate = word_classification['endDate']
             entity.lastUpdatedBy = word_classification['lastUpdatedBy']
-            entity.lastUpdateDate = word_classification['lastUpdateDate']
+            entity.lastUpdatedDate = word_classification['lastUpdatedDate']
             entity.save_to_db()
 
             return entity

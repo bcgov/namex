@@ -14,7 +14,7 @@ def _to_string(string):
 @deprecated
 '''
 
-
+'''
 class VirtualWordCondition(db.Model):
     __tablename__ = 'virtual_word_condition'
 
@@ -26,7 +26,7 @@ class VirtualWordCondition(db.Model):
     rc_instructions = Column(db.VARCHAR(1000))
     rc_consent_required = db.Column(db.Boolean(), default=False)
     rc_allow_use = db.Column(db.Boolean(), default=True)
-
+'''
 
 # The class that corresponds to the database table for decision reasons audits.
 class DecisionReasonAudit(db.Model):
