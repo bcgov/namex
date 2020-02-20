@@ -15,6 +15,9 @@ from .mixins.model import SynonymModelMixin
 
 from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes
 from . import DesignationPositionCodes
+from ..name_request.auto_analyse.name_analysis_utils import get_flat_list
+from ..name_request.auto_analyse.abstract_name_analysis_builder \
+    import AbstractNameAnalysisBuilder
 
 
 class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
