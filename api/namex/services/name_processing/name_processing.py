@@ -31,14 +31,14 @@ class NameProcessingService:
     def prepare_data(self):
         # Query database for word designations
         self._stop_words = self._synonym_service.get_stop_words()
-        #self._designated_end_words = self._synonym_service.get_designated_end_words()
-        #self._designated_any_words = self._synonym_service.get_designated_any_words()
+        self._prefixes = self._synonym_service.get_prefixes()
         self._designated_end_words = self._synonym_service.get_designated_end_all_words()
         self._designated_any_words = self._synonym_service.get_designated_any_all_words()
 
     '''
     Split a name string into classifiable tokens. Called internally whenever set_name is invoked.
     @:param string:name
+    '''
     '''
     def preprocess_name(self):
         if not self._name_as_submitted:
@@ -60,6 +60,7 @@ class NameProcessingService:
 
         # Store clean, preprocessed name to instance
         self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
+    '''
 
     def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[], prefix_list=[]):
         # TODO: Warn or something if params aren't set!

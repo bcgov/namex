@@ -100,7 +100,8 @@ class Synonym(db.Model):
     @classmethod
     def get_synonym_list(cls, word=None):
         if word:
-            return cls.query_category('!~* ' + "'" + '\w*(sub|stop)\s*$' + "'" + ' AND ' + 's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")
+            return cls.query_category(
+                '!~* ' + "'" + '\w*(sub|stop)\s*$' + "'" + ' AND ' + 's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")
 
     @classmethod
     def get_stop_word_list(cls):
@@ -148,9 +149,9 @@ class Synonym(db.Model):
         query = ''
 
         if code_str == AllEntityTypes.ALL.value:
-            query = "'" + '^' + lang.lower() + '[_ -]+designation[s]?[_-]+' + position_str.lower() + "'"
+            query = '~ ' + "'" + '^' + lang.lower() + '[_ -]+designation[s]?[_-]+' + position_str.lower() + "'"
         else:
-            query = "'" + '^' + code_str.lower() + '.*(' + lang.lower() + '[_ -]+)+designation[s]?[_-]' + position_str.lower() + "'"
+            query = '~ ' + "'" + '^' + code_str.lower() + '.*(' + lang.lower() + '[_ -]+)+designation[s]?[_-]' + position_str.lower() + "'"
 
         results = cls.query_category(query)
         return results
@@ -165,11 +166,11 @@ class Synonym(db.Model):
             designations[code_str] = cls.get_entity_type_designation(code, position_code, lang)
 
         return designations
-    
+
     '''
     TODO: All these following methods could be refactored into a single method, really...
     '''
-    
+
     # TODO: These are ALL the same method, with a single different type... consolidate these functions!
     @classmethod
     def get_en_CC_entity_type_end_designation(cls):
@@ -205,7 +206,7 @@ class Synonym(db.Model):
             response = get_flat_list(response)
             return response
         return None
-    
+
     # TODO: These are ALL the same method, with a single different type... consolidate these functions!
     @classmethod
     def get_en_CR_entity_type_end_designation(cls):
@@ -241,7 +242,7 @@ class Synonym(db.Model):
             response = get_flat_list(response)
             return response
         return None
-    
+
     # TODO: These are ALL the same method, with a single different type... consolidate these functions!
     @classmethod
     def get_en_CC_entity_type_any_designation(cls):
@@ -253,7 +254,7 @@ class Synonym(db.Model):
             response = get_flat_list(response)
             return response
         return None
-    
+
     # TODO: These are ALL the same method, with a single different type... consolidate these functions!
     @classmethod
     def get_fr_designation_end_list(cls):
@@ -289,7 +290,42 @@ class Synonym(db.Model):
             response = get_flat_list(response)
             return response
         return None
-    
+
+    # TODO: Need to move to requests/names model
+    @classmethod
+    def build_query_distinctive(cls, dist_all_permutations, length):
+        query = "select n.name " + \
+                "from requests r, names n " + \
+                "where r.id = n.nr_id and " + \
+                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
+                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
+                "n.state IN ('APPROVED','CONDITION') and " + \
+                "lower(n.name) similar to " + "'"
+        st = ''
+        for s in range(length):
+            st += '%s '
+
+        permutations = "|".join(st % tup for tup in dist_all_permutations)
+        query += "(" + permutations + ")%%" + "'"
+
+        return query
+
+    # TODO: Need to move to requests/names model
+    @classmethod
+    def build_query_descriptive(cls, desc_substitution_list, query):
+        for element in desc_substitution_list:
+            query += " and lower(n.name) similar to "
+            substitutions = ' ?| '.join(map(str, element))
+            query += "'" + "%%( " + substitutions + " ?)%%" + "'"
+
+        return query
+
+    # TODO: Need to move to requests/names model
+    @classmethod
+    def get_conflicts(cls, query):
+        matches = pd.read_sql_query(query, con=db.engine)
+        return matches
+
 
 class SynonymSchema(ma.ModelSchema):
     class Meta:

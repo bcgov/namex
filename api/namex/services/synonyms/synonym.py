@@ -4,6 +4,9 @@ from namex.models import Synonym
 
 from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes
 from . import DesignationPositionCodes
+from ..name_request.auto_analyse.name_analysis_utils import get_flat_list
+from ..name_request.auto_analyse.abstract_name_analysis_builder \
+    import AbstractNameAnalysisBuilder
 
 
 class SynonymService:
@@ -21,13 +24,25 @@ class SynonymService:
         synonyms = self._model.get_synonym_list()
         return synonyms
 
+    def get_synonym_list(self, word):
+        synonym_list = self._model.get_synonym_list(word)
+        return synonym_list
+
     def get_substitutions(self):
         substitutions = self._model.get_substitution_list()
         return substitutions
 
+    def get_substitution_list(self, word):
+        substitution_list = self._model.get_substitution_list(word)
+        return substitution_list
+
     def get_stop_words(self):
         stop_words = self._model.get_stop_word_list()
         return stop_words
+
+    def get_prefixes(self):
+        prefixes = self._model.get_prefix_list()
+        return prefixes
 
     def get_designated_start_words(self):
         # start_words = self._model.get_entity_type_designations()
@@ -140,12 +155,12 @@ class SynonymService:
     # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
     def regex_transform(self, text, designation_any, designation_end, prefix_list):
         designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
-        designation_any_regex = "(" + '|'.join(designation_any.value.tolist()) + ")"
+        designation_any_regex = "(" + '|'.join(designation_any) + ")"
         prefixes = '|'.join(prefix_list)
 
         exceptions_ws = []
         for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
-            if self.get_substitution_list(word):
+            if self._model.get_substitution_list(word):
                 exceptions_ws.append(word)
 
         if not exceptions_ws:
@@ -210,3 +225,31 @@ class SynonymService:
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
+
+    def get_all_end_designations(self):
+        entity_end_designation_dict = {'RLC': self._model.get_en_RLC_entity_type_end_designation(),
+                                       'LL': self._model.get_en_LL_entity_type_end_designation(),
+                                       'CC': self._model.get_en_CC_entity_type_end_designation(),
+                                       'UL': self._model.get_en_UL_entity_type_end_designation(),
+                                       'BC': self._model.get_en_BC_entity_type_end_designation(),
+                                       'CR': self._model.get_en_CR_entity_type_end_designation()}
+
+        return entity_end_designation_dict
+
+    def get_all_any_designations(self):
+        entity_any_designation_dict = {'CP': self._model.get_en_CP_entity_type_any_designation(),
+                                       'XCP': self._model.get_en_XCP_entity_type_any_designation(),
+                                       'CC': self._model.get_en_CC_entity_type_any_designation()}
+        return entity_any_designation_dict
+
+    def get_query_distinctive(self, dist_all_permutations, length):
+        query = self._model.build_query_distinctive(dist_all_permutations, length)
+        return query
+
+    def get_query_descriptive(self, desc_substitution_list,query):
+        query = self._model.build_query_descriptive(desc_substitution_list, query)
+        return query
+
+    def get_conflicts(self, query):
+        conflicts = self._model.get_conflicts(query)
+        return conflicts

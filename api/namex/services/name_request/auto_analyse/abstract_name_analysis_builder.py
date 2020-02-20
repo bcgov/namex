@@ -10,8 +10,11 @@ class AbstractNameAnalysisBuilder():
     _director = None
 
 
-class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
-    __metaclass__ = abc.ABCMeta
+    _designation_any_list_user = []
+    _designation_end_list_user = []
+
+    _in_province_conflicts = []
+    _all_conflicts = []
 
     _entity_type = None
     _name = ''
@@ -43,6 +46,9 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
         self._designated_end_words = kwargs.get('designated_end_words')
         self._designated_any_words = kwargs.get('designated_any_words')
 
+        self._designation_end_list_user = kwargs.get('designation_end_list_user')
+        self._designation_any_list_user = kwargs.get('designation_any_list_user')
+
         self._in_province_conflicts = kwargs.get('in_province_conflicts')
         self._all_conflicts = kwargs.get('all_conflicts')
 
@@ -65,8 +71,11 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     def desc_synonym_list(self):
         return self._synonyms
 
-    def get_substitutions(self):
-        return self._substitutions
+    def get_substitution_list(self):
+        return self._substitution_list
+
+    def get_synonym_list(self, word):
+        return self._synonym_list
 
     def get_stop_words(self):
         return self._stop_words
@@ -82,9 +91,17 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
         # like updating the classifications table
         self._director = director
         self._word_classification_service = director.get_word_classification_service()
+        self._synonym_service = director.get_synonym_service()
+        self._virtual_word_condition_service = director.get_virtual_word_condition_service()
+
+    def get_synonym_service(self):
+        return self._synonym_service
 
     def get_word_classification_service(self):
         return self._word_classification_service
+
+    def get_virtual_word_condition_service(self):
+        return self._virtual_word_condition_service
 
     # Just a wrapped call to the API's getClassification
     def get_word_classification(self, word):
@@ -98,6 +115,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     Check to see if a provided name is valid
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, company_name):
         return ProcedureResult(is_valid=True)
@@ -111,6 +129,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     to avoid specifically in cases where it is necessary.
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_words_to_avoid(self):
         return ProcedureResult(is_valid=True)
@@ -119,6 +138,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def search_conflicts(self, list_dist, list_desc):
         return ProcedureResult(is_valid=True)
@@ -139,6 +159,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_words_requiring_consent(self):
         return ProcedureResult(is_valid=True)
@@ -147,6 +168,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_designation(self):
         return ProcedureResult(is_valid=True)

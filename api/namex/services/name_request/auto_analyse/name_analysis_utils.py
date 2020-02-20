@@ -7,6 +7,7 @@ from toolz import unique
 
 from namex.services.name_request.auto_analyse import DataFrameFields
 
+
 # TODO: Fix caps and stuff...
 def data_frame_to_list(df):
     df_dist = df.loc[df.word_classification == DataFrameFields.DISTINCTIVE.value]
@@ -19,46 +20,15 @@ def data_frame_to_list(df):
 
     return list_dist, list_desc, list_none
 
+
 def get_dataframe_list(df, field):
-    # subs_list = []
     return df[field].str.split(',').tolist()
-
-    # subs_list = [item for sublist in subs_list for item in sublist]
-    # subs_list = [x.strip() for x in subs_list]
-
-    # return dataframe_list
 
 
 def get_flat_list(lst):
     subs_list = [item for sublist in lst for item in sublist]
     return [x.strip() for x in subs_list]
     # return subs_list
-
-def build_query_distinctive(dist_all_permutations, l):
-    query = "select n.name " + \
-            "from requests r, names n " + \
-            "where r.id = n.nr_id and " + \
-            "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
-            "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
-            "n.state IN ('APPROVED','CONDITION') and " + \
-            "lower(n.name) similar to " + "'"
-    st = ''
-    for s in range(l):
-        st += '%s '
-
-    permutations = "|".join(st % tup for tup in dist_all_permutations)
-    query += "(" + permutations + ")%%" + "'"
-
-    return query
-
-
-def build_query_descriptive(desc_substitution_list, query):
-    for element in desc_substitution_list:
-        query += " and lower(n.name) similar to "
-        substitutions = ' ?| '.join(map(str, element))
-        query += "'" + "%%( " + substitutions + " ?)%%" + "'"
-
-    return query
 
 
 '''
