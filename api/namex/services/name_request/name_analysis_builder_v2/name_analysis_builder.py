@@ -25,16 +25,28 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
+        list_all = list_dist + list_desc
+
+        # Containing unclassifiable word should be replaced by descriptive and distinctive
+
         if len(list_none) > 0:
             unclassified_words_list_response = []
-
             for idx, token in enumerate(list_name):
                 if any(token in word for word in list_none):
                     unclassified_words_list_response.append({idx: token})
 
             result.is_valid = False
             result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.value = unclassified_words_list_response
+            result.values = unclassified_words_list_response
+        elif not list_all == list_name:
+            reverse_order_list = []
+            for idx, (token_dist_desc, token_name) in enumerate(zip(list_all, list_name)):
+                if token_dist_desc != token_name:
+                    reverse_order_list.append({idx: token_name})
+
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.REVERSE_ORDER
+            result.values = reverse_order_list
         elif len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
