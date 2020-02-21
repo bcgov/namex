@@ -242,11 +242,27 @@ class SynonymService:
                                        'CC': self._model.get_en_CC_entity_type_any_designation()}
         return entity_any_designation_dict
 
+    def get_all_substitutions_synonyms(self, list_d, distinctive=True):
+        aux_list = []
+        response_list = []
+
+        for word in list_d:
+            if distinctive:
+                aux_list = self.get_substitution_list(word)
+            else:
+                aux_list = self.get_synonym_list(word)
+            if aux_list:
+                response_list.append(aux_list)
+            else:
+                response_list.append([word.lower()])
+
+        return response_list
+
     def get_query_distinctive(self, dist_all_permutations, length):
         query = self._model.build_query_distinctive(dist_all_permutations, length)
         return query
 
-    def get_query_descriptive(self, desc_substitution_list,query):
+    def get_query_descriptive(self, desc_substitution_list, query):
         query = self._model.build_query_descriptive(desc_substitution_list, query)
         return query
 
