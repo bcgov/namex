@@ -109,6 +109,7 @@ class NameProcessingService(GetSynonymListsMixin):
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
+    '''
 
     def _prepare_data(self):
         syn_svc = self.synonym_service
