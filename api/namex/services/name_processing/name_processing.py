@@ -62,6 +62,8 @@ class NameProcessingService:
         self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
     '''
 
+    # Moved to name_analysis_director
+    '''
     def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[], prefix_list=[]):
         # TODO: Warn or something if params aren't set!
         words = text.lower()
@@ -71,9 +73,12 @@ class NameProcessingService:
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
+    '''
 
     '''
     Set and preprocess a submitted name string using the preprocess_name class method.
+    '''
+    # Moved to name_analysis_director
     '''
     def set_name(self, name):
         # Process the name
@@ -103,3 +108,4 @@ class NameProcessingService:
 
     def get_list_none(self):
         return self._list_none_words
+    '''
