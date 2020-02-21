@@ -1,5 +1,6 @@
 # TODO: Name pre-processing has been moved to its own service
 import collections
+import warnings
 
 import pandas as pd
 
@@ -215,7 +216,11 @@ class NameAnalysisDirector:
 
     def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[],
                          prefix_list=[]):
-        # TODO: Warn or something if params aren't set!
+        if not text or not stop_words or not designation_any or not designation_end or not prefix_list:
+            warnings.warn(
+                "Parameters in clean_name_words function are not set.",
+                Warning
+            )
         words = text.lower()
         words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
         words = remove_french(words, fr_designation_end_list)

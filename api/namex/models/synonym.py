@@ -129,7 +129,9 @@ class Synonym(db.Model):
 
     @classmethod
     def query_category(cls, category_query):
-        # TODO: Raise error if category not provided or None or empty
+        if not category_query:
+            raise ValueError('Invalid category provided')
+
         query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ' + category_query
         df = pd.read_sql_query(query, con=db.engine)
 
@@ -138,6 +140,7 @@ class Synonym(db.Model):
             response = get_flat_list(response)
             return response
         return None
+
 
     # TODO: Use real code types and complete this, so we can get rid of all the permutations...
     #  This should be okay with a string like "'" + '^ll.*(english[_ -]+)+designation[s]?[_-]end' + "'"
