@@ -90,53 +90,18 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         matches_response = []
 
         for w_dist, w_desc in zip(list_dist, list_desc):
-            dist_substitution_tmp_list = []
             dist_substitution_list = []
             desc_synonym_list = []
             dist_all_permutations = []
-            substitution_list = []
 
-            # Get all word substitution for sublist element (distinctive)
-            if isinstance(w_dist, list):
-                for word in w_dist:
-                    substitution_list = self.get_synonym_service().get_substitution_list(word)
-                    if substitution_list:
-                        dist_substitution_tmp_list.append(substitution_list)
-                    else:
-                        dist_substitution_tmp_list.append([word.lower()])
-                dist_substitution_list.append(dist_substitution_tmp_list)
-            else:
-                substitution_list = self.get_synonym_service().get_substitution_list(w_dist)
-                if substitution_list:
-                    dist_substitution_list.append(substitution_list)
-                else:
-                    dist_substitution_list.append(w_dist.lower())
-
-            # Get all possible combinations for those words substitutions
-            for element in dist_substitution_list:
-                if len(element) > 1:
-                    dist_all_permutations.append(list(itertools.product(*element)))
-                else:
-                    dist_all_permutations.append([(item,) for sublist in element for item in sublist])
+            dist_substitution_list = self.get_synonym_service().get_all_substitutions_synonyms(w_dist)
+            dist_all_permutations.append(list(itertools.product(*dist_substitution_list)))
 
             # Inject distinctive section in query
             for element in dist_all_permutations:
                 query = self.get_synonym_service().get_query_distinctive(element, len(element[0]))
 
-            # Get the synonyms for for sublist element (descriptives)
-            if isinstance(w_desc, list):
-                for word in w_desc:
-                    synonym_list = self.get_synonym_service().get_synonym_list(word)
-                    if synonym_list:
-                        desc_synonym_list.append(synonym_list)
-                    else:
-                        desc_synonym_list.append([word.lower()])
-            else:
-                synonym_list = self.get_synonym_service().get_synonym_list(w_desc)
-                if synonym_list:
-                    desc_synonym_list.append(synonym_list)
-                else:
-                    desc_synonym_list.append([w_desc.lower()])
+            desc_synonym_list = self.get_synonym_service().get_all_substitutions_synonyms(w_desc, False)
 
             # Inject descriptive section into query, execute and add matches to list
             if desc_synonym_list:
@@ -191,7 +156,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_designation(self, list_name, entity_type_user,all_designations, wrong_designation_place, all_designations_user):
+    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place,
+                          all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
 
