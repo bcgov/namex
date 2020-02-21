@@ -730,3 +730,45 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         ]
 
         return issue
+
+
+class ReverseOrder(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.REVERSE_ORDER
+    status_text = "Further Action Required"
+    issue = NameAnalysisIssue(
+        issue_type=issue_type,
+        line1="Need to reverse the word order.",
+        line2=None,
+        consenting_body=None,
+        designations=None,
+        # words=None,
+        # word_index=None,
+        show_reserve_button=False,
+        show_examination_button=True,
+        conflicts=None,
+        setup=None,
+        name_actions=[]
+    )
+
+    @classmethod
+    def create_issue(cls, procedure_result):
+        issue = cls.issue
+
+        issue.name_actions = [
+            NameAction(
+                type=NameActions.HIGHLIGHT
+            )
+        ]
+
+        # Setup boxes
+        issue.setup = [
+            Setup(
+                button="",
+                checkbox="",
+                header="Helpful Hint",
+                line1="You can change the the order of the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
+                line2=""
+            )
+        ]
+
+        return issue
