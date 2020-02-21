@@ -9,7 +9,7 @@ from ..auto_analyse.analysis_issues import \
     TooManyWordsIssue, \
     NameRequiresConsentIssue, \
     ContainsUnclassifiableWordIssue, \
-    CorporateNameConflictIssue
+    CorporateNameConflictIssue, ReverseOrder
 
 from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
@@ -22,6 +22,7 @@ def response_issues(issue_code):
         AnalysisResultCodes.ADD_DESCRIPTIVE_WORD: AddDescriptiveWordIssue,
         AnalysisResultCodes.TOO_MANY_WORDS: TooManyWordsIssue,
         AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD: ContainsUnclassifiableWordIssue,
+        AnalysisResultCodes.REVERSE_ORDER : ReverseOrder,
         AnalysisResultCodes.WORD_TO_AVOID: ContainsWordsToAvoidIssue,
         AnalysisResultCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisResultCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
