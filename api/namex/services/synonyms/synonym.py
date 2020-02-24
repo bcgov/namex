@@ -173,32 +173,4 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       re.IGNORECASE)
         return text
 
-    # TODO: This was moved to name processing
-    def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[],
-                         prefix_list=[]):
-        # TODO: Warn or something if params aren't set!
-        words = text.lower()
-        words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
-        # TODO: Re-enable remove_french!
-        # words = remove_french(words, fr_designation_end_list)
-        tokens = self.regex_transform(words, designation_any, designation_end, prefix_list)
-        tokens = tokens.split()
-
-        return [x.lower() for x in tokens if x]
-
-    def get_all_substitutions_synonyms(self, list_d, distinctive=True):
-        aux_list = []
-        response_list = []
-
-        for word in list_d:
-            if distinctive:
-                aux_list = self.get_substitution_list(word)
-            else:
-                aux_list = self.get_synonym_list(word)
-            if aux_list:
-                response_list.append(aux_list)
-            else:
-                response_list.append([word.lower()])
-
-        return response_list
 

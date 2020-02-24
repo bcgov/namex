@@ -3,9 +3,6 @@ import collections
 
 from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes
 
-# TODO: Move these methods to somewhere more generic / common
-from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
-
 from . import SynonymServiceMixin
 from .. import DesignationPositionCodes
 
@@ -36,7 +33,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     def get_wrong_place_end_designations(self, name):
         en_designation_end_all_list = self.get_model().get_en_designation_end_all_list()
         designation_any_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
-        designation_any_regex = r'\b' + designation_any_rgx + '(?=\s)'
+        designation_any_regex = r'\y' + designation_any_rgx + '(?=\s)'
 
         # Returns list of tuples
         wrong_designation_any_list = re.findall(designation_any_regex, name.lower())
@@ -93,7 +90,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     def get_designation_any_in_name(self, name):
         en_designation_any_all_list = self.get_model().get_en_designation_any_all_list()
         designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
-        designation_any_regex = r'\b' + designation_any_rgx + '(?=\s)'
+        designation_any_regex = r'\y' + designation_any_rgx + '(?=\s)'
 
         # Returns list of tuples
         found_designation_any = re.findall(designation_any_regex, name.lower())
