@@ -772,3 +772,45 @@ class ReverseOrder(AnalysisResponseIssue):
         ]
 
         return issue
+
+
+class WordSpecialUse(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.WORD_SPECIAL_USE
+    status_text = "Further Action Required"
+    issue = NameAnalysisIssue(
+        issue_type=issue_type,
+        line1="Word do not require consent but can only be used under certain content.",
+        line2=None,
+        consenting_body=None,
+        designations=None,
+        # words=None,
+        # word_index=None,
+        show_reserve_button=False,
+        show_examination_button=True,
+        conflicts=None,
+        setup=None,
+        name_actions=[]
+    )
+
+    @classmethod
+    def create_issue(cls, procedure_result):
+        issue = cls.issue
+
+        issue.name_actions = [
+            NameAction(
+                type=NameActions.HIGHLIGHT
+            )
+        ]
+
+        # Setup boxes
+        issue.setup = [
+            Setup(
+                button="",
+                checkbox="",
+                header="Helpful Hint",
+                line1="You can use the word <b>Doctor</b> under certain conditions, you might remove it.  Alternately, you can submit your name for examination-wait times are quoted above.",
+                line2=""
+            )
+        ]
+
+        return issue
