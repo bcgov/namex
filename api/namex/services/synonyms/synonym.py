@@ -1,156 +1,115 @@
 import re
-import collections
+from sqlalchemy import func
+
 from namex.models import Synonym
+from namex.criteria.synonym.query_criteria import SynonymQueryCriteria
 
-from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes
-from . import DesignationPositionCodes
-from ..name_request.auto_analyse.name_analysis_utils import get_flat_list
-from ..name_request.auto_analyse.abstract_name_analysis_builder \
-    import AbstractNameAnalysisBuilder
+from .mixins.designation import SynonymDesignationMixin
+from .mixins.model import SynonymModelMixin
+
+"""
+- Services implement business logic, and NON generic queries. 
+- Services don't have generic model query methods like find, find_one, or find_by_criteria.
+- Methods like find, find_one, or find_by_criteria or iterate belong in models.
+"""
 
 
-class SynonymService:
+class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     _model = None
+    _parse_csv_line = lambda x: (x.split(','))
 
     def __init__(self):
         # TODO: Not sure if we'll need this later once Model is done
         self._model = Synonym
         print(self._model)
 
+    @classmethod
+    def _flatten_synonyms_text(cls, results):
+        # Convert tuple results to a list of of CSV strings
+        result_arr = [item for sublist in results for item in sublist]
+        result_arr = [x.strip() for x in result_arr]
+
+        result_arr = [*map(cls._parse_csv_line, result_arr)]
+        flattened_arr = [item for sublist in result_arr for item in sublist]
+        return flattened_arr
+
+    def find_word_synonyms(self, word, filters):
+        model = self.get_model()
+        word = word.lower() if isinstance(word, str) else None
+
+        if word:
+            filters.append(func.lower(model.synonyms_text).like(word))
+
+        criteria = SynonymQueryCriteria(
+            word=word,
+            fields=[self._model.synonyms_text],
+            filters=filters
+        )
+
+        return model.find_by_criteria(criteria)
+
     def get_model(self):
         return self._model
 
-    def get_synonyms(self):
-        synonyms = self._model.get_synonym_list()
-        return synonyms
+    def get_synonyms(self, word='food'):
+        model = self.get_model()
 
-    def get_synonym_list(self, word):
-        synonym_list = self._model.get_synonym_list(word)
-        return synonym_list
+        filters = [
+            ~func.lower(model.category).op('~')(r'\y{}\y'.format('sub')),
+            ~func.lower(model.category).op('~')(r'\y{}\y'.format('stop')),
+        ]
 
-    def get_substitutions(self):
-        substitutions = self._model.get_substitution_list()
-        return substitutions
+        results = self.find_word_synonyms(word, filters)
+        flattened = self._flatten_synonyms_text(results)
+        return flattened
 
-    def get_substitution_list(self, word):
-        substitution_list = self._model.get_substitution_list(word)
-        return substitution_list
+    def get_substitutions(self, word=None):
+        model = self.get_model()
 
-    def get_stop_words(self):
-        stop_words = self._model.get_stop_word_list()
-        return stop_words
+        filters = [
+            func.lower(model.category).op('~')(r'\y{}\y'.format('sub'))
+        ]
+
+        results = self.find_word_synonyms(word, filters)
+        flattened = self._flatten_synonyms_text(results)
+        return flattened
+
+    def get_stop_words(self, word=None):
+        model = self.get_model()
+
+        filters = [
+            func.lower(model.category).op('~')(r'\y{}\y'.format('(stop|stop word[s]?)')),
+        ]
+
+        results = self.find_word_synonyms(word, filters)
+        flattened = self._flatten_synonyms_text(results)
+        return flattened
 
     def get_prefixes(self):
-        prefixes = self._model.get_prefix_list()
-        return prefixes
+        model = self.get_model()
 
-    def get_designated_start_words(self):
-        # start_words = self._model.get_entity_type_designations()
-        start_words = []
-        return start_words
+        filters = [
+            func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))
+        ]
 
-    def get_designated_end_words(self):
-        end_words = self._model.get_entity_type_designations(ENTITY_TYPE_END_DESIGNATIONS, DesignationPositionCodes.END)
-        return end_words
+        results = self.find_word_synonyms(None, filters)
+        flattened = self._flatten_synonyms_text(results)
+        return flattened
 
-    def get_designated_any_words(self):
-        any_words = self._model.get_entity_type_designations(ENTITY_TYPE_ANY_DESIGNATIONS, DesignationPositionCodes.ANY)
-        return any_words
+    # TODO: Validate code type args!
+    def get_designations(self, entity_type_code, position_code, lang):
+        lang = lang if isinstance(lang, str) else 'english'
+        model = self.get_model()
 
-    def get_designated_end_all_words(self):
-        all_entity_types = AllEntityTypes.ALL.value
-        end_words = self._model.get_entity_type_designations([AllEntityTypes.ALL], DesignationPositionCodes.END)
-        return end_words.get(AllEntityTypes.ALL.value)
+        filters = [
+            func.lower(model.category).op('~')(r'\y{}[-_]+valid\y'.format(entity_type_code.value.lower())),
+            func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]+' + position_code.value.lower())),
+            func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower()))
+        ]
 
-    def get_designated_any_all_words(self):
-        any_words = self._model.get_entity_type_designations([AllEntityTypes.ALL], DesignationPositionCodes.ANY)
-        return any_words.get(AllEntityTypes.ALL.value)
-
-    def get_wrong_place_end_designations(self, name):
-        en_designation_end_all_list = self.get_model().get_en_designation_end_all_list()
-        designation_any_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
-        designation_any_regex = r'\b' + designation_any_rgx + '(?=\s)'
-
-        # Returns list of tuples
-        wrong_designation_any_list = re.findall(designation_any_regex, name.lower())
-
-        return wrong_designation_any_list
-
-    def get_entity_type_end_designation(self, entity_end_designation_dict, all_designation_any_end_list):
-        entity_type_end_designation_name = list()
-        for designation_end in all_designation_any_end_list:
-            entity_type_end_designation_name.extend(
-                self.get_entity_type_by_value(entity_end_designation_dict, designation_end))
-
-        all_entity_types = [item for item, count in collections.Counter(entity_type_end_designation_name).items() if
-                            count > 1]
-
-        if all_entity_types:
-            return all_entity_types
-
-        return entity_type_end_designation_name
-
-    def get_entity_type_any_designation(self, entity_any_designation_dict, all_designation_any_end_list):
-        entity_type_any_designation_name = list()
-
-        for designation_any in all_designation_any_end_list:
-            entity_type_any_designation_name.extend(
-                self.get_model().get_entity_type_by_value(entity_any_designation_dict, designation_any))
-
-        all_entity_types = [item for item, count in collections.Counter(entity_type_any_designation_name).items() if
-                            count > 1]
-
-        if all_entity_types:
-            return all_entity_types
-
-        return entity_type_any_designation_name
-
-    def get_designation_end_in_name(self, name):
-        en_designation_end_all_list = self.get_model().get_en_designation_end_all_list()
-        designation_end_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
-        designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
-
-        # Returns list of tuples
-        found_designation_end = re.findall(designation_end_regex, name.lower())
-
-        # Getting list of lists where the first list contains designations of type "anywhere" and the second list contains designations of type "end".
-        # [['association],['limited partnership']
-        designation_end_list = [list(elem) for elem in found_designation_end]
-        if any(isinstance(el, list) for el in designation_end_list):
-            designation_end_list = get_flat_list(designation_end_list)
-        designation_end_list = list(filter(None, designation_end_list))
-        designation_end_list = list(dict.fromkeys(designation_end_list))
-
-        return designation_end_list
-
-    def get_designation_any_in_name(self, name):
-        en_designation_any_all_list = self.get_model().get_en_designation_any_all_list()
-        designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
-        designation_any_regex = r'\b' + designation_any_rgx + '(?=\s)'
-
-        # Returns list of tuples
-        found_designation_any = re.findall(designation_any_regex, name.lower())
-
-        return found_designation_any
-
-    def get_wrong_place_any_designations(self, name):
-        en_designation_any_all_list = self.get_model().get_en_designation_any_all_list()
-
-        designation_end_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
-        designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
-
-        # Returns list of tuples
-        found_designation_end = re.findall(designation_end_regex, name.lower())
-
-        # Getting list of lists where the first list contains designations of type "anywhere" and the second list contains designations of type "end".
-        # [['association],['limited partnership']
-        wrong_designation_end_list = [list(elem) for elem in found_designation_end]
-        if any(isinstance(el, list) for el in wrong_designation_end_list):
-            wrong_designation_end_list = get_flat_list(wrong_designation_end_list)
-        wrong_designation_end_list = list(filter(None, wrong_designation_end_list))
-        wrong_designation_end_list = list(dict.fromkeys(wrong_designation_end_list))
-
-        return wrong_designation_end_list
+        results = self.find_word_synonyms(None, filters)
+        flattened = self._flatten_synonyms_text(results)
+        return flattened
 
     # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
     def regex_transform(self, text, designation_any, designation_end, prefix_list):
@@ -220,27 +179,12 @@ class SynonymService:
         # TODO: Warn or something if params aren't set!
         words = text.lower()
         words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
-        words = remove_french(words, fr_designation_end_list)
+        # TODO: Re-enable remove_french!
+        # words = remove_french(words, fr_designation_end_list)
         tokens = self.regex_transform(words, designation_any, designation_end, prefix_list)
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
-
-    def get_all_end_designations(self):
-        entity_end_designation_dict = {'RLC': self._model.get_en_RLC_entity_type_end_designation(),
-                                       'LL': self._model.get_en_LL_entity_type_end_designation(),
-                                       'CC': self._model.get_en_CC_entity_type_end_designation(),
-                                       'UL': self._model.get_en_UL_entity_type_end_designation(),
-                                       'BC': self._model.get_en_BC_entity_type_end_designation(),
-                                       'CR': self._model.get_en_CR_entity_type_end_designation()}
-
-        return entity_end_designation_dict
-
-    def get_all_any_designations(self):
-        entity_any_designation_dict = {'CP': self._model.get_en_CP_entity_type_any_designation(),
-                                       'XCP': self._model.get_en_XCP_entity_type_any_designation(),
-                                       'CC': self._model.get_en_CC_entity_type_any_designation()}
-        return entity_any_designation_dict
 
     def get_all_substitutions_synonyms(self, list_d, distinctive=True):
         aux_list = []
@@ -258,14 +202,3 @@ class SynonymService:
 
         return response_list
 
-    def get_query_distinctive(self, dist_all_permutations, length):
-        query = self._model.build_query_distinctive(dist_all_permutations, length)
-        return query
-
-    def get_query_descriptive(self, desc_substitution_list, query):
-        query = self._model.build_query_descriptive(desc_substitution_list, query)
-        return query
-
-    def get_conflicts(self, query):
-        conflicts = self._model.get_conflicts(query)
-        return conflicts

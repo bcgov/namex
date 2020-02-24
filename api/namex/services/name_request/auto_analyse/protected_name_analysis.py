@@ -37,7 +37,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     This is the main execution call for the class
     @:return ProcedureResult[]
     '''
-
     def do_analysis(self):
         builder = self._builder
 
@@ -100,7 +99,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             results.append(check_designation_mismatch)
         if not check_special_words.is_valid:
             results.append(check_special_words)
-        #else:
+        # else:
         #    results.append(ProcedureResult(is_valid=True))
 
         return results
