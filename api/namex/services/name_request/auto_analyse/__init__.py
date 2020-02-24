@@ -60,7 +60,7 @@ class AnalysisResultCodes(str, Enum):
     # Stop if error
     # TODO: What about these other guys?
     WORD_TO_AVOID = 'word_to_avoid'
-    WORD_SPECIAL_USE = 'word special use'
+    WORD_SPECIAL_USE = 'word_special_use'
     DESIGNATION_MISMATCH = 'designation_mismatch'
     DESIGNATION_MISPLACED = 'designation_misplaced'
     NAME_REQUIRES_CONSENT = 'consent_required'

@@ -1,20 +1,31 @@
 import re
 from . import db, ma
 
-from enum import Enum
-
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import and_
+
+from namex.constants import AllEntityTypes
 
 from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
 from ..services.name_request.auto_analyse import DataFrameFields
-from namex.constants import AllEntityTypes
+
+from namex.criteria.synonym.query_criteria import SynonymQueryCriteria
+
+"""
+- Models NEVER implement business logic, ONLY generic queries belong in here.
+- Methods like find, find_one, or find_by_criteria belong in models.
+- Methods like get_synonym_list or get_en_designation_end_all_list belong in a Service!
+    - They belong in a Service because getting eg. a list of designations or synonyms is a USE case of the model,
+      but getting a list of designations is not necessarily something that is inherent to the model; rather, that is
+      what a particular user of the model wants to query for.
+"""
 
 
 # The class that corresponds to the database table for synonyms.
 class Synonym(db.Model):
     __tablename__ = 'synonym'
-    __bind_key__ = 'synonyms'
+    # TODO: What's the deal with this bind key?
+    # __bind_key__ = 'synonyms'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category = db.Column(db.String(100))
@@ -52,6 +63,9 @@ class Synonym(db.Model):
                 entity_list.append(entity_designation[0])
         return entity_list
 
+    '''
+    Find a term by column.
+    '''
     @classmethod
     def find(cls, term, col):
         print('finding {} for {}'.format(col, term))
@@ -72,6 +86,24 @@ class Synonym(db.Model):
                     synonyms_list.append(row)
 
         return synonyms_list
+
+    '''
+    Query the model collection using an array of filters
+    @:param filters An array of query filters eg. 
+                    [
+                      func.lower(model.category).op('~')(r'\y{}\y'.format('sub')),
+                      func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))
+                    ]
+    '''
+    @classmethod
+    def find_by_criteria(cls, criteria=None):
+        SynonymQueryCriteria.is_valid_criteria(criteria)
+
+        query = cls.query.with_entities(*criteria.fields) \
+            .filter(and_(*criteria.filters))
+
+        print(query.statement)
+        return query.all()
 
     @classmethod
     def is_substitution_word(cls, word):

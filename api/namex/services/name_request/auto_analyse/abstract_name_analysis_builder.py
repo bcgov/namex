@@ -2,9 +2,11 @@ import abc
 
 from . import ProcedureResult
 
-from . import ProcedureResult
+from .mixins.get_synonyms_lists import GetSynonymsListsMixin
+from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
-class AbstractNameAnalysisBuilder():
+
+class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationListsMixin):
     __metaclass__ = abc.ABCMeta
 
     _director = None
@@ -13,15 +15,12 @@ class AbstractNameAnalysisBuilder():
     _designation_any_list_user = []
     _designation_end_list_user = []
 
+    # TODO: Are these conflict lists in use any more?
     _in_province_conflicts = []
     _all_conflicts = []
 
     _entity_type = None
     _name = ''
-    _list_name_words = []
-    _list_dist_words = []
-    _list_desc_words = []
-    _list_none_words = []
 
     def set_name(self, **kwargs):
         self._name = kwargs.get('name')
@@ -115,7 +114,6 @@ class AbstractNameAnalysisBuilder():
     Check to see if a provided name is valid
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, company_name):
         return ProcedureResult(is_valid=True)
@@ -129,7 +127,6 @@ class AbstractNameAnalysisBuilder():
     to avoid specifically in cases where it is necessary.
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_words_to_avoid(self):
         return ProcedureResult(is_valid=True)
@@ -138,7 +135,6 @@ class AbstractNameAnalysisBuilder():
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def search_conflicts(self, list_dist, list_desc):
         return ProcedureResult(is_valid=True)
@@ -159,7 +155,6 @@ class AbstractNameAnalysisBuilder():
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_words_requiring_consent(self):
         return ProcedureResult(is_valid=True)
@@ -168,7 +163,6 @@ class AbstractNameAnalysisBuilder():
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_designation(self):
         return ProcedureResult(is_valid=True)
@@ -177,7 +171,6 @@ class AbstractNameAnalysisBuilder():
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_word_special_use(self, list_name, name):
         return ProcedureResult(is_valid=True)

@@ -3,7 +3,8 @@ class GetSynonymsListsMixin(object):
     _synonyms = []
     _substitutions = []
     _stop_words = []
-    _number_words = []
+    _designated_end_words = []
+    _designated_any_words = []
 
     def get_prefixes(self):
         return self._prefixes
@@ -17,5 +18,8 @@ class GetSynonymsListsMixin(object):
     def get_stop_words(self):
         return self._stop_words
 
-    def get_number_words(self):
-        return self._number_words
+    def get_designated_end_words(self):
+        return self._designated_end_words
+
+    def get_designated_any_words(self):
+        return self._designated_any_words

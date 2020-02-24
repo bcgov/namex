@@ -8,6 +8,9 @@ from .name_analysis_utils import data_frame_to_list, remove_french
 
 from namex.models import Synonym
 
+from .mixins.get_synonyms_lists import GetSynonymsListsMixin
+from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
+
 from namex.services.synonyms.synonym \
     import SynonymService
 
@@ -20,12 +23,12 @@ from namex.services.word_classification.word_classification \
 from namex.services.virtual_word_condition.virtual_word_condition \
     import VirtualWordConditionService
 
-f'''
+'''
 This is the director for AutoAnalyseService.
 '''
 
 
-class NameAnalysisDirector:
+class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixin):
     _builder = None  # Store a reference to the builder
     _model = None
 
@@ -73,11 +76,7 @@ class NameAnalysisDirector:
     _entity_type = None
     _name_as_submitted = ''
     _preprocessed_name = ''
-
-    _list_name_words = []
-    _list_dist_words = []
-    _list_desc_words = []
-    _list_none_words = []
+    # _unclassifiable_words = []  # TODO: Or do we add these to list_none?
 
     # Conflicts
     _in_province_conflicts = []
@@ -121,7 +120,6 @@ class NameAnalysisDirector:
     '''
     Set and preprocess a submitted name string using the preprocess_name class method.
     '''
-
     def set_name(self, name):
         # Process the name
         self._name_as_submitted = name  # Store the user's submitted name string
@@ -139,39 +137,12 @@ class NameAnalysisDirector:
     def get_preprocessed_name(self):
         return self._preprocessed_name
 
-    def get_list_name(self):
-        return self._list_name_words
-
-    def get_list_dist(self):
-        return self._list_dist_words
-
-    def get_list_desc(self):
-        return self._list_desc_words
-
-    def get_list_none(self):
-        return self._list_none_words
-
-    def get_synonyms(self):
-        return self._synonyms
-
-    def get_substitutions(self):
-        return self._substitutions
-
-    def get_stop_words(self):
-        return self._stop_words
-
-    def get_designated_end_words(self):
-        return self._designated_end_words
-
-    def get_designated_any_words(self):
-        return self._designated_any_words
-
     '''
     Split a name string into classifiable tokens. Called internally whenever set_name is invoked.
     @:param string:name
     '''
-
     def preprocess_name(self):
+        syn_svc = self.get_synonym_service()
         wc_svc = self.get_word_classification_service()
         cf = pd.DataFrame(columns=['word', 'word_classification'])
 
@@ -180,6 +151,7 @@ class NameAnalysisDirector:
 
         # Clean the provided name and tokenize the string
         # Identify stop words, any words and end words an store the lists to our director instance
+        # self._list_name_words = syn_svc.clean_name_words  # TODO: Use this one!
         self._list_name_words = self.clean_name_words(
             self._name_as_submitted,
             self._stop_words,
@@ -212,6 +184,7 @@ class NameAnalysisDirector:
         self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
         self.configure_builder()  # Update builder dicts
 
+    # TODO: Isn't there another version of this already?
     def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[],
                          prefix_list=[]):
         if not text or not stop_words or not designation_any or not designation_end or not prefix_list:
