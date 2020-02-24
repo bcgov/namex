@@ -6,6 +6,9 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
+from .mixins.get_synonyms_lists import GetSynonymsListsMixin
+from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
+
 from namex.services.synonyms.synonym \
     import SynonymService
 
@@ -198,6 +201,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
         self.configure_builder()
 
+    # TODO: Isn't there another version of this already?
     def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[],
                          prefix_list=[]):
         if not text or not stop_words or not designation_any or not designation_end or not prefix_list:
