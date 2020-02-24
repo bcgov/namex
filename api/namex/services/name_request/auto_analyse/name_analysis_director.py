@@ -142,47 +142,50 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
     @:param string:name
     '''
     def preprocess_name(self):
-        syn_svc = self.get_synonym_service()
-        wc_svc = self.get_word_classification_service()
-        cf = pd.DataFrame(columns=['word', 'word_classification'])
+        try:
+            syn_svc = self.get_synonym_service()
+            wc_svc = self.get_word_classification_service()
+            cf = pd.DataFrame(columns=['word', 'word_classification'])
 
-        if not self._name_as_submitted:
-            return  # TODO: Should we throw an error or something?
+            if not self._name_as_submitted:
+                return  # TODO: Should we throw an error or something?
 
-        # Clean the provided name and tokenize the string
-        # Identify stop words, any words and end words an store the lists to our director instance
-        # self._list_name_words = syn_svc.clean_name_words  # TODO: Use this one!
-        self._list_name_words = self.clean_name_words(
-            self._name_as_submitted,
-            self._stop_words,
-            self._designated_any_words,
-            self._designated_end_words,
-            [],
-            self._prefixes
-        )
+            # Clean the provided name and tokenize the string
+            # Identify stop words, any words and end words an store the lists to our director instance
+            # self._list_name_words = syn_svc.clean_name_words  # TODO: Use this one!
+            self._list_name_words = self.clean_name_words(
+                self._name_as_submitted,
+                self._stop_words,
+                self._designated_any_words,
+                self._designated_end_words,
+                [],
+                self._prefixes
+            )
 
-        # Get the word classification for each word in the supplied name name
-        for word in self._list_name_words:
-            word_classification = wc_svc.find_one(word)
-            if not word_classification:
-                print('No word classification found for: ' + word)
-                new_row = {'word': word.lower().strip(), 'word_classification': 'none'}
-            else:
-                for row in word_classification:
-                    new_row = {'word': word.lower().strip(),
-                               'word_classification': row.classification.strip()}
-                    cf = cf.append(new_row, ignore_index=True)
+            # Get the word classification for each word in the supplied name name
+            for word in self._list_name_words:
+                word_classification = wc_svc.find_one(word)
+                if not word_classification:
+                    print('No word classification found for: ' + word)
+                    new_row = {'word': word.lower().strip(), 'word_classification': 'none'}
+                else:
+                    for row in word_classification:
+                        new_row = {'word': word.lower().strip(),
+                                   'word_classification': row.classification.strip()}
+                        cf = cf.append(new_row, ignore_index=True)
 
-        # TODO: If we don't find a classification, we should be adding a record and return the unclassified word issue
-        # TODO: Related to the above, we will need to pre-populate a list of classified words
+            # TODO: If we don't find a classification, we should be adding a record and return the unclassified word issue
+            # TODO: Related to the above, we will need to pre-populate a list of classified words
 
-        # Store results to instance
-        # self._list_name_words, # TODO: data_frame_to_list used to return _list_name words... why did we move away from that?
-        self._list_dist_words, self._list_desc_words, self._list_none_words = data_frame_to_list(cf)
+            # Store results to instance
+            # self._list_name_words, # TODO: data_frame_to_list used to return _list_name words... why did we move away from that?
+            self._list_dist_words, self._list_desc_words, self._list_none_words = data_frame_to_list(cf)
 
-        # Store clean, preprocessed name to instance
-        self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
-        self.configure_builder()  # Update builder dicts
+            # Store clean, preprocessed name to instance
+            self.set_preprocessed_name(' '.join(map(str, self.get_list_name())))
+            self.configure_builder()  # Update builder dicts
+        except Exception:
+            print('Pre-processing name failed')
 
     # TODO: Isn't there another version of this already?
     def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[],
