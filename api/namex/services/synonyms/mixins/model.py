@@ -10,7 +10,7 @@ class SynonymModelMixin(SynonymServiceMixin):
         query = self._model.build_query_distinctive(dist_all_permutations, length)
         return query
 
-    def get_query_descriptive(self, desc_substitution_list, query):
+    def get_query_descriptive(self, desc_substitution_list,query):
         query = self._model.build_query_descriptive(desc_substitution_list, query)
         return query
 
