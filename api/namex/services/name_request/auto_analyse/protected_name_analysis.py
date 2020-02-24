@@ -176,8 +176,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             lst_dist.append(self._list_dist_words)
             lst_desc.append(self._list_desc_words)
 
-            self._list_dist_words= lst_dist
-            self._list_desc_words= lst_desc
+            self._list_dist_words = lst_dist
+            self._list_desc_words = lst_desc
 
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())
