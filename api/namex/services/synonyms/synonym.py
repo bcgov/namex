@@ -132,24 +132,24 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = re.sub(r'\s+',
                       ' ',
                       re.sub(
-                          r'^(?:\d+(?:ST|[RN]D|TH)?\s+)+(?=[^\d]+$)(?!.*?(?:HOLDINGS$|BC$|VENTURES$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)',
+                          r'^(?:\d+(?:ST|[RN]D|TH)?\s+)+(?=[^\d]+$)(?!.*?(?:HOLDINGS$|BC$|VENTURES$))|(?<=\y[A-Za-z]\y) +(?=[a-zA-Z]\y)',
                           '',
-                          re.sub(r'(?<=[A-Za-z]\b )([ 0-9]*(ST|[RN]D|TH)?\b)',
+                          re.sub(r'(?<=[A-Za-z]\y )([ 0-9]*(ST|[RN]D|TH)?\y)',
                                  '',
-                                 re.sub(r'(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)|^\s+|\s+$',
+                                 re.sub(r'(?<=\y[A-Za-z]\y) +(?=[a-zA-Z]\y)|^\s+|\s+$',
                                         '',
                                         re.sub(r'[&/-]',
                                                ' ',
                                                ws_rx.sub(lambda x: x.group(1) or " ",
-                                                         re.sub(r'\b(\d+(ST|[RN]D|TH))(\w+)\b',
+                                                         re.sub(r'\y(\d+(ST|[RN]D|TH))(\w+)\y',
                                                                 r'\1 \3',
-                                                                re.sub(r'\b(\w{2,})(\b\W+\b\1\b)*',
+                                                                re.sub(r'\y(\w{2,})(\y\W+\y\1\y)*',
                                                                        r'\1',
                                                                        re.sub(
                                                                            r'(?<=[a-zA-Z])\'[Ss]|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &/-]+',
                                                                            ' ',
                                                                            re.sub(
-                                                                               r'\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b' + designation_any_regex + '\\b|\\s' + designation_end_regex + '(?=(\\s' + designation_end_regex + ')*$)',
+                                                                               r'\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\y)|\y' + designation_any_regex + '\\y|\\s' + designation_end_regex + '(?=(\\s' + designation_end_regex + ')*$)',
                                                                                '',
                                                                                text,
                                                                                0,
@@ -186,19 +186,4 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         return [x.lower() for x in tokens if x]
 
-    def get_all_substitutions_synonyms(self, list_d, distinctive=True):
-        aux_list = []
-        response_list = []
-
-        for word in list_d:
-            if distinctive:
-                aux_list = self.get_substitution_list(word)
-            else:
-                aux_list = self.get_synonym_list(word)
-            if aux_list:
-                response_list.append(aux_list)
-            else:
-                response_list.append([word.lower()])
-
-        return response_list
 
