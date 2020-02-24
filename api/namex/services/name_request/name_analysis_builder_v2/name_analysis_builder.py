@@ -64,7 +64,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_to_avoid(self, name):
+    def check_words_to_avoid(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -75,7 +75,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             if words_to_avoid.lower() in name.lower():
                 words_to_avoid_list.append(words_to_avoid)
 
-        list_name = name.split()
         words_to_avoid_list_response = []
 
         for idx, token in enumerate(list_name):
@@ -138,7 +137,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_words_requiring_consent(self, name):
+    def check_words_requiring_consent(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -149,7 +148,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             if words_consent.lower() in name.lower():
                 words_consent_list.append(words_consent)
 
-        list_name = name.split()
         words_consent_list_response = []
 
         for idx, token in enumerate(list_name):
@@ -196,6 +194,35 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
             result.values = response
+
+        return result
+
+    '''
+    Override the abstract / base class method
+    @return ProcedureResult
+    '''
+
+    def check_word_special_use(self, list_name, name):
+        result = ProcedureResult()
+        result.is_valid = True
+
+        all_word_special_use_list = self.get_virtual_word_condition_service().get_word_special_use()
+        word_special_use_list = []
+
+        for words_special in all_word_special_use_list:
+            if words_special.lower() in name.lower():
+                word_special_use_list.append(words_special.lower())
+
+        word_special_use_list_response = []
+
+        for idx, token in enumerate(list_name):
+            if any(token in word for word in word_special_use_list):
+                word_special_use_list_response.append({idx: token})
+
+        if word_special_use_list_response:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.WORD_SPECIAL_USE
+            result.values = word_special_use_list_response
 
         return result
 

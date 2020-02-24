@@ -42,7 +42,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
-        check_words_to_avoid = builder.check_words_to_avoid(self.get_preprocessed_name())
+        check_words_to_avoid = builder.check_words_to_avoid(self.get_list_name(), self.get_preprocessed_name())
         if not check_words_to_avoid.is_valid:
             results.append(check_words_to_avoid)
 
@@ -55,8 +55,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             lst_dist.append(self._list_dist_words)
             lst_desc.append(self._list_desc_words)
 
-            self._list_dist_words= lst_dist
-            self._list_desc_words= lst_desc
+            self._list_dist_words = lst_dist
+            self._list_desc_words = lst_desc
 
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())
@@ -66,7 +66,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(self.get_list_name())  # This is correct
         check_words_requiring_consent = builder.check_words_requiring_consent(
-            self.get_preprocessed_name())  # This is incorrect
+            self.get_list_name(), self.get_preprocessed_name())  # This is incorrect
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
 
@@ -90,10 +90,14 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
                                                                self.get_entity_type(),
                                                                self.get_all_designations(),
                                                                self.get_wrong_designation_by_input_name(),
-                                                               self.get_all_designations_user())  # This is incorrect
+                                                               self.get_all_designations_user())
+        check_special_words = builder.check_word_special_use(self.get_list_name(), self.get_name())
+
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
-        else:
-            results.append(ProcedureResult(is_valid=True))
+        if not check_special_words.is_valid:
+            results.append(check_special_words)
+        #else:
+        #    results.append(ProcedureResult(is_valid=True))
 
         return results
