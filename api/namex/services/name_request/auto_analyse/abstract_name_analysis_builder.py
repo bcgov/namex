@@ -79,7 +79,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     Check to see if a provided name is valid
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name):
         return ProcedureResult(is_valid=True)
@@ -93,7 +92,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     to avoid specifically in cases where it is necessary.
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_words_to_avoid(self, list_name, name):
         return ProcedureResult(is_valid=True)
@@ -102,7 +100,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def search_conflicts(self, list_dist, list_desc, list_name, name):
         return ProcedureResult(is_valid=True)
@@ -123,7 +120,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_words_requiring_consent(self, list_name, name):
         return ProcedureResult(is_valid=True)
@@ -177,7 +173,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
         return ProcedureResult(is_valid=True)
@@ -186,7 +181,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
-
     @abc.abstractmethod
     def check_word_special_use(self, list_name, name):
         return ProcedureResult(is_valid=True)

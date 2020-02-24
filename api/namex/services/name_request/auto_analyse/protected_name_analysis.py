@@ -149,7 +149,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     This is the main execution call for running name analysis checks.
     @:return ProcedureResult[]
     '''
-
     def do_analysis(self):
         builder = self.builder
 

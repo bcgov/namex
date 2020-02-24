@@ -13,11 +13,11 @@ from .mixins.model import SynonymModelMixin
 - Methods like find, find_one, or find_by_criteria or iterate belong in models.
 """
 
-from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes
-from . import DesignationPositionCodes
-from ..name_request.auto_analyse.name_analysis_utils import get_flat_list
-from ..name_request.auto_analyse.abstract_name_analysis_builder \
-    import AbstractNameAnalysisBuilder
+"""
+- Services implement business logic, and NON generic queries. 
+- Services don't have generic model query methods like find, find_one, or find_by_criteria.
+- Methods like find, find_one, or find_by_criteria or iterate belong in models.
+"""
 
 
 class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
