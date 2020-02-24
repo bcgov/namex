@@ -49,7 +49,7 @@ class VirtualWordCondition(db.Model):
         return None
 
     @classmethod
-    def get_words_special_use(cls):
+    def get_word_special_use(cls):
         query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_consent_required = false and rc_allow_use = true'
 
         df = pd.read_sql_query(query, con=db.engine)

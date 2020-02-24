@@ -3,11 +3,22 @@ from ..auto_analyse.abstract_name_analysis_builder \
 
 from ..auto_analyse import AnalysisResultCodes
 
-
 '''
 Sample builder
 # TODO: What convention should we use? Nice to use _v<BuilderVersion> if it doesn't break PEP8
 '''
+
+
+def check_word_special_use():
+    result = ProcedureResult()
+    result.is_valid = True
+
+    success = True
+    if not success:
+        result.is_valid = False
+        result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
+
+    return result
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
@@ -33,6 +44,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_name_is_well_formed(self):
         result = ProcedureResult()
         result.is_valid = True
@@ -52,6 +64,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_words_to_avoid(self):
         result = ProcedureResult()
         result.is_valid = True
@@ -67,6 +80,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def search_conflicts(self):
         result = ProcedureResult()
         result.is_valid = True
@@ -82,6 +96,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_words_requiring_consent(self):
         result = ProcedureResult()
         result.is_valid = True
@@ -97,6 +112,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_designation(self):
         result = ProcedureResult()
         result.is_valid = True
@@ -108,3 +124,18 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
+    '''
+    Override the abstract / base class method
+    @return ProcedureResult
+    '''
+
+    def check_word_special_use(self):
+        result = ProcedureResult()
+        result.is_valid = True
+
+        success = True
+        if not success:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.WORD_SPECIAL_USE
+
+        return result
