@@ -215,7 +215,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                                                ws_rx.sub(lambda x: x.group(1) or " ",
                                                          re.sub(r'\b(\d+(' + ordinal_suffixes + '))(\\w+)\\b',
                                                                 r'\1 \3',
-                                                                re.sub(r'\b(\w{2,})(\b\W+\b\1\b)*',
+                                                                re.sub(r'\y(\w{2,})(\y\W+\y\1\y)*',
                                                                        r'\1',
                                                                        re.sub(
                                                                            r'(?<=[a-zA-Z])\'[Ss]|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &/-]+',
