@@ -99,7 +99,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             results.append(check_designation_mismatch)
         if not check_special_words.is_valid:
             results.append(check_special_words)
-        # else:
-        #    results.append(ProcedureResult(is_valid=True))
+
+        if not results.__len__() > 0:
+            results.append(ProcedureResult(is_valid=True))
 
         return results
