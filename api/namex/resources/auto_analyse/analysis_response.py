@@ -41,6 +41,7 @@ class AnalysisResponse:
 
         print(repr(analysis_result))
 
+        is_valid_name_request = False
         if analysis_result and len(analysis_result) > 0:
             for procedure_result in analysis_result:
                 if callable(response_issues(procedure_result.result_code)):
@@ -49,14 +50,16 @@ class AnalysisResponse:
                     if response_issue and response_issue.issue_type is not AnalysisResultCodes.VALID_NAME:
                         self.issues.append(response_issue)
                     else:
-                        pass
+                        is_valid_name_request = True
+                        break
 
         # TODO: This is an incomplete implementation! Get returned status codes from ProcedureResult
-        status_code = "fa"
-
-        if status_code == "fa":
+        if not is_valid_name_request:
             self.status_code = "fa"
             self.header = "Further Action Required"
+        else:
+            self.status_code = "Available"
+            self.header = "Available"
 
     def prepare_payload(self):
         payload = NameAnalysisResponse(
