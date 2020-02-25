@@ -102,14 +102,14 @@ class Synonym(db.Model):
         query = cls.query.with_entities(*criteria.fields) \
             .filter(and_(*criteria.filters))
 
-        print(query.statement)
+        # print(query.statement)
         return query.all()
 
     @classmethod
     def is_substitution_word(cls, word):
         df = pd.read_sql_query(
             'SELECT s.synonyms_text FROM synonym s where lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + 'and ' + \
-            's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "'", con=db.engine)
+            's.synonyms_text ~ ' + "'" + '\y' + word.lower() + '\y' + "'", con=db.engine)
         if not df.empty:
             return True
         return False
@@ -118,7 +118,7 @@ class Synonym(db.Model):
     def get_substitution_list(cls, word=None):
         if word:
             query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + ' AND ' + \
-                    's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';"
+                    's.synonyms_text ~ ' + "'" + '\y' + word.lower() + '\y' + "';"
         else:
             query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'"
 
@@ -133,7 +133,7 @@ class Synonym(db.Model):
     def get_synonym_list(cls, word=None):
         if word:
             return cls.query_category(
-                '!~* ' + "'" + '\w*(sub|stop)\s*$' + "'" + ' AND ' + 's.synonyms_text ~ ' + "'" + '\\y' + word.lower() + '\\y' + "';")
+                '!~* ' + "'" + '\w*(sub|stop)\s*$' + "'" + ' AND ' + 's.synonyms_text ~ ' + "'" + '\y' + word.lower() + '\y' + "';")
 
     @classmethod
     def get_stop_word_list(cls):
@@ -164,8 +164,12 @@ class Synonym(db.Model):
         if not category_query:
             raise ValueError('Invalid category provided')
 
-        query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ' + category_query
-        df = pd.read_sql_query(query, con=db.engine)
+        try:
+            query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ' + category_query
+            df = pd.read_sql_query(query, con=db.engine)
+        except Exception as error:
+            print('SQL error :' + repr(error))
+            raise Exception(error)
 
         if not df.empty:
             response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)

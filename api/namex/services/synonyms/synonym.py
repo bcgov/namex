@@ -19,9 +19,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     _parse_csv_line = lambda x: (x.split(','))
 
     def __init__(self):
-        # TODO: Not sure if we'll need this later once Model is done
         self._model = Synonym
-        print(self._model)
 
     @classmethod
     def _flatten_synonyms_text(cls, results):
