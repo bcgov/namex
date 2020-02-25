@@ -370,11 +370,12 @@ class AnalysisResponse:
             self.header = "Available"
 
         # TODO: This is an incomplete implementation! Get returned status codes from ProcedureResult
-        status_code = "fa"
-
-        if status_code == "fa":
+        if not is_valid_name_request:
             self.status_code = "fa"
             self.header = "Further Action Required"
+        else:
+            self.status_code = "Available"
+            self.header = "Available"
 
     def prepare_payload(self):
         payload = NameAnalysisResponse(
