@@ -149,6 +149,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     This is the main execution call for running name analysis checks.
     @:return ProcedureResult[]
     '''
+
     def do_analysis(self):
         builder = self.builder
 
@@ -166,17 +167,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
 
-        # Check if list_dist and list_desc are the same
         if self.get_list_dist() == self.get_list_desc():
-            self._list_dist_words, self._list_desc_words = words_distinctive_descriptive(self.get_list_name())
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.get_list_name())
         else:
-            lst_dist = []
-            lst_desc = []
-            lst_dist.append(self._list_dist_words)
-            lst_desc.append(self._list_desc_words)
-
-            self._list_dist_words = lst_dist
-            self._list_desc_words = lst_desc
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.get_list_name(), self.get_list_dist(), self.get_list_desc())
 
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())
