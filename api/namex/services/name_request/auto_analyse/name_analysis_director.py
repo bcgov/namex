@@ -122,6 +122,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
     '''
     Set and preprocess a submitted name string using the preprocess_name class method.
     '''
+
     def set_name(self, name):
         # Process the name
         self._name_as_submitted = name  # Store the user's submitted name string
@@ -143,6 +144,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
     Split a name string into classifiable tokens. Called internally whenever set_name is invoked.
     @:param string:name
     '''
+
     def preprocess_name(self):
         try:
             syn_svc = self.get_synonym_service()
@@ -250,11 +252,15 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
         builder = self._builder
 
         results = []
+        if self.get_list_none():
+            self._list_dist_words, self._list_desc_words = builder.handle_unclassified_words(self.get_list_dist(),
+                                                                                             self.get_list_desc(),
+                                                                                             self.get_list_none(),
+                                                                                             self.get_list_name())
 
         check_name_is_well_formed = builder.check_name_is_well_formed(
             self.get_list_dist(),
             self.get_list_desc(),
-            self.get_list_none(),
             self.get_list_name()
         )
 

@@ -470,12 +470,12 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         return issue
 
 
-class ReverseOrder(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.REVERSE_ORDER
+class IncorrectCategory(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
-        line1="Need to reverse the word order.",
+        line1="Category of the word is incorrect.",
         line2=None,
         consenting_body=None,
         designations=None,
