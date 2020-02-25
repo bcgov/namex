@@ -100,6 +100,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_special_words.is_valid:
             results.append(check_special_words)
 
+        # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
         if not results.__len__() > 0:
             results.append(ProcedureResult(is_valid=True))
 
