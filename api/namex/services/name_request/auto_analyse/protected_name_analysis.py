@@ -3,7 +3,8 @@ from datetime import (datetime)
 from .name_analysis_director import NameAnalysisDirector
 from . import ProcedureResult
 
-from .name_analysis_utils import words_distinctive_descriptive
+from .name_analysis_utils import list_distinctive_descriptive_same, validate_distinctive_descriptive_lists, \
+    list_distinctive_descriptive
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -36,6 +37,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     '''
     @:return ProcedureResult[]
     '''
+
     def do_analysis(self):
         builder = self._builder
 
@@ -45,17 +47,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_words_to_avoid.is_valid:
             results.append(check_words_to_avoid)
 
-        # Check if list_dist and list_desc are the same
         if self.get_list_dist() == self.get_list_desc():
-            self._list_dist_words, self._list_desc_words = words_distinctive_descriptive(self.get_list_name())
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.get_list_name())
         else:
-            lst_dist = []
-            lst_desc = []
-            lst_dist.append(self._list_dist_words)
-            lst_desc.append(self._list_desc_words)
-
-            self._list_dist_words = lst_dist
-            self._list_desc_words = lst_desc
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.get_list_name(), self.get_list_dist(), self.get_list_desc())
 
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())

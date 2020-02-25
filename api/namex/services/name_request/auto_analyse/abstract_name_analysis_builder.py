@@ -114,6 +114,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     Check to see if a provided name is valid
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, company_name):
         return ProcedureResult(is_valid=True)
@@ -127,6 +128,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     to avoid specifically in cases where it is necessary.
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_words_to_avoid(self):
         return ProcedureResult(is_valid=True)
@@ -135,6 +137,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def search_conflicts(self, list_dist, list_desc):
         return ProcedureResult(is_valid=True)
@@ -155,6 +158,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_words_requiring_consent(self):
         return ProcedureResult(is_valid=True)
@@ -163,6 +167,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_designation(self):
         return ProcedureResult(is_valid=True)
@@ -171,6 +176,15 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_word_special_use(self, list_name, name):
+        return ProcedureResult(is_valid=True)
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+    @abc.abstractmethod
+    def handle_unclassified_words(self, list_dist, list_desc, list_none, list_name):
         return ProcedureResult(is_valid=True)
