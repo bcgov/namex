@@ -5,9 +5,7 @@ class VirtualWordConditionService:
     _model = None
 
     def __init__(self):
-        # TODO: Not sure if we'll need this later once Model is done
         self._model = VirtualWordCondition
-        print(self._model)
 
     def get_model(self):
         return self._model

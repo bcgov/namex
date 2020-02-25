@@ -22,6 +22,24 @@ class SynonymModelMixin(SynonymServiceMixin):
         substitution_list = self._model.get_substitution_list(word)
         return substitution_list
 
+    def get_all_substitutions_synonyms(self, list_d, distinctive=True):
+        aux_list = []
+        response_list = []
+
+        for word in list_d:
+            if distinctive:
+                aux_list = self.get_substitution_list(word)
+            else:
+                aux_list = self.get_synonym_list(word)
+            if aux_list:
+                response_list.append(aux_list)
+            else:
+                response_list.append([word.lower()])
+
+        return response_list
+
     def get_conflicts(self, query):
         conflicts = self._model.get_conflicts(query)
         return conflicts
+
+
