@@ -66,31 +66,3 @@ class XproUnprotectedNameEntityTypes(Enum):
             values.append(item.value)
 
         return values
-
-
-class AllEntityTypes(Enum):
-    ALL = 'ALL'
-
-    @classmethod
-    def list(cls):
-        values = []
-        for item in cls:
-            values.append(item.value)
-
-        return values
-
-
-ENTITY_TYPE_END_DESIGNATIONS = [
-    XproUnprotectedNameEntityTypes.XPRO_LIMITED_LIABILITY_COMPANY,
-    BCUnprotectedNameEntityTypes.BC_LIMITED_LIABILITY_PARTNERSHIP,
-    BCProtectedNameEntityTypes.BC_COMMUNITY_CONTRIBUTION_COMPANY,
-    BCProtectedNameEntityTypes.BC_UNLIMITED_LIABILITY_COMPANY,
-    BCProtectedNameEntityTypes.BC_BENEFIT_COMPANY,
-    BCProtectedNameEntityTypes.BC_CORPORATION
-]
-
-ENTITY_TYPE_ANY_DESIGNATIONS = [
-    BCProtectedNameEntityTypes.BC_COOPERATIVE,
-    BCProtectedNameEntityTypes.BC_COMMUNITY_CONTRIBUTION_COMPANY,
-    XproUnprotectedNameEntityTypes.XPRO_COOPERATIVE
-]

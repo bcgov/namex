@@ -9,13 +9,6 @@ from http import HTTPStatus
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
-# from sqlalchemy.dialects import postgresql
-# from sqlalchemy.orm.exc import NoResultFound
-# from sqlalchemy import func, text
-# from sqlalchemy.inspection import inspect
-
-from namex import jwt
-
 from namex.services.word_classification.word_classification import WordClassificationService
 
 setup_logging() ## important to do this first

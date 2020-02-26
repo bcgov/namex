@@ -1,12 +1,4 @@
-import jsonpickle
-import json
 from enum import Enum
-
-# Limit number of words to analyse
-# TODO: We can set this to three later (in PROD), but this is way easier to test with a higher max limit
-# eg. I can easily test for a bunch of issues using Flerkin Mountain View Engineering Cooperative
-# TODO: Make this configurable in OpenShift
-MAX_LIMIT = 4
 
 # Limit number of words to analyse
 MAX_LIMIT = 4
