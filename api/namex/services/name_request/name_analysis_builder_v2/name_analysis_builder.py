@@ -7,6 +7,8 @@ from ..auto_analyse.abstract_name_analysis_builder \
 from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
 
+from namex.models.request import Request
+
 '''
 Sample builder
 # TODO: What convention should we use? Nice to use _v<BuilderVersion> if it doesn't break PEP8
@@ -123,14 +125,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             # Inject distinctive section in query
             for element in dist_all_permutations:
-                query = syn_svc.get_query_distinctive(element, len(element[0]))
+                query = Request.get_query_distinctive(element, len(element[0]))
 
             desc_synonym_dict = self.get_synonym_service().get_all_substitutions_synonyms(w_desc, False)
             desc_synonym_list = desc_synonym_dict.values()
             # Inject descriptive section into query, execute and add matches to list
             if desc_synonym_list:
-                query = syn_svc.get_query_descriptive(desc_synonym_list, query)
-                matches = syn_svc.get_conflicts(query)
+                query = Request.get_query_descriptive(desc_synonym_list, query)
+                matches = Request.get_conflicts(query)
                 matches_response.extend([val.pop() for i, val in enumerate(matches.values.tolist())])
                 matches_response = list(dict.fromkeys(matches_response))
                 dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
