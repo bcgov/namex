@@ -1,7 +1,7 @@
 import re
 from . import db, ma
 
-import pandas as pd
+
 from sqlalchemy import and_
 
 from namex.criteria.synonym.query_criteria import SynonymQueryCriteria
@@ -74,12 +74,6 @@ class Synonym(db.Model):
 
         # print(query.statement)
         return query.all()
-
-    #  TODO: Move this out of here, and use the models!
-    @classmethod
-    def get_conflicts(cls, query):
-        matches = pd.read_sql_query(query, con=db.engine)
-        return matches
 
 
 class SynonymSchema(ma.ModelSchema):

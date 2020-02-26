@@ -21,6 +21,9 @@ import re
 # TODO: Remove this when we update get_conflicts
 import pandas as pd
 
+# TODO: Remove this when we update get_conflicts
+import pandas as pd
+
 
 # create sequence if not exists nr_seq;
 # noinspection PyPep8Naming
