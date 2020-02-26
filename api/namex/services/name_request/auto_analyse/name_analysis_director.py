@@ -275,7 +275,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
         check_name_is_well_formed = builder.check_name_is_well_formed(
             self.get_list_dist(),
             self.get_list_desc(),
-            self.get_list_none(),
             self.get_list_name()
         )
 

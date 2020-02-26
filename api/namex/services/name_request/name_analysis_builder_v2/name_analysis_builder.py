@@ -1,12 +1,9 @@
 import itertools
 
-from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
-from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
+from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT
 from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
-
-from namex.models.request import Request
 
 '''
 Sample builder
@@ -21,40 +18,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name):
+    def check_name_is_well_formed(self, list_dist, list_desc, list_name):
         result = ProcedureResult()
         result.is_valid = True
 
         _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
 
-        if len(list_none) > 0:
-            unclassified_words_list_response = []
-            for idx, token in enumerate(list_name):
-                if any(token in word for word in list_none):
-                    unclassified_words_list_response.append(token)
-
+        if list_incorrect_classification:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.values = {
-                'list_name': list_name or [],
-                'list_none': unclassified_words_list_response
-            }
-
-        # TODO: These checks might be of use, but they don't really belong in here
-        # if list_incorrect_classification:
-        #    result.is_valid = False
-        #    result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
-        #    result.values = list_incorrect_classification
-        # elif not list_all == list_name:
-        #    reverse_order_list = []
-        #    for idx, (token_dist_desc, token_name) in enumerate(zip(list_all, list_name)):
-        #        if token_dist_desc != token_name:
-        #            reverse_order_list.append({idx: token_name})
-
-        #    result.is_valid = False
-        #    result.result_code = AnalysisResultCodes.REVERSE_ORDER
-        #    result.values = reverse_order_list
-        elif len(list_dist) < 1:
+            result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
+            result.values = list_incorrect_classification
+        if len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
             result.values = list_name
@@ -62,16 +36,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(list_desc) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-        # TODO: We need another check here but we also need unclassified words check before we run check name is well formed
-        elif len(list_none) > 0:
-            unclassified_words_list_response = []
-            for idx, token in enumerate(list_name):
-                if any(token in word for word in list_none):
-                    unclassified_words_list_response.append({idx: token})
-
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.values = unclassified_words_list_response
         elif len(list_name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
