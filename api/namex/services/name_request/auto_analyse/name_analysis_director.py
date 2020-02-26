@@ -84,7 +84,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
 
     def __init__(self):
         self._synonym_service = SynonymService()
-        self._name_processing_service = NameProcessingService()
+        # TODO: Finish moving name processing out into its own service!
+        # self._name_processing_service = NameProcessingService()
         self._word_classification_service = WordClassificationService()
         self._virtual_word_condition_service = VirtualWordConditionService()
         self._model = Synonym
