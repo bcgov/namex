@@ -75,6 +75,122 @@ class Synonym(db.Model):
         # print(query.statement)
         return query.all()
 
+    @classmethod
+    def is_substitution_word(cls, word):
+        df = pd.read_sql_query(
+            'SELECT s.synonyms_text FROM synonym s where lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + 'and ' + \
+            's.synonyms_text ~ ' + "'" + '\y' + word.lower() + '\y' + "'", con=db.engine)
+        if not df.empty:
+            return True
+        return False
+
+    @classmethod
+    def get_substitution_list(cls, word=None):
+        if word:
+            query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'" + ' AND ' + \
+                    's.synonyms_text ~ ' + "'" + '\y' + word.lower() + '\y' + "';"
+        else:
+            query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) LIKE ' + "'" + '%% ' + "sub'"
+
+        df = pd.read_sql_query(query, con=db.engine)
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+
+    @classmethod
+    def get_synonym_list(cls, word=None):
+        if word:
+            return cls.query_category(
+                '!~* ' + "'" + '\w*(sub|stop)\s*$' + "'" + ' AND ' + 's.synonyms_text ~ ' + "'" + '\y' + word.lower() + '\y' + "';")
+
+    @classmethod
+    def query_category(cls, category_query):
+        if not category_query:
+            raise ValueError('Invalid category provided')
+
+        try:
+            query = 'SELECT s.synonyms_text FROM synonym s WHERE lower(s.category) ' + category_query
+            df = pd.read_sql_query(query, con=db.engine)
+        except Exception as error:
+            print('SQL error :' + repr(error))
+            raise Exception(error)
+
+        if not df.empty:
+            response = get_dataframe_list(df, DataFrameFields.FIELD_SYNONYMS.value)
+            response = get_flat_list(response)
+            return response
+        return None
+
+
+    # TODO: Use real code types and complete this, so we can get rid of all the permutations...
+    #  This should be okay with a string like "'" + '^ll.*(english[_ -]+)+designation[s]?[_-]end' + "'"
+    #  I haven't worked out the other possibilities that are still in this class...
+    @classmethod
+    def get_entity_type_designation(cls, entity_type_code, position_code, lang='english'):
+        code_str = entity_type_code.value
+        position_str = position_code.value
+        query = ''
+
+        if code_str == AllEntityTypes.ALL.value:
+            query = '~ ' + "'" + '^' + lang.lower() + '[_ -]+designation[s]?[_-]+' + position_str.lower() + "'"
+        else:
+            query = '~ ' + "'" + '^' + code_str.lower() + '.*(' + lang.lower() + '[_ -]+)+designation[s]?[_-]' + position_str.lower() + "'"
+
+        results = cls.query_category(query)
+        return results
+
+    # TODO: Use real code types and complete this, so we can get rid of all the permutations
+    @classmethod
+    def get_entity_type_designations(cls, entity_type_codes, position_code, lang='english'):
+        designations = dict.fromkeys(map(lambda c: c.value, entity_type_codes), [])
+
+        for code in entity_type_codes:
+            code_str = code.value
+            designations[code_str] = cls.get_entity_type_designation(code, position_code, lang)
+
+        return designations
+
+    '''
+    TODO: All these following methods could be refactored into a single method, really...
+    '''
+
+    # TODO: Need to move to requests/names model
+    @classmethod
+    def build_query_distinctive(cls, dist_all_permutations, length):
+        query = "select n.name " + \
+                "from requests r, names n " + \
+                "where r.id = n.nr_id and " + \
+                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
+                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
+                "n.state IN ('APPROVED','CONDITION') and " + \
+                "lower(n.name) similar to " + "'"
+        st = ''
+        for s in range(length):
+            st += '%s '
+
+        permutations = "|".join(st % tup for tup in dist_all_permutations)
+        query += "(" + permutations + ")%%" + "'"
+
+        return query
+
+    # TODO: Need to move to requests/names model
+    @classmethod
+    def build_query_descriptive(cls, desc_substitution_list, query):
+        for element in desc_substitution_list:
+            query += " and lower(n.name) similar to "
+            substitutions = ' ?| '.join(map(str, element))
+            query += "'" + "%%( " + substitutions + " ?)%%" + "'"
+
+        return query
+
+    # TODO: Need to move to requests/names model
+    @classmethod
+    def get_conflicts(cls, query):
+        matches = pd.read_sql_query(query, con=db.engine)
+        return matches
+
 
 class SynonymSchema(ma.ModelSchema):
     class Meta:

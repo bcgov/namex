@@ -51,6 +51,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         if self.get_list_dist() == self.get_list_desc():
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.get_list_name())
+
         else:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.get_list_name(), self.get_list_dist(), self.get_list_desc())
 
