@@ -123,14 +123,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             # Inject distinctive section in query
             for element in dist_all_permutations:
-                query = self.get_synonym_service().get_query_distinctive(element, len(element[0]))
+                query = syn_svc.get_query_distinctive(element, len(element[0]))
 
             desc_synonym_dict = self.get_synonym_service().get_all_substitutions_synonyms(w_desc, False)
             desc_synonym_list = desc_synonym_dict.values()
             # Inject descriptive section into query, execute and add matches to list
             if desc_synonym_list:
-                query = self.get_synonym_service().get_query_descriptive(desc_synonym_list, query)
-                matches = self.get_synonym_service().get_conflicts(query)
+                query = syn_svc.get_query_descriptive(desc_synonym_list, query)
+                matches = syn_svc.get_conflicts(query)
                 matches_response.extend([val.pop() for i, val in enumerate(matches.values.tolist())])
                 matches_response = list(dict.fromkeys(matches_response))
                 dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
