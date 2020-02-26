@@ -144,16 +144,16 @@ class NameAnalysis(Resource):
         'name': 'A company / organization name string',
         'location': 'A location code [ BC | CA | INTL ]',
         'entity_type': 'An entity type code [ CR, UL, CC ]',
-        # 'request_action': 'A request action code'  # TODO: Use request_action not request_type, this needs to be updated on the front end!!!
-        'request_type': 'A request action code'  # TODO: Leave this as request_type for now...
+        'request_action': 'A request action code'  # TODO: Use request_action not request_type, this needs to be updated on the front end!!!
+        # 'request_type': 'A request action code'  # TODO: Leave this as request_type for now...
     })
     def get():
         name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None
         location = unquote_plus(request.args.get('location').strip()) if request.args.get('location') else None
         entity_type = unquote_plus(request.args.get('entity_type').strip()) if request.args.get('entity_type') else None
         # TODO: Let's not call var request_type because it's ambiguous - change to request_action on frontend too
-        #request_action = unquote_plus(request.args.get('request_action').strip()) if request.args.get('request_action') else None  # TODO: Use request_action not request_type, this needs to be updated on the front end!!!
-        request_action = unquote_plus(request.args.get('request_type').strip()) if request.args.get('request_type') else None  # TODO: Leave this as request_type for now...
+        request_action = unquote_plus(request.args.get('request_action').strip()) if request.args.get('request_action') else None  # TODO: Use request_action not request_type, this needs to be updated on the front end!!!
+        # request_action = unquote_plus(request.args.get('request_type').strip()) if request.args.get('request_type') else None  # TODO: Leave this as request_type for now...
 
         # Do our service stuff
         # Instantiate an appropriate service and register a builder for that service (subclasses of NameAnalysisDirector)
