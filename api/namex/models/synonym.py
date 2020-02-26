@@ -47,17 +47,6 @@ class Synonym(db.Model):
 
         return None
 
-    # TODO: Does this belong here?
-    @classmethod
-    def get_entity_type_by_value(cls, entity_type_dicts, designation):
-        entity_list = list()
-        entity__designation_end_list = entity_type_dicts.items()
-        print(entity__designation_end_list)
-        for entity_designation in entity__designation_end_list:
-            if any(designation in value for value in entity_designation[1]):
-                entity_list.append(entity_designation[0])
-        return entity_list
-
     '''
     Find a term by column.
     '''
