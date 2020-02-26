@@ -189,8 +189,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place,
-                          all_designations_user):
+    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
 
