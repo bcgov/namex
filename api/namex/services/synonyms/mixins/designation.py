@@ -46,7 +46,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
         for designation_any in all_designation_any_end_list:
             entity_type_any_designation_name.extend(
-                self.get_model().get_entity_type_by_value(entity_any_designation_dict, designation_any))
+                self.get_entity_type_by_value(entity_any_designation_dict, designation_any))
 
         all_entity_types = [item for item, count in collections.Counter(entity_type_any_designation_name).items() if
                             count > 1]
@@ -137,3 +137,12 @@ class SynonymDesignationMixin(SynonymServiceMixin):
             entity_any_designation_dict[entity_type.value] = self.get_designations(entity_type, DesignationPositionCodes.ANY, 'english')
 
         return entity_any_designation_dict
+
+    def get_entity_type_by_value(self, entity_type_dicts, designation):
+        entity_list = list()
+        entity__designation_end_list = entity_type_dicts.items()
+        print(entity__designation_end_list)
+        for entity_designation in entity__designation_end_list:
+            if any(designation in value for value in entity_designation[1]):
+                entity_list.append(entity_designation[0])
+        return entity_list
