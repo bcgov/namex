@@ -4,12 +4,10 @@ from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
 # Import DTOs
 from .response_objects.name_analysis_issue import NameAnalysisIssue
-from .response_objects.name_analysis_response import NameAnalysisResponse
 from .response_objects.name_action import NameAction, NameActions, WordPositions
 from .response_objects.consenting_body import ConsentingBody
 from .response_objects.conflict import Conflict
 from .response_objects.setup import Setup
-from .response_objects.descriptive_word import DescriptiveWord
 
 
 class AnalysisResponseIssue:

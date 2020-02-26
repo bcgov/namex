@@ -1,14 +1,6 @@
 # from namex.exceptions import BusinessException
 from namex.models import db, WordClassification, WordClassificationSchema
 
-from sqlalchemy import create_engine
-
-POSTGRES_ADDRESS = 'localhost'
-POSTGRES_PORT = '5432'
-POSTGRES_USERNAME = 'postgres'
-POSTGRES_PASSWORD = 'BVict31C'
-POSTGRES_DBNAME = 'namex-auto-analyse'
-
 
 class WordClassificationService:
     def __init__(self):

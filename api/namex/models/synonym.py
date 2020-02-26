@@ -4,11 +4,6 @@ from . import db, ma
 import pandas as pd
 from sqlalchemy import and_
 
-from namex.constants import AllEntityTypes
-
-from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
-from ..services.name_request.auto_analyse import DataFrameFields
-
 from namex.criteria.synonym.query_criteria import SynonymQueryCriteria
 
 """

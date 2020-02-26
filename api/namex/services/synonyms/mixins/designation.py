@@ -1,9 +1,10 @@
 import re
 import collections
 
-from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes, \
+from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
-from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
+
+from namex.services.name_request.auto_analyse.name_analysis_utils import get_flat_list
 
 from . import SynonymServiceMixin
 from .. import DesignationPositionCodes
