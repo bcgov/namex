@@ -12,10 +12,13 @@ from .. import DesignationPositionCodes
 
 class SynonymDesignationMixin(SynonymServiceMixin):
     def get_designated_end_all_words(self):
-        return self.get_designations(None, DesignationPositionCodes.END, 'english')
+        all_entity_types = AllEntityTypes.ALL.value
+        end_words = self.get_designations(None, DesignationPositionCodes.END, 'english')
+        return end_words.get(AllEntityTypes.ALL.value)
 
     def get_designated_any_all_words(self):
-        return self.get_designations(None, DesignationPositionCodes.ANY, 'english')
+        any_words = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
+        return any_words.get(AllEntityTypes.ALL.value)
 
     def get_misplaced_end_designations(self, name, designation_end_entity_type):
         # en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
