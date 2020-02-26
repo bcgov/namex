@@ -14,8 +14,8 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 from namex.services.synonyms.synonym \
     import SynonymService
 
-from namex.services.name_processing.name_processing \
-    import NameProcessingService
+# from namex.services.name_processing.name_processing \
+#    import NameProcessingService
 
 from namex.services.word_classification.word_classification \
     import WordClassificationService

@@ -1,8 +1,5 @@
-import itertools
 import re
-import pandas as pd
 import collections
-from sqlalchemy import create_engine
 from toolz import unique
 
 from namex.services.name_request.auto_analyse import DataFrameFields

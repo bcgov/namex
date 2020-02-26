@@ -1,8 +1,4 @@
-import jsonpickle
-import json
 from enum import Enum
-
-# Define service variables
 
 # Limit number of words to analyse
 MAX_LIMIT = 4
