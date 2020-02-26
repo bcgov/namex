@@ -62,11 +62,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(list_desc) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-            result.values = {
-                'list_name': list_name or [],
-                'list_dist': list_dist or []
-            }
+        # TODO: We need another check here but we also need unclassified words check before we run check name is well formed
+        elif len(list_none) > 0:
+            unclassified_words_list_response = []
+            for idx, token in enumerate(list_name):
+                if any(token in word for word in list_none):
+                    unclassified_words_list_response.append({idx: token})
 
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+            result.values = unclassified_words_list_response
         elif len(list_name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
@@ -216,10 +221,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if words_consent_list_response:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
-            result.values = {
-                'list_name': list_name,
-                'list_consent': words_consent_list_response
-            }
+            result.values = words_consent_list_response
 
         return result
 
