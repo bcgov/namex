@@ -12,9 +12,10 @@ from sqlalchemy.orm import backref
 
 import re
 import pandas as pd
-from datetime import datetime, date
-from sqlalchemy import func, create_engine
+from datetime import datetime
+from sqlalchemy import func
 from sqlalchemy.orm import backref
+
 
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
