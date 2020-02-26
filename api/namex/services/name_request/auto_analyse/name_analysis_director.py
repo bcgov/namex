@@ -6,9 +6,13 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
+from namex.constants import \
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
+
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
+from namex.services.synonyms import DesignationPositionCodes
 from namex.services.synonyms.synonym \
     import SynonymService
 
