@@ -14,8 +14,6 @@ from namex.constants import \
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
-from . import DataFrameFields
-
 from namex.services.synonyms import DesignationPositionCodes
 from namex.services.synonyms.synonym \
     import SynonymService
