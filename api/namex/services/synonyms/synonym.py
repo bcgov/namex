@@ -140,6 +140,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
+    # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
     '''
     Rules for Regex Transform (from bottom to top):
     1.- Replace with non-space 
