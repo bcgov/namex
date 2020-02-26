@@ -99,8 +99,12 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         lang = lang if isinstance(lang, str) else 'english'
         model = self.get_model()
 
-        filters = [
-            func.lower(model.category).op('~')(r'\y{}[-_]+valid\y'.format(entity_type_code.value.lower())),
+        filters = []
+
+        if entity_type_code is not None:
+            filters += func.lower(model.category).op('~')(r'\y{}[-_]+valid\y'.format(entity_type_code.value.lower()))
+
+        filters += [
             func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]+' + position_code.value.lower())),
             func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower()))
         ]
