@@ -103,8 +103,12 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         if entity_type_code is not None:
             filters += func.lower(model.category).op('~')(r'\y{}[-_]+valid\y'.format(entity_type_code.value.lower()))
 
+        if position_code is not None:
+            filters += func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]+' + position_code.value.lower()))
+        else:
+            filters += func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]'))
+
         filters += [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]+' + position_code.value.lower())),
             func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower()))
         ]
 
@@ -112,7 +116,6 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened = self._flatten_synonyms_text(results)
         return flattened
 
-    # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
     '''
     Rules for Regex Transform (from bottom to top):
     1.- Replace with non-space 
