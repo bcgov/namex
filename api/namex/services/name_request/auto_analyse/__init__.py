@@ -48,7 +48,7 @@ class AnalysisResultCodes(str, Enum):
     ADD_DISTINCTIVE_WORD = 'add_distinctive'  # Well formed
     ADD_DESCRIPTIVE_WORD = 'add_descriptive'  # Well formed
     TOO_MANY_WORDS = 'excess_words'  # Well formed
-    REVERSE_ORDER = 'reverse_order'  # Well formed
+    INCORRECT_CATEGORY = 'incorrect_category'  # Well formed
     # Stop if error with Well Formed
     CONTAINS_UNCLASSIFIABLE_WORD = 'unclassified_word'  # To examiner
     # Stop if error

@@ -176,3 +176,11 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     @abc.abstractmethod
     def check_word_special_use(self, list_name, name):
         return ProcedureResult(is_valid=True)
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+    @abc.abstractmethod
+    def handle_unclassified_words(self, list_dist, list_desc, list_none, list_name):
+        return ProcedureResult(is_valid=True)

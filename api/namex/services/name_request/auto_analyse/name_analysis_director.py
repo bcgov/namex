@@ -217,7 +217,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
 
         self._stop_words = self._synonym_service.get_stop_words()
         self._designated_end_words = self._synonym_service.get_designated_end_all_words()
-        self._designated_any_words = self._synonym_service.get_designated_end_all_words()
+        self._designated_any_words = self._synonym_service.get_designated_any_all_words()
 
         self.configure_builder()
 
@@ -250,11 +250,17 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
         builder = self._builder
 
         results = []
+        if self.get_list_none():
+            self._list_dist_words, self._list_desc_words = builder.handle_unclassified_words(
+                self.get_list_dist(),
+                self.get_list_desc(),
+                self.get_list_none(),
+                self.get_list_name()
+            )
 
         check_name_is_well_formed = builder.check_name_is_well_formed(
             self.get_list_dist(),
             self.get_list_desc(),
-            self.get_list_none(),
             self.get_list_name()
         )
 

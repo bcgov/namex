@@ -1,12 +1,9 @@
 import itertools
-import pandas as pd
-import collections
-from sqlalchemy import create_engine
 
-from ..auto_analyse.abstract_name_analysis_builder \
-    import AbstractNameAnalysisBuilder, ProcedureResult
+from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT
+from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
 
 '''
 Sample builder
@@ -21,54 +18,50 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name):
+    def check_name_is_well_formed(self, list_dist, list_desc, list_name):
         result = ProcedureResult()
         result.is_valid = True
 
-        list_all = list_dist + list_desc
+        _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
 
-        # Containing unclassifiable word should be replaced by descriptive and distinctive
-
-        if len(list_none) > 0:
-            unclassified_words_list_response = []
-            for idx, token in enumerate(list_name):
-                if any(token in word for word in list_none):
-                    unclassified_words_list_response.append({idx: token})
-
+        if list_incorrect_classification:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.values = unclassified_words_list_response
-        #elif not list_all == list_name:
-        #    reverse_order_list = []
-        #    for idx, (token_dist_desc, token_name) in enumerate(zip(list_all, list_name)):
-        #        if token_dist_desc != token_name:
-        #            reverse_order_list.append({idx: token_name})
-
-        #    result.is_valid = False
-        #    result.result_code = AnalysisResultCodes.REVERSE_ORDER
-        #    result.values = reverse_order_list
-
-        elif len(list_dist) < 1:
+            result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
+            result.values = list_incorrect_classification
+        if len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
         elif len(list_desc) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-        # TODO: We need another check here but we also need unclassified words check before we run check name is well formed
-        elif len(list_none) > 0:
-            unclassified_words_list_response = []
-            for idx, token in enumerate(list_name):
-                if any(token in word for word in list_none):
-                    unclassified_words_list_response.append({idx: token})
-
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.values = unclassified_words_list_response
         elif len(list_name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
 
         return result
+
+    '''
+    Add unclassified words to distinctive and descriptive list
+    Override the abstract / base class method
+    @return list_dist, list_desc
+    '''
+    def handle_unclassified_words(self, list_dist, list_desc, list_none, list_name):
+        idx_dist = -1
+        idx_desc = -1
+        for word in list_name:
+            if word in list_none:
+                idx_dist += 1
+                idx_desc += 1
+                list_dist.insert(idx_dist, word)
+                list_desc.insert(idx_desc, word)
+            else:
+                try:
+                    idx_dist = list_dist.index(word)
+                    idx_desc = list_desc.index(word)
+                except ValueError:
+                    pass
+
+        return list_dist, list_desc
 
     '''
     Override the abstract / base class method
