@@ -1,5 +1,3 @@
-import jsonpickle
-import json
 from enum import Enum
 
 # Limit number of words to analyse
