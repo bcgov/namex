@@ -219,7 +219,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
 
         self._stop_words = self._synonym_service.get_stop_words()
         self._designated_end_words = self._synonym_service.get_designated_end_all_words()
-        self._designated_any_words = self._synonym_service.get_designated_end_all_words()
+        self._designated_any_words = self._synonym_service.get_designated_any_all_words()
 
         self.configure_builder()
 
