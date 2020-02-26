@@ -136,30 +136,6 @@ class Synonym(db.Model):
                 '!~* ' + "'" + '\w*(sub|stop)\s*$' + "'" + ' AND ' + 's.synonyms_text ~ ' + "'" + '\y' + word.lower() + '\y' + "';")
 
     @classmethod
-    def get_stop_word_list(cls):
-        return cls.query_category('~ ' + "'" + '^stop[_ -]+word[s]?' + "'")
-
-    @classmethod
-    def get_prefix_list(cls):
-        return cls.query_category('~ ' + "'" + '^prefix(es)?' + "'")
-
-    @classmethod
-    def get_en_designation_any_all_list(cls):
-        return cls.query_category('~ ' + "'" + '^(english[_ -]+)?designation[s]?[_-]any' + "'")
-
-    @classmethod
-    def get_en_designation_end_all_list(cls):
-        return cls.query_category('~ ' + "'" + '^english[_ -]+designation[s]?[_-]+end' + "'")
-
-    @classmethod
-    def get_fr_designation_end_list(cls):
-        return cls.query_category("'" + '(?=french[/_ -]+designation[s]?[/_-]+end)' + "'")
-
-    @classmethod
-    def get_stand_alone_list(cls):
-        return cls.query_category('~ ' + "'" + '(?=stand[/_ -]?alone)' + "'")
-
-    @classmethod
     def query_category(cls, category_query):
         if not category_query:
             raise ValueError('Invalid category provided')

@@ -50,6 +50,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         if self.get_list_dist() == self.get_list_desc():
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.get_list_name())
+
         else:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.get_list_name(), self.get_list_dist(), self.get_list_desc())
 
@@ -68,24 +69,44 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # TODO: Use the list_name array, don't use a string in the method!
         # check_designation_mismatch = builder.check_designation(self.get_list_name(), self.get_entity_type())  # This is correct
         self.set_designations_by_entity_type_user(
-            self.get_entity_type())  # Set _designation_any_list_user and _designation_end_list_user based on entity type typed by user
+            self.get_entity_type()
+        )  # Set _designation_any_list_user and _designation_end_list_user based on entity type typed by user
+
         self.set_designations_by_input_name(
-            self.get_preprocessed_name())  # Set _designation_any_list and _designation_end_list based on company name typed by user
+            self.get_preprocessed_name()
+        )  # Set _designation_any_list and _designation_end_list based on company name typed by user
+
         self.set_wrong_designation_by_input_name(
-            self.get_preprocessed_name())  # Set _wrong_designation_place based on company name typed by user
-        self.set_entity_type_any_designation(self._entity_any_designation_dict,
-                                             self._designation_any_list)  # Set _entity_type_any_designation for designations based on
-        # company name typed by user
-        self.set_entity_type_end_designation(self._entity_end_designation_dict,
-                                             self._designation_end_list)  # Set _entity_type_end_designation for designations based on
-        # company name typed by user
+            self.get_preprocessed_name()
+        )  # Set _wrong_designation_place based on company name typed by user
+
+        # TODO: Fix this it's broken!
+        '''
+        self.set_entity_type_any_designation(
+            self._entity_any_designation_dict,
+            self._designation_any_list
+        )  # Set _entity_type_any_designation for designations based on company name typed by user
+        '''
+
+        # TODO: Fix this it's broken!
+        '''
+        self.set_entity_type_end_designation(
+            self._entity_end_designation_dict,
+            self._designation_end_list
+        )  # Set _entity_type_end_designation for designations based on company name typed by user
+        '''
+
         self.set_all_designations_user()  # Set all designations based on entity type typed by user
         self.set_all_designations()  # Set all designations based on company name typed by user
-        check_designation_mismatch = builder.check_designation(self.get_list_name(),
-                                                               self.get_entity_type(),
-                                                               self.get_all_designations(),
-                                                               self.get_wrong_designation_by_input_name(),
-                                                               self.get_all_designations_user())
+
+        check_designation_mismatch = builder.check_designation(
+            self.get_list_name(),
+            self.get_entity_type(),
+            self.get_all_designations(),
+            self.get_wrong_designation_by_input_name(),
+            self.get_all_designations_user()
+        )
+
         check_special_words = builder.check_word_special_use(self.get_list_name(), self.get_name())
 
         if not check_designation_mismatch.is_valid:

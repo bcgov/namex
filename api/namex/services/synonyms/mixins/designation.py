@@ -10,19 +10,6 @@ from .. import DesignationPositionCodes
 
 
 class SynonymDesignationMixin(SynonymServiceMixin):
-    def get_designated_start_words(self):
-        # start_words = self._model.get_entity_type_designations()
-        start_words = []
-        return start_words
-
-    def get_designated_end_words(self):
-        end_words = self._model.get_entity_type_designations(ENTITY_TYPE_END_DESIGNATIONS, DesignationPositionCodes.END)
-        return end_words
-
-    def get_designated_any_words(self):
-        any_words = self._model.get_entity_type_designations(ENTITY_TYPE_ANY_DESIGNATIONS, DesignationPositionCodes.ANY)
-        return any_words
-
     def get_designated_end_all_words(self):
         all_entity_types = AllEntityTypes.ALL.value
         end_words = self._model.get_entity_type_designations([AllEntityTypes.ALL], DesignationPositionCodes.END)
@@ -33,7 +20,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         return any_words.get(AllEntityTypes.ALL.value)
 
     def get_wrong_place_end_designations(self, name):
-        en_designation_end_all_list = self.get_model().get_en_designation_end_all_list()
+        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
         designation_any_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
         designation_any_regex = r'\\y' + designation_any_rgx + '(?=\s)'
 
@@ -72,7 +59,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         return entity_type_any_designation_name
 
     def get_designation_end_in_name(self, name):
-        en_designation_end_all_list = self.get_model().get_en_designation_end_all_list()
+        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
         designation_end_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
         designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
 
@@ -90,7 +77,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         return designation_end_list
 
     def get_designation_any_in_name(self, name):
-        en_designation_any_all_list = self.get_model().get_en_designation_any_all_list()
+        en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
         designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
         designation_any_regex = r'\\y' + designation_any_rgx + '(?=\s)'
 
@@ -100,7 +87,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         return found_designation_any
 
     def get_wrong_place_any_designations(self, name):
-        en_designation_any_all_list = self.get_model().get_en_designation_any_all_list()
+        en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
 
         designation_end_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
         designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
