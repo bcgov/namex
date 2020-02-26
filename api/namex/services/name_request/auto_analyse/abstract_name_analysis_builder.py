@@ -122,7 +122,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     @return ProcedureResult
     '''
     @abc.abstractmethod
-    def check_name_is_well_formed(self, list_dist, list_desc, list_none, company_name):
+    def check_name_is_well_formed(self, list_dist, list_desc, list_name):
         return ProcedureResult(is_valid=True)
 
     '''
@@ -130,7 +130,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     @return ProcedureResult
     '''
     @abc.abstractmethod
-    def check_words_to_avoid(self):
+    def check_words_to_avoid(self, list_name, name):
         return ProcedureResult(is_valid=True)
 
     '''
@@ -158,7 +158,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     @return ProcedureResult
     '''
     @abc.abstractmethod
-    def check_words_requiring_consent(self):
+    def check_words_requiring_consent(self, list_name, name):
         return ProcedureResult(is_valid=True)
 
     '''
@@ -166,7 +166,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     @return ProcedureResult
     '''
     @abc.abstractmethod
-    def check_designation(self):
+    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, all_designations_user):
         return ProcedureResult(is_valid=True)
 
     '''
