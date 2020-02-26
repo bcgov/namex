@@ -1,7 +1,4 @@
 import itertools
-import pandas as pd
-import collections
-from sqlalchemy import create_engine
 
 from . import porter
 from ..auto_analyse.abstract_name_analysis_builder \
@@ -39,16 +36,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(list_desc) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-        # TODO: We need another check here but we also need unclassified words check before we run check name is well formed
-        elif len(list_none) > 0:
-            unclassified_words_list_response = []
-            for idx, token in enumerate(list_name):
-                if any(token in word for word in list_none):
-                    unclassified_words_list_response.append({idx: token})
-
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.values = unclassified_words_list_response
         elif len(list_name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
