@@ -3,11 +3,12 @@ Virtual word classification classifies all words in a name approved by an examin
 """
 
 from . import db, ma
-import re
+
 import pandas as pd
-from datetime import datetime, date
-from sqlalchemy import func, create_engine
+from datetime import datetime
+from sqlalchemy import func
 from sqlalchemy.orm import backref
+
 
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'

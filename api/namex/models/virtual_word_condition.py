@@ -5,7 +5,7 @@ Word classification classifies all words in a name approved by an examiner to be
 from . import db, ma
 
 import pandas as pd
-from sqlalchemy import create_engine, Column
+from sqlalchemy import Column
 
 from namex.services.name_request.auto_analyse import DataFrameFields
 from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
