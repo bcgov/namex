@@ -18,6 +18,9 @@ from datetime import datetime
 from enum import Enum
 import re
 
+# TODO: Remove this when we update get_conflicts
+import pandas as pd
+
 
 # create sequence if not exists nr_seq;
 # noinspection PyPep8Naming
@@ -302,170 +305,52 @@ class Request(db.Model):
         return True
 
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+    #  TODO: Use the models... get rid of the connection string and raw query!
     @classmethod
-    def get_general_query(cls):
-        filters = [
-            Request.id == Name.nrId,
-            Request.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
-            Request.requestTypeCd.in_(
-                ['PA', 'CR', 'CP', 'FI', 'SO', 'UL', 'CUL', 'CCR', 'CFI', 'CCP', 'CSO', 'CCC', 'CC']),
-            Name.state.in_(['APPROVED', 'CONDITION'])
-        ]
-
-        criteria = RequestConditionCriteria(
-            fields=[Name.name],
-            filters=filters
-        )
-
-        return criteria
+    def get_conflicts(cls, query):
+        matches = pd.read_sql_query(query, con=db.engine)
+        return matches
 
     @classmethod
-    def get_query_exact_match(cls, criteria, prep_name):
-        criteria.filters.append(func.lower(Name.name) == func.lower(prep_name))
-
-        results = Request.find_by_criteria(criteria)
-        flattened = [item.strip() for sublist in results for item in sublist]
-
-        return flattened
+    def get_query_distinctive(cls, dist_all_permutations, length):
+        query = cls.build_query_distinctive(dist_all_permutations, length)
+        return query
 
     @classmethod
-    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
-        if not distinctive:
-            # Reset filter index 5 which contains the descriptive in the previous round.
-            # The filter index 4 contains distinctive value
-            if len(criteria.filters) > 5:
-                criteria.filters.pop()
-            substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
-            criteria.filters.append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
-        else:
-            substitutions = '|'.join(map(str, descriptive_element))
-            criteria.filters.append(func.lower(Name.name).op('~')(r'^({})\y '.format(substitutions)))
-            return criteria
-
-        results = Request.find_by_criteria(criteria)
-        flattened = [item.strip() for sublist in results for item in sublist]
-
-        return flattened
+    def get_query_descriptive(cls, desc_substitution_list,query):
+        query = cls.build_query_descriptive(desc_substitution_list, query)
+        return query
 
     @classmethod
-    def find_by_criteria(cls, criteria=None):
-        RequestConditionCriteria.is_valid_criteria(criteria)
+    def build_query_distinctive(cls, dist_all_permutations, length):
+        query = "select n.name " + \
+                "from requests r, names n " + \
+                "where r.id = n.nr_id and " + \
+                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
+                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
+                "n.state IN ('APPROVED','CONDITION') and " + \
+                "lower(n.name) similar to " + "'"
+        st = ''
+        for s in range(length):
+            st += '%s '
 
-        query = cls.query.with_entities(*criteria.fields) \
-            .filter(and_(*criteria.filters))
+        permutations = "|".join(st % tup for tup in dist_all_permutations)
+        query += "(" + permutations + ")%%" + "'"
 
-        # print(query.statement)
-        return query.all()
+        return query
 
-#set the source from NRO, Societis Online, Name Request
-@event.listens_for(Request, 'before_insert')
-@event.listens_for(Request, 'before_update')
-def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the source of the NR."""
-    request = target
-    soc_list = []
-    soc_list = ['SO','ASO','CSO','RSO','CTSO','XSO','XCSO','XRSO','XASO','XCASO','CSSO']
+    # TODO: Replace this method... use the models!
+    @classmethod
+    def build_query_descriptive(cls, desc_substitution_list, query):
+        for element in desc_substitution_list:
+            query += " and lower(n.name) similar to "
+            substitutions = ' ?| '.join(map(str, element))
+            query += "'" + "%%( " + substitutions + " ?)%%" + "'"
 
-    # comes from NRO/Societies Online
-    if(re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd not in soc_list):
-        request._source = Request.Source.NRO.value  # pylint: disable=protected-access
-    else:
-        if (re.match(r"NR [A-Z]+", request.nrNum)):
-             request._source = Request.Source.NAMEREQUEST.value   # pylint: disable=protected-access
-        else:
-            if(request.requestTypeCd in soc_list ):
-             request._source = Request.Source.SO.value   # pylint: disable=protected-access
+        return query
 
-@event.listens_for(Request, 'before_insert')
-@event.listens_for(Request, 'before_update')
-def update_request_action_entity_type(mapper, connection, target): # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
-    # needed to break apart  request_type
-    request = target
+    # END NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
 
-    if(re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None ):
-        #todo: handle assumed name as it is a name type and not currently a request action?
-        # map the legacy request_type to the new Entity_type and Request_action
-        request_type_mapping = [
-            ('CR', Request.EntityType.BCORP.value, Request.RequestAction.NEW_AML.value),
-            ('CCR', Request.EntityType.BCORP.value, Request.RequestAction.CHG.value),
-            ('CT', Request.EntityType.BCORP.value, Request.RequestAction.MVE.value),
-            ('RCR', Request.EntityType.BCORP.value, Request.RequestAction.REST.value),
-            ('XCR', Request.EntityType.XCORP.value, Request.RequestAction.NEW.value),
-            ('XCCR', Request.EntityType.XCORP.value, Request.RequestAction.CHG.value),
-            ('XRCR', Request.EntityType.XCORP.value, Request.RequestAction.REST.value),
-            ('AS', Request.EntityType.XCORP.value, Request.RequestAction.AS.value),
-            ('LC', Request.EntityType.XLLC.value, Request.RequestAction.NEW.value),
-            ('CLC', Request.EntityType.XLLC.value, Request.RequestAction.CHG.value),
-            ('RLC', Request.EntityType.XLLC.value, Request.RequestAction.REST.value),
-            ('AL', Request.EntityType.XLLC.value, Request.RequestAction.AS.value),
-            ('FR', Request.EntityType.FIRM.value, Request.RequestAction.NEW.value),
-            ('CFR', Request.EntityType.FIRM.value, Request.RequestAction.CHG.value),
-            ('LL', Request.EntityType.LLP.value, Request.RequestAction.NEW.value),
-            ('CLL', Request.EntityType.LLP.value, Request.RequestAction.CHG.value),
-            ('XLL', Request.EntityType.XLLP.value, Request.RequestAction.NEW.value),
-            ('XCLL', Request.EntityType.XLLP.value, Request.RequestAction.CHG.value),
-            ('LP', Request.EntityType.LP.value, Request.RequestAction.NEW.value),
-            ('CLP', Request.EntityType.LP.value, Request.RequestAction.CHG.value),
-            ('XLP', Request.EntityType.XLP.value, Request.RequestAction.NEW.value),
-            ('CXLP', Request.EntityType.XLP.value, Request.RequestAction.CHG.value),
-            ('SO', Request.EntityType.SO.value, Request.RequestAction.NEW.value),
-            ('ASO', Request.EntityType.SO.value, Request.RequestAction.AML.value),
-            ('CSO', Request.EntityType.SO.value, Request.RequestAction.CHG.value),
-            ('RSO', Request.EntityType.SO.value, Request.RequestAction.REST.value),
-            ('CTSO', Request.EntityType.SO.value, Request.RequestAction.MVE.value),
-            ('CSSO', Request.EntityType.SO.value, Request.RequestAction.CNV.value),
-            ('XSO', Request.EntityType.XSO.value, Request.RequestAction.NEW.value),
-            ('XCSO', Request.EntityType.XSO.value, Request.RequestAction.CHG.value),
-            ('XRSO', Request.EntityType.XSO.value, Request.RequestAction.REST.value),
-            ('XASO', Request.EntityType.XSO.value, Request.RequestAction.AS.value),
-            ('XCASO', Request.EntityType.XSO.value, Request.RequestAction.ACHG.value),
-            ('CP', Request.EntityType.CP.value, Request.RequestAction.NEW_AML.value),
-            ('CCP', Request.EntityType.CP.value, Request.RequestAction.CHG.value),
-            ('CTC', Request.EntityType.CP.value, Request.RequestAction.MVE.value),
-            ('RCP', Request.EntityType.CP.value, Request.RequestAction.REST.value),
-            ('XCP', Request.EntityType.XCP.value, Request.RequestAction.NEW.value),
-            ('XCCP', Request.EntityType.XCP.value, Request.RequestAction.CHG.value),
-            ('XRCP', Request.EntityType.XCP.value, Request.RequestAction.REST.value),
-            ('CC', Request.EntityType.CCC.value, Request.RequestAction.NEW_AML.value),
-            ('CCV', Request.EntityType.CCC.value, Request.RequestAction.CNV.value),
-            ('CCC', Request.EntityType.CCC.value, Request.RequestAction.CHG.value),
-            ('CCCT', Request.EntityType.CCC.value, Request.RequestAction.MVE.value),
-            ('RCC', Request.EntityType.CCC.value, Request.RequestAction.REST.value),
-            ('UL', Request.EntityType.ULC.value, Request.RequestAction.NEW.value),
-            ('UC', Request.EntityType.ULC.value, Request.RequestAction.CNV.value),
-            ('CUL', Request.EntityType.ULC.value, Request.RequestAction.CHG.value),
-            ('ULCT', Request.EntityType.ULC.value, Request.RequestAction.MVE.value),
-            ('RUL', Request.EntityType.ULC.value, Request.RequestAction.REST.value),
-            ('UA', Request.EntityType.XULC.value, Request.RequestAction.AS.value),
-            ('XUL', Request.EntityType.XULC.value, Request.RequestAction.NEW.value),
-            ('XCUL', Request.EntityType.XULC.value, Request.RequestAction.CHG.value),
-            ('XRUL', Request.EntityType.XULC.value, Request.RequestAction.REST.value),
-            ('FI', Request.EntityType.FI.value, Request.RequestAction.NEW.value),
-            ('CFI', Request.EntityType.FI.value, Request.RequestAction.CHG.value),
-            ('RFI', Request.EntityType.FI.value, Request.RequestAction.REST.value),
-            ('PA', Request.EntityType.PRIV.value, Request.RequestAction.NEW.value),
-            ('PAR', Request.EntityType.PAR.value, Request.RequestAction.NEW.value)
-         ]
-
-        new_value = request.requestTypeCd
-        output = [item for item in request_type_mapping
-                  if item[0] == new_value]
-
-        request._entity_type_cd = output[0][1]
-        request._request_action_cd = output[0][2]
-
-@event.listens_for(Request, 'before_update')
-def add_to_word_class_queue(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the cleaned_name when an examiner approves a BC corp class request_type when it is approved/conditionally approved in Namex"""
-    # needed to reduce query time for conflict matching in Name Request
-    request = target
-    # TODO: put the name on the word classification queue to be picked up by the word classification service and update wod classification table
-    # TODO: may have to review which entity types are included
-    #if(request.stateCd  == 'APPROVED' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' :
-        #add it to the queue to add or update words
-    #if(request_stateCd == 'HOLD' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' and request.hasBeenReset=True):
-        #add to the queue to decrement or remove words from word classification
 
 class RequestsSchema(ma.ModelSchema):
     class Meta:
