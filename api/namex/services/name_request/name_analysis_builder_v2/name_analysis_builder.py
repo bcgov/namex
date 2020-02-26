@@ -8,6 +8,8 @@ from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBu
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
 
+from namex.models.request import Request
+
 '''
 Sample builder
 # TODO: What convention should we use? Nice to use _v<BuilderVersion> if it doesn't break PEP8
