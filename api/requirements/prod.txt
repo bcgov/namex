@@ -18,4 +18,3 @@ pronouncing
 requests
 httpx
 toolz
-nltk
