@@ -14,23 +14,15 @@ class SynonymModelMixin(SynonymServiceMixin):
         query = self._model.build_query_descriptive(desc_substitution_list, query)
         return query
 
-    def get_synonym_list(self, word):
-        synonym_list = self._model.get_synonym_list(word)
-        return synonym_list
-
-    def get_substitution_list(self, word):
-        substitution_list = self._model.get_substitution_list(word)
-        return substitution_list
-
     def get_all_substitutions_synonyms(self, list_d, distinctive=True):
         aux_list = []
         dict_subs = {}
 
         for word in list_d:
             if distinctive:
-                aux_list = self.get_substitution_list(word)
+                aux_list = self.get_substitutions(word)
             else:
-                aux_list = self.get_synonym_list(word)
+                aux_list = self.get_synonyms(word)
             if aux_list:
                 dict_subs.update({word: aux_list})
             else:
