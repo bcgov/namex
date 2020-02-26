@@ -1,13 +1,9 @@
 import itertools
 
-from . import porter
-from ..auto_analyse.abstract_name_analysis_builder \
-    import AbstractNameAnalysisBuilder, ProcedureResult
+from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
-from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
+from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT
 from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
-
-from namex.models.request import Request
 
 '''
 Sample builder
@@ -22,34 +18,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name):
+    def check_name_is_well_formed(self, list_dist, list_desc, list_name):
         result = ProcedureResult()
         result.is_valid = True
 
         _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
 
-        if len(list_none) > 0:
-            unclassified_words_list_response = []
-            for idx, token in enumerate(list_name):
-                if any(token in word for word in list_none):
-                    unclassified_words_list_response.append(token)
-
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            result.values = {
-                'list_name': list_name or [],
-                'list_none': unclassified_words_list_response
-            }
-
         if list_incorrect_classification:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
-            result.values = {
-                'list_name': list_name or [],
-                'list_cat': list_incorrect_classification
-            }
-
-        elif len(list_dist) < 1:
+            result.values = list_incorrect_classification
+        if len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
             result.values = list_name
@@ -57,11 +36,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(list_desc) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
-            result.values = {
-                'list_name': list_name or [],
-                'list_dist': list_dist or []
-            }
-
         elif len(list_name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
@@ -73,7 +47,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return list_dist, list_desc
     '''
-
     def handle_unclassified_words(self, list_dist, list_desc, list_none, list_name):
         idx_dist = -1
         idx_desc = -1

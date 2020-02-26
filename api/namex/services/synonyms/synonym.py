@@ -114,6 +114,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened = self._flatten_synonyms_text(results)
         return flattened
 
+    # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
     '''
     Rules for Regex Transform (from bottom to top):
     1.- Replace with non-space 
@@ -147,7 +148,6 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     	 Set single letters together (initials):(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     11.- Remove extra spaces to have just one space: \s+
     '''
-
     def regex_transform(self, text, designation_any, designation_end, prefix_list):
         designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
         designation_any_regex = "(" + '|'.join(designation_any) + ")"
@@ -172,9 +172,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = re.sub(r'\s+',
                       ' ',
                       re.sub(
-                          r'^(?:\d+(?:{ordinal_suffixes})?\s+)+(?=[^\d]+$)(?!.*?(?:{stand_alone_words}$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)',
+                          r'^(?:\d+(?:' + ordinal_suffixes + ')?\\s+)+(?=[^\\d]+$)(?!.*?(?:' + stand_alone_words + '))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)',
                           '',
-                          re.sub(r'(?<=[A-Za-z]\b )([ 0-9]*({ordinal_suffixes})?\b)',
+                          re.sub(r'(?<=[A-Za-z]\b )([ 0-9]*' + ordinal_suffixes + '?\b)',
                                  '',
                                  re.sub(r'(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)|^\s+|\s+$',
                                         '',
@@ -183,7 +183,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                                                # re.sub(r'(?<=[0-9])\s+(?=(?:{ordinal_suffixes})(?: +[^\W\d_]|$))',
                                                #       '',
                                                ws_rx.sub(lambda x: x.group(1) or " ",
-                                                         re.sub(r'\b(\d+({ordinal_suffixes}))(\w+)\b',
+                                                         re.sub(r'\b(\d+(' + ordinal_suffixes + '))(\\w+)\b',
                                                                 r'\1 \3',
                                                                 re.sub(r'\b(\w{2,})(\b\W+\b\1\b)*',
                                                                        r'\1',
@@ -194,7 +194,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                                                                                r'\b(' + prefixes + ')([ &/.-])([A-Za-z]+)',
                                                                                r'\1\3',
                                                                                re.sub(
-                                                                                   rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_any_regex}\b|\s{designation_end_regex}(?=(\s{designation_end_regex})*$)",
+                                                                                   r'' + internet_domains + '|(?<=\\d),(?=\\d)|(?<=[A-Za-z])+[/&-](?=[A-Za-z]\b)|\b' + designation_any_regex + '\\b|\\s' + designation_end_regex + '(?=(\\s' + designation_end_regex + ')*$)',
                                                                                    '',
                                                                                    text,
                                                                                    0,

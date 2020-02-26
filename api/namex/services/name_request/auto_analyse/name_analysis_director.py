@@ -265,15 +265,16 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
 
         results = []
         if self.get_list_none():
-            self._list_dist_words, self._list_desc_words = builder.handle_unclassified_words(self.get_list_dist(),
-                                                                                             self.get_list_desc(),
-                                                                                             self.get_list_none(),
-                                                                                             self.get_list_name())
+            self._list_dist_words, self._list_desc_words = builder.handle_unclassified_words(
+                self.get_list_dist(),
+                self.get_list_desc(),
+                self.get_list_none(),
+                self.get_list_name()
+            )
 
         check_name_is_well_formed = builder.check_name_is_well_formed(
             self.get_list_dist(),
             self.get_list_desc(),
-            self.get_list_none(),
             self.get_list_name()
         )
 

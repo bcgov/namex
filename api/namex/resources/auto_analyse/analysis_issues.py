@@ -522,12 +522,12 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         return issue
 
 
-class DesignationMismatchIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
+class IncorrectCategory(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
-        line1="Designation <b>Cooperative</b> cannot be used with selected business type of <b>Corporation</b>",
+        line1="Category of the word is incorrect.",
         line2=None,
         consenting_body=None,
         # TODO: Replace with real values from ProcedureResult
