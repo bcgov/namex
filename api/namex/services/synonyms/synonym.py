@@ -49,7 +49,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     def get_model(self):
         return self._model
 
-    def get_synonyms(self, word='food'):
+    def get_synonyms(self, word=None):
         model = self.get_model()
 
         filters = [
@@ -158,7 +158,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         # Build exception list to avoid separation of numbers and letters when they are part of synonym table such as H20, 4MULA, ACTIV8
         exceptions_ws = []
         for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
-            if self._model.get_substitution_list(word):
+            if self.get_substitutions(word):
                 exceptions_ws.append(word)
 
         if not exceptions_ws:
