@@ -89,40 +89,7 @@ class Synonym(db.Model):
         # print(query.statement)
         return query.all()
 
-    '''
-    TODO: All these following methods could be refactored into a single method, really...
-    '''
-
-    # TODO: Need to move to requests/names model
-    @classmethod
-    def build_query_distinctive(cls, dist_all_permutations, length):
-        query = "select n.name " + \
-                "from requests r, names n " + \
-                "where r.id = n.nr_id and " + \
-                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
-                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
-                "n.state IN ('APPROVED','CONDITION') and " + \
-                "lower(n.name) similar to " + "'"
-        st = ''
-        for s in range(length):
-            st += '%s '
-
-        permutations = "|".join(st % tup for tup in dist_all_permutations)
-        query += "(" + permutations + ")%%" + "'"
-
-        return query
-
-    # TODO: Need to move to requests/names model
-    @classmethod
-    def build_query_descriptive(cls, desc_substitution_list, query):
-        for element in desc_substitution_list:
-            query += " and lower(n.name) similar to "
-            substitutions = ' ?| '.join(map(str, element))
-            query += "'" + "%%( " + substitutions + " ?)%%" + "'"
-
-        return query
-
-    # TODO: Need to move to requests/names model
+    #  TODO: Move this out of here, and use the models!
     @classmethod
     def get_conflicts(cls, query):
         matches = pd.read_sql_query(query, con=db.engine)
