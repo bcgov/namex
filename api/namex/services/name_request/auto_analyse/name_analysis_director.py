@@ -8,9 +8,13 @@ from .name_analysis_utils import data_frame_to_list, remove_french
 
 from namex.models import Synonym
 
+from namex.constants import \
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
+
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
+from namex.services.synonyms import DesignationPositionCodes
 from namex.services.synonyms.synonym \
     import SynonymService
 
@@ -279,14 +283,25 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
     def get_name_designation(self):
         pass
 
-    def set_designations_by_entity_type_user(self, entity_type_user):
-        designations_entity_type_user = self._model.get_designation_by_entity_type(entity_type_user)
+    # TODO: When setting entity type maybe we should use the code... that way we get a code here instead of a string
+    #  I figure I'll move the entity type logic to the resource / endpoint, but we'll have to make some tweaks to the
+    #  directors and builders to get it working properly, we'll do that later...
+    def set_designations_by_entity_type_user(self, entity_type):
+        syn_svc = self.get_synonym_service()
 
-        for k, v in designations_entity_type_user.items():
-            if k.lower() == 'any':
-                self._designation_any_list_user.extend(v)
-            else:
-                self._designation_end_list_user.extend(v)
+        entity_type_code = None
+        if BCProtectedNameEntityTypes(entity_type):
+            entity_type_code = BCProtectedNameEntityTypes(entity_type)
+        elif BCUnprotectedNameEntityTypes(entity_type):
+            entity_type_code = BCUnprotectedNameEntityTypes(entity_type)
+        elif XproUnprotectedNameEntityTypes(entity_type):
+            entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
+
+        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
+        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
+
+        self._designation_any_list_user.extend(any_list)
+        self._designation_end_list_user.extend(end_list)
 
     def set_designations_by_input_name(self, name):
         self._designation_any_list = self.get_synonym_service().get_designation_any_in_name(name)
