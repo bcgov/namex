@@ -1,5 +1,7 @@
+import itertools
 import re
 import collections
+from sqlalchemy import create_engine
 from toolz import unique
 
 from namex.services.name_request.auto_analyse import DataFrameFields
@@ -110,7 +112,7 @@ def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
             current_category = DataFrameFields.DESCRIPTIVE.value
             list_desc_tmp.extend([token_name])
         else:
-            list_incorrect_classification.append(token_name)
+            list_incorrect_classification.append({token_name: idx})
             # break
 
     return list_dist_tmp, list_desc_tmp, list_incorrect_classification
@@ -160,7 +162,6 @@ def lookahead(iterable):
     it = iter(iterable)
     last = next(it)
     # Run the iterator to exhaustion (starting from the second value).
-    idx = 0
     for idx, val in enumerate(it):
         # Report the *previous* value (more to come).
         yield idx, last, True
