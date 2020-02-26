@@ -1,7 +1,8 @@
 import re
 import collections
 
-from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes
+from namex.constants import ENTITY_TYPE_END_DESIGNATIONS, ENTITY_TYPE_ANY_DESIGNATIONS, AllEntityTypes, \
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
 
 from . import SynonymServiceMixin
@@ -118,17 +119,36 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         return wrong_designation_end_list
 
     def get_all_end_designations(self):
-        entity_end_designation_dict = {'RLC': self._model.get_en_RLC_entity_type_end_designation(),
-                                       'LL': self._model.get_en_LL_entity_type_end_designation(),
-                                       'CC': self._model.get_en_CC_entity_type_end_designation(),
-                                       'UL': self._model.get_en_UL_entity_type_end_designation(),
-                                       'BC': self._model.get_en_BC_entity_type_end_designation(),
-                                       'CR': self._model.get_en_CR_entity_type_end_designation()}
+        # TODO: Fix RLC we don't have that entity type, code changed to RLC from something else...
+        # 'RLC': self._model.get_en_RLC_entity_type_end_designation()
+        entity_types = [
+            XproUnprotectedNameEntityTypes.XPRO_LIMITED_LIABILITY_COMPANY,
+            BCUnprotectedNameEntityTypes.BC_LIMITED_LIABILITY_PARTNERSHIP,
+            BCProtectedNameEntityTypes.BC_COMMUNITY_CONTRIBUTION_COMPANY,
+            BCProtectedNameEntityTypes.BC_UNLIMITED_LIABILITY_COMPANY,
+            BCProtectedNameEntityTypes.BC_BENEFIT_COMPANY,
+            BCProtectedNameEntityTypes.BC_CORPORATION
+        ]
+
+        entity_end_designation_dict = {}
+
+        for entity_type in entity_types:
+            # TODO: Use an enum for languages too!
+            entity_end_designation_dict[entity_type.value] = self.get_designations(entity_type, DesignationPositionCodes.END, 'english')
 
         return entity_end_designation_dict
 
     def get_all_any_designations(self):
-        entity_any_designation_dict = {'CP': self._model.get_en_CP_entity_type_any_designation(),
-                                       'XCP': self._model.get_en_XCP_entity_type_any_designation(),
-                                       'CC': self._model.get_en_CC_entity_type_any_designation()}
+        entity_types = [
+            BCProtectedNameEntityTypes.BC_COOPERATIVE,
+            BCProtectedNameEntityTypes.BC_COMMUNITY_CONTRIBUTION_COMPANY,
+            XproUnprotectedNameEntityTypes.XPRO_COOPERATIVE
+        ]
+
+        entity_any_designation_dict = {}
+
+        for entity_type in entity_types:
+            # TODO: Use an enum for languages too!
+            entity_any_designation_dict[entity_type.value] = self.get_designations(entity_type, DesignationPositionCodes.ANY, 'english')
+
         return entity_any_designation_dict
