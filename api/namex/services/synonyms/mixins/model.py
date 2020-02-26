@@ -6,6 +6,14 @@ Model accessors for the Synonym service.
 
 
 class SynonymModelMixin(SynonymServiceMixin):
+    def get_query_distinctive(self, dist_all_permutations, length):
+        query = self._model.build_query_distinctive(dist_all_permutations, length)
+        return query
+
+    def get_query_descriptive(self, desc_substitution_list,query):
+        query = self._model.build_query_descriptive(desc_substitution_list, query)
+        return query
+
     def get_all_substitutions_synonyms(self, list_d, distinctive=True):
         aux_list = []
         dict_subs = {}
