@@ -1,7 +1,7 @@
 import re
 from . import db, ma
 
-
+import pandas as pd
 from sqlalchemy import and_
 
 from namex.criteria.synonym.query_criteria import SynonymQueryCriteria
