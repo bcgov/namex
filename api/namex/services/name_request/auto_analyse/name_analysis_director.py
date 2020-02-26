@@ -304,7 +304,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
 
     def set_entity_type_any_designation(self, entity_any_designation_dict, designation_any_list):
         self._entity_type_any_designation = self.get_synonym_service().get_entity_type_any_designation(
-            self.get_synonym_service().get_all_end_designations,
+            self.get_synonym_service().get_all_end_designations(),
             designation_any_list)
 
     def get_entity_type_any_designation(self):
@@ -312,7 +312,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
 
     def set_entity_type_end_designation(self, entity_end_designation_dict, designation_end_list):
         self._entity_type_end_designation = self.get_synonym_service().get_entity_type_end_designation(
-            self.get_synonym_service().get_all_any_designations,
+            self.get_synonym_service().get_all_any_designations(),
             designation_end_list)
 
     def get_entity_type_end_designation(self):
