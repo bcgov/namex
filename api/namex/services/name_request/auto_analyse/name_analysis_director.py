@@ -332,20 +332,16 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
         return self._wrong_designation_place
 
     def set_entity_type_any_designation(self, entity_any_designation_dict, designation_any_list):
-        syn_svc = self.get_synonym_service()
-
-        self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
-            syn_svc.get_all_end_designations(),
+        self._entity_type_any_designation = self.get_synonym_service().get_entity_type_any_designation(
+            self.get_synonym_service().get_all_end_designations(),
             designation_any_list)
 
     def get_entity_type_any_designation(self):
         return self._entity_type_any_designation
 
     def set_entity_type_end_designation(self, entity_end_designation_dict, designation_end_list):
-        syn_svc = self.get_synonym_service()
-
-        self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
-            syn_svc.get_all_any_designations(),
+        self._entity_type_end_designation = self.get_synonym_service().get_entity_type_end_designation(
+            self.get_synonym_service().get_all_any_designations(),
             designation_end_list)
 
     def get_entity_type_end_designation(self):
