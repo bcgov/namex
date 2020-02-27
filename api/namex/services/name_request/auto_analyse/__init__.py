@@ -3,6 +3,9 @@ from enum import Enum
 # Limit number of words to analyse
 MAX_LIMIT = 4
 
+# Limit number of matches returned to user
+MAX_MATCHES_LIMIT = 1
+
 
 class DataFrameFields(Enum):
     FIELD_SYNONYMS = 'synonyms_text'
@@ -40,7 +43,6 @@ class AnalysisRequestActions(str, Enum):
 
 class AnalysisResultCodes(str, Enum):
     VALID_NAME = 'auto_approved'
-
     ADD_DISTINCTIVE_WORD = 'add_distinctive'  # Well formed
     ADD_DESCRIPTIVE_WORD = 'add_descriptive'  # Well formed
     TOO_MANY_WORDS = 'excess_words'  # Well formed
