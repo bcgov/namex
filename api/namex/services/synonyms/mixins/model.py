@@ -18,11 +18,7 @@ class SynonymModelMixin(SynonymServiceMixin):
             if aux_list:
                 dict_subs.update({word: aux_list})
             else:
-                response_list.append([word.lower()])
-
-        return response_list
-
-
+                dict_subs.update({word: [word.lower()]})
 
         # Return {'mountain': ['mount', 'mountain', 'mt', 'mtn']} based on list_d
         return dict_subs

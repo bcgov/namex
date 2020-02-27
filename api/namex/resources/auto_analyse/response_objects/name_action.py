@@ -42,7 +42,7 @@ class NameAction(Serializable):
             raise TypeError('Invalid index, index must be a positive integer or zero')
 
         self.type = kwargs.get('type').value if kwargs.get('type') else None
-        self.position = kwargs.get('position', None)
+        self.position = kwargs.get('position').value if kwargs.get('position') else None
         self.message = kwargs.get('message', None)
         self.word = kwargs.get('word', None)
         self.index = kwargs.get('index', None)
