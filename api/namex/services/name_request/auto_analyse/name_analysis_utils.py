@@ -87,7 +87,7 @@ def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
             current_category = DataFrameFields.DESCRIPTIVE.value
             list_desc_tmp.extend([token_name])
         else:
-            list_incorrect_classification.append({token_name: idx})
+            list_incorrect_classification.append(token_name)
             # break
 
     return list_dist_tmp, list_desc_tmp, list_incorrect_classification
