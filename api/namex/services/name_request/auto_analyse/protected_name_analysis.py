@@ -74,12 +74,13 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             self.get_entity_type()
         )  # Set _designation_any_list_user and _designation_end_list_user based on entity type typed by user
 
+        # Use _name_as_submitted
         self.set_designations_by_input_name(
-            self.get_preprocessed_name()
+            self.get_name()
         )  # Set _designation_any_list and _designation_end_list based on company name typed by user
 
         self.set_wrong_designation_by_input_name(
-            self.get_preprocessed_name()
+            self.get_name()
         )  # Set _wrong_designation_place based on company name typed by user
 
         # TODO: Fix this it's broken!
