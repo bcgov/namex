@@ -43,7 +43,6 @@ class AnalysisRequestActions(str, Enum):
 
 class AnalysisResultCodes(str, Enum):
     VALID_NAME = 'auto_approved'
-
     ADD_DISTINCTIVE_WORD = 'add_distinctive'  # Well formed
     ADD_DESCRIPTIVE_WORD = 'add_descriptive'  # Well formed
     TOO_MANY_WORDS = 'excess_words'  # Well formed
