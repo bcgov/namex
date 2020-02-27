@@ -1,8 +1,9 @@
 import itertools
 
+from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
-from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT
+from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
 
 from namex.models.request import Request
@@ -132,7 +133,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def search_conflicts(self, list_dist, list_desc):
+    def search_conflicts(self, list_dist, list_desc, list_name, name):
         syn_svc = self.get_synonym_service()
 
         result = ProcedureResult()
@@ -148,14 +149,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             desc_synonym_list = []
             dist_all_permutations = []
 
-            dist_substitution_list = syn_svc.get_all_substitutions_synonyms(w_dist)
+            dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(w_dist)
+            dist_substitution_list = dist_substitution_dict.values()
             dist_all_permutations.append(list(itertools.product(*dist_substitution_list)))
 
             # Inject distinctive section in query
             for element in dist_all_permutations:
                 query = Request.get_query_distinctive(element, len(element[0]))
 
-            desc_synonym_list = syn_svc.get_all_substitutions_synonyms(w_desc, False)
+            desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
+            desc_synonym_list = desc_synonym_dict.values()
 
             desc_synonym_dict = self.get_synonym_service().get_all_substitutions_synonyms(w_desc, False)
             desc_synonym_list = desc_synonym_dict.values()
@@ -169,6 +172,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                                                         dict_highest_detail,
                                                                                         matches_response, w_dist,
                                                                                         w_desc, list_name, name)
+
         most_similar_names.extend(
             list({k for k, v in
                   sorted(dict_highest_counter.items(), key=lambda item: (-item[1], item[0]))[0:MAX_MATCHES_LIMIT]}))
@@ -282,3 +286,57 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.values = word_special_use_list_response
 
         return result
+
+    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
+                               list_name, name):
+        if matches:
+            dist_substitution_dict = self.get_synonym_service().get_all_substitutions_synonyms(list_dist)
+            dist_substitution_list = dist_substitution_dict.values()
+            dist_substitution_list = [item for sublist in dist_substitution_list for item in sublist]
+
+            desc_substitution_dict = self.get_synonym_service().get_all_substitutions_synonyms(list_desc, False)
+            desc_substitution_list = desc_substitution_dict.values()
+            desc_substitution_list = [item for sublist in desc_substitution_list for item in sublist]
+
+            all_substitutions = dist_substitution_list + desc_substitution_list
+
+            dict_matches_counter = {}
+            dict_matches_words = {}
+            for match in matches:
+                match_list = match.split()
+                counter = 0
+                word_n = 0
+                for word in match_list:
+                    word_n += 1
+                    if porter.stem(word.lower()) in all_substitutions:
+                        counter += 1
+                dict_matches_counter.update({match: counter / word_n})
+
+            dict_matches_words.update(
+                self.get_details_most_similar(list(dict_matches_counter), dist_substitution_dict,
+                                              desc_substitution_dict))
+            # Get two highest scores (values) and shortest names (key)
+            dict_highest_counter.update({k: v for k, v in
+                                         sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
+                                         0:MAX_MATCHES_LIMIT]})
+
+            for k in dict_highest_counter.keys():
+                dict_highest_detail.update({k: dict_matches_words.get(k)})
+
+        return dict_highest_counter, dict_highest_detail
+
+    def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
+        dict_words_matches = {}
+        dict_detail_matches = {}
+        for name in list_response:
+            name_list = name.split()
+            for word in name_list:
+                dist_values = dist_substitution_dict.get(word.lower())
+                desc_values = desc_substitution_dict.get(word.lower())
+                if dist_values is not None:
+                    dict_words_matches.update({word.lower(): dist_values})
+                if desc_values is not None:
+                    dict_words_matches.update({word.lower(): desc_values})
+            dict_detail_matches.update({name: dict_words_matches})
+
+        return dict_detail_matches
