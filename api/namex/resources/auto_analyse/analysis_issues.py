@@ -61,8 +61,6 @@ class IncorrectCategory(AnalysisResponseIssue):
         line2=None,
         consenting_body=None,
         designations=None,
-        # words=None,
-        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -108,8 +106,6 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         line2="It might still be approvable by manual examination.",
         consenting_body=None,
         designations=None,
-        # words=None,
-        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -161,8 +157,6 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
         line2=None,
         consenting_body=None,
         designations=None,
-        # words=None,
-        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -213,8 +207,6 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         line2="It might still be approvable by manual examination.",
         consenting_body=None,
         designations=None,
-        # words=None,
-        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -262,8 +254,6 @@ class TooManyWordsIssue(AnalysisResponseIssue):
         line2=None,
         consenting_body=None,
         designations=None,
-        # words=None,
-        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -304,8 +294,6 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         line2="Walmart",
         consenting_body=None,
         designations=None,
-        # words=None,
-        # wordIndex=None,
         show_reserve_button=False,
         show_examination_button=False,
         conflicts=None,
@@ -346,12 +334,10 @@ class WordSpecialUse(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
-        line1="Word do not require consent but can only be used under certain content.",
+        line1="Words do not require consent but can only be used under certain content.",
         line2=None,
         consenting_body=None,
         designations=None,
-        # words=None,
-        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -393,13 +379,14 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
-        line1="Your name contains words that cannot be approved:",
-        line2="Walmart",
-        consenting_body=None,
+        line1=None,
+        line2=None,
+        consenting_body=ConsentingBody(
+            name="",
+            email=""
+        ),
         designations=None,
-        # words=None,
-        # wordIndex=None,
-        show_reserve_button=False,
+        show_reserve_button=None,
         show_examination_button=False,
         conflicts=None,
         setup=None,
@@ -409,20 +396,51 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     @classmethod
     def create_issue(cls, procedure_result):
         issue = cls.issue
+        list_name = procedure_result.values['list_name']
+        list_consent = procedure_result.values['list_consent']
 
-        issue.name_actions = [
-            NameAction(
-                type=NameActions.STRIKE
+        # TODO: Everything else lets the backend dictate the response message, using line1 and line2 except this one...
+        issue.line1 = "The word(s) <b>" + ", ".join(list_consent) + "</b> require consent from:"
+        issue.line2 = "Example Conflict Company Ltd.<br />" + "email@example.com"
+
+        issue.name_actions = []
+        for word in list_consent:
+            consent_word_idx = list_name.index(word)
+            issue.name_actions.append(
+                NameAction(
+                    type=NameActions.HIGHLIGHT,
+                    word=word,
+                    index=consent_word_idx
+                )
             )
-        ]
+
+        # TODO: Where does this info come from?
+        issue.consenting_body = ConsentingBody(
+            name="Example Conflict Company Ltd.",
+            email="email@example.com"
+        )
 
         # Setup boxes
         issue.setup = [
             Setup(
                 button="",
                 checkbox="",
-                header="Helpful Hint",
-                line1="Remove the word <b>Walmart</b> from your search and try again.",
+                header="Option 1",
+                line1="You can remove or replace the word(s) " + ", ".join(list_consent) + " and try your search again.",
+                line2=""
+            ),
+            Setup(
+                button="examine",
+                checkbox="",
+                header="Option 2",
+                line1="You can choose to submit this name for examination. Examination wait times are listed above.",
+                line2=""
+            ),
+            Setup(
+                button="consent",
+                checkbox="",
+                header="Option 3",
+                line1="This name can be auto-approved but you will be required to send confirmation of consent to the BC Business Registry.",
                 line2=""
             )
         ]
@@ -535,8 +553,6 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
             "Limited",
             "Ltd"
         ],
-        # words=None,
-        # wordIndex=None,
         show_reserve_button=False,
         show_examination_button=False,
         conflicts=None,

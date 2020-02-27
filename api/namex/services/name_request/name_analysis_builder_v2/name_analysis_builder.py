@@ -213,7 +213,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if words_consent_list_response:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
-            result.values = words_consent_list_response
+            result.values = {
+                'list_name': list_name,
+                'list_consent': words_consent_list_response
+            }
 
         return result
 
