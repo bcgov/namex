@@ -164,6 +164,108 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         return issue
 
 
+"""
+Word Classification Engine Issues
+"""
+
+
+class IncorrectCategory(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
+    status_text = "Further Action Required"
+    issue = NameAnalysisIssue(
+        issue_type=issue_type,
+        line1="Category of the word is incorrect.",
+        line2=None,
+        consenting_body=None,
+        designations=None,
+        # words=None,
+        # word_index=None,
+        show_reserve_button=False,
+        show_examination_button=True,
+        conflicts=None,
+        setup=None,
+        name_actions=[]
+    )
+
+    @classmethod
+    def create_issue(cls, procedure_result):
+        issue = cls.issue
+
+        issue.name_actions = [
+            NameAction(
+                type=NameActions.HIGHLIGHT
+            )
+        ]
+
+        # Setup boxes
+        issue.setup = [
+            Setup(
+                button="",
+                checkbox="",
+                header="Helpful Hint",
+                line1="You can change the the order of the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
+                line2=""
+            )
+        ]
+
+        return issue
+
+
+"""
+Well-Formed Name Issues
+"""
+
+
+class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+    status_text = "Further Action Required"
+    issue = NameAnalysisIssue(
+        issue_type=issue_type,
+        line1="<b>Flerkin</b> is an unknown word.  The system cannot auto-approve a name with unknown words.",
+        line2="It might still be approvable by manual examination.",
+        consenting_body=None,
+        designations=None,
+        # words=None,
+        # word_index=None,
+        show_reserve_button=False,
+        show_examination_button=True,
+        conflicts=None,
+        setup=None,
+        name_actions=[]
+    )
+
+    @classmethod
+    def create_issue(cls, procedure_result):
+        issue = cls.issue
+        list_name = procedure_result.values['list_name']
+        list_none = procedure_result.values['list_none']
+
+        issue.name_actions = []
+        for word in list_none:
+            none_word_idx = list_name.index(word)
+            issue.name_actions.append(
+                NameAction(
+                    type=NameActions.HIGHLIGHT,
+                    message="Add a Descriptive Word Here",
+                    word=word,
+                    index=none_word_idx
+                )
+            )
+
+        # Setup boxes
+        issue.setup = [
+            Setup(
+                button="",
+                checkbox="",
+                header="Helpful Hint",
+                line1="You can remove or replace the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
+                line2=""
+            )
+        ]
+
+        return issue
+
+
 class AddDistinctiveWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
     status_text = "Further Action Required"
