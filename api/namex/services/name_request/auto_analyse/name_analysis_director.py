@@ -14,6 +14,8 @@ from namex.constants import \
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
+from . import DataFrameFields
+
 from namex.services.synonyms import DesignationPositionCodes
 from namex.services.synonyms.synonym \
     import SynonymService
@@ -273,6 +275,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
         check_name_is_well_formed = builder.check_name_is_well_formed(
             self.get_list_dist(),
             self.get_list_desc(),
+            self.get_list_none(),
             self.get_list_name()
         )
 
