@@ -238,7 +238,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
     def configure_builder(self):
         self._builder.set_entity_type(self._entity_type)
         self._builder.set_dicts(
+            # List of all synonyms, loaded into the director in prepare_data
             synonyms=self._synonyms,
+            # List of all substitution, loaded into the director in prepare_data
             substitutions=self._substitutions,
             stop_words=self._stop_words,
             designated_end_words=self._designated_end_words,
@@ -315,6 +317,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
         self._designation_any_list_user.extend(any_list)
         self._designation_end_list_user.extend(end_list)
 
+    '''
+    @:param name <string> the original name
+    '''
     def set_designations_by_input_name(self, name):
         syn_svc = self.get_synonym_service()
 
