@@ -73,10 +73,15 @@ class IncorrectCategory(AnalysisResponseIssue):
     @classmethod
     def create_issue(cls, procedure_result):
         issue = cls.issue
+        values = procedure_result.values
 
         issue.name_actions = [
             NameAction(
-                type=NameActions.HIGHLIGHT
+                type=NameActions.BRACKETS,
+                position=WordPositions.START,
+                message="Add a Word Here",
+                word=values[0],
+                index=0
             )
         ]
 
@@ -121,18 +126,17 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     def create_issue(cls, procedure_result):
         issue = cls.issue
         list_name = procedure_result.values['list_name']
-        list_none = procedure_result.values['list_none']
+        list_dist = procedure_result.values['list_dist']
 
-        issue.name_actions = []
-        for word in list_none:
-            none_word_idx = list_name.index(word)
-            issue.name_actions.append(
-                NameAction(
-                    type=NameActions.HIGHLIGHT,
-                    message="Add a Descriptive Word Here",
-                    word=word,
-                    index=none_word_idx
-                )
+        last_dist_word = list_dist.pop()
+        dist_word_idx = list_name.index(last_dist_word)
+        issue.name_actions = [
+            NameAction(
+                type=NameActions.BRACKETS,
+                position=WordPositions.END,
+                message="Add a Descriptive Word Here",
+                word=last_dist_word,
+                index=dist_word_idx
             )
 
         # Setup boxes
