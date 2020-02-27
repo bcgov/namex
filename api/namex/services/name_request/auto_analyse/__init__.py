@@ -7,6 +7,9 @@ from enum import Enum
 # Limit number of words to analyse
 MAX_LIMIT = 4
 
+# Limit number of matches returned to user
+MAX_MATCHES_LIMIT = 1
+
 
 class DataFrameFields(Enum):
     FIELD_SYNONYMS = 'synonyms_text'

@@ -56,7 +56,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.get_list_name(), self.get_list_dist(), self.get_list_desc())
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc())
+        check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc(), self.get_list_name(), self.get_name())
+
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
