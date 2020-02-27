@@ -23,7 +23,7 @@ def response_issues(issue_code):
         AnalysisResultCodes.TOO_MANY_WORDS: TooManyWordsIssue,
         AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD: ContainsUnclassifiableWordIssue,
         AnalysisResultCodes.INCORRECT_CATEGORY: IncorrectCategory,
-        AnalysisResultCodes.WORD_TO_AVOID: ContainsWordsToAvoidIssue,
+        AnalysisResultCodes.WORDS_TO_AVOID: ContainsWordsToAvoidIssue,
         AnalysisResultCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisResultCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
         AnalysisResultCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,

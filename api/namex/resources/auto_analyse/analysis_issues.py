@@ -286,12 +286,12 @@ General Name Issues
 
 
 class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.WORD_TO_AVOID
+    issue_type = AnalysisResultCodes.WORDS_TO_AVOID
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
         line1="Your name contains words that cannot be approved:",
-        line2="Walmart",
+        line2=None,
         consenting_body=None,
         designations=None,
         show_reserve_button=False,
@@ -305,15 +305,21 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     def create_issue(cls, procedure_result):
         issue = cls.issue
         list_name = procedure_result.values['list_name']
-        list_dist = procedure_result.values['list_dist']
+        list_avoid = procedure_result.values['list_avoid']
 
-        last_dist_word = list_dist.pop()
-        dist_word_idx = list_name.index(last_dist_word)
-        issue.name_actions = [
-            NameAction(
-                type=NameActions.STRIKE
+        cls.issue.line1 = "The word(s) <b>" + ", ".join(list_avoid) + "</b> cannot be approved for use. Please remove them and try again."
+
+        # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
+        issue.name_actions = []
+        for word in list_avoid:
+            avoid_word_idx = list_name.index(word)
+            issue.name_actions.append(
+                NameAction(
+                    type=NameActions.STRIKE,
+                    word=word,
+                    index=avoid_word_idx
+                )
             )
-        ]
 
         # Setup boxes
         issue.setup = [
@@ -321,7 +327,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
                 button="",
                 checkbox="",
                 header="Helpful Hint",
-                line1="Remove the word <b>Walmart</b> from your search and try again.",
+                line1="Remove the word(s) <b>" + ", ".join(list_avoid) + "</b> from your search and try again.",
                 line2=""
             )
         ]
