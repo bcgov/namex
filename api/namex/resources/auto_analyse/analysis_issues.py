@@ -755,8 +755,6 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
             "Limited",
             "Ltd"
         ],
-        # words=None,
-        # wordIndex=None,
         show_reserve_button=False,
         show_examination_button=False,
         conflicts=None,
