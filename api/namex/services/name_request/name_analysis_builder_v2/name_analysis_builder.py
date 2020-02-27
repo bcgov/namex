@@ -116,7 +116,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         for idx, token in enumerate(list_name):
             if any(token in word for word in words_to_avoid_list):
-                words_to_avoid_list_response.append({idx: token})
+                words_to_avoid_list_response.append(token)
 
         if words_to_avoid_list_response:
             result.is_valid = False
@@ -191,12 +191,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         for idx, token in enumerate(list_name):
             if any(token in word for word in words_consent_list):
-                words_consent_list_response.append({idx: token})
+                words_consent_list_response.append(token)
 
         if words_consent_list_response:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
-            result.values = words_consent_list_response
+            result.values = {
+                'list_name': list_name,
+                'list_consent': words_consent_list_response
+            }
 
         return result
 
@@ -255,7 +258,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         for idx, token in enumerate(list_name):
             if any(token in word for word in word_special_use_list):
-                word_special_use_list_response.append({idx: token})
+                word_special_use_list_response.append(token)
 
         if word_special_use_list_response:
             result.is_valid = False
