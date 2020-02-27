@@ -61,6 +61,8 @@ class IncorrectCategory(AnalysisResponseIssue):
         line2=None,
         consenting_body=None,
         designations=None,
+        # words=None,
+        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -102,10 +104,12 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
-        line1="The submitted name contains unknown words. The system cannot auto-approve a name with unknown words.",
+        line1="<b>Flerkin</b> is an unknown word.  The system cannot auto-approve a name with unknown words.",
         line2="It might still be approvable by manual examination.",
         consenting_body=None,
         designations=None,
+        # words=None,
+        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -119,16 +123,13 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         list_name = procedure_result.values['list_name']
         list_none = procedure_result.values['list_none']
 
-        cls.issue.line1 = "The word(s) <b>" + ", ".join(list_none) + "</b> are unknown. The system cannot auto-approve a name with unknown words."
-
-        # TODO: Fix the case eg. 'Asdfadsf Something Asdfadsf Company Ltd.'...
-        #  If there's a duplicate of an unclassified word, just grabbing the index won't do!
         issue.name_actions = []
         for word in list_none:
             none_word_idx = list_name.index(word)
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
+                    message="Add a Descriptive Word Here",
                     word=word,
                     index=none_word_idx
                 )
@@ -140,7 +141,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
                 button="",
                 checkbox="",
                 header="Helpful Hint",
-                line1="You can remove or replace the words <b>" + ", ".join(list_none) + "</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
+                line1="You can remove or replace the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
                 line2=""
             )
         ]
@@ -250,6 +251,8 @@ class TooManyWordsIssue(AnalysisResponseIssue):
         line2=None,
         consenting_body=None,
         designations=None,
+        # words=None,
+        # word_index=None,
         show_reserve_button=False,
         show_examination_button=True,
         conflicts=None,
@@ -289,6 +292,8 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         line2="Walmart",
         consenting_body=None,
         designations=None,
+        # words=None,
+        # wordIndex=None,
         show_reserve_button=False,
         show_examination_button=False,
         conflicts=None,
@@ -325,7 +330,7 @@ class WordSpecialUse(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
-        line1="Words do not require consent but can only be used under certain content.",
+        line1="Word do not require consent but can only be used under certain content.",
         line2=None,
         consenting_body=None,
         designations=None,
@@ -522,12 +527,12 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         return issue
 
 
-class IncorrectCategory(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
+class DesignationMismatchIssue(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
-        line1="Category of the word is incorrect.",
+        line1="Designation <b>Cooperative</b> cannot be used with selected business type of <b>Corporation</b>",
         line2=None,
         consenting_body=None,
         # TODO: Replace with real values from ProcedureResult
@@ -539,6 +544,8 @@ class IncorrectCategory(AnalysisResponseIssue):
             "Limited",
             "Ltd"
         ],
+        # words=None,
+        # wordIndex=None,
         show_reserve_button=False,
         show_examination_button=False,
         conflicts=None,
