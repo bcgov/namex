@@ -26,16 +26,22 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
 
-        if list_incorrect_classification:
-            result.is_valid = False
-            result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
-            result.values = list_incorrect_classification
+        # if list_incorrect_classification:
+        #    result.is_valid = False
+        #    result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
+        #    result.values = list_incorrect_classification
+        # elif...
         if len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+            result.values = list_name
         elif len(list_desc) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+            result.values = {
+                'list_name': list_name or [],
+                'list_dist': list_dist or []
+            }
         elif len(list_name) > MAX_LIMIT:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
