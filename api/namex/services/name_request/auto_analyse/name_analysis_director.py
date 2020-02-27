@@ -14,6 +14,8 @@ from namex.constants import \
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
+from . import DataFrameFields
+
 from namex.services.synonyms import DesignationPositionCodes
 from namex.services.synonyms.synonym \
     import SynonymService
@@ -172,14 +174,21 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
             # Get the word classification for each word in the supplied name name
             for word in self._list_name_words:
                 word_classification = wc_svc.find_one(word)
+                new_row = {}
                 if not word_classification:
                     print('No word classification found for: ' + word)
-                    new_row = {'word': word.lower().strip(), 'word_classification': 'none'}
+                    new_row = {
+                        'word': word.lower().strip(),
+                        'word_classification': DataFrameFields.UNCLASSIFIED.value
+                    }
                 else:
                     for row in word_classification:
-                        new_row = {'word': word.lower().strip(),
-                                   'word_classification': row.classification.strip()}
-                        cf = cf.append(new_row, ignore_index=True)
+                        new_row = {
+                            'word': word.lower().strip(),
+                            'word_classification': row.classification.strip()
+                        }
+
+                cf = cf.append(new_row, ignore_index=True)
 
             # TODO: If we don't find a classification, we should be adding a record and return the unclassified word issue
             # TODO: Related to the above, we will need to pre-populate a list of classified words
@@ -264,6 +273,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetWordClassificationListsMixi
         check_name_is_well_formed = builder.check_name_is_well_formed(
             self.get_list_dist(),
             self.get_list_desc(),
+            self.get_list_none(),
             self.get_list_name()
         )
 
