@@ -121,8 +121,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if words_to_avoid_list_response:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.WORD_TO_AVOID
-            result.values = words_to_avoid_list_response
+            result.result_code = AnalysisResultCodes.WORDS_TO_AVOID
+            result.values = {
+                'list_name': list_name,
+                'list_avoid': words_to_avoid_list_response
+            }
 
         return result
 

@@ -53,7 +53,7 @@ class AnalysisResultCodes(str, Enum):
     CORPORATE_CONFLICT = 'corp_conflict'
     # Stop if error
     # TODO: What about these other guys?
-    WORD_TO_AVOID = 'word_to_avoid'
+    WORDS_TO_AVOID = 'word_to_avoid'
     WORD_SPECIAL_USE = 'word_special_use'
     DESIGNATION_MISMATCH = 'designation_mismatch'
     NAME_REQUIRES_CONSENT = 'consent_required'
