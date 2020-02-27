@@ -139,7 +139,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
     '''
 
     @abc.abstractmethod
-    def search_conflicts(self, list_dist, list_desc):
+    def search_conflicts(self, list_dist, list_desc, list_name, name):
         return ProcedureResult(is_valid=True)
 
     # Default handler - this method should be overridden in extending Builder classes

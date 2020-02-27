@@ -147,6 +147,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     	 Set single letters together (initials):(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     11.- Remove extra spaces to have just one space: \s+
     '''
+
     def regex_transform(self, text, designation_any, designation_end, prefix_list):
         designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
         designation_any_regex = "(" + '|'.join(designation_any) + ")"
