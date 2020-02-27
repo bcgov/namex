@@ -83,20 +83,16 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         )  # Set _wrong_designation_place based on company name typed by user
 
         # TODO: Fix this it's broken!
-        '''
         self.set_entity_type_any_designation(
             self._entity_any_designation_dict,
             self._designation_any_list
         )  # Set _entity_type_any_designation for designations based on company name typed by user
-        '''
 
         # TODO: Fix this it's broken!
-        '''
         self.set_entity_type_end_designation(
             self._entity_end_designation_dict,
             self._designation_end_list
         )  # Set _entity_type_end_designation for designations based on company name typed by user
-        '''
 
         self.set_all_designations_user()  # Set all designations based on entity type typed by user
         self.set_all_designations()  # Set all designations based on company name typed by user
@@ -113,6 +109,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
+
         if not check_special_words.is_valid:
             results.append(check_special_words)
 

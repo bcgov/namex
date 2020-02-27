@@ -5,9 +5,9 @@ Query criteria for the Synonym model.
 
 class SynonymQueryCriteria(object):
     def __init__(self, **kwargs):
-        self.word = kwargs['word'] if kwargs.get('word') else None  # Required! <string>
-        self.fields = kwargs['fields'] if kwargs.get('fields') else []
-        self.filters = kwargs['filters'] if kwargs.get('filters') else []
+        self.word = kwargs.get('word', None)  # Required! <string>
+        self.fields = kwargs.get('fields', [])
+        self.filters = kwargs.get('filters', [])
 
     '''
     Used to validate criteria instances.

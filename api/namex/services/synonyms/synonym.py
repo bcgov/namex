@@ -101,12 +101,16 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         filters = []
 
         if entity_type_code is not None:
-            filters += func.lower(model.category).op('~')(r'\y{}[-_]+valid\y'.format(entity_type_code.value.lower()))
+            filters.append(
+                func.lower(model.category).op('~')(r'\y{}[-_]+valid\y'.format(entity_type_code.value.lower())))
 
-        filters += [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]+' + position_code.value.lower())),
-            func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower()))
-        ]
+        if position_code is not None:
+            filters.append(func.lower(model.category).op('~')(
+                r'\y{}\y'.format('designation[s]?[_-]+' + position_code.value.lower())))
+        else:
+            filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]')))
+
+        filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
 
         results = self.find_word_synonyms(None, filters)
         flattened = self._flatten_synonyms_text(results)

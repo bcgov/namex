@@ -129,6 +129,7 @@ def lookahead(iterable):
     it = iter(iterable)
     last = next(it)
     # Run the iterator to exhaustion (starting from the second value).
+    idx = 0
     for idx, val in enumerate(it):
         # Report the *previous* value (more to come).
         yield idx, last, True
