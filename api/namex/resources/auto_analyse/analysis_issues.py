@@ -70,12 +70,15 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
     @classmethod
     def create_issue(cls, procedure_result):
         issue = cls.issue
+        values = procedure_result.values
 
         issue.name_actions = [
             NameAction(
                 type=NameActions.BRACKETS,
                 position=WordPositions.START,
-                message="Add a Word Here"
+                message="Add a Word Here",
+                word=values[0],
+                index=0
             )
         ]
 
@@ -114,12 +117,18 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
     @classmethod
     def create_issue(cls, procedure_result):
         issue = cls.issue
+        list_name = procedure_result.values['list_name']
+        list_dist = procedure_result.values['list_dist']
 
+        last_dist_word = list_dist.pop()
+        dist_word_idx = list_name.index(last_dist_word)
         issue.name_actions = [
             NameAction(
                 type=NameActions.BRACKETS,
                 position=WordPositions.END,
-                message="Add a Descriptive Word Here"
+                message="Add a Descriptive Word Here",
+                word=last_dist_word,
+                index=dist_word_idx
             )
         ]
 
