@@ -271,6 +271,12 @@ class TooManyWordsIssue(AnalysisResponseIssue):
             name_actions=None
         )
 
+        issue.name_actions = [
+            NameAction(
+                type=NameActions.HIGHLIGHT
+            )
+        ]
+
         # Setup boxes
         issue.setup = self.setup_config
         for setup_item in issue.setup:
@@ -732,19 +738,27 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         return issue
 
 
-class IncorrectCategory(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
+class DesignationMismatchIssue(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
     status_text = "Further Action Required"
     issue = NameAnalysisIssue(
         issue_type=issue_type,
-        line1="Category of the word is incorrect.",
+        line1="Designation <b>Cooperative</b> cannot be used with selected business type of <b>Corporation</b>",
         line2=None,
         consenting_body=None,
-        designations=None,
+        # TODO: Replace with real values from ProcedureResult
+        designations=[
+            "Inc",
+            "Incorporated",
+            "Incorpore",
+            "Limite",
+            "Limited",
+            "Ltd"
+        ],
         # words=None,
-        # word_index=None,
+        # wordIndex=None,
         show_reserve_button=False,
-        show_examination_button=True,
+        show_examination_button=False,
         conflicts=None,
         setup=None,
         name_actions=[]
@@ -765,52 +779,18 @@ class IncorrectCategory(AnalysisResponseIssue):
             Setup(
                 button="",
                 checkbox="",
-                header="Helpful Hint",
-                line1="You can change the the order of the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
+                header="Option 1",
+                line1="If your intention was to reserve a name for a BC Corporation, you can replace Cooperative with a comptatible designation. The following are allowed:",
                 line2=""
-            )
-        ]
-
-        return issue
-
-
-class WordSpecialUse(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.WORD_SPECIAL_USE
-    status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Word do not require consent but can only be used under certain content.",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        # words=None,
-        # word_index=None,
-        show_reserve_button=False,
-        show_examination_button=True,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
-
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
-
-        issue.name_actions = [
-            NameAction(
-                type=NameActions.HIGHLIGHT
-            )
-        ]
-
-        # Setup boxes
-        issue.setup = [
+            ),
             Setup(
-                button="",
+                button="restart",
                 checkbox="",
-                header="Helpful Hint",
-                line1="You can use the word <b>Doctor</b> under certain conditions, you might remove it.  Alternately, you can submit your name for examination-wait times are quoted above.",
+                header="Option 2",
+                line1="If you would like to start a Cooperative business instead of a Corporation, start your search over and change your business type to 'Cooperative'.",
                 line2=""
             )
         ]
 
         return issue
+
