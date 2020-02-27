@@ -41,20 +41,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'list_none': unclassified_words_list_response
             }
 
-        # TODO: These checks might be of use, but they don't really belong in here
-        # if list_incorrect_classification:
-        #    result.is_valid = False
-        #    result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
-        #    result.values = list_incorrect_classification
-        # elif not list_all == list_name:
-        #    reverse_order_list = []
-        #    for idx, (token_dist_desc, token_name) in enumerate(zip(list_all, list_name)):
-        #        if token_dist_desc != token_name:
-        #            reverse_order_list.append({idx: token_name})
+        if list_incorrect_classification:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
+            result.values = {
+                'list_name': list_name or [],
+                'list_cat': list_incorrect_classification
+            }
 
-        #    result.is_valid = False
-        #    result.result_code = AnalysisResultCodes.REVERSE_ORDER
-        #    result.values = reverse_order_list
         elif len(list_dist) < 1:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
