@@ -163,7 +163,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
             desc_synonym_list = desc_synonym_dict.values()
 
-            desc_synonym_dict = self.get_synonym_service().get_all_substitutions_synonyms(w_desc, False)
+            desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
             desc_synonym_list = desc_synonym_dict.values()
             # Inject descriptive section into query, execute and add matches to list
             if desc_synonym_list:
@@ -290,14 +290,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
-    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
-                               list_name, name):
+    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc, list_name, name):
+        syn_svc = self.get_synonym_service()
+
         if matches:
-            dist_substitution_dict = self.get_synonym_service().get_all_substitutions_synonyms(list_dist)
+            dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_dist)
             dist_substitution_list = dist_substitution_dict.values()
             dist_substitution_list = [item for sublist in dist_substitution_list for item in sublist]
 
-            desc_substitution_dict = self.get_synonym_service().get_all_substitutions_synonyms(list_desc, False)
+            desc_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_desc, False)
             desc_substitution_list = desc_substitution_dict.values()
             desc_substitution_list = [item for sublist in desc_substitution_list for item in sublist]
 
