@@ -148,7 +148,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     This is the main execution call for running name analysis checks.
     @:return ProcedureResult[]
     '''
-
     def do_analysis(self):
         builder = self.builder
 
@@ -211,3 +210,62 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             results.append(check_designation_misplaced)
 
         return results
+
+    def set_designations_by_entity_type_user(self, entity_type):
+        syn_svc = self.synonym_service
+
+        entity_type_code = None
+        if BCProtectedNameEntityTypes(entity_type):
+            entity_type_code = BCProtectedNameEntityTypes(entity_type)
+        elif BCUnprotectedNameEntityTypes(entity_type):
+            entity_type_code = BCUnprotectedNameEntityTypes(entity_type)
+        elif XproUnprotectedNameEntityTypes(entity_type):
+            entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
+
+        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
+        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
+
+        self._designation_any_list_user.extend(any_list)
+        self._designation_end_list_user.extend(end_list)
+
+    def set_designations_by_input_name(self, name):
+        syn_svc = self.synonym_service
+
+        self._designation_any_list = syn_svc.get_designation_any_in_name(name)
+        self._designation_end_list = syn_svc.get_designation_end_in_name(name)
+
+    def set_wrong_designation_by_input_name(self, name):
+        syn_svc = self.synonym_service
+
+        self._wrong_designation_any_list = syn_svc.get_wrong_place_any_designations(name)
+        self._wrong_designation_end_list = syn_svc.get_wrong_place_end_designations(name)
+
+        self._wrong_designation_place = self._wrong_designation_any_list + self._wrong_designation_end_list
+
+    def set_entity_type_any_designation(self, entity_any_designation_dict, designation_any_list):
+        syn_svc = self.synonym_service
+
+        self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
+            syn_svc.get_all_end_designations(),
+            designation_any_list)
+
+    def set_entity_type_end_designation(self, entity_end_designation_dict, designation_end_list):
+        syn_svc = self.synonym_service
+
+        self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
+            syn_svc.get_all_any_designations(),
+            designation_end_list)
+
+    def set_all_entity_types(self):
+        self._all_entity_types = [item for item, count in collections.Counter(
+            self._entity_type_any_designation + self._entity_type_end_designation
+        ).items() if count > 1]
+
+        if not self._all_entity_types:
+            self._all_entity_types = self._entity_type_any_designation + self._entity_type_end_designation
+
+    def set_all_designations_user(self):
+        self._all_designations_user = self._designation_any_list_user + self._designation_end_list_user
+
+    def set_all_designations(self):
+        self._all_designations = self._designation_any_list + self._designation_end_list

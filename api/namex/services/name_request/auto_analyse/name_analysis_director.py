@@ -9,20 +9,15 @@ from . import AnalysisIssueCodes
 from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from namex.constants import \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
-
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
+from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
-from . import DataFrameFields
-
-from namex.services.synonyms import DesignationPositionCodes
 from namex.services.synonyms.synonym \
     import SynonymService
 
-# from namex.services.name_processing.name_processing \
-#    import NameProcessingService
+from namex.services.name_processing.name_processing \
+    import NameProcessingService
 
 from namex.services.word_classification.word_classification \
     import WordClassificationService
@@ -126,9 +121,22 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted_tokenized if np_svc else ''
 
-    # TODO: Raise an exception if entity type is not set!!!
-    # TODO: Validate entity types against valid types
+    # API for extending implementations
+    def get_name(self):
+        return self._name_as_submitted
+
+    # API for extending implementations
+    def get_preprocessed_name(self):
+        return self._preprocessed_name
+
+    # Get the company's designation if it's in the name
+    def get_name_designation(self):
+        pass
+
+    # API for extending implementations
     def get_entity_type(self):
+        # TODO: Raise an exception if entity type is not set!!!
+        # TODO: Validate entity types against valid types
         return self._entity_type
 
     def set_entity_type(self, entity_type):
@@ -224,13 +232,12 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         tokens = self._synonym_service.regex_transform(words, designation_any, designation_end, prefix_list)
         tokens = tokens.split()
 
-        return [x.lower() for x in tokens if x]
+        self.configure_builder()  # Update builder dicts
 
     '''
     Prepare any data required by the analysis builder.
     prepare_data is an abstract method and must be implemented in extending classes.
     '''
-
     def prepare_data(self):
         # Query for whatever data we need to load up here
         self.configure_builder()
@@ -246,7 +253,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     - If you don't want to check to see if a name is well formed first, override check_name_is_well_formed in the supplied builder.
     @:return ProcedureResult[]
     '''
-
     def execute_analysis(self):
         try:
             # Execute analysis using the supplied builder
