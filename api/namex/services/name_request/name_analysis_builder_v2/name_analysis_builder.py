@@ -17,6 +17,17 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
+    def desc_synonym_list(self):
+        return self._synonyms
+
+    # TODO: We have stuff for these already, possible duplicate?
+    def get_substitution_list(self):
+        return self._substitution_list
+
+    # TODO: We have stuff for these already, possible duplicate?
+    def get_synonym_list(self, word):
+        return self._synonym_list
+
     '''
     Check to see if a provided name is valid
     Override the abstract / base class method
