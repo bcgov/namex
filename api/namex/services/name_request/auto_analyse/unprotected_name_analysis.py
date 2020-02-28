@@ -32,7 +32,8 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         super(UnprotectedNameAnalysisService, self).__init__()
 
     '''
-    This is the main execution call for the class
+    do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
+    This is the main execution call for running name analysis checks.
     @:return ProcedureResult[]
     '''
     def do_analysis(self):

@@ -15,12 +15,22 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
+    def desc_synonym_list(self):
+        return self._synonyms
+
+    # TODO: We have stuff for these already, possible duplicate?
+    def get_substitution_list(self):
+        return self._substitution_list
+
+    # TODO: We have stuff for these already, possible duplicate?
+    def get_synonym_list(self, word):
+        return self._synonym_list
+
     '''
     Check to see if a provided name is valid
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name):
         result = ProcedureResult()
         result.is_valid = True
@@ -100,13 +110,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_words_to_avoid(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
 
-        # TODO: Arturo plz check the word against the list, provide it as an input for get_virtual_word_condition_service().get_words_to_avoid()
-        all_words_to_avoid_list = self.get_virtual_word_condition_service().get_words_to_avoid()
+        # TODO: Arturo plz check the word against the list, provide it as an input for word_condition_service.get_words_to_avoid()
+        all_words_to_avoid_list = self.word_condition_service.get_words_to_avoid()
         words_to_avoid_list = []
 
         for words_to_avoid in all_words_to_avoid_list:
@@ -135,9 +144,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
            list_desc= ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
-
     def search_conflicts(self, list_dist, list_desc, list_name, name):
-        syn_svc = self.get_synonym_service()
+        syn_svc = self.synonym_service
 
         result = ProcedureResult()
         result.is_valid = False
@@ -198,12 +206,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_words_requiring_consent(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
 
-        all_words_consent_list = self.get_virtual_word_condition_service().get_words_requiring_consent()
+        all_words_consent_list = self.word_condition_service.get_words_requiring_consent()
         words_consent_list = []
 
         for words_consent in all_words_consent_list:
@@ -230,7 +237,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
@@ -265,12 +271,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
-
     def check_word_special_use(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
 
-        all_word_special_use_list = self.get_virtual_word_condition_service().get_word_special_use()
+        all_word_special_use_list = self.word_condition_service.get_word_special_use()
         word_special_use_list = []
 
         for words_special in all_word_special_use_list:
@@ -291,7 +296,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return result
 
     def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc, list_name, name):
-        syn_svc = self.get_synonym_service()
+        syn_svc = self.synonym_service
 
         if matches:
             dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_dist)

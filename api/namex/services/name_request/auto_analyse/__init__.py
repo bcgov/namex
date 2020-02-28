@@ -6,7 +6,7 @@ MAX_LIMIT = 4
 # Limit number of matches returned to user
 MAX_MATCHES_LIMIT = 1
 
-
+# TODO: I have copied this over to new name processing service, hoping I can get rid of this here...
 class DataFrameFields(Enum):
     FIELD_SYNONYMS = 'synonyms_text'
     FIELD_SPECIAL_WORDS = 'rc_words'

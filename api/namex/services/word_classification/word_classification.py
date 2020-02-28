@@ -1,5 +1,6 @@
-# from namex.exceptions import BusinessException
 from namex.models import db, WordClassification, WordClassificationSchema
+
+from .token_classifier import TokenClassifier
 
 
 class WordClassificationService:
@@ -64,8 +65,12 @@ class WordClassificationService:
         entity = self.find_one(word_classification.word) or None
 
         if entity:
-            # TODO: Delete
             pass
 
     def validate(self):
         return True
+
+    def classify_tokens(self, word_tokens):
+        token_classifier = TokenClassifier(self)
+        token_classifier.name_tokens = word_tokens
+        return token_classifier
