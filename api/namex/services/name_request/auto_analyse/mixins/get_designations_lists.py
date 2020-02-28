@@ -11,14 +11,14 @@ class GetDesignationsListsMixin(object):
     designations_entity_type_user = []
 
     # Designation_any_list and designation_end_list based on company name typed by user
-    #_designation_any_list = []
-    #_designation_end_list = []
+    _designation_any_list = []
+    _designation_end_list = []
     _all_designations = []
 
     # Wrong any_list and end_list based on company name typed by user
-    _misplaced_designation_any_list = []
-    _misplaced_designation_end_list = []
-    _misplaced_designation_all_list = []
+    _wrong_designation_any_list = []
+    _wrong_designation_end_list = []
+    _wrong_designation_place = []
 
     # Entity type(s) for designations related to company name typed by user:
     _entity_type_any_designation = []
@@ -36,17 +36,8 @@ class GetDesignationsListsMixin(object):
     def get_designated_any_words(self):
         return self._designated_any_words
 
-    # def get_misplaced_designation_in_input_name(self):
-    #    return self._misplaced_designation
-
-    def get_misplaced_designation_any(self):
-        return self._misplaced_designation_any_list
-
-    def get_misplaced_designation_end(self):
-        return self._misplaced_designation_end_list
-
-    def get_misplaced_designation_all(self):
-        return self._misplaced_designation_all_list
+    def get_wrong_designation_by_input_name(self):
+        return self._wrong_designation_place
 
     def get_entity_type_any_designation(self):
         return self._entity_type_any_designation

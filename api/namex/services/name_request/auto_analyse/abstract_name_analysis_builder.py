@@ -3,24 +3,59 @@ import abc
 from . import ProcedureResult
 
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
+from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
 
-class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationListsMixin):
+class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
     __metaclass__ = abc.ABCMeta
-
-    _director = None
-
-
-    _designation_any_list_user = []
-    _designation_end_list_user = []
-
-    # TODO: Are these conflict lists in use any more?
-    _in_province_conflicts = []
-    _all_conflicts = []
 
     _entity_type = None
     _name = ''
+
+    @property
+    def director(self):
+        return self._director
+
+    @director.setter
+    def director(self, director):
+        self._director = director
+
+    @property
+    def word_classification_service(self):
+        return self._word_classification_service
+
+    @word_classification_service.setter
+    def word_classification_service(self, svc):
+        self._word_classification_service = svc
+
+    @property
+    def word_condition_service(self):
+        return self._word_condition_service
+
+    @word_condition_service.setter
+    def word_condition_service(self, svc):
+        self._word_condition_service = svc
+
+    @property
+    def synonym_service(self):
+        return self._synonym_service
+
+    @synonym_service.setter
+    def synonym_service(self, svc):
+        self._synonym_service = svc
+
+    def __init__(self, director):
+        # Store a reference to the director, we will need to access methods on the director instance to do things
+        # like updating the classifications table
+        self.director = director
+
+        self.word_classification_service = director.word_classification_service
+        self.synonym_service = director.synonym_service
+        self.word_condition_service = director.word_condition_service
+
+    def get_name(self):
+        return self._name
 
     def set_name(self, **kwargs):
         self._name = kwargs.get('name')
@@ -29,8 +64,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
         self._list_desc_words = kwargs.get('list_desc')
         self._list_none_words = kwargs.get('list_none')
 
-    # TODO: Raise an exception if entity type is not set!!!
-    # TODO: Validate entity types against valid types
     def get_entity_type(self):
         return self._entity_type
 
@@ -48,67 +81,13 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetWordClassificationLi
         self._designation_end_list_user = kwargs.get('designation_end_list_user')
         self._designation_any_list_user = kwargs.get('designation_any_list_user')
 
-        self._in_province_conflicts = kwargs.get('in_province_conflicts')
-        self._all_conflicts = kwargs.get('all_conflicts')
-
-    # API for extending implementations
-    def get_name(self):
-        return self._name
-
-    def get_list_name(self):
-        return self._list_name_words
-
-    def get_list_dist(self):
-        return self._list_dist_words
-
-    def get_list_desc(self):
-        return self._list_desc_words
-
-    def get_list_none(self):
-        return self._list_none_words
-
-    def desc_synonym_list(self):
-        return self._synonyms
-
-    def get_substitution_list(self):
-        return self._substitution_list
-
-    def get_synonym_list(self, word):
-        return self._synonym_list
-
-    def get_stop_words(self):
-        return self._stop_words
-
-    def get_designated_end_words(self):
-        return self._designated_end_words
-
-    def get_designated_any_words(self):
-        return self._designated_any_words
-
-    def __init__(self, director):
-        # Store a reference to the director, we will need to access methods on the director instance to do things
-        # like updating the classifications table
-        self._director = director
-        self._word_classification_service = director.get_word_classification_service()
-        self._synonym_service = director.get_synonym_service()
-        self._virtual_word_condition_service = director.get_virtual_word_condition_service()
-
-    def get_synonym_service(self):
-        return self._synonym_service
-
-    def get_word_classification_service(self):
-        return self._word_classification_service
-
-    def get_virtual_word_condition_service(self):
-        return self._virtual_word_condition_service
-
     # Just a wrapped call to the API's getClassification
     def get_word_classification(self, word):
-        return self._word_classification_service.find_one(word)
+        return self.word_classification_service.find_one(word)
 
     # Just a wrapped call to the API's updateClassification
     def update_word_classification(self, word_classification):
-        return self._word_classification_service.update(word_classification)
+        return self.word_classification_service.update(word_classification)
 
     '''
     Check to see if a provided name is valid

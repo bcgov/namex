@@ -79,30 +79,6 @@ class TokenClassifier:
 
         return list_dist, list_desc, list_none
 
-    '''
-    Utility for adding unclassified words to distinctive and descriptive list
-    Override the abstract / base class method
-    @return list_dist, list_desc
-    '''
-    @staticmethod
-    def handle_unclassified_words(list_dist, list_desc, list_none, list_name):
-        idx_dist = -1
-        idx_desc = -1
-        for word in list_name:
-            if word in list_none:
-                idx_dist += 1
-                idx_desc += 1
-                list_dist.insert(idx_dist, word)
-                list_desc.insert(idx_desc, word)
-            else:
-                try:
-                    idx_dist = list_dist.index(word)
-                    idx_desc = list_desc.index(word)
-                except ValueError:
-                    pass
-
-        return list_dist, list_desc
-
     def _classify_tokens(self, word_tokens):
         try:
             cf = pd.DataFrame(columns=['word', 'word_classification'])
@@ -112,24 +88,23 @@ class TokenClassifier:
             # Get the word classification for each word in the supplied name name
             for word in word_tokens:
                 word_classification = wc_svc.find_one(word)
-                new_row = []
+                new_row = {}
                 if not word_classification:
                     print('No word classification found for: ' + word)
-                    new_row.append({
+                    new_row = {
                         'word': word.lower().strip(),
                         'word_classification': DataFrameFields.UNCLASSIFIED.value
-                    })
+                    }
                 else:
                     for row in word_classification:
-                        new_row.append({
+                        new_row = {
                             'word': word.lower().strip(),
                             'word_classification': row.classification.strip()
-                        })
+                        }
 
                 cf = cf.append(new_row, ignore_index=True)
 
             self.distinctive_word_tokens, self.descriptive_word_tokens, self.unclassified_word_tokens = data_frame_to_list(cf)
 
-        except Exception as error:
-            print('Token classification failed! ' + repr(error))
-            raise
+        except Exception:
+            print('Token classification failed')
