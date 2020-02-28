@@ -349,12 +349,22 @@ class WordSpecialUse(AnalysisResponseIssue):
     @classmethod
     def create_issue(cls, procedure_result):
         issue = cls.issue
+        list_name = procedure_result.values['list_name']
+        list_special = procedure_result.values['list_special']
 
-        issue.name_actions = [
-            NameAction(
-                type=NameActions.HIGHLIGHT
+        cls.issue.line1 = "The word(s) <b>" + ", ".join(list_special) + "</b> can only be approved for use under certain conditions."
+
+        # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
+        issue.name_actions = []
+        for word in list_special:
+            list_special_idx = list_name.index(word)
+            issue.name_actions.append(
+                NameAction(
+                    type=NameActions.HIGHLIGHT,
+                    word=word,
+                    index=list_special_idx
+                )
             )
-        ]
 
         # Setup boxes
         issue.setup = [
@@ -362,7 +372,7 @@ class WordSpecialUse(AnalysisResponseIssue):
                 button="",
                 checkbox="",
                 header="Helpful Hint",
-                line1="You can use the word <b>Doctor</b> under certain conditions, you might remove it.  Alternately, you can submit your name for examination-wait times are quoted above.",
+                line1="You can use the word <b>" + ", ".join(list_special) + " under certain conditions, you might remove it. Alternately, you can submit your name for examination-wait times are quoted above.",
                 line2=""
             )
         ]
