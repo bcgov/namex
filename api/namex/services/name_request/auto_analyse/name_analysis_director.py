@@ -83,6 +83,21 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_processing_service.name_tokens if np_svc else ''
 
     @property
+    def token_classifier(self):
+        return self._token_classifier
+
+    @token_classifier.setter
+    def token_classifier(self, token_classifier):
+        self._token_classifier = token_classifier
+
+    @property
+    def word_classification_tokens(self):
+        return \
+            self.token_classifier.distinctive_word_tokens, \
+            self.token_classifier.descriptive_word_tokens, \
+            self.token_classifier.unclassified_word_tokens
+
+    @property
     def processed_name(self):
         np_svc = self.name_processing_service
         return self.name_processing_service.processed_name if np_svc else ''
@@ -92,12 +107,22 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted if np_svc else ''
 
+    '''
+    Just an alias for name_as_submitted
+    '''
+    @property
+    def original_name(self):
+        return self.name_as_submitted
+
     def __init__(self):
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
         self.name_processing_service = NameProcessingService()
+
         self.builder = None
+        self.token_classifier = None
+
         self.entity_type = None
 
     # Call this method from whatever is using this director
@@ -122,13 +147,12 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_tokens
 
     # API for extending implementations
+    def get_original_name(self):
+        return self.original_name
+
+    # API for extending implementations
     def get_processed_name(self):
         return self.processed_name
-
-    # TODO: What is this for? Did Arturo or I add this?
-    # Get the company's designation if it's in the name
-    def get_name_designation(self):
-        pass
 
     '''
     Set and preprocess a submitted name string.
@@ -147,51 +171,21 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self._list_name_words = np_svc.name_tokens
 
         # Classify the tokens that were created by NameProcessingService
-        token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
+        self.token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
-        # TODO: Maybe get rid of this when done refactoring! We could just pass the token_classifier around...
-        # Store the classified tokens to our director instance
-        self._list_dist_words, self._list_desc_words, self._list_none_words = [
-            token_classifier.distinctive_word_tokens,
-            token_classifier.descriptive_word_tokens,
-            token_classifier.unclassified_word_tokens
-        ]
-
-        self.configure_builder()  # Update builder dicts
+        self.configure_builder()
 
     '''
     Prepare any data required by the analysis builder.
     prepare_data is an abstract method and must be implemented in extending classes.
     '''
     def prepare_data(self):
-        syn_svc = self.synonym_service
-
-        # Query database for synonyms, substitutions and designations
-        self._synonyms = syn_svc.get_synonyms()
-        self._substitutions = syn_svc.get_substitutions()
-        self._prefixes = syn_svc.get_prefixes()
-
-        self._stop_words = syn_svc.get_stop_words()
-        self._designated_end_words = syn_svc.get_designated_end_all_words()
-        self._designated_any_words = syn_svc.get_designated_any_all_words()
-
+        # Query for whatever data we need to load up here
         self.configure_builder()
 
     def configure_builder(self):
-        self.builder.set_entity_type(self._entity_type)
-        self.builder.set_dicts(
-            # List of all synonyms, loaded into the director in prepare_data
-            synonyms=self._synonyms,
-            # List of all substitution, loaded into the director in prepare_data
-            substitutions=self._substitutions,
-            stop_words=self._stop_words,
-            designated_end_words=self._designated_end_words,
-            designated_any_words=self._designated_any_words,
-            designation_end_list_user=self._designation_end_list_user,
-            designation_any_list_user=self._designation_any_list_user,
-            entity_end_designation_dict=self._entity_end_designation_dict,
-            entity_any_designation_dict=self._entity_any_designation_dict
-        )
+        # Do anything else required to configure the builder
+        pass
 
     '''
     This is the main execution call that wraps name analysis checks. 
@@ -201,31 +195,44 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     @:return ProcedureResult[]
     '''
     def execute_analysis(self):
-        builder = self.builder
+        try:
+            # Execute analysis using the supplied builder
+            builder = self.builder
 
-        results = []
-        if self.get_list_none():
-            self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
-                self.get_list_dist(),
-                self.get_list_desc(),
-                self.get_list_none(),
-                self.get_list_name()
+            list_name = self.name_tokens
+            list_dist, list_desc, list_none = self.word_classification_tokens
+
+            results = []
+            if list_none and list_none.__len__() > 0:
+                self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
+                    list_dist,
+                    list_desc,
+                    list_none,
+                    list_name
+                )
+
+            check_name_is_well_formed = builder.check_name_is_well_formed(
+                self.token_classifier.distinctive_word_tokens,
+                self.token_classifier.descriptive_word_tokens,
+                self.token_classifier.unclassified_word_tokens,
+                self.name_tokens
             )
 
-        check_name_is_well_formed = builder.check_name_is_well_formed(
-            self.get_list_dist(),
-            self.get_list_desc(),
-            self.get_list_none(),
-            self.get_list_name()
-        )
+            if not check_name_is_well_formed.is_valid:
+                results.append(check_name_is_well_formed)
+                return results
+                #  Name is not well formed - do not continue
 
-        if not check_name_is_well_formed.is_valid:
-            results.append(check_name_is_well_formed)
-            return results
-            #  Do not continue
+            analysis = results + self.do_analysis()
 
-        # TODO: Persist preprocessed name here?
-        return results + self.do_analysis()
+            if not analysis:
+                # TODO: Get the classname of the concrete class, somehow, for the message...
+                raise ValueError('NameAnalysisDirector.execute_analysis did not return a result')
+
+            return analysis
+
+        except Exception as error:
+            print('Error executing name analysis: ' + repr(error))
 
     '''
     This is the main execution call for running name analysis checks.
