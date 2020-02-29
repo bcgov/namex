@@ -199,19 +199,10 @@ class NameAnalysis(Resource):
 
         except Exception as error:
             print('Error initializing NameAnalysisService: ' + repr(error))
+            raise
 
-        # Perform the name analysis
-        analysis = None
-
-        try:
-            # Execute analysis using the supplied builder
-            analysis = service.execute_analysis()
-
-            if not analysis:
-                raise ValueError('NameAnalysisService did not return a result')
-
-        except Exception as error:
-            print('Error executing name analysis: ' + repr(error))
+        # Perform the name analysis - execute analysis using the supplied builder
+        analysis = service.execute_analysis()
 
         # Build the appropriate response for the analysis result
         analysis_response = AnalysisResponse(analysis)

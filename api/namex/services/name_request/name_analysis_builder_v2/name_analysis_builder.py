@@ -15,17 +15,6 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
-    def desc_synonym_list(self):
-        return self._synonyms
-
-    # TODO: We have stuff for these already, possible duplicate?
-    def get_substitution_list(self):
-        return self._substitution_list
-
-    # TODO: We have stuff for these already, possible duplicate?
-    def get_synonym_list(self, word):
-        return self._synonym_list
-
     '''
     Check to see if a provided name is valid
     Override the abstract / base class method
@@ -121,7 +110,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
            list_desc = ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
-    def search_conflicts(self, list_dist, list_desc, list_name, name):
+    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name):
         syn_svc = self.synonym_service
 
         result = ProcedureResult()
@@ -132,7 +121,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         dict_highest_detail = {}
         response = {}
 
-        for w_dist, w_desc in zip(list_dist, list_desc):
+        for w_dist, w_desc in zip(list_dist_words, list_desc_words):
             dist_substitution_list = []
             desc_synonym_list = []
             dist_all_permutations = []
@@ -173,8 +162,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
             result.values = {
                 'list_name': list_name,
-                'list_dist': list_dist,
-                'list_desc': list_desc,
+                'list_dist': list_dist_words,
+                'list_desc': list_desc_words,
                 'list_conflicts': response
             }
         else:

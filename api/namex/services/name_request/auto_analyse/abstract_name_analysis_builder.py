@@ -10,9 +10,6 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
     __metaclass__ = abc.ABCMeta
 
-    _entity_type = None
-    _name = ''
-
     @property
     def director(self):
         return self._director
@@ -20,6 +17,14 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     @director.setter
     def director(self, director):
         self._director = director
+
+    @property
+    def name_processing_service(self):
+        return self._name_processing_service
+
+    @name_processing_service.setter
+    def name_processing_service(self, svc):
+        self._name_processing_service = svc
 
     @property
     def word_classification_service(self):
@@ -45,41 +50,19 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     def synonym_service(self, svc):
         self._synonym_service = svc
 
+    @property
+    def entity_type(self):
+        return self.director.entity_type
+
     def __init__(self, director):
         # Store a reference to the director, we will need to access methods on the director instance to do things
         # like updating the classifications table
         self.director = director
 
+        self.name_processing_service = director.name_processing_service
         self.word_classification_service = director.word_classification_service
-        self.synonym_service = director.synonym_service
         self.word_condition_service = director.word_condition_service
-
-    def get_name(self):
-        return self._name
-
-    def set_name(self, **kwargs):
-        self._name = kwargs.get('name')
-        self._list_name_words = kwargs.get('list_name')
-        self._list_dist_words = kwargs.get('list_dist')
-        self._list_desc_words = kwargs.get('list_desc')
-        self._list_none_words = kwargs.get('list_none')
-
-    def get_entity_type(self):
-        return self._entity_type
-
-    def set_entity_type(self, entity_type):
-        self._entity_type = entity_type
-
-    def set_dicts(self, **kwargs):
-        self._synonyms = kwargs.get('synonyms')
-        self._substitutions = kwargs.get('substitutions')
-
-        self._stop_words = kwargs.get('stop_words')
-        self._designated_end_words = kwargs.get('designated_end_words')
-        self._designated_any_words = kwargs.get('designated_any_words')
-
-        self._designation_end_list_user = kwargs.get('designation_end_list_user')
-        self._designation_any_list_user = kwargs.get('designation_any_list_user')
+        self.synonym_service = director.synonym_service
 
     # Just a wrapped call to the API's getClassification
     def get_word_classification(self, word):
