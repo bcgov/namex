@@ -46,7 +46,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     @:return ProcedureResult[]
     '''
     def do_analysis(self):
-        builder = self._builder
+        builder = self.builder
 
         results = []
 

@@ -79,6 +79,30 @@ class TokenClassifier:
 
         return list_dist, list_desc, list_none
 
+    '''
+    Utility for adding unclassified words to distinctive and descriptive list
+    Override the abstract / base class method
+    @return list_dist, list_desc
+    '''
+    @staticmethod
+    def handle_unclassified_words(list_dist, list_desc, list_none, list_name):
+        idx_dist = -1
+        idx_desc = -1
+        for word in list_name:
+            if word in list_none:
+                idx_dist += 1
+                idx_desc += 1
+                list_dist.insert(idx_dist, word)
+                list_desc.insert(idx_desc, word)
+            else:
+                try:
+                    idx_dist = list_dist.index(word)
+                    idx_desc = list_desc.index(word)
+                except ValueError:
+                    pass
+
+        return list_dist, list_desc
+
     def _classify_tokens(self, word_tokens):
         try:
             cf = pd.DataFrame(columns=['word', 'word_classification'])

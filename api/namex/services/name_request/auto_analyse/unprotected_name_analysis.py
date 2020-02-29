@@ -37,7 +37,7 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
     @:return ProcedureResult[]
     '''
     def do_analysis(self):
-        builder = self._builder
+        builder = self.builder
 
         # TODO: If XPRO then run unclassified word check too
         # Return any combination of these checks
