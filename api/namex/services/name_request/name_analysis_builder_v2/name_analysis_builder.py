@@ -171,12 +171,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if response:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
-            result.values = response
+            result.values = {
+                'list_name': list_name,
+                'list_dist': list_dist,
+                'list_desc': list_desc,
+                'list_conflicts': response
+            }
         else:
             result.is_valid = True
             result.result_code = AnalysisResultCodes.VALID_NAME
             result.values = []
-
         return result
 
     '''
