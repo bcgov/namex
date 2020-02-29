@@ -84,29 +84,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return result
 
     '''
-    Add unclassified words to distinctive and descriptive list
-    Override the abstract / base class method
-    @return list_dist, list_desc
-    '''
-    def handle_unclassified_words(self, list_dist, list_desc, list_none, list_name):
-        idx_dist = -1
-        idx_desc = -1
-        for word in list_name:
-            if word in list_none:
-                idx_dist += 1
-                idx_desc += 1
-                list_dist.insert(idx_dist, word)
-                list_desc.insert(idx_desc, word)
-            else:
-                try:
-                    idx_dist = list_dist.index(word)
-                    idx_desc = list_desc.index(word)
-                except ValueError:
-                    pass
-
-        return list_dist, list_desc
-
-    '''
     Override the abstract / base class method
     @return ProcedureResult
     '''
@@ -140,8 +117,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
-    Input: list_dist= ['MOUNTAIN', 'VIEW']
-           list_desc= ['FOOD', 'GROWERS']
+    Input: list_dist = ['MOUNTAIN', 'VIEW']
+           list_desc = ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
     def search_conflicts(self, list_dist, list_desc, list_name, name):

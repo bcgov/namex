@@ -13,6 +13,9 @@ from namex.services.name_processing.name_processing \
 from namex.services.word_classification.word_classification \
     import WordClassificationService
 
+from namex.services.word_classification.token_classifier \
+    import TokenClassifier
+
 from namex.services.virtual_word_condition.virtual_word_condition \
     import VirtualWordConditionService
 
@@ -22,25 +25,22 @@ This is the director for AutoAnalyseService.
 
 
 class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
-    _builder = None  # Store a reference to the builder
-    _model = None
-
-    # Services
-    _synonym_service = None
-    # _solr_conflicts_service = None
-    _name_processing_service = None
-    _word_classification_service = None
-    _virtual_word_condition_service = None
-
     # Name + tokens
     _entity_type = None
     _name_as_submitted = ''
     _preprocessed_name = ''
-    # _unclassifiable_words = []  # TODO: Or do we add these to list_none?
 
-    # Conflicts
-    _in_province_conflicts = []
-    _all_conflicts = []
+    @property
+    def builder(self):
+        return self._builder
+
+    @builder.setter
+    def builder(self, builder):
+        self._builder = builder
+
+    @property
+    def model(self):
+        return Synonym
 
     @property
     def word_classification_service(self):
@@ -79,11 +79,10 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
         self.name_processing_service = NameProcessingService()
-
-        self._model = Synonym
+        self.builder = None
 
     def use_builder(self, builder):
-        self._builder = builder if builder else None
+        self.builder = builder if builder else None
 
     # API for extending implementations
     def get_name(self):
@@ -137,20 +136,22 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     prepare_data is an abstract method and must be implemented in extending classes.
     '''
     def prepare_data(self):
-        # Query database for synonyms, substitutions and designations
-        self._synonyms = self._synonym_service.get_synonyms()
-        self._substitutions = self._synonym_service.get_substitutions()
-        self._prefixes = self._synonym_service.get_prefixes()
+        syn_svc = self.synonym_service
 
-        self._stop_words = self._synonym_service.get_stop_words()
-        self._designated_end_words = self._synonym_service.get_designated_end_all_words()
-        self._designated_any_words = self._synonym_service.get_designated_any_all_words()
+        # Query database for synonyms, substitutions and designations
+        self._synonyms = syn_svc.get_synonyms()
+        self._substitutions = syn_svc.get_substitutions()
+        self._prefixes = syn_svc.get_prefixes()
+
+        self._stop_words = syn_svc.get_stop_words()
+        self._designated_end_words = syn_svc.get_designated_end_all_words()
+        self._designated_any_words = syn_svc.get_designated_any_all_words()
 
         self.configure_builder()
 
     def configure_builder(self):
-        self._builder.set_entity_type(self._entity_type)
-        self._builder.set_dicts(
+        self.builder.set_entity_type(self._entity_type)
+        self.builder.set_dicts(
             # List of all synonyms, loaded into the director in prepare_data
             synonyms=self._synonyms,
             # List of all substitution, loaded into the director in prepare_data
@@ -161,9 +162,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             designation_end_list_user=self._designation_end_list_user,
             designation_any_list_user=self._designation_any_list_user,
             entity_end_designation_dict=self._entity_end_designation_dict,
-            entity_any_designation_dict=self._entity_any_designation_dict,
-            in_province_conflicts=self._in_province_conflicts,
-            all_conflicts=self._all_conflicts
+            entity_any_designation_dict=self._entity_any_designation_dict
         )
 
     '''
@@ -174,11 +173,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     @:return ProcedureResult[]
     '''
     def execute_analysis(self):
-        builder = self._builder
+        builder = self.builder
 
         results = []
         if self.get_list_none():
-            self._list_dist_words, self._list_desc_words = builder.handle_unclassified_words(
+            self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
                 self.get_list_dist(),
                 self.get_list_desc(),
                 self.get_list_none(),
