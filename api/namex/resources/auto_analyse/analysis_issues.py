@@ -488,46 +488,61 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         list_desc = procedure_result.values['list_desc']
         list_conflicts = procedure_result.values['list_conflicts']
 
-        # TODO: What is the conflicting word(s)
-        #  - index, position
+        '''
+        eg:
+        list_name: <class 'list'>: ['mountain', 'view', 'growers']
+        list_dist: <class 'list'>: [['mountain'], ['mountain', 'view']]
+        list_desc: <class 'list'>: [['view', 'growers'], ['growers']]
+        list_conflicts: <class 'dict'>: {'MOUNTAIN VIEW GROWERS INC.': {'mountain': ['mountain'], 'view': ['view'], 'growers': ['growers']}}
+        '''
 
-        issue.name_actions = []
+        # Grab the first conflict
+        current_conflict_name = list(list_conflicts.keys())[0]  # eg: 'MOUNTAIN VIEW GROWERS INC.'
+        current_conflict = list_conflicts[current_conflict_name]  # eg: {'mountain': ['mountain'], 'view': ['view'], 'growers': ['growers']}
+        current_conflict_keys = list(current_conflict.keys())
 
-        # TODO: Move this logic out into its own thing
-        index = 0
-        word = 'Mountain'
-        position = WordPositions.START
+        is_exact_match = (list_name == current_conflict_keys)
 
-        issue.name_actions.append(NameAction(
-            word=word,
-            index=index,
-            type=NameActions.STRIKE
-        ))
+        list_dist_words = [item for sublist in list_dist for item in sublist]
+        list_desc_words = [item for sublist in list_desc for item in sublist]
 
-        index = 1
-        word = 'Mountain'
-        position = WordPositions.START
+        # Apply our is_exact_match strategy:
+        # - Add brackets after the first distinctive word
+        # - Add brackets after the last descriptive word?
+        # - Strike out the last word
 
-        issue.name_actions.append(NameAction(
-            word=word,
-            index=index,
-            type=NameActions.BRACKETS,
-            position=position,
-            message="Add a Word Here"
-        ))
+        if is_exact_match:
+            # Loop over the list_name words, we need to decide to do with each word
+            for word in list_name:
+                name_word_idx = list_name.index(word)
 
-        # Create conflicts
-        # TODO: Check if it is a list
-        if procedure_result.values:
-            issue.conflicts = []
+                # Add brackets after the first distinctive word
+                first_dist_word_idx = list_name.index(list_dist_words[0])
+                if first_dist_word_idx == name_word_idx:
+                    issue.name_actions.append(NameAction(
+                        word=word,
+                        index=first_dist_word_idx,
+                        type=NameActions.BRACKETS,
+                        position=WordPositions.END,
+                        message="Add a Word Here"
+                    ))
 
-            for value in procedure_result.values:
-                conflict = Conflict(
-                    name=value,
-                    date=date.today()
-                )
+                # Strike out the last word
+                if name_word_idx == list_name.__len__() - 1:
+                    issue.name_actions.append(NameAction(
+                        word=word,
+                        index=name_word_idx,
+                        type=NameActions.STRIKE
+                    ))
 
-                issue.conflicts.append(conflict)
+        issue.conflicts = []
+
+        conflict = Conflict(
+            name=current_conflict_name,
+            date=date.today()
+        )
+
+        issue.conflicts.append(conflict)
 
         # Setup boxes
         issue.setup = [
