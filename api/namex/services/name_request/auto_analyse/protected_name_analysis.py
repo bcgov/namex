@@ -40,81 +40,16 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     def __init__(self):
         super(ProtectedNameAnalysisService, self).__init__()
 
-    '''
-    do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
-    This is the main execution call for running name analysis checks.
-    @:return ProcedureResult[]
-    '''
-    def do_analysis(self):
-        builder = self.builder
+    # TODO: I don't see this called anywhere (was prev called: set_all_entity_types)
+    def _set_all_entity_types(self):
+        self._all_entity_types = [item for item, count in collections.Counter(
+            self._entity_type_any_designation + self._entity_type_end_designation
+        ).items() if count > 1]
 
-        results = []
+        if not self._all_entity_types:
+            self._all_entity_types = self._entity_type_any_designation + self._entity_type_end_designation
 
-        check_words_to_avoid = builder.check_words_to_avoid(self.get_list_name(), self.get_preprocessed_name())
-        if not check_words_to_avoid.is_valid:
-            results.append(check_words_to_avoid)
-
-        if self.get_list_dist() == self.get_list_desc():
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.get_list_name())
-
-        else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.get_list_name(), self.get_list_dist(), self.get_list_desc())
-
-        # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc(), self.get_list_name(), self.get_name())
-
-        if not check_conflicts.is_valid:
-            results.append(check_conflicts)
-
-        # TODO: Use the list_name array, don't use a string in the method!
-        # check_words_requiring_consent = builder.check_words_requiring_consent(self.get_list_name())  # This is correct
-        check_words_requiring_consent = builder.check_words_requiring_consent(
-            self.get_list_name(), self.get_preprocessed_name())  # This is incorrect
-        if not check_words_requiring_consent.is_valid:
-            results.append(check_words_requiring_consent)
-
-
-        # TODO: Use the list_name array, don't use a string in the method!
-        # check_designation_mismatch = builder.check_designation(self.get_list_name(), self.get_entity_type())  # This is correct
-        self.set_designations_by_entity_type_user(self.get_entity_type())
-
-        # Use _name_as_submitted
-        self.set_designations_by_input_name(self.get_name())  # Set _designation_any_list and _designation_end_list based on company name typed by user
-
-        self.set_wrong_designation_by_input_name(self.get_name())  # Set _wrong_designation_place based on company name typed by user
-
-        # TODO: Fix this it's broken!
-        self.set_entity_type_any_designation(self._entity_any_designation_dict, self._designation_any_list)  # Set _entity_type_any_designation for designations based on company name typed by user
-
-        # TODO: Fix this it's broken!
-        self.set_entity_type_end_designation(self._entity_end_designation_dict, self._designation_end_list)  # Set _entity_type_end_designation for designations based on company name typed by user
-
-        self.set_all_designations_user()  # Set all designations based on entity type typed by user
-        self.set_all_designations()  # Set all designations based on company name typed by user
-
-        check_designation_mismatch = builder.check_designation(
-            self.get_list_name(),
-            self.get_entity_type(),
-            self.get_all_designations(),
-            self.get_wrong_designation_by_input_name(),
-            self.get_all_designations_user()
-        )
-
-        check_special_words = builder.check_word_special_use(self.get_list_name(), self.get_name())
-
-        if not check_designation_mismatch.is_valid:
-            results.append(check_designation_mismatch)
-
-        if not check_special_words.is_valid:
-            results.append(check_special_words)
-
-        # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
-        if not results.__len__() > 0:
-            results.append(ProcedureResult(is_valid=True))
-
-        return results
-
-    def set_designations_by_entity_type_user(self, entity_type):
+    def _set_designations_by_entity_type_user(self, entity_type):
         syn_svc = self.synonym_service
 
         entity_type_code = None
@@ -131,13 +66,13 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         self._designation_any_list_user.extend(any_list)
         self._designation_end_list_user.extend(end_list)
 
-    def set_designations_by_input_name(self, name):
+    def _set_designations_by_input_name(self, name):
         syn_svc = self.synonym_service
 
         self._designation_any_list = syn_svc.get_designation_any_in_name(name)
         self._designation_end_list = syn_svc.get_designation_end_in_name(name)
 
-    def set_wrong_designation_by_input_name(self, name):
+    def _set_wrong_designation_by_input_name(self, name):
         syn_svc = self.synonym_service
 
         self._wrong_designation_any_list = syn_svc.get_wrong_place_any_designations(name)
@@ -145,30 +80,109 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         self._wrong_designation_place = self._wrong_designation_any_list + self._wrong_designation_end_list
 
-    def set_entity_type_any_designation(self, entity_any_designation_dict, designation_any_list):
+    def _set_entity_type_any_designation(self, entity_any_designation_dict, designation_any_list):
         syn_svc = self.synonym_service
 
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
-            syn_svc.get_all_end_designations(),
-            designation_any_list)
+            syn_svc.get_all_end_designations(), designation_any_list
+        )
 
-    def set_entity_type_end_designation(self, entity_end_designation_dict, designation_end_list):
+    def _set_entity_type_end_designation(self, entity_end_designation_dict, designation_end_list):
         syn_svc = self.synonym_service
 
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
-            syn_svc.get_all_any_designations(),
-            designation_end_list)
+            syn_svc.get_all_any_designations(), designation_end_list
+        )
 
-    def set_all_entity_types(self):
-        self._all_entity_types = [item for item, count in collections.Counter(
-            self._entity_type_any_designation + self._entity_type_end_designation
-        ).items() if count > 1]
+    def _set_designations(self):
+        # TODO: Use the list_name array, don't use a string in the method!
+        # check_designation_mismatch = builder.check_designation(list_name, self.get_entity_type())  # This is correct
+        self._set_designations_by_entity_type_user(self.get_entity_type())
 
-        if not self._all_entity_types:
-            self._all_entity_types = self._entity_type_any_designation + self._entity_type_end_designation
+        # Set _designation_any_list and _designation_end_list based on company name typed by user
+        self._set_designations_by_input_name(self.get_name())  # Use _name_as_submitted
 
-    def set_all_designations_user(self):
+        # Set _wrong_designation_place based on company name typed by user
+        self._set_wrong_designation_by_input_name(self.get_name())
+
+        # TODO: Fix this it's broken!
+        # Set _entity_type_any_designation for designations based on company name typed by user
+        self._set_entity_type_any_designation(self._entity_any_designation_dict, self._designation_any_list)
+
+        # TODO: Fix this it's broken!
+        # Set _entity_type_end_designation for designations based on company name typed by user
+        self._set_entity_type_end_designation(self._entity_end_designation_dict, self._designation_end_list)
+
+        # Set all designations based on entity type typed by user
         self._all_designations_user = self._designation_any_list_user + self._designation_end_list_user
 
-    def set_all_designations(self):
+        # Set all designations based on company name typed by user
         self._all_designations = self._designation_any_list + self._designation_end_list
+
+    '''
+    do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
+    This is the main execution call for running name analysis checks.
+    @:return ProcedureResult[]
+    '''
+    def do_analysis(self):
+        builder = self.builder
+
+        results = []
+
+        check_words_to_avoid = builder.check_words_to_avoid(self.get_list_name(), self.get_processed_name())
+        if not check_words_to_avoid.is_valid:
+            results.append(check_words_to_avoid)
+
+        list_dist = self.get_list_dist()
+        list_desc = self.get_list_desc()
+        list_name = self.get_list_name()
+
+        if list_dist == list_desc:
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name)
+
+        else:
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name, list_dist, list_desc)
+
+        # TODO: I am just re-getting these in case they have changed
+        list_dist = self.get_list_dist()
+        list_desc = self.get_list_desc()
+        list_name = self.get_list_name()
+
+        # Return any combination of these checks
+        check_conflicts = builder.search_conflicts(list_dist, list_desc, list_name, self.get_name())
+
+        if not check_conflicts.is_valid:
+            results.append(check_conflicts)
+
+        # TODO: Use the list_name array, don't use a string in the method!
+        # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
+        check_words_requiring_consent = builder.check_words_requiring_consent(
+            list_name, self.get_processed_name())  # This is incorrect
+
+        if not check_words_requiring_consent.is_valid:
+            results.append(check_words_requiring_consent)
+
+        # Set designations and run our check
+        self._set_designations()
+
+        check_designation_mismatch = builder.check_designation(
+            list_name,
+            self.get_entity_type(),
+            self.get_all_designations(),
+            self.get_wrong_designation_by_input_name(),
+            self.get_all_designations_user()
+        )
+
+        check_special_words = builder.check_word_special_use(list_name, self.get_name())
+
+        if not check_designation_mismatch.is_valid:
+            results.append(check_designation_mismatch)
+
+        if not check_special_words.is_valid:
+            results.append(check_special_words)
+
+        # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
+        if not results.__len__() > 0:
+            results.append(ProcedureResult(is_valid=True))
+
+        return results

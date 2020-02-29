@@ -483,12 +483,17 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
     @classmethod
     def create_issue(cls, procedure_result):
         issue = cls.issue
+        list_name = procedure_result.values['list_name']
+        list_dist = procedure_result.values['list_dist']
+        list_desc = procedure_result.values['list_desc']
+        list_conflicts = procedure_result.values['list_conflicts']
 
         # TODO: What is the conflicting word(s)
         #  - index, position
 
         issue.name_actions = []
 
+        # TODO: Move this logic out into its own thing
         index = 0
         word = 'Mountain'
         position = WordPositions.START

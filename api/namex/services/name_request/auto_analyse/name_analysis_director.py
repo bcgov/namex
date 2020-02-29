@@ -25,23 +25,6 @@ This is the director for AutoAnalyseService.
 
 
 class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
-    # Name + tokens
-    _entity_type = None
-    _name_as_submitted = ''
-    _preprocessed_name = ''
-
-    @property
-    def builder(self):
-        return self._builder
-
-    @builder.setter
-    def builder(self, builder):
-        self._builder = builder
-
-    @property
-    def model(self):
-        return Synonym
-
     @property
     def word_classification_service(self):
         return self._word_classification_service
@@ -74,54 +57,99 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def name_processing_service(self, svc):
         self._name_processing_service = svc
 
+    @property
+    def builder(self):
+        return self._builder
+
+    @builder.setter
+    def builder(self, builder):
+        self._builder = builder
+
+    @property
+    def model(self):
+        return Synonym
+
+    @property
+    def entity_type(self):
+        return self._entity_type
+
+    @entity_type.setter
+    def entity_type(self, entity_type):
+        self._entity_type = entity_type
+
+    @property
+    def name_tokens(self):
+        np_svc = self.name_processing_service
+        return self.name_processing_service.name_tokens if np_svc else ''
+
+    @property
+    def processed_name(self):
+        np_svc = self.name_processing_service
+        return self.name_processing_service.processed_name if np_svc else ''
+
+    @property
+    def name_as_submitted(self):
+        np_svc = self.name_processing_service
+        return self.name_processing_service.name_as_submitted if np_svc else ''
+
     def __init__(self):
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
         self.name_processing_service = NameProcessingService()
         self.builder = None
+        self.entity_type = None
 
+    # Call this method from whatever is using this director
     def use_builder(self, builder):
         self.builder = builder if builder else None
 
+    # Convenience method for extending implementations
+    def get_entity_type(self):
+        return self.entity_type
+
+    # Convenience method for extending implementations
+    def set_entity_type(self, entity_type):
+        self.entity_type = entity_type
+
     # API for extending implementations
+    def get_name_tokens(self):
+        return self.name_tokens
+
+    # API for extending implementations
+    # TODO: Just for backward compat. et rid of this when we are done refactoring!
     def get_name(self):
-        return self._name_as_submitted
+        return self.name_tokens
 
     # API for extending implementations
-    def get_preprocessed_name(self):
-        return self._preprocessed_name
+    def get_processed_name(self):
+        return self.processed_name
 
+    # TODO: What is this for? Did Arturo or I add this?
     # Get the company's designation if it's in the name
     def get_name_designation(self):
         pass
 
-    # API for extending implementations
-    def get_entity_type(self):
-        # TODO: Raise an exception if entity type is not set!!!
-        # TODO: Validate entity types against valid types
-        return self._entity_type
-
-    def set_entity_type(self, entity_type):
-        self._entity_type = entity_type
-
     '''
-    Set and preprocess a submitted name string using the preprocess_name class method.
+    Set and preprocess a submitted name string.
+    Setting the name using np_svc.set_name will clean the name and set the following properties:
+    @:prop name_as_submitted The original name string
+    @:prop processed_name The cleaned name
+    @:prop name_tokens Word tokens generated from the cleaned name
     '''
     def set_name(self, name):
         np_svc = self.name_processing_service
         wc_svc = self.word_classification_service
 
-        self._name_as_submitted = name  # Store the user's submitted name string
+        np_svc.set_name(name)
 
-        np_svc.set_name(name)  # Setting the name will automatically clean the name
-        # Store the clean, processed name to our director instance
-        self._preprocessed_name = np_svc.processed_name
+        # TODO: Get rid of this when done refactoring!
         self._list_name_words = np_svc.name_tokens
 
         # Classify the tokens that were created by NameProcessingService
         token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
+        # TODO: Maybe get rid of this when done refactoring! We could just pass the token_classifier around...
         # Store the classified tokens to our director instance
         self._list_dist_words, self._list_desc_words, self._list_none_words = [
             token_classifier.distinctive_word_tokens,

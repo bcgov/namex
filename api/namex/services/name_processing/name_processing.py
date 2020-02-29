@@ -7,6 +7,14 @@ from namex.services.word_classification.word_classification import WordClassific
 
 from .mixins.get_synonym_lists import GetSynonymListsMixin
 
+'''
+Service for pre-processing of a user submitted name request name string.
+Setting the name using NameProcessingService.set_name will clean the name and set the following properties:
+@:prop name_as_submitted The original name string
+@:prop processed_name The cleaned name
+@:prop name_tokens Word tokens generated from the cleaned name
+'''
+
 
 class NameProcessingService(GetSynonymListsMixin):
     @property
