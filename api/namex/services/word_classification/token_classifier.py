@@ -112,19 +112,16 @@ class TokenClassifier:
             # Get the word classification for each word in the supplied name name
             for word in word_tokens:
                 word_classification = wc_svc.find_one(word)
-                new_row = {}
+                new_row = []
                 if not word_classification:
                     print('No word classification found for: ' + word)
-                    new_row = {
-                        'word': word.lower().strip(),
-                        'word_classification': DataFrameFields.UNCLASSIFIED.value
-                    }
+                    new_row = {}
                 else:
                     for row in word_classification:
-                        new_row = {
+                        new_row.append({
                             'word': word.lower().strip(),
                             'word_classification': row.classification.strip()
-                        }
+                        })
 
                 cf = cf.append(new_row, ignore_index=True)
 
