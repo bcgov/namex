@@ -10,7 +10,8 @@ from namex.services.synonyms import DesignationPositionCodes
 from .name_analysis_director import NameAnalysisDirector
 from . import ProcedureResult
 
-from .name_analysis_utils import list_distinctive_descriptive_same, validate_distinctive_descriptive_lists, list_distinctive_descriptive
+from .name_analysis_utils import list_distinctive_descriptive_same, validate_distinctive_descriptive_lists, \
+    list_distinctive_descriptive
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -148,6 +149,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     This is the main execution call for running name analysis checks.
     @:return ProcedureResult[]
     '''
+
     def do_analysis(self):
         builder = self.builder
 
@@ -172,7 +174,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name, list_dist, list_desc)
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, list_name, self.processed_name)
+        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, list_name,
+                                                   self.processed_name)
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
