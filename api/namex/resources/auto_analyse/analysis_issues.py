@@ -1,4 +1,5 @@
 from datetime import date
+from copy import copy
 
 from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
@@ -20,9 +21,8 @@ class AnalysisResponseIssue:
     def __init__(self):
         pass
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        return cls.issue
+    def create_issue(self, procedure_result):
+        return self.issue
 
 
 class ValidName(AnalysisResponseIssue):
@@ -41,9 +41,10 @@ class ValidName(AnalysisResponseIssue):
         name_actions=None
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+
         return issue
 
 
@@ -68,9 +69,10 @@ class IncorrectCategory(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
 
         issue.name_actions = [
             NameAction(
@@ -113,13 +115,15 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
+
         list_name = procedure_result.values['list_name']
         list_none = procedure_result.values['list_none']
 
-        cls.issue.line1 = "The word(s) <b>" + ", ".join(list_none) + "</b> are unknown. The system cannot auto-approve a name with unknown words."
+        self.issue.line1 = "The word(s) <b>" + ", ".join(list_none) + "</b> are unknown. The system cannot auto-approve a name with unknown words."
 
         # TODO: Fix the case eg. 'Asdfadsf Something Asdfadsf Company Ltd.'...
         #  If there's a duplicate of an unclassified word, just grabbing the index won't do!
@@ -164,9 +168,11 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
+
         values = procedure_result.values
 
         issue.name_actions = [
@@ -214,9 +220,11 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
+
         list_name = procedure_result.values['list_name']
         list_dist = procedure_result.values['list_dist']
 
@@ -261,10 +269,10 @@ class TooManyWordsIssue(AnalysisResponseIssue):
         name_actions=None
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
-        values = procedure_result.values
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
 
         # Setup boxes
         issue.setup = [
@@ -301,13 +309,15 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
+
         list_name = procedure_result.values['list_name']
         list_avoid = procedure_result.values['list_avoid']
 
-        cls.issue.line1 = "The word(s) <b>" + ", ".join(list_avoid) + "</b> cannot be approved for use. Please remove them and try again."
+        self.issue.line1 = "The word(s) <b>" + ", ".join(list_avoid) + "</b> cannot be approved for use. Please remove them and try again."
 
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
@@ -351,13 +361,15 @@ class WordSpecialUse(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
+
         list_name = procedure_result.values['list_name']
         list_special = procedure_result.values['list_special']
 
-        cls.issue.line1 = "The word(s) <b>" + ", ".join(list_special) + "</b> can only be approved for use under certain conditions."
+        self.issue.line1 = "The word(s) <b>" + ", ".join(list_special) + "</b> can only be approved for use under certain conditions."
 
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
@@ -409,9 +421,10 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+
         list_name = procedure_result.values['list_name']
         list_consent = procedure_result.values['list_consent']
 
@@ -480,9 +493,12 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
+        issue.name_actions = []
+
         list_name = procedure_result.values['list_name']
         list_dist = procedure_result.values['list_dist']
         list_desc = procedure_result.values['list_desc']
@@ -503,8 +519,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         is_exact_match = (list_name == current_conflict_keys)
 
-        list_dist_words = [item for sublist in list_dist for item in sublist]
-        list_desc_words = [item for sublist in list_desc for item in sublist]
+        list_dist_words = list(set([item for sublist in list_dist for item in sublist]))
+        list_desc_words = list(set([item for sublist in list_desc for item in sublist]))
 
         # Apply our is_exact_match strategy:
         # - Add brackets after the first distinctive word
@@ -516,24 +532,48 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
             for word in list_name:
                 name_word_idx = list_name.index(word)
 
-                # Add brackets after the first distinctive word
-                first_dist_word_idx = list_name.index(list_dist_words[0])
-                if first_dist_word_idx == name_word_idx:
+                # Highlight the descriptives
+                # <class 'list'>: ['mountain', 'view']
+                if word in list_dist_words:
                     issue.name_actions.append(NameAction(
                         word=word,
-                        index=first_dist_word_idx,
-                        type=NameActions.BRACKETS,
-                        position=WordPositions.END,
-                        message="Add a Word Here"
+                        index=name_word_idx,
+                        type=NameActions.HIGHLIGHT
                     ))
 
-                # Strike out the last word
-                if name_word_idx == list_name.__len__() - 1:
+                # Strike out the last descriptive word
+                if word in list_desc_words and name_word_idx == list_name.__len__() - 1:
+                    # <class 'list'>: ['growers', 'view']
                     issue.name_actions.append(NameAction(
                         word=word,
                         index=name_word_idx,
                         type=NameActions.STRIKE
                     ))
+
+        if not is_exact_match:
+            # Loop over the list_name words, we need to decide to do with each word
+            for word in list_name:
+                name_word_idx = list_name.index(word)
+
+                # Highlight the descriptives
+                # <class 'list'>: ['mountain', 'view']
+                if word in list_dist_words:
+                    issue.name_actions.append(NameAction(
+                        word=word,
+                        index=name_word_idx,
+                        type=NameActions.HIGHLIGHT
+                    ))
+
+                # Strike out the last descriptive word
+                '''
+                if word in list_desc_words and name_word_idx == list_name.__len__() - 1:
+                    # <class 'list'>: ['growers', 'view']
+                    issue.name_actions.append(NameAction(
+                        word=word,
+                        index=name_word_idx,
+                        type=NameActions.STRIKE
+                    ))
+                '''
 
         issue.conflicts = []
 
@@ -596,9 +636,10 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
 
         issue.name_actions = [
             NameAction(
@@ -625,4 +666,3 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         ]
 
         return issue
-

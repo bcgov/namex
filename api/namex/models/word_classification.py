@@ -5,8 +5,8 @@ Virtual word classification classifies all words in a name approved by an examin
 from . import db, ma
 
 import pandas as pd
-from datetime import datetime
-from sqlalchemy import func
+from datetime import datetime, date
+from sqlalchemy import func, or_
 from sqlalchemy.orm import backref
 
 
@@ -44,13 +44,22 @@ class WordClassification(db.Model):
     @classmethod
     def find_word_classification(cls, word):
         # TODO: Can we return more than one result?
-        # print(cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all())
-        return cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all() #\
-                   # .filter(or_(cls.end_dt is None, datetime.date(cls.end_dt) > date.today()))\
-                   # .filter(datetime.date(cls.start_dt) <= date.today())\
-                   # .filter(cls.approved_dt) <= date.today().all()
+        results = cls.query.filter(func.lower(WordClassification.word) == func.lower(word))
+        print(word)
+        print(list(map(lambda x: x.classification, results)))
+        return cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all()
+    '''
+    # TODO: Fix this it's not working...
+    @classmethod
+    def find_word_classification(cls, word):
+        # print(cls.query.filter(func.lower(WordClassification.word) == word.lower()))
+        word_property = WordClassification.word
+        lower_func_1 = func.lower(word_property)
+        lower_func_2 = func.lower(word)
+        return cls.query.filter(lower_func_1 == lower_func_2).all()
+    '''
 
-    # TODO: This has been moved to WordClassification model!
+    # TODO: This isn't being used anymore..
     @classmethod
     def get_classification(cls, word):
         query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
