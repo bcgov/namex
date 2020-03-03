@@ -187,7 +187,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             results.append(check_words_requiring_consent)
 
         # Set designations and run our check
-        '''
         self._set_designations()
 
         check_designation_mismatch = builder.check_designation_mismatch(
@@ -199,10 +198,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
-        '''
 
-        '''
-        check_special_words = builder.check_word_special_use(list_name, self.get_name())
+        check_special_words = builder.check_word_special_use(list_name, self.get_original_name())
 
         check_designation_misplaced = builder.check_designation_misplaced(
             self.get_original_name_tokenized(),
