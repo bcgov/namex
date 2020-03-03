@@ -77,7 +77,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     def get_designation_any_in_name(self, name):
         en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
         designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
-        designation_any_regex = r'\\y' + designation_any_rgx + '(?=\s)'
+        designation_any_regex = designation_any_rgx + '(?=\\s)'
 
         # Returns list of tuples
         found_designation_any = re.findall(designation_any_regex, name.lower())
@@ -119,7 +119,9 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
         for entity_type in entity_types:
             # TODO: Use an enum for languages too!
-            entity_end_designation_dict[entity_type.value] = self.get_designations(entity_type, DesignationPositionCodes.END, 'english')
+            entity_end_designation_dict[entity_type.value] = self.get_designations(entity_type,
+                                                                                   DesignationPositionCodes.END,
+                                                                                   'english')
 
         return entity_end_designation_dict
 
@@ -134,7 +136,9 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
         for entity_type in entity_types:
             # TODO: Use an enum for languages too!
-            entity_any_designation_dict[entity_type.value] = self.get_designations(entity_type, DesignationPositionCodes.ANY, 'english')
+            entity_any_designation_dict[entity_type.value] = self.get_designations(entity_type,
+                                                                                   DesignationPositionCodes.ANY,
+                                                                                   'english')
 
         return entity_any_designation_dict
 

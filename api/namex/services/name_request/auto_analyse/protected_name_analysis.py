@@ -41,17 +41,17 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     def _set_designations_by_input_name(self):
         syn_svc = self.synonym_service
-        name = self.get_name()
+        original_name = self.get_original_name()
 
-        self._designation_any_list = syn_svc.get_designation_any_in_name(name)
-        self._designation_end_list = syn_svc.get_designation_end_in_name(name)
+        self._designation_any_list = syn_svc.get_designation_any_in_name(original_name)
+        self._designation_end_list = syn_svc.get_designation_end_in_name(original_name)
 
     def _set_wrong_designation_by_input_name(self):
         syn_svc = self.synonym_service
-        name = self.get_name()
+        original_name = self.get_original_name()
 
-        self._wrong_designation_any_list = syn_svc.get_wrong_place_any_designations(name)
-        self._wrong_designation_end_list = syn_svc.get_wrong_place_end_designations(name)
+        self._wrong_designation_any_list = syn_svc.get_wrong_place_any_designations(original_name)
+        self._wrong_designation_end_list = syn_svc.get_wrong_place_end_designations(original_name)
 
         self._wrong_designation_place = self._wrong_designation_any_list + self._wrong_designation_end_list
 
@@ -158,27 +158,23 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             results.append(check_words_requiring_consent)
 
         # Set designations and run our check
-        '''
         self._set_designations()
 
         check_designation_mismatch = builder.check_designation(
-            list_name,
+            self.get_original_name().lower().split(),
             self.entity_type,
             self.get_all_designations(),
             self.get_wrong_designation_by_input_name(),
             self.get_all_designations_user()
         )
-        
+
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
-        '''
 
-        '''
-        check_special_words = builder.check_word_special_use(list_name, self.get_name())
+        check_special_words = builder.check_word_special_use(list_name, self.get_original_name())
 
         if not check_special_words.is_valid:
             results.append(check_special_words)
-        '''
 
         # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
         if not results.__len__() > 0:
