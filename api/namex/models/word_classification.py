@@ -59,7 +59,7 @@ class WordClassification(db.Model):
         print(list(map(lambda x: x.classification, results)))
         return results
 
-    # TODO: This has been moved to WordClassification model!
+    # TODO: This isn't being used anymore..
     @classmethod
     def get_classification(cls, word):
         query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
