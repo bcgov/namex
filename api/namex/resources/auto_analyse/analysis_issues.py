@@ -185,9 +185,10 @@ class IncorrectCategory(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
 
         issue.name_actions = [
             NameAction(
@@ -230,9 +231,11 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
+
         list_name = procedure_result.values['list_name']
         list_none = procedure_result.values['list_none']
 
@@ -861,9 +864,10 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         name_actions=[]
     )
 
-    @classmethod
-    def create_issue(cls, procedure_result):
-        issue = cls.issue
+    def create_issue(self, procedure_result):
+        issue = NameAnalysisIssue()
+        issue.issue_type = self.issue.issue_type
+        issue.line1 = self.issue.line1
 
         issue.name_actions = [
             NameAction(
@@ -890,4 +894,3 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         ]
 
         return issue
-
