@@ -13,8 +13,9 @@ class NameAnalysisIssue(Serializable):
         # self.word = kwargs.get('word', None)  # <string> | None
         # self.word_index = kwargs.get('wordIndex', None)  # <integer> | None
         # self.descriptive_words = kwargs.get('descriptive_words', None)  # <DescriptiveWord>[]
-        self.show_reserve_button = kwargs['show_reserve_button'] if kwargs.get('show_reserve_button') else False  # <boolean>
-        self.show_examination_button = kwargs['show_examination_button'] if kwargs.get('show_examination_button') else False  # <boolean>
+        self.show_next_button = kwargs.get('show_next_button', False)  # <boolean>
+        self.show_reserve_button = kwargs.get('show_reserve_button', False)  # <boolean>
+        self.show_examination_button = kwargs.get('show_examination_button', False)  # <boolean>
         self.conflicts = kwargs.get('conflicts', None)  # <Conflict>[] | None
         # TODO: Get rid of options
         self.setup = kwargs.get('setup', None)

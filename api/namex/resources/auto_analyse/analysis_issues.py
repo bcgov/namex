@@ -18,11 +18,20 @@ class AnalysisResponseIssue:
     status = "fa"  # This is a CODE [AV | FA | RC]
     issue = None
 
-    def __init__(self):
-        pass
+    '''
+    @:param setup_config Setup[]
+    '''
+    def __init__(self, setup_config):
+        self.setup_issue(setup_config)
 
     def create_issue(self, procedure_result):
         return self.issue
+
+    '''
+    @:param setup_config Setup[]
+    '''
+    def setup_issue(self, setup_config):
+        pass
 
 
 class ValidName(AnalysisResponseIssue):
@@ -51,6 +60,11 @@ class ValidName(AnalysisResponseIssue):
 """
 Word Classification Engine Issues
 """
+
+
+'''
+@:deprecated
+'''
 
 
 class IncorrectCategory(AnalysisResponseIssue):
@@ -141,8 +155,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = [
             Setup(
-                button="",
-                checkbox="",
+                type="hint",
                 header="Helpful Hint",
                 line1="You can remove or replace the words <b>" + ", ".join(list_none) + "</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
                 line2=""
@@ -235,16 +248,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
             )
         ]
 
-        # Setup boxes
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Helpful Hint",
-                line1="Some words that can set your name apart include an individual's name or intials; a geographic location; a colour; a coined, made-up word; or an acronym.",
-                line2=""
-            )
-        ]
+
 
         return issue
 
