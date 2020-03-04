@@ -115,7 +115,10 @@ class TokenClassifier:
                 new_row = []
                 if not word_classification:
                     print('No word classification found for: ' + word)
-                    new_row = {}
+                    new_row.append({
+                        'word': word.lower().strip(),
+                        'word_classification': DataFrameFields.UNCLASSIFIED.value
+                    })
                 else:
                     for row in word_classification:
                         new_row.append({
@@ -127,5 +130,5 @@ class TokenClassifier:
 
             self.distinctive_word_tokens, self.descriptive_word_tokens, self.unclassified_word_tokens = data_frame_to_list(cf)
 
-        except Exception:
-            print('Token classification failed')
+        except Exception as error:
+            print('Token classification failed! ' + repr(error))

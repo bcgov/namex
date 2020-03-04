@@ -202,6 +202,7 @@ class NameAnalysis(Resource):
             raise
 
         # Perform the name analysis - execute analysis using the supplied builder
+        # @:return an array of ProcedureResult[]
         analysis = service.execute_analysis()
 
         # Build the appropriate response for the analysis result
