@@ -169,6 +169,11 @@ Word Classification Engine Issues
 """
 
 
+'''
+@:deprecated
+'''
+
+
 class IncorrectCategory(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
     status_text = "Further Action Required"
@@ -254,8 +259,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = [
             Setup(
-                button="",
-                checkbox="",
+                type="hint",
                 header="Helpful Hint",
                 line1="You can remove or replace the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
                 line2=""
