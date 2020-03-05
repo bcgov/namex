@@ -149,8 +149,8 @@ class ReplaceDesignationSetup(Setup):
 replace_designation_setup = ReplaceDesignationSetup(
     type="replace_designation",
     header="Replace Designation",
-    line1="Replace Designation",
-    line2=""
+    line1="Change the designation from to one of the following:",
+    line2="{list designations}"
 )
 
 
@@ -161,6 +161,7 @@ class ChangeEntityTypeSetup(Setup):
 change_entity_type_setup = ChangeEntityTypeSetup(
     type="change_entity_type",
     header="Change Entity Type",
-    line1="Change Entity Type",
-    line2=""
+    line1="if you would like to start a {word} business instead of a {sub} start your search over and change your entity type to {cooperative}",
+    line2="",
+    label="Change {entity_type} to {coop}"
 )
