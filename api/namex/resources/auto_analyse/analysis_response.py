@@ -14,24 +14,16 @@ from ..auto_analyse.analysis_issues import \
 from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
 from .analysis_options import \
-    HelpfulHintSetup, \
-    AddDistinctiveSetup, \
-    AddDescriptiveSetup, \
-    TooManyWordsSetup, \
-    RemoveOrReplaceSetup, \
-    SendToExaminerSetup, \
-    ObtainConsentSetup, \
-    SelfConsentSetup, \
-    ReplaceDesignationSetup, \
-    ChangeEntityTypeSetup, \
     helpful_hint_setup, \
     add_distinctive_setup, \
     add_descriptive_setup, \
     too_many_words_setup, \
+    remove_setup, \
     remove_or_replace_setup, \
+    resolve_conflict_setup, \
     send_to_examiner_setup, \
     obtain_consent_setup, \
-    self_consent_setup, \
+    conflict_self_consent_setup, \
     replace_designation_setup, \
     change_entity_type_setup
 
@@ -79,6 +71,19 @@ class AnalysisResponse:
                     option2 = None  # When assigning, use a preconfigured setup type
                     option3 = None  # When assigning, use a preconfigured setup type
 
+                    if procedure_result.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                        option1 = remove_or_replace_setup
+                        # option2 = None
+                        # option3 = None
+
+                        issue_builder = response_issues(procedure_result.result_code)([
+                            option1,
+                            # option2,
+                            # option3
+                        ])
+                        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+                        executed_procedures.append(procedure_result.result_code)
+
                     if procedure_result.result_code == AnalysisResultCodes.ADD_DISTINCTIVE_WORD:
                         option1 = add_distinctive_setup
                         # option2 = None
@@ -86,8 +91,8 @@ class AnalysisResponse:
 
                         issue_builder = response_issues(procedure_result.result_code)([
                             option1,
-                            option2,
-                            option3
+                            # option2,
+                            # option3
                         ])
                         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
                         executed_procedures.append(procedure_result.result_code)
@@ -99,8 +104,8 @@ class AnalysisResponse:
 
                         issue_builder = response_issues(procedure_result.result_code)([
                             option1,
-                            option2,
-                            option3
+                            # option2,
+                            # option3
                         ])
                         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
                         executed_procedures.append(procedure_result.result_code)
@@ -118,28 +123,15 @@ class AnalysisResponse:
                         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
                         executed_procedures.append(procedure_result.result_code)
 
-                    if procedure_result.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
-                        option1 = remove_or_replace_setup
-                        # option2 = None
-                        # option3 = None
-
-                        issue_builder = response_issues(procedure_result.result_code)([
-                            option1,
-                            option2,
-                            option3
-                        ])
-                        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-                        executed_procedures.append(procedure_result.result_code)
-
                     if procedure_result.result_code == AnalysisResultCodes.WORDS_TO_AVOID:
-                        option1 = remove_or_replace_setup
+                        option1 = remove_setup
                         # option2 = None
                         # option3 = None
 
                         issue_builder = response_issues(procedure_result.result_code)([
                             option1,
-                            option2,
-                            option3
+                            # option2,
+                            # option3
                         ])
                         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
                         executed_procedures.append(procedure_result.result_code)
@@ -157,6 +149,19 @@ class AnalysisResponse:
                         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
                         executed_procedures.append(procedure_result.result_code)
 
+                    if procedure_result.result_code == AnalysisResultCodes.CORPORATE_CONFLICT:
+                        option1 = resolve_conflict_setup
+                        option2 = send_to_examiner_setup
+                        option3 = conflict_self_consent_setup
+
+                        issue_builder = response_issues(procedure_result.result_code)([
+                            option1,
+                            option2,
+                            option3
+                        ])
+                        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+                        executed_procedures.append(procedure_result.result_code)
+
                     if procedure_result.result_code == AnalysisResultCodes.DESIGNATION_MISMATCH:
                         option1 = replace_designation_setup
                         option2 = change_entity_type_setup
@@ -165,34 +170,21 @@ class AnalysisResponse:
                         issue_builder = response_issues(procedure_result.result_code)([
                             option1,
                             option2,
-                            option3
-                        ])
-                        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-                        executed_procedures.append(procedure_result.result_code)
-
-                    if procedure_result.result_code == AnalysisResultCodes.CORPORATE_CONFLICT:
-                        option1 = remove_or_replace_setup
-                        option2 = send_to_examiner_setup
-                        option3 = self_consent_setup
-
-                        issue_builder = response_issues(procedure_result.result_code)([
-                            option1,
-                            option2,
-                            option3
+                            # option3
                         ])
                         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
                         executed_procedures.append(procedure_result.result_code)
 
                     # TODO: Is this a real thing?
                     if procedure_result.result_code == AnalysisResultCodes.WORD_SPECIAL_USE:
-                        option1 = None
-                        option2 = None
-                        option3 = None
+                        # option1 = None
+                        # option2 = None
+                        # option3 = None
 
                         issue_builder = response_issues(procedure_result.result_code)([
-                            option1,
-                            option2,
-                            option3
+                            # option1,
+                            # option2,
+                            # option3
                         ])
                         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
                         executed_procedures.append(procedure_result.result_code)

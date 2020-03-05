@@ -34,26 +34,29 @@ class AnalysisResponseIssue:
     def set_issue_setups(self, setup_config):
         self.setup_config = setup_config
 
+    @classmethod
+    def _join_list_words(cls, list_words):
+        return "<b>" + ", ".join(list_words) + "</b>"
+
 
 class ValidName(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.VALID_NAME
     status_text = "Approved"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1=None,
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=None,
-        show_examination_button=None,
-        conflicts=None,
-        setup=None,
-        name_actions=None
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1=None,
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=None,
+            show_examination_button=None,
+            conflicts=None,
+            setup=None,
+            name_actions=None
+        )
 
         return issue
 
@@ -67,27 +70,27 @@ Word Classification Engine Issues
 @:deprecated
 '''
 
+# TODO: Get RID OF THIS!!!
+
 
 class IncorrectCategory(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Category of the word is incorrect.",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=True,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="Category of the word is incorrect.",
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=True,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         issue.name_actions = [
             NameAction(
@@ -97,17 +100,6 @@ class IncorrectCategory(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Helpful Hint",
-                line1="You can change the the order of the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
-                line2=""
-            )
-        ]
-        '''
 
         return issue
 
@@ -120,28 +112,24 @@ Well-Formed Name Issues
 class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="The submitted name contains unknown words. The system cannot auto-approve a name with unknown words.",
-        line2="It might still be approvable by manual examination.",
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=True,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
-
         list_name = procedure_result.values['list_name']
         list_none = procedure_result.values['list_none']
 
-        self.issue.line1 = "The word(s) <b>" + ", ".join(list_none) + "</b> are unknown. The system cannot auto-approve a name with unknown words."
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="The word(s) " + self._join_list_words(list_none) + " have not previously been approved for use.",
+            line2="Please check wait times at the top of the screen.",
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=True,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         # TODO: Fix the case eg. 'Asdfadsf Something Asdfadsf Company Ltd.'...
         #  If there's a duplicate of an unclassified word, just grabbing the index won't do!
@@ -159,40 +147,27 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = self.setup_config
 
-        '''
-        issue.setup = [
-            Setup(
-                type="hint",
-                header="Helpful Hint",
-                line1="You can remove or replace the words <b>" + ", ".join(list_none) + "</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
-                line2=""
-            )
-        ]
-        '''
-
         return issue
 
 
 class AddDistinctiveWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Requires a word at the beginning of your name that sets it apart.",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=False,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="Requires a word at the beginning of your name that sets it apart.",
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         values = procedure_result.values
 
@@ -209,44 +184,30 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = self.setup_config
 
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Helpful Hint",
-                line1="Some words that can set your name apart include an individual's name or intials; a geographic location; a colour; a coined, made-up word; or an acronym.",
-                line2=""
-            )
-        ]
-        '''
-
         return issue
 
 
 class AddDescriptiveWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Requires a Business Category Word",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=False,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
-
         list_name = procedure_result.values['list_name']
         list_dist = procedure_result.values['list_dist']
+
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="Requires a word that describes the nature of your business.",
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         last_dist_word = list_dist.pop()
         dist_word_idx = list_name.index(last_dist_word)
@@ -266,38 +227,24 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
 class TooManyWordsIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.TOO_MANY_WORDS
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="This name is too long to be auto-approved.",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=True,
-        conflicts=None,
-        setup=None,
-        name_actions=None
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="Names longer than three words, not including proper designations, may be sent to examination.",
+            line2="Please check wait times at the top of the screen.",
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=True,
+            conflicts=None,
+            setup=None,
+            name_actions=None
+        )
 
         # Setup boxes
         issue.setup = self.setup_config
-
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Helpful Hint",
-                line1="You can remove one or more words and try your search again, or you can choose to submit the name above for examination.",
-                line2=""
-            )
-        ]
-        '''
 
         return issue
 
@@ -310,28 +257,24 @@ General Name Issues
 class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.WORDS_TO_AVOID
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Your name contains words that cannot be approved:",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=False,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
-
         list_name = procedure_result.values['list_name']
         list_avoid = procedure_result.values['list_avoid']
 
-        self.issue.line1 = "The word(s) <b>" + ", ".join(list_avoid) + "</b> cannot be approved for use. Please remove them and try again."
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="The word(s) " + self._join_list_words(list_avoid) + " cannot be used.",
+            line2="",
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
@@ -363,31 +306,33 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         return issue
 
 
+# TODO: Is this even a thing?
+'''
+@:deprecated
+'''
+
+
 class WordSpecialUse(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.WORD_SPECIAL_USE
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Words do not require consent but can only be used under certain content.",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=True,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
-
         list_name = procedure_result.values['list_name']
         list_special = procedure_result.values['list_special']
 
-        self.issue.line1 = "The word(s) <b>" + ", ".join(list_special) + "</b> can only be approved for use under certain conditions."
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="",
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=True,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
@@ -404,50 +349,33 @@ class WordSpecialUse(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = self.setup_config
 
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Helpful Hint",
-                line1="You can use the word <b>" + ", ".join(list_special) + " under certain conditions, you might remove it. Alternately, you can submit your name for examination-wait times are quoted above.",
-                line2=""
-            )
-        ]
-        '''
-
         return issue
 
 
 class NameRequiresConsentIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.NAME_REQUIRES_CONSENT
-    status_text = "May be Approved With Consent"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1=None,
-        line2=None,
-        consenting_body=ConsentingBody(
-            name="",
-            email=""
-        ),
-        designations=None,
-        show_reserve_button=None,
-        show_examination_button=False,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    status_text = "Further Action Required"
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-
         list_name = procedure_result.values['list_name']
         list_consent = procedure_result.values['list_consent']
 
-        # TODO: Everything else lets the backend dictate the response message, using line1 and line2 except this one...
-        issue.line1 = "The word(s) <b>" + ", ".join(list_consent) + "</b> require consent from:"
-        issue.line2 = "Example Conflict Company Ltd.<br />" + "email@example.com"
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="The word(s) " + self._join_list_words(list_consent) + " are restricted and may require consent.",
+            line2="Please check the options below.",
+            consenting_body=ConsentingBody(
+                name="",
+                email=""
+            ),
+            designations=None,
+            show_reserve_button=None,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         issue.name_actions = []
         for word in list_consent:
@@ -501,29 +429,26 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 class CorporateNameConflictIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.CORPORATE_CONFLICT
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Too similar to an existing name.",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=None,
-        show_examination_button=False,
-        conflicts=[],
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
-        issue.name_actions = []
-
         list_name = procedure_result.values['list_name']
         list_dist = procedure_result.values['list_dist']
         list_desc = procedure_result.values['list_desc']
         list_conflicts = procedure_result.values['list_conflicts']
+
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="Too similar to an existing name.",
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=None,
+            show_examination_button=False,
+            conflicts=[],
+            setup=None,
+            name_actions=[]
+        )
 
         '''
         eg:
@@ -640,31 +565,29 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 class DesignationMismatchIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Designation <b>Cooperative</b> cannot be used with selected business type of <b>Corporation</b>",
-        line2=None,
-        consenting_body=None,
-        # TODO: Replace with real values from ProcedureResult
-        designations=[
-            "Inc",
-            "Incorporated",
-            "Incorpore",
-            "Limite",
-            "Limited",
-            "Ltd"
-        ],
-        show_reserve_button=False,
-        show_examination_button=False,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="Designation <b>Cooperative</b> cannot be used with selected business type of <b>Corporation</b>",
+            line2=None,
+            consenting_body=None,
+            # TODO: Replace with real values from ProcedureResult
+            designations=[
+                "Inc",
+                "Incorporated",
+                "Incorpore",
+                "Limite",
+                "Limited",
+                "Ltd"
+            ],
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         issue.name_actions = [
             NameAction(
