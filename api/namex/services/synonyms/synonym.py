@@ -37,7 +37,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         word = word.lower() if isinstance(word, str) else None
 
         if word:
-            filters.append(func.lower(model.synonyms_text).like('%' + word + '%'))
+            filters.append(func.lower(model.synonyms_text).op('~')(r'\y{}\y'.format(word)))
 
         if designation:
             field = model.stems_text

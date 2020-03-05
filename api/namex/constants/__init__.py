@@ -34,6 +34,9 @@ class BCProtectedNameEntityTypes(Enum):
 
         return values
 
+    @classmethod
+    def has_value(cls, value):
+        return value in cls._value2member_map_
 
 class BCUnprotectedNameEntityTypes(Enum):
     BC_SOLE_PROPRIETORSHIP = 'FR'
@@ -50,6 +53,9 @@ class BCUnprotectedNameEntityTypes(Enum):
 
         return values
 
+    @classmethod
+    def has_value(cls, value):
+        return value in cls._value2member_map_
 
 class XproUnprotectedNameEntityTypes(Enum):
     XPRO_CORPORATION = 'XCR'
@@ -66,3 +72,7 @@ class XproUnprotectedNameEntityTypes(Enum):
             values.append(item.value)
 
         return values
+
+    @classmethod
+    def has_value(cls, value):
+        return value in cls._value2member_map_
