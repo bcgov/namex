@@ -173,27 +173,27 @@ Word Classification Engine Issues
 @:deprecated
 '''
 
+# TODO: Get RID OF THIS!!!
+
 
 class IncorrectCategory(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Category of the word is incorrect.",
-        line2=None,
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=True,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="Category of the word is incorrect.",
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=True,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         issue.name_actions = [
             NameAction(
@@ -203,17 +203,6 @@ class IncorrectCategory(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Helpful Hint",
-                line1="You can change the the order of the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
-                line2=""
-            )
-        ]
-        '''
 
         return issue
 
@@ -240,10 +229,6 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     )
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
-
         list_name = procedure_result.values['list_name']
         list_none = procedure_result.values['list_none']
 
@@ -857,31 +842,29 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
 class DesignationMismatchIssue(AnalysisResponseIssue):
     issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
     status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="Designation <b>Cooperative</b> cannot be used with selected business type of <b>Corporation</b>",
-        line2=None,
-        consenting_body=None,
-        # TODO: Replace with real values from ProcedureResult
-        designations=[
-            "Inc",
-            "Incorporated",
-            "Incorpore",
-            "Limite",
-            "Limited",
-            "Ltd"
-        ],
-        show_reserve_button=False,
-        show_examination_button=False,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
+    issue = None
 
     def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue()
-        issue.issue_type = self.issue.issue_type
-        issue.line1 = self.issue.line1
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="Designation <b>Cooperative</b> cannot be used with selected business type of <b>Corporation</b>",
+            line2=None,
+            consenting_body=None,
+            # TODO: Replace with real values from ProcedureResult
+            designations=[
+                "Inc",
+                "Incorporated",
+                "Incorpore",
+                "Limite",
+                "Limited",
+                "Ltd"
+            ],
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
 
         issue.name_actions = [
             NameAction(
