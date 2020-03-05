@@ -202,6 +202,8 @@ class IncorrectCategory(AnalysisResponseIssue):
         ]
 
         # Setup boxes
+        issue.setup = self.setup_config
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -211,6 +213,7 @@ class IncorrectCategory(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -257,6 +260,9 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
             )
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 type="hint",
@@ -265,6 +271,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -382,6 +389,7 @@ class TooManyWordsIssue(AnalysisResponseIssue):
                 type=NameActions.HIGHLIGHT
             )
         ]
+        '''
 
         # Setup boxes
         issue.setup = self.setup_config
@@ -472,6 +480,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -840,6 +849,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -880,6 +890,9 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         ]
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -896,5 +909,6 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
