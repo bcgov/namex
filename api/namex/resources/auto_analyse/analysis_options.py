@@ -106,7 +106,9 @@ send_to_examiner_setup = SendToExaminerSetup(
     header="Send to Examiner",
     line1="You can choose to submit this name for examination. Please check wait times at the top of the screen.",
     line2="",
-    action="I want my name examined."
+    action="I want my name examined.",
+    button="",
+    checkbox="examine"
 )
 
 
@@ -119,7 +121,9 @@ obtain_consent_setup = ObtainConsentSetup(
     header="Obtain Consent",
     line1="This name can be auto-approved, but you will be required to send written consent to the BC Business Registry.",
     line2="",
-    action="I am able to obtain and send written consent."
+    action="I am able to obtain and send written consent.",
+    button="",
+    checkbox="consent_body"
 )
 
 
@@ -132,7 +136,9 @@ conflict_self_consent_setup = SelfConsentSetup(
     header="Conflict Self Consent",
     line1="This name can be auto-approved if you are the registered owner of the conflicting name, but you are required to send written consent to the BC Business Registry.",
     line2="",
-    action="I am the registered owner of the conflicting name. I will send written consent."
+    action="I am the registered owner of the conflicting name. I will send written consent.",
+    button="",
+    checkbox="consent_corp"
 )
 
 
