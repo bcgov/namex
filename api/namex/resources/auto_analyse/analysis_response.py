@@ -73,6 +73,8 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
                         option1 = remove_or_replace_setup
+                        # Tweak the header
+                        option1.header = "Helpful Tip"
                         # option2 = None
                         # option3 = None
 
@@ -86,6 +88,8 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisResultCodes.ADD_DISTINCTIVE_WORD:
                         option1 = add_distinctive_setup
+                        # Tweak the header
+                        option1.header = "Helpful Tip"
                         # option2 = None
                         # option3 = None
 
@@ -99,6 +103,8 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisResultCodes.ADD_DESCRIPTIVE_WORD:
                         option1 = add_descriptive_setup
+                        # Tweak the header
+                        option1.header = "Helpful Tip"
                         # option2 = None
                         # option3 = None
 
@@ -112,6 +118,8 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisResultCodes.TOO_MANY_WORDS:
                         option1 = too_many_words_setup
+                        # Tweak the header
+                        option1.header = "Helpful Tip"
                         # option2 = None
                         # option3 = None
 
@@ -125,6 +133,8 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisResultCodes.WORDS_TO_AVOID:
                         option1 = remove_setup
+                        # Tweak the header
+                        option1.header = "Helpful Tip"
                         # option2 = None
                         # option3 = None
 
@@ -138,8 +148,16 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisResultCodes.NAME_REQUIRES_CONSENT:
                         option1 = remove_or_replace_setup
+                        # Tweak the header
+                        option1.header = "Option 1"
+
                         option2 = send_to_examiner_setup
+                        # Tweak the header
+                        option2.header = "Option 2"
+
                         option3 = obtain_consent_setup
+                        # Tweak the header
+                        option3.header = "Option 3"
 
                         issue_builder = response_issues(procedure_result.result_code)([
                             option1,
@@ -151,8 +169,16 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisResultCodes.CORPORATE_CONFLICT:
                         option1 = resolve_conflict_setup
+                        # Tweak the header
+                        option1.header = "Option 1"
+
                         option2 = send_to_examiner_setup
+                        # Tweak the header
+                        option2.header = "Option 2"
+
                         option3 = conflict_self_consent_setup
+                        # Tweak the header
+                        option3.header = "Option 3"
 
                         issue_builder = response_issues(procedure_result.result_code)([
                             option1,
@@ -164,7 +190,13 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisResultCodes.DESIGNATION_MISMATCH:
                         option1 = replace_designation_setup
+                        # Tweak the header
+                        option1.header = "Option 1"
+
                         option2 = change_entity_type_setup
+                        # Tweak the header
+                        option2.header = "Option 2"
+
                         # option3 = None
 
                         issue_builder = response_issues(procedure_result.result_code)([
