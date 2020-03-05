@@ -156,10 +156,13 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.name_tokens)
 
         else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens, self.token_classifier.distinctive_word_tokens, self.token_classifier.descriptive_word_tokens)
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens,
+                                                                                        self.token_classifier.distinctive_word_tokens,
+                                                                                        self.token_classifier.descriptive_word_tokens)
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
+        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens,
+                                                   self.processed_name)
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
@@ -167,8 +170,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
         check_words_requiring_consent = builder.check_words_requiring_consent(
-            self.name_tokens, self.processed_name
-        )  # This is incorrect
+            self.name_tokens, self.processed_name)  # This is incorrect
 
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
@@ -189,8 +191,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
 
-        # TODO: Handle special words...
-        # check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
+        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
 
         # if not check_special_words.is_valid:
         #    results.append(check_special_words)
