@@ -22,7 +22,8 @@ class AnalysisResponseIssue:
     @:param setup_config Setup[]
     '''
     def __init__(self, setup_config):
-        self.setup_issue(setup_config)
+        self.setup_config = []
+        self.set_issue_setups(setup_config)
 
     def create_issue(self, procedure_result):
         return self.issue
@@ -30,8 +31,8 @@ class AnalysisResponseIssue:
     '''
     @:param setup_config Setup[]
     '''
-    def setup_issue(self, setup_config):
-        pass
+    def set_issue_setups(self, setup_config):
+        self.setup_config = setup_config
 
 
 class ValidName(AnalysisResponseIssue):
@@ -95,6 +96,8 @@ class IncorrectCategory(AnalysisResponseIssue):
         ]
 
         # Setup boxes
+        issue.setup = self.setup_config
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -104,6 +107,7 @@ class IncorrectCategory(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -153,6 +157,9 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
             )
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 type="hint",
@@ -161,6 +168,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -199,6 +207,9 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
         ]
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -208,6 +219,7 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -252,8 +264,6 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
                 index=dist_word_idx
             )
 
-
-
         return issue
 
 
@@ -279,6 +289,9 @@ class TooManyWordsIssue(AnalysisResponseIssue):
         issue.line1 = self.issue.line1
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -288,6 +301,7 @@ class TooManyWordsIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -336,6 +350,9 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
             )
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -345,6 +362,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -388,6 +406,9 @@ class WordSpecialUse(AnalysisResponseIssue):
             )
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -397,6 +418,7 @@ class WordSpecialUse(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -454,6 +476,9 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         )
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -477,6 +502,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -589,6 +615,9 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         issue.conflicts.append(conflict)
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -612,6 +641,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
 
@@ -652,6 +682,9 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         ]
 
         # Setup boxes
+        issue.setup = self.setup_config
+
+        '''
         issue.setup = [
             Setup(
                 button="",
@@ -668,5 +701,6 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                 line2=""
             )
         ]
+        '''
 
         return issue
