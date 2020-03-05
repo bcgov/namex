@@ -570,7 +570,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="Designation <b>Cooperative</b> cannot be used with selected business type of <b>Corporation</b>",
+            line1="The <b>Cooperative</b> designation cannot be used with selected entity type of <b>Corporation</b>",
             line2=None,
             consenting_body=None,
             # TODO: Replace with real values from ProcedureResult
