@@ -40,6 +40,18 @@ def remove_french(text, fr_designation_end_list):
     return text
 
 
+def remove_stop_words(original_name, stop_words):
+    stop_words_rgx = '(' + '|'.join(map(str, stop_words)) + ')'
+    stop_words_regex = r'' + stop_words_rgx + '(?=\\s|$)'
+
+    found_stop_words = re.findall(stop_words_regex, original_name)
+
+    for word in found_stop_words:
+        original_name = original_name.replace(word, "")
+
+    return re.sub(' +', ' ', original_name)
+
+
 def list_distinctive_descriptive_same(name_list):
     queue = collections.deque(name_list)
     dist_list = []
