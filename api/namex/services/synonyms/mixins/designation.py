@@ -17,15 +17,17 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     def get_designated_any_all_words(self):
         return self.get_designations(None, DesignationPositionCodes.ANY, 'english')
 
-    def get_wrong_place_end_designations(self, name):
-        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
-        designation_any_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
-        designation_any_regex = r'\\y' + designation_any_rgx + '(?=\s)'
+    def get_misplaced_end_designations(self, name, designation_end_entity_type):
+        # en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
+        if not designation_end_entity_type:
+            return list()
+        designation_any_rgx = '(' + '|'.join(map(str, designation_end_entity_type)) + ')'
+        designation_any_regex = r'\b{}\s'.format(designation_any_rgx)
 
         # Returns list of tuples
-        wrong_designation_any_list = re.findall(designation_any_regex, name.lower())
+        misplaced_designation_any_list = re.findall(designation_any_regex, name.lower())
 
-        return wrong_designation_any_list
+        return misplaced_designation_any_list
 
     def get_entity_type_end_designation(self, entity_end_designation_dict, all_designation_any_end_list):
         entity_type_end_designation_name = list()
@@ -74,6 +76,22 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
         return designation_end_list
 
+    def get_designation_all_in_name(self, name):
+        all_designations_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
+        all_designations_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
+
+        all_designations = list(set(all_designations_end_all_list + all_designations_any_all_list))
+
+        all_designations.sort(key=len, reverse=True)
+
+        all_designations_rgx = '(' + '|'.join(map(str, all_designations)) + ')'
+        all_designations_regex = r'' + all_designations_rgx + '(?=\\s|$)'
+
+        # Returns list of tuples
+        found_all_designations = re.findall(all_designations_regex, name.lower())
+
+        return found_all_designations
+
     def get_designation_any_in_name(self, name):
         en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
         designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
@@ -84,10 +102,11 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
         return found_designation_any
 
-    def get_wrong_place_any_designations(self, name):
-        en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
-
-        designation_end_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
+    def get_misplaced_any_designations(self, name, designation_any_entity_type):
+        # en_designation_any_all_list = self.get_designations(entity_type, DesignationPositionCodes.ANY, 'english')
+        if not designation_any_entity_type:
+            return list()
+        designation_end_rgx = '(' + '|'.join(map(str, designation_any_entity_type)) + ')'
         designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
 
         # Returns list of tuples
@@ -95,13 +114,13 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
         # Getting list of lists where the first list contains designations of type "anywhere" and the second list contains designations of type "end".
         # [['association],['limited partnership']
-        wrong_designation_end_list = [list(elem) for elem in found_designation_end]
-        if any(isinstance(el, list) for el in wrong_designation_end_list):
-            wrong_designation_end_list = get_flat_list(wrong_designation_end_list)
-        wrong_designation_end_list = list(filter(None, wrong_designation_end_list))
-        wrong_designation_end_list = list(dict.fromkeys(wrong_designation_end_list))
+        misplaced_designation_end_list = [list(elem) for elem in found_designation_end]
+        if any(isinstance(el, list) for el in misplaced_designation_end_list):
+            misplaced_designation_end_list = get_flat_list(misplaced_designation_end_list)
+        misplaced_designation_end_list = list(filter(None, misplaced_designation_end_list))
+        misplaced_designation_end_list = list(dict.fromkeys(misplaced_designation_end_list))
 
-        return wrong_designation_end_list
+        return misplaced_designation_end_list
 
     def get_all_end_designations(self):
         # TODO: Fix RLC we don't have that entity type, code changed to RLC from something else...

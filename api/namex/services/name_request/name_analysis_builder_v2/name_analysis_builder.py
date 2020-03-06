@@ -235,11 +235,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
+    list_name: original name tokenized
+    entity_type_user: Entity type typed u user in UI
+    all_designations: All Designations found in name
+    wrong_designation_place: Designations found in name in wrong place
+    all_designations_user: All designations for the entity type typed by the user. 
     @return ProcedureResult
     '''
 
     def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place,
-                          all_designations_user):
+                          misplaced_designation_any, misplaced_designation_end, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -256,16 +261,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     mismatch_wrong_designation_place.append({idx: token.upper()})
 
         if mismatch_entity_designation_list or wrong_designation_place:
-            response = list()
-            response.append(mismatch_wrong_designation_place)
-            response.append(mismatch_entity_designation_list)
-            if mismatch_entity_designation_list:
-                response.append(list(map(str.upper, all_designations_user)))
-            else:
-                response.append(list())
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
-            result.values = response
+            result.values = {
+                'incorrect_designation': mismatch_entity_designation_list,
+                'correct_designations': all_designations_user,
+                'misplaced_any_designation': misplaced_designation_any,
+                'misplaced_end_designation': misplaced_designation_end
+            }
 
         return result
 
@@ -294,7 +297,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if word_special_use_list_response:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.WORD_SPECIAL_USE
-            result.values = word_special_use_list_response
+            result.values = {
+                'list_name': list_name,
+                'list_special': word_special_use_list_response
+            }
 
         return result
 
