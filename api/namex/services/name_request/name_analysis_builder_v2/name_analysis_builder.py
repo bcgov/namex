@@ -248,14 +248,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     list_name: original name tokenized
     entity_type_user: Entity type typed u user in UI
-    all_designations: All Designations found in name (either misplaced or not)
+    all_designations: All Designations found in name
     wrong_designation_place: Designations found in name in wrong place
     all_designations_user: All designations for the entity type typed by the user. 
     @return ProcedureResult
     '''
 
     def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place,
-                          all_designations_user):
+                          misplaced_designation_any, misplaced_designation_end, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -275,7 +275,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
             result.values = {
-                'incorrect_designations': mismatch_entity_designation_list,
+                'incorrect_designation': mismatch_entity_designation_list,
                 'correct_designations': all_designations_user,
                 'misplaced_any_designation': misplaced_designation_any,
                 'misplaced_end_designation': misplaced_designation_end

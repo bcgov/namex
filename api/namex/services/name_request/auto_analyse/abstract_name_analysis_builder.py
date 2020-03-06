@@ -131,7 +131,8 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     '''
 
     @abc.abstractmethod
-    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, misplaced_designation_any, misplaced_designation_end, all_designations_user):
+    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, misplaced_designation_any,
+                          misplaced_designation_end, all_designations_user):
         return ProcedureResult(is_valid=True)
 
     '''

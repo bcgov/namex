@@ -66,8 +66,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         correct_designation_end_list = self._designation_end_list
         correct_designation_any_list = self._designation_any_list
 
-        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name, correct_designation_any_list)
-        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name, correct_designation_end_list)
+        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name,
+                                                                                      correct_designation_any_list)
+        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name,
+                                                                                      correct_designation_end_list)
 
         self._wrong_designation_place = self._misplaced_designation_any_list + self._misplaced_designation_end_list
 
@@ -181,7 +183,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         check_designation_mismatch = builder.check_designation(
             self.get_original_name_tokenized(),
             self.entity_type,
-            self.get_all_designations(),
+            self.get_all_designations(),  # Need to get all designations
             self.get_misplaced_designation_in_input_name(),
             self.get_misplaced_designation_any(),
             self.get_misplaced_designation_end(),
