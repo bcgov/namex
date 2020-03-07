@@ -80,16 +80,10 @@ class NameProcessingService(GetSynonymListsMixin):
     '''
     Set and process a submitted name string using the process_name class method.
     '''
+
     def set_name(self, name):
         self.name_as_submitted = name  # Store the user's submitted name string
         self._process_name()
-
-    def set_name_tokenized(self, name):
-        all_designations = self._designated_all_words
-        all_designations.sort(key=len, reverse=True)
-        designation_alternators = '|'.join(all_designations)
-        regex = re.compile(r'\b({}|[a-z-A-Z]+)\b'.format(designation_alternators))
-        self.name_as_submitted_tokenized = regex.findall(name.lower())
 
     def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[],
                           fr_designation_end_list=[], prefix_list=[]):
@@ -126,6 +120,7 @@ class NameProcessingService(GetSynonymListsMixin):
     Split a name string into classifiable tokens. Called whenever set_name is invoked.
     @:param string:name
     '''
+
     def _process_name(self):
         try:
             # Prepare any data that we need to pre-process the name
