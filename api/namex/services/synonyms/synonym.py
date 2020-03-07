@@ -157,9 +157,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     11.- Remove extra spaces to have just one space: \s+
     '''
 
-    def regex_transform(self, text, designation_any, designation_end, prefix_list):
+    def regex_transform(self, text, designation_any, designation_end, designation_all, prefix_list):
         designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
         designation_any_regex = "(" + '|'.join(designation_any) + ")"
+        designation_all_regex = "(" + '|'.join(designation_all) + ")"
         prefixes = '|'.join(prefix_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$'
@@ -203,7 +204,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                                                                                r'\b(' + prefixes + ')([ &/.-])([A-Za-z]+)',
                                                                                r'\1\3',
                                                                                re.sub(
-                                                                                   rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_any_regex}\b|\s{designation_end_regex}(?=(\s{designation_end_regex})*$)",
+                                                                                   #rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_any_regex}\b|\s{designation_end_regex}(?=(\s{designation_end_regex})*$)",
+                                                                                   rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_all_regex}\b",
                                                                                    '',
                                                                                    text,
                                                                                    0,

@@ -70,11 +70,13 @@ class NameProcessingService(GetSynonymListsMixin):
     '''
     Set and process a submitted name string using the process_name class method.
     '''
+
     def set_name(self, name):
         self.name_as_submitted = name  # Store the user's submitted name string
         self._process_name()
 
-    def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[], prefix_list=[]):
+    def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[],
+                          fr_designation_end_list=[], prefix_list=[]):
         if not text or not stop_words or not designation_any or not designation_end or not prefix_list:
             warnings.warn("Parameters in clean_name_words function are not set.", Warning)
 
@@ -83,11 +85,11 @@ class NameProcessingService(GetSynonymListsMixin):
         words = text.lower()
         words = remove_stop_words(words, stop_words)
         words = remove_french(words, fr_designation_end_list)
-        tokens = syn_svc.regex_transform(words, designation_any, designation_end, prefix_list)
+        tokens = syn_svc.regex_transform(words, designation_any, designation_end, designation_all, prefix_list)
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
-    
+
     def _prepare_data(self):
         syn_svc = self.synonym_service
 
@@ -98,6 +100,9 @@ class NameProcessingService(GetSynonymListsMixin):
         self._prefixes = syn_svc.get_prefixes()
         self._designated_end_words = syn_svc.get_designated_end_all_words()
         self._designated_any_words = syn_svc.get_designated_any_all_words()
+        self._designated_all_words = list(set(self._designated_any_words +
+                                              self._designated_end_words))
+        self._designated_all_words.sort(key=len, reverse=True)
         # TODO: Handle french designations
         self._fr_designation_end_list = []
 
@@ -105,6 +110,7 @@ class NameProcessingService(GetSynonymListsMixin):
     Split a name string into classifiable tokens. Called whenever set_name is invoked.
     @:param string:name
     '''
+
     def _process_name(self):
         try:
             # Prepare any data that we need to pre-process the name
@@ -118,6 +124,7 @@ class NameProcessingService(GetSynonymListsMixin):
                 self._stop_words,
                 self._designated_any_words,
                 self._designated_end_words,
+                self._designated_all_words,
                 self._fr_designation_end_list,
                 self._prefixes
             )

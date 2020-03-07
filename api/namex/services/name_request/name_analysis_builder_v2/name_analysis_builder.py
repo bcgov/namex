@@ -237,7 +237,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     list_name: original name tokenized
     entity_type_user: Entity type typed u user in UI
-    all_designations: All Designations found in name
+    all_designations: All Designations found in name (either misplaced or not)
     wrong_designation_place: Designations found in name in wrong place
     all_designations_user: All designations for the entity type typed by the user. 
     @return ProcedureResult

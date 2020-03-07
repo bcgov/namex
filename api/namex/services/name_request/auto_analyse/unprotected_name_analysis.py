@@ -132,7 +132,7 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         # Set all designations based on entity type typed by user
         self._all_designations_user = self._designation_any_list_user + self._designation_end_list_user
         # Set all designations based on company name typed by user
-        self._all_designations = self._designation_any_list + self._designation_end_list
+        #self._all_designations = self._designation_any_list + self._designation_end_list
 
     '''
     do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
