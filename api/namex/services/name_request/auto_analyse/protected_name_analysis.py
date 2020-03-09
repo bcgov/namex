@@ -49,11 +49,11 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         all_designations = syn_svc.get_designation_all_in_name(original_name)
 
         for idx, designation in enumerate(designation_any_list):
-            if not any(designation in all_designations):
+            if designation not in all_designations:
                 designation_any_list.pop(idx)
 
         for idx, designation in enumerate(designation_end_list):
-            if not any(designation in all_designations):
+            if designation not in all_designations:
                 designation_end_list.pop(idx)
 
         self._designation_any_list = designation_any_list
