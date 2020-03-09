@@ -879,8 +879,8 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         # TODO: If case comes back in upper case for the incorrect designations we won't have a match...
         # Convert all strings to lower-case before comparing
-        incorrect_designations_lc = map(lambda d: d.lower() if isinstance(d, str) else '', incorrect_designations)
-        list_name_lc = map(lambda d: d.lower(), list_name)
+        incorrect_designations_lc = list(map(lambda d: d.lower() if isinstance(d, str) else '', incorrect_designations))
+        list_name_lc = list(map(lambda d: d.lower(), list_name))
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
