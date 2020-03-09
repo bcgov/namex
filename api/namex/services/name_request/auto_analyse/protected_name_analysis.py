@@ -95,6 +95,12 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
         end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
 
+        # TODO: This was the code that was previously getting called
+        # self._designation_any_list_user.extend(any_list)
+        # self._designation_end_list_user.extend(end_list)
+        # TODO: We were getting duplicate lists as result of extending lists
+        #  _designation_any_list_user and / or _designation_end_list_user are being set more than o:q
+        #  which may or may not be an issue - just ensure that this is expected behavior
         self._designation_any_list_user = any_list
         self._designation_end_list_user = end_list
 
