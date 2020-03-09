@@ -18,7 +18,7 @@ class GetDesignationsListsMixin(object):
     # Wrong any_list and end_list based on company name typed by user
     _misplaced_designation_any_list = []
     _misplaced_designation_end_list = []
-    _wrong_designation_place = []
+    _misplaced_designation_place = []
 
     # Entity type(s) for designations related to company name typed by user:
     _entity_type_any_designation = []
