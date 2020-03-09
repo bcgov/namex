@@ -568,20 +568,24 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
+        list_name = procedure_result.values['list_name']
+        incorrect_designations = procedure_result.values['incorrect_designations']
+        correct_designations = procedure_result.values['correct_designations']
+        # TODO: Implement the misplaced designations cases!
+        misplaced_any_designation = procedure_result.values['misplaced_any_designation']
+        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
+
+        # TODO: If case comes back in upper case for the incorrect designations we won't have a match...
+        # Convert all strings to lower-case before comparing
+        incorrect_designations_lc = map(lambda d: d.lower() if isinstance(d, str) else '', incorrect_designations)
+        list_name_lc = map(lambda d: d.lower(), list_name)
+
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The <b>Cooperative</b> designation cannot be used with selected entity type of <b>Corporation</b>",
+            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of <b>{replace-me}</b>",
             line2=None,
             consenting_body=None,
-            # TODO: Replace with real values from ProcedureResult
-            designations=[
-                "Inc",
-                "Incorporated",
-                "Incorpore",
-                "Limite",
-                "Limited",
-                "Ltd"
-            ],
+            designations=correct_designations,
             show_reserve_button=False,
             show_examination_button=False,
             conflicts=None,
@@ -589,11 +593,18 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
-        issue.name_actions = [
-            NameAction(
-                type=NameActions.HIGHLIGHT
-            )
-        ]
+        # Loop over the list_name words, we need to decide to do with each word
+        for word in list_name_lc:
+            name_word_idx = list_name.index(word)
+
+            # Highlight the descriptives
+            # <class 'list'>: ['mountain', 'view']
+            if word in incorrect_designations_lc:
+                issue.name_actions.append(NameAction(
+                    word=word,
+                    index=name_word_idx,
+                    type=NameActions.HIGHLIGHT
+                ))
 
         # Setup boxes
         issue.setup = self.setup_config
