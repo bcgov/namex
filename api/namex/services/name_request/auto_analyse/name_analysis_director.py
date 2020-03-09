@@ -1,3 +1,5 @@
+import re
+
 from namex.models import Synonym
 
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
