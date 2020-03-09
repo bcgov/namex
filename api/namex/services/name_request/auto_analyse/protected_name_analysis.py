@@ -7,7 +7,6 @@ from namex.constants import \
 
 from namex.services.synonyms import DesignationPositionCodes
 
-
 from .name_analysis_director import NameAnalysisDirector
 from . import ProcedureResult
 
@@ -67,10 +66,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         correct_designation_end_list = self._designation_end_list
         correct_designation_any_list = self._designation_any_list
 
-        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name,
-                                                                                      correct_designation_any_list)
-        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name,
-                                                                                      correct_designation_end_list)
+        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name, correct_designation_any_list)
+        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name, correct_designation_end_list)
 
         self._wrong_designation_place = self._misplaced_designation_any_list + self._misplaced_designation_end_list
 
@@ -147,7 +144,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         builder = self.builder
 
         list_name = self.name_tokens
-        list_dist, list_desc, list_none = self.word_classification_tokens
+        # list_dist, list_desc, list_none = self.word_classification_tokens
 
         results = []
 
@@ -161,13 +158,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.name_tokens)
 
         else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens,
-                                                                                        self.token_classifier.distinctive_word_tokens,
-                                                                                        self.token_classifier.descriptive_word_tokens)
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens, self.token_classifier.distinctive_word_tokens, self.token_classifier.descriptive_word_tokens)
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens,
-                                                   self.processed_name)
+        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
@@ -175,7 +169,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
         check_words_requiring_consent = builder.check_words_requiring_consent(
-            self.name_tokens, self.processed_name)  # This is incorrect
+            self.name_tokens, self.processed_name
+        )  # This is incorrect
 
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
@@ -196,10 +191,11 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
 
-        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
+        # TODO: Handle special words...
+        # check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
 
-        if not check_special_words.is_valid:
-            results.append(check_special_words)
+        # if not check_special_words.is_valid:
+        #    results.append(check_special_words)
 
         # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
         if not results.__len__() > 0:

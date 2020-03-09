@@ -6,6 +6,8 @@ from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
+from . import AnalysisResultCodes
+
 from namex.services.synonyms.synonym \
     import SynonymService
 
@@ -233,9 +235,29 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.name_tokens
             )
 
-            if not check_name_is_well_formed.is_valid:
-                results.append(check_name_is_well_formed)
+            results = results + check_name_is_well_formed
+            # If the error coming back is that a name is not well formed
+            # eg. result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+            # don't return the result yet, the name is well formed, we just have an unclassified
+            # word in the result.
+
+            issues_that_must_be_fixed = [
+                AnalysisResultCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisResultCodes.ADD_DESCRIPTIVE_WORD,
+                AnalysisResultCodes.TOO_MANY_WORDS
+            ]
+
+            issue_must_be_fixed = False
+            result_codes = list(map(lambda r: r.result_code, results))
+
+            for code in result_codes:
+                if code in issues_that_must_be_fixed:
+                    issue_must_be_fixed = True
+                    break
+
+            if issue_must_be_fixed:
                 return results
+
                 #  Name is not well formed - do not continue
 
             analysis = results + self.do_analysis()
