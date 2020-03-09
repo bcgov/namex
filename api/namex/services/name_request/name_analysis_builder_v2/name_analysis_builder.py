@@ -270,6 +270,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
             result.values = {
+                'list_name': list_name,
                 'incorrect_designations': mismatch_entity_designation_list,
                 'correct_designations': all_designations_user,
                 'misplaced_any_designation': misplaced_designation_any,
