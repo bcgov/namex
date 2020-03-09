@@ -221,6 +221,9 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
             )
         ]
 
+        # Setup boxes
+        issue.setup = self.setup_config
+
         return issue
 
 
