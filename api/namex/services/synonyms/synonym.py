@@ -38,7 +38,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         word = word.lower() if isinstance(word, str) else None
 
         if word:
-            filters.append(func.lower(model.synonyms_text).like('%' + word + '%'))
+            filters.append(func.lower(model.synonyms_text).op('~')(r'\y{}\y'.format(word)))
 
         if designation:
             field = model.stems_text
@@ -83,7 +83,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         filters = [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('(stop|stop word[s]?)')),
+            func.lower(model.category).op('~')(r'\y{}\y'.format('stop word[s]?')),
         ]
 
         results = self.find_word_synonyms(word, filters)
@@ -158,9 +158,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     11.- Remove extra spaces to have just one space: \s+
     '''
 
-    def regex_transform(self, text, designation_any, designation_end, prefix_list):
+    def regex_transform(self, text, designation_any, designation_end, designation_all, prefix_list):
         designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
         designation_any_regex = "(" + '|'.join(designation_any) + ")"
+        designation_all_regex = "(" + '|'.join(designation_all) + ")"
         prefixes = '|'.join(prefix_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$'
@@ -204,7 +205,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                                                                                r'\b(' + prefixes + ')([ &/.-])([A-Za-z]+)',
                                                                                r'\1\3',
                                                                                re.sub(
-                                                                                   rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_any_regex}\b|\s{designation_end_regex}(?=(\s{designation_end_regex})*$)",
+                                                                                   #rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_any_regex}\b|\s{designation_end_regex}(?=(\s{designation_end_regex})*$)",
+                                                                                   rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_all_regex}\b",
                                                                                    '',
                                                                                    text,
                                                                                    0,

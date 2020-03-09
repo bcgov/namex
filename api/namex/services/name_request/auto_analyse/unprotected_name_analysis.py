@@ -1,7 +1,17 @@
 from datetime import (datetime)
 
+import collections
+
 from .name_analysis_director import NameAnalysisDirector
 from . import ProcedureResult
+
+from namex.constants import \
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
+
+from namex.services.synonyms import DesignationPositionCodes
+
+from namex.services.word_classification.token_classifier \
+    import TokenClassifier
 
 '''
 The UnprotectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -25,32 +35,165 @@ d = datetime.now()  # Was just used for perf analysis
 
 
 class UnprotectedNameAnalysisService(NameAnalysisDirector):
-    _builder = None  # TODO: Is there a way to 'duck-type' this, or IoC this?
+    # _builder = None  # TODO: Is there a way to 'duck-type' this, or IoC this?
     _d = d  # Just used for perf
 
     def __init__(self):
         super(UnprotectedNameAnalysisService, self).__init__()
+
+    def _set_designations_by_input_name(self):
+        syn_svc = self.synonym_service
+        original_name = self.get_original_name()
+
+        # designation any/end_list get the designation at any/end place as long as they are placed correctly:
+        designation_any_list = syn_svc.get_designation_any_in_name(original_name)
+        designation_end_list = syn_svc.get_designation_end_in_name(original_name)
+
+        # all_designations gets all the designations regardless they are placed correctly or not.
+        # For instance, if limited liability partnership (end designation) is placed in a different location then
+        # we will get the designation in here, but not in the previous lists (designation any/end list)
+        all_designations = syn_svc.get_designation_all_in_name(original_name)
+
+        for idx, designation in enumerate(designation_any_list):
+            if not designation in all_designations:
+                designation_any_list.pop(idx)
+
+        for idx, designation in enumerate(designation_end_list):
+            if not designation in all_designations:
+                designation_end_list.pop(idx)
+
+        self._designation_any_list = designation_any_list
+        self._designation_end_list = designation_end_list
+        self._all_designations = all_designations
+
+    def _set_misplaced_designation_in_input_name(self):
+        syn_svc = self.synonym_service
+        original_name = self.get_original_name()
+        correct_designation_end = self._designation_end_list_user
+        correct_designation_any = self._designation_any_list_user
+        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name, correct_designation_any)
+        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name, correct_designation_end)
+
+        self._misplaced_designation_place = self._misplaced_designation_any_list + self._misplaced_designation_end_list
+
+    # TODO: I don't see this called anywhere (was prev called: set_all_entity_types)
+    def _set_all_entity_types(self):
+        self._all_entity_types = [item for item, count in collections.Counter(
+            self._entity_type_any_designation + self._entity_type_end_designation
+        ).items() if count > 1]
+
+        if not self._all_entity_types:
+            self._all_entity_types = self._entity_type_any_designation + self._entity_type_end_designation
+
+    def _set_designations_by_entity_type_user(self):
+        syn_svc = self.synonym_service
+        entity_type = self.entity_type
+
+        entity_type_code = None
+        if BCProtectedNameEntityTypes.has_value(entity_type):
+            entity_type_code = BCProtectedNameEntityTypes(entity_type)
+        elif BCUnprotectedNameEntityTypes.has_value(entity_type):
+            entity_type_code = BCUnprotectedNameEntityTypes(entity_type)
+        elif XproUnprotectedNameEntityTypes.has_value(entity_type):
+            entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
+
+        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
+        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
+
+        self._designation_any_list_user.extend(any_list)
+        self._designation_end_list_user.extend(end_list)
+
+    def _set_entity_type_any_designation(self):
+        syn_svc = self.synonym_service
+        entity_any_designation_dict = self._entity_any_designation_dict
+        designation_any_list = self._designation_any_list
+
+        self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
+            syn_svc.get_all_end_designations(), designation_any_list
+        )
+
+    def _set_entity_type_end_designation(self):
+        syn_svc = self.synonym_service
+        entity_end_designation_dict = self._entity_end_designation_dict
+        designation_end_list = self._designation_end_list
+
+        self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
+            syn_svc.get_all_any_designations(), designation_end_list
+        )
+
+    def _set_designations(self):
+        self._set_designations_by_entity_type_user()
+        # Set _designation_any_list and _designation_end_list based on company name typed by user
+        self._set_designations_by_input_name()
+        # TODO: Double check this to make sure it works
+        # Set _entity_type_any_designation for designations based on company name typed by user
+        self._set_entity_type_any_designation()
+        # TODO: Double check this to make sure it works
+        # Set _entity_type_end_designation for designations based on company name typed by user
+        self._set_entity_type_end_designation()
+        # Set _wrong_designation_place based on company name typed by user
+        self._set_misplaced_designation_in_input_name()
+
+        # Set all designations based on entity type typed by user
+        self._all_designations_user = self._designation_any_list_user + self._designation_end_list_user
+        # Set all designations based on company name typed by user
+        #self._all_designations = self._designation_any_list + self._designation_end_list
 
     '''
     do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
     This is the main execution call for running name analysis checks.
     @:return ProcedureResult[]
     '''
+
     def do_analysis(self):
         builder = self.builder
 
-        # TODO: If XPRO then run unclassified word check too
-        # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self.get_list_dist(), self.get_list_desc(), self.get_list_name(), self.get_name())
-
+        list_name = self.name_tokens
         results = []
+
+        check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
+        if not check_words_to_avoid.is_valid:
+            results.append(check_words_to_avoid)
+            return results
+            #  Do not continue
+
+        # Return any combination of these checks
+        check_conflicts = builder.search_exact_match(self.processed_name, self.name_tokens)
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
-            return results
 
-        return ProcedureResult(is_valid=True)
+        # TODO: Use the list_name array, don't use a string in the method!
+        # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
+        check_words_requiring_consent = builder.check_words_requiring_consent(
+            self.name_tokens, self.processed_name)  # This is incorrect
 
+        if not check_words_requiring_consent.is_valid:
+            results.append(check_words_requiring_consent)
 
+        # Set designations and run our check
+        self._set_designations()
 
+        check_designation_mismatch = builder.check_designation(
+            self.get_original_name_tokenized(),
+            self.entity_type,
+            self.get_all_designations(),
+            self.get_misplaced_designation_in_input_name(),
+            self.get_misplaced_designation_any(),
+            self.get_misplaced_designation_end(),
+            self.get_all_designations_user()
+        )
 
+        if not check_designation_mismatch.is_valid:
+            results.append(check_designation_mismatch)
+
+        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
+
+        if not check_special_words.is_valid:
+            results.append(check_special_words)
+
+        # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
+        if not results.__len__() > 0:
+            results.append(ProcedureResult(is_valid=True))
+
+        return results
