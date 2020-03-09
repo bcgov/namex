@@ -85,6 +85,13 @@ class NameProcessingService(GetSynonymListsMixin):
         self.name_as_submitted = name  # Store the user's submitted name string
         self._process_name()
 
+    def set_name_tokenized(self, name):
+        all_designations = self._designated_all_words
+        all_designations.sort(key=len, reverse=True)
+        designation_alternators = '|'.join(all_designations)
+        regex = re.compile(r'\b({}|[a-z-A-Z]+)\b'.format(designation_alternators))
+        self.name_as_submitted_tokenized = regex.findall(name.lower())
+
     def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[],
                           fr_designation_end_list=[], prefix_list=[]):
         if not text or not stop_words or not designation_any or not designation_end or not prefix_list:

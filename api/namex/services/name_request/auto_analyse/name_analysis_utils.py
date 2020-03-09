@@ -40,10 +40,9 @@ def remove_french(text, fr_designation_end_list):
 
 
 def remove_stop_words(original_name, stop_words):
-    stop_words_rgx = '(' + '|'.join(map(str, stop_words)) + ')'
-    stop_words_regex = r'' + stop_words_rgx + '(?=\\s|$)'
-
-    found_stop_words = re.findall(stop_words_regex, original_name)
+    stop_words_rgx = '|'.join(stop_words)
+    regex = re.compile(r'\b({})\b'.format(stop_words_rgx))
+    found_stop_words = regex.findall(original_name.lower())
 
     for word in found_stop_words:
         original_name = original_name.replace(word, "")
