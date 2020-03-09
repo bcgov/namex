@@ -272,7 +272,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if word_special_use_list_response:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.WORD_SPECIAL_USE
-            result.values = word_special_use_list_response
+            result.values = {
+                'list_name': list_name,
+                'list_special': word_special_use_list_response
+            }
 
         return result
 
