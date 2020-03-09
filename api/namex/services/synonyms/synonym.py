@@ -33,6 +33,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     def find_word_synonyms(self, word, filters, designation=False):
         model = self.get_model()
+        # TODO: Don't use an empty string here, instantiate a different SynonymQueryCriteria to handle a case with no fields or set to null or whatever
         field = ''
         word = word.lower() if isinstance(word, str) else None
 

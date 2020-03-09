@@ -80,7 +80,6 @@ class NameProcessingService(GetSynonymListsMixin):
     '''
     Set and process a submitted name string using the process_name class method.
     '''
-
     def set_name(self, name):
         self.name_as_submitted = name  # Store the user's submitted name string
         self._process_name()
@@ -127,7 +126,6 @@ class NameProcessingService(GetSynonymListsMixin):
     Split a name string into classifiable tokens. Called whenever set_name is invoked.
     @:param string:name
     '''
-
     def _process_name(self):
         try:
             # Prepare any data that we need to pre-process the name

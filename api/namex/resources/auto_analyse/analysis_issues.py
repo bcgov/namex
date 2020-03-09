@@ -224,6 +224,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
                 word=last_dist_word,
                 index=dist_word_idx
             )
+        ]
 
         return issue
 
