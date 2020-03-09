@@ -95,8 +95,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
         end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
 
-        self._designation_any_list_user.extend(any_list)
-        self._designation_end_list_user.extend(end_list)
+        self._designation_any_list_user = any_list
+        self._designation_end_list_user = end_list
 
     def _set_entity_type_any_designation(self):
         syn_svc = self.synonym_service
