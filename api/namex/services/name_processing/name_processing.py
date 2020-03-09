@@ -1,6 +1,7 @@
+import re
 import warnings
 
-from ..name_request.auto_analyse.name_analysis_utils import remove_french
+from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words
 
 from namex.services.synonyms.synonym import SynonymService
 from namex.services.word_classification.word_classification import WordClassificationService
@@ -21,9 +22,17 @@ class NameProcessingService(GetSynonymListsMixin):
     def name_as_submitted(self):
         return self._name_as_submitted
 
+    @property
+    def name_as_submitted_tokenized(self):
+        return self._name_as_submitted_tokenized
+
     @name_as_submitted.setter
     def name_as_submitted(self, val):
         self._name_as_submitted = val
+
+    @name_as_submitted_tokenized.setter
+    def name_as_submitted_tokenized(self, val):
+        self._name_as_submitted_tokenized = val
 
     @property
     def processed_name(self):
@@ -61,6 +70,7 @@ class NameProcessingService(GetSynonymListsMixin):
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.name_as_submitted = None
+        self.name_as_submitted_tokenized = None
         self.processed_name = None
         self.name_tokens = None
         self.distinctive_word_tokens = None
@@ -74,20 +84,28 @@ class NameProcessingService(GetSynonymListsMixin):
         self.name_as_submitted = name  # Store the user's submitted name string
         self._process_name()
 
-    def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[], prefix_list=[]):
+    def set_name_tokenized(self, name):
+        all_designations = self._designated_all_words
+        all_designations.sort(key=len, reverse=True)
+        designation_alternators = '|'.join(all_designations)
+        regex = re.compile(r'\b({}|[a-z-A-Z]+)\b'.format(designation_alternators))
+        self.name_as_submitted_tokenized = regex.findall(name.lower())
+
+    def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[],
+                          fr_designation_end_list=[], prefix_list=[]):
         if not text or not stop_words or not designation_any or not designation_end or not prefix_list:
             warnings.warn("Parameters in clean_name_words function are not set.", Warning)
 
         syn_svc = self.synonym_service
 
         words = text.lower()
-        words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
+        words = remove_stop_words(words, stop_words)
         words = remove_french(words, fr_designation_end_list)
-        tokens = syn_svc.regex_transform(words, designation_any, designation_end, prefix_list)
+        tokens = syn_svc.regex_transform(words, designation_any, designation_end, designation_all, prefix_list)
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
-    
+
     def _prepare_data(self):
         syn_svc = self.synonym_service
 
@@ -98,6 +116,9 @@ class NameProcessingService(GetSynonymListsMixin):
         self._prefixes = syn_svc.get_prefixes()
         self._designated_end_words = syn_svc.get_designated_end_all_words()
         self._designated_any_words = syn_svc.get_designated_any_all_words()
+        self._designated_all_words = list(set(self._designated_any_words +
+                                              self._designated_end_words))
+        self._designated_all_words.sort(key=len, reverse=True)
         # TODO: Handle french designations
         self._fr_designation_end_list = []
 
@@ -118,6 +139,7 @@ class NameProcessingService(GetSynonymListsMixin):
                 self._stop_words,
                 self._designated_any_words,
                 self._designated_end_words,
+                self._designated_all_words,
                 self._fr_designation_end_list,
                 self._prefixes
             )

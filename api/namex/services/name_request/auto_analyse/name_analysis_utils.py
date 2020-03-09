@@ -39,6 +39,17 @@ def remove_french(text, fr_designation_end_list):
     return text
 
 
+def remove_stop_words(original_name, stop_words):
+    stop_words_rgx = '|'.join(stop_words)
+    regex = re.compile(r'\b({})\b'.format(stop_words_rgx))
+    found_stop_words = regex.findall(original_name.lower())
+
+    for word in found_stop_words:
+        original_name = original_name.replace(word, "")
+
+    return re.sub(' +', ' ', original_name)
+
+
 def list_distinctive_descriptive_same(name_list):
     queue = collections.deque(name_list)
     dist_list = []
@@ -96,11 +107,15 @@ def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
 
 def list_distinctive_descriptive(name_list, dist_list, desc_list):
     queue_dist = collections.deque(dist_list)
+
+    if dist_list == name_list:
+        queue_dist.pop()
+
     dist_list_all = []
     desc_list_all = []
 
+    dist_list_all.append(list(queue_dist))
     while len(queue_dist) > 1:
-        dist_list_all.append(list(queue_dist))
         queue_dist.pop()
         dist_list_all.append(list(queue_dist))
 

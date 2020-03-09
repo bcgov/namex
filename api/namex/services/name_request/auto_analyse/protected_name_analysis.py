@@ -44,17 +44,32 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
 
-        self._designation_any_list = syn_svc.get_designation_any_in_name(original_name)
-        self._designation_end_list = syn_svc.get_designation_end_in_name(original_name)
+        designation_any_list = syn_svc.get_designation_any_in_name(original_name)
+        designation_end_list = syn_svc.get_designation_end_in_name(original_name)
+        all_designations = syn_svc.get_designation_all_in_name(original_name)
 
-    def _set_wrong_designation_by_input_name(self):
+        for idx, designation in enumerate(designation_any_list):
+            if not any(designation in all_designations):
+                designation_any_list.pop(idx)
+
+        for idx, designation in enumerate(designation_end_list):
+            if not any(designation in all_designations):
+                designation_end_list.pop(idx)
+
+        self._designation_any_list = designation_any_list
+        self._designation_end_list = designation_end_list
+        self._all_designations = all_designations
+
+    def _set_misplaced_designation_in_input_name(self):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
+        correct_designation_end_list = self._designation_end_list
+        correct_designation_any_list = self._designation_any_list
 
-        self._wrong_designation_any_list = syn_svc.get_wrong_place_any_designations(original_name)
-        self._wrong_designation_end_list = syn_svc.get_wrong_place_end_designations(original_name)
+        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name, correct_designation_any_list)
+        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name, correct_designation_end_list)
 
-        self._wrong_designation_place = self._wrong_designation_any_list + self._wrong_designation_end_list
+        self._wrong_designation_place = self._misplaced_designation_any_list + self._misplaced_designation_end_list
 
     # TODO: I don't see this called anywhere (was prev called: set_all_entity_types)
     def _set_all_entity_types(self):
@@ -105,19 +120,19 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         self._set_designations_by_entity_type_user()
         # Set _designation_any_list and _designation_end_list based on company name typed by user
         self._set_designations_by_input_name()
-        # Set _wrong_designation_place based on company name typed by user
-        self._set_wrong_designation_by_input_name()
         # TODO: Double check this to make sure it works
         # Set _entity_type_any_designation for designations based on company name typed by user
         self._set_entity_type_any_designation()
         # TODO: Double check this to make sure it works
         # Set _entity_type_end_designation for designations based on company name typed by user
         self._set_entity_type_end_designation()
+        # Set _wrong_designation_place based on company name typed by user
+        self._set_misplaced_designation_in_input_name()
 
         # Set all designations based on entity type typed by user
         self._all_designations_user = self._designation_any_list_user + self._designation_end_list_user
         # Set all designations based on company name typed by user
-        self._all_designations = self._designation_any_list + self._designation_end_list
+        # self._all_designations = self._designation_any_list + self._designation_end_list
 
     '''
     do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
@@ -129,7 +144,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         builder = self.builder
 
         list_name = self.name_tokens
-        list_dist, list_desc, list_none = self.word_classification_tokens
+        # list_dist, list_desc, list_none = self.word_classification_tokens
 
         results = []
 
@@ -137,15 +152,14 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_words_to_avoid.is_valid:
             results.append(check_words_to_avoid)
 
-        if list_dist == list_desc:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name)
+        if self.token_classifier.distinctive_word_tokens == self.token_classifier.descriptive_word_tokens:
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.name_tokens)
 
         else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name, list_dist, list_desc)
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens, self.token_classifier.distinctive_word_tokens, self.token_classifier.descriptive_word_tokens)
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, list_name,
-                                                   self.processed_name)
+        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
@@ -153,7 +167,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
         check_words_requiring_consent = builder.check_words_requiring_consent(
-            list_name, self.processed_name)  # This is incorrect
+            self.name_tokens, self.processed_name
+        )  # This is incorrect
 
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
@@ -162,20 +177,23 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         self._set_designations()
 
         check_designation_mismatch = builder.check_designation(
-            self.get_original_name().lower().split(),
+            self.get_original_name_tokenized(),
             self.entity_type,
             self.get_all_designations(),
-            self.get_wrong_designation_by_input_name(),
+            self.get_misplaced_designation_in_input_name(),
+            self.get_misplaced_designation_any(),
+            self.get_misplaced_designation_end(),
             self.get_all_designations_user()
         )
 
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
 
-        # check_special_words = builder.check_word_special_use(list_name, self.get_original_name())
+        # TODO: Handle special words...
+        # check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
 
         # if not check_special_words.is_valid:
-        #     results.append(check_special_words)
+        #    results.append(check_special_words)
 
         # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
         if not results.__len__() > 0:

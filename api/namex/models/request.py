@@ -219,7 +219,7 @@ class Request(db.Model):
                 'corpNum': self.corpNum,
                 'names': [name.as_dict() for name in self.names.all()],
                 'applicants': '' if (
-                        self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
+                            self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
                 'comments': [comment.as_dict() for comment in self.comments.all()],
                 'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
                 }
@@ -320,8 +320,13 @@ class Request(db.Model):
         return query
 
     @classmethod
-    def get_query_descriptive(cls, desc_substitution_list,query):
+    def get_query_descriptive(cls, desc_substitution_list, query):
         query = cls.build_query_descriptive(desc_substitution_list, query)
+        return query
+
+    @classmethod
+    def get_query_exact_match(cls, prep_name):
+        query = cls.build_query_exact_match(prep_name)
         return query
 
     @classmethod
@@ -352,7 +357,19 @@ class Request(db.Model):
 
         return query
 
-    # END NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+    @classmethod
+    def build_query_exact_match(cls, prep_name):
+        query = "select n.name " + \
+                "from requests r, names n " + \
+                "where r.id = n.nr_id and " + \
+                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
+                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
+                "n.state IN ('APPROVED','CONDITION') and " + \
+                "lower(n.name) = " + "'" + prep_name + "'"
+
+        return query
+
+        # END NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
 
 
 class RequestsSchema(ma.ModelSchema):

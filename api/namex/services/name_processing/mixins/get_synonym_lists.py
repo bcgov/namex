@@ -5,6 +5,7 @@ class GetSynonymListsMixin(object):
     _stop_words = []
     _designated_end_words = []
     _designated_any_words = []
+    _designated_all_words = []
     _fr_designation_end_list = []
 
     def get_prefixes(self):

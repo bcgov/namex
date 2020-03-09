@@ -183,6 +183,32 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.values = []
         return result
 
+    def search_exact_match(self, preprocess_name, list_name):
+        result = ProcedureResult()
+        result.is_valid = False
+        matches_response = []  # Contains all the conflicts from database
+        response = {}
+
+        query = Request.build_query_exact_match(preprocess_name)
+        exact_match = Request.get_conflicts(query)
+        exact_match_response = exact_match.values.tolist()
+
+        if exact_match_response:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+            result.values = {
+                'list_name': list_name,
+                'list_dist': None,
+                'list_desc': None,
+                'list_conflicts': exact_match
+            }
+        else:
+            result.is_valid = True
+            result.result_code = AnalysisResultCodes.VALID_NAME
+            result.values = []
+
+        return result
+
     '''
     Override the abstract / base class method
     @return ProcedureResult
@@ -216,35 +242,39 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
+    list_name: original name tokenized
+    entity_type_user: Entity type typed u user in UI
+    all_designations: All Designations found in name (either misplaced or not)
+    wrong_designation_place: Designations found in name in wrong place
+    all_designations_user: All designations for the entity type typed by the user. 
     @return ProcedureResult
     '''
-    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, all_designations_user):
+
+    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, misplaced_designation_any, misplaced_designation_end, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
 
         mismatch_entity_designation_list = []
-        mismatch_wrong_designation_place = []
+        # mismatch_wrong_designation_place = []
         for idx, token in enumerate(list_name):
             if any(token in designation for designation in all_designations):
                 if token not in all_designations_user:
-                    mismatch_entity_designation_list.append({idx: token.upper()})
-
+                    mismatch_entity_designation_list.append(token.upper())
+        '''
         if wrong_designation_place:
             for idx, token in enumerate(list_name):
                 if any(token in wrong_designation for wrong_designation in wrong_designation_place):
                     mismatch_wrong_designation_place.append({idx: token.upper()})
-
+        '''
         if mismatch_entity_designation_list or wrong_designation_place:
-            response = list()
-            response.append(mismatch_wrong_designation_place)
-            response.append(mismatch_entity_designation_list)
-            if mismatch_entity_designation_list:
-                response.append(list(map(str.upper, all_designations_user)))
-            else:
-                response.append(list())
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
-            result.values = response
+            result.values = {
+                'incorrect_designations': mismatch_entity_designation_list,
+                'correct_designations': all_designations_user,
+                'misplaced_any_designation': misplaced_designation_any,
+                'misplaced_end_designation': misplaced_designation_end
+            }
 
         return result
 
