@@ -249,22 +249,22 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result.is_valid = True
 
         mismatch_entity_designation_list = []
-        mismatch_wrong_designation_place = []
+        # mismatch_wrong_designation_place = []
         for idx, token in enumerate(list_name):
             if any(token in designation for designation in all_designations):
                 if token not in all_designations_user:
-                    mismatch_entity_designation_list.append({idx: token.upper()})
-
+                    mismatch_entity_designation_list.append(token.upper())
+        '''
         if wrong_designation_place:
             for idx, token in enumerate(list_name):
                 if any(token in wrong_designation for wrong_designation in wrong_designation_place):
                     mismatch_wrong_designation_place.append({idx: token.upper()})
-
+        '''
         if mismatch_entity_designation_list or wrong_designation_place:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
             result.values = {
-                'incorrect_designation': mismatch_entity_designation_list,
+                'incorrect_designations': mismatch_entity_designation_list,
                 'correct_designations': all_designations_user,
                 'misplaced_any_designation': misplaced_designation_any,
                 'misplaced_end_designation': misplaced_designation_end
