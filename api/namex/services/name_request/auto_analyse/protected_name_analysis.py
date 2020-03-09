@@ -7,7 +7,6 @@ from namex.constants import \
 
 from namex.services.synonyms import DesignationPositionCodes
 
-
 from .name_analysis_director import NameAnalysisDirector
 from . import ProcedureResult
 

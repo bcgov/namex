@@ -674,6 +674,31 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                     ))
                 '''
 
+        if not is_exact_match:
+            # Loop over the list_name words, we need to decide to do with each word
+            for word in list_name:
+                name_word_idx = list_name.index(word)
+
+                # Highlight the descriptives
+                # <class 'list'>: ['mountain', 'view']
+                if word in list_dist_words:
+                    issue.name_actions.append(NameAction(
+                        word=word,
+                        index=name_word_idx,
+                        type=NameActions.HIGHLIGHT
+                    ))
+
+                # Strike out the last descriptive word
+                '''
+                if word in list_desc_words and name_word_idx == list_name.__len__() - 1:
+                    # <class 'list'>: ['growers', 'view']
+                    issue.name_actions.append(NameAction(
+                        word=word,
+                        index=name_word_idx,
+                        type=NameActions.STRIKE
+                    ))
+                '''
+
         issue.conflicts = []
 
         conflict = Conflict(
