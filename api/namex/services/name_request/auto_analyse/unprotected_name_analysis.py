@@ -50,11 +50,11 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         all_designations = syn_svc.get_designation_all_in_name(original_name)
 
         for idx, designation in enumerate(designation_any_list):
-            if not any(designation in all_designations):
+            if not designation in all_designations:
                 designation_any_list.pop(idx)
 
         for idx, designation in enumerate(designation_end_list):
-            if not any(designation in all_designations):
+            if not designation in all_designations:
                 designation_end_list.pop(idx)
 
         self._designation_any_list = designation_any_list
@@ -170,7 +170,7 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         self._set_designations()
 
         check_designation_mismatch = builder.check_designation(
-            self.get_original_name().lower().split(),
+            self.get_original_name_tokenized(),
             self.entity_type,
             self.get_all_designations(),
             self.get_misplaced_designation_in_input_name(),

@@ -1,3 +1,4 @@
+import re
 import warnings
 
 from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words
@@ -21,9 +22,17 @@ class NameProcessingService(GetSynonymListsMixin):
     def name_as_submitted(self):
         return self._name_as_submitted
 
+    @property
+    def name_as_submitted_tokenized(self):
+        return self._name_as_submitted_tokenized
+
     @name_as_submitted.setter
     def name_as_submitted(self, val):
         self._name_as_submitted = val
+
+    @name_as_submitted_tokenized.setter
+    def name_as_submitted_tokenized(self, val):
+        self._name_as_submitted_tokenized = val
 
     @property
     def processed_name(self):
@@ -61,6 +70,7 @@ class NameProcessingService(GetSynonymListsMixin):
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.name_as_submitted = None
+        self.name_as_submitted_tokenized = None
         self.processed_name = None
         self.name_tokens = None
         self.distinctive_word_tokens = None
@@ -74,6 +84,13 @@ class NameProcessingService(GetSynonymListsMixin):
     def set_name(self, name):
         self.name_as_submitted = name  # Store the user's submitted name string
         self._process_name()
+
+    def set_name_tokenized(self, name):
+        all_designations = self._designated_all_words
+        all_designations.sort(key=len, reverse=True)
+        designation_alternators = '|'.join(all_designations)
+        regex = re.compile(r'\b({}|[a-z-A-Z]+)\b'.format(designation_alternators))
+        self.name_as_submitted_tokenized = regex.findall(name.lower())
 
     def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[],
                           fr_designation_end_list=[], prefix_list=[]):

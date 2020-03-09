@@ -1,3 +1,5 @@
+import re
+
 from namex.models import Synonym
 
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
@@ -107,12 +109,21 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted if np_svc else ''
 
+    @property
+    def name_as_submitted_tokenized(self):
+        np_svc = self.name_processing_service
+        return self.name_processing_service.name_as_submitted_tokenized if np_svc else ''
+
     '''
     Just an alias for name_as_submitted
     '''
     @property
     def original_name(self):
         return self.name_as_submitted
+
+    @property
+    def original_name_tokenized(self):
+        return self.name_as_submitted_tokenized
 
     def __init__(self):
         self.synonym_service = SynonymService()
@@ -154,6 +165,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def get_processed_name(self):
         return self.processed_name
 
+    def get_original_name_tokenized(self):
+        return self.original_name_tokenized
+
     '''
     Set and preprocess a submitted name string.
     Setting the name using np_svc.set_name will clean the name and set the following properties:
@@ -166,6 +180,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         wc_svc = self.word_classification_service
 
         np_svc.set_name(name)
+        np_svc.set_name_tokenized(name)
 
         # TODO: Get rid of this when done refactoring!
         self._list_name_words = np_svc.name_tokens
