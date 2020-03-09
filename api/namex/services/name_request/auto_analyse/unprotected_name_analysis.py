@@ -164,6 +164,15 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
+        check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
+        if not check_words_to_avoid.is_valid:
+            results.append(check_words_to_avoid)
+            return results
+            #  Do not continue
+
+        # Return any combination of these checks
+        check_conflicts = builder.search_exact_match(self.processed_name, self.name_tokens)
+
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
