@@ -176,7 +176,7 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
                 type=NameActions.BRACKETS,
                 position=WordPositions.START,
                 message="Add a Word Here",
-                word=values[0],
+                word=values[0] if values.__len__() > 0 else None,
                 index=0
             )
         ]
