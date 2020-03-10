@@ -21,7 +21,8 @@ class AnalysisResponseIssue:
     '''
     @:param setup_config Setup[]
     '''
-    def __init__(self, setup_config):
+    def __init__(self, entity_type, setup_config):
+        self.entity_type = entity_type
         self.setup_config = []
         self.set_issue_setups(setup_config)
 
@@ -294,18 +295,6 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = self.setup_config
 
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Helpful Hint",
-                line1="Remove the word(s) <b>" + ", ".join(list_avoid) + "</b> from your search and try again.",
-                line2=""
-            )
-        ]
-        '''
-
         return issue
 
 
@@ -399,32 +388,6 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
-
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Option 1",
-                line1="You can remove or replace the word(s) " + ", ".join(list_consent) + " and try your search again.",
-                line2=""
-            ),
-            Setup(
-                button="examine",
-                checkbox="",
-                header="Option 2",
-                line1="You can choose to submit this name for examination. Examination wait times are listed above.",
-                line2=""
-            ),
-            Setup(
-                button="consent",
-                checkbox="",
-                header="Option 3",
-                line1="This name can be auto-approved but you will be required to send confirmation of consent to the BC Business Registry.",
-                line2=""
-            )
-        ]
-        '''
 
         return issue
 
@@ -536,32 +499,6 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         # Setup boxes
         issue.setup = self.setup_config
 
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Option 1",
-                line1="Add a word to the beginning of the name that sets it apart like a person's name or initials.",
-                line2="Or remove ${some-word} and replace it with a different word"
-            ),
-            Setup(
-                button="examine",
-                checkbox="",
-                header="Option 2",
-                line1="You can choose to submit this name for examination. Examination wait times are listed above.",
-                line2=""
-            ),
-            Setup(
-                button="consent",
-                checkbox="",
-                header="Option 3",
-                line1="If you are the registered owner of the existing name, it can be auto-approved but you are required to send confirmation of consent to the BC Business Registry.",
-                line2=""
-            )
-        ]
-        '''
-
         return issue
 
 
@@ -585,7 +522,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of <b>{replace-me}</b>",
+            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of " + self._join_list_words([self.entity_type]) + " </b>",
             line2=None,
             consenting_body=None,
             designations=correct_designations,
@@ -611,24 +548,5 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
-
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Option 1",
-                line1="If your intention was to reserve a name for a BC Corporation, you can replace Cooperative with a comptatible designation. The following are allowed:",
-                line2=""
-            ),
-            Setup(
-                button="restart",
-                checkbox="",
-                header="Option 2",
-                line1="If you would like to start a Cooperative business instead of a Corporation, start your search over and change your business type to 'Cooperative'.",
-                line2=""
-            )
-        ]
-        '''
 
         return issue

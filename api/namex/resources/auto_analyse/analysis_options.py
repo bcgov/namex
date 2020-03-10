@@ -93,7 +93,7 @@ resolve_conflict_setup = ResolveConflictSetup(
     type="resolve_conflict",
     header="Resolve Conflict",
     line1="Add a word to the beginning of the name that sets it apart like a person’s name or initials.",
-    line2="Or remove the word(s) {words} and replace them with different ones."
+    line2="Or remove the word(s) {{$list_conflicts}} and replace them with different ones."
 )
 
 
@@ -108,7 +108,7 @@ send_to_examiner_setup = SendToExaminerSetup(
     line2="",
     action="I want my name examined.",
     button="",
-    checkbox="examine"
+    checkbox=""
 )
 
 
@@ -123,7 +123,7 @@ obtain_consent_setup = ObtainConsentSetup(
     line2="",
     action="I am able to obtain and send written consent.",
     button="",
-    checkbox="consent_body"
+    checkbox=""
 )
 
 
@@ -138,7 +138,7 @@ conflict_self_consent_setup = SelfConsentSetup(
     line2="",
     action="I am the registered owner of the conflicting name. I will send written consent.",
     button="",
-    checkbox="consent_corp"
+    checkbox=""
 )
 
 
@@ -150,7 +150,7 @@ replace_designation_setup = ReplaceDesignationSetup(
     type="replace_designation",
     header="Replace Designation",
     line1="Change the designation from to one of the following:",
-    line2="{list designations}"
+    line2=""
 )
 
 
@@ -161,7 +161,7 @@ class ChangeEntityTypeSetup(Setup):
 change_entity_type_setup = ChangeEntityTypeSetup(
     type="change_entity_type",
     header="Change Entity Type",
-    line1="if you would like to start a {word} business instead of a {sub} start your search over and change your entity type to {cooperative}",
+    line1="If you would like to start a {{$correct_designation}} business instead of a {{$incorrect_designation}} start your search over and change your entity type to {{$entity_type}}",
     line2="",
-    label="Change {entity_type} to {coop}"
+    label="Change {{$entity_type}} to {{$correct_designation}}"
 )
