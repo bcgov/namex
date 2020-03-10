@@ -154,10 +154,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
-        check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
-        if not check_words_to_avoid.is_valid:
-            results.append(check_words_to_avoid)
-
         if self.token_classifier.distinctive_word_tokens == self.token_classifier.descriptive_word_tokens:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.name_tokens)
 

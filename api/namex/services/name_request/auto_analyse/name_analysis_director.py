@@ -217,7 +217,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             list_name = self.name_tokens
             list_dist, list_desc, list_none = self.word_classification_tokens
 
-            results = []
+            analysis = []
             if list_none and list_none.__len__() > 0:
                 self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
                     list_dist,
@@ -226,6 +226,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     list_name
                 )
 
+            check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
+            if not check_words_to_avoid.is_valid:
+                analysis.append(check_words_to_avoid)
+                return analysis
+
             check_name_is_well_formed = builder.check_name_is_well_formed(
                 self.token_classifier.distinctive_word_tokens,
                 self.token_classifier.descriptive_word_tokens,
@@ -233,20 +238,23 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.name_tokens
             )
 
-            results = results + check_name_is_well_formed
+            analysis = analysis + check_name_is_well_formed
+
             # If the error coming back is that a name is not well formed
+            # OR if the error coming back has words to avoid...
             # eg. result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
             # don't return the result yet, the name is well formed, we just have an unclassified
             # word in the result.
 
             issues_that_must_be_fixed = [
+                AnalysisResultCodes.WORDS_TO_AVOID,
                 AnalysisResultCodes.ADD_DISTINCTIVE_WORD,
                 AnalysisResultCodes.ADD_DESCRIPTIVE_WORD,
                 AnalysisResultCodes.TOO_MANY_WORDS
             ]
 
             issue_must_be_fixed = False
-            result_codes = list(map(lambda r: r.result_code, results))
+            result_codes = list(map(lambda r: r.result_code, analysis))
 
             for code in result_codes:
                 if code in issues_that_must_be_fixed:
@@ -254,15 +262,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     break
 
             if issue_must_be_fixed:
-                return results
+                return analysis
 
                 #  Name is not well formed - do not continue
 
-            analysis = results + self.do_analysis()
+            analysis = analysis + self.do_analysis()
 
-            if not analysis:
-                # TODO: Get the classname of the concrete class, somehow, for the message...
-                raise ValueError('NameAnalysisDirector.execute_analysis did not return a result')
+            # if not analysis:
+            #    raise ValueError('NameAnalysisDirector.execute_analysis did not return a result')
 
             # If the WORD_TO_AVOID check failed, the UNCLASSIFIED_WORD check
             # will have failed too because words to avoid are never classified.
