@@ -884,7 +884,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of <b>{replace-me}</b>",
+            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of " + self._join_list_words([self.entity_type]) + " </b>",
             line2=None,
             consenting_body=None,
             designations=correct_designations,
@@ -910,24 +910,5 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
-
-        '''
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Option 1",
-                line1="If your intention was to reserve a name for a BC Corporation, you can replace Cooperative with a comptatible designation. The following are allowed:",
-                line2=""
-            ),
-            Setup(
-                button="restart",
-                checkbox="",
-                header="Option 2",
-                line1="If you would like to start a Cooperative business instead of a Corporation, start your search over and change your business type to 'Cooperative'.",
-                line2=""
-            )
-        ]
-        '''
 
         return issue
