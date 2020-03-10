@@ -293,6 +293,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     issue = analysis.pop(idx)
                     uc_word_issues.append(issue)
 
+                analysis = analysis + uc_word_issues
+
             return analysis
 
         except Exception as error:
