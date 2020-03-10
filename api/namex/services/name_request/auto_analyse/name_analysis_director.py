@@ -1,5 +1,3 @@
-import re
-
 from namex.models import Synonym
 
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
@@ -349,6 +347,35 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             analysis = analysis + self.do_analysis()
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
+
+            # If the WORD_TO_AVOID check failed, the UNCLASSIFIED_WORD check
+            # will have failed too because words to avoid are never classified.
+            # Strip out the unclassified words errors involving the same name words.
+            list_avoid = []
+
+            match_words_to_avoid = list(filter(lambda i: i.result_code == AnalysisResultCodes.WORDS_TO_AVOID, analysis))
+            if match_words_to_avoid.__len__() > 0:
+                for procedure_result in match_words_to_avoid:
+                    list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
+
+                def remove_words_to_avoid(result):
+                    if result.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                        for word in list_avoid:
+                            result.values['list_none'].remove(word)
+                    return result
+
+                analysis = list(map(remove_words_to_avoid, analysis))
+
+                # Serve the unclassified word issues last
+                uc_word_issue_indexes = []
+                uc_word_issues = []
+                for idx, issue in enumerate(analysis):
+                    if issue.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                        uc_word_issue_indexes.append(idx)
+
+                for idx in uc_word_issue_indexes:
+                    issue = analysis.pop(idx)
+                    uc_word_issues.append(issue)
 
             return analysis
 
