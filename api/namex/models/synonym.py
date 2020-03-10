@@ -1,21 +1,55 @@
+import re
 from . import db, ma
+
+
+from sqlalchemy import and_
+
+from namex.criteria.synonym.query_criteria import SynonymQueryCriteria
+
+"""
+- Models NEVER implement business logic, ONLY generic queries belong in here.
+- Methods like find, find_one, or find_by_criteria belong in models.
+- Methods like get_synonym_list or get_en_designation_end_all_list belong in a Service!
+    - They belong in a Service because getting eg. a list of designations or synonyms is a USE case of the model,
+      but getting a list of designations is not necessarily something that is inherent to the model; rather, that is
+      what a particular user of the model wants to query for.
+"""
+
 
 # The class that corresponds to the database table for synonyms.
 class Synonym(db.Model):
     __tablename__ = 'synonym'
-    __bind_key__ = 'synonyms'
+    # TODO: What's the deal with this bind key?
+    # __bind_key__ = 'synonyms'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category = db.Column(db.String(100))
     synonyms_text = db.Column(db.String(1000), unique=True, nullable=False)
-    stems_text = db.Column(db.String(1000),nullable=False)
+    stems_text = db.Column(db.String(1000), nullable=False)
     comment = db.Column(db.String(1000))
     enabled = db.Column(db.Boolean(), default=True)
 
     def json(self):
         return {"id": self.id, "category": self.category, "synonymsText": self.synonyms_text,
-                "stemsText": self.stems_text, "comment":self.comment, "enabled": self.enabled}
+                "stemsText": self.stems_text, "comment": self.comment, "enabled": self.enabled}
 
+    # TODO: Remove this completely, use get_designations instead!
+    @classmethod
+    def get_designation_by_entity_type(cls, entity_type):
+        query = 'SELECT s.category, s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^' + entity_type.lower() + '.*(english[_ -]+)+designation[s]?[_-]' + "'"
+        df = pd.read_sql_query(query, con=db.engine)
+
+        if not df.empty:
+            designation_value_list = {
+                re.sub(r'.*(any).*|.*(end).*', r'\1\2', x[0], 0, re.IGNORECASE): ''.join(x[1:]).split(",") for x in
+                df.itertuples(index=False)}
+            return designation_value_list
+
+        return None
+
+    '''
+    Find a term by column.
+    '''
     @classmethod
     def find(cls, term, col):
         print('finding {} for {}'.format(col, term))
@@ -36,6 +70,24 @@ class Synonym(db.Model):
                     synonyms_list.append(row)
 
         return synonyms_list
+
+    '''
+    Query the model collection using an array of filters
+    @:param filters An array of query filters eg. 
+                    [
+                      func.lower(model.category).op('~')(r'\y{}\y'.format('sub')),
+                      func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))
+                    ]
+    '''
+    @classmethod
+    def find_by_criteria(cls, criteria=None):
+        SynonymQueryCriteria.is_valid_criteria(criteria)
+
+        query = cls.query.with_entities(*criteria.fields) \
+            .filter(and_(*criteria.filters))
+
+        # print(query.statement)
+        return query.all()
 
 
 class SynonymSchema(ma.ModelSchema):

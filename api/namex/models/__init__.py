@@ -2,8 +2,10 @@
    This is picked up by the DB management system to maintain tables, etc.
 """
 from flask_sqlalchemy import SQLAlchemy
+
 db = SQLAlchemy()
 from flask_marshmallow import Marshmallow
+
 ma = Marshmallow()
 
 from marshmallow.exceptions import ValidationError
@@ -18,6 +20,7 @@ from .user import User, UserSchema
 from .state import State, StateSchema
 from .decision_reason import DecisionReason
 from .nro_sync_tables import NRONamesSyncJob, NRONamesSyncJobDetail, NRONamesSyncJobStatus
-from .admin_tables import DecisionReasonAudit, RestrictedConditionAudit, VirtualWordCondition
-from .word_classification import WordClassification, WordClassificationSchema
+from .admin_tables import DecisionReasonAudit, RestrictedConditionAudit
 from .synonym import Synonym, SynonymSchema
+from .word_classification import WordClassification, WordClassificationSchema
+from .virtual_word_condition import VirtualWordCondition

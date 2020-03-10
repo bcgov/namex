@@ -1,10 +1,14 @@
-""""word classification classifies all words in a name approved by an exmainer to be used for auto-approval
-
 """
+Virtual word classification classifies all words in a name approved by an examiner to be used for auto-approval
+"""
+
 from . import db, ma
+
+import pandas as pd
 from datetime import datetime, date
+from sqlalchemy import func, or_
 from sqlalchemy.orm import backref
-from sqlalchemy import or_
+
 
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
@@ -20,7 +24,7 @@ class WordClassification(db.Model):
     start_dt = db.Column('start_dt', db.DateTime(timezone=True))
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    last_update_dt =  db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
+    last_updated_dt = db.Column('last_updated_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approved_by])
@@ -31,14 +35,40 @@ class WordClassification(db.Model):
                 "lastNameUsed": self. last_name_used, "lastPrepName": self.last_prep_name,
                 "frequency": self.frequency,"approvedDate": self.approved_dt,
                 "approvedBy": self.approved_by, "startDate": self.start_dt,
-                "lastUpdatedBy": self.last_updated_by, "lastUpdatedate": self.last_update_dt}
+                "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
 
+    # TODO: Fix this it's not working...
+    '''
+    Note: we convert to lower case as word text in the DB will be in all caps.
+    '''
     @classmethod
     def find_word_classification(cls, word):
-        return cls.query.filter(word=word)\
-                   .filter(or_(cls.end_dt is None, datetime.date(cls.end_dt) > date.today()))\
-                   .filter(datetime.date(cls.start_dt) <= date.today())\
-                   .filter(cls.approved_dt) <= date.today().all()
+        # TODO: Can we return more than one result?
+        results = cls.query.filter(func.lower(WordClassification.word) == func.lower(word))
+        print(word)
+        print(list(map(lambda x: x.classification, results)))
+        return cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all()
+    '''
+    # TODO: Fix this it's not working...
+    @classmethod
+    def find_word_classification(cls, word):
+        # print(cls.query.filter(func.lower(WordClassification.word) == word.lower()))
+        word_property = WordClassification.word
+        lower_func_1 = func.lower(word_property)
+        lower_func_2 = func.lower(word)
+        return cls.query.filter(lower_func_1 == lower_func_2).all()
+    '''
+
+    # TODO: This isn't being used anymore..
+    @classmethod
+    def get_classification(cls, word):
+        query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
+        cf = pd.read_sql_query(query, con=db.engine)
+
+        if not cf.empty and len(cf) == 1:
+            return cf['word_classification'].to_string(index=False).lower()
+
+        return 'none'
 
     def save_to_db(self):
         db.session.add(self)
@@ -49,5 +79,5 @@ class WordClassification(db.Model):
 
 
 class WordClassificationSchema(ma.ModelSchema):
-        class Meta:
-            model = WordClassification
+    class Meta:
+        model = WordClassification

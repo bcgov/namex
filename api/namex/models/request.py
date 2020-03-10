@@ -14,6 +14,9 @@ from .name import Name, NameSchema
 from .state import State, StateSchema
 from datetime import datetime
 
+# TODO: Remove this when we update get_conflicts
+import pandas as pd
+
 
 # create sequence if not exists nr_seq;
 # noinspection PyPep8Naming
@@ -39,7 +42,7 @@ class Request(db.Model):
     xproJurisdiction = db.Column('xpro_jurisdiction', db.String(40))
     corpNum = db.Column('corp_num', db.String(20), default=None)
     submitter_userid = db.Column('submitter_userid', db.Integer, db.ForeignKey('users.id'))
-    #legacy sync tracking
+    # legacy sync tracking
     furnished = db.Column('furnished', db.String(1), default='N', index=True)
 
     # Flag to indicate this NR has been reset. Cleared upon submission, so it is only true after
@@ -91,22 +94,22 @@ class Request(db.Model):
         except:
             previousNr = None
 
-        return {'id' : self.id,
-                'submittedDate' : self.submittedDate,
-                'lastUpdate' : self.lastUpdate,
-                'userId' : '' if (self.activeUser is None) else self.activeUser.username,
-                'submitter_userid' : '' if (self.submitter is None) else self.submitter.username,
-                'state' : self.stateCd,
+        return {'id': self.id,
+                'submittedDate': self.submittedDate,
+                'lastUpdate': self.lastUpdate,
+                'userId': '' if (self.activeUser is None) else self.activeUser.username,
+                'submitter_userid': '' if (self.submitter is None) else self.submitter.username,
+                'state': self.stateCd,
                 'previousStateCd': self.previousStateCd,
-                'nrNum' : self.nrNum,
-                'consentFlag' : self.consentFlag,
-                'expirationDate' : self.expirationDate,
-                'requestTypeCd' : self.requestTypeCd,
-                'priorityCd' : self.priorityCd,
+                'nrNum': self.nrNum,
+                'consentFlag': self.consentFlag,
+                'expirationDate': self.expirationDate,
+                'requestTypeCd': self.requestTypeCd,
+                'priorityCd': self.priorityCd,
                 'priorityDate': self.priorityDate,
-                'xproJurisdiction' : self.xproJurisdiction,
-                'additionalInfo' : self.additionalInfo,
-                'natureBusinessInfo' : self.natureBusinessInfo,
+                'xproJurisdiction': self.xproJurisdiction,
+                'additionalInfo': self.additionalInfo,
+                'natureBusinessInfo': self.natureBusinessInfo,
                 'furnished': self.furnished if (self.furnished is not None) else 'N',
                 'hasBeenReset': self.hasBeenReset,
                 'previousRequestId': self.previousRequestId,
@@ -114,7 +117,8 @@ class Request(db.Model):
                 'submitCount': self.submitCount,
                 'corpNum': self.corpNum,
                 'names': [name.as_dict() for name in self.names.all()],
-                'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
+                'applicants': '' if (
+                            self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
                 'comments': [comment.as_dict() for comment in self.comments.all()],
                 'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
                 }
@@ -125,16 +129,16 @@ class Request(db.Model):
 
     def save_to_db(self):
         # if self.id is None:
-            # NR is not the primary key, but has to be a unique value.
-            # seq = Sequence('nr_seq')
-            # next_nr = db.engine.execute(seq)
-            # self.nr = 'NR{0:0>8}'.format(next_nr)
+        # NR is not the primary key, but has to be a unique value.
+        # seq = Sequence('nr_seq')
+        # next_nr = db.engine.execute(seq)
+        # self.nr = 'NR{0:0>8}'.format(next_nr)
 
         db.session.add(self)
         db.session.commit()
 
     def delete_from_db(self):
-        #TODO: Add listener onto the SQLALchemy event to block deletes
+        # TODO: Add listener onto the SQLALchemy event to block deletes
         raise BusinessException({"code": "cannot_delete_nr",
                                  "description":
                                      "NRs cannot be deleted, maybe try cancelling instead"},
@@ -154,17 +158,17 @@ class Request(db.Model):
             return existing_nr, False
 
         # this will error if there's nothing in the queue - likelihood ~ 0
-        r = db.session.query(Request).\
-                filter(Request.stateCd.in_([State.DRAFT])).\
-                order_by(Request.priorityCd.desc(), Request.submittedDate.asc()).\
-                with_for_update().first()
+        r = db.session.query(Request). \
+            filter(Request.stateCd.in_([State.DRAFT])). \
+            order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
+            with_for_update().first()
         # this row is now locked
 
         if not r:
             raise BusinessException(None, 404)
 
         # mark this as assigned to the user, masking it from others.
-        r.stateCd= State.INPROGRESS
+        r.stateCd = State.INPROGRESS
         r.userId = userObj.id
 
         db.session.add(r)
@@ -178,8 +182,8 @@ class Request(db.Model):
            and assigned to the user
            this assumes that a user can ONLY EVER have 1 Request in progress at a time.
         """
-        existing_nr = db.session.query(Request).\
-            filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS).\
+        existing_nr = db.session.query(Request). \
+            filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS). \
             one_or_none()
 
         return existing_nr
@@ -202,6 +206,70 @@ class Request(db.Model):
 
         return True
 
+    # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+    #  TODO: Use the models... get rid of the connection string and raw query!
+    @classmethod
+    def get_conflicts(cls, query):
+        matches = pd.read_sql_query(query, con=db.engine)
+        return matches
+
+    @classmethod
+    def get_query_distinctive(cls, dist_all_permutations, length):
+        query = cls.build_query_distinctive(dist_all_permutations, length)
+        return query
+
+    @classmethod
+    def get_query_descriptive(cls, desc_substitution_list, query):
+        query = cls.build_query_descriptive(desc_substitution_list, query)
+        return query
+
+    @classmethod
+    def get_query_exact_match(cls, prep_name):
+        query = cls.build_query_exact_match(prep_name)
+        return query
+
+    @classmethod
+    def build_query_distinctive(cls, dist_all_permutations, length):
+        query = "select n.name " + \
+                "from requests r, names n " + \
+                "where r.id = n.nr_id and " + \
+                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
+                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
+                "n.state IN ('APPROVED','CONDITION') and " + \
+                "lower(n.name) similar to " + "'"
+        st = ''
+        for s in range(length):
+            st += '%s '
+
+        permutations = "|".join(st % tup for tup in dist_all_permutations)
+        query += "(" + permutations + ")%%" + "'"
+
+        return query
+
+    # TODO: Replace this method... use the models!
+    @classmethod
+    def build_query_descriptive(cls, desc_substitution_list, query):
+        for element in desc_substitution_list:
+            query += " and lower(n.name) similar to "
+            substitutions = ' ?| '.join(map(str, element))
+            query += "'" + "%%( " + substitutions + " ?)%%" + "'"
+
+        return query
+
+    @classmethod
+    def build_query_exact_match(cls, prep_name):
+        query = "select n.name " + \
+                "from requests r, names n " + \
+                "where r.id = n.nr_id and " + \
+                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
+                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
+                "n.state IN ('APPROVED','CONDITION') and " + \
+                "lower(n.name) = " + "'" + prep_name + "'"
+
+        return query
+
+        # END NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+
 
 class RequestsSchema(ma.ModelSchema):
     class Meta:
@@ -209,9 +277,9 @@ class RequestsSchema(ma.ModelSchema):
         additional = ['stateCd']
 
     names = ma.Nested(NameSchema, many=True)
-    activeUser = ma.Nested(UserSchema, many=False,  only='username')
-    submitter = ma.Nested(UserSchema, many=False,  only='username')
-    comments = ma.Nested(CommentSchema, many=True,  only=['comment', 'examiner', 'timestamp'])
+    activeUser = ma.Nested(UserSchema, many=False, only='username')
+    submitter = ma.Nested(UserSchema, many=False, only='username')
+    comments = ma.Nested(CommentSchema, many=True, only=['comment', 'examiner', 'timestamp'])
 
     @post_dump
     def clean_missing(self, data):
@@ -227,23 +295,23 @@ class RequestsHeaderSchema(ma.ModelSchema):
         # sqla_session = db.scoped_session
         # additional = ['stateCd']
         fields = ('additionalInfo'
-                 ,'consentFlag'
-                 ,'corpNum'
-                 ,'expirationDate'
-                 ,'furnished'
-                 ,'hasBeenReset'
-                 ,'id'
-                 ,'natureBusinessInfo'
-                 ,'nrNum'
-                 ,'nroLastUpdate'
-                 ,'priorityCd'
-                 ,'requestTypeCd'
-                 ,'stateCd'
-                 ,'previousStateCd'
-                 ,'submitCount'
-                 ,'submittedDate'
-                 ,'xproJurisdiction'
-                 )
+                  , 'consentFlag'
+                  , 'corpNum'
+                  , 'expirationDate'
+                  , 'furnished'
+                  , 'hasBeenReset'
+                  , 'id'
+                  , 'natureBusinessInfo'
+                  , 'nrNum'
+                  , 'nroLastUpdate'
+                  , 'priorityCd'
+                  , 'requestTypeCd'
+                  , 'stateCd'
+                  , 'previousStateCd'
+                  , 'submitCount'
+                  , 'submittedDate'
+                  , 'xproJurisdiction'
+                  )
 
 
 class RequestsSearchSchema(ma.ModelSchema):
@@ -252,25 +320,26 @@ class RequestsSearchSchema(ma.ModelSchema):
         # sqla_session = db.scoped_session
         # additional = ['stateCd']
         fields = ('additionalInfo'
-                 ,'comments'
-                 ,'consentFlag'
-                 ,'corpNum'
-                 ,'expirationDate'
-                 ,'furnished'
-                 ,'lastUpdate'
-                 ,'natureBusinessInfo'
-                 ,'nrNum'
-                 ,'nroLastUpdate'
-                 ,'priorityCd'
-                 ,'priorityDate'
-                 ,'requestTypeCd'
-                 ,'stateCd'
-                 ,'submitCount'
-                 ,'submittedDate'
-                 ,'xproJurisdiction'
-                 ,'names'
-                 ,'activeUser'
-                 )
+                  , 'comments'
+                  , 'consentFlag'
+                  , 'corpNum'
+                  , 'expirationDate'
+                  , 'furnished'
+                  , 'lastUpdate'
+                  , 'natureBusinessInfo'
+                  , 'nrNum'
+                  , 'nroLastUpdate'
+                  , 'priorityCd'
+                  , 'priorityDate'
+                  , 'requestTypeCd'
+                  , 'stateCd'
+                  , 'submitCount'
+                  , 'submittedDate'
+                  , 'xproJurisdiction'
+                  , 'names'
+                  , 'activeUser'
+                  )
+
     names = ma.Nested(NameSchema, many=True)
-    activeUser = ma.Nested(UserSchema, many=False,  only='username')
+    activeUser = ma.Nested(UserSchema, many=False, only='username')
     comments = ma.Nested(CommentSchema, many=True, only=['comment', 'examiner', 'timestamp'])
