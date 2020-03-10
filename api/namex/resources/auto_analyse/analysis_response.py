@@ -51,7 +51,8 @@ class AnalysisResponse:
     '''
     @:param analysis_result ProcedureResult[]
     '''
-    def __init__(self, analysis_result):
+    def __init__(self, entity_type, analysis_result):
+        self.entity_type = entity_type
         self.header = ""
         self.status_code = ""
         self.issues = []
@@ -78,7 +79,7 @@ class AnalysisResponse:
                         # option2 = None
                         # option3 = None
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             # option2,
                             # option3
@@ -93,7 +94,7 @@ class AnalysisResponse:
                         # option2 = None
                         # option3 = None
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             # option2,
                             # option3
@@ -108,7 +109,7 @@ class AnalysisResponse:
                         # option2 = None
                         # option3 = None
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             # option2,
                             # option3
@@ -123,7 +124,7 @@ class AnalysisResponse:
                         # option2 = None
                         # option3 = None
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             # option2 = None
                             # option3 = None
@@ -138,7 +139,7 @@ class AnalysisResponse:
                         # option2 = None
                         # option3 = None
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             # option2,
                             # option3
@@ -159,7 +160,7 @@ class AnalysisResponse:
                         # Tweak the header
                         option3.header = "Option 3"
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             option2,
                             option3
@@ -180,7 +181,7 @@ class AnalysisResponse:
                         # Tweak the header
                         option3.header = "Option 3"
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             option2,
                             option3
@@ -199,7 +200,7 @@ class AnalysisResponse:
 
                         # option3 = None
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             option2,
                             # option3
@@ -213,7 +214,7 @@ class AnalysisResponse:
                         # option2 = None
                         # option3 = None
 
-                        issue_builder = response_issues(procedure_result.result_code)([
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             # option1,
                             # option2,
                             # option3
