@@ -37,7 +37,7 @@ class WordClassification(db.Model):
                 "approvedBy": self.approved_by, "startDate": self.start_dt,
                 "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
 
-    # TODO: Fix this it's not working...
+    # TODO: Do we still need to update this method?
     '''
     Note: we convert to lower case as word text in the DB will be in all caps.
     '''
@@ -48,27 +48,6 @@ class WordClassification(db.Model):
         print(word)
         print(list(map(lambda x: x.classification, results)))
         return cls.query.filter(func.lower(WordClassification.word) == func.lower(word)).all()
-    '''
-    # TODO: Fix this it's not working...
-    @classmethod
-    def find_word_classification(cls, word):
-        # print(cls.query.filter(func.lower(WordClassification.word) == word.lower()))
-        word_property = WordClassification.word
-        lower_func_1 = func.lower(word_property)
-        lower_func_2 = func.lower(word)
-        return cls.query.filter(lower_func_1 == lower_func_2).all()
-    '''
-
-    # TODO: This isn't being used anymore..
-    @classmethod
-    def get_classification(cls, word):
-        query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
-        cf = pd.read_sql_query(query, con=db.engine)
-
-        if not cf.empty and len(cf) == 1:
-            return cf['word_classification'].to_string(index=False).lower()
-
-        return 'none'
 
     def save_to_db(self):
         db.session.add(self)
