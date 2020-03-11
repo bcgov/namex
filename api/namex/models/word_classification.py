@@ -44,7 +44,7 @@ class WordClassification(db.Model):
                 "approvedBy": self.approved_by, "startDate": self.start_dt,
                 "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
 
-    # TODO: Fix this it's not working...
+    # TODO: Do we still need to update this method?
     '''
     Note: we convert to lower case as word text in the DB will be in all caps.
     '''
