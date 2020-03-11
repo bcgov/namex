@@ -33,20 +33,6 @@ class Synonym(db.Model):
         return {"id": self.id, "category": self.category, "synonymsText": self.synonyms_text,
                 "stemsText": self.stems_text, "comment": self.comment, "enabled": self.enabled}
 
-    # TODO: Remove this completely, use get_designations instead!
-    @classmethod
-    def get_designation_by_entity_type(cls, entity_type):
-        query = 'SELECT s.category, s.synonyms_text FROM synonym s WHERE lower(s.category) ~ ' + "'" + '^' + entity_type.lower() + '.*(english[_ -]+)+designation[s]?[_-]' + "'"
-        df = pd.read_sql_query(query, con=db.engine)
-
-        if not df.empty:
-            designation_value_list = {
-                re.sub(r'.*(any).*|.*(end).*', r'\1\2', x[0], 0, re.IGNORECASE): ''.join(x[1:]).split(",") for x in
-                df.itertuples(index=False)}
-            return designation_value_list
-
-        return None
-
     '''
     Find a term by column.
     '''
