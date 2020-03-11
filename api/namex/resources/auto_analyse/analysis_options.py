@@ -157,7 +157,7 @@ class ChangeEntityTypeSetup(Setup):
 change_entity_type_setup = ChangeEntityTypeSetup(
     type="change_entity_type",
     header=Template("Change Entity Type"),
-    line1=Template("If you would like to start a $correct_designations business instead of a $incorrect_designations start your search over and change your entity type to $entity_type"),
+    line1=Template("If you would like to start a $correct_designations business instead of a $incorrect_designations start your search over and change your entity type to $entity_type."),
     line2=Template(""),
     label=Template("Change $entity_type to $correct_designations")
 )
