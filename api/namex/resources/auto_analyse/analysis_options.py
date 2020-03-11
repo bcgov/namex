@@ -1,4 +1,5 @@
 from .response_objects.setup import Setup
+from string import Template
 
 
 class HelpfulHintSetup(Setup):
@@ -19,9 +20,9 @@ class AddDistinctiveSetup(Setup):
 
 add_distinctive_setup = AddDistinctiveSetup(
     type="add_distinctive",
-    header="Add Distinctive",
-    line1="Add some words to the beginning of your name that sets your name apart. For example, an individual's name or initials; a geographic location; a colour; a coined, made-up word; or an acronym.",
-    line2="Example: Change 'Renovations Ltd.' → 'Joe's Renovations Ltd."
+    header=Template("Add Distinctive"),
+    line1=Template("Add some words to the beginning of your name that sets your name apart. For example, an individual's name or initials; a geographic location; a colour; a coined, made-up word; or an acronym."),
+    line2=Template("Example: Change 'Renovations Ltd.' → 'Joe's Renovations Ltd.")
 )
 
 
@@ -31,9 +32,9 @@ class AddDescriptiveSetup(Setup):
 
 add_descriptive_setup = AddDistinctiveSetup(
     type="add_descriptive",
-    header="Add Descriptive",
-    line1="Add some additional words that help describe what your business does. For example, the product or service you provide.",
-    line2="Example: Change 'Joe's Ltd.' → 'Joe's Renovations Ltd."
+    header=Template("Add Descriptive"),
+    line1=Template("Add some additional words that help describe what your business does. For example, the product or service you provide."),
+    line2=Template("Example: Change 'Joe's Ltd.' → 'Joe's Renovations Ltd.")
 )
 
 
@@ -43,9 +44,9 @@ class TooManyWordsSetup(Setup):
 
 too_many_words_setup = TooManyWordsSetup(
     type="too_many_words",
-    header="Too Many Words",
-    line1="Please remove one or more words and try your search again, or you can choose to submit the name above for examination.",
-    line2="Note: Designations at the end of your name such as 'Limited', 'Inc', 'Cooperative' will not be counted."
+    header=Template("Too Many Words"),
+    line1=Template("Please remove one or more words and try your search again, or you can choose to submit the name above for examination."),
+    line2=Template("Note: Designations at the end of your name such as 'Limited', 'Inc', 'Cooperative' will not be counted.")
 )
 
 
@@ -55,9 +56,9 @@ class RemoveSetup(Setup):
 
 remove_setup = RemoveSetup(
     type="remove",
-    header="Remove",
-    line1="Please remove or replace the word from your search and try again.",
-    line2=""
+    header=Template("Remove"),
+    line1=Template("Please remove or replace the word from your search and try again."),
+    line2=Template("")
 )
 
 
@@ -67,9 +68,9 @@ class RemoveOrReplaceSetup(Setup):
 
 remove_or_replace_setup = RemoveOrReplaceSetup(
     type="remove_or_replace",
-    header="Remove or Replace",
-    line1="Please remove or replace the highlighted words and try your search again.",
-    line2=""
+    header=Template("Remove or Replace"),
+    line1=Template("Please remove or replace the highlighted words and try your search again."),
+    line2=Template("")
 )
 
 
@@ -79,9 +80,9 @@ class RemoveOrSubmitSetup(Setup):
 
 remove_or_submit_setup = RemoveOrReplaceSetup(
     type="remove_or_submit",
-    header="Remove or Submit",
-    line1="Please remove or replace the highlighted words and try your search again, or you can choose to submit the name above for examination.",
-    line2=""
+    header=Template("Remove or Submit"),
+    line1=Template("Please remove or replace the highlighted words and try your search again, or you can choose to submit the name above for examination."),
+    line2=Template("")
 )
 
 
@@ -91,9 +92,9 @@ class ResolveConflictSetup(Setup):
 
 resolve_conflict_setup = ResolveConflictSetup(
     type="resolve_conflict",
-    header="Resolve Conflict",
-    line1="Add a word to the beginning of the name that sets it apart like a person’s name or initials.",
-    line2="Or remove the word(s) {{$list_conflicts}} and replace them with different ones."
+    header=Template("Resolve Conflict"),
+    line1=Template("Add a word to the beginning of the name that sets it apart like a person’s name or initials."),
+    line2=Template("Or remove the word(s) $list_remove and replace them with different ones.")
 )
 
 
@@ -103,12 +104,10 @@ class SendToExaminerSetup(Setup):
 
 send_to_examiner_setup = SendToExaminerSetup(
     type="send_to_examiner",
-    header="Send to Examiner",
-    line1="You can choose to submit this name for examination. Please check wait times at the top of the screen.",
-    line2="",
-    action="I want my name examined.",
-    button="",
-    checkbox=""
+    header=Template("Send to Examiner"),
+    line1=Template("You can choose to submit this name for examination. Please check wait times at the top of the screen."),
+    line2=Template(""),
+    action=Template("I want my name examined.")
 )
 
 
@@ -118,12 +117,10 @@ class ObtainConsentSetup(Setup):
 
 obtain_consent_setup = ObtainConsentSetup(
     type="obtain_consent",
-    header="Obtain Consent",
-    line1="This name can be auto-approved, but you will be required to send written consent to the BC Business Registry.",
-    line2="",
-    action="I am able to obtain and send written consent.",
-    button="",
-    checkbox=""
+    header=Template("Obtain Consent"),
+    line1=Template("This name can be auto-approved, but you will be required to send written consent to the BC Business Registry."),
+    line2=Template(""),
+    action=Template("I am able to obtain and send written consent.")
 )
 
 
@@ -133,13 +130,12 @@ class SelfConsentSetup(Setup):
 
 conflict_self_consent_setup = SelfConsentSetup(
     type="conflict_self_consent",
-    header="Conflict Self Consent",
-    line1="This name can be auto-approved if you are the registered owner of the conflicting name, but you are required to send written consent to the BC Business Registry.",
-    line2="",
-    action="I am the registered owner of the conflicting name. I will send written consent.",
-    button="",
-    checkbox=""
+    header=Template("Conflict Self Consent"),
+    line1=Template("This name can be auto-approved if you are the registered owner of the conflicting name, but you are required to send written consent to the BC Business Registry."),
+    line2=Template(""),
+    action=Template("I am the registered owner of the conflicting name. I will send written consent.")
 )
+
 
 
 class ReplaceDesignationSetup(Setup):
@@ -148,9 +144,9 @@ class ReplaceDesignationSetup(Setup):
 
 replace_designation_setup = ReplaceDesignationSetup(
     type="replace_designation",
-    header="Replace Designation",
-    line1="Change the designation from to one of the following:",
-    line2=""
+    header=Template("Replace Designation"),
+    line1=Template("Change the designation from to one of the following:"),
+    line2=Template("")
 )
 
 
@@ -160,8 +156,8 @@ class ChangeEntityTypeSetup(Setup):
 
 change_entity_type_setup = ChangeEntityTypeSetup(
     type="change_entity_type",
-    header="Change Entity Type",
-    line1="If you would like to start a {{$correct_designation}} business instead of a {{$incorrect_designation}} start your search over and change your entity type to {{$entity_type}}",
-    line2="",
-    label="Change {{$entity_type}} to {{$correct_designation}}"
+    header=Template("Change Entity Type"),
+    line1=Template("If you would like to start a $correct_designations business instead of a $incorrect_designations start your search over and change your entity type to $entity_type"),
+    line2=Template(""),
+    label=Template("Change $entity_type to $correct_designations")
 )

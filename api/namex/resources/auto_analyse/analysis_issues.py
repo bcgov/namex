@@ -1,5 +1,5 @@
 from datetime import date
-from copy import copy
+from string import Template
 
 from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
@@ -8,7 +8,6 @@ from .response_objects.name_analysis_issue import NameAnalysisIssue
 from .response_objects.name_action import NameAction, NameActions, WordPositions
 from .response_objects.consenting_body import ConsentingBody
 from .response_objects.conflict import Conflict
-from .response_objects.setup import Setup
 
 
 class AnalysisResponseIssue:
@@ -444,6 +443,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         # - Add brackets after the last descriptive word?
         # - Strike out the last word
 
+        list_remove = []  # These are passed down to the Template
+
         if is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
             for word in list_name:
@@ -461,6 +462,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                 # Strike out the last descriptive word
                 if word in list_desc_words and name_word_idx == list_name.__len__() - 1:
                     # <class 'list'>: ['growers', 'view']
+                    list_remove.append(word)
                     issue.name_actions.append(NameAction(
                         word=word,
                         index=name_word_idx,
@@ -503,6 +505,18 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        # Replace template strings in setup boxes
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute({
+                        'list_name': self._join_list_words(list_name),
+                        'list_remove': self._join_list_words(list_remove),
+                        'list_dist': self._join_list_words(list_dist_words),
+                        'list_desc': self._join_list_words(list_desc_words)
+                    }))
 
         return issue
 
@@ -553,5 +567,17 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        # Replace template strings in setup boxes
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute({
+                        'list_name': self._join_list_words(list_name),
+                        'correct_designations': self._join_list_words(correct_designations),
+                        'incorrect_designations': self._join_list_words(incorrect_designations),
+                        'entity_type': self.entity_type  # TODO: Map this CODE!
+                    }))
 
         return issue
