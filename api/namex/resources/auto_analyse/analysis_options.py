@@ -148,6 +148,7 @@ def conflict_self_consent_setup():
     )
 
 
+
 class ReplaceDesignationSetup(Setup):
     pass
 
