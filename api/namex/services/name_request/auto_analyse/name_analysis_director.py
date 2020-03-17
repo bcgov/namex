@@ -4,7 +4,7 @@ from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
-from . import AnalysisResultCodes
+from . import AnalysisIssueCodes
 
 from namex.services.synonyms.synonym \
     import SynonymService
@@ -242,15 +242,15 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
-            # eg. result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+            # eg. result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
             # don't return the result yet, the name is well formed, we just have an unclassified
             # word in the result.
 
             issues_that_must_be_fixed = [
-                AnalysisResultCodes.WORDS_TO_AVOID,
-                AnalysisResultCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisResultCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisResultCodes.TOO_MANY_WORDS
+                AnalysisIssueCodes.WORDS_TO_AVOID,
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                AnalysisIssueCodes.TOO_MANY_WORDS
             ]
 
             issue_must_be_fixed = False
@@ -276,13 +276,13 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             # Strip out the unclassified words errors involving the same name words.
             list_avoid = []
 
-            match_words_to_avoid = list(filter(lambda i: i.result_code == AnalysisResultCodes.WORDS_TO_AVOID, analysis))
+            match_words_to_avoid = list(filter(lambda i: i.result_code == AnalysisIssueCodes.WORDS_TO_AVOID, analysis))
             if match_words_to_avoid.__len__() > 0:
                 for procedure_result in match_words_to_avoid:
                     list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
 
                 def remove_words_to_avoid(result):
-                    if result.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                    if result.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
                         for word in list_avoid:
                             result.values['list_none'].remove(word)
                     return result
@@ -293,7 +293,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 uc_word_issue_indexes = []
                 uc_word_issues = []
                 for idx, issue in enumerate(analysis):
-                    if issue.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                    if issue.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
                         uc_word_issue_indexes.append(idx)
 
                 for idx in uc_word_issue_indexes:
