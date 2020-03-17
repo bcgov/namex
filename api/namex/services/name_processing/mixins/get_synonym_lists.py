@@ -3,6 +3,8 @@ class GetSynonymListsMixin(object):
     _synonyms = []
     _substitutions = []
     _stop_words = []
+    # TODO: Arturo _number_words is declared in multiple files
+    _number_words = []
     _designated_end_words = []
     _designated_any_words = []
     _designated_all_words = []
@@ -19,6 +21,9 @@ class GetSynonymListsMixin(object):
 
     def get_stop_words(self):
         return self._stop_words
+
+    def get_number_words(self):
+        return self._number_words
 
     def get_designated_end_words(self):
         return self._designated_end_words

@@ -9,7 +9,10 @@ from ..auto_analyse.analysis_issues import \
     TooManyWordsIssue, \
     NameRequiresConsentIssue, \
     ContainsUnclassifiableWordIssue, \
-    CorporateNameConflictIssue, IncorrectCategory, WordSpecialUse
+    CorporateNameConflictIssue, \
+    IncorrectCategory, \
+    WordSpecialUse, \
+    DesignationMisplacedIssue
 
 from namex.services.name_request.auto_analyse import AnalysisResultCodes
 
@@ -25,7 +28,8 @@ from .analysis_options import \
     obtain_consent_setup, \
     conflict_self_consent_setup, \
     replace_designation_setup, \
-    change_entity_type_setup
+    change_entity_type_setup, \
+    change_designation_order_setup
 
 
 # Execute analysis returns a response strategy code
@@ -40,6 +44,7 @@ def response_issues(issue_code):
         AnalysisResultCodes.WORDS_TO_AVOID: ContainsWordsToAvoidIssue,
         AnalysisResultCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisResultCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
+        AnalysisResultCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisResultCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
         AnalysisResultCodes.WORD_SPECIAL_USE: WordSpecialUse
     }
@@ -203,6 +208,19 @@ class AnalysisResponse:
                         issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
                             option2,
+                            # option3
+                        ])
+                        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+                        executed_procedures.append(procedure_result.result_code)
+
+                    if procedure_result.result_code == AnalysisResultCodes.DESIGNATION_MISPLACED:
+                        option1 = change_designation_order_setup
+                        # Tweak the header
+                        option1.header = "Option 1"
+
+                        issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
+                            option1,
+                            # option2,
                             # option3
                         ])
                         # Add the procedure to the stack of executed_procedures so we know what issues have been set up

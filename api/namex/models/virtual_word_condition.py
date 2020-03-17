@@ -6,12 +6,15 @@ from . import db, ma
 
 import pandas as pd
 from sqlalchemy import Column
+from sqlalchemy import and_
 
 from namex.services.name_request.auto_analyse import DataFrameFields
 from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
 
-
 # TODO: Remove deprecated duplicate from admin_tables.py
+from ..criteria.virtual_word_condition.query_criteria import VirtualWordConditionCriteria
+
+
 class VirtualWordCondition(db.Model):
     __tablename__ = 'virtual_word_condition'
 
@@ -24,6 +27,8 @@ class VirtualWordCondition(db.Model):
     rc_consent_required = db.Column(db.Boolean(), default=False)
     rc_allow_use = db.Column(db.Boolean(), default=True)
 
+    # These queries were moved to SQLALchemy
+    '''
     @classmethod
     def get_words_to_avoid(cls):
         query = 'SELECT rc_words FROM virtual_word_condition WHERE rc_allow_use = false;'
@@ -60,4 +65,18 @@ class VirtualWordCondition(db.Model):
             return response
 
         return None
+    '''
+    @classmethod
+    def find_by_criteria(cls, criteria=None):
+        VirtualWordConditionCriteria.is_valid_criteria(criteria)
 
+        query = cls.query.with_entities(*criteria.fields) \
+            .filter(and_(*criteria.filters))
+
+        # print(query.statement)
+        return query.all()
+
+
+class VirtualWordConditionSchema(ma.ModelSchema):
+    class Meta:
+        model = VirtualWordCondition

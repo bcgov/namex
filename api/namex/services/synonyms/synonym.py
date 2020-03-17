@@ -101,6 +101,17 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
         return flattened
 
+    def get_number_words(self):
+        model = self.get_model()
+
+        filters = [
+            func.lower(model.category).op('~')(r'\y{}\y'.format('number(s)? sub')),
+        ]
+
+        results = self.find_word_synonyms(None, filters)
+        flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
+        return flattened
+
     def get_designations(self, entity_type_code, position_code, lang):
         lang = lang if isinstance(lang, str) else 'english'
         model = self.get_model()
@@ -153,18 +164,20 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         A.- Remove cardinal and ordinal numbers from string in the middle and end: (?<=[A-Za-z]\b )([ 0-9]*(ST|[RN]D|TH)?\b)
         #(Note: May be removed) B.- Set together numbers separated by more than 2 spaces: (?<=\d)\s{2,}(?=\d+).
     10.- Replace with non-space:
-         Remove numbers at the beginning or keep them as long as the last string is any BC|HOLDINGS|VENTURES: ^(?:\d+(?:ST|[RN]D|TH)?\s)+(?=[^\d]+$)(?!.*?(?:HOLDINGS$|BC$|VENTURES$))
+         Remove numbers and numbers in words at the beginning or keep them as long as the last string is 
+         any BC|HOLDINGS|VENTURES: (^(?:\d+(?:{ordinal_suffixes})?\s+)+(?=[^\d]+$)|(?:({numbers})\s+)(?!.*?(?:{stand_alone_words}$))
     	 Set single letters together (initials):(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     11.- Remove extra spaces to have just one space: \s+
     '''
 
-    def regex_transform(self, text, designation_any, designation_end, designation_all, prefix_list):
+    def regex_transform(self, text, designation_any, designation_end, designation_all, prefix_list, number_list):
         designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
         designation_any_regex = "(" + '|'.join(designation_any) + ")"
         designation_all_regex = "(" + '|'.join(designation_all) + ")"
         prefixes = '|'.join(prefix_list)
+        numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
-        stand_alone_words = 'HOLDINGS$|BC$|VENTURES$'
+        stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
         internet_domains = '.COM'
 
         # Build exception list to avoid separation of numbers and letters when they are part of synonym table such as H20, 4MULA, ACTIV8
@@ -183,9 +196,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = re.sub(r'\s+',
                       ' ',
                       re.sub(
-                          r'^(?:\d+(?:{ordinal_suffixes})?\s+)+(?=[^\d]+$)(?!.*?(?:{stand_alone_words}$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)',
+                          r'(^(?:\d+(?:' + ordinal_suffixes + ')?\\s+)+(?=[^\\d]+$)|(?:' + numbers + ')\\s+)(?!.*?(?:' + stand_alone_words + '$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)',
                           '',
-                          re.sub(r'(?<=[A-Za-z]\b )([ 0-9]*({ordinal_suffixes})?\b)',
+                          re.sub(r'(?<=[A-Za-z]\b )([ 0-9]*(' + ordinal_suffixes + ')?\b)',
                                  '',
                                  re.sub(r'(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)|^\s+|\s+$',
                                         '',
@@ -194,7 +207,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                                                # re.sub(r'(?<=[0-9])\s+(?=(?:{ordinal_suffixes})(?: +[^\W\d_]|$))',
                                                #       '',
                                                ws_rx.sub(lambda x: x.group(1) or " ",
-                                                         re.sub(r'\b(\d+({ordinal_suffixes}))(\w+)\b',
+                                                         re.sub(r'\b(\d+(' + ordinal_suffixes + '))(\\w+)\\b',
                                                                 r'\1 \3',
                                                                 re.sub(r'\b(\w{2,})(\b\W+\b\1\b)*',
                                                                        r'\1',
@@ -205,7 +218,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                                                                                r'\b(' + prefixes + ')([ &/.-])([A-Za-z]+)',
                                                                                r'\1\3',
                                                                                re.sub(
-                                                                                   #rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_any_regex}\b|\s{designation_end_regex}(?=(\s{designation_end_regex})*$)",
+                                                                                   # rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_any_regex}\b|\s{designation_end_regex}(?=(\s{designation_end_regex})*$)",
                                                                                    rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_all_regex}\b",
                                                                                    '',
                                                                                    text,
