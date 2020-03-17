@@ -28,6 +28,7 @@ def get_flat_list(lst):
     # return subs_list
 
 
+# TODO: What is going on here? Why the change?
 '''
 def remove_french(text, fr_designation_end_list):
     compound = re.findall(r'[^/]+(?://[^/]*)*', text)
@@ -36,6 +37,16 @@ def remove_french(text, fr_designation_end_list):
         if any(item in fr_designation_end_list for item in fr_list_text):
             compound.pop()
             text = ' '.join(map(str, compound))
+    return text
+'''
+
+
+def remove_french(text):
+    text = re.sub(r'/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
+                  ' ',
+                  text,
+                  0,
+                  re.IGNORECASE)
     return text
 
 
@@ -115,6 +126,9 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
     desc_list_all = []
 
     dist_list_all.append(list(queue_dist))
+
+    # TODO: Arturo why the change?
+    '''
     while len(queue_dist) > 1:
         queue_dist.pop()
         dist_list_all.append(list(queue_dist))
@@ -122,15 +136,18 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
     dist = map(list, unique(map(tuple, dist_list_all)))
     dist_list_all = list(dist)
     dist_list_all.reverse()
+    '''
 
     for dist in dist_list_all:
         desc_list_all.append([i for i in name_list if i not in dist])
 
+    # TODO: Arturo why the change?
+    '''
     flatten_desc = [item for sublist in desc_list_all for item in sublist]
     flatten_desc = list(set(flatten_desc))
     if flatten_desc.sort() != desc_list.sort():
         raise Exception('Invalid generated descriptive list.')
-
+    '''
     return dist_list_all, desc_list_all
 
 

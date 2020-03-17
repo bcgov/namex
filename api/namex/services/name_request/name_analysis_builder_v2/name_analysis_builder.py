@@ -22,8 +22,30 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name):
         results = []
+        # TODO: We're doing two checks for name is well formed, that should probably not be the case
 
+        # list_name = ['victoria', 'abc', 'view', 'book']
+        # list_dist = ['victoria', 'book']
+        # list_desc = ['victoria', 'abc', 'view']
+        # Returns words in wrong classification following distinctive | descriptive: [{book:3}]
         _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
+
+        if len(list_name) < 2 and len(list_dist) == 1:
+            result = ProcedureResult()
+            result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+            result.values = {
+                'list_name': list_name or [],
+                'list_dist': list_dist or []
+            }
+
+            results.append(result)
+        elif len(list_name) < 2 and len(list_dist) == 0:
+            result = ProcedureResult()
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+            result.values = list_name
+
+            results.append(result)
 
         if len(list_none) > 0:
             unclassified_words_list_response = []
@@ -139,28 +161,33 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(w_dist)
             dist_substitution_list = dist_substitution_dict.values()
+
+            # TODO: Confirm that these lines should be removed
+            '''
             dist_all_permutations.append(list(itertools.product(*dist_substitution_list)))
 
             # Inject distinctive section in query
             for element in dist_all_permutations:
                 query = Request.get_query_distinctive(element, len(element[0]))
+            '''
 
             desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
             desc_synonym_list = desc_synonym_dict.values()
 
-            desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
-            desc_synonym_list = desc_synonym_dict.values()
-            # Inject descriptive section into query, execute and add matches to list
-            if desc_synonym_list:
-                query = Request.get_query_descriptive(desc_synonym_list, query)
-                matches = Request.get_conflicts(query)
-                matches_response.extend([val.pop() for i, val in enumerate(matches.values.tolist())])
-                matches_response = list(dict.fromkeys(matches_response))
-                dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
-                                                                                        dict_highest_detail,
-                                                                                        matches_response, w_dist,
-                                                                                        w_desc, list_name, name)
-
+            # Inject distinctive section in query
+            for dist in dist_substitution_list:
+                query_dist = Request.get_general_query()
+                query_dist = Request.get_query_distinctive_descriptive(dist, query_dist, True)
+                # Inject descriptive section into query, execute and add matches to list
+                for desc in desc_synonym_list:
+                    query = Request.get_query_distinctive_descriptive(desc, query_dist)
+                    matches = Request.get_conflicts(query)
+                    matches_response.extend([val.pop() for i, val in enumerate(matches.values.tolist())])
+                    matches_response = list(dict.fromkeys(matches_response))
+                    dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
+                                                                                            dict_highest_detail,
+                                                                                            matches_response, w_dist,
+                                                                                            w_desc, list_name, name)
         most_similar_names.extend(
             list({k for k, v in
                   sorted(dict_highest_counter.items(), key=lambda item: (-item[1], item[0]))[0:MAX_MATCHES_LIMIT]}))
@@ -245,36 +272,49 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     list_name: original name tokenized
     entity_type_user: Entity type typed u user in UI
     all_designations: All Designations found in name (either misplaced or not)
-    wrong_designation_place: Designations found in name in wrong place
     all_designations_user: All designations for the entity type typed by the user. 
     @return ProcedureResult
     '''
 
-    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, misplaced_designation_any, misplaced_designation_end, all_designations_user):
+    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
 
         mismatch_entity_designation_list = []
-        # mismatch_wrong_designation_place = []
         for idx, token in enumerate(list_name):
             if any(token in designation for designation in all_designations):
                 if token not in all_designations_user:
                     mismatch_entity_designation_list.append(token.upper())
-        '''
-        if wrong_designation_place:
-            for idx, token in enumerate(list_name):
-                if any(token in wrong_designation for wrong_designation in wrong_designation_place):
-                    mismatch_wrong_designation_place.append({idx: token.upper()})
-        '''
-        if mismatch_entity_designation_list or wrong_designation_place:
+
+        if mismatch_entity_designation_list:
             result.is_valid = False
             result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
             result.values = {
                 'list_name': list_name,
                 'incorrect_designations': mismatch_entity_designation_list,
                 'correct_designations': all_designations_user,
+            }
+
+        return result
+
+    '''
+        Override the abstract / base class method
+        misplaced_designation_any, misplaced_designation_end, misplaced_designation_all
+        @return ProcedureResult
+        '''
+
+    def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end, misplaced_designation_all):
+        result = ProcedureResult()
+        result.is_valid = True
+
+        if misplaced_designation_all:
+            result.is_valid = False
+            result.result_code = AnalysisResultCodes.DESIGNATION_MISPLACED
+            result.values = {
+                'list_name': list_name,
                 'misplaced_any_designation': misplaced_designation_any,
-                'misplaced_end_designation': misplaced_designation_end
+                'misplaced_end_designation': misplaced_designation_end,
+                'misplaced_all_designation': misplaced_designation_all
             }
 
         return result
@@ -323,7 +363,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             desc_substitution_list = [item for sublist in desc_substitution_list for item in sublist]
 
             all_substitutions = dist_substitution_list + desc_substitution_list
-
+            all_subs_stem = [porter.stem(substitution.lower()) for substitution in all_substitutions]
             dict_matches_counter = {}
             dict_matches_words = {}
             for match in matches:
@@ -332,7 +372,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 word_n = 0
                 for word in match_list:
                     word_n += 1
-                    if porter.stem(word.lower()) in all_substitutions:
+                    if porter.stem(word.lower()) in all_subs_stem:
                         counter += 1
                 dict_matches_counter.update({match: counter / word_n})
 

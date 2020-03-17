@@ -315,13 +315,13 @@ class Request(db.Model):
         return matches
 
     @classmethod
-    def get_query_distinctive(cls, dist_all_permutations, length):
-        query = cls.build_query_distinctive(dist_all_permutations, length)
+    def get_general_query(cls):
+        query = cls.build_query_distinctive()
         return query
 
     @classmethod
-    def get_query_descriptive(cls, desc_substitution_list, query):
-        query = cls.build_query_descriptive(desc_substitution_list, query)
+    def get_query_distinctive_descriptive(cls, desc_substitution_list, query, distinctive=False):
+        query = cls.build_query_descriptive(desc_substitution_list, query, distinctive)
         return query
 
     @classmethod
@@ -330,30 +330,25 @@ class Request(db.Model):
         return query
 
     @classmethod
-    def build_query_distinctive(cls, dist_all_permutations, length):
+    def build_query_distinctive(cls):
         query = "select n.name " + \
                 "from requests r, names n " + \
                 "where r.id = n.nr_id and " + \
                 "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
                 "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
-                "n.state IN ('APPROVED','CONDITION') and " + \
-                "lower(n.name) similar to " + "'"
-        st = ''
-        for s in range(length):
-            st += '%s '
-
-        permutations = "|".join(st % tup for tup in dist_all_permutations)
-        query += "(" + permutations + ")%%" + "'"
+                "n.state IN ('APPROVED','CONDITION') "
 
         return query
 
     # TODO: Replace this method... use the models!
     @classmethod
-    def build_query_descriptive(cls, desc_substitution_list, query):
-        for element in desc_substitution_list:
-            query += " and lower(n.name) similar to "
-            substitutions = ' ?| '.join(map(str, element))
-            query += "'" + "%%( " + substitutions + " ?)%%" + "'"
+    def build_query_descriptive(cls, descriptive_element, query, distinctive=False):
+        query += " and lower(n.name) ~ "
+        substitutions = ' ?| '.join(map(str, descriptive_element))
+        if not distinctive:
+            query += "'" + "\\y( " + substitutions + " ?)\\y" + "'"
+        else:
+            query += "'" + "\\y(" + substitutions + ")\\y" + "'"
 
         return query
 
