@@ -48,6 +48,7 @@ class WordClassification(Resource):
                 response = make_response(payload, HTTPStatus.OK)
             except Exception as error:
                 print('Error: ' + repr(error))
+                raise
         else:
             response = make_response(HTTPStatus.BAD_REQUEST)
 
@@ -74,6 +75,7 @@ class WordClassification(Resource):
                 response = make_response(payload, HTTPStatus.CREATED)
             except Exception as error:
                 print('Error: ' + repr(error))
+                raise
         else:
             response = make_response(HTTPStatus.BAD_REQUEST)
 
@@ -100,6 +102,7 @@ class WordClassification(Resource):
                 response = make_response(payload, HTTPStatus.OK)
             except Exception as error:
                 print('Error: ' + repr(error))
+                raise
         else:
             response = make_response(HTTPStatus.BAD_REQUEST)
 
@@ -126,6 +129,7 @@ class WordClassification(Resource):
                 response = make_response(payload, HTTPStatus.NO_CONTENT)
             except Exception as error:
                 print('Error: ' + repr(error))
+                raise
         else:
             response = make_response(HTTPStatus.BAD_REQUEST)
 

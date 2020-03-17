@@ -186,9 +186,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
             self.get_original_name_tokenized(),
             self.entity_type,
             self.get_all_designations(),
-            self.get_misplaced_designation_in_input_name(),
-            self.get_misplaced_designation_any(),
-            self.get_misplaced_designation_end(),
             self.get_all_designations_user()
         )
 

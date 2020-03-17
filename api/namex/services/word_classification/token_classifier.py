@@ -132,3 +132,4 @@ class TokenClassifier:
 
         except Exception as error:
             print('Token classification failed! ' + repr(error))
+            raise

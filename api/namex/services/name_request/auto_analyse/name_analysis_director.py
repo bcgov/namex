@@ -306,6 +306,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
         except Exception as error:
             print('Error executing name analysis: ' + repr(error))
+            raise
 
     '''
     This is the main execution call for running name analysis checks.
