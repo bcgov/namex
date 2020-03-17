@@ -1,5 +1,4 @@
 import jsonpickle
-import simplejson
 
 
 class Serializable(object):
