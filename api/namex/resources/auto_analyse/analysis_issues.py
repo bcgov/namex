@@ -100,6 +100,12 @@ class IncorrectCategory(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -125,7 +131,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
-            show_examination_button=True,
+            show_examination_button=False,
             conflicts=None,
             setup=None,
             name_actions=[]
@@ -146,6 +152,13 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        # Replace template strings in setup boxes
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -183,6 +196,12 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -223,6 +242,12 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -248,6 +273,12 @@ class TooManyWordsIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -293,6 +324,12 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -339,6 +376,12 @@ class WordSpecialUse(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -387,6 +430,12 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
