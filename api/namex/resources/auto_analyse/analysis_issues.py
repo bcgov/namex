@@ -246,6 +246,13 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        # Replace template strings in setup boxes
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         '''
         issue.setup = [
