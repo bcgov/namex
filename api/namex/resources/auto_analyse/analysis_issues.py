@@ -922,7 +922,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
 
 class DesignationMisplacedIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.DESIGNATION_MISPLACED
+    issue_type = AnalysisIssueCodes.DESIGNATION_MISPLACED
     status_text = "Further Action Required"
     issue = None
 
