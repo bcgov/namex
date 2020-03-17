@@ -126,7 +126,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         ]
 
         results = self.find_word_synonyms(None, filters)
-        flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
+        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
     def get_designations(self, entity_type_code, position_code, lang):
