@@ -389,5 +389,7 @@ class AnalysisResponse:
     This is invoked by consumers of this class
     '''
     def build_response(self):
+        # Reset executed procedures
+        self.executed_procedures = []
         response = self.prepare_payload()
         return response
