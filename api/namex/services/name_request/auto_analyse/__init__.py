@@ -42,8 +42,14 @@ class AnalysisRequestActions(str, Enum):
         return values
 
 
-class AnalysisResultCodes(str, Enum):
-    VALID_NAME = 'auto_approved'
+class AnalysisResponseCodes(str, Enum):
+    # TODO: Not the best idea to have a cased constant, but this is what is used on the frontend, we can change it later
+    AUTO_APPROVED = 'Available'
+    FURTHER_ACTION_REQUIRED = 'fa'
+
+
+class AnalysisIssueCodes(str, Enum):
+    CHECK_IS_VALID = 'check_is_valid'
     ADD_DISTINCTIVE_WORD = 'add_distinctive'  # Well formed
     ADD_DESCRIPTIVE_WORD = 'add_descriptive'  # Well formed
     TOO_MANY_WORDS = 'excess_words'  # Well formed

@@ -202,14 +202,4 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_designation_misplaced.is_valid:
             results.append(check_designation_misplaced)
 
-        # TODO: Handle special words...
-        # check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
-
-        # if not check_special_words.is_valid:
-        #    results.append(check_special_words)
-
-        # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
-        if not results.__len__() > 0:
-            results.append(ProcedureResult(is_valid=True))
-
         return results

@@ -3,7 +3,7 @@ import itertools
 from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
-from ..auto_analyse import AnalysisResultCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
+from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
 
 from namex.models.request import Request
@@ -32,7 +32,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if len(list_name) < 2 and len(list_dist) == 1:
             result = ProcedureResult()
-            result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+            result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
             result.values = {
                 'list_name': list_name or [],
                 'list_dist': list_dist or []
@@ -42,7 +42,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(list_name) < 2 and len(list_dist) == 0:
             result = ProcedureResult()
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
             result.values = list_name
 
             results.append(result)
@@ -55,7 +55,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             result = ProcedureResult()
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+            result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
             result.values = {
                 'list_name': list_name or [],
                 'list_none': unclassified_words_list_response
@@ -66,7 +66,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         # TODO: These checks might be of use, but they don't really belong in here
         # if list_incorrect_classification:
         #    result.is_valid = False
-        #    result.result_code = AnalysisResultCodes.INCORRECT_CATEGORY
+        #    result.result_code = AnalysisIssueCodes.INCORRECT_CATEGORY
         #    result.values = list_incorrect_classification
         # elif not list_all == list_name:
         #    reverse_order_list = []
@@ -75,12 +75,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         #            reverse_order_list.append({idx: token_name})
 
         #    result.is_valid = False
-        #    result.result_code = AnalysisResultCodes.REVERSE_ORDER
+        #    result.result_code = AnalysisIssueCodes.REVERSE_ORDER
         #    result.values = reverse_order_list
         if len(list_dist) < 1:
             result = ProcedureResult()
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
             result.values = list_name
 
             results.append(result)
@@ -88,7 +88,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(list_desc) < 1:
             result = ProcedureResult()
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+            result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
             result.values = {
                 'list_name': list_name or [],
                 'list_dist': list_dist or []
@@ -99,7 +99,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         elif len(list_name) > MAX_LIMIT:
             result = ProcedureResult()
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.TOO_MANY_WORDS
+            result.result_code = AnalysisIssueCodes.TOO_MANY_WORDS
 
             results.append(result)
 
@@ -129,7 +129,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if words_to_avoid_list_response:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.WORDS_TO_AVOID
+            result.result_code = AnalysisIssueCodes.WORDS_TO_AVOID
             result.values = {
                 'list_name': list_name,
                 'list_avoid': words_to_avoid_list_response
@@ -197,7 +197,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if response:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+            result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
             result.values = {
                 'list_name': list_name,
                 'list_dist': list_dist_words,
@@ -206,7 +206,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             }
         else:
             result.is_valid = True
-            result.result_code = AnalysisResultCodes.VALID_NAME
+            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
             result.values = []
         return result
 
@@ -222,7 +222,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if exact_match_response:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.CORPORATE_CONFLICT
+            result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
             result.values = {
                 'list_name': list_name,
                 'list_dist': None,
@@ -231,7 +231,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             }
         else:
             result.is_valid = True
-            result.result_code = AnalysisResultCodes.VALID_NAME
+            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
             result.values = []
 
         return result
@@ -259,7 +259,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if words_consent_list_response:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.NAME_REQUIRES_CONSENT
+            result.result_code = AnalysisIssueCodes.NAME_REQUIRES_CONSENT
             result.values = {
                 'list_name': list_name,
                 'list_consent': words_consent_list_response
@@ -288,7 +288,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if mismatch_entity_designation_list:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.DESIGNATION_MISMATCH
+            result.result_code = AnalysisIssueCodes.DESIGNATION_MISMATCH
             result.values = {
                 'list_name': list_name,
                 'incorrect_designations': mismatch_entity_designation_list,
@@ -309,7 +309,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if misplaced_designation_all:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.DESIGNATION_MISPLACED
+            result.result_code = AnalysisIssueCodes.DESIGNATION_MISPLACED
             result.values = {
                 'list_name': list_name,
                 'misplaced_any_designation': misplaced_designation_any,
@@ -342,7 +342,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if word_special_use_list_response:
             result.is_valid = False
-            result.result_code = AnalysisResultCodes.WORD_SPECIAL_USE
+            result.result_code = AnalysisIssueCodes.WORD_SPECIAL_USE
             result.values = {
                 'list_name': list_name,
                 'list_special': word_special_use_list_response

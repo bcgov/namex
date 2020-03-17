@@ -1,7 +1,7 @@
 from datetime import date
 from string import Template
 
-from namex.services.name_request.auto_analyse import AnalysisResultCodes
+from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 # Import DTOs
 from .response_objects.name_analysis_issue import NameAnalysisIssue
@@ -39,8 +39,8 @@ class AnalysisResponseIssue:
         return "<b>" + ", ".join(list_words) + "</b>"
 
 
-class ValidName(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.VALID_NAME
+class CheckIsValid(AnalysisResponseIssue):
+    issue_type = AnalysisIssueCodes.CHECK_IS_VALID
     status_text = "Approved"
     issue = None
 
@@ -74,7 +74,7 @@ Word Classification Engine Issues
 
 
 class IncorrectCategory(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
+    issue_type = AnalysisIssueCodes.INCORRECT_CATEGORY
     status_text = "Further Action Required"
     issue = None
 
@@ -116,7 +116,7 @@ Well-Formed Name Issues
 
 
 class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+    issue_type = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
     status_text = "Further Action Required"
     issue = None
 
@@ -164,7 +164,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
 
 
 class AddDistinctiveWordIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+    issue_type = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
     status_text = "Further Action Required"
     issue = None
 
@@ -207,7 +207,7 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
 
 
 class AddDescriptiveWordIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+    issue_type = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
     status_text = "Further Action Required"
     issue = None
 
@@ -253,7 +253,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
 
 
 class TooManyWordsIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.TOO_MANY_WORDS
+    issue_type = AnalysisIssueCodes.TOO_MANY_WORDS
     status_text = "Further Action Required"
     issue = None
 
@@ -289,7 +289,7 @@ General Name Issues
 
 
 class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.WORDS_TO_AVOID
+    issue_type = AnalysisIssueCodes.WORDS_TO_AVOID
     status_text = "Further Action Required"
     issue = None
 
@@ -341,7 +341,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
 
 
 class WordSpecialUse(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.WORD_SPECIAL_USE
+    issue_type = AnalysisIssueCodes.WORD_SPECIAL_USE
     status_text = "Further Action Required"
     issue = None
 
@@ -387,7 +387,7 @@ class WordSpecialUse(AnalysisResponseIssue):
 
 
 class NameRequiresConsentIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.NAME_REQUIRES_CONSENT
+    issue_type = AnalysisIssueCodes.NAME_REQUIRES_CONSENT
     status_text = "Further Action Required"
     issue = None
 
@@ -441,7 +441,7 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
 
 class CorporateNameConflictIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.CORPORATE_CONFLICT
+    issue_type = AnalysisIssueCodes.CORPORATE_CONFLICT
     status_text = "Further Action Required"
     issue = None
 
@@ -566,7 +566,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
 
 class DesignationMismatchIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
+    issue_type = AnalysisIssueCodes.DESIGNATION_MISMATCH
     status_text = "Further Action Required"
     issue = None
 
@@ -629,7 +629,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
 
 class DesignationMisplacedIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.DESIGNATION_MISPLACED
+    issue_type = AnalysisIssueCodes.DESIGNATION_MISPLACED
     status_text = "Further Action Required"
     issue = None
 
