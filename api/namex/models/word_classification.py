@@ -44,6 +44,28 @@ class WordClassification(db.Model):
                 "approvedBy": self.approved_by, "startDate": self.start_dt,
                 "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
 
+    '''
+    # TODO: Fix this it's not working...
+    @classmethod
+    def find_word_classification(cls, word):
+        # print(cls.query.filter(func.lower(WordClassification.word) == word.lower()))
+        word_property = WordClassification.word
+        lower_func_1 = func.lower(word_property)
+        lower_func_2 = func.lower(word)
+        return cls.query.filter(lower_func_1 == lower_func_2).all()
+        --- OR ---
+        # TODO: Can we return more than one result?
+        # results = cls.query.filter(func.lower(WordClassification.word) == func.lower(word))
+        results = db.session.query(cls.word, cls.classification) \
+            .filter(func.lower(cls.word) == func.lower(word)) \
+            .filter(cls.end_dt == None) \
+            .filter(cls.start_dt <= date.today()) \
+            .filter(cls.approved_dt <= date.today()).all()
+        print(word)
+        print(list(map(lambda x: x.classification, results)))
+        return results
+    '''
+
     # TODO: Do we still need to update this method?
     '''
     Note: we convert to lower case as word text in the DB will be in all caps.

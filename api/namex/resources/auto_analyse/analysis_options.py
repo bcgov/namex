@@ -148,7 +148,6 @@ def conflict_self_consent_setup():
     )
 
 
-
 class ReplaceDesignationSetup(Setup):
     pass
 
@@ -173,6 +172,18 @@ def change_designation_order_setup():
         line1=Template("Change designation order to the end of the name."),
         line2=Template("")
     )
+
+
+class ChangeDesignationSetup(Setup):
+    pass
+
+
+change_designation_order_setup = ChangeDesignationSetup(
+    type="change designation at the end",
+    header=Template("Change Designation order"),
+    line1=Template("Change designation order to the end of the name."),
+    line2=Template("")
+)
 
 
 class ChangeEntityTypeSetup(Setup):
