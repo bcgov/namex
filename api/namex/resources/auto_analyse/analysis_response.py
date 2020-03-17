@@ -53,25 +53,56 @@ def response_issues(issue_code):
 
 
 class AnalysisResponse:
-    def _build_unclassified_word_issue(self, procedure_result):
-        option1 = remove_or_replace_setup
-        # Tweak the header
-        option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
+    @classmethod
+    def _has_next_issue(cls, issue_count, issue_idx):
+        return issue_idx + 1 < issue_count
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            # option2,
-            # option3
-        ])
+    @classmethod
+    def _is_only_issue(cls, issue_count, issue_idx):
+        return (issue_idx + 1) == issue_count == 1
+
+    def _build_unclassified_word_issue(self, procedure_result, issue_count, issue_idx):
+        is_only_issue = self._is_only_issue(issue_count, issue_idx)
+        has_next_issue = self._has_next_issue(issue_count, issue_idx)
+
+        # If there's only one issue, display helpful hint and the examination button
+        if is_only_issue:
+            option1 = remove_or_replace_setup
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+                option1,
+                option2,
+                # option3
+            ])
+
+            issue.show_examination_button = True
+        elif has_next_issue:
+            option1 = remove_or_replace_setup
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+                option1,
+                option2,
+                # option3
+            ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
 
         return issue
 
-    def _build_add_distinctive_word_issue(self, procedure_result):
+    def _build_add_distinctive_word_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_distinctive_setup
         # Tweak the header
         option1.header = "Helpful Tip"
@@ -88,7 +119,7 @@ class AnalysisResponse:
 
         return issue
 
-    def _build_add_descriptive_word_issue(self, procedure_result):
+    def _build_add_descriptive_word_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_descriptive_setup
         # Tweak the header
         option1.header = "Helpful Tip"
@@ -105,7 +136,7 @@ class AnalysisResponse:
 
         return issue
 
-    def _build_too_many_words_issue(self, procedure_result):
+    def _build_too_many_words_issue(self, procedure_result, issue_count, issue_idx):
         option1 = too_many_words_setup
         # Tweak the header
         option1.header = "Helpful Tip"
@@ -122,7 +153,7 @@ class AnalysisResponse:
 
         return issue
 
-    def _build_words_to_avoid_issue(self, procedure_result):
+    def _build_words_to_avoid_issue(self, procedure_result, issue_count, issue_idx):
         option1 = remove_setup
         # Tweak the header
         option1.header = "Helpful Tip"
@@ -139,7 +170,7 @@ class AnalysisResponse:
 
         return issue
 
-    def _build_name_requires_consent_issue(self, procedure_result):
+    def _build_name_requires_consent_issue(self, procedure_result, issue_count, issue_idx):
         option1 = remove_or_replace_setup
         # Tweak the header
         option1.header = "Option 1"
@@ -163,7 +194,7 @@ class AnalysisResponse:
 
         return issue
 
-    def _build_corporate_conflict_issue(self, procedure_result):
+    def _build_corporate_conflict_issue(self, procedure_result, issue_count, issue_idx):
         option1 = resolve_conflict_setup
         # Tweak the header
         option1.header = "Option 1"
@@ -187,7 +218,7 @@ class AnalysisResponse:
 
         return issue
 
-    def _build_designation_mismatch_issue(self, procedure_result):
+    def _build_designation_mismatch_issue(self, procedure_result, issue_count, issue_idx):
         option1 = replace_designation_setup
         # Tweak the header
         option1.header = "Option 1"
@@ -208,7 +239,7 @@ class AnalysisResponse:
 
         return issue
 
-    def _build_designation_misplaced_issue(self, procedure_result):
+    def _build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
         option1 = change_designation_order_setup
         # Tweak the header
         option1.header = "Option 1"
@@ -223,7 +254,7 @@ class AnalysisResponse:
 
         return issue
 
-    def _build_word_special_use_issue(self, procedure_result):
+    def _build_word_special_use_issue(self, procedure_result, issue_count, issue_idx):
         # option1 = None
         # option2 = None
         # option3 = None
@@ -250,51 +281,46 @@ class AnalysisResponse:
 
         print(repr(analysis_result))
 
-        executed_procedures = []
-
         is_valid_name_request = True
         issue_count = len(analysis_result)
+        issue_idx = None
 
         if analysis_result and issue_count > 0:
             for result_idx, procedure_result in enumerate(analysis_result):
                 if callable(response_issues(procedure_result.result_code)):
                     # Pass in params?
                     issue = None
+                    issue_idx = result_idx
 
                     if procedure_result.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
-                        issue = self._build_unclassified_word_issue(procedure_result)
+                        issue = self._build_unclassified_word_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.ADD_DISTINCTIVE_WORD:
-                        issue = self._build_add_distinctive_word_issue(procedure_result)
+                        issue = self._build_add_distinctive_word_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD:
-                        issue = self._build_add_descriptive_word_issue(procedure_result)
+                        issue = self._build_add_descriptive_word_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.TOO_MANY_WORDS:
-                        issue = self._build_too_many_words_issue(procedure_result)
+                        issue = self._build_too_many_words_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.WORDS_TO_AVOID:
-                        issue = self._build_words_to_avoid_issue(procedure_result)
+                        issue = self._build_words_to_avoid_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.NAME_REQUIRES_CONSENT:
-                        issue = self._build_name_requires_consent_issue(procedure_result)
+                        issue = self._build_name_requires_consent_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
-                        issue = self._build_corporate_conflict_issue(procedure_result)
+                        issue = self._build_corporate_conflict_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISMATCH:
-                        issue = self._build_designation_mismatch_issue(procedure_result)
+                        issue = self._build_designation_mismatch_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISPLACED:
-                        issue = self._build_designation_misplaced_issue(procedure_result)
+                        issue = self._build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.WORD_SPECIAL_USE:
-                        issue = self._build_word_special_use_issue(procedure_result)
-
-                    if procedure_result.is_valid == AnalysisIssueCodes.CHECK_IS_VALID:
-                        issue = response_issues(procedure_result.result_code)()
-                        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-                        executed_procedures.append(procedure_result.result_code)
+                        issue = self._build_word_special_use_issue(procedure_result, issue_count, issue_idx)
 
                     response_issue = None
 
@@ -329,5 +355,7 @@ class AnalysisResponse:
     This is invoked by consumers of this class
     '''
     def build_response(self):
+        # Reset executed procedures
+        self.executed_procedures = []
         response = self.prepare_payload()
         return response
