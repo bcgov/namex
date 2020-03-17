@@ -137,7 +137,6 @@ conflict_self_consent_setup = SelfConsentSetup(
 )
 
 
-
 class ReplaceDesignationSetup(Setup):
     pass
 
@@ -146,6 +145,18 @@ replace_designation_setup = ReplaceDesignationSetup(
     type="replace_designation",
     header=Template("Replace Designation"),
     line1=Template("Change the designation from to one of the following:"),
+    line2=Template("")
+)
+
+
+class ChangeDesignationSetup(Setup):
+    pass
+
+
+change_designation_order_setup = ChangeDesignationSetup(
+    type="change designation at the end",
+    header=Template("Change Designation order"),
+    line1=Template("Change designation order to the end of the name."),
     line2=Template("")
 )
 

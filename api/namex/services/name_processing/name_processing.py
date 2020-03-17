@@ -87,21 +87,20 @@ class NameProcessingService(GetSynonymListsMixin):
     def set_name_tokenized(self, name):
         all_designations = self._designated_all_words
         all_designations.sort(key=len, reverse=True)
-        designation_alternators = '|'.join(all_designations)
-        regex = re.compile(r'\b({}|[a-z-A-Z]+)\b'.format(designation_alternators))
+        designation_alternators = '|'.join(map(re.escape, all_designations))
+        regex = re.compile(r'(?<!\w)({}|[a-z-A-Z]+)(?!\w)'.format(designation_alternators))
         self.name_as_submitted_tokenized = regex.findall(name.lower())
 
-    def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[],
-                          fr_designation_end_list=[], prefix_list=[]):
-        if not text or not stop_words or not designation_any or not designation_end or not prefix_list:
+    def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[], fr_designation_end_list=[], prefix_list=[], number_list=[]):
+        if not text or not stop_words or not designation_any or not designation_end or not prefix_list and not number_list:
             warnings.warn("Parameters in clean_name_words function are not set.", Warning)
 
         syn_svc = self.synonym_service
 
         words = text.lower()
         words = remove_stop_words(words, stop_words)
-        words = remove_french(words, fr_designation_end_list)
-        tokens = syn_svc.regex_transform(words, designation_any, designation_end, designation_all, prefix_list)
+        words = remove_french(words)
+        tokens = syn_svc.regex_transform(words, designation_any, designation_end, designation_all, prefix_list, number_list)
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
@@ -114,6 +113,7 @@ class NameProcessingService(GetSynonymListsMixin):
         # See the class constructor
         self._stop_words = syn_svc.get_stop_words()
         self._prefixes = syn_svc.get_prefixes()
+        self._number_words = syn_svc.get_number_words()
         self._designated_end_words = syn_svc.get_designated_end_all_words()
         self._designated_any_words = syn_svc.get_designated_any_all_words()
         self._designated_all_words = list(set(self._designated_any_words +
@@ -141,7 +141,8 @@ class NameProcessingService(GetSynonymListsMixin):
                 self._designated_end_words,
                 self._designated_all_words,
                 self._fr_designation_end_list,
-                self._prefixes
+                self._prefixes,
+                self._number_words
             )
 
             # Store clean, processed name to instance

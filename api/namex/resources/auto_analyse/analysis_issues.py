@@ -526,8 +526,9 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         incorrect_designations = procedure_result.values['incorrect_designations']
         correct_designations = procedure_result.values['correct_designations']
         # TODO: Implement the misplaced designations cases!
-        misplaced_any_designation = procedure_result.values['misplaced_any_designation']
-        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
+        # TODO: I think we can remove this, misplaced has been moved out into its own procedure!
+        # misplaced_any_designation = procedure_result.values['misplaced_any_designation']
+        # misplaced_end_designation = procedure_result.values['misplaced_end_designation']
 
         # TODO: If case comes back in upper case for the incorrect designations we won't have a match...
         # Convert all strings to lower-case before comparing
@@ -574,5 +575,54 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                         'incorrect_designations': self._join_list_words(incorrect_designations),
                         'entity_type': self.entity_type  # TODO: Map this CODE!
                     }))
+
+        return issue
+
+
+class DesignationMisplacedIssue(AnalysisResponseIssue):
+    issue_type = AnalysisResultCodes.DESIGNATION_MISPLACED
+    status_text = "Further Action Required"
+    issue = None
+
+    def create_issue(self, procedure_result):
+        list_name = procedure_result.values['list_name']
+        misplaced_any_designation = procedure_result.values['misplaced_any_designation']
+        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
+        misplaced_all_designation = procedure_result.values['misplaced_all_designation']
+
+        list_name_lc = list(map(lambda d: d.lower(), list_name))
+
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="The " + self._join_list_words(
+                misplaced_end_designation) + " designation(s) cannot be used in a position different to end of the name." ,
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
+
+
+        # Loop over the list_name words, we need to decide to do with each word
+        for word in list_name_lc:
+            name_word_idx = list_name.index(word)
+
+            # Highlight the descriptives
+            # <class 'list'>: ['mountain', 'view']
+            if word in misplaced_all_designation:
+                issue.name_actions.append(NameAction(
+                    word=word,
+                    index=name_word_idx,
+                    type=NameActions.HIGHLIGHT
+                ))
+
+
+        # Setup boxes
+        # TODO: We need setup boxes for this new stuff...
+        issue.setup = self.setup_config
 
         return issue
