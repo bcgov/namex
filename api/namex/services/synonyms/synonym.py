@@ -22,7 +22,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         self._model = Synonym
 
     @classmethod
-    def _flatten_synonyms_text(cls, results):
+    def flatten_synonyms_text(cls, results):
         # Convert tuple results to a list of of CSV strings
         result_arr = [item for sublist in results for item in sublist]
         result_arr = [x.strip() for x in result_arr]
@@ -65,7 +65,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         ]
 
         results = self.find_word_synonyms(word, filters)
-        flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
+        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
     def get_substitutions(self, word=None):
@@ -76,7 +76,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         ]
 
         results = self.find_word_synonyms(word, filters)
-        flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
+        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
     def get_stop_words(self, word=None):
@@ -87,7 +87,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         ]
 
         results = self.find_word_synonyms(word, filters)
-        flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
+        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
     def get_prefixes(self):
@@ -98,7 +98,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         ]
 
         results = self.find_word_synonyms(None, filters, True)
-        flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
+        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
     def get_number_words(self):
@@ -109,7 +109,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         ]
 
         results = self.find_word_synonyms(None, filters)
-        flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
+        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
     def get_designations(self, entity_type_code, position_code, lang):
@@ -131,7 +131,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
 
         results = self.find_word_synonyms(None, filters, True)
-        flattened = list(map(str.strip, (list(filter(None, self._flatten_synonyms_text(results))))))
+        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
     # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
