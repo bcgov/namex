@@ -67,11 +67,11 @@ class AnalysisResponse:
 
         # If there's only one issue, display helpful hint and the examination button
         if is_only_issue:
-            option1 = remove_or_replace_setup
+            option1 = remove_or_replace_setup()
             # Tweak the header
             option1.header = "Option 1"
 
-            option2 = send_to_examiner_setup
+            option2 = send_to_examiner_setup()
             # Tweak the header
             option2.header = "Option 2"
 
@@ -83,11 +83,11 @@ class AnalysisResponse:
 
             issue.show_examination_button = True
         elif has_next_issue:
-            option1 = remove_or_replace_setup
+            option1 = remove_or_replace_setup()
             # Tweak the header
             option1.header = "Option 1"
 
-            option2 = send_to_examiner_setup
+            option2 = send_to_examiner_setup()
             # Tweak the header
             option2.header = "Option 2"
 
@@ -103,7 +103,7 @@ class AnalysisResponse:
         return issue
 
     def _build_add_distinctive_word_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = add_distinctive_setup
+        option1 = add_distinctive_setup()
         # Tweak the header
         option1.header = "Helpful Tip"
         # option2 = None
@@ -120,7 +120,7 @@ class AnalysisResponse:
         return issue
 
     def _build_add_descriptive_word_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = add_descriptive_setup
+        option1 = add_descriptive_setup()
         # Tweak the header
         option1.header = "Helpful Tip"
         # option2 = None
@@ -137,7 +137,7 @@ class AnalysisResponse:
         return issue
 
     def _build_too_many_words_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = too_many_words_setup
+        option1 = too_many_words_setup()
         # Tweak the header
         option1.header = "Helpful Tip"
         # option2 = None
@@ -154,7 +154,7 @@ class AnalysisResponse:
         return issue
 
     def _build_words_to_avoid_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = remove_setup
+        option1 = remove_setup()
         # Tweak the header
         option1.header = "Helpful Tip"
         # option2 = None
@@ -171,15 +171,15 @@ class AnalysisResponse:
         return issue
 
     def _build_name_requires_consent_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = remove_or_replace_setup
+        option1 = remove_or_replace_setup()
         # Tweak the header
         option1.header = "Option 1"
 
-        option2 = send_to_examiner_setup
+        option2 = send_to_examiner_setup()
         # Tweak the header
         option2.header = "Option 2"
 
-        option3 = obtain_consent_setup
+        option3 = obtain_consent_setup()
         # Tweak the header
         option3.header = "Option 3"
 
@@ -195,15 +195,15 @@ class AnalysisResponse:
         return issue
 
     def _build_corporate_conflict_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = resolve_conflict_setup
+        option1 = resolve_conflict_setup()
         # Tweak the header
         option1.header = "Option 1"
 
-        option2 = send_to_examiner_setup
+        option2 = send_to_examiner_setup()
         # Tweak the header
         option2.header = "Option 2"
 
-        option3 = conflict_self_consent_setup
+        option3 = conflict_self_consent_setup()
         # Tweak the header
         option3.header = "Option 3"
 
@@ -219,11 +219,11 @@ class AnalysisResponse:
         return issue
 
     def _build_designation_mismatch_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = replace_designation_setup
+        option1 = replace_designation_setup()
         # Tweak the header
         option1.header = "Option 1"
 
-        option2 = change_entity_type_setup
+        option2 = change_entity_type_setup()
         # Tweak the header
         option2.header = "Option 2"
 
@@ -240,7 +240,7 @@ class AnalysisResponse:
         return issue
 
     def _build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = change_designation_order_setup
+        option1 = change_designation_order_setup()
         # Tweak the header
         option1.header = "Option 1"
 
@@ -355,7 +355,5 @@ class AnalysisResponse:
     This is invoked by consumers of this class
     '''
     def build_response(self):
-        # Reset executed procedures
-        self.executed_procedures = []
         response = self.prepare_payload()
         return response
