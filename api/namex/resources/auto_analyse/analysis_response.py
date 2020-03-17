@@ -66,7 +66,7 @@ class AnalysisResponse:
 
         executed_procedures = []
 
-        is_valid_name_request = False
+        is_valid_name_request = True
         if analysis_result and len(analysis_result) > 0:
             for result_idx, procedure_result in enumerate(analysis_result):
                 if callable(response_issues(procedure_result.result_code)):
@@ -83,6 +83,8 @@ class AnalysisResponse:
                         option1.header = "Helpful Tip"
                         # option2 = None
                         # option3 = None
+
+                        # TODO: Check for other issues...
 
                         issue_builder = response_issues(procedure_result.result_code)(self.entity_type, [
                             option1,
@@ -256,9 +258,7 @@ class AnalysisResponse:
                     if response_issue and response_issue.issue_type is not AnalysisResultCodes.VALID_NAME:
                         # We know what the issues are? Now how do we apply the setup types
                         self.issues.append(response_issue)
-                    else:
-                        is_valid_name_request = True
-                        break
+                        is_valid_name_request = False
 
         # TODO: This is an incomplete implementation! Get returned status codes from ProcedureResult
         if not is_valid_name_request:
