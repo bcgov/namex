@@ -5,6 +5,7 @@ from flask import current_app
 from namex.exceptions import BusinessException
 from sqlalchemy import Sequence
 from sqlalchemy.orm import backref
+from sqlalchemy import and_, func
 from marshmallow import Schema, fields, post_load, post_dump
 from .nwpta import PartnerNameSystem
 from .user import User, UserSchema
@@ -17,9 +18,11 @@ from datetime import datetime
 # TODO: Remove this when we update get_conflicts
 import pandas as pd
 
-
 # create sequence if not exists nr_seq;
 # noinspection PyPep8Naming
+from ..criteria.request.query_criteria import RequestConditionCriteria
+
+
 class Request(db.Model):
     __tablename__ = 'requests'
 
@@ -118,7 +121,7 @@ class Request(db.Model):
                 'corpNum': self.corpNum,
                 'names': [name.as_dict() for name in self.names.all()],
                 'applicants': '' if (
-                            self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
+                        self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
                 'comments': [comment.as_dict() for comment in self.comments.all()],
                 'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
                 }
@@ -207,63 +210,58 @@ class Request(db.Model):
         return True
 
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
-    #  TODO: Use the models... get rid of the connection string and raw query!
-    @classmethod
-    def get_conflicts(cls, query):
-        matches = pd.read_sql_query(query, con=db.engine)
-        return matches
-
     @classmethod
     def get_general_query(cls):
-        query = cls.build_query_distinctive()
-        return query
+        filters = [
+            Request.id == Name.nrId,
+            Request.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
+            Request.requestTypeCd.in_(
+                ['PA', 'CR', 'CP', 'FI', 'SO', 'UL', 'CUL', 'CCR', 'CFI', 'CCP', 'CSO', 'CCC', 'CC']),
+            Name.state.in_(['APPROVED', 'CONDITION'])
+        ]
+
+        criteria = RequestConditionCriteria(
+            fields=[Name.name],
+            filters=filters
+        )
+
+        return criteria
 
     @classmethod
-    def get_query_distinctive_descriptive(cls, desc_substitution_list, query, distinctive=False):
-        query = cls.build_query_descriptive(desc_substitution_list, query, distinctive)
-        return query
+    def get_query_exact_match(cls, criteria, prep_name):
+        criteria.filters.append(func.lower(Name.name) == func.lower(prep_name))
+
+        results = Request.find_by_criteria(criteria)
+        flattened = [item.strip() for sublist in results for item in sublist]
+
+        return flattened
 
     @classmethod
-    def get_query_exact_match(cls, prep_name):
-        query = cls.build_query_exact_match(prep_name)
-        return query
-
-    @classmethod
-    def build_query_distinctive(cls):
-        query = "select n.name " + \
-                "from requests r, names n " + \
-                "where r.id = n.nr_id and " + \
-                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
-                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
-                "n.state IN ('APPROVED','CONDITION') "
-
-        return query
-
-    # TODO: Replace this method... use the models!
-    @classmethod
-    def build_query_descriptive(cls, descriptive_element, query, distinctive=False):
-        query += " and lower(n.name) ~ "
+    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
         substitutions = ' ?| '.join(map(str, descriptive_element))
-        if not distinctive:
-            query += "'" + "\\y( " + substitutions + " ?)\\y" + "'"
-        else:
-            query += "'" + "\\y(" + substitutions + ")\\y" + "'"
 
-        return query
+        if not distinctive:
+            criteria.filters.append(func.lower(Name.name).op('~')(r'\y {} ?\y'.format(substitutions)))
+        else:
+            criteria.filters.append(func.lower(Name.name).op('~')(r'\y{}\y'.format(substitutions)))
+            return criteria
+
+        results = Request.find_by_criteria(criteria)
+        flattened = [item.strip() for sublist in results for item in sublist]
+
+        return flattened
 
     @classmethod
-    def build_query_exact_match(cls, prep_name):
-        query = "select n.name " + \
-                "from requests r, names n " + \
-                "where r.id = n.nr_id and " + \
-                "r.state_cd IN ('APPROVED','CONDITIONAL') and " + \
-                "r.request_type_cd IN ('PA','CR','CP','FI','SO', 'UL','CUL','CCR','CFI','CCP','CSO','CCC','CC') and " + \
-                "n.state IN ('APPROVED','CONDITION') and " + \
-                "lower(n.name) = " + "'" + prep_name + "'"
+    def find_by_criteria(cls, criteria=None):
+        RequestConditionCriteria.is_valid_criteria(criteria)
 
-        return query
+        query = cls.query.with_entities(*criteria.fields) \
+            .filter(and_(*criteria.filters))
 
-        # END NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+        # print(query.statement)
+        return query.all()
+
+    # END NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
 
 
 class RequestsSchema(ma.ModelSchema):
