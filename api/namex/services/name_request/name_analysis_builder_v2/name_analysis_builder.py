@@ -176,14 +176,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             # Inject distinctive section in query
             for dist in dist_substitution_list:
-                query_dist = Request.get_general_query()
-                query_dist = Request.get_query_distinctive_descriptive(dist, query_dist, True)
+                criteria = Request.get_general_query()
+                criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
                 # Inject descriptive section into query, execute and add matches to list
                 for desc in desc_synonym_list:
-                    query = Request.get_query_distinctive_descriptive(desc, query_dist)
-                    matches = Request.get_conflicts(query)
-                    matches_response.extend([val.pop() for i, val in enumerate(matches.values.tolist())])
-                    matches_response = list(dict.fromkeys(matches_response))
+                    matches = Request.get_query_distinctive_descriptive(desc, criteria)
+                    matches_response = list(dict.fromkeys(matches))
                     dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
                                                                                             dict_highest_detail,
                                                                                             matches_response, w_dist,
@@ -213,14 +211,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def search_exact_match(self, preprocess_name, list_name):
         result = ProcedureResult()
         result.is_valid = False
-        matches_response = []  # Contains all the conflicts from database
-        response = {}
 
-        query = Request.build_query_exact_match(preprocess_name)
-        exact_match = Request.get_conflicts(query)
-        exact_match_response = exact_match.values.tolist()
+        criteria = Request.get_general_query()
+        exact_match = Request.get_query_exact_match(criteria, preprocess_name)
 
-        if exact_match_response:
+        if exact_match:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
             result.values = {
