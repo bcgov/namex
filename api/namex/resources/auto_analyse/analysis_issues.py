@@ -228,8 +228,8 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
-        last_dist_word = list_dist.pop()
-        dist_word_idx = list_name.index(last_dist_word)
+        last_dist_word = list_dist.pop() if list_dist.__len__() > 0 else None
+        dist_word_idx = list_name.index(last_dist_word) if list_dist.__len__() > 0 else 0
         issue.name_actions = [
             NameAction(
                 type=NameActions.BRACKETS,
