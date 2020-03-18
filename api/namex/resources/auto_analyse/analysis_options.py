@@ -128,7 +128,7 @@ def obtain_consent_setup():
     return ObtainConsentSetup(
         type="obtain_consent",
         header=Template("Obtain Consent"),
-        line1=Template("This name can be auto-approved, but you will be required to send written consent to the BC Business Registry."),
+        line1=Template("This name can be approved, but you will be required to send written consent to the BC Business Registry."),
         line2=Template(""),
         action=Template("I am able to obtain and send written consent.")
     )
@@ -142,7 +142,7 @@ def conflict_self_consent_setup():
     return SelfConsentSetup(
         type="conflict_self_consent",
         header=Template("Conflict Self Consent"),
-        line1=Template("This name can be auto-approved if you are the registered owner of the conflicting name, but you are required to send written consent to the BC Business Registry."),
+        line1=Template("This name can be approved if you are the registered owner of the conflicting name, but you are required to send written consent to the BC Business Registry."),
         line2=Template(""),
         action=Template("I am the registered owner of the conflicting name. I will send written consent.")
     )
