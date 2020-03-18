@@ -182,7 +182,7 @@ def change_entity_type_setup():
     return ChangeEntityTypeSetup(
         type="change_entity_type",
         header=Template("Change Entity Type"),
-        line1=Template("If you would like to start a $correct_designations business instead of a $incorrect_designations start your search over and change your entity type to $entity_type."),
+        line1=Template("The designation you have selected is not appropriate for this entity type. You can choose to select a different type by pressing the 'RESTART and CHANGE TYPE' button."),
         line2=Template(""),
         label=Template("Change $entity_type to $correct_designations")
     )
