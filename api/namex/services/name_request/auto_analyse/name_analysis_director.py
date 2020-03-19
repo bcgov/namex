@@ -302,6 +302,25 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
                 analysis = analysis + uc_word_issues
 
+            # Serve unclassified words first if there are words that require consent in the name
+            match_name_requires_consent = list(
+                filter(lambda i: i.result_code == AnalysisIssueCodes.NAME_REQUIRES_CONSENT, analysis)
+            )
+
+            if match_name_requires_consent.__len__() > 0:
+                # Serve the unclassified word issues last
+                uc_word_issue_indexes = []
+                uc_word_issues = []
+                for idx, issue in enumerate(analysis):
+                    if issue.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                        uc_word_issue_indexes.append(idx)
+
+                for idx in uc_word_issue_indexes:
+                    issue = analysis.pop(idx)
+                    uc_word_issues.append(issue)
+
+                analysis = analysis + uc_word_issues
+
             return analysis
 
         except Exception as error:

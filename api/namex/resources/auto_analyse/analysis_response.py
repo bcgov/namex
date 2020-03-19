@@ -65,6 +65,8 @@ class AnalysisResponse:
         is_only_issue = self._is_only_issue(issue_count, issue_idx)
         has_next_issue = self._has_next_issue(issue_count, issue_idx)
 
+        issue = None
+
         # If there's only one issue, display helpful hint and the examination button
         if is_only_issue:
             option1 = remove_or_replace_setup()
