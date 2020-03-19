@@ -1,5 +1,7 @@
 import itertools
 
+import collections
+
 from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
@@ -30,23 +32,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         # Returns words in wrong classification following distinctive | descriptive: [{book:3}]
         _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
 
-        if len(list_name) < 2 and len(list_dist) == 1:
-            result = ProcedureResult()
-            result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-            result.values = {
-                'list_name': list_name or [],
-                'list_dist': list_dist or []
-            }
-
-            results.append(result)
-        elif len(list_name) < 2 and len(list_dist) == 0:
+        # First, check to make sure the name doesn't have too many words
+        if len(list_name) > MAX_LIMIT:
             result = ProcedureResult()
             result.is_valid = False
-            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-            result.values = list_name
+            result.result_code = AnalysisIssueCodes.TOO_MANY_WORDS
 
             results.append(result)
 
+        # Next, we check for unclassified words
         if len(list_none) > 0:
             unclassified_words_list_response = []
             for idx, token in enumerate(list_name):
@@ -63,44 +57,65 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             results.append(result)
 
-        # TODO: These checks might be of use, but they don't really belong in here
-        # if list_incorrect_classification:
-        #    result.is_valid = False
-        #    result.result_code = AnalysisIssueCodes.INCORRECT_CATEGORY
-        #    result.values = list_incorrect_classification
-        # elif not list_all == list_name:
-        #    reverse_order_list = []
-        #    for idx, (token_dist_desc, token_name) in enumerate(zip(list_all, list_name)):
-        #        if token_dist_desc != token_name:
-        #            reverse_order_list.append({idx: token_name})
+        # Now that too many words and unclassified words are handled, handle distinctive and descriptive issues
+        result = None
 
-        #    result.is_valid = False
-        #    result.result_code = AnalysisIssueCodes.REVERSE_ORDER
-        #    result.values = reverse_order_list
-        if len(list_dist) < 1:
+        if len(list_name) == 0:
+            # If we have no words in our name, obviously we need to add a distinctive... this is kind of redundant as
+            # we shouldn't have a name with no words but we still need to handle the case in our API
             result = ProcedureResult()
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-            result.values = list_name
-
-            results.append(result)
-
-        elif len(list_desc) < 1:
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
             result.values = {
-                'list_name': list_name or [],
-                'list_dist': list_dist or []
+                'list_name': [],
+                'list_dist': []
             }
+        elif len(list_name) == 1:
+            # If there's only one word and it's not distinctive, we need to add a distinctive word
+            if len(list_dist) == 0:
+                result = ProcedureResult()
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
+                result.values = {
+                    'list_name': list_name,
+                    'list_dist': []
+                }
+            elif len(list_desc) == 0:
+                result = ProcedureResult()
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
+                result.values = {
+                    'list_name': list_name or [],
+                    'list_dist': list_dist or []
+                }
+        else:
+            if len(list_dist) == 0:
+                result = ProcedureResult()
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
+                result.values = {
+                    'list_name': list_name,
+                    'list_dist': []
+                }
+            elif len(list_desc) == 0:
+                result = ProcedureResult()
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
+                result.values = {
+                    'list_name': list_name or [],
+                    'list_dist': list_dist or []
+                }
+            elif collections.Counter(list_dist) == collections.Counter(list_desc):
+                # If there's more than one word and all words are both distinctive and descriptive add another distinctive
+                result = ProcedureResult()
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
+                result.values = {
+                    'list_name': list_name,
+                    'list_dist': []
+                }
 
-            results.append(result)
-
-        elif len(list_name) > MAX_LIMIT:
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.TOO_MANY_WORDS
-
+        if result:
             results.append(result)
 
         return results
