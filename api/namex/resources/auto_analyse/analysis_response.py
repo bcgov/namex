@@ -369,14 +369,6 @@ class AnalysisResponse:
             self.status_code = AnalysisResponseCodes.AUTO_APPROVED.value
             self.header = "Available"
 
-        # TODO: This is an incomplete implementation! Get returned status codes from ProcedureResult
-        if not is_valid_name_request:
-            self.status_code = "fa"
-            self.header = "Further Action Required"
-        else:
-            self.status_code = "Available"
-            self.header = "Available"
-
     def prepare_payload(self):
         payload = NameAnalysisResponse(
             header=self.header,
@@ -389,7 +381,5 @@ class AnalysisResponse:
     This is invoked by consumers of this class
     '''
     def build_response(self):
-        # Reset executed procedures
-        self.executed_procedures = []
         response = self.prepare_payload()
         return response

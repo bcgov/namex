@@ -246,6 +246,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.is_valid = True
             result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
             result.values = []
+
         return result
 
     '''

@@ -174,18 +174,6 @@ def change_designation_order_setup():
     )
 
 
-class ChangeDesignationSetup(Setup):
-    pass
-
-
-change_designation_order_setup = ChangeDesignationSetup(
-    type="change designation at the end",
-    header=Template("Change Designation order"),
-    line1=Template("Change designation order to the end of the name."),
-    line2=Template("")
-)
-
-
 class ChangeEntityTypeSetup(Setup):
     pass
 

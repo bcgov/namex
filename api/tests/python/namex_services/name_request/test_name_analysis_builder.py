@@ -46,11 +46,6 @@ def test_search_conflicts(client, jwt, app):
 #    assert_that(builder.check_designation(user_input, entity_type_user),
 #                [[], ['UL']])
 
-
-#def test_check_designation(client, jwt, app):
-#    assert_that(builder.check_designation(user_input, entity_type_user),
-#                [[], ['UL']])
-
 '''
 def test_do_analysis(client, jwt, app):
     assert_that(builder.do_analysis(user_input,entity_type_end_desig_user, entity_type_any_desig_user), True)

@@ -19,34 +19,12 @@ class DataFrameFields(Enum):
     DISTINCTIVE = 'DIST'
     UNCLASSIFIED = 'NONE'
 
-# Field dataframe
-field_synonyms = 'synonyms_text'
-field_special_words = 'rc_words'
-
-field_synonyms = 'synonyms_text'
-field_special_words = 'rc_words'
-
 
 class ProcedureResult:
     def __init__(self, **kwargs):
         self.is_valid = kwargs.get('is_valid', False)
         self.result_code = kwargs.get('result_code', None)
         self.values = kwargs.get('values', None)
-
-    @classmethod
-    def list(cls):
-        values = []
-        for item in cls:
-            values.append(item.value)
-
-        return values
-
-
-class ProcedureResult:
-    def __init__(self, **kwargs):
-        self.is_valid = kwargs.get('is_valid', False)
-        self.result_code = kwargs.get('result_code', None)
-        self.data = kwargs.get('data', None)
 
 
 class AnalysisRequestActions(str, Enum):

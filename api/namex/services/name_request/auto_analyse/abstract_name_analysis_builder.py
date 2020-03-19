@@ -64,9 +64,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
         self.word_condition_service = director.word_condition_service
         self.synonym_service = director.synonym_service
 
-    def get_virtual_word_condition_service(self):
-        return self._virtual_word_condition_service
-
     # Just a wrapped call to the API's getClassification
     def get_word_classification(self, word):
         return self.word_classification_service.find_one(word)
@@ -154,32 +151,6 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
 
     @abc.abstractmethod
     def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end, misplaced_designation_all):
-        return ProcedureResult(is_valid=True)
-
-    '''
-    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
-    @return ProcedureResult
-    '''
-
-    @abc.abstractmethod
-    def check_word_special_use(self, list_name, name):
-        return ProcedureResult(is_valid=True)
-
-    '''
-    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
-    @return ProcedureResult
-    '''
-    @abc.abstractmethod
-    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc, list_name, name):
-        return ProcedureResult(is_valid=True)
-
-    '''
-    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
-    @return ProcedureResult
-    '''
-
-    @abc.abstractmethod
-    def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
         return ProcedureResult(is_valid=True)
 
     '''

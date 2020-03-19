@@ -19,20 +19,6 @@ list_dist = []
 list_desc = []
 list_none = ['MOUNTAIN', 'VIEW', 'FOOD', 'GROWERS']
 
-name = ['WM', 'MOUNTAIN', 'VENTURES']
-
-substitution_word = '4mula'
-list_dist = ['WM', '4BY4']
-list_desc = ['VENTURES']
-list_none = []
-
-name = ['WM', 'MOUNTAIN', 'VENTURES']
-
-substitution_word = '4mula'
-list_dist = ['WM', '4BY4']
-list_desc = ['VENTURES']
-list_none = []
-
 stop_words = ['an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', \
               'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', \
               'such', 'that', 'the', 'their', 'then', 'there', 'these', \
@@ -227,9 +213,6 @@ field = 'synonyms_text'
 synonym_text_list = ['an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', \
                      'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this',
                      'to']
-name = 'MOUNTAIN ASSOCIATION VIEW LIMITED PARTNERSHIP'
-#                       [anywhere designation, end designation]
-designation_name_list = [['association'], ['limited partnership']]
 
 user_input = 'MOUNTAIN COOPERATIVE VIEW LIMITED LIABILITY PARTNERSHIP'
 designation_name_list = ['cooperative', 'limited liability partnership']
@@ -284,93 +267,6 @@ def test_get_fr_designation_end_list(client, jwt, app):
 def test_get_designations_in_name(client, jwt, app):
     assert_that(get_designations_in_name(user_input), designation_name_list)
 '''
-
-def test_get_designation_by_entity_type(client, jwt, app):
-    assert_that(get_designation_by_entity_type(entity_type), entity_type_designation_list)
-
-'''
-def test_get_stand_alone_list(client, jwt, app):
-    assert_that(get_stand_alone_list(), stand_alone_list)
-
-
-def test_get_words_to_avoid(client, jwt, app):
-    assert_that(get_words_to_avoid(), words_to_avoid)
-
-
-def test_get_words_requiring_consent(client, jwt, app):
-    assert_that(get_words_requiring_consent(), words_require_consent)
-
-
-def test_get_classification(client, jwt, app):
-    assert_that(get_classification(word), 'none')
-
-
-def test_get_substitution_list(client, jwt, app):
-    assert_that(get_substitution_list(substitution_word), ['mount', 'mountain', 'mt', 'mtn'])
-
-
-def test_is_substitution_word(client, jwt, app):
-    assert_that(is_substitution_word(substitution_word), True)
-
-
-def test_get_stop_word_list(client, jwt, app):
-    assert_that(get_stop_word_list(), stop_words)
-
-
-def test_get_prefix_list(client, jwt, app):
-    assert_that(get_prefix_list(), prefix_list)
-
-
-def test_get_en_designation_any_list(client, jwt, app):
-    assert_that(get_en_designation_any_list(), en_designation_any_list)
-
-
-def test_get_en_designation_end_list(client, jwt, app):
-    assert_that(get_en_designation_end_list(), en_designation_end_list)
-
-
-def test_get_fr_designation_end_list(client, jwt, app):
-    assert_that(get_fr_designation_end_list(), fr_designation_end_list)
-
-
-def test_get_stand_alone_list(client, jwt, app):
-    assert_that(get_stand_alone_list(), stand_alone_list)
-
-
-def test_get_classification(client, jwt, app):
-    assert_that(get_classification(word), 'none')
-
-
-def test_get_substitution_list(client, jwt, app):
-    assert_that(get_substitution_list(substitution_word), ['mount', 'mountain', 'mt', 'mtn'])
-
-
-def test_is_substitution_word(client, jwt, app):
-    assert_that(is_substitution_word(substitution_word), True)
-
-
-def test_get_stop_word_list(client, jwt, app):
-    assert_that(get_stop_word_list(), stop_words)
-
-
-def test_get_prefix_list(client, jwt, app):
-    assert_that(get_prefix_list(), prefix_list)
-
-
-def test_get_en_designation_any_list(client, jwt, app):
-    assert_that(get_en_designation_any_list(), en_designation_any_list)
-
-
-def test_get_en_designation_end_all_list(client, jwt, app):
-    assert_that(get_en_designation_end_all_list(), en_designation_end_list)
-
-
-def test_get_fr_designation_end_list(client, jwt, app):
-    assert_that(get_fr_designation_end_list(), fr_designation_end_list)
-
-
-def test_get_designations_in_name(client, jwt, app):
-    assert_that(get_designations_in_name(user_input), designation_name_list)
 
 def test_get_designation_by_entity_type(client, jwt, app):
     assert_that(get_designation_by_entity_type(entity_type), entity_type_designation_list)
