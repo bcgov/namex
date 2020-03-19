@@ -373,15 +373,23 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     if issue.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
                         uc_word_issue_indexes.append(idx)
 
-                for idx in uc_word_issue_indexes:
-                    issue = analysis.pop(idx)
-                    uc_word_issues.append(issue)
+        return sorted_analysis_issues
 
             return analysis
 
-        except Exception as error:
-            print('Error executing name analysis: ' + repr(error))
-            raise
+        return word_issues
+
+    @classmethod
+    def _has_analysis_issue_type(cls, analysis, issue_code):
+        return cls._get_analysis_issue_type_issues(analysis, issue_code).__len__() > 0
+
+    @classmethod
+    def _get_analysis_issue_type_issues(cls, analysis, issue_code):
+        issues = list(
+            filter(lambda i: i.result_code == issue_code, analysis)
+        )
+
+        return issues
 
     def sort_analysis_issues(self, analysis_issues, sort_order):
         sorted_analysis_issues = []
