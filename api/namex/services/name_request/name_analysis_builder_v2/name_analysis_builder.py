@@ -77,7 +77,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
                 result.values = {
-                    'list_name': list_name,
+                    'list_name': list_name or [],
                     'list_dist': []
                 }
             elif len(list_desc) == 0:
@@ -94,7 +94,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
                 result.values = {
-                    'list_name': list_name,
+                    'list_name': list_name or [],
                     'list_dist': []
                 }
             elif len(list_desc) == 0:
