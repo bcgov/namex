@@ -24,7 +24,7 @@ class WordClassification(db.Model):
     start_dt = db.Column('start_dt', db.DateTime(timezone=True))
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    last_updated_dt = db.Column('last_updated_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
+    last_updated_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approved_by])
