@@ -55,9 +55,7 @@ class WordClassification(db.Model):
         print(list(map(lambda x: x.classification, results)))
         return results
     '''
-
     # TODO: Do we still need to update this method?
-    '''
     Note: we convert to lower case as word text in the DB will be in all caps.
     '''
     @classmethod
