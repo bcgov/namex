@@ -145,7 +145,6 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
-                    message="Add a Descriptive Word Here",
                     word=word,
                     index=none_word_idx
                 )
@@ -160,110 +159,6 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
                 if isinstance(setup_item.__dict__[prop], Template):
                     # Render the Template string, replacing placeholder vars
                     setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
-
-        return issue
-
-
-"""
-Word Classification Engine Issues
-"""
-
-
-'''
-@:deprecated
-'''
-
-# TODO: Get RID OF THIS!!!
-
-
-class IncorrectCategory(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
-    status_text = "Further Action Required"
-    issue = None
-
-    def create_issue(self, procedure_result):
-        issue = NameAnalysisIssue(
-            issue_type=self.issue_type,
-            line1="Category of the word is incorrect.",
-            line2=None,
-            consenting_body=None,
-            designations=None,
-            show_reserve_button=False,
-            show_examination_button=True,
-            conflicts=None,
-            setup=None,
-            name_actions=[]
-        )
-
-        issue.name_actions = [
-            NameAction(
-                type=NameActions.HIGHLIGHT
-            )
-        ]
-
-        # Setup boxes
-        issue.setup = self.setup_config
-
-        return issue
-
-
-"""
-Well-Formed Name Issues
-"""
-
-
-class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
-    status_text = "Further Action Required"
-    issue = NameAnalysisIssue(
-        issue_type=issue_type,
-        line1="<b>Flerkin</b> is an unknown word.  The system cannot auto-approve a name with unknown words.",
-        line2="It might still be approvable by manual examination.",
-        consenting_body=None,
-        designations=None,
-        show_reserve_button=False,
-        show_examination_button=True,
-        conflicts=None,
-        setup=None,
-        name_actions=[]
-    )
-
-    def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
-        list_none = procedure_result.values['list_none']
-
-        issue.name_actions = []
-        for word in list_none:
-            none_word_idx = list_name.index(word)
-            issue.name_actions.append(
-                NameAction(
-                    type=NameActions.HIGHLIGHT,
-                    message="Add a Descriptive Word Here",
-                    word=word,
-                    index=none_word_idx
-                )
-            )
-
-        # Setup boxes
-        issue.setup = self.setup_config
-        # Replace template strings in setup boxes
-        for setup_item in issue.setup:
-            # Loop over properties
-            for prop in vars(setup_item):
-                if isinstance(setup_item.__dict__[prop], Template):
-                    # Render the Template string, replacing placeholder vars
-                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
-
-        '''
-        issue.setup = [
-            Setup(
-                type="hint",
-                header="Helpful Hint",
-                line1="You can remove or replace the word <b>Flerkin</b> and try your search again.  Alternately, you can submit your name for examination-wait times are quoted above.",
-                line2=""
-            )
-        ]
-        '''
 
         return issue
 
@@ -376,13 +271,6 @@ class TooManyWordsIssue(AnalysisResponseIssue):
             name_actions=None
         )
 
-        issue.name_actions = [
-            NameAction(
-                type=NameActions.HIGHLIGHT
-            )
-        ]
-        '''
-
         # Setup boxes
         issue.setup = self.setup_config
         for setup_item in issue.setup:
@@ -442,37 +330,6 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
                 if isinstance(setup_item.__dict__[prop], Template):
                     # Render the Template string, replacing placeholder vars
                     setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
-
-        issue.consenting_body = ConsentingBody(
-            name="Association of Professional Engineers of BC",
-            email="email@engineer.ca"
-        )
-
-        # Setup boxes
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                heading="Option 1",
-                line1="You can remove or replace the word “Engineering” and try your search again.",
-                line2=""
-            ),
-            Setup(
-                button="examine",
-                checkbox="",
-                header="Option 2",
-                line1="You can choose to submit this name for examination. Examination wait times are listed above.",
-                line2=""
-            ),
-            Setup(
-                button="consent",
-                checkbox="",
-                header="Option 3",
-                line1="This name can be auto-approved but you will be required to send confirmation of consent to the BC Business Registry.",
-                line2=""
-            )
-        ]
-        '''
 
         return issue
 
@@ -681,31 +538,6 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                     ))
                 '''
 
-        if not is_exact_match:
-            # Loop over the list_name words, we need to decide to do with each word
-            for word in list_name:
-                name_word_idx = list_name.index(word)
-
-                # Highlight the descriptives
-                # <class 'list'>: ['mountain', 'view']
-                if word in list_dist_words:
-                    issue.name_actions.append(NameAction(
-                        word=word,
-                        index=name_word_idx,
-                        type=NameActions.HIGHLIGHT
-                    ))
-
-                # Strike out the last descriptive word
-                '''
-                if word in list_desc_words and name_word_idx == list_name.__len__() - 1:
-                    # <class 'list'>: ['growers', 'view']
-                    issue.name_actions.append(NameAction(
-                        word=word,
-                        index=name_word_idx,
-                        type=NameActions.STRIKE
-                    ))
-                '''
-
         issue.conflicts = []
 
         conflict = Conflict(
@@ -792,131 +624,6 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                         'incorrect_designations': self._join_list_words(incorrect_designations),
                         'entity_type': self.entity_type  # TODO: Map this CODE!
                     }))
-
-        return issue
-
-
-class DesignationMisplacedIssue(AnalysisResponseIssue):
-    issue_type = AnalysisIssueCodes.DESIGNATION_MISPLACED
-    status_text = "Further Action Required"
-    issue = None
-
-    def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
-        misplaced_any_designation = procedure_result.values['misplaced_any_designation']
-        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
-        misplaced_all_designation = procedure_result.values['misplaced_all_designation']
-
-        list_name_lc = list(map(lambda d: d.lower(), list_name))
-
-        issue = NameAnalysisIssue(
-            issue_type=self.issue_type,
-            line1="The " + self._join_list_words(
-                misplaced_end_designation) + " designation(s) cannot be used in a position different to end of the name." ,
-            line2=None,
-            consenting_body=None,
-            designations=None,
-            show_reserve_button=False,
-            show_examination_button=False,
-            conflicts=None,
-            setup=None,
-            name_actions=[]
-        )
-
-
-        # Loop over the list_name words, we need to decide to do with each word
-        for word in list_name_lc:
-            name_word_idx = list_name.index(word)
-
-            # Highlight the descriptives
-            # <class 'list'>: ['mountain', 'view']
-            if word in misplaced_all_designation:
-                issue.name_actions.append(NameAction(
-                    word=word,
-                    index=name_word_idx,
-                    type=NameActions.HIGHLIGHT
-                ))
-
-
-        # Setup boxes
-        # TODO: We need setup boxes for this new stuff...
-        issue.setup = self.setup_config
-
-        # Setup boxes
-        issue.setup = [
-            Setup(
-                button="",
-                checkbox="",
-                header="Option 1",
-                line1="Add a word to the beginning of the name that sets it apart like a person's name or initials.",
-                line2="Or remove ${some-word} and replace it with a different word"
-            ),
-            Setup(
-                button="examine",
-                checkbox="",
-                header="Option 2",
-                line1="You can choose to submit this name for examination. Examination wait times are listed above.",
-                line2=""
-            ),
-            Setup(
-                button="consent",
-                checkbox="",
-                header="Option 3",
-                line1="If you are the registered owner of the existing name, it can be auto-approved but you are required to send confirmation of consent to the BC Business Registry.",
-                line2=""
-            )
-        ]
-        '''
-
-        return issue
-
-
-class DesignationMismatchIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
-    status_text = "Further Action Required"
-    issue = None
-
-    def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
-        incorrect_designations = procedure_result.values['incorrect_designations']
-        correct_designations = procedure_result.values['correct_designations']
-        # TODO: Implement the misplaced designations cases!
-        misplaced_any_designation = procedure_result.values['misplaced_any_designation']
-        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
-
-        # TODO: If case comes back in upper case for the incorrect designations we won't have a match...
-        # Convert all strings to lower-case before comparing
-        incorrect_designations_lc = list(map(lambda d: d.lower() if isinstance(d, str) else '', incorrect_designations))
-        list_name_lc = list(map(lambda d: d.lower(), list_name))
-
-        issue = NameAnalysisIssue(
-            issue_type=self.issue_type,
-            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of " + self._join_list_words([self.entity_type]) + " </b>",
-            line2=None,
-            consenting_body=None,
-            designations=correct_designations,
-            show_reserve_button=False,
-            show_examination_button=False,
-            conflicts=None,
-            setup=None,
-            name_actions=[]
-        )
-
-        # Loop over the list_name words, we need to decide to do with each word
-        for word in list_name_lc:
-            name_word_idx = list_name.index(word)
-
-            # Highlight the descriptives
-            # <class 'list'>: ['mountain', 'view']
-            if word in incorrect_designations_lc:
-                issue.name_actions.append(NameAction(
-                    word=word,
-                    index=name_word_idx,
-                    type=NameActions.HIGHLIGHT
-                ))
-
-        # Setup boxes
-        issue.setup = self.setup_config
 
         return issue
 

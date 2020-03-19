@@ -167,15 +167,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
 
-        if self.token_classifier.distinctive_word_tokens == self.token_classifier.descriptive_word_tokens:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.name_tokens)
-
-        else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens, self.token_classifier.distinctive_word_tokens, self.token_classifier.descriptive_word_tokens)
-
-        # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
-
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
@@ -200,19 +191,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
-
-        check_designation_misplaced = builder.check_designation_misplaced(
-            self.get_original_name_tokenized(),
-            self.get_misplaced_designation_any(),
-            self.get_misplaced_designation_end(),
-            self.get_misplaced_designation_all()
-        )
-
-        if not check_designation_misplaced.is_valid:
-            results.append(check_designation_misplaced)
-
-        # TODO: Handle special words...
-        # check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
 
         check_designation_misplaced = builder.check_designation_misplaced(
             self.get_original_name_tokenized(),

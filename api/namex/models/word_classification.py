@@ -10,13 +10,6 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import backref
 
 
-import re
-import pandas as pd
-from datetime import datetime
-from sqlalchemy import func
-from sqlalchemy.orm import backref
-
-
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
 
@@ -31,7 +24,7 @@ class WordClassification(db.Model):
     start_dt = db.Column('start_dt', db.DateTime(timezone=True))
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    last_updated_dt = db.Column('last_updated_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
+    last_updated_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,onupdate=datetime.utcnow)
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approved_by])
@@ -44,18 +37,8 @@ class WordClassification(db.Model):
                 "approvedBy": self.approved_by, "startDate": self.start_dt,
                 "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
 
-    @classmethod
-    def find_word_classification(cls, word):
-        results = db.session.query(cls.word, cls.classification) \
-            .filter(func.lower(cls.word) == func.lower(word)) \
-            .filter(cls.end_dt == None) \
-            .filter(cls.start_dt <= date.today()) \
-            .filter(cls.approved_dt <= date.today()).all()
-        print(word)
-        print(list(map(lambda x: x.classification, results)))
-        return results
+    # TODO: Fix this it's not working...
     '''
-    # TODO: Do we still need to update this method?
     Note: we convert to lower case as word text in the DB will be in all caps.
     '''
     @classmethod
@@ -68,17 +51,6 @@ class WordClassification(db.Model):
         print(word)
         print(list(map(lambda x: x.classification, results)))
         return results
-
-    # TODO: This isn't being used anymore..
-    @classmethod
-    def get_classification(cls, word):
-        query = 'SELECT s.word_classification FROM word_classification s WHERE lower(s.word)=' + "'" + word.lower() + "'"
-        cf = pd.read_sql_query(query, con=db.engine)
-
-        if not cf.empty and len(cf) == 1:
-            return cf['word_classification'].to_string(index=False).lower()
-
-        return 'none'
 
     def save_to_db(self):
         db.session.add(self)

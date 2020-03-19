@@ -6,13 +6,6 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
-from namex.constants import \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
-
-from .mixins.get_synonyms_lists import GetSynonymsListsMixin
-from .mixins.get_designations_lists import GetDesignationsListsMixin
-from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
-
 from namex.services.synonyms.synonym \
     import SynonymService
 
@@ -121,32 +114,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted_tokenized if np_svc else ''
 
-    # Convenience method for extending implementations
-    def get_entity_type(self):
-        return self.entity_type
-
-    # Convenience method for extending implementations
-    def set_entity_type(self, entity_type):
-        self.entity_type = entity_type
-
-    # API for extending implementations
-    def get_name_tokens(self):
-        return self.name_tokens
-
-    # API for extending implementations
-    # TODO: Just for backward compat. et rid of this when we are done refactoring!
-    def get_name(self):
-        return self.name_tokens
-
-    # API for extending implementations
-    def get_processed_name(self):
-        return self.processed_name
-
-    # TODO: What is this for? Did Arturo or I add this?
-    # Get the company's designation if it's in the name
-    def get_name_designation(self):
-        pass
-
     '''
     Just an alias for name_as_submitted
     '''
@@ -222,22 +189,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
         self.configure_builder()
-
-    # TODO: Isn't there another version of this already?
-    def clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], fr_designation_end_list=[],
-                         prefix_list=[]):
-        if not text or not stop_words or not designation_any or not designation_end or not prefix_list:
-            warnings.warn(
-                "Parameters in clean_name_words function are not set.",
-                Warning
-            )
-        words = text.lower()
-        words = ' '.join([word for x, word in enumerate(words.split(" ")) if x == 0 or word not in stop_words])
-        words = remove_french(words, fr_designation_end_list)
-        tokens = self._synonym_service.regex_transform(words, designation_any, designation_end, prefix_list)
-        tokens = tokens.split()
-
-        self.configure_builder()  # Update builder dicts
 
     '''
     Prepare any data required by the analysis builder.
@@ -348,48 +299,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             analysis = analysis + self.do_analysis()
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
 
-            # If the WORD_TO_AVOID check failed, the UNCLASSIFIED_WORD check
-            # will have failed too because words to avoid are never classified.
-            # Strip out the unclassified words errors involving the same name words.
-            list_avoid = []
-
-            match_words_to_avoid = list(filter(lambda i: i.result_code == AnalysisResultCodes.WORDS_TO_AVOID, analysis))
-            if match_words_to_avoid.__len__() > 0:
-                for procedure_result in match_words_to_avoid:
-                    list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
-
-                def remove_words_to_avoid(result):
-                    if result.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
-                        for word in list_avoid:
-                            result.values['list_none'].remove(word)
-                    return result
-
-                analysis = list(map(remove_words_to_avoid, analysis))
-
-                # Serve the unclassified word issues last
-                uc_word_issue_indexes = []
-                uc_word_issues = []
-                for idx, issue in enumerate(analysis):
-                    if issue.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
-                        uc_word_issue_indexes.append(idx)
-
-        return sorted_analysis_issues
-
             return analysis
 
-        return word_issues
-
-    @classmethod
-    def _has_analysis_issue_type(cls, analysis, issue_code):
-        return cls._get_analysis_issue_type_issues(analysis, issue_code).__len__() > 0
-
-    @classmethod
-    def _get_analysis_issue_type_issues(cls, analysis, issue_code):
-        issues = list(
-            filter(lambda i: i.result_code == issue_code, analysis)
-        )
-
-        return issues
+        except Exception as error:
+            print('Error executing name analysis: ' + repr(error))
+            raise
 
     def sort_analysis_issues(self, analysis_issues, sort_order):
         sorted_analysis_issues = []

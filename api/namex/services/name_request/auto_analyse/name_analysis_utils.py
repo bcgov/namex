@@ -1,5 +1,7 @@
+import itertools
 import re
 import collections
+from sqlalchemy import create_engine
 from toolz import unique
 
 from namex.services.name_request.auto_analyse import DataFrameFields
@@ -160,6 +162,7 @@ def lookahead(iterable):
     it = iter(iterable)
     last = next(it)
     # Run the iterator to exhaustion (starting from the second value).
+    idx = 0
     for idx, val in enumerate(it):
         # Report the *previous* value (more to come).
         yield idx, last, True

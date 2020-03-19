@@ -77,10 +77,6 @@ class NameProcessingService(GetSynonymListsMixin):
         self.descriptive_word_tokens = None
         self.unclassified_word_tokens = None
 
-    @name_as_submitted.setter
-    def name_as_submitted(self, val):
-        self._name_as_submitted = val
-
     '''
     Set and process a submitted name string using the process_name class method.
     '''
@@ -107,35 +103,7 @@ class NameProcessingService(GetSynonymListsMixin):
         tokens = syn_svc.regex_transform(words, designation_any, designation_end, designation_all, prefix_list, number_list)
         tokens = tokens.split()
 
-    @name_tokens.setter
-    def name_tokens(self, val):
-        self._name_tokens = val
-
-    @property
-    def word_classification_service(self):
-        return self._word_classification_service
-
-    @word_classification_service.setter
-    def word_classification_service(self, svc):
-        self._word_classification_service = svc
-
-    @property
-    def synonym_service(self):
-        return self._synonym_service
-
-    @synonym_service.setter
-    def synonym_service(self, svc):
-        self._synonym_service = svc
-
-    def __init__(self):
-        self.synonym_service = SynonymService()
-        self.word_classification_service = WordClassificationService()
-        self.name_as_submitted = None
-        self.processed_name = None
-        self.name_tokens = None
-        self.distinctive_word_tokens = None
-        self.descriptive_word_tokens = None
-        self.unclassified_word_tokens = None
+        return [x.lower() for x in tokens if x]
 
     def _prepare_data(self):
         syn_svc = self.synonym_service

@@ -13,12 +13,6 @@ from .mixins.model import SynonymModelMixin
 - Methods like find, find_one, or find_by_criteria or iterate belong in models.
 """
 
-"""
-- Services implement business logic, and NON generic queries. 
-- Services don't have generic model query methods like find, find_one, or find_by_criteria.
-- Methods like find, find_one, or find_by_criteria or iterate belong in models.
-"""
-
 
 class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     _model = None
@@ -118,17 +112,6 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
-    def get_number_words(self):
-        model = self.get_model()
-
-        filters = [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('number(s)? sub')),
-        ]
-
-        results = self.find_word_synonyms(None, filters)
-        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
-        return flattened
-
     def get_designations(self, entity_type_code, position_code, lang):
         lang = lang if isinstance(lang, str) else 'english'
         model = self.get_model()
@@ -151,6 +134,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
+    # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
     '''
     Rules for Regex Transform (from bottom to top):
     1.- Replace with non-space 
