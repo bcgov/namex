@@ -107,6 +107,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 }
             elif collections.Counter(list_dist) == collections.Counter(list_desc):
                 # If there's more than one word and all words are both distinctive and descriptive add another distinctive
+                '''
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
@@ -114,6 +115,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_name': list_name,
                     'list_dist': []
                 }
+                '''
 
         if result:
             results.append(result)
