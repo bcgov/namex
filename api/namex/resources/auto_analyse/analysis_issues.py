@@ -182,14 +182,14 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
-        values = procedure_result.values
+        list_name = procedure_result.values['list_name']
 
         issue.name_actions = [
             NameAction(
                 type=NameActions.BRACKETS,
                 position=WordPositions.START,
                 message="Add a Word Here",
-                word=values[0] if values.__len__() > 0 else None,
+                word=list_name[0] if list_name.__len__() > 0 else None,
                 index=0
             )
         ]
