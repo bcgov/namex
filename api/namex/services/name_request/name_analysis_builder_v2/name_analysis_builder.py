@@ -123,7 +123,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return results
 
     '''
-    Override the abstract / base class method
+    Override the abstract / base class method.
+    
     @return ProcedureResult
     '''
     def check_words_to_avoid(self, list_name, name):
