@@ -475,7 +475,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         # Grab the first conflict
         current_conflict_name = list(list_conflicts.keys())[0]  # eg: 'MOUNTAIN VIEW GROWERS INC.'
         current_conflict = list_conflicts[current_conflict_name]  # eg: {'mountain': ['mountain'], 'view': ['view'], 'growers': ['growers']}
-        current_conflict_keys = list(current_conflict.keys())
+        current_conflict_keys = list(current_conflict.keys()) if current_conflict else []
 
         is_exact_match = (list_name == current_conflict_keys)
 
