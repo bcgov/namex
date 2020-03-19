@@ -1,7 +1,7 @@
 from enum import Enum
 
 # Limit number of words to analyse
-MAX_LIMIT = 4
+MAX_LIMIT = 3
 
 # Limit number of matches returned to user
 MAX_MATCHES_LIMIT = 1
