@@ -1,3 +1,8 @@
+from sqlalchemy import func
+from sqlalchemy.sql.expression import false, true
+
+from namex.criteria.virtual_word_condition.query_criteria import VirtualWordConditionCriteria
+from namex.services.synonyms.synonym import SynonymService
 from namex.models import VirtualWordCondition
 
 
@@ -11,13 +16,54 @@ class VirtualWordConditionService:
         return self._model
 
     def get_words_to_avoid(self):
-        words_to_avoid = self._model.get_words_to_avoid()
-        return words_to_avoid
+        model = self.get_model()
+        syn_svc = SynonymService()
+
+        filters = [
+            model.rc_allow_use == false(),
+        ]
+
+        criteria = VirtualWordConditionCriteria(
+            fields=[model.rc_words],
+            filters=filters
+        )
+
+        results = model.find_by_criteria(criteria)
+        flattened = list(map(str.strip, (list(filter(None, syn_svc.flatten_synonyms_text(results))))))
+        return flattened
 
     def get_words_requiring_consent(self):
-        words_requiring_consent = self._model.get_words_requiring_consent()
-        return words_requiring_consent
+        model = self.get_model()
+        syn_svc = SynonymService()
+
+        filters = [
+            model.rc_allow_use == true(),
+            model.rc_consent_required == true(),
+        ]
+
+        criteria = VirtualWordConditionCriteria(
+            fields=[model.rc_words],
+            filters=filters
+        )
+
+        results = model.find_by_criteria(criteria)
+        flattened = list(map(str.strip, (list(filter(None, syn_svc.flatten_synonyms_text(results))))))
+        return flattened
 
     def get_word_special_use(self):
-        word_special_use = self._model.get_word_special_use()
-        return word_special_use
+        model = self.get_model()
+        syn_svc = SynonymService()
+
+        filters = [
+            model.rc_consent_required == false(),
+            model.rc_allow_use == true(),
+        ]
+
+        criteria = VirtualWordConditionCriteria(
+            fields=[model.rc_words],
+            filters=filters
+        )
+
+        results = model.find_by_criteria(criteria)
+        flattened = list(map(str.strip, (list(filter(None, syn_svc.flatten_synonyms_text(results))))))
+        return flattened

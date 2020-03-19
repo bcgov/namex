@@ -83,6 +83,11 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
 
     '''
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    
+    The reason this check is done separately from check_name_is_well_formed is
+    because out of province / intl names may not follow the same analysis rules.
+    Having this check separate allows us the flexibility of checking for words
+    to avoid specifically in cases where it is necessary.
     @return ProcedureResult
     '''
 
@@ -125,8 +130,27 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     @return ProcedureResult
     '''
 
+    # TODO: Ensure this isn't needed anywhere before replacing it!
+    # @abc.abstractmethod
+    #def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, misplaced_designation_any, misplaced_designation_end, all_designations_user):
+    #    return ProcedureResult(is_valid=True)
+
+    '''
+        This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+        @return ProcedureResult
+        '''
+
     @abc.abstractmethod
-    def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, misplaced_designation_any, misplaced_designation_end, all_designations_user):
+    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
+        return ProcedureResult(is_valid=True)
+
+    '''
+        This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+        @return ProcedureResult
+        '''
+
+    @abc.abstractmethod
+    def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end, misplaced_designation_all):
         return ProcedureResult(is_valid=True)
 
     '''

@@ -4,7 +4,7 @@ from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
-from . import AnalysisResultCodes
+from . import AnalysisIssueCodes
 
 from namex.services.synonyms.synonym \
     import SynonymService
@@ -242,15 +242,15 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
-            # eg. result.result_code = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+            # eg. result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
             # don't return the result yet, the name is well formed, we just have an unclassified
             # word in the result.
 
             issues_that_must_be_fixed = [
-                AnalysisResultCodes.WORDS_TO_AVOID,
-                AnalysisResultCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisResultCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisResultCodes.TOO_MANY_WORDS
+                AnalysisIssueCodes.WORDS_TO_AVOID,
+                AnalysisIssueCodes.TOO_MANY_WORDS,
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
             ]
 
             issue_must_be_fixed = False
@@ -263,49 +263,90 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             if issue_must_be_fixed:
                 return analysis
-
                 #  Name is not well formed - do not continue
-
-            analysis = analysis + self.do_analysis()
-
-            # if not analysis:
-            #    raise ValueError('NameAnalysisDirector.execute_analysis did not return a result')
 
             # If the WORD_TO_AVOID check failed, the UNCLASSIFIED_WORD check
             # will have failed too because words to avoid are never classified.
             # Strip out the unclassified words errors involving the same name words.
             list_avoid = []
 
-            match_words_to_avoid = list(filter(lambda i: i.result_code == AnalysisResultCodes.WORDS_TO_AVOID, analysis))
-            if match_words_to_avoid.__len__() > 0:
-                for procedure_result in match_words_to_avoid:
+            has_words_to_avoid = self._has_analysis_issue_type(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
+            if has_words_to_avoid:
+                matched_words_to_avoid = self._get_analysis_issue_type_issues(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
+                for procedure_result in matched_words_to_avoid:
                     list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
 
                 def remove_words_to_avoid(result):
-                    if result.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                    if result.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
                         for word in list_avoid:
                             result.values['list_none'].remove(word)
                     return result
 
                 analysis = list(map(remove_words_to_avoid, analysis))
 
-                # Serve the unclassified word issues last
-                uc_word_issue_indexes = []
-                uc_word_issues = []
-                for idx, issue in enumerate(analysis):
-                    if issue.result_code == AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD:
-                        uc_word_issue_indexes.append(idx)
+            analysis_issues_sort_order = [
+                AnalysisIssueCodes.WORDS_TO_AVOID,
+                AnalysisIssueCodes.TOO_MANY_WORDS,
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
+                AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
+                AnalysisIssueCodes.CORPORATE_CONFLICT,
+                AnalysisIssueCodes.DESIGNATION_MISMATCH,
+                AnalysisIssueCodes.DESIGNATION_MISPLACED
+            ]
 
-                for idx in uc_word_issue_indexes:
-                    issue = analysis.pop(idx)
-                    uc_word_issues.append(issue)
-
-                analysis = analysis + uc_word_issues
+            analysis = analysis + self.do_analysis()
+            analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
 
             return analysis
 
         except Exception as error:
             print('Error executing name analysis: ' + repr(error))
+            raise
+
+    def sort_analysis_issues(self, analysis_issues, sort_order):
+        sorted_analysis_issues = []
+
+        while True:
+            issue_type = sort_order.pop(0)
+
+            # Serve unclassified words first if there are words that require consent in the name
+            matched_issues = self._has_analysis_issue_type(analysis_issues, issue_type)
+            if matched_issues:
+                consent_issues = self._extract_analysis_issues_by_type(analysis_issues, issue_type)
+                sorted_analysis_issues += consent_issues
+
+            if sort_order.__len__() == 0:
+                break
+
+        return sorted_analysis_issues
+
+    @classmethod
+    def _extract_analysis_issues_by_type(cls, analysis, issue_code):
+        word_issue_indexes = []
+        word_issues = []
+        for idx, issue in enumerate(analysis):
+            if issue.result_code == issue_code:
+                word_issue_indexes.append(idx)
+
+        for idx in word_issue_indexes:
+            issue = analysis.pop(idx)
+            word_issues.append(issue)
+
+        return word_issues
+
+    @classmethod
+    def _has_analysis_issue_type(cls, analysis, issue_code):
+        return cls._get_analysis_issue_type_issues(analysis, issue_code).__len__() > 0
+
+    @classmethod
+    def _get_analysis_issue_type_issues(cls, analysis, issue_code):
+        issues = list(
+            filter(lambda i: i.result_code == issue_code, analysis)
+        )
+
+        return issues
 
     '''
     This is the main execution call for running name analysis checks.

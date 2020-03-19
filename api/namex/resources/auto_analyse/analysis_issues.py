@@ -1,14 +1,13 @@
 from datetime import date
-from copy import copy
+from string import Template
 
-from namex.services.name_request.auto_analyse import AnalysisResultCodes
+from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 # Import DTOs
 from .response_objects.name_analysis_issue import NameAnalysisIssue
 from .response_objects.name_action import NameAction, NameActions, WordPositions
 from .response_objects.consenting_body import ConsentingBody
 from .response_objects.conflict import Conflict
-from .response_objects.setup import Setup
 
 
 class AnalysisResponseIssue:
@@ -40,8 +39,8 @@ class AnalysisResponseIssue:
         return "<b>" + ", ".join(list_words) + "</b>"
 
 
-class ValidName(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.VALID_NAME
+class CheckIsValid(AnalysisResponseIssue):
+    issue_type = AnalysisIssueCodes.CHECK_IS_VALID
     status_text = "Approved"
     issue = None
 
@@ -75,7 +74,7 @@ Word Classification Engine Issues
 
 
 class IncorrectCategory(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.INCORRECT_CATEGORY
+    issue_type = AnalysisIssueCodes.INCORRECT_CATEGORY
     status_text = "Further Action Required"
     issue = None
 
@@ -101,6 +100,12 @@ class IncorrectCategory(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -111,7 +116,7 @@ Well-Formed Name Issues
 
 
 class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD
+    issue_type = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
     status_text = "Further Action Required"
     issue = None
 
@@ -126,7 +131,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
-            show_examination_button=True,
+            show_examination_button=False,
             conflicts=None,
             setup=None,
             name_actions=[]
@@ -147,12 +152,19 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        # Replace template strings in setup boxes
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
 
 class AddDistinctiveWordIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.ADD_DISTINCTIVE_WORD
+    issue_type = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
     status_text = "Further Action Required"
     issue = None
 
@@ -170,26 +182,32 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
-        values = procedure_result.values
+        list_name = procedure_result.values['list_name']
 
         issue.name_actions = [
             NameAction(
                 type=NameActions.BRACKETS,
                 position=WordPositions.START,
                 message="Add a Word Here",
-                word=values[0] if values.__len__() > 0 else None,
+                word=list_name[0] if list_name.__len__() > 0 else None,
                 index=0
             )
         ]
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
 
 class AddDescriptiveWordIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.ADD_DESCRIPTIVE_WORD
+    issue_type = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
     status_text = "Further Action Required"
     issue = None
 
@@ -210,8 +228,8 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
-        last_dist_word = list_dist.pop()
-        dist_word_idx = list_name.index(last_dist_word)
+        last_dist_word = list_dist.pop() if list_dist.__len__() > 0 else None
+        dist_word_idx = list_name.index(last_dist_word) if list_dist.__len__() > 0 else 0
         issue.name_actions = [
             NameAction(
                 type=NameActions.BRACKETS,
@@ -224,12 +242,18 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
 
 class TooManyWordsIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.TOO_MANY_WORDS
+    issue_type = AnalysisIssueCodes.TOO_MANY_WORDS
     status_text = "Further Action Required"
     issue = None
 
@@ -249,6 +273,12 @@ class TooManyWordsIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -259,7 +289,7 @@ General Name Issues
 
 
 class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.WORDS_TO_AVOID
+    issue_type = AnalysisIssueCodes.WORDS_TO_AVOID
     status_text = "Further Action Required"
     issue = None
 
@@ -294,6 +324,12 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
@@ -305,7 +341,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
 
 
 class WordSpecialUse(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.WORD_SPECIAL_USE
+    issue_type = AnalysisIssueCodes.WORD_SPECIAL_USE
     status_text = "Further Action Required"
     issue = None
 
@@ -340,12 +376,18 @@ class WordSpecialUse(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
 
 class NameRequiresConsentIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.NAME_REQUIRES_CONSENT
+    issue_type = AnalysisIssueCodes.NAME_REQUIRES_CONSENT
     status_text = "Further Action Required"
     issue = None
 
@@ -388,12 +430,18 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
 
 
 class CorporateNameConflictIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.CORPORATE_CONFLICT
+    issue_type = AnalysisIssueCodes.CORPORATE_CONFLICT
     status_text = "Further Action Required"
     issue = None
 
@@ -427,7 +475,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         # Grab the first conflict
         current_conflict_name = list(list_conflicts.keys())[0]  # eg: 'MOUNTAIN VIEW GROWERS INC.'
         current_conflict = list_conflicts[current_conflict_name]  # eg: {'mountain': ['mountain'], 'view': ['view'], 'growers': ['growers']}
-        current_conflict_keys = list(current_conflict.keys())
+        current_conflict_keys = list(current_conflict.keys()) if current_conflict else []
 
         is_exact_match = (list_name == current_conflict_keys)
 
@@ -438,6 +486,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         # - Add brackets after the first distinctive word
         # - Add brackets after the last descriptive word?
         # - Strike out the last word
+
+        list_remove = []  # These are passed down to the Template
 
         if is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
@@ -456,6 +506,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                 # Strike out the last descriptive word
                 if word in list_desc_words and name_word_idx == list_name.__len__() - 1:
                     # <class 'list'>: ['growers', 'view']
+                    list_remove.append(word)
                     issue.name_actions.append(NameAction(
                         word=word,
                         index=name_word_idx,
@@ -498,12 +549,24 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         # Setup boxes
         issue.setup = self.setup_config
+        # Replace template strings in setup boxes
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute({
+                        'list_name': self._join_list_words(list_name),
+                        'list_remove': self._join_list_words(list_remove),
+                        'list_dist': self._join_list_words(list_dist_words),
+                        'list_desc': self._join_list_words(list_desc_words)
+                    }))
 
         return issue
 
 
 class DesignationMismatchIssue(AnalysisResponseIssue):
-    issue_type = AnalysisResultCodes.DESIGNATION_MISMATCH
+    issue_type = AnalysisIssueCodes.DESIGNATION_MISMATCH
     status_text = "Further Action Required"
     issue = None
 
@@ -512,8 +575,9 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         incorrect_designations = procedure_result.values['incorrect_designations']
         correct_designations = procedure_result.values['correct_designations']
         # TODO: Implement the misplaced designations cases!
-        misplaced_any_designation = procedure_result.values['misplaced_any_designation']
-        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
+        # TODO: I think we can remove this, misplaced has been moved out into its own procedure!
+        # misplaced_any_designation = procedure_result.values['misplaced_any_designation']
+        # misplaced_end_designation = procedure_result.values['misplaced_end_designation']
 
         # TODO: If case comes back in upper case for the incorrect designations we won't have a match...
         # Convert all strings to lower-case before comparing
@@ -547,6 +611,67 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                 ))
 
         # Setup boxes
+        issue.setup = self.setup_config
+        # Replace template strings in setup boxes
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute({
+                        'list_name': self._join_list_words(list_name),
+                        'correct_designations': self._join_list_words(correct_designations),
+                        'incorrect_designations': self._join_list_words(incorrect_designations),
+                        'entity_type': self.entity_type  # TODO: Map this CODE!
+                    }))
+
+        return issue
+
+
+class DesignationMisplacedIssue(AnalysisResponseIssue):
+    issue_type = AnalysisIssueCodes.DESIGNATION_MISPLACED
+    status_text = "Further Action Required"
+    issue = None
+
+    def create_issue(self, procedure_result):
+        list_name = procedure_result.values['list_name']
+        misplaced_any_designation = procedure_result.values['misplaced_any_designation']
+        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
+        misplaced_all_designation = procedure_result.values['misplaced_all_designation']
+
+        list_name_lc = list(map(lambda d: d.lower(), list_name))
+
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="The " + self._join_list_words(
+                misplaced_end_designation) + " designation(s) cannot be used in a position different to end of the name." ,
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
+
+
+        # Loop over the list_name words, we need to decide to do with each word
+        for word in list_name_lc:
+            name_word_idx = list_name.index(word)
+
+            # Highlight the descriptives
+            # <class 'list'>: ['mountain', 'view']
+            if word in misplaced_all_designation:
+                issue.name_actions.append(NameAction(
+                    word=word,
+                    index=name_word_idx,
+                    type=NameActions.HIGHLIGHT
+                ))
+
+
+        # Setup boxes
+        # TODO: We need setup boxes for this new stuff...
         issue.setup = self.setup_config
 
         return issue

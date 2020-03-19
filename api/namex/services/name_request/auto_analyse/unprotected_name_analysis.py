@@ -74,7 +74,7 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name, correct_designation_any)
         self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name, correct_designation_end)
 
-        self._misplaced_designation_place = self._misplaced_designation_any_list + self._misplaced_designation_end_list
+        self._misplaced_designation_all_list = self._misplaced_designation_any_list + self._misplaced_designation_end_list
 
     # TODO: I don't see this called anywhere (was prev called: set_all_entity_types)
     def _set_all_entity_types(self):
@@ -131,7 +131,7 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         # TODO: Double check this to make sure it works
         # Set _entity_type_end_designation for designations based on company name typed by user
         self._set_entity_type_end_designation()
-        # Set _wrong_designation_place based on company name typed by user
+        # Set _misplaced_designation_all based on company name typed by user
         self._set_misplaced_designation_in_input_name()
 
         # Set all designations based on entity type typed by user
@@ -174,18 +174,25 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         # Set designations and run our check
         self._set_designations()
 
-        check_designation_mismatch = builder.check_designation(
+        check_designation_mismatch = builder.check_designation_mismatch(
             self.get_original_name_tokenized(),
             self.entity_type,
             self.get_all_designations(),
-            self.get_misplaced_designation_in_input_name(),
-            self.get_misplaced_designation_any(),
-            self.get_misplaced_designation_end(),
             self.get_all_designations_user()
         )
 
         if not check_designation_mismatch.is_valid:
             results.append(check_designation_mismatch)
+
+        check_designation_misplaced = builder.check_designation_misplaced(
+            self.get_original_name_tokenized(),
+            self.get_misplaced_designation_any(),
+            self.get_misplaced_designation_end(),
+            self.get_misplaced_designation_all()
+        )
+
+        if not check_designation_misplaced.is_valid:
+            results.append(check_designation_misplaced)
 
         check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
 
