@@ -229,6 +229,17 @@ class AnalysisResponse:
             option3
         ])
 
+        '''
+        # Quick tests for overriding button behavior
+        '''
+        if issue_count > 1:
+            issue.show_reserve_button = True
+            issue.show_examination_button = False
+        else:
+            issue.show_reserve_button = True
+            issue.show_examination_button = False
+        '''
+
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
 
