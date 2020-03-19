@@ -98,6 +98,20 @@ class AnalysisResponse:
                 option2,
                 # option3
             ])
+        elif not is_only_issue and has_next_issue is False:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+                option1,
+                option2,
+                # option3
+            ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
