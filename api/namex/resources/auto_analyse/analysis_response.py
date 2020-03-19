@@ -231,7 +231,6 @@ class AnalysisResponse:
 
         '''
         # Quick tests for overriding button behavior
-        '''
         if issue_count > 1:
             issue.show_reserve_button = True
             issue.show_examination_button = False
