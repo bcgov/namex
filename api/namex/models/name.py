@@ -35,7 +35,7 @@ class Name(db.Model):
 
 
     # required for name request name analysis
-    _name_type_cd = db.Column('name_type_cd', db.String(10), server_default="CO")
+    _name_type_cd = db.Column('name_type_cd', db.String(10))
     _clean_name = db.Column('clean_name', db.String(1024), index=True)
 
     NOT_EXAMINED = 'NE'
