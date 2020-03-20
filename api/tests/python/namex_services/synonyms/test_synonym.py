@@ -129,3 +129,19 @@ class TestSynonymService(TestCase):
         for idx, name in enumerate(companies):
             assert_that(syn_svc.regex_numbers_standalone(name, ordinal_suffixes, numbers, stand_alone_words),
                         expected[idx])
+
+    '''
+    @pytest.mark.parametrize("name, expected",
+                             [
+                                 ("ONE TWO THREE HOLDINGS", "ONE TWO HOLDINGS"),
+                                 ("123 HOLDINGS", "123 HOLDINGS"),
+                                 ("FIRST SECOND HOLDINGS", "FIRST SECOND HOLDINGS"),
+                                 ("1ST 2ND HOLDINGS", "1ST 2ND HOLDINGS"),
+                                 ("ONE TWO THREE CANADA", " CANADA"),
+                                 ("123 CANADA", " CANADA"),
+                                 ("FIRST SECOND THIRD CANADA", " CANADA"),
+                                 ("1ST 2ND 3RD CANADA", " CANADA")
+                             ])
+    def test_regex_numbers_standalone(self, name, expected):
+       assert syn_svc.regex_numbers_standalone(name, ordinal_suffixes, numbers, stand_alone_words) == expected
+    '''
