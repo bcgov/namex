@@ -352,7 +352,7 @@ class Request(db.Model):
         # print(query.statement)
         return query.all()
 
-
+#set the source from NRO, Societis Online, Name Request
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
 def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
@@ -371,6 +371,89 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
             if(request.requestTypeCd in soc_list ):
              request._source = Request.Source.SO.value   # pylint: disable=protected-access
 
+
+@event.listens_for(Request, 'before_insert')
+@event.listens_for(Request, 'before_update')
+def update_request_action_entity_type(mapper, connection, target): # pylint: disable=unused-argument; SQLAlchemy callback signature
+    """Set the request_action when it is null because the NR is coming from NRO or NAMEX"""
+    # needed to break apart  request_type
+    request = target
+    #it is from name Request-this will be set already so do nothing
+    if('NR R'  in request.nrNum):
+        return
+
+    #todo: handle assumed name as it is a name type and not currently a request action?
+    # map the legacy request_type to the new Entity_type and Request_action
+    request_type_mapping = [
+        ('CR', Request.EntityType.BCORP.value, Request.RequestAction.NEW_AML.value),
+        ('CCR', Request.EntityType.BCORP.value, Request.RequestAction.CHG.value),
+        ('CT', Request.EntityType.BCORP.value, Request.RequestAction.MVE.value),
+        ('RCR', Request.EntityType.BCORP.value, Request.RequestAction.REST.value),
+        ('XCR', Request.EntityType.XCORP.value, Request.RequestAction.NEW.value),
+        ('XCCR', Request.EntityType.XCORP.value, Request.RequestAction.CHG.value),
+        ('XRCR', Request.EntityType.XCORP.value, Request.RequestAction.REST.value),
+        ('AS', Request.EntityType.XCORP.value, Request.RequestAction.AS.value),
+        ('LC', Request.EntityType.XLLC.value, Request.RequestAction.NEW.value),
+        ('CLC', Request.EntityType.XLLC.value, Request.RequestAction.CHG.value),
+        ('RLC', Request.EntityType.XLLC.value, Request.RequestAction.REST.value),
+        ('AL', Request.EntityType.XLLC.value, Request.RequestAction.AS.value),
+        ('FR', Request.EntityType.FIRM.value, Request.RequestAction.NEW.value),
+        ('CFR', Request.EntityType.FIRM.value, Request.RequestAction.CHG.value),
+        ('LL', Request.EntityType.LLP.value, Request.RequestAction.NEW.value),
+        ('CFR', Request.EntityType.LLP.value, Request.RequestAction.CHG.value),
+        ('LL', Request.EntityType.LLP.value, Request.RequestAction.NEW.value),
+        ('CLL', Request.EntityType.LLP.value, Request.RequestAction.CHG.value),
+        ('XLL', Request.EntityType.XLLP.value, Request.RequestAction.NEW.value),
+        ('XCLL', Request.EntityType.XLLP.value, Request.RequestAction.CHG.value),
+        ('LP', Request.EntityType.LP.value, Request.RequestAction.NEW.value),
+        ('CLP', Request.EntityType.LP.value, Request.RequestAction.CHG.value),
+        ('XLP', Request.EntityType.XLP.value, Request.RequestAction.NEW.value),
+        ('CXLP', Request.EntityType.XLP.value, Request.RequestAction.CHG.value),
+        ('SO', Request.EntityType.SO.value, Request.RequestAction.NEW.value),
+        ('ASO', Request.EntityType.SO.value, Request.RequestAction.AML.value),
+        ('CSO', Request.EntityType.SO.value, Request.RequestAction.CHG.value),
+        ('RSO', Request.EntityType.SO.value, Request.RequestAction.REST.value),
+        ('CTSO', Request.EntityType.SO.value, Request.RequestAction.MVE.value),
+        ('CSSO', Request.EntityType.SO.value, Request.RequestAction.CNV.value),
+        ('XSO', Request.EntityType.XSO.value, Request.RequestAction.NEW.value),
+        ('XCSO', Request.EntityType.XSO.value, Request.RequestAction.CHG.value),
+        ('XRSO', Request.EntityType.XSO.value, Request.RequestAction.REST.value),
+        ('XASO', Request.EntityType.XSO.value, Request.RequestAction.AS.value),
+        ('XCASO', Request.EntityType.XSO.value, Request.RequestAction.ACHG.value),
+        ('CP', Request.EntityType.CP.value, Request.RequestAction.NEW_AML.value),
+        ('CCP', Request.EntityType.CP.value, Request.RequestAction.CHG.value),
+        ('CTC', Request.EntityType.CP.value, Request.RequestAction.MVE.value),
+        ('RCP', Request.EntityType.CP.value, Request.RequestAction.REST.value),
+        ('XCP', Request.EntityType.XCP.value, Request.RequestAction.NEW.value),
+        ('XCCP', Request.EntityType.XCP.value, Request.RequestAction.CHG.value),
+        ('XRCP', Request.EntityType.XCP.value, Request.RequestAction.REST.value),
+        ('CC', Request.EntityType.CCC.value, Request.RequestAction.NEW_AML.value),
+        ('CCV', Request.EntityType.CCC.value, Request.RequestAction.CNV.value),
+        ('CCC', Request.EntityType.CCC.value, Request.RequestAction.CHG.value),
+        ('CCCT', Request.EntityType.CCC.value, Request.RequestAction.MVE.value),
+        ('RCC', Request.EntityType.CCC.value, Request.RequestAction.REST.value),
+        ('UL', Request.EntityType.ULC.value, Request.RequestAction.NEW.value),
+        ('UC', Request.EntityType.ULC.value, Request.RequestAction.CNV.value),
+        ('CUL', Request.EntityType.ULC.value, Request.RequestAction.CHG.value),
+        ('ULCT', Request.EntityType.ULC.value, Request.RequestAction.MVE.value),
+        ('RUL', Request.EntityType.ULC.value, Request.RequestAction.REST.value),
+        ('UA', Request.EntityType.XULC.value, Request.RequestAction.AS.value),
+        ('XUL', Request.EntityType.XULC.value, Request.RequestAction.NEW.value),
+        ('XCUL', Request.EntityType.XULC.value, Request.RequestAction.CHG.value),
+        ('XRUL', Request.EntityType.XULC.value, Request.RequestAction.REST.value),
+        ('FI', Request.EntityType.FI.value, Request.RequestAction.NEW.value),
+        ('CFI', Request.EntityType.FI.value, Request.RequestAction.CHG.value),
+        ('RFI', Request.EntityType.FI.value, Request.RequestAction.REST.value),
+        ('PA', Request.EntityType.PRIV.value, Request.RequestAction.NEW.value),
+        ('PAR', Request.EntityType.PAR.value, Request.RequestAction.NEW.value)
+    ]
+
+    new_value = request.requestTypeCd
+    output = [item for item in request_type_mapping
+              if item[0] == new_value]
+
+    request._entity_type_cd = output[0][1]
+    request._request_action_cd = output[0][2]
 
 
 class RequestsSchema(ma.ModelSchema):
