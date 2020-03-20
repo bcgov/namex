@@ -3,7 +3,7 @@
 from . import db, ma
 from flask import current_app
 from namex.exceptions import BusinessException
-from sqlalchemy import event, inspect
+from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import and_, func
