@@ -3,8 +3,9 @@
 from . import db, ma
 from flask import current_app
 from namex.exceptions import BusinessException
-from sqlalchemy import Sequence
+from sqlalchemy import event, inspect
 from sqlalchemy.orm import backref
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import and_, func
 from marshmallow import Schema, fields, post_load, post_dump
 from .nwpta import PartnerNameSystem
@@ -14,16 +15,66 @@ from .applicant import Applicant
 from .name import Name, NameSchema
 from .state import State, StateSchema
 from datetime import datetime
+from enum import Enum
 
-# TODO: Remove this when we update get_conflicts
-import pandas as pd
 
 # create sequence if not exists nr_seq;
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
 
-
 class Request(db.Model):
+
+    # Indicates the source application
+    class Source(Enum):
+        NAMEX = 'NAMEX'
+        NAMEREQUEST = 'NAMEREQUEST'
+        NRO = 'NRO'
+        SO = 'SO'
+
+    # Request Action separated from the legacy request type
+    class RequestAction(Enum):
+        NEW = 'NEW'
+        MVE = 'MVE'
+        CHG = 'CHG'
+        DBA = 'DBA'
+        AML = 'AML'
+        CNV = 'CNV'
+        REH = 'REH'
+        REN = 'REN'
+        AS = 'ASSUMED'
+        ACHG = 'CHG-ASSUM'
+        # required for legacy
+        NEW_AML = 'NRO-NEWAML'
+        REST = 'NRO-REST'
+
+    #Entity Types derived from the legacy request_type
+    class EntityType(Enum):
+        #BC Types
+        BCORP = 'CR'
+        ULC = 'UL'
+        SP = 'FR'
+        GP = 'GP'
+        DBA = 'DBA'
+        LP = 'LP'
+        LLP = 'LL'
+        CP = 'CP'
+        BC = 'BC'
+        CCC = 'CC'
+        SO = 'SO'
+        PRIV = 'PA'
+        FI = 'FI'
+        PAR = 'PAR'
+        # XPRO and Foreign Types
+        XCORP = 'XCR'
+        XULC = 'XUL'
+        XLLC = 'LLC'
+        XLP = 'XLP'
+        XLLP = 'XLL'
+        XCP = 'XCP'
+        XSO = 'XSO'
+        # legacy
+        FIRM = 'FIRM'
+
     __tablename__ = 'requests'
 
     # Field names use a JSON / JavaScript naming pattern,
@@ -79,8 +130,48 @@ class Request(db.Model):
     # Relationships - Examiner Comments
     partnerNS = db.relationship('PartnerNameSystem', lazy='dynamic')
 
+    # Name Request Additional Fields
+    _request_action_cd = db.Column('request_action_cd', db.String(10))
+    _entity_type_cd = db.Column('entity_type_cd', db.String(10))
+    consent_dt = db.Column('consent_dt', db.DateTime(timezone=True))
+    _payment_token = db.Column('payment_id', db.String(4096))
+    _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
+    _source = db.Column('source', db.String(15), default=Source.NRO)
+
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
+
+    # properties
+    @hybrid_property
+    def payment_token(self):
+        """Property containing the payment token."""
+        return self._payment_token
+
+    @payment_token.setter
+    def payment_token(self, token: int):
+        if self.locked:
+            self._raise_default_lock_exception()
+        self._payment_token = token
+
+    @hybrid_property
+    def payment_completion_date(self):
+        """Property containing the date the payment cleared."""
+        return self._payment_completion_date
+
+    @property
+    def source(self):
+        """Property containing the source app."""
+        return self._source
+
+    @property
+    def request_action_cd(self):
+        """Property containing the request action from name request."""
+        return self._request_action_cd
+
+    @property
+    def entity_type_cd(self):
+        """Property containing the entity type from name request"""
+        return self._entity_type_cd
 
     def __init__(self, *args, **kwargs):
         pass
@@ -261,7 +352,25 @@ class Request(db.Model):
         # print(query.statement)
         return query.all()
 
-    # END NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+
+@event.listens_for(Request, 'before_insert')
+@event.listens_for(Request, 'before_update')
+def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+    """Set the source of the NR."""
+    request = target
+    soc_list = []
+    soc_list = ['SO','ASO','CSO','RSO','CTSO','XSO','XCSO','XRSO','XASO','XCASO','CSSO']
+
+    # comes from NRO/Societies Online
+    if  ((request.activeUser.username == 'nro_service_account') or 'NR' in request.nrNum and request.requestTypeCd not in soc_list):
+        request._source = Request.Source.NRO.value  # pylint: disable=protected-access
+    else:
+        if (request.activeUser.username == 'name_request_service_account' or 'NR R' in request.nrNum):
+             request._source = Request.Source.NAMEREQUEST.value   # pylint: disable=protected-access
+        else:
+            if(request.requestTypeCd in soc_list ):
+             request._source = Request.Source.SO.value   # pylint: disable=protected-access
+
 
 
 class RequestsSchema(ma.ModelSchema):
