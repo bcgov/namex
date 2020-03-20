@@ -1,7 +1,8 @@
 import pytest
 from hamcrest import assert_that
 
-from tests.python.namex_services.synonyms import syn_svc, designation_all_regex, prefixes, ordinal_suffixes, exceptions_ws, numbers, stand_alone_words
+from tests.python.namex_services.synonyms import syn_svc, designation_all_regex, prefixes, ordinal_suffixes, \
+    exceptions_ws, numbers, stand_alone_words, internet_domains
 
 from unittest import TestCase
 
@@ -16,11 +17,15 @@ class TestSynonymService(TestCase):
     '''
 
     def test_regex_remove_designations(self):
-        companies = ["TOBI.COM CANADA OPERATIONS LTD.", "ONE AND 1,000 NIGHTS GROUP", "AB-C HOMES LTD.",
+        companies = ["TOBI.COM CANADA OPERATIONS LTD.", "TOBI.ORG CANADA OPERATIONS LTD.",
+                     "TOBI.NET CANADA OPERATIONS LTD.",
+                     "TOBI.EDU CANADA OPERATIONS LTD.", "ONE AND 1,000 NIGHTS GROUP", "AB-C HOMES LTD.",
                      "MOUNTAIN VIEW INC. FOOD"]
-        expected = ["TOBI CANADA OPERATIONS", "ONE 1000 NIGHTS GROUP", "ABC HOMES", "MOUNTAIN VIEW FOOD"]
+        expected = ["TOBI CANADA OPERATIONS", "TOBI CANADA OPERATIONS", "TOBI CANADA OPERATIONS",
+                    "TOBI CANADA OPERATIONS",
+                    "ONE 1000 NIGHTS GROUP", "ABC HOMES", "MOUNTAIN VIEW FOOD"]
         for idx, name in enumerate(companies):
-            assert_that(syn_svc.regex_remove_designations(name, designation_all_regex),
+            assert_that(syn_svc.regex_remove_designations(name, internet_domains, designation_all_regex),
                         expected[idx])
 
     '''
@@ -124,4 +129,3 @@ class TestSynonymService(TestCase):
         for idx, name in enumerate(companies):
             assert_that(syn_svc.regex_numbers_standalone(name, ordinal_suffixes, numbers, stand_alone_words),
                         expected[idx])
-

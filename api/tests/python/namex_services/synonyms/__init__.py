@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from hamcrest import assert_that
 
@@ -26,4 +28,4 @@ prefixes = '|'.join(prefix_list)
 numbers = '|'.join(number_list)
 ordinal_suffixes = 'ST|[RN]D|TH'
 stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
-internet_domains = '.COM'
+internet_domains = '.COM|.ORG|.NET|.EDU'

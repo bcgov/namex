@@ -167,14 +167,14 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     '''
 
     def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
-        designation_all_regex = "(" + '|'.join(designation_all) + ")"
+        designation_all_regex = '|'.join(designation_all)
         prefixes = '|'.join(prefix_list)
         numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
-        internet_domains = '.COM'
+        internet_domains = '.COM|.ORG|.NET|.EDU'
 
-        text = self.regex_remove_designations(text, designation_all_regex)
+        text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
         text = self.regex_prefixes(text, prefixes)
         text = self.regex_numbers_lot(text)
         text = self.regex_repeated_strings(text)
@@ -187,8 +187,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         return text
 
-    def regex_remove_designations(self, text, designation_all_regex):
-        text = re.sub(r'\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[/&-](?=[A-Za-z]\b)|\b' + designation_all_regex + '\\b\\.?',
+    def regex_remove_designations(self, text, internet_domains, designation_all_regex):
+        text = re.sub(r'{}|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|\b({})\b.?'.format(internet_domains, designation_all_regex),
                       '',
                       text,
                       0,
@@ -196,7 +196,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return text
 
     def regex_prefixes(self, text, prefixes):
-        text = re.sub(r'\b(' + prefixes + ')([ &/.-])([A-Za-z]+)',
+        text = re.sub(r'\b({})([ &/.-])([A-Za-z]+)'.format(prefixes),
                       r'\1\3',
                       text,
                       0,
@@ -220,7 +220,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return text
 
     def regex_separated_ordinals(self, text, ordinal_suffixes):
-        text = re.sub(r'\b(\d+(' + ordinal_suffixes + '))(\\w+)\\b',
+        text = re.sub(r'\b(\d+({}))(\w+)\b'.format(ordinal_suffixes),
                       r'\1 \3',
                       text,
                       0,
@@ -230,7 +230,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     def regex_keep_together_abv(self, text, exceptions_ws):
         exception_ws_rx = '|'.join(map(re.escape, exceptions_ws))
         ws_generic_rx = r'(?<=\d)(?=[^\d\s])|(?<=[^\d\s])(?=\d)'
-        ws_rx = re.compile(rf'({exception_ws_rx})|{ws_generic_rx}', re.I)
+        ws_rx = re.compile(r'({})|{}'.format(exception_ws_rx, ws_generic_rx), re.I)
 
         text = ws_rx.sub(lambda x: x.group(1) or " ", text)
 
@@ -254,7 +254,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     def regex_numbers_standalone(self, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
-            r'(^(?:\d+(?:' + ordinal_suffixes + ')?\\s*)+(?=[^\\d]*$)|\\b(?:' + numbers + ')\\b)(?!.*?(?:' + stand_alone_words + '$))|(?<=\\b[A-Za-z]\\b) +(?=[a-zA-Z]\\b)',
+            r'(^(?:\d+(?:{})?\s*)+(?=[^\d]*$)|\b(?:{})\b)(?!.*?(?:{}$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)'.format(ordinal_suffixes, numbers, stand_alone_words),
             '',
             text,
             0,
