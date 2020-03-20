@@ -30,7 +30,6 @@ def get_flat_list(lst):
     # return subs_list
 
 
-# TODO: What is going on here? Why the change?
 '''
 def remove_french(text, fr_designation_end_list):
     compound = re.findall(r'[^/]+(?://[^/]*)*', text)
@@ -42,9 +41,15 @@ def remove_french(text, fr_designation_end_list):
     return text
 '''
 
+'''
+Previous behaviour: The section after slash considered french designations to imply the section was in French.
+Current behaviour: The section after slash is not longer considering french designation and just removing any string
+                   after the slash as long as it is a word.
+'''
+
 
 def remove_french(text):
-    text = re.sub(r'/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
+    text = re.sub(r'/([A-Za-z]+(?:[^[A-Za-z]\n]+[A-Za-z]+)+[^[A-Za-z]\n]*$)?',
                   ' ',
                   text,
                   0,
