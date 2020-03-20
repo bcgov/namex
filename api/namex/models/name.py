@@ -3,6 +3,7 @@
 from . import db, ma
 from marshmallow import fields
 from sqlalchemy.orm import backref
+from sqlalchemy import event
 
 class Name(db.Model):
     __tablename__ = 'names'
@@ -32,10 +33,28 @@ class Name(db.Model):
     # if a comment is added during decision, link it to the name record to be sent back to NRO
     comment = db.relationship("Comment", backref=backref("related_name", uselist=False), foreign_keys=[commentId])
 
+
+    # required for name request name analysis
+    _name_type_cd = db.Column('name_type_cd', db.String(10))
+    _clean_name = db.Column('clean_name', db.String(1024), index=True)
+
     NOT_EXAMINED = 'NE'
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'
     CONDITION = 'CONDITION'
+    # needed for name request reservation before completing the nr
+    RESERVED = 'RESERVED'
+
+    #Properties added for Name Request
+    @property
+    def name_type_cd(self):
+        """Property containing the name type which is used by name Request."""
+        return self._name_type_cd
+
+    @property
+    def clean_name(self):
+        """Property containing the cleaned approved name used in analysis in Name Request"""
+        return self._clean_name
 
     def as_dict(self):
         return {
@@ -68,6 +87,14 @@ class Name(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
+
+@event.listens_for(Name, 'before_update')
+def set_analysis_name(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+    """Set the cleaned_name when an examiner approves a name (any name)"""
+    name = target
+    #if(name.state  == 'APPROVED'):
+        #TODO: Run the regex service to set the clean name
+
 
 
 class NameSchema(ma.ModelSchema):
