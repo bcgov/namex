@@ -375,7 +375,7 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
 def update_request_action_entity_type(mapper, connection, target): # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the request_action when it is null because the NR is coming from NRO or NAMEX"""
+    """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
     # needed to break apart  request_type
     request = target
     #it is from name Request-this will be set already so do nothing
