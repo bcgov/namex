@@ -49,12 +49,12 @@ Current behaviour: The section after slash is not longer considering french desi
 
 
 def remove_french(text):
-    text = re.sub(r'/([A-Za-z]+(?:[^[A-Za-z]\n]+[A-Za-z]+)+[^[A-Za-z]\n]*$)?',
+    text = re.sub(r'/([A-Za-z]+(?:[^[A-Za-z\n]+[A-Za-z]+)+[^A-Za-z\n]*$)?',
                   ' ',
                   text,
                   0,
                   re.IGNORECASE)
-    return text
+    return " ".join(text.split())
 
 
 def remove_stop_words(original_name, stop_words):
