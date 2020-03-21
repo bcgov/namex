@@ -193,7 +193,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       text,
                       0,
                       re.IGNORECASE)
-        return text
+        return " ".join(text.split())
 
     def regex_prefixes(self, text, prefixes):
         text = re.sub(r'\b({})([ &/.-])([A-Za-z]+)'.format(prefixes),
@@ -201,7 +201,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       text,
                       0,
                       re.IGNORECASE)
-        return text
+        return " ".join(text.split())
 
     def regex_numbers_lot(self, text):
         text = re.sub(r'(?<=[a-zA-Z])\'[Ss]|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &/-]+',
@@ -209,7 +209,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       text,
                       0,
                       re.IGNORECASE)
-        return text
+        return " ".join(text.split())
 
     def regex_repeated_strings(self, text):
         text = re.sub(r'\b(\w{2,})(\b\W+\b\1\b)*',
@@ -217,7 +217,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       text,
                       0,
                       re.IGNORECASE)
-        return text
+        return " ".join(text.split())
 
     def regex_separated_ordinals(self, text, ordinal_suffixes):
         text = re.sub(r'\b(\d+({}))(\w+)\b'.format(ordinal_suffixes),
@@ -225,7 +225,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       text,
                       0,
                       re.IGNORECASE)
-        return text
+        return " ".join(text.split())
 
     def regex_keep_together_abv(self, text, exceptions_ws):
         exception_ws_rx = '|'.join(map(re.escape, exceptions_ws))
@@ -234,7 +234,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         text = ws_rx.sub(lambda x: x.group(1) or " ", text)
 
-        return text
+        return " ".join(text.split())
 
     def regex_punctuation(self, text):
         text = re.sub(r'[&/-]',
@@ -242,7 +242,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       text,
                       0,
                       re.IGNORECASE)
-        return text
+        return " ".join(text.split())
 
     def regex_together_one_letter(self, text):
         text = re.sub(r'(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)|^\s+|\s+$',
@@ -250,7 +250,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       text,
                       0,
                       re.IGNORECASE)
-        return text
+        return " ".join(text.split())
 
     def regex_numbers_standalone(self, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
@@ -259,14 +259,15 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
             text,
             0,
             re.IGNORECASE)
-        return text
+        return " ".join(text.split())
 
     def regex_remove_extra_spaces(self, text):
-        return re.sub(r'\s+',
+        text = re.sub(r'\s+',
                       ' ',
                       text,
                       0,
                       re.IGNORECASE)
+        return " ".join(text.split())
 
     def exception_regex(self, text):
         # Build exception list to avoid separation of numbers and letters when they are part of synonym table such as H20, 4MULA, ACTIV8
