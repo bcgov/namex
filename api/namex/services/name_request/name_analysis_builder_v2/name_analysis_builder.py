@@ -22,7 +22,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult[] An array of procedure results
     '''
-    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name):
+
+    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
         results = []
         # TODO: We're doing two checks for name is well formed, that should probably not be the case
 
@@ -60,6 +61,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         # Now that too many words and unclassified words are handled, handle distinctive and descriptive issues
         result = None
 
+        # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
+        # the original name should be passed to get the correct index when reporting issues to front end.
+
         if len(list_name) == 0:
             # If we have no words in our name, obviously we need to add a distinctive... this is kind of redundant as
             # we shouldn't have a name with no words but we still need to handle the case in our API
@@ -71,21 +75,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'list_dist': []
             }
         elif len(list_name) == 1:
-            # If there's only one word and it's not distinctive, we need to add a distinctive word
-            if len(list_dist) == 0:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_name': list_name or [],
-                    'list_dist': []
-                }
-            elif len(list_desc) == 0:
+            # If there's only one word and it's distinctive, we need to add a descriptive word
+            if len(list_dist) == 1:
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
                 result.values = {
-                    'list_name': list_name or [],
+                    'list_name': list_original_name or [],
+                    'list_dist': list_dist or []
+                }
+            else:
+                result = ProcedureResult()
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
+                result.values = {
+                    'list_name': list_original_name or [],
                     'list_dist': list_dist or []
                 }
         else:
@@ -94,7 +98,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
                 result.values = {
-                    'list_name': list_name or [],
+                    'list_name': list_original_name or [],
                     'list_dist': []
                 }
             elif len(list_desc) == 0:
@@ -102,11 +106,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
                 result.values = {
-                    'list_name': list_name or [],
+                    'list_name': list_original_name or [],
                     'list_dist': list_dist or []
                 }
-            elif collections.Counter(list_dist) == collections.Counter(list_desc):
-                # If there's more than one word and all words are both distinctive and descriptive add another distinctive
+                # elif collections.Counter(list_dist) == collections.Counter(list_desc):
+                # If there's more than one word and all words are both distinctive and descriptive ~~add another distinctive~~
+                # Then we find all possible combinations in search_conflicts
                 '''
                 result = ProcedureResult()
                 result.is_valid = False
@@ -127,6 +132,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     
     @return ProcedureResult
     '''
+
     def check_words_to_avoid(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -161,6 +167,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
            list_desc = ['FOOD', 'GROWERS']
     @return ProcedureResult
     '''
+
     def search_conflicts(self, list_dist_words, list_desc_words, list_name, name):
         syn_svc = self.synonym_service
 
@@ -253,6 +260,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_words_requiring_consent(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -316,7 +324,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         @return ProcedureResult
         '''
 
-    def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end, misplaced_designation_all):
+    def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end,
+                                    misplaced_designation_all):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -336,6 +345,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult
     '''
+
     def check_word_special_use(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -363,7 +373,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
-    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc, list_name, name):
+    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
+                               list_name, name):
         syn_svc = self.synonym_service
 
         if matches:
