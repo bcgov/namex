@@ -85,6 +85,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_processing_service.name_tokens if np_svc else ''
 
     @property
+    def name_original_tokens(self):
+        np_svc = self.name_processing_service
+        return self.name_processing_service.name_original_tokens if np_svc else ''
+
+    @property
     def token_classifier(self):
         return self._token_classifier
 
@@ -109,6 +114,10 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted if np_svc else ''
 
+    '''
+    name_as_submitted_tokenized tokenize the original name and when there is a compound designation made of more than one
+    word, the term is counted as token. For instance, designations such as limited liability company is counted as one token.
+    '''
     @property
     def name_as_submitted_tokenized(self):
         np_svc = self.name_processing_service
@@ -235,7 +244,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.token_classifier.distinctive_word_tokens,
                 self.token_classifier.descriptive_word_tokens,
                 self.token_classifier.unclassified_word_tokens,
-                self.name_tokens
+                self.name_tokens,
+                self.name_original_tokens
             )
 
             analysis = analysis + check_name_is_well_formed
