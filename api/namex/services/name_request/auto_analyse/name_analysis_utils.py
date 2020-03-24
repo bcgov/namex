@@ -49,8 +49,8 @@ Current behaviour: The section after slash is not longer considering french desi
 
 
 def remove_french(text):
-    text = re.sub(r'/([A-Za-z]+(?:[^[A-Za-z\n]+[A-Za-z]+)+[^A-Za-z\n]*$)?',
-                  ' ',
+    text = re.sub(r'(^\w+(?:[^\w\n]+\w+)+[^\w\n]*)/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
+                  r'\1 ',
                   text,
                   0,
                   re.IGNORECASE)
