@@ -17,13 +17,12 @@ from .state import State, StateSchema
 from datetime import datetime
 from enum import Enum
 
-
 # create sequence if not exists nr_seq;
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
 
-class Request(db.Model):
 
+class Request(db.Model):
     # Indicates the source application
     class Source(Enum):
         NAMEX = 'NAMEX'
@@ -47,9 +46,9 @@ class Request(db.Model):
         NEW_AML = 'NRO-NEWAML'
         REST = 'NRO-REST'
 
-    #Entity Types derived from the legacy request_type
+    # Entity Types derived from the legacy request_type
     class EntityType(Enum):
-        #BC Types
+        # BC Types
         BCORP = 'CR'
         ULC = 'UL'
         SP = 'FR'
@@ -329,11 +328,15 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
-        substitutions = '|'.join(map(str, descriptive_element))
-
         if not distinctive:
-            criteria.filters.append(func.lower(Name.name).op('~')(r'\y ({}) ?\y'.format(substitutions)))
+            # Reset filter index 5 which contains the descriptive in the previous round.
+            # The filter index 4 contains distinctive value
+            if len(criteria.filters) > 5:
+                criteria.filters.pop()
+            substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
+            criteria.filters.append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
         else:
+            substitutions = '|'.join(map(str, descriptive_element))
             criteria.filters.append(func.lower(Name.name).op('~')(r'\y({})\y'.format(substitutions)))
             return criteria
 
@@ -352,37 +355,40 @@ class Request(db.Model):
         # print(query.statement)
         return query.all()
 
-#set the source from NRO, Societis Online, Name Request
+
+# set the source from NRO, Societis Online, Name Request
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
 def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the source of the NR."""
     request = target
     soc_list = []
-    soc_list = ['SO','ASO','CSO','RSO','CTSO','XSO','XCSO','XRSO','XASO','XCASO','CSSO']
+    soc_list = ['SO', 'ASO', 'CSO', 'RSO', 'CTSO', 'XSO', 'XCSO', 'XRSO', 'XASO', 'XCASO', 'CSSO']
 
     # comes from NRO/Societies Online
-    if  ((request.activeUser.username == 'nro_service_account') or 'NR' in request.nrNum and request.requestTypeCd not in soc_list):
+    if ((
+            request.activeUser.username == 'nro_service_account') or 'NR' in request.nrNum and request.requestTypeCd not in soc_list):
         request._source = Request.Source.NRO.value  # pylint: disable=protected-access
     else:
         if (request.activeUser.username == 'name_request_service_account' or 'NR R' in request.nrNum):
-             request._source = Request.Source.NAMEREQUEST.value   # pylint: disable=protected-access
+            request._source = Request.Source.NAMEREQUEST.value  # pylint: disable=protected-access
         else:
-            if(request.requestTypeCd in soc_list ):
-             request._source = Request.Source.SO.value   # pylint: disable=protected-access
+            if (request.requestTypeCd in soc_list):
+                request._source = Request.Source.SO.value  # pylint: disable=protected-access
 
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
-def update_request_action_entity_type(mapper, connection, target): # pylint: disable=unused-argument; SQLAlchemy callback signature
+def update_request_action_entity_type(mapper, connection,
+                                      target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
     # needed to break apart  request_type
     request = target
-    #it is from name Request-this will be set already so do nothing
-    if('NR R'  in request.nrNum):
+    # it is from name Request-this will be set already so do nothing
+    if ('NR R' in request.nrNum):
         return
 
-    #todo: handle assumed name as it is a name type and not currently a request action?
+    # todo: handle assumed name as it is a name type and not currently a request action?
     # map the legacy request_type to the new Entity_type and Request_action
     request_type_mapping = [
         ('CR', Request.EntityType.BCORP.value, Request.RequestAction.NEW_AML.value),
@@ -455,17 +461,20 @@ def update_request_action_entity_type(mapper, connection, target): # pylint: dis
     request._entity_type_cd = output[0][1]
     request._request_action_cd = output[0][2]
 
+
 @event.listens_for(Request, 'before_update')
-def add_to_word_class_queue(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+def add_to_word_class_queue(mapper, connection,
+                            target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the cleaned_name when an examiner approves a BC corp class request_type when it is approved/conditionally approved in Namex"""
     # needed to reduce query time for conflict matching in Name Request
     request = target
     # TODO: put the name on the word classification queue to be picked up by the word classification service and update wod classification table
     # TODO: may have to review which entity types are included
-    #if(request.stateCd  == 'APPROVED' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' :
-        #add it to the queue to add or update words
-    #if(request_stateCd == 'HOLD' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' and request.hasBeenReset=True):
-        #add to the queue to decrement or remove words from word classification
+    # if(request.stateCd  == 'APPROVED' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' :
+    # add it to the queue to add or update words
+    # if(request_stateCd == 'HOLD' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' and request.hasBeenReset=True):
+    # add to the queue to decrement or remove words from word classification
+
 
 class RequestsSchema(ma.ModelSchema):
     class Meta:

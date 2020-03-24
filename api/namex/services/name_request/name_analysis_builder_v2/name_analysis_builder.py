@@ -183,17 +183,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(w_dist)
             dist_substitution_list = dist_substitution_dict.values()
 
-            # TODO: Confirm that these lines should be removed
-            # We should remove this. We are not longer searching for results such as (mountain view|mtn vue|mt vu|).
-            # That changed to search one distinctive at a time with each descriptive
-            '''
-            dist_all_permutations.append(list(itertools.product(*dist_substitution_list)))
-
-            # Inject distinctive section in query
-            for element in dist_all_permutations:
-                query = Request.get_query_distinctive(element, len(element[0]))
-            '''
-
             desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
             desc_synonym_list = desc_synonym_dict.values()
 
@@ -400,10 +389,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             for match in matches:
                 match_list = match.split()
                 counter = 0
-                word_n = 0
                 for word in match_list:
-                    if word not in designation_all:
-                        word_n += 1
                     if word.lower() in list_name:
                         counter += 1
                     elif porter.stem(word.lower()) in list_name_stem:
