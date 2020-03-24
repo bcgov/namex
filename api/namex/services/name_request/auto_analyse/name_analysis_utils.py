@@ -129,27 +129,21 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
 
     dist_list_all.append(list(queue_dist))
 
-    # TODO: Arturo why the change?
-    '''
     while len(queue_dist) > 1:
         queue_dist.pop()
         dist_list_all.append(list(queue_dist))
 
-    dist = map(list, unique(map(tuple, dist_list_all)))
-    dist_list_all = list(dist)
     dist_list_all.reverse()
-    '''
 
     for dist in dist_list_all:
-        desc_list_all.append([i for i in name_list if i not in dist])
+        desc_list_all.append([i for i in name_list if i not in dist and i in desc_list])
 
-    # TODO: Arturo why the change?
-    '''
-    flatten_desc = [item for sublist in desc_list_all for item in sublist]
-    flatten_desc = list(set(flatten_desc))
-    if flatten_desc.sort() != desc_list.sort():
-        raise Exception('Invalid generated descriptive list.')
-    '''
+    # Validate generation of list of lists of distinctives and descriptives with the correct combinations:
+    for idx, element in enumerate(dist_list_all):
+        if dist_list_all[idx] + desc_list_all[idx] != name_list:
+            dist_list_all.pop(idx)
+            desc_list_all.pop(idx)
+
     return dist_list_all, desc_list_all
 
 

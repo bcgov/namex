@@ -329,12 +329,12 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
-        substitutions = ' ?| '.join(map(str, descriptive_element))
+        substitutions = '|'.join(map(str, descriptive_element))
 
         if not distinctive:
-            criteria.filters.append(func.lower(Name.name).op('~')(r'\y {} ?\y'.format(substitutions)))
+            criteria.filters.append(func.lower(Name.name).op('~')(r'\y ({}) ?\y'.format(substitutions)))
         else:
-            criteria.filters.append(func.lower(Name.name).op('~')(r'\y{}\y'.format(substitutions)))
+            criteria.filters.append(func.lower(Name.name).op('~')(r'\y({})\y'.format(substitutions)))
             return criteria
 
         results = Request.find_by_criteria(criteria)
