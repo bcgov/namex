@@ -43,8 +43,16 @@ def remove_french(text, fr_designation_end_list):
 
 '''
 Previous behaviour: The section after slash considered french designations to imply the section was in French.
-Current behaviour: The section after slash is not longer considering french designation and just removing any string
-                   after the slash as long as it is a word.
+Current behaviour: The section after slash is not longer considering french designation.
+Rules:  1) Before and after slash has to be at least two words to removed string after slash.
+           Eg.
+           ABC ENGINEERING/CENTRAL CARE  --> ABC ENGINEERING
+        2) In the case just having a word at the beginning then the string is kept with no changes.
+           Eg.
+           RE/MAX WALNUT DEVELOPMENT  --> RE/MAX WALNUT DEVELOPMENT
+        3) In the case just having a word at the end, this is kept removing the slash.
+           Eg.
+           ABC ENGINEERING 7/24 --> ABC ENGINEERING 7 24
 '''
 
 
