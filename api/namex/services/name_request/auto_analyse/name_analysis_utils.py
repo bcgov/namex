@@ -124,25 +124,24 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
     if dist_list == name_list:
         queue_dist.pop()
 
-    dist_list_all = []
-    desc_list_all = []
+    dist_list_tmp, dist_list_all, desc_list_tmp, desc_list_all = [], [], [], []
 
-    dist_list_all.append(list(queue_dist))
+    dist_list_tmp.append(list(queue_dist))
 
     while len(queue_dist) > 1:
         queue_dist.pop()
-        dist_list_all.append(list(queue_dist))
+        dist_list_tmp.append(list(queue_dist))
 
-    dist_list_all.reverse()
+    dist_list_tmp.reverse()
 
-    for dist in dist_list_all:
-        desc_list_all.append([i for i in name_list if i not in dist and i in desc_list])
+    for dist in dist_list_tmp:
+        desc_list_tmp.append([i for i in name_list if i not in dist and i in desc_list])
 
     # Validate generation of list of lists of distinctives and descriptives with the correct combinations:
-    for idx, element in enumerate(dist_list_all):
-        if dist_list_all[idx] + desc_list_all[idx] != name_list:
-            dist_list_all.pop(idx)
-            desc_list_all.pop(idx)
+    for idx, element in enumerate(dist_list_tmp):
+        if (dist_list_tmp[idx] + desc_list_tmp[idx]) == name_list:
+            dist_list_all.append(dist_list_tmp[idx])
+            desc_list_all.append(desc_list_tmp[idx])
 
     return dist_list_all, desc_list_all
 
