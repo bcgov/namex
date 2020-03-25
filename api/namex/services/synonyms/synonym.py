@@ -31,19 +31,18 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened_arr = [item for sublist in result_arr for item in sublist]
         return flattened_arr
 
-    def find_word_synonyms(self, word, filters, designation=False):
+    '''
+        Designations, distinctives and descriptives return stems_text
+        '''
+
+    def find_word_synonyms(self, word, filters):
         model = self.get_model()
-        # TODO: Don't use an empty string here, instantiate a different SynonymQueryCriteria to handle a case with no fields or set to null or whatever
-        field = ''
         word = word.lower() if isinstance(word, str) else None
 
         if word:
             filters.append(func.lower(model.synonyms_text).op('~')(r'\y{}\y'.format(word)))
 
-        if designation:
-            field = model.stems_text
-        else:
-            field = model.synonyms_text
+        field = model.stems_text
 
         criteria = SynonymQueryCriteria(
             word=word,
