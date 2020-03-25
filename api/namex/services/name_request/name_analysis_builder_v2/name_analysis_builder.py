@@ -389,14 +389,20 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             for match in matches:
                 match_list = match.split()
                 counter = 0
-                for word in match_list:
-                    if word.lower() in list_name:
+                for idx, word in enumerate(match_list):
+                    # Compare in the same place
+                    if length_original == len(match_list) and word.lower() == list_name[idx]:
                         counter += 1
+                    elif length_original == len(match_list) and porter.stem(word.lower()) == list_name_stem[idx]:
+                        counter += 0.95
+                    elif word.lower() in list_name:
+                        counter += 0.85
                     elif porter.stem(word.lower()) in list_name_stem:
-                        counter += 0.8
+                        counter += 0.75
                     elif porter.stem(word.lower()) in all_subs_stem:
                         counter += 0.7
-                dict_matches_counter.update({match: counter / length_original})
+                similarity=counter / length_original
+                dict_matches_counter.update({match: similarity})
 
             dict_matches_words.update(
                 self.get_details_most_similar(list(dict_matches_counter), dist_substitution_dict,
