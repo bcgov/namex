@@ -30,26 +30,29 @@ def get_flat_list(lst):
     # return subs_list
 
 
-# TODO: What is going on here? Why the change?
 '''
-def remove_french(text, fr_designation_end_list):
-    compound = re.findall(r'[^/]+(?://[^/]*)*', text)
-    if len(compound) == 2:
-        fr_list_text = [x.lower() for x in compound[1].split(" ") if x]
-        if any(item in fr_designation_end_list for item in fr_list_text):
-            compound.pop()
-            text = ' '.join(map(str, compound))
-    return text
+Previous behaviour: The section after slash considered french designations to imply the section was in French.
+Current behaviour: The section after slash is not longer considering french designation.
+Rules:  1) Before and after slash has to be at least two words to removed string after slash.
+           Eg.
+           ABC ENGINEERING/CENTRAL CARE  --> ABC ENGINEERING
+        2) In the case just having a word at the beginning then the string is kept with no changes.
+           Eg.
+           RE/MAX WALNUT DEVELOPMENT  --> RE/MAX WALNUT DEVELOPMENT
+        3) In the case just having a word at the end, this is kept removing the slash.
+           Eg.
+           ABC ENGINEERING 7/24 --> ABC ENGINEERING 7 24
 '''
 
 
 def remove_french(text):
-    text = re.sub(r'/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
-                  ' ',
+    text = re.sub(r'(^\w+(?:[^\w\n]+\w+)+[^\w\n]*)/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
+                  r'\1 ',
                   text,
                   0,
                   re.IGNORECASE)
-    return text
+    return " ".join(text.split())
+
 
 
 def remove_stop_words(original_name, stop_words):
