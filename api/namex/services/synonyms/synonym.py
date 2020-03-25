@@ -96,7 +96,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
             func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))
         ]
 
-        results = self.find_word_synonyms(None, filters, True)
+        results = self.find_word_synonyms(None, filters)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
@@ -129,7 +129,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
 
-        results = self.find_word_synonyms(None, filters, True)
+        results = self.find_word_synonyms(None, filters)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
