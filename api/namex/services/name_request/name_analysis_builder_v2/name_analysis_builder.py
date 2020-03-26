@@ -187,15 +187,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(w_dist)
             dist_substitution_list = dist_substitution_dict.values()
 
-            # TODO: Confirm that these lines should be removed
-            '''
-            dist_all_permutations.append(list(itertools.product(*dist_substitution_list)))
-
-            # Inject distinctive section in query
-            for element in dist_all_permutations:
-                query = Request.get_query_distinctive(element, len(element[0]))
-            '''
-
             desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
             desc_synonym_list = desc_synonym_dict.values()
 
@@ -388,17 +379,29 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             all_substitutions = dist_substitution_list + desc_substitution_list
             all_subs_stem = [porter.stem(substitution.lower()) for substitution in all_substitutions]
+
+            list_name_stem = [porter.stem(name.lower()) for name in list_name]
+            length_original = len(list_name)
+
             dict_matches_counter = {}
             dict_matches_words = {}
             for match in matches:
                 match_list = match.split()
                 counter = 0
-                word_n = 0
-                for word in match_list:
-                    word_n += 1
-                    if porter.stem(word.lower()) in all_subs_stem:
+                for idx, word in enumerate(match_list):
+                    # Compare in the same place
+                    if length_original == len(match_list) and word.lower() == list_name[idx]:
                         counter += 1
-                dict_matches_counter.update({match: counter / word_n})
+                    elif length_original == len(match_list) and porter.stem(word.lower()) == list_name_stem[idx]:
+                        counter += 0.95
+                    elif word.lower() in list_name:
+                        counter += 0.85
+                    elif porter.stem(word.lower()) in list_name_stem:
+                        counter += 0.75
+                    elif porter.stem(word.lower()) in all_subs_stem:
+                        counter += 0.7
+                similarity=counter / length_original
+                dict_matches_counter.update({match: similarity})
 
             dict_matches_words.update(
                 self.get_details_most_similar(list(dict_matches_counter), dist_substitution_dict,
