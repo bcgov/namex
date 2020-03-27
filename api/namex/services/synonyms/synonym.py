@@ -158,16 +158,19 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     8.- Replace with non-space:
          Set together letter of length one separated by spaces: (?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     	 Trailing and leading spaces in string: ^\s+|\s+$
-    9.- Replace with non-space:
+    9.- Replace with non-space the following:
+         Remove cardinal and ordinal numbers from string in the middle and end: (?<=[A-Za-z]\b )([ 0-9]*(ST|[RN]D|TH)?\b)
+    10.- Replace with non-space:
          Remove numbers and numbers in words at the beginning or keep them as long as the last string is 
          any BC|HOLDINGS|VENTURES: (^(?:\d+(?:{ordinal_suffixes})?\s+)+(?=[^\d]+$)|(?:({numbers})\s+)(?!.*?(?:{stand_alone_words}$))
     	 Set single letters together (initials):(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
-    10.- Remove extra spaces to have just one space: \s+
+    11.- Remove extra spaces to have just one space: \s+
     '''
 
     def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
         designation_all_regex = '|'.join(designation_all)
         prefixes = '|'.join(prefix_list)
+        number_list = number_list = sorted(number_list, key=len, reverse=True)
         numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
@@ -181,6 +184,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = self.regex_keep_together_abv(text, exceptions_ws)
         text = self.regex_punctuation(text)
         text = self.regex_together_one_letter(text)
+        text = self.regex_strip_out_numbers_middle_end(text)
         text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_words)
         text = self.regex_remove_extra_spaces(text)
 
@@ -245,6 +249,14 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     def regex_together_one_letter(self, text):
         text = re.sub(r'(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)|^\s+|\s+$',
+                      '',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_strip_out_numbers_middle_end(self, text, ordinal_suffixes, numbers):
+        text = re.sub(r'(?<=[A-Za-z]\b\s)([ 0-9]+({})?|({})\b)'.format(ordinal_suffixes, numbers),
                       '',
                       text,
                       0,
