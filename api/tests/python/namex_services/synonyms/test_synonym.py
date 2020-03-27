@@ -140,7 +140,28 @@ def test_regex_together_one_letter(name, expected):
 
 
 '''
-9.- Replace with non-space:
+9.- Replace with non-space the following:
+         Remove cardinal and ordinal numbers from string in the middle and end: (?<=[A-Za-z]\b )([ 0-9]*(ST|[RN]D|TH)?\b)
+'''
+
+
+@pytest.mark.parametrize("name, expected",
+                         [
+                             ("ARMSTRONG 111 PLUMBING", "ARMSTRONG PLUMBING"),
+                             ("ARMSTRONG PLUMBING 111", "ARMSTRONG PLUMBING"),
+                             ("ARMSTRONG 111 PLUMBING 111", "ARMSTRONG PLUMBING"),
+                             ("123 HOLDINGS 2020", "123 HOLDINGS"),
+                             ("ARMSTRONG 20 20 VISION", "ARMSTRONG VISION"),
+                             ("ARMSTRONG VISION 20 20", "ARMSTRONG VISION"),
+                             ("ARMSTRONG ONE HUNDRED ELEVEN PLUMBING","ARMSTRONG PLUMBING"),
+                             ("ARMSTRONG PLUMBING ONE HUNDRED ELEVENTH", "ARMSTRONG PLUMBING")
+                         ])
+def test_regex_strip_out_numbers_middle_end(name, expected):
+    assert syn_svc.regex_strip_out_numbers_middle_end(name,ordinal_suffixes, numbers) == expected
+
+
+'''
+10.- Replace with non-space:
     Remove numbers and numbers in words at the beginning or keep them as long as the last string is 
     any BC|HOLDINGS|VENTURES:    
 '''
