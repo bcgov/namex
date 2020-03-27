@@ -57,7 +57,7 @@ Rules:  1) Before and after slash has to be at least two words to removed string
 
 
 def remove_french(text):
-    text = re.sub(r'(^\w+(?:[^\w\n]+\w+)+[^\w\n]*)/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
+    text = re.sub(r'(^[A-Z]+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*)/(\w+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*$)+',
                   r'\1 ',
                   text,
                   0,
