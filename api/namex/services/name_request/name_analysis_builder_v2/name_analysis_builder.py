@@ -9,6 +9,7 @@ from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
 
 from namex.models.request import Request
+from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 '''
 Sample builder
@@ -386,8 +387,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dict_matches_counter = {}
             dict_matches_words = {}
 
-            np_svc= self.name_processing_service
+            service = ProtectedNameAnalysisService()
             for match in matches:
+                np_svc = service.name_processing_service
                 np_svc.set_name(match)
                 # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
