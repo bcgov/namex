@@ -65,15 +65,10 @@ def remove_french(text):
     return " ".join(text.split())
 
 
-def remove_stop_words(original_name, stop_words):
-    stop_words_rgx = '|'.join(stop_words)
-    regex = re.compile(r'\b({})\b'.format(stop_words_rgx))
-    found_stop_words = regex.findall(original_name.lower())
+def remove_stop_words(original_name_list, stop_words):
+    words = ' '.join([word for x, word in enumerate(original_name_list) if word not in stop_words])
 
-    for word in found_stop_words:
-        original_name = original_name.replace(word, "")
-
-    return re.sub(' +', ' ', original_name)
+    return words
 
 
 def list_distinctive_descriptive_same(name_list):
