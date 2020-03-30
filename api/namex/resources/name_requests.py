@@ -21,26 +21,36 @@ from namex.services.name_request import get_or_create_user_by_jwt
 
 
 # Register a local namespace for the NR reserve
-api = Namespace('publicNameRequests', description='Public facing Name Requests')
+api = Namespace('nameRequests', description='Public facing Name Requests')
 @cors_preflight("POST")
 @api.route('/<string:name>/<string:requestAction>/<string:location>/<string: entityType>', methods=['POST','OPTIONS'])
 class Name_Requests(Resource):
-     a_request = api.model('Request', {'name': fields.String('The name to be reserved'),
+     a_name_request = api.model('Request', {'name': fields.String('The name to be reserved'),
                                       'entityType': fields.String('The type of business'),
                                       'requestAction': fields.String('The type of name request'),
                                       'location': fields.String('The location such as province or country')
                                       })
 
      @staticmethod
-     @api.expect(a_request)
      @cors.crossdomain(origin='*')
-     @jwt.requires_roles([User.PUBLIC])
+     #@jwt.requires_roles([User.PUBLIC])
+
+     @api.expect(a_name_request)
+
      # noinspection PyUnusedLocal,PyUnusedLocal
      def post(name, entityType,requestAction, location, *args, **kwargs):
         if(name == None or requestAction == None or location == None or entityType == None):
              return jsonify({'message': 'Missing input data provided'}), 400
 
-        user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+        # GET existing or CREATE new user based on the JWT info
+        try:
+            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+        except ServicesError as se:
+            return jsonify(message='unable to get ot create user, aborting operation'), 500
+        except Exception as unmanaged_error:
+            current_app.logger.error(unmanaged_error.with_traceback(None))
+            return jsonify(message='internal server error'), 500
+
         if(user.username != 'name_request_service_account'):
             return jsonify({'message': 'Missing input data provided'}), 400
         #TODO:  There is a list of things to do here: 1) get an NR, set state=RESERVED, set requestType, entitytype, request_action and name, name_state
