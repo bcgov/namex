@@ -169,14 +169,10 @@ def test_regex_strip_out_numbers_middle_end(name, expected):
 
 @pytest.mark.parametrize("name, expected",
                          [
-                             ("ONE TWO THREE HOLDINGS", "ONE TWO THREE HOLDINGS"),
                              ("123 HOLDINGS", "123 HOLDINGS"),
-                             ("FIRST SECOND HOLDINGS", "FIRST SECOND HOLDINGS"),
-                             ("1ST 2ND HOLDINGS", "1ST 2ND HOLDINGS"),
-                             ("ONE TWO THREE CANADA", "CANADA"),
                              ("123 CANADA", "CANADA"),
-                             ("FIRST SECOND THIRD CANADA", "CANADA"),
-                             ("1ST 2ND 3RD CANADA", "CANADA")
+                             ("123 CATHEDRAL VENTURES","CATHEDRAL VENTURES"),
+                             ("123 VENTURES", "123 VENTURES")
                          ])
 def test_regex_numbers_standalone(name, expected):
-    assert syn_svc.regex_numbers_standalone(name, ordinal_suffixes, numbers, stand_alone_words) == expected
+    assert syn_svc.regex_numbers_standalone(name, stand_alone_words) == expected

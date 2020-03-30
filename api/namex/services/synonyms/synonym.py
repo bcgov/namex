@@ -161,7 +161,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     9.- Replace with non-space the following:
          Remove cardinal and ordinal numbers from string in the middle and end: (?<=[A-Za-z]\b )([ 0-9]*(ST|[RN]D|TH)?\b)
     10.- Replace with non-space:
-         Remove numbers and numbers in words at the beginning or keep them as long as the last string is 
+         Remove numbers at the beginning or keep them as long as the last string and following string is 
          any BC|HOLDINGS|VENTURES: (^(?:\d+(?:{ordinal_suffixes})?\s+)+(?=[^\d]+$)|(?:({numbers})\s+)(?!.*?(?:{stand_alone_words}$))
     	 Set single letters together (initials):(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     11.- Remove extra spaces to have just one space: \s+
@@ -186,7 +186,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = self.regex_punctuation(text)
         text = self.regex_together_one_letter(text)
         text = self.regex_strip_out_numbers_middle_end(text, ordinal_suffixes, numbers)
-        text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_words)
+        text = self.regex_numbers_standalone(text, stand_alone_words)
         text = self.regex_remove_extra_spaces(text)
 
         return text
@@ -264,9 +264,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       re.IGNORECASE)
         return " ".join(text.split())
 
-    def regex_numbers_standalone(self, text, ordinal_suffixes, numbers, stand_alone_words):
+    def regex_numbers_standalone(self, text, stand_alone_words):
         text = re.sub(
-            r'(^(?:\d+(?:{})?\s*)+(?=[^\d]*$)|\b(?:{})\b)(?!.*?(?:{}$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)'.format(ordinal_suffixes, numbers, stand_alone_words),
+            r'\b(?=(\d+(?:\s+\d+)*))\1(?!\s+(?:{})\b)\s*'.format(stand_alone_words),
             '',
             text,
             0,
