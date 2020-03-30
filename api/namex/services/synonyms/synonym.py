@@ -192,7 +192,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return text
 
     def regex_remove_designations(self, text, internet_domains, designation_all_regex):
-        text = re.sub(r'{}|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|\b({})\b.?'.format(internet_domains, designation_all_regex),
+        text = re.sub(r'\b({})\b|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|\b({})\b.?'.format(internet_domains, designation_all_regex),
                       '',
                       text,
                       0,
