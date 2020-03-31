@@ -32,8 +32,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return flattened_arr
 
     '''
-        Designations, distinctives and descriptives return stems_text
-        '''
+    Designations, distinctives and descriptives return stems_text
+    '''
 
     def find_word_synonyms(self, word, filters):
         model = self.get_model()
@@ -130,7 +130,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
 
         results = self.find_word_synonyms(None, filters)
-        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
+        flattened = list(set(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results)))))))
+        flattened.sort(key=len, reverse=True)
+
         return flattened
 
     # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
@@ -162,7 +164,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
          Remove cardinal and ordinal numbers from string in the middle and end: (?<=[A-Za-z]\b )([ 0-9]*(ST|[RN]D|TH)?\b)
     10.- Replace with non-space:
          Remove numbers at the beginning or keep them as long as the last string and following string is 
-         any BC|HOLDINGS|VENTURES: (^(?:\d+(?:{ordinal_suffixes})?\s+)+(?=[^\d]+$)|(?:({numbers})\s+)(?!.*?(?:{stand_alone_words}$))
+         any BC|HOLDINGS|VENTURES.
     	 Set single letters together (initials):(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     11.- Remove extra spaces to have just one space: \s+
     '''
