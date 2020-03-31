@@ -188,7 +188,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = self.regex_punctuation(text)
         text = self.regex_together_one_letter(text)
         text = self.regex_strip_out_numbers_middle_end(text, ordinal_suffixes, numbers)
-        text = self.regex_numbers_standalone(text, stand_alone_words)
+        text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_words)
         text = self.regex_remove_extra_spaces(text)
 
         return text
@@ -266,9 +266,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       re.IGNORECASE)
         return " ".join(text.split())
 
-    def regex_numbers_standalone(self, text, stand_alone_words):
+    def regex_numbers_standalone(self, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
-            r'\b(?=(\d+(?:\s+\d+)*))\1(?!\s+(?:{})\b)\s*'.format(stand_alone_words),
+            r'\b(?=(\d+(?:{0})?(?:\s+\d+(?:{0})?)*|(?:{1})(?:\s+(?:{1}))*))\1(?!\s+(?:{2})\b)\s*'.format(ordinal_suffixes, numbers, stand_alone_words),
             '',
             text,
             0,
