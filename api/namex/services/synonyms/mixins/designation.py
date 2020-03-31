@@ -7,7 +7,7 @@ from namex.constants import \
 from namex.services.name_request.auto_analyse.name_analysis_utils import get_flat_list
 
 from . import SynonymServiceMixin
-from .. import DesignationPositionCodes
+from .. import DesignationPositionCodes, LanguageCodes
 
 
 class SynonymDesignationMixin(SynonymServiceMixin):
@@ -113,8 +113,6 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         return found_designation_any
 
     def get_all_end_designations(self):
-        # TODO: Fix RLC we don't have that entity type, code changed to RLC from something else...
-        # 'RLC': self._model.get_en_RLC_entity_type_end_designation()
         entity_types = [
             XproUnprotectedNameEntityTypes.XPRO_LIMITED_LIABILITY_COMPANY,
             BCUnprotectedNameEntityTypes.BC_LIMITED_LIABILITY_PARTNERSHIP,
@@ -125,11 +123,10 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         entity_end_designation_dict = {}
 
         for entity_type in entity_types:
-            # TODO: Use an enum for languages too!
             entity_end_designation_dict[entity_type.value] = self.get_designations(
                 entity_type,
                 DesignationPositionCodes.END,
-                'english'
+                LanguageCodes.ENG
             )
 
         return entity_end_designation_dict
@@ -142,11 +139,10 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         entity_any_designation_dict = {}
 
         for entity_type in entity_types:
-            # TODO: Use an enum for languages too!
             entity_any_designation_dict[entity_type.value] = self.get_designations(
                 entity_type,
                 DesignationPositionCodes.ANY,
-                'english'
+                LanguageCodes.ENG
             )
 
         return entity_any_designation_dict
