@@ -12,10 +12,10 @@ from .. import DesignationPositionCodes, LanguageCodes
 
 class SynonymDesignationMixin(SynonymServiceMixin):
     def get_designated_end_all_words(self):
-        return self.get_designations(None, DesignationPositionCodes.END, 'english')
+        return self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
 
     def get_designated_any_all_words(self):
-        return self.get_designations(None, DesignationPositionCodes.ANY, 'english')
+        return self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG)
 
     def get_misplaced_end_designations(self, name, designation_end_entity_type):
         # en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
@@ -64,7 +64,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     '''
 
     def get_designation_end_in_name(self, name):
-        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
+        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
         designation_end_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
         designation_end_regex = r'{0}(?=(\s{0})*$)'.format(designation_end_rgx)
 
@@ -88,7 +88,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     '''
 
     def get_incorrect_designation_end_in_name(self, name):
-        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
+        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
         designation_end_rgx = '|'.join(map(str, en_designation_end_all_list))
         designation_end_regex = r'({})(?=(?:.*\s\w+$))'.format(designation_end_rgx)
 
@@ -103,7 +103,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     '''
 
     def get_designation_any_in_name(self, name):
-        en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
+        en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG)
         designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
         designation_any_regex = r'{}(?=\s|$)'.format(designation_any_rgx)
 

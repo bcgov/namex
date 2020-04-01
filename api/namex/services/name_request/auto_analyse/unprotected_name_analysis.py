@@ -8,7 +8,7 @@ from . import ProcedureResult
 from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from namex.services.synonyms import DesignationPositionCodes
+from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
 
 from namex.services.word_classification.token_classifier \
     import TokenClassifier
@@ -97,8 +97,8 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes.has_value(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
-        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
+        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, LanguageCodes.ENG)
+        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, LanguageCodes.ENG)
 
         self._designation_any_list_correct.extend(any_list)
         self._designation_end_list_correct.extend(end_list)

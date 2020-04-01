@@ -3,6 +3,7 @@ from sqlalchemy import func
 
 from namex.models import Synonym
 from namex.criteria.synonym.query_criteria import SynonymQueryCriteria
+from . import LanguageCodes
 
 from .mixins.designation import SynonymDesignationMixin
 from .mixins.model import SynonymModelMixin
@@ -112,7 +113,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return flattened
 
     def get_designations(self, entity_type_code, position_code, lang):
-        lang = lang if isinstance(lang, str) else 'english'
+        lang = lang if isinstance(lang, str) else LanguageCodes.ENG
         model = self.get_model()
 
         filters = []
@@ -127,7 +128,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         else:
             filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]')))
 
-        filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
+        filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.value.lower())))
 
         results = self.find_word_synonyms(None, filters)
         flattened = list(set(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results)))))))

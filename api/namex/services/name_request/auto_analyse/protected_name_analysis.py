@@ -5,7 +5,7 @@ import collections
 from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from namex.services.synonyms import DesignationPositionCodes
+from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
 
 from .name_analysis_director import NameAnalysisDirector
 from . import ProcedureResult
@@ -88,8 +88,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
-        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
+        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, LanguageCodes.ENG)
+        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, LanguageCodes.ENG)
 
         self._designation_any_list_correct = any_list
         self._designation_end_list_correct = end_list

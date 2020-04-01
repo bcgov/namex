@@ -18,5 +18,5 @@ class DesignationPositionCodes(Enum):
 
 
 class LanguageCodes(Enum):
-    ENG = 'english'
-    FR = 'french'
+    ENG = 'ENGLISH'
+    FR = 'FRENCH'
