@@ -16,8 +16,9 @@ from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
 
 from urllib.parse import unquote_plus
+from datetime import datetime
 
-from namex.models import Request as RequestDAO, User, Name, Event, State,Comment
+from namex.models import Request, Name, NRNumber, User, Event,State,Comment
 from namex.services import ServicesError, MessageServices, EventRecorder
 from namex.services.name_request import get_or_create_user_by_jwt, convert_to_ascii
 
@@ -88,7 +89,7 @@ def validate_name_request(location, entity_type, request_action):
 
 @cors_preflight("POST")
 @api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
-class NameAnalysis(Resource):
+class NameRequest(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_roles([User.PUBLIC])
@@ -97,29 +98,63 @@ class NameAnalysis(Resource):
         'name': 'A company / organization name string',
         'location': 'A location code [ BC | CA | INTL ]',
         'entity_type': 'An entity type code [ CR, UL, CC ]',
-        'request_action': 'A request action code'  # TODO: Use request_action not request_type, this needs to be updated on the front end!!!
-        # 'request_type': 'A request action code'  # TODO: Leave this as request_type for now...
+        'request_action': 'A request action code',
+        'designation': 'The designation if at the end'
     })
     def post():
         name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None
         location = unquote_plus(request.args.get('location').strip()) if request.args.get('location') else None
         entity_type = unquote_plus(request.args.get('entity_type').strip()) if request.args.get('entity_type') else None
-        request_action = unquote_plus(request.args.get('request_action').strip()) if request.args.get('request_action') else None  # TODO: Use request_action not request_type, this needs to be updated on the front end!!!
+        request_action = unquote_plus(request.args.get('request_action').strip()) if request.args.get('request_action') else None
+        designation = unquote_plus(request.args.get('designation').strip()) if request.args.get('designation') else None
 
         if not validate_name_request(location, entity_type, request_action):
-            return  # TODO: Return invalid response! What is it?
+            return jsonify(message='Incorrect input data provided'), 400
 
-        #create an NR
-        #set the state to RESERVED
+        name_request = Request()
+        reserved_name = Name()
+
+        seq = db.Sequence('requests_id_seq')
+        next_nr_id = db.engine.execute(seq)
+
+        last_nr = NRNumber.find_last_nr_num()
+        last_nr_num = list(last_nr)
+
+        next_nr_num=name_request.get_next_nr_num(last_nr_num[0])
+
+        name_request.id = next_nr_id
+        name_request.submittedDate=datetime.utcnow()
+        name_request.nrNum=next_nr_num # must be replaced with a formula
+        # requestTypeCd= a formuls,
+        # expirationDate= formula submitted date + 56 days,
+        #consentFlag= #need more data
+        name_request.stateCd='RESERVED'  # must be reserved
+
+        #name_request.entity_type_cd = entity_type
+        #name_request.request_action_cd = request_action
+
+        reserved_name.choice = 1
+        reserved_name.name = name
+        reserved_name.state = 'RESERVED'
+        reserved_name.designation = designation
+        reserved_name.nrId = next_nr_id
+
+        name_request.names.append(reserved_name)
+
+        current_app.logger.debug(name_request.json())
+        name_request.save_to_db()
+
+        return jsonify(name_request.json()), 200
+
+
         #GENERATE AN NR #
+
+
 
        #if entity_type in BCProtectedNameEntityTypes.list():
             #ADD IT TO SOLR
 
 
-        # save record
-        #nrd.save_to_db()
-        #EventRecorder.record(user, Event.POST, nrd, json_input)
 
 
 
