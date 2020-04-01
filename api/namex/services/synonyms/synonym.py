@@ -181,7 +181,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         internet_domains = '.COM|.ORG|.NET|.EDU'
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
-        text = self.regex_prefixes(text, prefixes)
+        # text = self.regex_prefixes(text, prefixes)
         text = self.regex_numbers_lot(text)
         text = self.regex_repeated_strings(text)
         text = self.regex_separated_ordinals(text, ordinal_suffixes)
