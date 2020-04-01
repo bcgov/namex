@@ -9,7 +9,7 @@ import jsonpickle
 from namex.models import User
 from namex.services.name_request.auto_analyse import AnalysisRequestActions, AnalysisResultCodes
 
-from tests.python import integration_oracle_namesdb
+# from tests.python import integration_oracle_namesdb
 
 token_header = {
     "alg": "RS256",
@@ -63,6 +63,19 @@ def assert_issues_count_is_gt(count, issues):
         print('- ' + issue.issueType.value + '\n')
     assert issues.__len__() > count
 
+@pytest.mark.skip
+def assert_issue_type_is_one_of(types, issue):
+    assert issue.issueType in types
+
+
+@pytest.mark.skip
+def assert_has_issue_type(issue_type, issues):
+    has_issue = False
+    for issue in issues:
+        has_issue = True if issue.issueType == issue_type and issue.issueType.value == issue_type.value else False
+
+    assert has_issue is True
+
 
 # @pytest.mark.xfail(raises=ValueError)
 def test_get_analysis_request_response(client, jwt, app):
@@ -77,16 +90,13 @@ def test_get_analysis_request_response(client, jwt, app):
         'request_type': 'NEW'
     }
 
-    # TODO: Obviously we can't be using strings with spaces but I don't know how to deal with this yet
-    # query = '&'.join("{!s}={}".format(k, v) for (k, v) in test_params.items())
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
     path = ENDPOINT_PATH + '?' + query
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
-    print("Assert that the payload does not contain any issues, and if it does that it is an empty list")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is(0, payload.issues)
+    assert isinstance(payload.status, str) is True
+    assert isinstance(payload.issues, list) is True
 
 
 # Test each of the response strategies
@@ -147,7 +157,7 @@ def test_new_bc_ul_valid_response(client, jwt, app):
         if payload.issues.__len__() > 0:
             print('\n' + 'Issue types:' + '\n')
             for issue in payload.issues:
-                print('\n' + issue.issueType + '\n')
+                print('\n' + issue.issueType.value + '\n')
         assert payload.issues.__len__() == 0
 
 

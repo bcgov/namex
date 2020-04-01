@@ -78,7 +78,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     '''
 
     @abc.abstractmethod
-    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name):
+    def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
         return ProcedureResult(is_valid=True)
 
     '''

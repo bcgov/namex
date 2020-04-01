@@ -31,19 +31,18 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened_arr = [item for sublist in result_arr for item in sublist]
         return flattened_arr
 
-    def find_word_synonyms(self, word, filters, designation=False):
+    '''
+    Designations, distinctives and descriptives return stems_text
+    '''
+
+    def find_word_synonyms(self, word, filters):
         model = self.get_model()
-        # TODO: Don't use an empty string here, instantiate a different SynonymQueryCriteria to handle a case with no fields or set to null or whatever
-        field = ''
         word = word.lower() if isinstance(word, str) else None
 
         if word:
             filters.append(func.lower(model.synonyms_text).op('~')(r'\y{}\y'.format(word)))
 
-        if designation:
-            field = model.stems_text
-        else:
-            field = model.synonyms_text
+        field = model.stems_text
 
         criteria = SynonymQueryCriteria(
             word=word,
@@ -97,7 +96,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
             func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))
         ]
 
-        results = self.find_word_synonyms(None, filters, True)
+        results = self.find_word_synonyms(None, filters)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
@@ -130,23 +129,23 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
 
-        results = self.find_word_synonyms(None, filters, True)
+        results = self.find_word_synonyms(None, filters)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
+    # TODO: Move this out of utils, it uses a model utils shouldn't use class methods
     '''
     Rules for Regex Transform (from bottom to top):
     1.- Replace with non-space 
         A.- .com: internet_domains
     	B.- Commas in numbers: 50,000 --> 50000 (?<=\\d),(?=\\d)|
     	B.- Set together words followed by punctuation and a character (AB-C, A-C, ABC-C): (?<=\b[A-Za-z])+[\/&-](?=[A-Za-z]\b)
-    	C.- Designations anywhere
-    	E.- Designations and numbers at the end: re.sub(r'\s('+desig_end+')$'
+    	C.- Designations anywhere    	
     2.- Search for prefixes followed by punctuation and a word (re/max) and set them together: \b('+prefixes+')([ &\/.-])([A-Za-z]+)
     3.- Replace with space the following:
         A.- Word with possesive such as Reynold's: (?<=[a-zA-Z])\'[Ss]
     	B.- (NO. 111),NO. 465,(LOT 111),LOT 27,LOT( 100-2),(100): \(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d+\)?|\(\d+\)
-    	C.- Punctuation except ampersand, slash, hyphen used for separation: [^a-zA-Z0-9 &/-]+
+    	#C.- Punctuation except ampersand, slash, hyphen used for separation: [^a-zA-Z0-9 &/-]+
     4.- Remove repeated strings with minimum two characters (AB -- AB --> AB): \b(\w{2,})(\b\W+\b\1\b)*
     5.- Separate ordinal numbers from words (4THGEN --> 4TH GEN):\b(\d+(ST|[RN]D|TH))(\w+)\b
     6.- Replace with space: 
@@ -159,26 +158,117 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     8.- Replace with non-space:
          Set together letter of length one separated by spaces: (?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     	 Trailing and leading spaces in string: ^\s+|\s+$
-    9.- Replace with non-space the following:
-        A.- Remove cardinal and ordinal numbers from string in the middle and end: (?<=[A-Za-z]\b )([ 0-9]*(ST|[RN]D|TH)?\b)
-        #(Note: May be removed) B.- Set together numbers separated by more than 2 spaces: (?<=\d)\s{2,}(?=\d+).
-    10.- Replace with non-space:
+    9.- Replace with non-space:
          Remove numbers and numbers in words at the beginning or keep them as long as the last string is 
          any BC|HOLDINGS|VENTURES: (^(?:\d+(?:{ordinal_suffixes})?\s+)+(?=[^\d]+$)|(?:({numbers})\s+)(?!.*?(?:{stand_alone_words}$))
     	 Set single letters together (initials):(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
-    11.- Remove extra spaces to have just one space: \s+
+    10.- Remove extra spaces to have just one space: \s+
     '''
 
-    def regex_transform(self, text, designation_any, designation_end, designation_all, prefix_list, number_list):
-        designation_end_regex = '((lot)+\\s+\\d+|\\d*|' + '|'.join(map(str, designation_end)) + ')'
-        designation_any_regex = "(" + '|'.join(designation_any) + ")"
-        designation_all_regex = "(" + '|'.join(designation_all) + ")"
+    def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
+        designation_all_regex = '|'.join(designation_all)
         prefixes = '|'.join(prefix_list)
         numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
-        internet_domains = '.COM'
+        internet_domains = '.COM|.ORG|.NET|.EDU'
 
+        text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
+        text = self.regex_prefixes(text, prefixes)
+        text = self.regex_numbers_lot(text)
+        text = self.regex_repeated_strings(text)
+        text = self.regex_separated_ordinals(text, ordinal_suffixes)
+        text = self.regex_keep_together_abv(text, exceptions_ws)
+        text = self.regex_punctuation(text)
+        text = self.regex_together_one_letter(text)
+        text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_words)
+        text = self.regex_remove_extra_spaces(text)
+
+        return text
+
+    def regex_remove_designations(self, text, internet_domains, designation_all_regex):
+        text = re.sub(r'{}|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|\b({})\b.?'.format(internet_domains, designation_all_regex),
+                      '',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_prefixes(self, text, prefixes):
+        text = re.sub(r'\b({})([ &/.-])([A-Za-z]+)'.format(prefixes),
+                      r'\1\3',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_numbers_lot(self, text):
+        text = re.sub(r'(?<=[a-zA-Z])\'[Ss]|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &/-]+',
+                      ' ',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_repeated_strings(self, text):
+        text = re.sub(r'\b(\w{2,})(\b\W+\b\1\b)*',
+                      r'\1',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_separated_ordinals(self, text, ordinal_suffixes):
+        text = re.sub(r'\b(\d+({}))(\w+)\b'.format(ordinal_suffixes),
+                      r'\1 \3',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_keep_together_abv(self, text, exceptions_ws):
+        exception_ws_rx = '|'.join(map(re.escape, exceptions_ws))
+        ws_generic_rx = r'(?<=\d)(?=[^\d\s])|(?<=[^\d\s])(?=\d)'
+        ws_rx = re.compile(r'({})|{}'.format(exception_ws_rx, ws_generic_rx), re.I)
+
+        text = ws_rx.sub(lambda x: x.group(1) or " ", text)
+
+        return " ".join(text.split())
+
+    def regex_punctuation(self, text):
+        text = re.sub(r'[&/-]',
+                      ' ',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_together_one_letter(self, text):
+        text = re.sub(r'(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)|^\s+|\s+$',
+                      '',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_numbers_standalone(self, text, ordinal_suffixes, numbers, stand_alone_words):
+        text = re.sub(
+            r'(^(?:\d+(?:{})?\s*)+(?=[^\d]*$)|\b(?:{})\b)(?!.*?(?:{}$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)'.format(ordinal_suffixes, numbers, stand_alone_words),
+            '',
+            text,
+            0,
+            re.IGNORECASE)
+        return " ".join(text.split())
+
+    def regex_remove_extra_spaces(self, text):
+        text = re.sub(r'\s+',
+                      ' ',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    def exception_regex(self, text):
         # Build exception list to avoid separation of numbers and letters when they are part of synonym table such as H20, 4MULA, ACTIV8
         exceptions_ws = []
         for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
@@ -188,60 +278,4 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         if not exceptions_ws:
             exceptions_ws.append('null')
 
-        exception_ws_rx = '|'.join(map(re.escape, exceptions_ws))
-        ws_generic_rx = r'(?<=\d)(?=[^\d\s])|(?<=[^\d\s])(?=\d)'
-        ws_rx = re.compile(rf'({exception_ws_rx})|{ws_generic_rx}', re.I)
-
-        text = re.sub(r'\s+',
-                      ' ',
-                      re.sub(
-                          r'(^(?:\d+(?:' + ordinal_suffixes + ')?\\s*)+(?=[^\\d]*$)|\\b(?:' + numbers + ')\\s*)(?!.*?(?:' + stand_alone_words + '$))|(?<=\\b[A-Za-z]\\b) +(?=[a-zA-Z]\\b)',
-                          '',
-                          #re.sub(r'(?<=[A-Za-z]\b )([ 0-9]*(' + ordinal_suffixes + ')?\\b)',
-                          #       '',
-                                 re.sub(r'(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)|^\s+|\s+$',
-                                        '',
-                                        re.sub(r'[&/-]',
-                                               ' ',
-                                               # re.sub(r'(?<=[0-9])\s+(?=(?:{ordinal_suffixes})(?: +[^\W\d_]|$))',
-                                               #       '',
-                                               ws_rx.sub(lambda x: x.group(1) or " ",
-                                                         re.sub(r'\b(\d+(' + ordinal_suffixes + '))(\\w+)\\b',
-                                                                r'\1 \3',
-                                                                re.sub(r'\b(\w{2,})(\b\W+\b\1\b)*',
-                                                                       r'\1',
-                                                                       re.sub(
-                                                                           r'(?<=[a-zA-Z])\'[Ss]|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &/-]+',
-                                                                           ' ',
-                                                                           re.sub(
-                                                                               r'\b(' + prefixes + ')([ &/.-])([A-Za-z]+)',
-                                                                               r'\1\3',
-                                                                               re.sub(
-                                                                                   # rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_any_regex}\b|\s{designation_end_regex}(?=(\s{designation_end_regex})*$)",
-                                                                                   rf"\.COM|(?<=\d),(?=\d)|(?<=[A-Za-z])+[\/&-](?=[A-Za-z]\b)|\b{designation_all_regex}\b",
-                                                                                   '',
-                                                                                   text,
-                                                                                   0,
-                                                                                   re.IGNORECASE),
-                                                                               0,
-                                                                               re.IGNORECASE),
-                                                                           0,
-                                                                           re.IGNORECASE),
-                                                                       0,
-                                                                       re.IGNORECASE),
-                                                                0,
-                                                                re.IGNORECASE),
-                                                         ),
-                                               # 0,
-                                               # re.IGNORECASE),
-                                               0,
-                                               re.IGNORECASE),
-                                        0,
-                                        re.IGNORECASE),
-                                 #0,
-                                 #re.IGNORECASE),
-                          0,
-                          re.IGNORECASE),
-                      0,
-                      re.IGNORECASE)
-        return text
+        return exceptions_ws

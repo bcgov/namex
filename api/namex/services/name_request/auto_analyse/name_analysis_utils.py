@@ -1,5 +1,7 @@
+import itertools
 import re
 import collections
+from sqlalchemy import create_engine
 from toolz import unique
 
 from namex.services.name_request.auto_analyse import DataFrameFields
@@ -28,7 +30,6 @@ def get_flat_list(lst):
     # return subs_list
 
 
-# TODO: What is going on here? Why the change?
 '''
 def remove_french(text, fr_designation_end_list):
     compound = re.findall(r'[^/]+(?://[^/]*)*', text)
@@ -40,14 +41,28 @@ def remove_french(text, fr_designation_end_list):
     return text
 '''
 
+'''
+Previous behaviour: The section after slash considered french designations to imply the section was in French.
+Current behaviour: The section after slash is not longer considering french designation.
+Rules:  1) Before and after slash has to be at least two words to removed string after slash.
+           Eg.
+           ABC ENGINEERING/CENTRAL CARE  --> ABC ENGINEERING
+        2) In the case just having a word at the beginning then the string is kept with no changes.
+           Eg.
+           RE/MAX WALNUT DEVELOPMENT  --> RE/MAX WALNUT DEVELOPMENT
+        3) In the case just having a word at the end, this is kept removing the slash.
+           Eg.
+           ABC ENGINEERING 7/24 --> ABC ENGINEERING 7 24
+'''
+
 
 def remove_french(text):
-    text = re.sub(r'/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
-                  ' ',
+    text = re.sub(r'(^\w+(?:[^\w\n]+\w+)+[^\w\n]*)/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
+                  r'\1 ',
                   text,
                   0,
                   re.IGNORECASE)
-    return text
+    return " ".join(text.split())
 
 
 def remove_stop_words(original_name, stop_words):
@@ -122,32 +137,25 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
     if dist_list == name_list:
         queue_dist.pop()
 
-    dist_list_all = []
-    desc_list_all = []
+    dist_list_tmp, dist_list_all, desc_list_tmp, desc_list_all = [], [], [], []
 
-    dist_list_all.append(list(queue_dist))
+    dist_list_tmp.append(list(queue_dist))
 
-    # TODO: Arturo why the change?
-    '''
     while len(queue_dist) > 1:
         queue_dist.pop()
-        dist_list_all.append(list(queue_dist))
+        dist_list_tmp.append(list(queue_dist))
 
-    dist = map(list, unique(map(tuple, dist_list_all)))
-    dist_list_all = list(dist)
-    dist_list_all.reverse()
-    '''
+    dist_list_tmp.reverse()
 
-    for dist in dist_list_all:
-        desc_list_all.append([i for i in name_list if i not in dist])
+    for dist in dist_list_tmp:
+        desc_list_tmp.append([i for i in name_list if i not in dist and i in desc_list])
 
-    # TODO: Arturo why the change?
-    '''
-    flatten_desc = [item for sublist in desc_list_all for item in sublist]
-    flatten_desc = list(set(flatten_desc))
-    if flatten_desc.sort() != desc_list.sort():
-        raise Exception('Invalid generated descriptive list.')
-    '''
+    # Validate generation of list of lists of distinctives and descriptives with the correct combinations:
+    for idx, element in enumerate(dist_list_tmp):
+        if (dist_list_tmp[idx] + desc_list_tmp[idx]) == name_list:
+            dist_list_all.append(dist_list_tmp[idx])
+            desc_list_all.append(desc_list_tmp[idx])
+
     return dist_list_all, desc_list_all
 
 

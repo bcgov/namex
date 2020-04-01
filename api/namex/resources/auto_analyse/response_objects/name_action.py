@@ -6,7 +6,8 @@ from enum import Enum
 class NameActions(Enum):
     STRIKE = 'strike'
     HIGHLIGHT = 'highlight'
-    ADD_WORD_BRACKETS = 'add_word_brackets'
+    BRACKETS = 'brackets'
+    SPELLING = 'spelling'
 
     @classmethod
     def list(cls):
@@ -32,6 +33,7 @@ class WordPositions(Enum):
 
 class NameAction(Serializable):
     def __init__(self, **kwargs):
+        # Required!
         if not kwargs.get('type').value in NameActions.list():
             raise TypeError('Invalid NameAction, please supply a valid NameAction type')
 

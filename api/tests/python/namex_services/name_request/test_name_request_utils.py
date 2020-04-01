@@ -213,9 +213,6 @@ field = 'synonyms_text'
 synonym_text_list = ['an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', \
                      'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this',
                      'to']
-name = 'MOUNTAIN ASSOCIATION VIEW LIMITED PARTNERSHIP'
-#                       [anywhere designation, end designation]
-designation_name_list = [['association'], ['limited partnership']]
 
 user_input = 'MOUNTAIN COOPERATIVE VIEW LIMITED LIABILITY PARTNERSHIP'
 designation_name_list = ['cooperative', 'limited liability partnership']

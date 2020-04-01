@@ -69,8 +69,6 @@ class AnalysisIssueCodes(str, Enum):
     DESIGNATION_MISMATCH = 'designation_mismatch'
     DESIGNATION_MISPLACED = 'designation_misplaced'
     NAME_REQUIRES_CONSENT = 'consent_required'
-    CONTAINS_UNCLASSIFIABLE_WORD = 'unclassified_word'
-    CORPORATE_CONFLICT = 'corp_conflict'
 
     def __getstate__(self):
         pickled_state = str(self.value)
