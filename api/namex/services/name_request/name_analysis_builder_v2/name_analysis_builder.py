@@ -407,7 +407,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     elif porter.stem(word.lower()) in all_subs_stem:
                         counter += 0.7
                 similarity = counter / length_original
-                dict_matches_counter.update({match: similarity})
+                if similarity > 0.65:
+                    dict_matches_counter.update({match: similarity})
 
             dict_matches_words.update(
                 self.get_details_most_similar(list(dict_matches_counter), dist_substitution_dict,
