@@ -12,7 +12,6 @@ setup_logging() ## important to do this first
 
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
 
 from urllib.parse import unquote_plus
@@ -117,17 +116,23 @@ class NameRequest(Resource):
         seq = db.Sequence('requests_id_seq')
         next_nr_id = db.engine.execute(seq)
 
-        last_nr = NRNumber.find_last_nr_num()
-        last_nr_num = list(last_nr)
+        r = db.session.query(NRNumber).first()
+        if(r == None):
+            #set starting nr number
+            last_nr = 'NR L000000'
+        else:
+            last_nr = r.nrNum
+        next_nr_num = NRNumber.get_next_nr_num(last_nr)
+        r.nrNum = next_nr_num
+        r.save_to_db()
 
-        next_nr_num=name_request.get_next_nr_num(last_nr_num[0])
-
+        #set the name attributes
         name_request.id = next_nr_id
         name_request.submittedDate=datetime.utcnow()
         name_request.nrNum=next_nr_num # must be replaced with a formula
         # requestTypeCd= a formuls,
         # expirationDate= formula submitted date + 56 days,
-        #consentFlag= #need more data
+        #consentFlag= #need more data (by reserved or conditionally reserved)
         name_request.stateCd='RESERVED'  # must be reserved
 
         #name_request.entity_type_cd = entity_type
@@ -140,19 +145,11 @@ class NameRequest(Resource):
         reserved_name.nrId = next_nr_id
 
         name_request.names.append(reserved_name)
-
-        current_app.logger.debug(name_request.json())
         name_request.save_to_db()
 
+        current_app.logger.debug(name_request.json())
         return jsonify(name_request.json()), 200
 
-
-        #GENERATE AN NR #
-
-
-
-       #if entity_type in BCProtectedNameEntityTypes.list():
-            #ADD IT TO SOLR
 
 
 
