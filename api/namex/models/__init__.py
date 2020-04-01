@@ -24,3 +24,4 @@ from .admin_tables import DecisionReasonAudit, RestrictedConditionAudit
 from .synonym import Synonym, SynonymSchema
 from .word_classification import WordClassification, WordClassificationSchema
 from .virtual_word_condition import VirtualWordCondition
+from .nr_number import NRNumber
