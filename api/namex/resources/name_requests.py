@@ -91,7 +91,7 @@ def validate_name_request(location, entity_type, request_action):
 class NameRequest(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @jwt.requires_roles([User.PUBLIC])
+    @jwt.requires_roles([User.PUBLIC])
 
     @api.doc(params={
         'name': 'A company / organization name string',
@@ -101,6 +101,7 @@ class NameRequest(Resource):
         'designation': 'The designation if at the end'
     })
     def post():
+        #ADD THE CHECK FOR USERNAME_RQEQUEST SERVICE ACCOUNT BEFORE PROCEEDING
         name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None
         location = unquote_plus(request.args.get('location').strip()) if request.args.get('location') else None
         entity_type = unquote_plus(request.args.get('entity_type').strip()) if request.args.get('entity_type') else None
