@@ -269,7 +269,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     def regex_numbers_standalone(self, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
-            r'\b(?=(\d+(?:{0})?(?:\s+\d+(?:{0})?)*|(?:{1})(?:\s+(?:{1}))*))\1(?!\s+(?:{2})\b)\s*'.format(ordinal_suffixes, numbers, stand_alone_words),
+            r'\b(?=(\d+(?:{0})?(?:\s+\d+(?:\b{0}\b)?)*|(?:\b({1})\b)(?:\s+(?:\b({1})\b))*))\1(?!\s+(?:{2})\b)\s*'.format(ordinal_suffixes, numbers, stand_alone_words),
             '',
             text,
             0,
