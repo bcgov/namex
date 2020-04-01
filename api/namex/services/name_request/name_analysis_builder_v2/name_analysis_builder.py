@@ -282,8 +282,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
-    list_name: original name tokenized
-    entity_type_user: Entity type typed u user in UI
+    list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
+    entity_type_user: Entity type typed by user. 'CR' by default
     all_designations: All Designations found in name (either misplaced or not)
     all_designations_user: All designations for the entity type typed by the user. 
     @return ProcedureResult
@@ -312,23 +312,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
         Override the abstract / base class method
-        misplaced_designation_any, misplaced_designation_end, misplaced_designation_all
+        Just <end> designation can be misplaced in other position, it can be at the beginning, middle or before end in the name
+        Note: <any> designation can be anywhere in the name, so to be misplaced is not possible.
         @return ProcedureResult
         '''
 
-    def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end,
-                                    misplaced_designation_all):
+    def check_designation_misplaced(self, list_name, misplaced_designation_end):
         result = ProcedureResult()
         result.is_valid = True
 
-        if misplaced_designation_all:
+        if misplaced_designation_end:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.DESIGNATION_MISPLACED
             result.values = {
                 'list_name': list_name,
-                'misplaced_any_designation': misplaced_designation_any,
+                'misplaced_any_designation': None,
                 'misplaced_end_designation': misplaced_designation_end,
-                'misplaced_all_designation': misplaced_designation_all
+                'misplaced_all_designation': misplaced_designation_end
             }
 
         return result
