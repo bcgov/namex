@@ -1,4 +1,7 @@
 from enum import Enum
+from nltk.stem import PorterStemmer
+
+porter = PorterStemmer()
 
 # Limit number of words to analyse
 # TODO: We can set this to three later (in PROD), but this is way easier to test with a higher max limit
