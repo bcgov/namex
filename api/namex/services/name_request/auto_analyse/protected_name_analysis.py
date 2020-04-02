@@ -162,21 +162,22 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
+        '''
         if self.token_classifier.distinctive_word_tokens == self.token_classifier.descriptive_word_tokens:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.name_tokens)
 
         else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens,
-                                                                                        self.token_classifier.distinctive_word_tokens,
-                                                                                        self.token_classifier.descriptive_word_tokens)
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens, self.token_classifier.distinctive_word_tokens, self.token_classifier.descriptive_word_tokens)
+        '''
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens,
-                                                   self.processed_name)
+        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
+        # TODO: Use the list_name array, don't use a string in the method!
+        # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
         check_words_requiring_consent = builder.check_words_requiring_consent(
             self.name_tokens, self.processed_name
         )
