@@ -1,5 +1,5 @@
 import itertools
-
+import re
 from collections import OrderedDict
 
 from . import porter
@@ -255,7 +255,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         words_consent_list = []
 
         for words_consent in all_words_consent_list:
-            if words_consent.lower() in name.lower():
+            if re.search(r'\b{}\b'.format(re.escape(words_consent.lower())), name.lower()):
                 words_consent_list.append(words_consent.lower())
 
         words_consent_list_response = []
