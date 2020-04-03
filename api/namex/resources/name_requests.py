@@ -41,6 +41,8 @@ def validate_name_request(entity_type, request_action):
     # Raise error if request_action is invalid
     if request_action not in RequestAction.list():
         raise ValueError('Invalid request action provided')
+    #TODO Add a check for valid states include the states in constnats, they are somewhereright now
+    # may want to move them
     return True
 
 def set_request_type(entity_type, request_action):
@@ -68,7 +70,6 @@ class NameRequest(Resource):
 
     @api.doc(params={
         'name': 'A company / organization name string inclduing designation',
-        'location': 'A location code [ BC | CA | INTL ]',
         'entity_type': 'An entity type code [ CR, UL, CC ]',
         'request_action': 'A request action code',
         'designation': 'The designation if at the end',
@@ -81,6 +82,7 @@ class NameRequest(Resource):
         request_action = unquote_plus(request.args.get('request_action').strip()) if request.args.get('request_action') else None
         designation = unquote_plus(request.args.get('designation').strip()) if request.args.get('designation') else None
         reserve_state = unquote_plus(request.args.get('reserve_state').strip()) if request.args.get('reserve_state') else None
+
         if not validate_name_request(entity_type, request_action):
             return jsonify(message='Incorrect input data provided'), 400
 
