@@ -78,33 +78,28 @@ class Request(db.Model):
 
     # Entity types (legacy) used in search conflicts
     class EntityTypeBCORP(Enum):
-        # CR = 'CR'
         CCR = 'CCR'
         CT = 'CT'
         RCR = 'RCR'
 
     class EntityTypeULC(Enum):
-        # UL='UL'
         UC = 'UC'
         CUL = 'CUL'
         ULCT = 'ULCT'
         RUL = 'RUL'
 
     class EntityTypeCP(Enum):
-        # CP='CP'
         CCP = 'CCP'
         CTC = 'CTC'
         RCP = 'RCP'
 
     class EntityTypeCCC(Enum):
-        #CCC = 'CC'
         CCV = 'CCV'
         CC = 'CCC'
         CCCT = 'CCCT'
         RCC = 'RCC'
 
     class EntityTypeSO(Enum):
-        # SO='SO'
         ASO = 'ASO'
         CSO = 'CSO'
         RSO = 'RSO'
@@ -112,29 +107,24 @@ class Request(db.Model):
         CSSO = 'CSSO'
 
     class EntityTypeFI(Enum):
-        # FI = 'FI'
         CFI = 'CFI'
         RFI = 'RFI'
 
     class EntityTypeXCORP(Enum):
-        # XCR = 'XCR'
         XCCR = 'XCCR'
         XRCR = 'XRCR'
         AS = 'AS'
 
     class EntityTypeXULC(Enum):
-        # XUL='XUL'
         UA = 'UA'
         XCUL = 'XCUL'
         XRUL = 'XRUL'
 
     class EntityTypeXCP(Enum):
-        # XCP='XCP'
         XCCP = 'XCCP'
         XRCP = 'XRCP'
 
     class EntityTypeXSO(Enum):
-        # XSO='XSO'
         XCSO = 'XCSO'
         XRSO = 'XRSO'
         XASO = 'XASO'
