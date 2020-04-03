@@ -298,7 +298,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.WORDS_TO_AVOID,
                 AnalysisIssueCodes.TOO_MANY_WORDS,
                 AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
                 AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
                 AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
                 AnalysisIssueCodes.CORPORATE_CONFLICT,

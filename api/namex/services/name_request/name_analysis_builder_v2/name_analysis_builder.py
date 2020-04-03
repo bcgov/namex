@@ -5,6 +5,7 @@ from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
 
 from namex.models.request import Request
+from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 '''
 Sample builder
@@ -277,8 +278,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
-    list_name: original name tokenized
-    entity_type_user: Entity type typed u user in UI
+    list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
+    entity_type_user: Entity type typed by user. 'CR' by default
     all_designations: All Designations found in name (either misplaced or not)
     all_designations_user: All designations for the entity type typed by the user. 
     @return ProcedureResult
@@ -307,23 +308,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
         Override the abstract / base class method
-        misplaced_designation_any, misplaced_designation_end, misplaced_designation_all
+        Just <end> designation can be misplaced in other position, it can be at the beginning, middle or before end in the name
+        Note: <any> designation can be anywhere in the name, so to be misplaced is not possible.
         @return ProcedureResult
         '''
 
-    def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end,
-                                    misplaced_designation_all):
+    def check_designation_misplaced(self, list_name, misplaced_designation_end):
         result = ProcedureResult()
         result.is_valid = True
 
-        if misplaced_designation_all:
+        if misplaced_designation_end:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.DESIGNATION_MISPLACED
             result.values = {
                 'list_name': list_name,
-                'misplaced_any_designation': misplaced_designation_any,
+                'misplaced_any_designation': None,
                 'misplaced_end_designation': misplaced_designation_end,
-                'misplaced_all_designation': misplaced_designation_all
+                'misplaced_all_designation': misplaced_designation_end
             }
 
         return result
@@ -381,8 +382,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             dict_matches_counter = {}
             dict_matches_words = {}
+
+            service = ProtectedNameAnalysisService()
             for match in matches:
-                match_list = match.split()
+                np_svc = service.name_processing_service
+                np_svc.set_name(match)
+                # TODO: Get rid of this when done refactoring!
+                match_list = np_svc.name_tokens
                 counter = 0
                 for idx, word in enumerate(match_list):
                     # Compare in the same place
@@ -396,7 +402,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                         counter += 0.75
                     elif porter.stem(word.lower()) in all_subs_stem:
                         counter += 0.7
-                similarity=counter / length_original
+                similarity = counter / length_original
                 dict_matches_counter.update({match: similarity})
 
             dict_matches_words.update(

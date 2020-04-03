@@ -20,7 +20,8 @@ prefix_list = ['un', 're', 'in', 'dis', 'en', 'non', 'in', 'over', 'mis', 'sub',
                'trans', 'super', 'semi', 'anti', 'mid', 'under', 'ante', 'bene', 'circum', 'co', 'com', 'con',
                'col', 'dia', 'ex', 'homo', 'hyper', 'mal', 'micro', 'multi', 'para', 'poly', 'post', 'pro', 'retro',
                'tele', 'therm', 'trans', 'uni']
-number_list = ['one', 'two', 'three', 'first', 'second', 'third']
+number_list = ['nine hundred', 'one hundred', 'eleventh', 'eleven', 'second', 'three', 'first', 'third', 'eight',
+               'five', 'nine', 'one', 'two']
 exceptions_ws = ['activ8', 'h20']
 
 designation_all_regex = "(" + '|'.join(all_designations) + ")"

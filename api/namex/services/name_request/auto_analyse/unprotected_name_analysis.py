@@ -8,7 +8,7 @@ from . import ProcedureResult
 from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from namex.services.synonyms import DesignationPositionCodes
+from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
 
 from namex.services.word_classification.token_classifier \
     import TokenClassifier
@@ -69,8 +69,8 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
     def _set_misplaced_designation_in_input_name(self):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
-        correct_designation_end = self._designation_end_list_user
-        correct_designation_any = self._designation_any_list_user
+        correct_designation_end = self._designation_end_list_correct
+        correct_designation_any = self._designation_any_list_correct
         self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name, correct_designation_any)
         self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name, correct_designation_end)
 
@@ -97,11 +97,11 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes.has_value(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
-        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
+        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, LanguageCodes.ENG)
+        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, LanguageCodes.ENG)
 
-        self._designation_any_list_user.extend(any_list)
-        self._designation_end_list_user.extend(end_list)
+        self._designation_any_list_correct.extend(any_list)
+        self._designation_end_list_correct.extend(end_list)
 
     def _set_entity_type_any_designation(self):
         syn_svc = self.synonym_service
@@ -135,7 +135,7 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         self._set_misplaced_designation_in_input_name()
 
         # Set all designations based on entity type typed by user
-        self._all_designations_user = self._designation_any_list_user + self._designation_end_list_user
+        self._all_designations_user = self._designation_any_list_correct + self._designation_end_list_correct
         # Set all designations based on company name typed by user
         #self._all_designations = self._designation_any_list + self._designation_end_list
 
