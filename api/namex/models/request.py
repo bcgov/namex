@@ -411,7 +411,7 @@ class Request(db.Model):
             if len(criteria.filters) > 5:
                 criteria.filters.pop()
             substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
-            criteria.filters.append(func.lower(Name.name).op('~')(r'\s+\y{}\y'.format(substitutions)))
+            criteria.filters.append(func.lower(Name.name).op('~')(r'\s+\y( {})\y'.format(substitutions)))
         else:
             substitutions = '|'.join(map(str, descriptive_element))
             criteria.filters.append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
