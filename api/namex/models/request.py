@@ -15,66 +15,14 @@ from .applicant import Applicant
 from .name import Name, NameSchema
 from .state import State, StateSchema
 from datetime import datetime
-from enum import Enum
 import re
 
+from namex.constants import ValidSources, request_type_mapping
 
-# create sequence if not exists nr_seq;
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
 
 class Request(db.Model):
-
-    # Indicates the source application
-    class Source(Enum):
-        NAMEX = 'NAMEX'
-        NAMEREQUEST = 'NAMEREQUEST'
-        NRO = 'NRO'
-        SO = 'SO'
-
-    # Request Action separated from the legacy request type
-    class RequestAction(Enum):
-        NEW = 'NEW'
-        MVE = 'MVE'
-        CHG = 'CHG'
-        DBA = 'DBA'
-        AML = 'AML'
-        CNV = 'CNV'
-        REH = 'REH'
-        REN = 'REN'
-        AS = 'ASSUMED'
-        ACHG = 'CHG-ASSUM'
-        # required for legacy
-        NEW_AML = 'NRO-NEWAML'
-        REST = 'NRO-REST'
-
-    #Entity Types derived from the legacy request_type
-    class EntityType(Enum):
-        #BC Types
-        BCORP = 'CR'
-        ULC = 'UL'
-        SP = 'FR'
-        GP = 'GP'
-        DBA = 'DBA'
-        LP = 'LP'
-        LLP = 'LL'
-        CP = 'CP'
-        BC = 'BC'
-        CCC = 'CC'
-        SO = 'SO'
-        PRIV = 'PA'
-        FI = 'FI'
-        PAR = 'PAR'
-        # XPRO and Foreign Types
-        XCORP = 'XCR'
-        XULC = 'XUL'
-        XLLC = 'RLC'
-        XLP = 'XLP'
-        XLLP = 'XLL'
-        XCP = 'XCP'
-        XSO = 'XSO'
-        # legacy
-        FIRM = 'FIRM'
 
     __tablename__ = 'requests'
 
@@ -137,7 +85,7 @@ class Request(db.Model):
     consent_dt = db.Column('consent_dt', db.DateTime(timezone=True))
     _payment_token = db.Column('payment_id', db.String(4096))
     _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
-    _source = db.Column('source', db.String(15), default=Source.NRO)
+    _source = db.Column('source', db.String(15), default=ValidSources.NRO)
 
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
@@ -169,10 +117,18 @@ class Request(db.Model):
         """Property containing the request action from name request."""
         return self._request_action_cd
 
+    @request_action_cd.setter
+    def request_action_cd(self, value: str):
+        self._request_action_cd = value
+
     @property
     def entity_type_cd(self):
         """Property containing the entity type from name request"""
         return self._entity_type_cd
+
+    @entity_type_cd.setter
+    def entity_type_cd(self, value: str):
+        self._request_action_cd = value
 
     def __init__(self, *args, **kwargs):
         pass
@@ -198,8 +154,11 @@ class Request(db.Model):
                 'previousStateCd': self.previousStateCd,
                 'nrNum': self.nrNum,
                 'consentFlag': self.consentFlag,
+                'consent_dt': self.consent_dt,
                 'expirationDate': self.expirationDate,
                 'requestTypeCd': self.requestTypeCd,
+                'entity_type_cd':self.entity_type_cd,
+                'request_action_cd': self.request_action_cd,
                 'priorityCd': self.priorityCd,
                 'priorityDate': self.priorityDate,
                 'xproJurisdiction': self.xproJurisdiction,
@@ -368,13 +327,14 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
 
     # comes from NRO/Societies Online
     if(re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd not in soc_list):
-        request._source = Request.Source.NRO.value  # pylint: disable=protected-access
+        request._source = ValidSources.NRO.value  # pylint: disable=protected-access
     else:
         if (re.match(r"NR [A-Z]+", request.nrNum)):
-             request._source = Request.Source.NAMEREQUEST.value   # pylint: disable=protected-access
+             request._source = ValidSources.NAMEREQUEST.value   # pylint: disable=protected-access
         else:
             if(request.requestTypeCd in soc_list ):
-             request._source = Request.Source.SO.value   # pylint: disable=protected-access
+             request._source = ValidSources.SO.value   # pylint: disable=protected-access
+
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
@@ -382,72 +342,9 @@ def update_request_action_entity_type(mapper, connection, target): # pylint: dis
     """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
     # needed to break apart  request_type
     request = target
-
-    if(re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None ):
-        #todo: handle assumed name as it is a name type and not currently a request action?
+    if (re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None):
+        # todo: handle assumed name as it is a name type and not currently a request action?
         # map the legacy request_type to the new Entity_type and Request_action
-        request_type_mapping = [
-            ('CR', Request.EntityType.BCORP.value, Request.RequestAction.NEW_AML.value),
-            ('CCR', Request.EntityType.BCORP.value, Request.RequestAction.CHG.value),
-            ('CT', Request.EntityType.BCORP.value, Request.RequestAction.MVE.value),
-            ('RCR', Request.EntityType.BCORP.value, Request.RequestAction.REST.value),
-            ('XCR', Request.EntityType.XCORP.value, Request.RequestAction.NEW.value),
-            ('XCCR', Request.EntityType.XCORP.value, Request.RequestAction.CHG.value),
-            ('XRCR', Request.EntityType.XCORP.value, Request.RequestAction.REST.value),
-            ('AS', Request.EntityType.XCORP.value, Request.RequestAction.AS.value),
-            ('LC', Request.EntityType.XLLC.value, Request.RequestAction.NEW.value),
-            ('CLC', Request.EntityType.XLLC.value, Request.RequestAction.CHG.value),
-            ('RLC', Request.EntityType.XLLC.value, Request.RequestAction.REST.value),
-            ('AL', Request.EntityType.XLLC.value, Request.RequestAction.AS.value),
-            ('FR', Request.EntityType.FIRM.value, Request.RequestAction.NEW.value),
-            ('CFR', Request.EntityType.FIRM.value, Request.RequestAction.CHG.value),
-            ('LL', Request.EntityType.LLP.value, Request.RequestAction.NEW.value),
-            ('CLL', Request.EntityType.LLP.value, Request.RequestAction.CHG.value),
-            ('XLL', Request.EntityType.XLLP.value, Request.RequestAction.NEW.value),
-            ('XCLL', Request.EntityType.XLLP.value, Request.RequestAction.CHG.value),
-            ('LP', Request.EntityType.LP.value, Request.RequestAction.NEW.value),
-            ('CLP', Request.EntityType.LP.value, Request.RequestAction.CHG.value),
-            ('XLP', Request.EntityType.XLP.value, Request.RequestAction.NEW.value),
-            ('CXLP', Request.EntityType.XLP.value, Request.RequestAction.CHG.value),
-            ('SO', Request.EntityType.SO.value, Request.RequestAction.NEW.value),
-            ('ASO', Request.EntityType.SO.value, Request.RequestAction.AML.value),
-            ('CSO', Request.EntityType.SO.value, Request.RequestAction.CHG.value),
-            ('RSO', Request.EntityType.SO.value, Request.RequestAction.REST.value),
-            ('CTSO', Request.EntityType.SO.value, Request.RequestAction.MVE.value),
-            ('CSSO', Request.EntityType.SO.value, Request.RequestAction.CNV.value),
-            ('XSO', Request.EntityType.XSO.value, Request.RequestAction.NEW.value),
-            ('XCSO', Request.EntityType.XSO.value, Request.RequestAction.CHG.value),
-            ('XRSO', Request.EntityType.XSO.value, Request.RequestAction.REST.value),
-            ('XASO', Request.EntityType.XSO.value, Request.RequestAction.AS.value),
-            ('XCASO', Request.EntityType.XSO.value, Request.RequestAction.ACHG.value),
-            ('CP', Request.EntityType.CP.value, Request.RequestAction.NEW_AML.value),
-            ('CCP', Request.EntityType.CP.value, Request.RequestAction.CHG.value),
-            ('CTC', Request.EntityType.CP.value, Request.RequestAction.MVE.value),
-            ('RCP', Request.EntityType.CP.value, Request.RequestAction.REST.value),
-            ('XCP', Request.EntityType.XCP.value, Request.RequestAction.NEW.value),
-            ('XCCP', Request.EntityType.XCP.value, Request.RequestAction.CHG.value),
-            ('XRCP', Request.EntityType.XCP.value, Request.RequestAction.REST.value),
-            ('CC', Request.EntityType.CCC.value, Request.RequestAction.NEW_AML.value),
-            ('CCV', Request.EntityType.CCC.value, Request.RequestAction.CNV.value),
-            ('CCC', Request.EntityType.CCC.value, Request.RequestAction.CHG.value),
-            ('CCCT', Request.EntityType.CCC.value, Request.RequestAction.MVE.value),
-            ('RCC', Request.EntityType.CCC.value, Request.RequestAction.REST.value),
-            ('UL', Request.EntityType.ULC.value, Request.RequestAction.NEW.value),
-            ('UC', Request.EntityType.ULC.value, Request.RequestAction.CNV.value),
-            ('CUL', Request.EntityType.ULC.value, Request.RequestAction.CHG.value),
-            ('ULCT', Request.EntityType.ULC.value, Request.RequestAction.MVE.value),
-            ('RUL', Request.EntityType.ULC.value, Request.RequestAction.REST.value),
-            ('UA', Request.EntityType.XULC.value, Request.RequestAction.AS.value),
-            ('XUL', Request.EntityType.XULC.value, Request.RequestAction.NEW.value),
-            ('XCUL', Request.EntityType.XULC.value, Request.RequestAction.CHG.value),
-            ('XRUL', Request.EntityType.XULC.value, Request.RequestAction.REST.value),
-            ('FI', Request.EntityType.FI.value, Request.RequestAction.NEW.value),
-            ('CFI', Request.EntityType.FI.value, Request.RequestAction.CHG.value),
-            ('RFI', Request.EntityType.FI.value, Request.RequestAction.REST.value),
-            ('PA', Request.EntityType.PRIV.value, Request.RequestAction.NEW.value),
-            ('PAR', Request.EntityType.PAR.value, Request.RequestAction.NEW.value)
-         ]
-
         new_value = request.requestTypeCd
         output = [item for item in request_type_mapping
                   if item[0] == new_value]
