@@ -174,7 +174,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         designation_all_regex = '|'.join(designation_all)
         prefixes = '|'.join(prefix_list)
         number_list = number_list = sorted(number_list, key=len, reverse=True)
-        print(number_list)
+        # print(number_list)
         numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
