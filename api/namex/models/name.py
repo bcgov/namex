@@ -51,14 +51,25 @@ class Name(db.Model):
         """Property containing the name type which is used by name Request."""
         return self._name_type_cd
 
+    @name_type_cd.setter
+    def name_type_cd(self, value: str):
+        self._name_type_cd = value
+
     @property
     def clean_name(self):
         """Property containing the cleaned approved name used in analysis in Name Request"""
         return self._clean_name
 
+    @clean_name.setter
+    def clean_name(self, value: str):
+        self._clean_name = value
+
     def as_dict(self):
         return {
             "name": self.name,
+            "clean_name": self.clean_name,
+            "name_type_cd": self.name_type_cd,
+            "designation": self.designation,
             "choice": self.choice,
             "state": self.state,
             "conflict1": self.conflict1,

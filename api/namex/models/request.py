@@ -128,7 +128,7 @@ class Request(db.Model):
 
     @entity_type_cd.setter
     def entity_type_cd(self, value: str):
-        self._request_action_cd = value
+        self._entity_type_cd = value
 
     def __init__(self, *args, **kwargs):
         pass
