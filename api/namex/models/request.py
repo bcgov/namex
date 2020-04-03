@@ -76,6 +76,70 @@ class Request(db.Model):
         # legacy
         FIRM = 'FIRM'
 
+    # Entity types (legacy) used in search conflicts
+    class EntityTypeBCORP(Enum):
+        # CR = 'CR'
+        CCR = 'CCR'
+        CT = 'CT'
+        RCR = 'RCR'
+
+    class EntityTypeULC(Enum):
+        # UL='UL'
+        UC = 'UC'
+        CUL = 'CUL'
+        ULCT = 'ULCT'
+        RUL = 'RUL'
+
+    class EntityTypeCP(Enum):
+        # CP='CP'
+        CCP = 'CCP'
+        CTC = 'CTC'
+        RCP = 'RCP'
+
+    class EntityTypeCCC(Enum):
+        #CCC = 'CC'
+        CCV = 'CCV'
+        CC = 'CCC'
+        CCCT = 'CCCT'
+        RCC = 'RCC'
+
+    class EntityTypeSO(Enum):
+        # SO='SO'
+        ASO = 'ASO'
+        CSO = 'CSO'
+        RSO = 'RSO'
+        CTSO = 'CTSO'
+        CSSO = 'CSSO'
+
+    class EntityTypeFI(Enum):
+        # FI = 'FI'
+        CFI = 'CFI'
+        RFI = 'RFI'
+
+    class EntityTypeXCORP(Enum):
+        # XCR = 'XCR'
+        XCCR = 'XCCR'
+        XRCR = 'XRCR'
+        AS = 'AS'
+
+    class EntityTypeXULC(Enum):
+        # XUL='XUL'
+        UA = 'UA'
+        XCUL = 'XCUL'
+        XRUL = 'XRUL'
+
+    class EntityTypeXCP(Enum):
+        # XCP='XCP'
+        XCCP = 'XCCP'
+        XRCP = 'XRCP'
+
+    class EntityTypeXSO(Enum):
+        # XSO='XSO'
+        XCSO = 'XCSO'
+        XRSO = 'XRSO'
+        XASO = 'XASO'
+        XCASO = 'XCASO'
+
     __tablename__ = 'requests'
 
     # Field names use a JSON / JavaScript naming pattern,
@@ -308,8 +372,29 @@ class Request(db.Model):
             Request.id == Name.nrId,
             Request.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
             Request.requestTypeCd.in_(
-                ['PA', 'CR', 'CP', 'FI', 'SO', 'UL', 'CUL', 'CCR', 'CFI', 'CCP', 'CSO', 'CCC', 'CC']),
-            Name.state.in_(['APPROVED', 'CONDITION'])
+                [Request.EntityType.PRIV.value,
+                 Request.EntityType.BCORP.value, Request.EntityTypeBCORP.CCR.value, Request.EntityTypeBCORP.CT.value,
+                 Request.EntityTypeBCORP.RCR.value,
+                 Request.EntityType.CP.value, Request.EntityTypeCP.CCP.value, Request.EntityTypeCP.CTC.value, Request.EntityTypeCP.RCP.value,
+                 Request.EntityType.FI.value, Request.EntityTypeFI.CFI.value, Request.EntityTypeFI.RFI.value,
+                 Request.EntityType.SO.value, Request.EntityTypeSO.ASO.value, Request.EntityTypeSO.CSO.value, Request.EntityTypeSO.CSSO.value,
+                 Request.EntityTypeSO.CTSO.value, Request.EntityTypeSO.RSO.value,
+                 Request.EntityType.ULC.value, Request.EntityTypeULC.UC.value, Request.EntityTypeULC.CUL.value,
+                 Request.EntityTypeULC.ULCT.value, Request.EntityTypeULC.RUL.value,
+                 Request.EntityType.XSO.value, Request.EntityTypeXSO.XASO.value, Request.EntityTypeXSO.XCASO.value,
+                 Request.EntityTypeXSO.XCSO.value, Request.EntityTypeXSO.XRSO.value,
+                 Request.EntityType.CCC.value, Request.EntityTypeCCC.CC.value, Request.EntityTypeCCC.CCV.value,
+                 Request.EntityTypeCCC.CCCT.value, Request.EntityTypeCCC.RCC.value,
+                 Request.EntityType.PAR.value,
+                 Request.EntityType.XCORP.value, Request.EntityTypeXCORP.XCCR.value, Request.EntityTypeXCORP.XRCR.value,
+                 Request.EntityTypeXCORP.AS.value,
+                 Request.EntityType.XULC.value, Request.EntityTypeXULC.UA.value, Request.EntityTypeXULC.XCUL.value,
+                 Request.EntityTypeXULC.XRUL.value,
+                 Request.EntityType.XCP.value, Request.EntityTypeXCP.XCCP.value, Request.EntityTypeXCP.XRCP.value,
+                 Request.EntityType.BC.value
+                 ]),
+            Name.state.in_([Name.APPROVED, Name.CONDITION]),
+
         ]
 
         criteria = RequestConditionCriteria(
@@ -339,7 +424,7 @@ class Request(db.Model):
             criteria.filters.append(func.lower(Name.name).op('~')(r'\s+\y{}\y'.format(substitutions)))
         else:
             substitutions = '|'.join(map(str, descriptive_element))
-            criteria.filters.append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s+'.format(substitutions)))
+            criteria.filters.append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
             return criteria
 
         results = Request.find_by_criteria(criteria)
