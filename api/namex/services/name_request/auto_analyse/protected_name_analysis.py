@@ -64,7 +64,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         self._all_designations = self._designation_any_list + self._designation_end_list
 
-
     '''
     Set designations in position <end> found any other place in the company name, these designations are misplaced.
     '''
@@ -162,16 +161,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
-        '''
-        if self.token_classifier.distinctive_word_tokens == self.token_classifier.descriptive_word_tokens:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.name_tokens)
-
-        else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens, self.token_classifier.distinctive_word_tokens, self.token_classifier.descriptive_word_tokens)
-        '''
-
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
+        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc(), self.name_tokens,
+                                                   self.processed_name)
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
