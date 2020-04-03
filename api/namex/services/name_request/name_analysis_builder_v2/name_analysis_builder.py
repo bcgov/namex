@@ -99,15 +99,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_name': list_original_name or [],
                     'list_dist': list_dist or []
                 }
-
-        elif self._list_desc_words.__len__() == 0:
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-            result.values = {
-                'list_name': list_original_name or [],
-                'list_dist': list_dist or []
-            }
         else:
             if list_dist.__len__() == 0:
                 result = ProcedureResult()
@@ -117,7 +108,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_name': list_original_name or [],
                     'list_dist': []
                 }
-            elif list_desc.__len__() == 0:
+            elif list_desc.__len__() == 0 or self._list_desc_words.__len__() == 0:
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
