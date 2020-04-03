@@ -403,7 +403,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                         counter += 0.6
 
                 similarity = counter / length_original
-                if similarity > 0.65:
+                if similarity > 0.68:
                     dict_matches_counter.update({match: similarity})
 
             dict_matches_words.update(
