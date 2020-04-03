@@ -1,3 +1,6 @@
+import json
+import jsonpickle
+
 from flask import request, make_response, jsonify
 from flask_restplus import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
@@ -37,15 +40,18 @@ class _WordSynonyms(Resource):
     @api.doc(params={
     })
     def get(word=None):
-        service = SynonymService()
-        service.get_synonyms(word)
-
-        if not validate_request():
+        if not validate_request(request.args):
             return
 
-        payload = {}.to_json()
+        service = SynonymService()
+        results = service.get_synonyms(word)
 
-        response = make_response(payload, 200)
+        payload = {
+            # Always wrap arrays of JSON data, it prevents an exploit
+            'data': results
+        }
+
+        response = make_response(jsonpickle.encode(payload), 200)
         return response
 
 
@@ -58,15 +64,18 @@ class _WordSubstitutions(Resource):
     @api.doc(params={
     })
     def get(word=None):
-        service = SynonymService()
-        service.get_substitutions(word)
-
-        if not validate_request():
+        if not validate_request(request.args):
             return
 
-        payload = {}.to_json()
+        service = SynonymService()
+        results = service.get_substitutions(word)
 
-        response = make_response(payload, 200)
+        payload = {
+            # Always wrap arrays of JSON data, it prevents an exploit
+            'data': results
+        }
+
+        response = make_response(jsonpickle.encode(payload), 200)
         return response
 
 
@@ -79,15 +88,18 @@ class _WordStops(Resource):
     @api.doc(params={
     })
     def get(word=None):
-        service = SynonymService()
-        service.get_stop_words(word)
-
-        if not validate_request():
+        if not validate_request(request.args):
             return
 
-        payload = {}.to_json()
+        service = SynonymService()
+        results = service.get_stop_words(word)
 
-        response = make_response(payload, 200)
+        payload = {
+            # Always wrap arrays of JSON data, it prevents an exploit
+            'data': results
+        }
+
+        response = make_response(jsonpickle.encode(payload), 200)
         return response
 
 
@@ -100,15 +112,18 @@ class _Prefixes(Resource):
     @api.doc(params={
     })
     def get():
-        service = SynonymService()
-        service.get_prefixes()
-
-        if not validate_request():
+        if not validate_request(request.args):
             return
 
-        payload = {}.to_json()
+        service = SynonymService()
+        results = service.get_prefixes()
 
-        response = make_response(payload, 200)
+        payload = {
+            # Always wrap arrays of JSON data, it prevents an exploit
+            'data': results
+        }
+
+        response = make_response(jsonpickle.encode(payload), 200)
         return response
 
 
@@ -121,15 +136,18 @@ class _NumberWords(Resource):
     @api.doc(params={
     })
     def get():
-        service = SynonymService()
-        service.get_number_words()
-
-        if not validate_request():
+        if not validate_request(request.args):
             return
 
-        payload = {}.to_json()
+        service = SynonymService()
+        results = service.get_number_words()
 
-        response = make_response(payload, 200)
+        payload = {
+            # Always wrap arrays of JSON data, it prevents an exploit
+            'data': results
+        }
+
+        response = make_response(jsonpickle.encode(payload), 200)
         return response
 
 
@@ -149,15 +167,18 @@ class _Designations(Resource):
         position_code = unquote_plus(request.args.get('position_code'))
         lang = unquote_plus(request.args.get('lang'))
 
-        service = SynonymService()
-        service.get_designations(entity_type_code, position_code, lang)
-
-        if not validate_request():
+        if not validate_request(request.args):
             return
 
-        payload = {}.to_json()
+        service = SynonymService()
+        results = service.get_designations(entity_type_code, position_code, lang)
 
-        response = make_response(payload, 200)
+        payload = {
+            # Always wrap arrays of JSON data, it prevents an exploit
+            'data': results
+        }
+
+        response = make_response(jsonpickle.encode(payload), 200)
         return response
 
 
@@ -180,15 +201,18 @@ class _TransformText(Resource):
         number_list = unquote_plus(request.args.get('number_list'))
         # exceptions_ws
 
-        service = SynonymService()
-        service.regex_transform(text, designation_all, prefix_list, number_list)
-
-        if not validate_request():
+        if not validate_request(request.args):
             return
 
-        payload = {}.to_json()
+        service = SynonymService()
+        results = service.regex_transform(text, designation_all, prefix_list, number_list)
 
-        response = make_response(payload, 200)
+        payload = {
+            # Always wrap arrays of JSON data, it prevents an exploit
+            'data': results
+        }
+
+        response = make_response(jsonpickle.encode(payload), 200)
         return response
 
 

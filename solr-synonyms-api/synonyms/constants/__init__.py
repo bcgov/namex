@@ -1,5 +1,12 @@
 from enum import Enum
 
+
+class DesignationPositionCodes(Enum):
+    START = 'start'
+    END = 'end'
+    ANY = 'any'
+
+
 # TODO: I have copied this over to new name processing service, hoping I can get rid of this here...
 class DataFrameFields(Enum):
     FIELD_SYNONYMS = 'synonyms_text'
@@ -23,6 +30,7 @@ class ValidLocations(Enum):
             values.append(item.value)
 
         return values
+
 
 # Not a 'todo', just a note for later - these probably correlate to some JSON schemas in the LEAR project
 # bcgov/lear/schemas/src/registry_schemas/schemas for namerequest schema
@@ -65,6 +73,7 @@ class BCUnprotectedNameEntityTypes(Enum):
     @classmethod
     def has_value(cls, value):
         return value in cls._value2member_map_
+
 
 class XproUnprotectedNameEntityTypes(Enum):
     XPRO_CORPORATION = 'XCR'

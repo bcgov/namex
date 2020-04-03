@@ -14,6 +14,7 @@ __all__ = ['api']
 
 api = Namespace('WordClassification', description='Word Classification Service - Used by Namex API')
 
+
 @api.errorhandler(AuthError)
 def handle_auth_error(ex):
     response = jsonify(ex.error)
@@ -31,6 +32,7 @@ class _NameProcessing(Resource):
     @staticmethod
     def get():
         return ('results', [], 200)
+
 
 @api.route('/', strict_slashes=False, methods=['GET'])
 class _WordClassification(Resource):
