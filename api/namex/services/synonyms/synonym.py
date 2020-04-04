@@ -172,16 +172,13 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
         designation_all_regex = '|'.join(designation_all)
-        prefixes = '|'.join(prefix_list)
         number_list = number_list = sorted(number_list, key=len, reverse=True)
-        print(number_list)
         numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
         internet_domains = '.COM|.ORG|.NET|.EDU'
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
-        text = self.regex_prefixes(text, prefixes)
         text = self.regex_numbers_lot(text)
         text = self.regex_repeated_strings(text)
         text = self.regex_separated_ordinals(text, ordinal_suffixes)

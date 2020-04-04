@@ -1,6 +1,8 @@
 import itertools
 import re
 import collections
+
+from . import porter
 from sqlalchemy import create_engine
 from toolz import unique
 
@@ -152,6 +154,23 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
             desc_list_all.append(desc_list_tmp[idx])
 
     return dist_list_all, desc_list_all
+
+
+def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
+    dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_dist)
+    desc_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_desc, False)
+
+    all_substitution_dict = collections.OrderedDict()
+    for word in list_name:
+        if word in dist_substitution_dict:
+            all_substitution_dict[word] = dist_substitution_dict[word]
+        elif word in desc_substitution_dict:
+            all_substitution_dict[word] = desc_substitution_dict[word]
+
+    for k, v in all_substitution_dict.items():
+        all_substitution_dict[k] = [porter.stem(e.lower()) for e in v]
+
+    return all_substitution_dict, dist_substitution_dict, desc_substitution_dict
 
 
 def lookahead(iterable):
