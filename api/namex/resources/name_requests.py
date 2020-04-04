@@ -22,9 +22,7 @@ from namex.services import ServicesError, MessageServices, EventRecorder
 
 from namex.services.name_request.auto_analyse import AnalysisRequestActions
 
-from namex.constants import \
-    ValidLocations, BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
-    request_type_mapping, RequestAction, EntityType
+from namex.constants import request_type_mapping, RequestAction, EntityType
 
 
 # Register a local namespace for the NR reserve
