@@ -89,8 +89,9 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
     def get_incorrect_designation_end_in_name(self, name):
         en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
+        en_designation_end_all_list.sort(key=len, reverse=True)
         designation_end_rgx = '|'.join(map(str, en_designation_end_all_list))
-        designation_end_regex = r'({})(?=(?:.*\s\w+$))'.format(designation_end_rgx)
+        designation_end_regex = r'\b({})\B(?=(?:.*\s\w+$))'.format(designation_end_rgx)
 
         # Returns list of tuples
         found_incorrect_designation_end = re.findall(designation_end_regex, name.lower())

@@ -1,8 +1,13 @@
+import itertools
+import re
+from collections import OrderedDict
+
 from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists
+from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists, list_distinctive_descriptive, \
+    list_distinctive_descriptive_same, get_all_substitutions
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -28,7 +33,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         # list_dist = ['victoria', 'book']
         # list_desc = ['victoria', 'abc', 'view']
         # Returns words in wrong classification following distinctive | descriptive: [{book:3}]
-        _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
+        # _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
+
+        # Validate possible combinations using available distinctive and descriptive list:
+        if list_dist == list_desc:
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name)
+        else:
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name, list_dist, list_desc)
 
         # First, check to make sure the name doesn't have too many words
         if len(list_name) > MAX_LIMIT:
@@ -39,7 +50,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             results.append(result)
 
         # Next, we check for unclassified words
-        if len(list_none) > 0:
+        if list_none.__len__() > 0:
             unclassified_words_list_response = []
             for idx, token in enumerate(list_name):
                 if any(token in word for word in list_none):
@@ -60,8 +71,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
         # the original name should be passed to get the correct index when reporting issues to front end.
-
-        if len(list_name) == 0:
+        if list_name.__len__() == 0:
             # If we have no words in our name, obviously we need to add a distinctive... this is kind of redundant as
             # we shouldn't have a name with no words but we still need to handle the case in our API
             result = ProcedureResult()
@@ -71,9 +81,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'list_name': [],
                 'list_dist': []
             }
-        elif len(list_name) == 1:
+        elif list_name.__len__() == 1:
             # If there's only one word and it's distinctive, we need to add a descriptive word
-            if len(list_dist) == 1:
+            if list_dist.__len__() == 1:
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
@@ -90,7 +100,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_dist': list_dist or []
                 }
         else:
-            if len(list_dist) == 0:
+            if list_dist.__len__() == 0:
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
@@ -98,7 +108,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_name': list_original_name or [],
                     'list_dist': []
                 }
-            elif len(list_desc) == 0:
+            elif list_desc.__len__() == 0 or self._list_desc_words.__len__() == 0:
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
@@ -106,18 +116,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_name': list_original_name or [],
                     'list_dist': list_dist or []
                 }
-                # elif collections.Counter(list_dist) == collections.Counter(list_desc):
-                # If there's more than one word and all words are both distinctive and descriptive ~~add another distinctive~~
-                # Then we find all possible combinations in search_conflicts
-                '''
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_name': list_name,
-                    'list_dist': []
-                }
-                '''
 
         if result:
             results.append(result)
@@ -257,7 +255,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         words_consent_list = []
 
         for words_consent in all_words_consent_list:
-            if words_consent.lower() in name.lower():
+            if re.search(r'\b{}\b'.format(re.escape(words_consent.lower())), name.lower()):
                 words_consent_list.append(words_consent.lower())
 
         words_consent_list_response = []
@@ -363,27 +361,18 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
                                list_name, name):
-        syn_svc = self.synonym_service
 
         if matches:
-            dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_dist)
-            dist_substitution_list = dist_substitution_dict.values()
-            dist_substitution_list = [item for sublist in dist_substitution_list for item in sublist]
+            syn_svc = self.synonym_service
+            service = ProtectedNameAnalysisService()
 
-            desc_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_desc, False)
-            desc_substitution_list = desc_substitution_dict.values()
-            desc_substitution_list = [item for sublist in desc_substitution_list for item in sublist]
-
-            all_substitutions = dist_substitution_list + desc_substitution_list
-            all_subs_stem = [porter.stem(substitution.lower()) for substitution in all_substitutions]
-
+            all_subs_dict, dist_subs_dict, desc_subs_dict = get_all_substitutions(syn_svc, list_dist, list_desc,
+                                                                                  list_name)
             list_name_stem = [porter.stem(name.lower()) for name in list_name]
             length_original = len(list_name)
 
-            dict_matches_counter = {}
-            dict_matches_words = {}
+            dict_matches_counter, dict_matches_words = {}, {}
 
-            service = ProtectedNameAnalysisService()
             for match in matches:
                 np_svc = service.name_processing_service
                 np_svc.set_name(match)
@@ -391,23 +380,26 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 match_list = np_svc.name_tokens
                 counter = 0
                 for idx, word in enumerate(match_list):
-                    # Compare in the same place
-                    if length_original == len(match_list) and word.lower() == list_name[idx]:
+                    if length_original > idx and word.lower() == list_name[idx]:
                         counter += 1
-                    elif length_original == len(match_list) and porter.stem(word.lower()) == list_name_stem[idx]:
+                    elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
                         counter += 0.95
+                    elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
+                        counter += 0.9
                     elif word.lower() in list_name:
-                        counter += 0.85
+                        counter += 0.8
                     elif porter.stem(word.lower()) in list_name_stem:
-                        counter += 0.75
-                    elif porter.stem(word.lower()) in all_subs_stem:
                         counter += 0.7
+                    elif porter.stem(word.lower()) in all_subs_dict.values():
+                        counter += 0.6
+
                 similarity = counter / length_original
-                dict_matches_counter.update({match: similarity})
+                if similarity > 0.68:
+                    dict_matches_counter.update({match: similarity})
 
             dict_matches_words.update(
-                self.get_details_most_similar(list(dict_matches_counter), dist_substitution_dict,
-                                              desc_substitution_dict))
+                self.get_details_most_similar(list(dict_matches_counter), dist_subs_dict,
+                                              desc_subs_dict))
             # Get two highest scores (values) and shortest names (key)
             dict_highest_counter.update({k: v for k, v in
                                          sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
