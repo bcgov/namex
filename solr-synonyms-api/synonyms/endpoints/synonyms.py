@@ -32,16 +32,19 @@ def handle_auth_error(ex):
 def validate_request(request):
     return True
 
-@api.route('/synonyms', defaults={'word': None})
-@api.route('/synonyms/<word>', strict_slashes=False, methods=['GET'])
+
+@api.route('/synonyms', strict_slashes=False, methods=['GET'])
 class _WordSynonyms(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
     @api.doc(params={
+        'word': ''
     })
-    def get(word=None):
+    def get():
+        word = unquote_plus(request.args.get('word')) if request.args.get('word') else None
+
         if not validate_request(request.args):
             return
 
@@ -57,16 +60,18 @@ class _WordSynonyms(Resource):
         return response
 
 
-@api.route('/substitutions', defaults={'word': None})
-@api.route('/substitutions/<word>', strict_slashes=False, methods=['GET'])
+@api.route('/substitutions', strict_slashes=False, methods=['GET'])
 class _WordSubstitutions(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
     @api.doc(params={
+        'word': ''
     })
-    def get(word=None):
+    def get():
+        word = unquote_plus(request.args.get('word')) if request.args.get('word') else None
+
         if not validate_request(request.args):
             return
 
@@ -82,16 +87,18 @@ class _WordSubstitutions(Resource):
         return response
 
 
-@api.route('/stop-words', defaults={'word': None})
-@api.route('/stop-words/<word>', strict_slashes=False, methods=['GET'])
+@api.route('/stop-words', strict_slashes=False, methods=['GET'])
 class _StopWords(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
     @api.doc(params={
+        'word': ''
     })
-    def get(word=None):
+    def get():
+        word = unquote_plus(request.args.get('word')) if request.args.get('word') else None
+
         if not validate_request(request.args):
             return
 
