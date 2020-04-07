@@ -20,3 +20,5 @@ gunicorn
 gunicorn[eventlet]
 greenlet
 eventlet
+
+werkzeug==0.16.1

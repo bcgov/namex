@@ -29,6 +29,26 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
         return misplaced_designation_any_list
 
+    def get_misplaced_any_designations(self, name, designation_any_entity_type):
+        # en_designation_any_all_list = self.get_designations(entity_type, DesignationPositionCodes.ANY, 'english')
+        if not designation_any_entity_type:
+            return list()
+        designation_end_rgx = '(' + '|'.join(map(str, designation_any_entity_type)) + ')'
+        designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
+
+        # Returns list of tuples
+        found_designation_end = re.findall(designation_end_regex, name.lower())
+
+        # Getting list of lists where the first list contains designations of type "anywhere" and the second list contains designations of type "end".
+        # [['association],['limited partnership']
+        misplaced_designation_end_list = [list(elem) for elem in found_designation_end]
+        if any(isinstance(el, list) for el in misplaced_designation_end_list):
+            misplaced_designation_end_list = get_flat_list(misplaced_designation_end_list)
+        misplaced_designation_end_list = list(filter(None, misplaced_designation_end_list))
+        misplaced_designation_end_list = list(dict.fromkeys(misplaced_designation_end_list))
+
+        return misplaced_designation_end_list
+
     def get_entity_type_end_designation(self, entity_end_designation_dict, all_designation_any_end_list):
         entity_type_end_designation_name = list()
         for designation_end in all_designation_any_end_list:
@@ -101,26 +121,6 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         found_designation_any = re.findall(designation_any_regex, name.lower())
 
         return found_designation_any
-
-    def get_misplaced_any_designations(self, name, designation_any_entity_type):
-        # en_designation_any_all_list = self.get_designations(entity_type, DesignationPositionCodes.ANY, 'english')
-        if not designation_any_entity_type:
-            return list()
-        designation_end_rgx = '(' + '|'.join(map(str, designation_any_entity_type)) + ')'
-        designation_end_regex = r'' + designation_end_rgx + '(?=(\s' + designation_end_rgx + ')*$)'
-
-        # Returns list of tuples
-        found_designation_end = re.findall(designation_end_regex, name.lower())
-
-        # Getting list of lists where the first list contains designations of type "anywhere" and the second list contains designations of type "end".
-        # [['association],['limited partnership']
-        misplaced_designation_end_list = [list(elem) for elem in found_designation_end]
-        if any(isinstance(el, list) for el in misplaced_designation_end_list):
-            misplaced_designation_end_list = get_flat_list(misplaced_designation_end_list)
-        misplaced_designation_end_list = list(filter(None, misplaced_designation_end_list))
-        misplaced_designation_end_list = list(dict.fromkeys(misplaced_designation_end_list))
-
-        return misplaced_designation_end_list
 
     def get_all_end_designations(self):
         # TODO: Fix RLC we don't have that entity type, code changed to RLC from something else...
