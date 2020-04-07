@@ -2,7 +2,7 @@ import json
 import jsonpickle
 
 from flask import request, make_response, jsonify
-from flask_restplus import Namespace, Resource, cors
+from flask_restplus import Namespace, Resource, cors, fields, marshal_with
 from flask_jwt_oidc import AuthError
 
 from urllib.parse import unquote_plus
@@ -33,12 +33,20 @@ def validate_request(request):
     return True
 
 
+# Define our response object
+response_model = api.model('SynonymList', {
+    'data': fields.List(fields.String)
+})
+
+
 @api.route('/synonyms', strict_slashes=False, methods=['GET'])
 class _WordSynonyms(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'word': ''
     })
@@ -51,13 +59,9 @@ class _WordSynonyms(Resource):
         service = SynonymService()
         results = service.get_synonyms(word)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/substitutions', strict_slashes=False, methods=['GET'])
@@ -66,6 +70,8 @@ class _WordSubstitutions(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'word': ''
     })
@@ -78,13 +84,9 @@ class _WordSubstitutions(Resource):
         service = SynonymService()
         results = service.get_substitutions(word)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/stop-words', strict_slashes=False, methods=['GET'])
@@ -93,6 +95,8 @@ class _StopWords(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'word': ''
     })
@@ -105,13 +109,9 @@ class _StopWords(Resource):
         service = SynonymService()
         results = service.get_stop_words(word)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/prefixes', strict_slashes=False, methods=['GET'])
@@ -120,6 +120,8 @@ class _Prefixes(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
     })
     def get():
@@ -129,13 +131,9 @@ class _Prefixes(Resource):
         service = SynonymService()
         results = service.get_prefixes()
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/number-words', strict_slashes=False, methods=['GET'])
@@ -144,6 +142,8 @@ class _NumberWords(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
     })
     def get():
@@ -153,13 +153,9 @@ class _NumberWords(Resource):
         service = SynonymService()
         results = service.get_number_words()
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/designations', strict_slashes=False, methods=['GET'])
@@ -168,6 +164,8 @@ class _Designations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'entity_type_code': '',
         'position_code': '',
@@ -184,13 +182,9 @@ class _Designations(Resource):
         service = SynonymService()
         results = service.get_designations(entity_type_code, position_code, lang)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/designated-end-all-words', strict_slashes=False, methods=['GET'])
@@ -199,6 +193,8 @@ class _DesignatedEndAllWords(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'entity_type_code': '',
         'position_code': '',
@@ -215,13 +211,9 @@ class _DesignatedEndAllWords(Resource):
         service = SynonymService()
         results = service.get_designations(entity_type_code, position_code, lang)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/designated-any-all-words', strict_slashes=False, methods=['GET'])
@@ -230,6 +222,8 @@ class _DesignatedAnyAllWords(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'entity_type_code': '',
         'position_code': '',
@@ -246,13 +240,9 @@ class _DesignatedAnyAllWords(Resource):
         service = SynonymService()
         results = service.get_designations(entity_type_code, position_code, lang)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/misplaced-end-designations', strict_slashes=False, methods=['GET'])
@@ -261,6 +251,8 @@ class _MisplacedEndDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'name': '',
         'designation_end_entity_type': ''
@@ -275,13 +267,9 @@ class _MisplacedEndDesignations(Resource):
         service = SynonymService()
         results = service.get_misplaced_end_designations(name, designation_end_entity_type)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/misplaced-end-designations', strict_slashes=False, methods=['GET'])
@@ -290,6 +278,8 @@ class _MisplacedEndDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'name': '',
         'designation_end_entity_type': ''
@@ -304,13 +294,9 @@ class _MisplacedEndDesignations(Resource):
         service = SynonymService()
         results = service.get_misplaced_end_designations(name, designation_end_entity_type)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/misplaced-any-designations', strict_slashes=False, methods=['GET'])
@@ -319,6 +305,8 @@ class _MisplacedAnyDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'name': '',
         'designation_any_entity_type': ''
@@ -333,13 +321,9 @@ class _MisplacedAnyDesignations(Resource):
         service = SynonymService()
         results = service.get_misplaced_any_designations(name, designation_end_entity_type)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/entity-type-end-designation', strict_slashes=False, methods=['GET'])
@@ -348,6 +332,8 @@ class _EntityTypeEndDesignation(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'entity_end_designation_dict': '',
         'all_designation_any_end_list': ''
@@ -362,13 +348,9 @@ class _EntityTypeEndDesignation(Resource):
         service = SynonymService()
         results = service.get_entity_type_end_designation(name, designation_end_entity_type)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/entity-type-any-designation', strict_slashes=False, methods=['GET'])
@@ -377,6 +359,8 @@ class _EntityTypeAnyDesignation(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'entity_any_designation_dict': '',
         'all_designation_any_end_list': ''
@@ -391,13 +375,9 @@ class _EntityTypeAnyDesignation(Resource):
         service = SynonymService()
         results = service.get_entity_type_any_designation(name, designation_end_entity_type)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/designation-end-in-name', strict_slashes=False, methods=['GET'])
@@ -406,6 +386,8 @@ class _DesignationEndInName(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'name': ''
     })
@@ -418,13 +400,9 @@ class _DesignationEndInName(Resource):
         service = SynonymService()
         results = service.get_designation_end_in_name(name)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/designation-all-in-name', strict_slashes=False, methods=['GET'])
@@ -433,6 +411,8 @@ class _DesignationAllInName(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'name': ''
     })
@@ -445,13 +425,9 @@ class _DesignationAllInName(Resource):
         service = SynonymService()
         results = service.get_designation_all_in_name(name)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/designation-any-in-name', strict_slashes=False, methods=['GET'])
@@ -460,6 +436,8 @@ class _DesignationAnyInName(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'name': ''
     })
@@ -472,13 +450,9 @@ class _DesignationAnyInName(Resource):
         service = SynonymService()
         results = service.get_designation_any_in_name(name)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/all-end-designations', strict_slashes=False, methods=['GET'])
@@ -487,6 +461,8 @@ class _AllEndDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
     })
     def get():
@@ -496,13 +472,9 @@ class _AllEndDesignations(Resource):
         service = SynonymService()
         results = service.get_all_end_designations()
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/all-any-designations', strict_slashes=False, methods=['GET'])
@@ -511,6 +483,8 @@ class _AllAnyDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
     })
     def get():
@@ -520,13 +494,9 @@ class _AllAnyDesignations(Resource):
         service = SynonymService()
         results = service.get_all_any_designations()
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/entity-type-by-value', strict_slashes=False, methods=['GET'])
@@ -535,6 +505,8 @@ class _EntityTypeByValue(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'entity_type_dicts': '',
         'designation': ''
@@ -549,13 +521,9 @@ class _EntityTypeByValue(Resource):
         service = SynonymService()
         results = service.get_entity_type_by_value(entity_type_dicts, designation)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/transform-text', strict_slashes=False, methods=['GET'])
@@ -564,6 +532,8 @@ class _TransformText(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.response(200, 'SynonymsApi', response_model)
+    @marshal_with(response_model)
     @api.doc(params={
         'text': '',
         'designation_all': '',
@@ -583,13 +553,9 @@ class _TransformText(Resource):
         service = SynonymService()
         results = service.regex_transform(text, designation_all, prefix_list, number_list)
 
-        payload = {
-            # Always wrap arrays of JSON data, it prevents an exploit
+        return {
             'data': results
         }
-
-        response = make_response(jsonpickle.encode(payload), 200)
-        return response
 
 
 @api.route('/<col>/<term>', strict_slashes=False, methods=['GET'])
