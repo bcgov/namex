@@ -15,6 +15,7 @@ from flask_jwt_oidc import JwtManager
 
 jwtManager = JwtManager()
 
+from synonyms import models
 from synonyms.endpoints import api
 from synonyms.models import db, ma
 
@@ -53,9 +54,6 @@ def setup_jwt_manager(app, token_manager):
     app.config['JWT_ROLE_CALLBACK'] = get_roles
 
     token_manager.init_app(app)
-
-    return
-
 
 def register_shellcontext(app):
     """Register shell context objects."""
