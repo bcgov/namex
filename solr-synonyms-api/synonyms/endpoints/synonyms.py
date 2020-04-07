@@ -455,7 +455,7 @@ class _DesignationAllInName(Resource):
 
 
 @api.route('/designation-any-in-name', strict_slashes=False, methods=['GET'])
-class _DesignationAllInName(Resource):
+class _DesignationAnyInName(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
