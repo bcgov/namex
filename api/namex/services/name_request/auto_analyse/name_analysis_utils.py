@@ -3,10 +3,10 @@ import re
 import collections
 
 from . import porter
-from sqlalchemy import create_engine
-from toolz import unique
 
 from namex.services.name_request.auto_analyse import DataFrameFields
+
+from namex.utils.common import parse_dict_of_lists
 
 
 # TODO: Fix caps and stuff...
@@ -157,8 +157,11 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
 
 
 def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
-    dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(words=list_dist, words_are_distinctive=True).data
-    desc_substitution_dict = syn_svc.get_all_substitutions_synonyms(words=list_desc, words_are_distinctive='False').data
+    all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(words=list_dist, words_are_distinctive=True).data
+    dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
+
+    all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(words=list_desc, words_are_distinctive=False).data
+    desc_substitution_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
 
     all_substitution_dict = collections.OrderedDict()
     for word in list_name:

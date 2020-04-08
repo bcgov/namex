@@ -12,7 +12,7 @@ from urllib.parse import unquote_plus
 from synonyms.utils.logging import logging
 
 from synonyms.services.synonyms.synonym import SynonymService
-import synonyms.models.synonym as synonym
+from synonyms.models import synonym
 
 from synonyms.services.synonyms import DesignationPositionCodes
 
@@ -34,6 +34,16 @@ def handle_auth_error(ex):
 def validate_request(request):
     return True
 
+
+dictionary_list = api.model('DictionaryList', {
+    'key': fields.String,
+    'list': fields.List(fields.String)
+})
+
+# Define our response object
+response_dict_list = api.model('SynonymDictionaryList', {
+    'data': fields.List(fields.Nested(dictionary_list))
+})
 
 # Define our response object
 response_list = api.model('SynonymList', {
@@ -102,8 +112,8 @@ class _AllSubstitutionsSynonyms(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_list)
-    @marshal_with(response_list)
+    @api.response(200, 'SynonymsApi', response_dict_list)
+    @marshal_with(response_dict_list)
     @api.doc(params={
         'words': '',
         'words_are_distinctive': ''
@@ -121,9 +131,16 @@ class _AllSubstitutionsSynonyms(Resource):
 
         service = SynonymService()
         results = service.get_all_substitutions_synonyms(words, words_are_distinctive)
-        # TODO: RestPlus expects models not random dictionaries...
+
+        output = []
+        for key in results:
+            output.append({
+                'key': key,
+                'list': results[key]
+            })
+
         return {
-            'data': []  # results
+            'data': output
         }
 
 
@@ -411,11 +428,10 @@ class _EntityTypeAnyDesignation(Resource):
             return
 
         service = SynonymService()
-        # TODO: FIX ME FIRST More dictionaries!
-        # results = service.get_entity_type_any_designation(entity_any_designation_dict, all_designation_any_end_list)
+        results = service.get_entity_type_any_designation(entity_any_designation_dict, all_designation_any_end_list)
 
         return {
-            'data': []  #  results
+            'data': results
         }
 
 
@@ -500,8 +516,8 @@ class _AllEndDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_list)
-    @marshal_with(response_list)
+    @api.response(200, 'SynonymsApi', response_dict_list)
+    @marshal_with(response_dict_list)
     @api.doc(params={
     })
     def get():
@@ -511,13 +527,15 @@ class _AllEndDesignations(Resource):
         service = SynonymService()
         results = service.get_all_end_designations()
 
-        # TODO: Again, we can't just return random dicts
-        # return {
-        #   'data': []
-        # }
-        #
+        output = []
+        for key in results:
+            output.append({
+                'key': key,
+                'list': results[key]
+            })
+
         return {
-            'data': []
+            'data': output
         }
 
 
@@ -527,8 +545,8 @@ class _AllAnyDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_list)
-    @marshal_with(response_list)
+    @api.response(200, 'SynonymsApi', response_dict_list)
+    @marshal_with(response_dict_list)
     @api.doc(params={
     })
     def get():
@@ -536,11 +554,17 @@ class _AllAnyDesignations(Resource):
             return
 
         service = SynonymService()
-        # TODO: More dictionary stuff
-        # results = service.get_all_any_designations()
+        results = service.get_all_any_designations()
+
+        output = []
+        for key in results:
+            output.append({
+                'key': key,
+                'list': results[key]
+            })
 
         return {
-            'data': []  # results
+            'data': output
         }
 
 

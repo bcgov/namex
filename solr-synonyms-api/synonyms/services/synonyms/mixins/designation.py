@@ -162,8 +162,8 @@ class SynonymDesignationMixin(SynonymServiceMixin):
             # TODO: Use an enum for languages too!
             entity_any_designation_dict[entity_type.value] = self.get_designations(
                 entity_type,
-               DesignationPositionCodes.ANY,
-               'english'
+                DesignationPositionCodes.ANY,
+                'english'
             )
 
         return entity_any_designation_dict

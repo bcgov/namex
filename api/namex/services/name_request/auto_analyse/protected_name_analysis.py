@@ -1,17 +1,13 @@
 from datetime import (datetime)
 
-import collections
-
 from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
 from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
 
 from .name_analysis_director import NameAnalysisDirector
-from . import ProcedureResult
 
-from .name_analysis_utils import list_distinctive_descriptive_same, validate_distinctive_descriptive_lists, \
-    list_distinctive_descriptive
+from namex.utils.common import parse_dict_of_lists
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -101,11 +97,13 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     def _set_entity_type_any_designation(self):
         syn_svc = self.synonym_service
-        entity_any_designation_dict = self._entity_any_designation_dict
+        # entity_any_designation_dict = self._entity_any_designation_dict
         designation_any_list = self._designation_any_list
 
+        all_end_designations = syn_svc.get_all_end_designations().data
+
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
-            entity_any_designation_dict=syn_svc.get_all_end_designations().data,
+            entity_any_designation_dict=parse_dict_of_lists(all_end_designations),
             all_designation_any_end_list=designation_any_list
         ).data
 
@@ -115,11 +113,13 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     def _set_entity_type_end_designation(self):
         syn_svc = self.synonym_service
-        entity_end_designation_dict = self._entity_end_designation_dict
+        # entity_end_designation_dict = self._entity_end_designation_dict
         designation_end_list = self._designation_end_list
 
+        all_any_designations = syn_svc.get_all_any_designations().data
+
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
-            entity_end_designation_dict=syn_svc.get_all_any_designations().data,
+            entity_end_designation_dict=parse_dict_of_lists(all_any_designations),
             all_designation_any_end_list=designation_end_list
         ).data
 

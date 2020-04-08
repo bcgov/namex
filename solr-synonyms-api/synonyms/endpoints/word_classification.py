@@ -2,13 +2,6 @@ from flask import request, make_response, jsonify
 from flask_restplus import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
 
-from urllib.parse import unquote_plus
-
-from synonyms.utils.logging import logging
-
-import synonyms.models.synonym as synonym
-
-
 __all__ = ['api']
 
 
