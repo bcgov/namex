@@ -1,17 +1,13 @@
 from datetime import (datetime)
 
-import collections
-
 from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
 from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
 
 from .name_analysis_director import NameAnalysisDirector
-from . import ProcedureResult
 
-from .name_analysis_utils import list_distinctive_descriptive_same, validate_distinctive_descriptive_lists, \
-    list_distinctive_descriptive
+from namex.utils.common import parse_dict_of_lists
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -56,8 +52,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
 
-        designation_any_list = syn_svc.get_designation_any_in_name(original_name)
-        designation_end_list = syn_svc.get_designation_end_in_name(original_name)
+        designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
+        designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
 
         self._designation_any_list = designation_any_list
         self._designation_end_list = designation_end_list
@@ -72,7 +68,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
 
-        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(original_name)
+        # designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(name=original_name).data
+        # TODO: Where is this!!!!! The method doesn't exist anywhere...
+        designation_end_misplaced_list = []  # syn_svc.get_incorrect_designation_end_in_name(name=original_name).data
         self._misplaced_designation_end_list = designation_end_misplaced_list
 
     def _set_designations_by_entity_type_user(self):
@@ -87,8 +85,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, LanguageCodes.ENG)
-        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, LanguageCodes.ENG)
+        any_list = syn_svc.get_designations(entity_type_code=entity_type_code.value, position_code=DesignationPositionCodes.ANY.value, lang=LanguageCodes.ENG.value).data
+        end_list = syn_svc.get_designations(entity_type_code=entity_type_code.value, position_code=DesignationPositionCodes.END.value, lang=LanguageCodes.ENG.value).data
 
         self._designation_any_list_correct = any_list
         self._designation_end_list_correct = end_list
@@ -99,12 +97,15 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     def _set_entity_type_any_designation(self):
         syn_svc = self.synonym_service
-        entity_any_designation_dict = self._entity_any_designation_dict
+        # entity_any_designation_dict = self._entity_any_designation_dict
         designation_any_list = self._designation_any_list
 
+        all_end_designations = syn_svc.get_all_end_designations().data
+
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
-            syn_svc.get_all_end_designations(), designation_any_list
-        )
+            entity_any_designation_dict=parse_dict_of_lists(all_end_designations),
+            all_designation_any_end_list=designation_any_list
+        ).data
 
     '''
     Set the corresponding entity type for designations <end> found in name
@@ -112,12 +113,15 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     def _set_entity_type_end_designation(self):
         syn_svc = self.synonym_service
-        entity_end_designation_dict = self._entity_end_designation_dict
+        # entity_end_designation_dict = self._entity_end_designation_dict
         designation_end_list = self._designation_end_list
 
+        all_any_designations = syn_svc.get_all_any_designations().data
+
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
-            syn_svc.get_all_any_designations(), designation_end_list
-        )
+            entity_end_designation_dict=parse_dict_of_lists(all_any_designations),
+            all_designation_any_end_list=designation_end_list
+        ).data
 
     def _set_designations(self):
         # Set available designations for entity type selected by user (by default designations related to 'CR' entity type)

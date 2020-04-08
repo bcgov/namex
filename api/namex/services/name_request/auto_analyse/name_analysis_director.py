@@ -6,8 +6,8 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
-from namex.services.synonyms.synonym \
-    import SynonymService
+# from namex.services.synonyms.synonym \
+#    import SynonymService
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService
@@ -20,6 +20,8 @@ from namex.services.word_classification.token_classifier \
 
 from namex.services.virtual_word_condition.virtual_word_condition \
     import VirtualWordConditionService
+
+from swagger_client import SynonymsApi as SynonymService
 
 '''
 This is the director for AutoAnalyseService.

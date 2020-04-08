@@ -1,6 +1,4 @@
-import itertools
 import re
-from collections import OrderedDict
 
 from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
@@ -11,6 +9,8 @@ from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
+
+from namex.utils.common import parse_dict_of_lists
 
 '''
 Sample builder
@@ -179,10 +179,20 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             desc_synonym_list = []
             dist_all_permutations = []
 
-            dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(w_dist)
+            all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+                words=w_dist,
+                words_are_distinctive=True
+            ).data
+
+            dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
             dist_substitution_list = dist_substitution_dict.values()
 
-            desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
+            all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+                words=w_desc,
+                words_are_distinctive=False
+            ).data
+
+            desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
             desc_synonym_list = desc_synonym_dict.values()
 
             # Inject distinctive section in query

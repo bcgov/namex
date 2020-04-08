@@ -1,12 +1,24 @@
+python-dotenv
+
 Flask
 Flask-Restplus
 Flask-SQLAlchemy
-psycopg2-binary
-python-dotenv
+Flask-Marshmallow<3
+
 flask-migrate
 flask_script
+
+sqlalchemy
+jsonpickle
+
+marshmallow==2.19.2
+marshmallow-sqlalchemy
+
+psycopg2-binary
 
 gunicorn
 gunicorn[eventlet]
 greenlet
 eventlet
+
+werkzeug==0.16.1
