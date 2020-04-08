@@ -4,6 +4,7 @@ Flask
 Flask-Restplus
 Flask-SQLAlchemy
 Flask-Marshmallow<3
+flask-jwt-oidc>=0.1.5
 
 flask-migrate
 flask_script
