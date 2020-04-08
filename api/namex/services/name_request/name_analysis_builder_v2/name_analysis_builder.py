@@ -179,11 +179,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             desc_synonym_list = []
             dist_all_permutations = []
 
-            dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(w_dist)
-            dist_substitution_list = dist_substitution_dict.values()
+            # TODO: We can't just serialize random dictionaries!!!!
+            dist_substitution_dict = {}  # syn_svc.get_all_substitutions_synonyms(words=w_dist, words_are_distinctive=True).data
+            dist_substitution_list = []  # dist_substitution_dict.values()
 
-            desc_synonym_dict = syn_svc.get_all_substitutions_synonyms(w_desc, False)
-            desc_synonym_list = desc_synonym_dict.values()
+
+            desc_synonym_dict = {}  # syn_svc.get_all_substitutions_synonyms(words=w_desc, words_are_distinctive=False).data
+            desc_synonym_list = []  # desc_synonym_dict.values()
+            # TODO: END FIX ME SECTION
 
             # Inject distinctive section in query
             for dist in dist_substitution_list:

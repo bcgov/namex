@@ -1,8 +1,10 @@
 import json
 import jsonpickle
 
+from ast import literal_eval
+
 from flask import request, make_response, jsonify
-from flask_restplus import Namespace, Resource, cors, fields, marshal_with
+from flask_restplus import Namespace, Resource, cors, fields, marshal_with, reqparse
 from flask_jwt_oidc import AuthError
 
 from urllib.parse import unquote_plus
@@ -34,8 +36,13 @@ def validate_request(request):
 
 
 # Define our response object
-response_model = api.model('SynonymList', {
+response_list = api.model('SynonymList', {
     'data': fields.List(fields.String)
+})
+
+# Define our response object
+response_string = api.model('String', {
+    'data': fields.String
 })
 
 
@@ -45,8 +52,8 @@ class _WordSynonyms(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'word': ''
     })
@@ -70,8 +77,8 @@ class _WordSubstitutions(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'word': ''
     })
@@ -89,14 +96,45 @@ class _WordSubstitutions(Resource):
         }
 
 
+@api.route('/all-substitutions-synonyms', strict_slashes=False, methods=['GET'])
+class _AllSubstitutionsSynonyms(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    # @api.expect()
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
+    @api.doc(params={
+        'words': '',
+        'words_are_distinctive': ''
+    })
+    def get():
+        # TODO: Raise an error if no words?
+        words = literal_eval(request.args.get('words')) \
+            if request.args.get('words') else []
+
+        words_are_distinctive = literal_eval(request.args.get('words_are_distinctive')) \
+            if request.args.get('words_are_distinctive') else False
+
+        if not validate_request(request.args):
+            return
+
+        service = SynonymService()
+        results = service.get_all_substitutions_synonyms(words, words_are_distinctive)
+        # TODO: RestPlus expects models not random dictionaries...
+        return {
+            'data': []  # results
+        }
+
+
 @api.route('/stop-words', strict_slashes=False, methods=['GET'])
 class _StopWords(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'word': ''
     })
@@ -120,8 +158,8 @@ class _Prefixes(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
     })
     def get():
@@ -142,8 +180,8 @@ class _NumberWords(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
     })
     def get():
@@ -164,8 +202,8 @@ class _Designations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'entity_type_code': '',
         'position_code': '',
@@ -193,8 +231,8 @@ class _DesignatedEndAllWords(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'entity_type_code': '',
         'position_code': '',
@@ -222,8 +260,8 @@ class _DesignatedAnyAllWords(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'entity_type_code': '',
         'position_code': '',
@@ -251,8 +289,8 @@ class _MisplacedEndDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'name': '',
         'designation_end_entity_type': ''
@@ -278,8 +316,8 @@ class _MisplacedEndDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'name': '',
         'designation_end_entity_type': ''
@@ -305,21 +343,21 @@ class _MisplacedAnyDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'name': '',
         'designation_any_entity_type': ''
     })
     def get():
         name = unquote_plus(request.args.get('name'))
-        designation_end_entity_type = unquote_plus(request.args.get('designation_any_entity_type'))
+        designation_any_entity_type = unquote_plus(request.args.get('designation_any_entity_type'))
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        results = service.get_misplaced_any_designations(name, designation_end_entity_type)
+        results = service.get_misplaced_any_designations(name, designation_any_entity_type)
 
         return {
             'data': results
@@ -332,21 +370,21 @@ class _EntityTypeEndDesignation(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'entity_end_designation_dict': '',
         'all_designation_any_end_list': ''
     })
     def get():
-        name = unquote_plus(request.args.get('entity_end_designation_dict'))
-        designation_end_entity_type = unquote_plus(request.args.get('all_designation_any_end_list'))
+        entity_end_designation_dict = literal_eval(request.args.get('entity_end_designation_dict'))
+        all_designation_any_end_list = literal_eval(request.args.get('all_designation_any_end_list'))
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        results = service.get_entity_type_end_designation(name, designation_end_entity_type)
+        results = service.get_entity_type_end_designation(entity_end_designation_dict, all_designation_any_end_list)
 
         return {
             'data': results
@@ -359,24 +397,25 @@ class _EntityTypeAnyDesignation(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'entity_any_designation_dict': '',
         'all_designation_any_end_list': ''
     })
     def get():
-        name = unquote_plus(request.args.get('entity_any_designation_dict'))
-        designation_end_entity_type = unquote_plus(request.args.get('all_designation_any_end_list'))
+        entity_any_designation_dict = literal_eval(request.args.get('entity_any_designation_dict'))
+        all_designation_any_end_list = literal_eval(request.args.get('all_designation_any_end_list'))
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        results = service.get_entity_type_any_designation(name, designation_end_entity_type)
+        # TODO: FIX ME FIRST More dictionaries!
+        # results = service.get_entity_type_any_designation(entity_any_designation_dict, all_designation_any_end_list)
 
         return {
-            'data': results
+            'data': []  #  results
         }
 
 
@@ -386,8 +425,8 @@ class _DesignationEndInName(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'name': ''
     })
@@ -411,8 +450,8 @@ class _DesignationAllInName(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'name': ''
     })
@@ -436,8 +475,8 @@ class _DesignationAnyInName(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'name': ''
     })
@@ -461,8 +500,8 @@ class _AllEndDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
     })
     def get():
@@ -472,8 +511,13 @@ class _AllEndDesignations(Resource):
         service = SynonymService()
         results = service.get_all_end_designations()
 
+        # TODO: Again, we can't just return random dicts
+        # return {
+        #   'data': []
+        # }
+        #
         return {
-            'data': results
+            'data': []
         }
 
 
@@ -483,8 +527,8 @@ class _AllAnyDesignations(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
     })
     def get():
@@ -492,10 +536,11 @@ class _AllAnyDesignations(Resource):
             return
 
         service = SynonymService()
-        results = service.get_all_any_designations()
+        # TODO: More dictionary stuff
+        # results = service.get_all_any_designations()
 
         return {
-            'data': results
+            'data': []  # results
         }
 
 
@@ -505,14 +550,14 @@ class _EntityTypeByValue(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
     @api.doc(params={
         'entity_type_dicts': '',
         'designation': ''
     })
     def get():
-        entity_type_dicts = unquote_plus(request.args.get('entity_type_dicts'))
+        entity_type_dicts = literal_eval(request.args.get('entity_type_dicts'))
         designation = unquote_plus(request.args.get('designation'))
 
         if not validate_request(request.args):
@@ -526,35 +571,61 @@ class _EntityTypeByValue(Resource):
         }
 
 
+@api.route('/exception-regex', strict_slashes=False, methods=['GET'])
+class _ExceptionRegex(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    # @api.expect()
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
+    @api.doc(params={
+        'text': ''
+    })
+    def get():
+        text = unquote_plus(request.args.get('text'))
+
+        if not validate_request(request.args):
+            return
+
+        service = SynonymService()
+        results = service.exception_regex(text)
+
+        return {
+            'data': results
+        }
+
+
 @api.route('/transform-text', strict_slashes=False, methods=['GET'])
 class _TransformText(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_model)
-    @marshal_with(response_model)
+    @api.response(200, 'SynonymsApi', response_string)
+    @marshal_with(response_string)
     @api.doc(params={
         'text': '',
         'designation_all': '',
         'prefix_list': '',
         'number_list': '',
+        'exceptions_ws': '',
     })
     def get():
         text = unquote_plus(request.args.get('text'))
-        designation_all = unquote_plus(request.args.get('designation_all'))
-        prefix_list = unquote_plus(request.args.get('prefix_list'))
-        number_list = unquote_plus(request.args.get('number_list'))
-        # exceptions_ws
+        designation_all = literal_eval(request.args.get('designation_all'))
+        prefix_list = literal_eval(request.args.get('prefix_list'))
+        number_list = literal_eval(request.args.get('number_list'))
+        exceptions_ws = literal_eval(request.args.get('exceptions_ws')) if request.args.get('exceptions_ws') else []
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        results = service.regex_transform(text, designation_all, prefix_list, number_list)
+        result = service.regex_transform(text, designation_all, prefix_list, number_list, exceptions_ws)
 
         return {
-            'data': results
+            'data': result
         }
 
 

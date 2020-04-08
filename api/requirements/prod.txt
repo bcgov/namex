@@ -20,3 +20,4 @@ httpx
 toolz
 nltk
 werkzeug==0.16.1
+git+https://github.com/bcdevlucas/namex-synonyms-api-client-py.git#egg=swagger_client

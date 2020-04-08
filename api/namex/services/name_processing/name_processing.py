@@ -3,10 +3,12 @@ import warnings
 
 from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words
 
-from namex.services.synonyms.synonym import SynonymService
+# from namex.services.synonyms.synonym import SynonymService
 from namex.services.word_classification.word_classification import WordClassificationService
 
 from .mixins.get_synonym_lists import GetSynonymListsMixin
+
+from swagger_client import SynonymsApi as SynonymService
 
 '''
 Service for pre-processing of a user submitted name request name string.
@@ -112,8 +114,10 @@ class NameProcessingService(GetSynonymListsMixin):
 
         words = remove_stop_words(self.name_original_tokens, stop_words)
         words = remove_french(words)
-        exceptions_ws = syn_svc.exception_regex(words)
-        tokens = syn_svc.regex_transform(words, designation_all, prefix_list, number_list, exceptions_ws)
+
+        exceptions_ws = syn_svc.get_exception_regex(text=words).data
+
+        tokens = syn_svc.get_transform_text(text=words, designation_all=designation_all, prefix_list=prefix_list, number_list=number_list, exceptions_ws=exceptions_ws).data
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
@@ -124,11 +128,12 @@ class NameProcessingService(GetSynonymListsMixin):
         # Query database for word designations
         # These properties are mixed in via GetSynonymListsMixin
         # See the class constructor
-        self._stop_words = syn_svc.get_stop_words()
-        self._prefixes = syn_svc.get_prefixes()
-        self._number_words = syn_svc.get_number_words()
-        self._designated_end_words = syn_svc.get_designated_end_all_words()
-        self._designated_any_words = syn_svc.get_designated_any_all_words()
+        self._stop_words = syn_svc.get_stop_words().data
+        self._prefixes = syn_svc.get_prefixes().data
+        self._number_words = syn_svc.get_number_words().data
+        self._designated_end_words = syn_svc.get_designated_end_all_words().data
+        self._designated_any_words = syn_svc.get_designated_any_all_words().data
+
         self._designated_all_words = list(set(self._designated_any_words +
                                               self._designated_end_words))
         self._designated_all_words.sort(key=len, reverse=True)

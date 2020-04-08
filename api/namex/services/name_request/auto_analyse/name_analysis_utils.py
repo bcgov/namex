@@ -157,8 +157,8 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
 
 
 def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
-    dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_dist)
-    desc_substitution_dict = syn_svc.get_all_substitutions_synonyms(list_desc, False)
+    dist_substitution_dict = syn_svc.get_all_substitutions_synonyms(words=list_dist, words_are_distinctive=True).data
+    desc_substitution_dict = syn_svc.get_all_substitutions_synonyms(words=list_desc, words_are_distinctive='False').data
 
     all_substitution_dict = collections.OrderedDict()
     for word in list_name:

@@ -6,6 +6,18 @@ class DesignationPositionCodes(Enum):
     END = 'end'
     ANY = 'any'
 
+    @classmethod
+    def list(cls):
+        values = []
+        for item in cls:
+            values.append(item.value)
+
+        return values
+
+    @classmethod
+    def has_value(cls, value):
+        return value in cls._value2member_map_
+
 
 # TODO: I have copied this over to new name processing service, hoping I can get rid of this here...
 class DataFrameFields(Enum):
