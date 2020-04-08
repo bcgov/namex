@@ -157,10 +157,18 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
 
 
 def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
-    all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(words=list_dist, words_are_distinctive=True).data
+    all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+        words=list_dist,
+        words_are_distinctive=True
+    ).data
+
     dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
 
-    all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(words=list_desc, words_are_distinctive=False).data
+    all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+        words=list_desc,
+        words_are_distinctive=False
+    ).data
+
     desc_substitution_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
 
     all_substitution_dict = collections.OrderedDict()

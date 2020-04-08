@@ -179,11 +179,19 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             desc_synonym_list = []
             dist_all_permutations = []
 
-            all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(words=w_dist, words_are_distinctive=True).data
+            all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+                words=w_dist,
+                words_are_distinctive=True
+            ).data
+
             dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
             dist_substitution_list = dist_substitution_dict.values()
 
-            all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(words=w_desc, words_are_distinctive=False).data
+            all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+                words=w_desc,
+                words_are_distinctive=False
+            ).data
+
             desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
             desc_synonym_list = desc_synonym_dict.values()
 

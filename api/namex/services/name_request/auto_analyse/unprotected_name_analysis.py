@@ -45,13 +45,13 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         original_name = self.get_original_name()
 
         # designation any/end_list get the designation at any/end place as long as they are placed correctly:
-        designation_any_list = syn_svc.get_designation_any_in_name(original_name).data
-        designation_end_list = syn_svc.get_designation_end_in_name(original_name).data
+        designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
+        designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
 
         # all_designations gets all the designations regardless they are placed correctly or not.
         # For instance, if limited liability partnership (end designation) is placed in a different location then
         # we will get the designation in here, but not in the previous lists (designation any/end list)
-        all_designations = syn_svc.get_designation_all_in_name(original_name).data
+        all_designations = syn_svc.get_designation_all_in_name(name=original_name).data
 
         for idx, designation in enumerate(designation_any_list):
             if not designation in all_designations:

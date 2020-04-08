@@ -117,7 +117,14 @@ class NameProcessingService(GetSynonymListsMixin):
 
         exceptions_ws = syn_svc.get_exception_regex(text=words).data
 
-        tokens = syn_svc.get_transform_text(text=words, designation_all=designation_all, prefix_list=prefix_list, number_list=number_list, exceptions_ws=exceptions_ws).data
+        tokens = syn_svc.get_transform_text(
+            text=words,
+            designation_all=designation_all,
+            prefix_list=prefix_list,
+            number_list=number_list,
+            exceptions_ws=exceptions_ws
+        ).data
+
         tokens = tokens.split()
 
         return [x.lower() for x in tokens if x]
