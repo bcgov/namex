@@ -380,6 +380,29 @@ class _MisplacedAnyDesignations(Resource):
             'data': results
         }
 
+@api.route('/incorrect-designation-end-in-name', strict_slashes=False, methods=['GET'])
+class _IncorrectDesignationEndInName(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    # @api.expect()
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
+    @api.doc(params={
+        'name': ''
+    })
+    def get():
+        name = unquote_plus(request.args.get('name'))
+
+        if not validate_request(request.args):
+            return
+
+        service = SynonymService()
+        results = service.get_incorrect_designation_end_in_name(name)
+
+        return {
+            'data': results
+        }
 
 @api.route('/incorrect-designation-end-in-name', strict_slashes=False, methods=['GET'])
 class _IncorrectDesignationEndInName(Resource):
@@ -671,7 +694,7 @@ class _TransformText(Resource):
             return
 
         service = SynonymService()
-        result = service.regex_transform(text, designation_all, prefix_list, number_list, exceptions_ws)
+        result = service.regex_transform(text, designation_all, number_list, exceptions_ws)
 
         return {
             'data': result
