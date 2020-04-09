@@ -184,7 +184,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
           rx=re.compile(rf'({exception_rx})|{generic_rx}', re.I)
     	  rx.sub(lambda x: x.group(1) or " "
     7.- Replace with space:
-        Punctuation incqluding ampersand, slash, hyphen used for separation:[&/-]
+        Punctuation including ampersand, slash, hyphen used for separation:[&/-]
     8.- Replace with non-space:
          Set together letter of length one separated by spaces: (?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     	 Trailing and leading spaces in string: ^\s+|\s+$
