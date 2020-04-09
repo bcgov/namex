@@ -21,6 +21,5 @@ from .state import State, StateSchema
 from .decision_reason import DecisionReason
 from .nro_sync_tables import NRONamesSyncJob, NRONamesSyncJobDetail, NRONamesSyncJobStatus
 from .admin_tables import DecisionReasonAudit, RestrictedConditionAudit
-from .synonym import Synonym, SynonymSchema
 from .word_classification import WordClassification, WordClassificationSchema
 from .virtual_word_condition import VirtualWordCondition

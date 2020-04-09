@@ -1,5 +1,3 @@
-from namex.models import Synonym
-
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
@@ -69,9 +67,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def builder(self, builder):
         self._builder = builder
 
-    @property
-    def model(self):
-        return Synonym
+#    @property
+#    def model(self):
+#        return Synonym
 
     @property
     def entity_type(self):
