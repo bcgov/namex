@@ -140,7 +140,7 @@ if( triggerBuild(CONTEXT_DIRECTORY) == "" ) {
     }
     try {
         timeout(time: 1, unit: 'DAYS') {
-            input message: "Run namex-api-pipeline?", id: "1234", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
+            input message: "Run namex-api-pipeline?", id: "1234", submitter: 'admin,LJTrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
         }
     } catch (Exception e) {
         run_pipeline = false;
@@ -602,7 +602,7 @@ if (!run_pipeline) {
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy to test?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
+                input message: "Deploy to test?", submitter: 'admin,LJTrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
@@ -828,7 +828,7 @@ if (!run_pipeline) {
         def abort = false;
         try {
             timeout(time: 1, unit: 'DAYS') {
-                input message: "Deploy to prod?", submitter: 'admin,ljtrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
+                input message: "Deploy to prod?", submitter: 'admin,LJTrent-admin,thorwolpert-admin,rarmitag-admin,kialj876-edit,katiemcgoff-admin,waltermoar-admin'
             }
         } catch (Exception e) {
             abort = true;
