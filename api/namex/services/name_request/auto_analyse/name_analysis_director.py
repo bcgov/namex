@@ -1,4 +1,4 @@
-from namex.models import Synonym
+#from namex.models import Synonym
 
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
