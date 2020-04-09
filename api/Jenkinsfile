@@ -448,7 +448,7 @@ if (!run_pipeline) {
                         sh '''
                             pip install pip --upgrade
                             rm -r .eggs
-                            pip install setuptools==28.8.0
+                            pip install setuptools==40.8.0
                             pip install -r requirements/dev.txt
                             python setup.py test
                         '''
