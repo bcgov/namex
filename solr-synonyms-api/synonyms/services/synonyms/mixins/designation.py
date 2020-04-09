@@ -79,14 +79,14 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         have to be shown as misplaced.
     '''
 
-    def get_incorrect_designation_end_in_name(self, tokenized_name, designation_end_entity_type):
-        if not designation_end_entity_type:
-            return list()
+    def get_incorrect_designation_end_in_name(self, name):
+        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
+        en_designation_end_all_list.sort(key=len, reverse=True)
+        designation_end_rgx = '|'.join(map(str, en_designation_end_all_list))
+        designation_end_regex = r'\b({})(?=(?:.*\s\w+$))'.format(designation_end_rgx)
 
-        found_incorrect_designation_end = list()
-        for token in tokenized_name[:-1]:
-            if token in designation_end_entity_type:
-                found_incorrect_designation_end.extend([token])
+        # Returns list of tuples
+        found_incorrect_designation_end = re.findall(designation_end_regex, name.lower())
 
         return found_incorrect_designation_end
 
