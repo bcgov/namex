@@ -16,9 +16,7 @@ from synonyms.models import synonym
 
 from synonyms.services.synonyms import DesignationPositionCodes
 
-
 __all__ = ['api']
-
 
 api = Namespace('Synonyms', description='Synonyms Service - Used by Namex API and Name Processing Service')
 
@@ -380,6 +378,7 @@ class _MisplacedAnyDesignations(Resource):
             'data': results
         }
 
+
 @api.route('/incorrect-designation-end-in-name', strict_slashes=False, methods=['GET'])
 class _IncorrectDesignationEndInName(Resource):
     @staticmethod
@@ -389,20 +388,23 @@ class _IncorrectDesignationEndInName(Resource):
     @api.response(200, 'SynonymsApi', response_list)
     @marshal_with(response_list)
     @api.doc(params={
-        'name': ''
+        'name': '',
+        'designation_end_entity_type': ''
     })
     def get():
         name = unquote_plus(request.args.get('name'))
+        designation_end_entity_type = unquote_plus(request.args.get('designation_end_entity_type'))
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        results = service.get_incorrect_designation_end_in_name(name)
+        results = service.get_incorrect_designation_end_in_name(name, designation_end_entity_type)
 
         return {
             'data': results
         }
+
 
 @api.route('/incorrect-designation-end-in-name', strict_slashes=False, methods=['GET'])
 class _IncorrectDesignationEndInName(Resource):

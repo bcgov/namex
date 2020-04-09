@@ -160,7 +160,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
 
         results = self.find_word_synonyms(None, filters)
-        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
+        flattened = list(set(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results)))))))
+        flattened.sort(key=len, reverse=True)
         return flattened
 
     '''
@@ -300,10 +301,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return " ".join(text.split())
 
     @classmethod
-    def regex_numbers_standalone(cls, text, ordinal_suffixes, numbers, stand_alone_words):
+    def regex_numbers_standalone(self, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
-            r'(^(?:\d+(?:{})?\s*)+(?=[^\d]*$)|\b(?:{})\b)(?!.*?(?:{}$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)'
-            .format(ordinal_suffixes, numbers, stand_alone_words),
+            r'\b(?=(\d+(?:{0})?(?:\s+\d+(?:\b{0}\b)?)*|(?:\b({1})\b)(?:\s+(?:\b({1})\b))*))\1(?!\s+(?:{2})\b)\s*'.format(
+                ordinal_suffixes, numbers, stand_alone_words),
             '',
             text,
             0,
