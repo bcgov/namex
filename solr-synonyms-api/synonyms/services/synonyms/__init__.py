@@ -15,3 +15,8 @@ class DesignationPositionCodes(Enum):
     START = 'start'
     END = 'end'
     ANY = 'any'
+
+
+class LanguageCodes(Enum):
+    ENG = 'ENGLISH'
+    FR = 'FRENCH'

@@ -68,9 +68,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
 
-        # designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(name=original_name).data
-        # TODO: Where is this!!!!! The method doesn't exist anywhere...
-        designation_end_misplaced_list = []  # syn_svc.get_incorrect_designation_end_in_name(name=original_name).data
+        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(name=original_name).data
         self._misplaced_designation_end_list = designation_end_misplaced_list
 
     def _set_designations_by_entity_type_user(self):
