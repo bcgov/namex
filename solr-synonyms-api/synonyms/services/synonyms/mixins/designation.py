@@ -69,15 +69,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         designation_end_regex = r'{0}(?=(\s{0})*$)'.format(designation_end_rgx)
 
         # Returns list of tuples
-        found_designation_end = re.findall(designation_end_regex, name.lower())
-
-        # Getting list of lists where the first list contains designations of type "anywhere" and the second list contains designations of type "end".
-        # [['association],['limited partnership']
-        designation_end_list = [list(elem) for elem in found_designation_end]
-        if any(isinstance(el, list) for el in designation_end_list):
-            designation_end_list = get_flat_list(designation_end_list)
-        designation_end_list = list(filter(None, designation_end_list))
-        designation_end_list = list(dict.fromkeys(designation_end_list))
+        designation_end_list = re.findall(designation_end_regex, name.lower())
 
         return designation_end_list
 
@@ -87,14 +79,14 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         have to be shown as misplaced.
     '''
 
-    def get_incorrect_designation_end_in_name(self, name):
-        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
-        en_designation_end_all_list.sort(key=len, reverse=True)
-        designation_end_rgx = '|'.join(map(str, en_designation_end_all_list))
-        designation_end_regex = r'\b({})(?=(?:.*\s\w+$))'.format(designation_end_rgx)
+    def get_incorrect_designation_end_in_name(self, tokenized_name, designation_end_entity_type):
+        if not designation_end_entity_type:
+            return list()
 
-        # Returns list of tuples
-        found_incorrect_designation_end = re.findall(designation_end_regex, name.lower())
+        found_incorrect_designation_end = list()
+        for token in tokenized_name[:-1]:
+            if token in designation_end_entity_type:
+                found_incorrect_designation_end.extend([token])
 
         return found_incorrect_designation_end
 
@@ -112,6 +104,26 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         found_designation_any = re.findall(designation_any_regex, name.lower())
 
         return found_designation_any
+
+    '''
+        Get all designations in name, these can be misplaced or not.
+        '''
+
+    def get_designation_all_in_name(self, name):
+        all_designations_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
+        all_designations_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
+
+        all_designations = list(set(all_designations_end_all_list + all_designations_any_all_list))
+
+        all_designations.sort(key=len, reverse=True)
+
+        all_designations_rgx = '|'.join(map(str, all_designations))
+        all_designations_regex = r'({})(?=\s|$)'.format(all_designations_rgx)
+
+        # Returns list of tuples
+        found_all_designations = re.findall(all_designations_regex, name.lower())
+
+        return found_all_designations
 
     def get_all_end_designations(self):
         entity_types = [
