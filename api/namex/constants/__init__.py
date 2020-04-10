@@ -89,14 +89,6 @@ class ValidSources(Enum):
     NRO = 'NRO'
     SO = 'SO'
 
-    @classmethod
-    def list(cls):
-        values = []
-        for item in cls:
-            values.append(item.value)
-
-        return values
-
 # Request Action for name request and namex (includes legacy)
 class RequestAction(Enum):
     NEW = 'NEW'
@@ -120,6 +112,7 @@ class RequestAction(Enum):
             values.append(item.value)
 
         return values
+
 
 # Entity Types derived from the legacy request_type
 class EntityType(Enum):
@@ -149,7 +142,6 @@ class EntityType(Enum):
     # legacy
     FIRM = 'FIRM'
 
-
     @classmethod
     def list(cls):
         values = []
@@ -157,6 +149,64 @@ class EntityType(Enum):
             values.append(item.value)
 
         return values
+
+# Request types (legacy) used in search conflicts
+class EntityTypeBCORP(Enum):
+    CCR = 'CCR'
+    CT = 'CT'
+    RCR = 'RCR'
+
+
+class EntityTypeULC(Enum):
+    UC = 'UC'
+    CUL = 'CUL'
+    ULCT = 'ULCT'
+    RUL = 'RUL'
+
+
+
+class EntityTypeCP(Enum):
+    CCP = 'CCP'
+    CTC = 'CTC'
+    RCP = 'RCP'
+
+class EntityTypeCCC(Enum):
+    CCV = 'CCV'
+    CC = 'CCC'
+    CCCT = 'CCCT'
+    RCC = 'RCC'
+
+class EntityTypeSO(Enum):
+     ASO = 'ASO'
+     CSO = 'CSO'
+     RSO = 'RSO'
+     CTSO = 'CTSO'
+     CSSO = 'CSSO'
+
+class EntityTypeFI(Enum):
+     CFI = 'CFI'
+     RFI = 'RFI'
+
+class EntityTypeXCORP(Enum):
+     XCCR = 'XCCR'
+     XRCR = 'XRCR'
+     AS = 'AS'
+
+class EntityTypeXULC(Enum):
+     UA = 'UA'
+     XCUL = 'XCUL'
+     XRUL = 'XRUL'
+
+class EntityTypeXCP(Enum):
+     XCCP = 'XCCP'
+     XRCP = 'XRCP'
+
+class EntityTypeXSO(Enum):
+     XCSO = 'XCSO'
+     XRSO = 'XRSO'
+     XASO = 'XASO'
+     XCASO = 'XCASO'
+
 
 request_type_mapping = [
             ('CR', EntityType.BCORP.value, RequestAction.NEW_AML.value),

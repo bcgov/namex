@@ -44,6 +44,7 @@ class Name(db.Model):
     CONDITION = 'CONDITION'
     # needed for name request reservation before completing the nr
     RESERVED = 'RESERVED'
+    COND_RESERVE = 'COND-RESERVE'
 
     #Properties added for Name Request
     @property
@@ -100,11 +101,9 @@ class Name(db.Model):
         db.session.commit()
 
 @event.listens_for(Name, 'before_update')
-def set_analysis_name(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the cleaned_name when an examiner approves a name (any name)"""
+def set_clean_name(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     name = target
     #if(name.state  == 'APPROVED'):
-        #TODO: Run the regex service to set the clean name
 
 
 

@@ -18,7 +18,9 @@ from datetime import datetime
 from enum import Enum
 import re
 
-from namex.constants import ValidSources, request_type_mapping
+from namex.constants import ValidSources, request_type_mapping, EntityType,EntityTypeXSO, EntityTypeXCP, EntityTypeXULC, \
+EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP
+
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -262,41 +264,46 @@ class Request(db.Model):
         return True
 
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+        # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
     def get_general_query(cls):
         filters = [
-            Request.id == Name.nrId,
-            Request.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
-            Request.requestTypeCd.in_(
-                [Request.EntityType.PRIV.value,
-                 Request.EntityType.BCORP.value, Request.EntityTypeBCORP.CCR.value, Request.EntityTypeBCORP.CT.value,
-                 Request.EntityTypeBCORP.RCR.value,
-                 Request.EntityType.CP.value, Request.EntityTypeCP.CCP.value, Request.EntityTypeCP.CTC.value, Request.EntityTypeCP.RCP.value,
-                 Request.EntityType.FI.value, Request.EntityTypeFI.CFI.value, Request.EntityTypeFI.RFI.value,
-                 Request.EntityType.SO.value, Request.EntityTypeSO.ASO.value, Request.EntityTypeSO.CSO.value, Request.EntityTypeSO.CSSO.value,
-                 Request.EntityTypeSO.CTSO.value, Request.EntityTypeSO.RSO.value,
-                 Request.EntityType.ULC.value, Request.EntityTypeULC.UC.value, Request.EntityTypeULC.CUL.value,
-                 Request.EntityTypeULC.ULCT.value, Request.EntityTypeULC.RUL.value,
-                 Request.EntityType.XSO.value, Request.EntityTypeXSO.XASO.value, Request.EntityTypeXSO.XCASO.value,
-                 Request.EntityTypeXSO.XCSO.value, Request.EntityTypeXSO.XRSO.value,
-                 Request.EntityType.CCC.value, Request.EntityTypeCCC.CC.value, Request.EntityTypeCCC.CCV.value,
-                 Request.EntityTypeCCC.CCCT.value, Request.EntityTypeCCC.RCC.value,
-                 Request.EntityType.PAR.value,
-                 Request.EntityType.XCORP.value, Request.EntityTypeXCORP.XCCR.value, Request.EntityTypeXCORP.XRCR.value,
-                 Request.EntityTypeXCORP.AS.value,
-                 Request.EntityType.XULC.value, Request.EntityTypeXULC.UA.value, Request.EntityTypeXULC.XCUL.value,
-                 Request.EntityTypeXULC.XRUL.value,
-                 Request.EntityType.XCP.value, Request.EntityTypeXCP.XCCP.value, Request.EntityTypeXCP.XRCP.value,
-                 Request.EntityType.BC.value
-                 ]),
-            Name.state.in_([Name.APPROVED, Name.CONDITION]),
+                cls.id == Name.nrId,
+                cls.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
+                cls.requestTypeCd.in_(
+                    [EntityType.PRIV.value,
+                     EntityType.BCORP.value, EntityTypeBCORP.CCR.value,
+                     EntityTypeBCORP.CT.value,
+                     EntityTypeBCORP.RCR.value,
+                     EntityType.CP.value, EntityTypeCP.CCP.value, EntityTypeCP.CTC.value,
+                     EntityTypeCP.RCP.value,
+                     EntityType.FI.value, EntityTypeFI.CFI.value, EntityTypeFI.RFI.value,
+                     EntityType.SO.value, EntityTypeSO.ASO.value, EntityTypeSO.CSO.value,
+                     EntityTypeSO.CSSO.value,
+                     EntityTypeSO.CTSO.value, EntityTypeSO.RSO.value,
+                     EntityType.ULC.value, EntityTypeULC.UC.value, EntityTypeULC.CUL.value,
+                     EntityTypeULC.ULCT.value, EntityTypeULC.RUL.value,
+                     EntityType.XSO.value, EntityTypeXSO.XASO.value, EntityTypeXSO.XCASO.value,
+                     EntityTypeXSO.XCSO.value, EntityTypeXSO.XRSO.value,
+                     EntityType.CCC.value, EntityTypeCCC.CC.value, EntityTypeCCC.CCV.value,
+                     EntityTypeCCC.CCCT.value, EntityTypeCCC.RCC.value,
+                     EntityType.PAR.value,
+                     EntityType.XCORP.value, EntityTypeXCORP.XCCR.value,
+                     EntityTypeXCORP.XRCR.value,
+                     EntityTypeXCORP.AS.value,
+                     EntityType.XULC.value, EntityTypeXULC.UA.value, EntityTypeXULC.XCUL.value,
+                     EntityTypeXULC.XRUL.value,
+                     EntityType.XCP.value, EntityTypeXCP.XCCP.value, EntityTypeXCP.XRCP.value,
+                     EntityType.BC.value
+                     ]),
+                Name.state.in_([Name.APPROVED, Name.CONDITION]),
 
-        ]
+            ]
 
         criteria = RequestConditionCriteria(
             fields=[Name.name],
             filters=filters
-        )
+            )
 
         return criteria
 
@@ -327,6 +334,7 @@ class Request(db.Model):
         flattened = [item.strip() for sublist in results for item in sublist]
 
         return flattened
+
 
     @classmethod
     def find_by_criteria(cls, criteria=None):
@@ -374,17 +382,6 @@ def update_request_action_entity_type(mapper, connection, target): # pylint: dis
         request._entity_type_cd = output[0][1]
         request._request_action_cd = output[0][2]
 
-@event.listens_for(Request, 'before_update')
-def add_to_word_class_queue(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the cleaned_name when an examiner approves a BC corp class request_type when it is approved/conditionally approved in Namex"""
-    # needed to reduce query time for conflict matching in Name Request
-    request = target
-    # TODO: put the name on the word classification queue to be picked up by the word classification service and update wod classification table
-    # TODO: may have to review which entity types are included
-    #if(request.stateCd  == 'APPROVED' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' :
-        #add it to the queue to add or update words
-    #if(request_stateCd == 'HOLD' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' and request.hasBeenReset=True):
-        #add to the queue to decrement or remove words from word classification
 
 class RequestsSchema(ma.ModelSchema):
     class Meta:
