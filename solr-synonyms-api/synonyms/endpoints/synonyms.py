@@ -225,7 +225,7 @@ class _Designations(Resource):
         'lang': ''
     })
     def get():
-        entity_type_code = unquote_plus(request.args.get('entity_type_code', 'english'))
+        entity_type_code = unquote_plus(request.args.get('entity_type_code'))
         position_code = unquote_plus(request.args.get('position_code'))
         lang = unquote_plus(request.args.get('lang'))
 
@@ -373,33 +373,6 @@ class _MisplacedAnyDesignations(Resource):
 
         service = SynonymService()
         results = service.get_misplaced_any_designations(name, designation_any_entity_type)
-
-        return {
-            'data': results
-        }
-
-
-@api.route('/incorrect-designation-end-in-name', strict_slashes=False, methods=['GET'])
-class _IncorrectDesignationEndInName(Resource):
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    # @api.expect()
-    @api.response(200, 'SynonymsApi', response_list)
-    @marshal_with(response_list)
-    @api.doc(params={
-        'name': '',
-        'designation_end_entity_type': ''
-    })
-    def get():
-        name = unquote_plus(request.args.get('name'))
-        designation_end_entity_type = unquote_plus(request.args.get('designation_end_entity_type'))
-
-        if not validate_request(request.args):
-            return
-
-        service = SynonymService()
-        results = service.get_incorrect_designation_end_in_name(name, designation_end_entity_type)
 
         return {
             'data': results
