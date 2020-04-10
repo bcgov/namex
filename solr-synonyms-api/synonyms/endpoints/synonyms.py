@@ -284,7 +284,7 @@ class _DesignatedAnyAllWords(Resource):
     })
     def get():
         entity_type_code = None
-        position_code = DesignationPositionCodes.END.value
+        position_code = DesignationPositionCodes.ANY.value
         lang = unquote_plus(request.args.get('lang', 'english'))  # Default to english!
 
         if not validate_request(request.args):
