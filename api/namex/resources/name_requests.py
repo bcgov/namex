@@ -137,11 +137,11 @@ class NameRequest(Resource):
         #TODO: Need to add verification that the save was successful.
 
         #save to solr
-        nr_doc = [{ 'id': name_request.nrNum ,
-                    'name':  reserved_name.name,
-                    'source': 'NR',
-                    'start_date': name_request.submittedDate.strftime("%Y-%m-%dT%H:%M:00Z")
-                 }]
+        #nr_doc = [{ 'id': name_request.nrNum ,
+        #            'name':  reserved_name.name,
+        #            'source': 'NR',
+        #            'start_date': name_request.submittedDate.strftime("%Y-%m-%dT%H:%M:00Z")
+        #         }]
 
 
         #update_solr('possible.conflicts',nr_doc)
