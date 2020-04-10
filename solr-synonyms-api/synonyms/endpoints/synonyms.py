@@ -225,7 +225,7 @@ class _Designations(Resource):
         'lang': ''
     })
     def get():
-        entity_type_code = unquote_plus(request.args.get('entity_type_code'))
+        entity_type_code = unquote_plus(request.args.get('entity_type_code', 'english'))
         position_code = unquote_plus(request.args.get('position_code'))
         lang = unquote_plus(request.args.get('lang'))
 
