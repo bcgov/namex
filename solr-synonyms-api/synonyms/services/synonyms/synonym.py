@@ -143,7 +143,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         entity_type_code = get_entity_type_code(entity_type_str)
-        position_code = get_designation_position_code(position_str)
+        position_code = get_designation_position_code(position_str) if isinstance(position_str, str) else position_str
 
         filters = []
 
