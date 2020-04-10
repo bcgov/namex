@@ -18,117 +18,14 @@ from datetime import datetime
 from enum import Enum
 import re
 
+from namex.constants import ValidSources, request_type_mapping, EntityType,EntityTypeXSO, EntityTypeXCP, EntityTypeXULC, \
+EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP
 
-# create sequence if not exists nr_seq;
+
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
 
 class Request(db.Model):
-
-    # Indicates the source application
-    class Source(Enum):
-        NAMEX = 'NAMEX'
-        NAMEREQUEST = 'NAMEREQUEST'
-        NRO = 'NRO'
-        SO = 'SO'
-
-    # Request Action separated from the legacy request type
-    class RequestAction(Enum):
-        NEW = 'NEW'
-        MVE = 'MVE'
-        CHG = 'CHG'
-        DBA = 'DBA'
-        AML = 'AML'
-        CNV = 'CNV'
-        REH = 'REH'
-        REN = 'REN'
-        AS = 'ASSUMED'
-        ACHG = 'CHG-ASSUM'
-        # required for legacy
-        NEW_AML = 'NRO-NEWAML'
-        REST = 'NRO-REST'
-
-    #Entity Types derived from the legacy request_type
-    class EntityType(Enum):
-        #BC Types
-        BCORP = 'CR'
-        ULC = 'UL'
-        SP = 'FR'
-        GP = 'GP'
-        DBA = 'DBA'
-        LP = 'LP'
-        LLP = 'LL'
-        CP = 'CP'
-        BC = 'BC'
-        CCC = 'CC'
-        SO = 'SO'
-        PRIV = 'PA'
-        FI = 'FI'
-        PAR = 'PAR'
-        # XPRO and Foreign Types
-        XCORP = 'XCR'
-        XULC = 'XUL'
-        XLLC = 'RLC'
-        XLP = 'XLP'
-        XLLP = 'XLL'
-        XCP = 'XCP'
-        XSO = 'XSO'
-        # legacy
-        FIRM = 'FIRM'
-
-    # Entity types (legacy) used in search conflicts
-    class EntityTypeBCORP(Enum):
-        CCR = 'CCR'
-        CT = 'CT'
-        RCR = 'RCR'
-
-    class EntityTypeULC(Enum):
-        UC = 'UC'
-        CUL = 'CUL'
-        ULCT = 'ULCT'
-        RUL = 'RUL'
-
-    class EntityTypeCP(Enum):
-        CCP = 'CCP'
-        CTC = 'CTC'
-        RCP = 'RCP'
-
-    class EntityTypeCCC(Enum):
-        CCV = 'CCV'
-        CC = 'CCC'
-        CCCT = 'CCCT'
-        RCC = 'RCC'
-
-    class EntityTypeSO(Enum):
-        ASO = 'ASO'
-        CSO = 'CSO'
-        RSO = 'RSO'
-        CTSO = 'CTSO'
-        CSSO = 'CSSO'
-
-    class EntityTypeFI(Enum):
-        CFI = 'CFI'
-        RFI = 'RFI'
-
-    class EntityTypeXCORP(Enum):
-        XCCR = 'XCCR'
-        XRCR = 'XRCR'
-        AS = 'AS'
-
-    class EntityTypeXULC(Enum):
-        UA = 'UA'
-        XCUL = 'XCUL'
-        XRUL = 'XRUL'
-
-    class EntityTypeXCP(Enum):
-        XCCP = 'XCCP'
-        XRCP = 'XRCP'
-
-    class EntityTypeXSO(Enum):
-        XCSO = 'XCSO'
-        XRSO = 'XRSO'
-        XASO = 'XASO'
-        XCASO = 'XCASO'
 
     __tablename__ = 'requests'
 
@@ -191,7 +88,7 @@ class Request(db.Model):
     consent_dt = db.Column('consent_dt', db.DateTime(timezone=True))
     _payment_token = db.Column('payment_id', db.String(4096))
     _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
-    _source = db.Column('source', db.String(15), default=Source.NRO)
+    _source = db.Column('source', db.String(15), default=ValidSources.NRO)
 
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
@@ -223,10 +120,18 @@ class Request(db.Model):
         """Property containing the request action from name request."""
         return self._request_action_cd
 
+    @request_action_cd.setter
+    def request_action_cd(self, value: str):
+        self._request_action_cd = value
+
     @property
     def entity_type_cd(self):
         """Property containing the entity type from name request"""
         return self._entity_type_cd
+
+    @entity_type_cd.setter
+    def entity_type_cd(self, value: str):
+        self._entity_type_cd = value
 
     def __init__(self, *args, **kwargs):
         pass
@@ -252,8 +157,11 @@ class Request(db.Model):
                 'previousStateCd': self.previousStateCd,
                 'nrNum': self.nrNum,
                 'consentFlag': self.consentFlag,
+                'consent_dt': self.consent_dt,
                 'expirationDate': self.expirationDate,
                 'requestTypeCd': self.requestTypeCd,
+                'entity_type_cd':self.entity_type_cd,
+                'request_action_cd': self.request_action_cd,
                 'priorityCd': self.priorityCd,
                 'priorityDate': self.priorityDate,
                 'xproJurisdiction': self.xproJurisdiction,
@@ -356,41 +264,46 @@ class Request(db.Model):
         return True
 
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+        # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
     def get_general_query(cls):
         filters = [
-            Request.id == Name.nrId,
-            Request.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
-            Request.requestTypeCd.in_(
-                [Request.EntityType.PRIV.value,
-                 Request.EntityType.BCORP.value, Request.EntityTypeBCORP.CCR.value, Request.EntityTypeBCORP.CT.value,
-                 Request.EntityTypeBCORP.RCR.value,
-                 Request.EntityType.CP.value, Request.EntityTypeCP.CCP.value, Request.EntityTypeCP.CTC.value, Request.EntityTypeCP.RCP.value,
-                 Request.EntityType.FI.value, Request.EntityTypeFI.CFI.value, Request.EntityTypeFI.RFI.value,
-                 Request.EntityType.SO.value, Request.EntityTypeSO.ASO.value, Request.EntityTypeSO.CSO.value, Request.EntityTypeSO.CSSO.value,
-                 Request.EntityTypeSO.CTSO.value, Request.EntityTypeSO.RSO.value,
-                 Request.EntityType.ULC.value, Request.EntityTypeULC.UC.value, Request.EntityTypeULC.CUL.value,
-                 Request.EntityTypeULC.ULCT.value, Request.EntityTypeULC.RUL.value,
-                 Request.EntityType.XSO.value, Request.EntityTypeXSO.XASO.value, Request.EntityTypeXSO.XCASO.value,
-                 Request.EntityTypeXSO.XCSO.value, Request.EntityTypeXSO.XRSO.value,
-                 Request.EntityType.CCC.value, Request.EntityTypeCCC.CC.value, Request.EntityTypeCCC.CCV.value,
-                 Request.EntityTypeCCC.CCCT.value, Request.EntityTypeCCC.RCC.value,
-                 Request.EntityType.PAR.value,
-                 Request.EntityType.XCORP.value, Request.EntityTypeXCORP.XCCR.value, Request.EntityTypeXCORP.XRCR.value,
-                 Request.EntityTypeXCORP.AS.value,
-                 Request.EntityType.XULC.value, Request.EntityTypeXULC.UA.value, Request.EntityTypeXULC.XCUL.value,
-                 Request.EntityTypeXULC.XRUL.value,
-                 Request.EntityType.XCP.value, Request.EntityTypeXCP.XCCP.value, Request.EntityTypeXCP.XRCP.value,
-                 Request.EntityType.BC.value
-                 ]),
-            Name.state.in_([Name.APPROVED, Name.CONDITION]),
+                cls.id == Name.nrId,
+                cls.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
+                cls.requestTypeCd.in_(
+                    [EntityType.PRIV.value,
+                     EntityType.BCORP.value, EntityTypeBCORP.CCR.value,
+                     EntityTypeBCORP.CT.value,
+                     EntityTypeBCORP.RCR.value,
+                     EntityType.CP.value, EntityTypeCP.CCP.value, EntityTypeCP.CTC.value,
+                     EntityTypeCP.RCP.value,
+                     EntityType.FI.value, EntityTypeFI.CFI.value, EntityTypeFI.RFI.value,
+                     EntityType.SO.value, EntityTypeSO.ASO.value, EntityTypeSO.CSO.value,
+                     EntityTypeSO.CSSO.value,
+                     EntityTypeSO.CTSO.value, EntityTypeSO.RSO.value,
+                     EntityType.ULC.value, EntityTypeULC.UC.value, EntityTypeULC.CUL.value,
+                     EntityTypeULC.ULCT.value, EntityTypeULC.RUL.value,
+                     EntityType.XSO.value, EntityTypeXSO.XASO.value, EntityTypeXSO.XCASO.value,
+                     EntityTypeXSO.XCSO.value, EntityTypeXSO.XRSO.value,
+                     EntityType.CCC.value, EntityTypeCCC.CC.value, EntityTypeCCC.CCV.value,
+                     EntityTypeCCC.CCCT.value, EntityTypeCCC.RCC.value,
+                     EntityType.PAR.value,
+                     EntityType.XCORP.value, EntityTypeXCORP.XCCR.value,
+                     EntityTypeXCORP.XRCR.value,
+                     EntityTypeXCORP.AS.value,
+                     EntityType.XULC.value, EntityTypeXULC.UA.value, EntityTypeXULC.XCUL.value,
+                     EntityTypeXULC.XRUL.value,
+                     EntityType.XCP.value, EntityTypeXCP.XCCP.value, EntityTypeXCP.XRCP.value,
+                     EntityType.BC.value
+                     ]),
+                Name.state.in_([Name.APPROVED, Name.CONDITION]),
 
-        ]
+            ]
 
         criteria = RequestConditionCriteria(
             fields=[Name.name],
             filters=filters
-        )
+            )
 
         return criteria
 
@@ -422,6 +335,7 @@ class Request(db.Model):
 
         return flattened
 
+
     @classmethod
     def find_by_criteria(cls, criteria=None):
         RequestConditionCriteria.is_valid_criteria(criteria)
@@ -443,13 +357,14 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
 
     # comes from NRO/Societies Online
     if(re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd not in soc_list):
-        request._source = Request.Source.NRO.value  # pylint: disable=protected-access
+        request._source = ValidSources.NRO.value  # pylint: disable=protected-access
     else:
         if (re.match(r"NR [A-Z]+", request.nrNum)):
-             request._source = Request.Source.NAMEREQUEST.value   # pylint: disable=protected-access
+             request._source = ValidSources.NAMEREQUEST.value   # pylint: disable=protected-access
         else:
             if(request.requestTypeCd in soc_list ):
-             request._source = Request.Source.SO.value   # pylint: disable=protected-access
+             request._source = ValidSources.SO.value   # pylint: disable=protected-access
+
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
@@ -457,72 +372,9 @@ def update_request_action_entity_type(mapper, connection, target): # pylint: dis
     """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
     # needed to break apart  request_type
     request = target
-
-    if(re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None ):
-        #todo: handle assumed name as it is a name type and not currently a request action?
+    if (re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None):
+        # todo: handle assumed name as it is a name type and not currently a request action?
         # map the legacy request_type to the new Entity_type and Request_action
-        request_type_mapping = [
-            ('CR', Request.EntityType.BCORP.value, Request.RequestAction.NEW_AML.value),
-            ('CCR', Request.EntityType.BCORP.value, Request.RequestAction.CHG.value),
-            ('CT', Request.EntityType.BCORP.value, Request.RequestAction.MVE.value),
-            ('RCR', Request.EntityType.BCORP.value, Request.RequestAction.REST.value),
-            ('XCR', Request.EntityType.XCORP.value, Request.RequestAction.NEW.value),
-            ('XCCR', Request.EntityType.XCORP.value, Request.RequestAction.CHG.value),
-            ('XRCR', Request.EntityType.XCORP.value, Request.RequestAction.REST.value),
-            ('AS', Request.EntityType.XCORP.value, Request.RequestAction.AS.value),
-            ('LC', Request.EntityType.XLLC.value, Request.RequestAction.NEW.value),
-            ('CLC', Request.EntityType.XLLC.value, Request.RequestAction.CHG.value),
-            ('RLC', Request.EntityType.XLLC.value, Request.RequestAction.REST.value),
-            ('AL', Request.EntityType.XLLC.value, Request.RequestAction.AS.value),
-            ('FR', Request.EntityType.FIRM.value, Request.RequestAction.NEW.value),
-            ('CFR', Request.EntityType.FIRM.value, Request.RequestAction.CHG.value),
-            ('LL', Request.EntityType.LLP.value, Request.RequestAction.NEW.value),
-            ('CLL', Request.EntityType.LLP.value, Request.RequestAction.CHG.value),
-            ('XLL', Request.EntityType.XLLP.value, Request.RequestAction.NEW.value),
-            ('XCLL', Request.EntityType.XLLP.value, Request.RequestAction.CHG.value),
-            ('LP', Request.EntityType.LP.value, Request.RequestAction.NEW.value),
-            ('CLP', Request.EntityType.LP.value, Request.RequestAction.CHG.value),
-            ('XLP', Request.EntityType.XLP.value, Request.RequestAction.NEW.value),
-            ('CXLP', Request.EntityType.XLP.value, Request.RequestAction.CHG.value),
-            ('SO', Request.EntityType.SO.value, Request.RequestAction.NEW.value),
-            ('ASO', Request.EntityType.SO.value, Request.RequestAction.AML.value),
-            ('CSO', Request.EntityType.SO.value, Request.RequestAction.CHG.value),
-            ('RSO', Request.EntityType.SO.value, Request.RequestAction.REST.value),
-            ('CTSO', Request.EntityType.SO.value, Request.RequestAction.MVE.value),
-            ('CSSO', Request.EntityType.SO.value, Request.RequestAction.CNV.value),
-            ('XSO', Request.EntityType.XSO.value, Request.RequestAction.NEW.value),
-            ('XCSO', Request.EntityType.XSO.value, Request.RequestAction.CHG.value),
-            ('XRSO', Request.EntityType.XSO.value, Request.RequestAction.REST.value),
-            ('XASO', Request.EntityType.XSO.value, Request.RequestAction.AS.value),
-            ('XCASO', Request.EntityType.XSO.value, Request.RequestAction.ACHG.value),
-            ('CP', Request.EntityType.CP.value, Request.RequestAction.NEW_AML.value),
-            ('CCP', Request.EntityType.CP.value, Request.RequestAction.CHG.value),
-            ('CTC', Request.EntityType.CP.value, Request.RequestAction.MVE.value),
-            ('RCP', Request.EntityType.CP.value, Request.RequestAction.REST.value),
-            ('XCP', Request.EntityType.XCP.value, Request.RequestAction.NEW.value),
-            ('XCCP', Request.EntityType.XCP.value, Request.RequestAction.CHG.value),
-            ('XRCP', Request.EntityType.XCP.value, Request.RequestAction.REST.value),
-            ('CC', Request.EntityType.CCC.value, Request.RequestAction.NEW_AML.value),
-            ('CCV', Request.EntityType.CCC.value, Request.RequestAction.CNV.value),
-            ('CCC', Request.EntityType.CCC.value, Request.RequestAction.CHG.value),
-            ('CCCT', Request.EntityType.CCC.value, Request.RequestAction.MVE.value),
-            ('RCC', Request.EntityType.CCC.value, Request.RequestAction.REST.value),
-            ('UL', Request.EntityType.ULC.value, Request.RequestAction.NEW.value),
-            ('UC', Request.EntityType.ULC.value, Request.RequestAction.CNV.value),
-            ('CUL', Request.EntityType.ULC.value, Request.RequestAction.CHG.value),
-            ('ULCT', Request.EntityType.ULC.value, Request.RequestAction.MVE.value),
-            ('RUL', Request.EntityType.ULC.value, Request.RequestAction.REST.value),
-            ('UA', Request.EntityType.XULC.value, Request.RequestAction.AS.value),
-            ('XUL', Request.EntityType.XULC.value, Request.RequestAction.NEW.value),
-            ('XCUL', Request.EntityType.XULC.value, Request.RequestAction.CHG.value),
-            ('XRUL', Request.EntityType.XULC.value, Request.RequestAction.REST.value),
-            ('FI', Request.EntityType.FI.value, Request.RequestAction.NEW.value),
-            ('CFI', Request.EntityType.FI.value, Request.RequestAction.CHG.value),
-            ('RFI', Request.EntityType.FI.value, Request.RequestAction.REST.value),
-            ('PA', Request.EntityType.PRIV.value, Request.RequestAction.NEW.value),
-            ('PAR', Request.EntityType.PAR.value, Request.RequestAction.NEW.value)
-         ]
-
         new_value = request.requestTypeCd
         output = [item for item in request_type_mapping
                   if item[0] == new_value]
@@ -530,17 +382,6 @@ def update_request_action_entity_type(mapper, connection, target): # pylint: dis
         request._entity_type_cd = output[0][1]
         request._request_action_cd = output[0][2]
 
-@event.listens_for(Request, 'before_update')
-def add_to_word_class_queue(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the cleaned_name when an examiner approves a BC corp class request_type when it is approved/conditionally approved in Namex"""
-    # needed to reduce query time for conflict matching in Name Request
-    request = target
-    # TODO: put the name on the word classification queue to be picked up by the word classification service and update wod classification table
-    # TODO: may have to review which entity types are included
-    #if(request.stateCd  == 'APPROVED' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' :
-        #add it to the queue to add or update words
-    #if(request_stateCd == 'HOLD' and request.requestTypeCd in ['CR','CCR','CC','CCC','UL','CUL','BC'] and request.source != 'NAMEREQUEST' and request.hasBeenReset=True):
-        #add to the queue to decrement or remove words from word classification
 
 class RequestsSchema(ma.ModelSchema):
     class Meta:

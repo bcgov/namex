@@ -44,6 +44,7 @@ class Name(db.Model):
     CONDITION = 'CONDITION'
     # needed for name request reservation before completing the nr
     RESERVED = 'RESERVED'
+    COND_RESERVE = 'COND-RESERVE'
 
     #Properties added for Name Request
     @property
@@ -51,14 +52,25 @@ class Name(db.Model):
         """Property containing the name type which is used by name Request."""
         return self._name_type_cd
 
+    @name_type_cd.setter
+    def name_type_cd(self, value: str):
+        self._name_type_cd = value
+
     @property
     def clean_name(self):
         """Property containing the cleaned approved name used in analysis in Name Request"""
         return self._clean_name
 
+    @clean_name.setter
+    def clean_name(self, value: str):
+        self._clean_name = value
+
     def as_dict(self):
         return {
             "name": self.name,
+            "clean_name": self.clean_name,
+            "name_type_cd": self.name_type_cd,
+            "designation": self.designation,
             "choice": self.choice,
             "state": self.state,
             "conflict1": self.conflict1,
@@ -89,11 +101,9 @@ class Name(db.Model):
         db.session.commit()
 
 @event.listens_for(Name, 'before_update')
-def set_analysis_name(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the cleaned_name when an examiner approves a name (any name)"""
+def set_clean_name(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     name = target
     #if(name.state  == 'APPROVED'):
-        #TODO: Run the regex service to set the clean name
 
 
 

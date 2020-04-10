@@ -23,3 +23,4 @@ from .nro_sync_tables import NRONamesSyncJob, NRONamesSyncJobDetail, NRONamesSyn
 from .admin_tables import DecisionReasonAudit, RestrictedConditionAudit
 from .word_classification import WordClassification, WordClassificationSchema
 from .virtual_word_condition import VirtualWordCondition
+from .nr_number import NRNumber
