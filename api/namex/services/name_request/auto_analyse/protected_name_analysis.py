@@ -66,9 +66,11 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     def _set_designations_incorrect_position_by_input_name(self):
         syn_svc = self.synonym_service
-        original_name = self.get_original_name()
+        tokenized_name = self.get_original_name_tokenized()
+        correct_designation_end_list = self._designation_end_list_correct
 
-        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(name=original_name).data
+        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(name=tokenized_name,
+                                                                                       designation_end_list=correct_designation_end_list).data
         self._misplaced_designation_end_list = designation_end_misplaced_list
 
     def _set_designations_by_entity_type_user(self):
@@ -83,8 +85,12 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code=entity_type_code.value, position_code=DesignationPositionCodes.ANY.value, lang=LanguageCodes.ENG.value).data
-        end_list = syn_svc.get_designations(entity_type_code=entity_type_code.value, position_code=DesignationPositionCodes.END.value, lang=LanguageCodes.ENG.value).data
+        any_list = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                            position_code=DesignationPositionCodes.ANY.value,
+                                            lang=LanguageCodes.ENG.value).data
+        end_list = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                            position_code=DesignationPositionCodes.END.value,
+                                            lang=LanguageCodes.ENG.value).data
 
         self._designation_any_list_correct = any_list
         self._designation_end_list_correct = end_list

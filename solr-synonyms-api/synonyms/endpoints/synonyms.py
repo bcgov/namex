@@ -389,42 +389,17 @@ class _IncorrectDesignationEndInName(Resource):
     @marshal_with(response_list)
     @api.doc(params={
         'name': '',
-        'designation_end_entity_type': ''
+        'designation_end': ''
     })
     def get():
-        name = unquote_plus(request.args.get('name'))
-        designation_end_entity_type = unquote_plus(request.args.get('designation_end_entity_type'))
+        name = literal_eval(request.args.get('name'))
+        designation_end_list = literal_eval(request.args.get('designation_end_list'))
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        results = service.get_incorrect_designation_end_in_name(name, designation_end_entity_type)
-
-        return {
-            'data': results
-        }
-
-
-@api.route('/incorrect-designation-end-in-name', strict_slashes=False, methods=['GET'])
-class _IncorrectDesignationEndInName(Resource):
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    # @api.expect()
-    @api.response(200, 'SynonymsApi', response_list)
-    @marshal_with(response_list)
-    @api.doc(params={
-        'name': ''
-    })
-    def get():
-        name = unquote_plus(request.args.get('name'))
-
-        if not validate_request(request.args):
-            return
-
-        service = SynonymService()
-        results = service.get_incorrect_designation_end_in_name(name)
+        results = service.get_incorrect_designation_end_in_name(name, designation_end_list)
 
         return {
             'data': results
