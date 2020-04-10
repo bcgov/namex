@@ -110,8 +110,8 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         '''
 
     def get_designation_all_in_name(self, name):
-        all_designations_end_all_list = self.get_designations(None, DesignationPositionCodes.END, 'english')
-        all_designations_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, 'english')
+        all_designations_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
+        all_designations_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG)
 
         all_designations = list(set(all_designations_end_all_list + all_designations_any_all_list))
 
