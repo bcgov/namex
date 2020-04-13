@@ -292,7 +292,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return " ".join(text.split())
 
     @classmethod
-    def regex_strip_out_numbers_middle_end(self, text, ordinal_suffixes, numbers):
+    def regex_strip_out_numbers_middle_end(cls, text, ordinal_suffixes, numbers):
         text = re.sub(r'(?<=[A-Za-z]\b\s)([ 0-9]+({})?|({})\b)'.format(ordinal_suffixes, numbers),
                       '',
                       text,
@@ -301,7 +301,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return " ".join(text.split())
 
     @classmethod
-    def regex_numbers_standalone(self, text, ordinal_suffixes, numbers, stand_alone_words):
+    def regex_numbers_standalone(cls, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
             r'\b(?=(\d+(?:{0})?(?:\s+\d+(?:\b{0}\b)?)*|(?:\b({1})\b)(?:\s+(?:\b({1})\b))*))\1(?!\s+(?:{2})\b)\s*'.format(
                 ordinal_suffixes, numbers, stand_alone_words),
