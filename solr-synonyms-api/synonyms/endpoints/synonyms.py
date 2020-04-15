@@ -16,9 +16,7 @@ from synonyms.models import synonym
 
 from synonyms.services.synonyms import DesignationPositionCodes
 
-
 __all__ = ['api']
-
 
 api = Namespace('Synonyms', description='Synonyms Service - Used by Namex API and Name Processing Service')
 
@@ -227,7 +225,7 @@ class _Designations(Resource):
         'lang': ''
     })
     def get():
-        entity_type_code = unquote_plus(request.args.get('entity_type_code'))
+        entity_type_code = unquote_plus(request.args.get('entity_type_code', 'english'))
         position_code = unquote_plus(request.args.get('position_code'))
         lang = unquote_plus(request.args.get('lang'))
 
@@ -286,7 +284,7 @@ class _DesignatedAnyAllWords(Resource):
     })
     def get():
         entity_type_code = None
-        position_code = DesignationPositionCodes.END.value
+        position_code = DesignationPositionCodes.ANY.value
         lang = unquote_plus(request.args.get('lang', 'english'))  # Default to english!
 
         if not validate_request(request.args):
@@ -390,16 +388,18 @@ class _IncorrectDesignationEndInName(Resource):
     @api.response(200, 'SynonymsApi', response_list)
     @marshal_with(response_list)
     @api.doc(params={
-        'name': ''
+        'tokenized_name': '',
+        'designation_end_list': ''
     })
     def get():
-        name = unquote_plus(request.args.get('name'))
+        tokenized_name = literal_eval(request.args.get('tokenized_name'))
+        designation_end_list = literal_eval(request.args.get('designation_end_list'))
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        results = service.get_incorrect_designation_end_in_name(name)
+        results = service.get_incorrect_designation_end_in_name(tokenized_name, designation_end_list)
 
         return {
             'data': results
@@ -656,14 +656,12 @@ class _TransformText(Resource):
     @api.doc(params={
         'text': '',
         'designation_all': '',
-        'prefix_list': '',
         'number_list': '',
         'exceptions_ws': '',
     })
     def get():
         text = unquote_plus(request.args.get('text'))
         designation_all = literal_eval(request.args.get('designation_all'))
-        prefix_list = literal_eval(request.args.get('prefix_list'))
         number_list = literal_eval(request.args.get('number_list'))
         exceptions_ws = literal_eval(request.args.get('exceptions_ws')) if request.args.get('exceptions_ws') else []
 
@@ -671,7 +669,7 @@ class _TransformText(Resource):
             return
 
         service = SynonymService()
-        result = service.regex_transform(text, designation_all, prefix_list, number_list, exceptions_ws)
+        result = service.regex_transform(text, designation_all, number_list, exceptions_ws)
 
         return {
             'data': result

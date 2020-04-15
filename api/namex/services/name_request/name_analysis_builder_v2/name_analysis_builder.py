@@ -209,7 +209,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                                                             w_desc, list_name, name)
         most_similar_names.extend(
             list({k for k, v in
-                  sorted(dict_highest_counter.items(), key=lambda item: (-item[1], item[0]))[0:MAX_MATCHES_LIMIT]}))
+                  sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[0:MAX_MATCHES_LIMIT]}))
 
         for element in most_similar_names:
             response.update({element: dict_highest_detail.get(element, {})})
@@ -402,9 +402,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                         counter += 0.7
                     elif porter.stem(word.lower()) in all_subs_dict.values():
                         counter += 0.6
+                    else:
+                        counter -= 0.2
 
-                similarity = counter / length_original
-                if similarity > 0.68:
+                similarity = round(counter / length_original, 2)
+                if similarity >= 0.67:
                     dict_matches_counter.update({match: similarity})
 
             dict_matches_words.update(

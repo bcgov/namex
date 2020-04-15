@@ -38,27 +38,27 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     '''
     Set designations in <any> and <end> positions regardless the entity type. 
-    designation_any_list: Retrieves all designations found anywhere in the name regardless the entity type.
-                          <Entity type>-Valid English Designations_any Stop
-                          English Designations_any Stop
-    designation_end_list: Retrieves all designations found at the end in the name regardless the entity type
-                          <Entity type>-Valid English Designations_end Stop
-                          English Designations_end Stop,
-    Note: The previous lists contain designations that are in the correct position. For instance, designations with <end> position 
-          found anywhere are not counted here, they are counted in _set_designations_incorrect_position_by_input_name.
+    designation_any_list: Retrieves all designations properly placed anywhere in the name regardless the entity type.
+                           <Entity type>-Valid English Designations_any Stop
+                           English Designations_any Stop.
+    designation_end_list: Retrieves all designations properly placed at the end in the name regardless the entity type
+                           <Entity type>-Valid English Designations_end Stop
+                           English Designations_end Stop.
+   all_designations: Retrieves misplaced and correctly placed designations.
+     Note: The previous lists contain designations that are in the correct position. For instance, designations with <end> position
+           found anywhere are not counted here, they are counted in _set_designations_incorrect_position_by_input_name.
     '''
 
     def _set_designations_by_input_name(self):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
 
-        designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
-        designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
+        # These are used when getting the entity type in _set_entity_type_any_designation, _set_entity_type_end_designation
+        # for <any> and <end> designations which are properly placed:
+        self._designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
+        self._designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
 
-        self._designation_any_list = designation_any_list
-        self._designation_end_list = designation_end_list
-
-        self._all_designations = self._designation_any_list + self._designation_end_list
+        self._all_designations = syn_svc.get_designation_all_in_name(name=original_name).data
 
     '''
     Set designations in position <end> found any other place in the company name, these designations are misplaced.
@@ -66,9 +66,11 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     def _set_designations_incorrect_position_by_input_name(self):
         syn_svc = self.synonym_service
-        original_name = self.get_original_name()
+        tokenized_name = self.get_original_name_tokenized()
+        correct_designation_end_list = self._designation_end_list_correct
 
-        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(name=original_name).data
+        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
+                                                                                       designation_end_list=correct_designation_end_list).data
         self._misplaced_designation_end_list = designation_end_misplaced_list
 
     def _set_designations_by_entity_type_user(self):
@@ -83,8 +85,12 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code=entity_type_code.value, position_code=DesignationPositionCodes.ANY.value, lang=LanguageCodes.ENG.value).data
-        end_list = syn_svc.get_designations(entity_type_code=entity_type_code.value, position_code=DesignationPositionCodes.END.value, lang=LanguageCodes.ENG.value).data
+        any_list = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                            position_code=DesignationPositionCodes.ANY.value,
+                                            lang=LanguageCodes.ENG.value).data
+        end_list = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                            position_code=DesignationPositionCodes.END.value,
+                                            lang=LanguageCodes.ENG.value).data
 
         self._designation_any_list_correct = any_list
         self._designation_end_list_correct = end_list

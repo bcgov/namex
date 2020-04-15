@@ -3,6 +3,7 @@ from sqlalchemy import func
 
 from synonyms.models.synonym import Synonym
 from synonyms.criteria.synonym.query_criteria import SynonymQueryCriteria
+from . import LanguageCodes
 
 from .mixins.designation import SynonymDesignationMixin
 from .mixins.model import SynonymModelMixin
@@ -138,11 +139,11 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return flattened
 
     def get_designations(self, entity_type_str, position_str, lang):
-        lang = lang if isinstance(lang, str) else 'english'
+        lang = lang if isinstance(lang, str) else LanguageCodes.ENG.value
         model = self.get_model()
 
         entity_type_code = get_entity_type_code(entity_type_str)
-        position_code = get_designation_position_code(position_str)
+        position_code = get_designation_position_code(position_str) if isinstance(position_str, str) else position_str
 
         filters = []
 
@@ -159,7 +160,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
 
         results = self.find_word_synonyms(None, filters)
-        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
+        flattened = list(set(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results)))))))
+        flattened.sort(key=len, reverse=True)
         return flattened
 
     '''
@@ -182,7 +184,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
           rx=re.compile(rf'({exception_rx})|{generic_rx}', re.I)
     	  rx.sub(lambda x: x.group(1) or " "
     7.- Replace with space:
-        Punctuation including ampersand, slash, hyphen used for separation:[&/-]
+        Punctuation incqluding ampersand, slash, hyphen used for separation:[&/-]
     8.- Replace with non-space:
          Set together letter of length one separated by spaces: (?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     	 Trailing and leading spaces in string: ^\s+|\s+$
@@ -193,22 +195,21 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     10.- Remove extra spaces to have just one space: \s+
     '''
 
-    def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
+    def regex_transform(self, text, designation_all, number_list, exceptions_ws):
         designation_all_regex = '|'.join(designation_all)
-        prefixes = '|'.join(prefix_list)
         numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
         internet_domains = '.COM|.ORG|.NET|.EDU'
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
-        text = self.regex_prefixes(text, prefixes)
         text = self.regex_numbers_lot(text)
         text = self.regex_repeated_strings(text)
         text = self.regex_separated_ordinals(text, ordinal_suffixes)
         text = self.regex_keep_together_abv(text, exceptions_ws)
         text = self.regex_punctuation(text)
         text = self.regex_together_one_letter(text)
+        text = self.regex_strip_out_numbers_middle_end(text, ordinal_suffixes, numbers)
         text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_words)
         text = self.regex_remove_extra_spaces(text)
 
@@ -216,13 +217,14 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_remove_designations(cls, text, internet_domains, designation_all_regex):
-        text = re.sub(r'{}|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|\b({})\b.?'
-                      .format(internet_domains, designation_all_regex),
+        text = re.sub(r'\b({})\b|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|\b({})\b.?'.format(internet_domains,
+                                                                                                    designation_all_regex),
                       '',
                       text,
                       0,
                       re.IGNORECASE)
         return " ".join(text.split())
+
 
     @classmethod
     def regex_prefixes(cls, text, prefixes):
@@ -250,6 +252,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       0,
                       re.IGNORECASE)
         return " ".join(text.split())
+
 
     @classmethod
     def regex_separated_ordinals(cls, text, ordinal_suffixes):
@@ -289,10 +292,19 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return " ".join(text.split())
 
     @classmethod
+    def regex_strip_out_numbers_middle_end(cls, text, ordinal_suffixes, numbers):
+        text = re.sub(r'(?<=[A-Za-z]\b\s)([ 0-9]+({})?|({})\b)'.format(ordinal_suffixes, numbers),
+                      '',
+                      text,
+                      0,
+                      re.IGNORECASE)
+        return " ".join(text.split())
+
+    @classmethod
     def regex_numbers_standalone(cls, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
-            r'(^(?:\d+(?:{})?\s*)+(?=[^\d]*$)|\b(?:{})\b)(?!.*?(?:{}$))|(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)'
-            .format(ordinal_suffixes, numbers, stand_alone_words),
+            r'\b(?=(\d+(?:{0})?(?:\s+\d+(?:\b{0}\b)?)*|(?:\b({1})\b)(?:\s+(?:\b({1})\b))*))\1(?!\s+(?:{2})\b)\s*'.format(
+                ordinal_suffixes, numbers, stand_alone_words),
             '',
             text,
             0,
