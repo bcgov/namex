@@ -20,5 +20,4 @@ toolz
 nltk==3.4.5
 werkzeug==0.16.1
 pysolr
-pyopenssl
-git+https://github.com/bcdevlucas/namex-synonyms-api-client-py.git@config-port-8080#egg=swagger_client
+git+https://github.com/bcdevlucas/namex-synonyms-api-client-py.git#egg=swagger_client

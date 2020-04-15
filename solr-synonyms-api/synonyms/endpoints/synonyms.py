@@ -657,15 +657,13 @@ class _TransformText(Resource):
         'text': '',
         'designation_all': '',
         # TODO: Deprecate prefix_list
-        'prefix_list': '',  # Deprecate first, don't delete this yet!
+        'prefix_list': '',  # Deprecate first we don't want to break anything, don't delete this yet!
         'number_list': '',
         'exceptions_ws': '',
     })
     def get():
         text = unquote_plus(request.args.get('text'))
         designation_all = literal_eval(request.args.get('designation_all'))
-        # TODO: Deprecate prefix list param in regex_transform / transform_text
-        prefix_list = literal_eval(request.args.get('prefix_list')),  # Deprecate first, don't delete this yet!
         number_list = literal_eval(request.args.get('number_list'))
         exceptions_ws = literal_eval(request.args.get('exceptions_ws')) if request.args.get('exceptions_ws') else []
 
