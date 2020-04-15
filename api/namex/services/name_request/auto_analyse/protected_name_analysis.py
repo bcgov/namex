@@ -1,17 +1,13 @@
 from datetime import (datetime)
 
-import collections
-
 from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from namex.services.synonyms import DesignationPositionCodes
+from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
 
 from .name_analysis_director import NameAnalysisDirector
-from . import ProcedureResult
 
-from .name_analysis_utils import list_distinctive_descriptive_same, validate_distinctive_descriptive_lists, \
-    list_distinctive_descriptive
+from namex.utils.common import parse_dict_of_lists
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -40,49 +36,42 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     def __init__(self):
         super(ProtectedNameAnalysisService, self).__init__()
 
+    '''
+    Set designations in <any> and <end> positions regardless the entity type. 
+    designation_any_list: Retrieves all designations properly placed anywhere in the name regardless the entity type.
+                           <Entity type>-Valid English Designations_any Stop
+                           English Designations_any Stop.
+    designation_end_list: Retrieves all designations properly placed at the end in the name regardless the entity type
+                           <Entity type>-Valid English Designations_end Stop
+                           English Designations_end Stop.
+   all_designations: Retrieves misplaced and correctly placed designations.
+     Note: The previous lists contain designations that are in the correct position. For instance, designations with <end> position
+           found anywhere are not counted here, they are counted in _set_designations_incorrect_position_by_input_name.
+    '''
+
     def _set_designations_by_input_name(self):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
 
-        designation_any_list = syn_svc.get_designation_any_in_name(original_name)
-        designation_end_list = syn_svc.get_designation_end_in_name(original_name)
-        all_designations = syn_svc.get_designation_all_in_name(original_name)
+        # These are used when getting the entity type in _set_entity_type_any_designation, _set_entity_type_end_designation
+        # for <any> and <end> designations which are properly placed:
+        self._designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
+        self._designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
 
-        for idx, designation in enumerate(designation_any_list):
-            if designation not in all_designations:
-                designation_any_list.pop(idx)
+        self._all_designations = syn_svc.get_designation_all_in_name(name=original_name).data
 
-        for idx, designation in enumerate(designation_end_list):
-            if designation not in all_designations:
-                designation_end_list.pop(idx)
+    '''
+    Set designations in position <end> found any other place in the company name, these designations are misplaced.
+    '''
 
-        self._designation_any_list = designation_any_list
-        self._designation_end_list = designation_end_list
-        self._all_designations = all_designations
-
-    def _set_misplaced_designation_in_input_name(self):
+    def _set_designations_incorrect_position_by_input_name(self):
         syn_svc = self.synonym_service
-        original_name = self.get_original_name()
-        # TODO: Arturo why the change? These lines were like this:
-        # correct_designation_end_list = self._designation_end_list
-        # correct_designation_any_list = self._designation_any_list
-        # TODO: Arturo why the change?
-        correct_designation_end_list = self._designation_end_list_user
-        correct_designation_any_list = self._designation_any_list_user
+        tokenized_name = self.get_original_name_tokenized()
+        correct_designation_end_list = self._designation_end_list_correct
 
-        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name, correct_designation_any_list)
-        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name, correct_designation_end_list)
-
-        self._misplaced_designation_all_list = self._misplaced_designation_any_list + self._misplaced_designation_end_list
-
-    # TODO: I don't see this called anywhere (was prev called: set_all_entity_types)
-    def _set_all_entity_types(self):
-        self._all_entity_types = [item for item, count in collections.Counter(
-            self._entity_type_any_designation + self._entity_type_end_designation
-        ).items() if count > 1]
-
-        if not self._all_entity_types:
-            self._all_entity_types = self._entity_type_any_designation + self._entity_type_end_designation
+        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
+                                                                                       designation_end_list=correct_designation_end_list).data
+        self._misplaced_designation_end_list = designation_end_misplaced_list
 
     def _set_designations_by_entity_type_user(self):
         syn_svc = self.synonym_service
@@ -96,51 +85,73 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
-        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
+        any_list = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                            position_code=DesignationPositionCodes.ANY.value,
+                                            lang=LanguageCodes.ENG.value).data
+        end_list = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                            position_code=DesignationPositionCodes.END.value,
+                                            lang=LanguageCodes.ENG.value).data
 
-        # TODO: This was the code that was previously getting called
-        # self._designation_any_list_user.extend(any_list)
-        # self._designation_end_list_user.extend(end_list)
-        # TODO: We were getting duplicate lists as result of extending lists
-        #  _designation_any_list_user and / or _designation_end_list_user are being set more than o:q
-        #  which may or may not be an issue - just ensure that this is expected behavior
-        self._designation_any_list_user = any_list
-        self._designation_end_list_user = end_list
+        self._designation_any_list_correct = any_list
+        self._designation_end_list_correct = end_list
+
+    '''
+    Set the corresponding entity type for designations <any> found in name
+    '''
 
     def _set_entity_type_any_designation(self):
         syn_svc = self.synonym_service
-        entity_any_designation_dict = self._entity_any_designation_dict
+        # entity_any_designation_dict = self._entity_any_designation_dict
         designation_any_list = self._designation_any_list
 
+        all_end_designations = syn_svc.get_all_end_designations().data
+
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
-            syn_svc.get_all_end_designations(), designation_any_list
-        )
+            entity_any_designation_dict=parse_dict_of_lists(all_end_designations),
+            all_designation_any_end_list=designation_any_list
+        ).data
+
+    '''
+    Set the corresponding entity type for designations <end> found in name
+    '''
 
     def _set_entity_type_end_designation(self):
         syn_svc = self.synonym_service
-        entity_end_designation_dict = self._entity_end_designation_dict
+        # entity_end_designation_dict = self._entity_end_designation_dict
         designation_end_list = self._designation_end_list
 
+        all_any_designations = syn_svc.get_all_any_designations().data
+
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
-            syn_svc.get_all_any_designations(), designation_end_list
-        )
+            entity_end_designation_dict=parse_dict_of_lists(all_any_designations),
+            all_designation_any_end_list=designation_end_list
+        ).data
 
     def _set_designations(self):
+        # Set available designations for entity type selected by user (by default designations related to 'CR' entity type)
+        # _designation_any_list_user and _designation_end_list_user contain the only correct designations
         self._set_designations_by_entity_type_user()
-        # Set _designation_any_list and _designation_end_list based on company name typed by user
-        self._set_designations_by_input_name()
-        # TODO: Double check this to make sure it works
-        # Set _entity_type_any_designation for designations based on company name typed by user
-        self._set_entity_type_any_designation()
-        # TODO: Double check this to make sure it works
-        # Set _entity_type_end_designation for designations based on company name typed by user
-        self._set_entity_type_end_designation()
-        # Set _misplaced_designation_all based on company name typed by user
-        self._set_misplaced_designation_in_input_name()
 
-        # Set all designations based on entity type typed by user
-        self._all_designations_user = self._designation_any_list_user + self._designation_end_list_user
+        # Set _designation_any_list and _designation_end_list based on company name typed by user
+        # Set _all_designations (general list) based on company name typed by user
+        # All previous set designations have correct position, but may belong to wrong entity type
+        self._set_designations_by_input_name()
+
+        # Set _misplaced_designation_end_list which contains <end> designations in other part of the name
+        self._set_designations_incorrect_position_by_input_name()
+
+        # Set _entity_type_any_designation for designations found on company name typed by user
+        self._set_entity_type_any_designation()
+
+        # Set _entity_type_end_designation for designations found on company name typed by user
+        self._set_entity_type_end_designation()
+
+        # Set _misplaced_designation_all based on company name typed by user
+        # self._set_misplaced_designation_in_input_name()
+
+        # Set all designations based on entity type typed by user,'CR' by default
+        self._all_designations_user = self._designation_any_list_correct + self._designation_end_list_correct
+
         # Set all designations based on company name typed by user
         # self._all_designations = self._designation_any_list + self._designation_end_list
 
@@ -158,14 +169,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         results = []
 
-        if self.token_classifier.distinctive_word_tokens == self.token_classifier.descriptive_word_tokens:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(self.name_tokens)
-
-        else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(self.name_tokens, self.token_classifier.distinctive_word_tokens, self.token_classifier.descriptive_word_tokens)
-
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(self._list_dist_words, self._list_desc_words, self.name_tokens, self.processed_name)
+        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc(), self.name_tokens,
+                                                   self.processed_name)
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
@@ -174,7 +180,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
         check_words_requiring_consent = builder.check_words_requiring_consent(
             self.name_tokens, self.processed_name
-        )  # This is incorrect
+        )
 
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
@@ -194,9 +200,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         check_designation_misplaced = builder.check_designation_misplaced(
             self.get_original_name_tokenized(),
-            self.get_misplaced_designation_any(),
-            self.get_misplaced_designation_end(),
-            self.get_misplaced_designation_all()
+            self.get_misplaced_designation_end()
         )
 
         if not check_designation_misplaced.is_valid:

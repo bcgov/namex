@@ -1,12 +1,7 @@
-import itertools
 import re
 import collections
 
-from . import porter
-
-from namex.services.name_request.auto_analyse import DataFrameFields
-
-from namex.utils.common import parse_dict_of_lists
+from synonyms.constants import DataFrameFields
 
 
 # TODO: Fix caps and stuff...
@@ -59,7 +54,7 @@ Rules:  1) Before and after slash has to be at least two words to removed string
 
 
 def remove_french(text):
-    text = re.sub(r'(^[A-Z]+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*)/(\w+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*$)+',
+    text = re.sub(r'(^\w+(?:[^\w\n]+\w+)+[^\w\n]*)/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
                   r'\1 ',
                   text,
                   0,
@@ -67,10 +62,15 @@ def remove_french(text):
     return " ".join(text.split())
 
 
-def remove_stop_words(original_name_list, stop_words):
-    words = ' '.join([word for x, word in enumerate(original_name_list) if word not in stop_words])
+def remove_stop_words(original_name, stop_words):
+    stop_words_rgx = '|'.join(stop_words)
+    regex = re.compile(r'\b({})\b'.format(stop_words_rgx))
+    found_stop_words = regex.findall(original_name.lower())
 
-    return words
+    for word in found_stop_words:
+        original_name = original_name.replace(word, "")
+
+    return re.sub(' +', ' ', original_name)
 
 
 def list_distinctive_descriptive_same(name_list):
@@ -154,34 +154,6 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
             desc_list_all.append(desc_list_tmp[idx])
 
     return dist_list_all, desc_list_all
-
-
-def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
-    all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-        words=list_dist,
-        words_are_distinctive=True
-    ).data
-
-    dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
-
-    all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-        words=list_desc,
-        words_are_distinctive=False
-    ).data
-
-    desc_substitution_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-
-    all_substitution_dict = collections.OrderedDict()
-    for word in list_name:
-        if word in dist_substitution_dict:
-            all_substitution_dict[word] = dist_substitution_dict[word]
-        elif word in desc_substitution_dict:
-            all_substitution_dict[word] = desc_substitution_dict[word]
-
-    for k, v in all_substitution_dict.items():
-        all_substitution_dict[k] = [porter.stem(e.lower()) for e in v]
-
-    return all_substitution_dict, dist_substitution_dict, desc_substitution_dict
 
 
 def lookahead(iterable):

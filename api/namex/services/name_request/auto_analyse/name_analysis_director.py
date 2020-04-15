@@ -1,13 +1,11 @@
-from namex.models import Synonym
-
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
 from . import AnalysisIssueCodes
 
-from namex.services.synonyms.synonym \
-    import SynonymService
+# from namex.services.synonyms.synonym \
+#    import SynonymService
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService
@@ -20,6 +18,8 @@ from namex.services.word_classification.token_classifier \
 
 from namex.services.virtual_word_condition.virtual_word_condition \
     import VirtualWordConditionService
+
+from swagger_client import SynonymsApi as SynonymService
 
 '''
 This is the director for AutoAnalyseService.
@@ -67,9 +67,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def builder(self, builder):
         self._builder = builder
 
-    @property
-    def model(self):
-        return Synonym
+#    @property
+#    def model(self):
+#        return Synonym
 
     @property
     def entity_type(self):
@@ -298,7 +298,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.WORDS_TO_AVOID,
                 AnalysisIssueCodes.TOO_MANY_WORDS,
                 AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
                 AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
                 AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
                 AnalysisIssueCodes.CORPORATE_CONFLICT,

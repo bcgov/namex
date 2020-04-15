@@ -2,8 +2,9 @@
 import flask_restplus
 
 from . import synonyms
+from . import name_processing
 from . import probes
-from .. import solr-admin-app.solr_admin
+# from .. import solr-admin-app.solr_admin
 
 __all__ = ['api']
 
@@ -20,3 +21,4 @@ api.namespaces.clear()
 
 api.add_namespace(probes.api, path='/synonyms/probes')
 api.add_namespace(synonyms.api, path='/synonyms')
+api.add_namespace(name_processing.api, path='/name-processing')

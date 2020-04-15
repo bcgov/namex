@@ -8,10 +8,9 @@ from . import ProcedureResult
 from namex.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from namex.services.synonyms import DesignationPositionCodes
+from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
 
-from namex.services.word_classification.token_classifier \
-    import TokenClassifier
+from namex.utils.common import parse_dict_of_lists
 
 '''
 The UnprotectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -46,13 +45,13 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         original_name = self.get_original_name()
 
         # designation any/end_list get the designation at any/end place as long as they are placed correctly:
-        designation_any_list = syn_svc.get_designation_any_in_name(original_name)
-        designation_end_list = syn_svc.get_designation_end_in_name(original_name)
+        designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
+        designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
 
         # all_designations gets all the designations regardless they are placed correctly or not.
         # For instance, if limited liability partnership (end designation) is placed in a different location then
         # we will get the designation in here, but not in the previous lists (designation any/end list)
-        all_designations = syn_svc.get_designation_all_in_name(original_name)
+        all_designations = syn_svc.get_designation_all_in_name(name=original_name).data
 
         for idx, designation in enumerate(designation_any_list):
             if not designation in all_designations:
@@ -69,10 +68,10 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
     def _set_misplaced_designation_in_input_name(self):
         syn_svc = self.synonym_service
         original_name = self.get_original_name()
-        correct_designation_end = self._designation_end_list_user
-        correct_designation_any = self._designation_any_list_user
-        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(original_name, correct_designation_any)
-        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(original_name, correct_designation_end)
+        correct_designation_end = self._designation_end_list_correct
+        correct_designation_any = self._designation_any_list_correct
+        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(name=original_name, designation_any_entity_type=correct_designation_any).data
+        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(name=original_name, designation_end_entity_type=correct_designation_end).data
 
         self._misplaced_designation_all_list = self._misplaced_designation_any_list + self._misplaced_designation_end_list
 
@@ -97,29 +96,46 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes.has_value(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.ANY, 'english')
-        end_list = syn_svc.get_designations(entity_type_code, DesignationPositionCodes.END, 'english')
+        any_list = syn_svc.get_designations(
+            entity_type_code=entity_type_code.value,
+            position_code=DesignationPositionCodes.ANY.value,
+            lang=LanguageCodes.ENG.value
+        ).data
 
-        self._designation_any_list_user.extend(any_list)
-        self._designation_end_list_user.extend(end_list)
+        end_list = syn_svc.get_designations(
+            entity_type_code=entity_type_code.value,
+            position_code=DesignationPositionCodes.END.value,
+            lang=LanguageCodes.ENG.value
+        ).data
+
+        self._designation_any_list_correct.extend(any_list)
+        self._designation_end_list_correct.extend(end_list)
 
     def _set_entity_type_any_designation(self):
         syn_svc = self.synonym_service
-        entity_any_designation_dict = self._entity_any_designation_dict
+        # entity_any_designation_dict = self._entity_any_designation_dict
         designation_any_list = self._designation_any_list
 
+        designations = syn_svc.get_all_end_designations().data
+        designations_dict = parse_dict_of_lists(designations)
+
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
-            syn_svc.get_all_end_designations(), designation_any_list
-        )
+            entity_any_designation_dict=designations_dict,
+            all_designation_any_end_list=designation_any_list
+        ).data
 
     def _set_entity_type_end_designation(self):
         syn_svc = self.synonym_service
-        entity_end_designation_dict = self._entity_end_designation_dict
+        # entity_end_designation_dict = self._entity_end_designation_dict
         designation_end_list = self._designation_end_list
 
+        designations = syn_svc.get_all_any_designations().data
+        designations_dict = parse_dict_of_lists(designations)
+
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
-            syn_svc.get_all_any_designations(), designation_end_list
-        )
+            entity_end_designation_dict=designations_dict,
+            all_designation_any_end_list=designation_end_list
+        ).data
 
     def _set_designations(self):
         self._set_designations_by_entity_type_user()
@@ -135,7 +151,7 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         self._set_misplaced_designation_in_input_name()
 
         # Set all designations based on entity type typed by user
-        self._all_designations_user = self._designation_any_list_user + self._designation_end_list_user
+        self._all_designations_user = self._designation_any_list_correct + self._designation_end_list_correct
         # Set all designations based on company name typed by user
         #self._all_designations = self._designation_any_list + self._designation_end_list
 
