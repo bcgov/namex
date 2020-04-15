@@ -140,7 +140,7 @@ class NameAnalysis(Resource):
     # @api.expect()
     @api.doc(params={
         'name': 'A company / organization name string',
-        'location': 'A location code [ BC | CA | INTL ]',
+        'location': 'A location code [ BC | CA | IN ]',
         'entity_type': 'An entity type code [ CR, UL, CC ]',
         'request_action': 'A request action code'  # TODO: Use request_action not request_type, this needs to be updated on the front end!!!
         # 'request_type': 'A request action code'  # TODO: Leave this as request_type for now...
