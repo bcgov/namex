@@ -355,7 +355,7 @@ class WordSpecialUse(AnalysisResponseIssue):
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1="The word(s) "+ self._join_list_words(list_special) + " must go to examination ",
             line2=None,
             consenting_body=None,
             designations=None,

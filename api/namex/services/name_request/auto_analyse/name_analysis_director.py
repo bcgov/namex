@@ -301,6 +301,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
                 AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
                 AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
+                AnalysisIssueCodes.WORD_SPECIAL_USE,
                 AnalysisIssueCodes.CORPORATE_CONFLICT,
                 AnalysisIssueCodes.DESIGNATION_MISMATCH,
                 AnalysisIssueCodes.DESIGNATION_MISPLACED
