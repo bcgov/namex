@@ -184,7 +184,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
           rx=re.compile(rf'({exception_rx})|{generic_rx}', re.I)
     	  rx.sub(lambda x: x.group(1) or " "
     7.- Replace with space:
-        Punctuation incqluding ampersand, slash, hyphen used for separation:[&/-]
+        Punctuation including ampersand, slash, hyphen used for separation:[&/-]
     8.- Replace with non-space:
          Set together letter of length one separated by spaces: (?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
     	 Trailing and leading spaces in string: ^\s+|\s+$
@@ -225,7 +225,6 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       re.IGNORECASE)
         return " ".join(text.split())
 
-
     @classmethod
     def regex_prefixes(cls, text, prefixes):
         text = re.sub(r'\b({})([ &/.-])([A-Za-z]+)'.format(prefixes),
@@ -252,7 +251,6 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
                       0,
                       re.IGNORECASE)
         return " ".join(text.split())
-
 
     @classmethod
     def regex_separated_ordinals(cls, text, ordinal_suffixes):
