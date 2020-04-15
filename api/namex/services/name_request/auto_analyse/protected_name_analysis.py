@@ -69,7 +69,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         tokenized_name = self.get_original_name_tokenized()
         correct_designation_end_list = self._designation_end_list_correct
 
-        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(name=tokenized_name,
+        designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
                                                                                        designation_end_list=correct_designation_end_list).data
         self._misplaced_designation_end_list = designation_end_misplaced_list
 

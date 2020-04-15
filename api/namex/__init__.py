@@ -28,7 +28,7 @@ from namex import models
 run_version = get_run_version()
 
 
-def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
+def create_app(run_mode=os.getenv('FLASK_ENV', 'development')):
 
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
