@@ -656,6 +656,8 @@ class _TransformText(Resource):
     @api.doc(params={
         'text': '',
         'designation_all': '',
+        # TODO: Deprecate prefix_list
+        'prefix_list': '',  # Deprecate first we don't want to break anything, don't delete this yet!
         'number_list': '',
         'exceptions_ws': '',
     })

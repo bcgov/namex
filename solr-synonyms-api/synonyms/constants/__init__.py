@@ -33,7 +33,7 @@ class ValidLocations(Enum):
     CA_BC = 'BC'
     CA_NOT_BC = 'CA'
     # CA = 'CA',
-    INTL = 'INTL'
+    INTL = 'IN'
 
     @classmethod
     def list(cls):
