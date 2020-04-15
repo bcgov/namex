@@ -16,9 +16,7 @@ from synonyms.models import synonym
 
 from synonyms.services.synonyms import DesignationPositionCodes
 
-
 __all__ = ['api']
-
 
 api = Namespace('Synonyms', description='Synonyms Service - Used by Namex API and Name Processing Service')
 
@@ -658,13 +656,16 @@ class _TransformText(Resource):
     @api.doc(params={
         'text': '',
         'designation_all': '',
-        'prefix_list': '',
+        # TODO: Deprecate prefix_list
+        'prefix_list': '',  # Deprecate first, don't delete this yet!
         'number_list': '',
         'exceptions_ws': '',
     })
     def get():
         text = unquote_plus(request.args.get('text'))
         designation_all = literal_eval(request.args.get('designation_all'))
+        # TODO: Deprecate prefix list param in regex_transform / transform_text
+        prefix_list = literal_eval(request.args.get('prefix_list')),  # Deprecate first, don't delete this yet!
         number_list = literal_eval(request.args.get('number_list'))
         exceptions_ws = literal_eval(request.args.get('exceptions_ws')) if request.args.get('exceptions_ws') else []
 
