@@ -281,15 +281,57 @@ class AnalysisResponse:
         return issue
 
     def _build_word_special_use_issue(self, procedure_result, issue_count, issue_idx):
-        # option1 = None
-        # option2 = None
-        # option3 = None
+        is_only_issue = self._is_only_issue(issue_count, issue_idx)
+        has_next_issue = self._has_next_issue(issue_count, issue_idx)
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            # option1,
-            # option2,
-            # option3
-        ])
+        issue = None
+
+        # If there's only one issue, display helpful hint and the examination button
+        if is_only_issue:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+                option1,
+                option2,
+                # option3
+            ])
+
+            issue.show_examination_button = True
+        elif has_next_issue:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+                option1,
+                option2,
+                # option3
+            ])
+        elif not is_only_issue and has_next_issue is False:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+                option1,
+                option2,
+                # option3
+            ])
+
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
 
