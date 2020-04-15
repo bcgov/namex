@@ -1,9 +1,8 @@
 from datetime import (datetime)
 
 from namex.constants import \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
-
-from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
+    DesignationPositionCodes, LanguageCodes
 
 from .name_analysis_director import NameAnalysisDirector
 
