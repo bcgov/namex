@@ -388,18 +388,18 @@ class _IncorrectDesignationEndInName(Resource):
     @api.response(200, 'SynonymsApi', response_list)
     @marshal_with(response_list)
     @api.doc(params={
-        'name': '',
-        'designation_end': ''
+        'tokenized_name': '',
+        'designation_end_list': ''
     })
     def get():
-        name = literal_eval(request.args.get('name'))
+        tokenized_name = literal_eval(request.args.get('tokenized_name'))
         designation_end_list = literal_eval(request.args.get('designation_end_list'))
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        results = service.get_incorrect_designation_end_in_name(name, designation_end_list)
+        results = service.get_incorrect_designation_end_in_name(tokenized_name, designation_end_list)
 
         return {
             'data': results
