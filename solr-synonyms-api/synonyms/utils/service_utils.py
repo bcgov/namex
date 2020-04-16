@@ -3,6 +3,35 @@ import collections
 
 from synonyms.constants import DataFrameFields
 
+# TODO: Implement a true shared lib for stuff like this!
+#  Most, if not all of these methods are shared with the namex api project!
+from synonyms.constants import \
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
+    DesignationPositionCodes
+
+# TODO: Implement a true shared lib for stuff like this!
+#  Most, if not all of these methods are shared with the namex api project!
+
+
+def get_entity_type_code(entity_type_str):
+    entity_type_code = None
+    if BCProtectedNameEntityTypes.has_value(entity_type_str):
+        entity_type_code = BCProtectedNameEntityTypes(entity_type_str)
+    elif BCUnprotectedNameEntityTypes.has_value(entity_type_str):
+        entity_type_code = BCUnprotectedNameEntityTypes(entity_type_str)
+    elif XproUnprotectedNameEntityTypes.has_value(entity_type_str):
+        entity_type_code = XproUnprotectedNameEntityTypes(entity_type_str)
+
+    return entity_type_code
+
+
+def get_designation_position_code(position_code_str):
+    position_code = None
+    if DesignationPositionCodes.has_value(position_code_str):
+        position_code = DesignationPositionCodes(position_code_str)
+
+    return position_code
+
 
 # TODO: Fix caps and stuff...
 def data_frame_to_list(df):

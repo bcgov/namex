@@ -100,17 +100,17 @@ class NameAnalysis(Resource):
     - the location and the entity type:
       BC:
           NAME PROTECTED:
-              CR = 'BC_CORPORATION'
-              UL = 'BC_UNLIMITED_LIABILITY_COMPANY'
-              CP = 'BC_COOPERATIVE'
-              BC = 'BC_BENEFIT_COMPANY'
-              CC = 'BC_COMMUNITY_CONTRIBUTION_COMPANY'
+              CR = 'CORPORATION'
+              UL = 'UNLIMITED_LIABILITY_COMPANY'
+              CP = 'COOPERATIVE'
+              BC = 'BENEFIT_COMPANY'
+              CC = 'COMMUNITY_CONTRIBUTION_COMPANY'
           NAME UNPROTECTED (Just check for conflicts!):
-              FR = 'BC_SOLE_PROPRIETORSHIP'
-              DBA = 'BC_DOING_BUSINESS_AS'
-              GP = 'BC_GENERAL_PARTNERSHIP'
-              LP = 'BC_LIMITED_PARTNERSHIP'
-              LL = 'BC_LIMITED_LIABILITY_PARTNERSHIP'
+              FR = 'SOLE_PROPRIETORSHIP'
+              DBA = 'DOING_BUSINESS_AS'
+              GP = 'GENERAL_PARTNERSHIP'
+              LP = 'LIMITED_PARTNERSHIP'
+              LL = 'LIMITED_LIABILITY_PARTNERSHIP'
       NOT BC:
           XCR = 'XPRO_CORPORATION'
           XUL = 'XPRO_UNLIMITED_LIABILITY_COMPANY'

@@ -3,6 +3,8 @@ from string import Template
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from namex.utils.service_utils import get_entity_type_description
+
 # Import DTOs
 from .response_objects.name_analysis_issue import NameAnalysisIssue
 from .response_objects.name_action import NameAction, NameActions, WordPositions
@@ -586,9 +588,11 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         incorrect_designations_lc = list(map(lambda d: d.lower() if isinstance(d, str) else '', incorrect_designations))
         list_name_lc = list(map(lambda d: d.lower(), list_name))
 
+        entity_type_description = get_entity_type_description(self.entity_type)
+
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of " + self._join_list_words([self.entity_type]) + " </b>",
+            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>",
             line2=None,
             consenting_body=None,
             designations=correct_designations,
