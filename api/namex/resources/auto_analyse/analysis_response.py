@@ -249,6 +249,7 @@ class AnalysisResponse:
 
     def _build_non_existent_designation_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_designation_setup()
+        # option1 = replace_designation_setup()
         # Tweak the header
         option1.header = "Option 1"
 
