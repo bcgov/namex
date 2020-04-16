@@ -177,7 +177,7 @@ def add_designation_setup():
     return AddDesignationSetup(
         type="add_designation",
         header=Template("Add Designation"),
-        line1=Template("Please select a designation from one of the following:"),
+        line1=Template("Add a designation from to one of the following:"),
         line2=Template("")
     )
 

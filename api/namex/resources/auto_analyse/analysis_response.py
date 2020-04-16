@@ -248,8 +248,8 @@ class AnalysisResponse:
         return issue
 
     def _build_non_existent_designation_issue(self, procedure_result, issue_count, issue_idx):
-        # option1 = add_designation_setup()
-        option1 = replace_designation_setup()
+        # option1 = replace_designation_setup()
+        option1 = add_designation_setup()
         # Tweak the header
         option1.header = "Option 1"
 
@@ -260,7 +260,7 @@ class AnalysisResponse:
 
         issue = response_issues(procedure_result.result_code)(self.entity_type, [
             option1,
-            #option2,
+            # option2,
             # option3
         ])
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -412,7 +412,7 @@ class AnalysisResponse:
                         issue = self._build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_NON_EXISTENT:
-                        issue = self._build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
+                        issue = self._build_non_existent_designation_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.WORD_SPECIAL_USE:
                         issue = self._build_word_special_use_issue(procedure_result, issue_count, issue_idx)
@@ -449,7 +449,6 @@ class AnalysisResponse:
     '''
     This is invoked by consumers of this class
     '''
-
     def build_response(self):
         response = self.prepare_payload()
         return response
