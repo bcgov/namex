@@ -327,6 +327,20 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
+    def check_designation_existence(self, list_name, all_designations, all_designations_user):
+        result = ProcedureResult()
+        result.is_valid = True
+
+        if not all_designations:
+            result.is_valid = False
+            result.result_code = AnalysisIssueCodes.DESIGNATION_NON_EXISTENT
+            result.values = {
+                'list_name': list_name,
+                'correct_designations': all_designations_user
+            }
+
+        return result
+
     '''
     Override the abstract / base class method
     list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
