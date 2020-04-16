@@ -187,6 +187,13 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # Set designations and run our check
         self._set_designations()
 
+        check_designation_existence = builder.check_designation_existence(self.get_original_name_tokenized(),
+                                                                          self.get_all_designations(),
+                                                                          self.get_all_designations_user())
+
+        if not check_designation_existence.is_valid:
+            results.append(check_designation_existence)
+
         check_designation_mismatch = builder.check_designation_mismatch(
             self.get_original_name_tokenized(),
             self.entity_type,

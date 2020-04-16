@@ -387,6 +387,9 @@ class AnalysisResponse:
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISPLACED:
                         issue = self._build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
 
+                    if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_NON_EXISTENT:
+                        issue = self._build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
+
                     if procedure_result.result_code == AnalysisIssueCodes.WORD_SPECIAL_USE:
                         issue = self._build_word_special_use_issue(procedure_result, issue_count, issue_idx)
 
