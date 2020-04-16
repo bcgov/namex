@@ -650,7 +650,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
             line1="The " + self._join_list_words(
-                misplaced_end_designation) + " designation(s) cannot be used in a position different to end of the name." ,
+                misplaced_end_designation) + " designation(s) must be at the end of the name.",
             line2=None,
             consenting_body=None,
             designations=None,
