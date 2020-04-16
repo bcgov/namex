@@ -169,8 +169,12 @@ def replace_designation_setup():
     )
 
 
+class AddDesignationSetup(Setup):
+    pass
+
+
 def add_designation_setup():
-    return ReplaceDesignationSetup(
+    return AddDesignationSetup(
         type="add_designation",
         header=Template("Add Designation"),
         line1=Template("Add a designation from to one of the following:"),
