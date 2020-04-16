@@ -302,7 +302,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
                 AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
                 AnalysisIssueCodes.CORPORATE_CONFLICT,
-                AnalysisIssueCodes.DESIGNATION_NON_EXISTENT
+                AnalysisIssueCodes.DESIGNATION_NON_EXISTENT,
                 AnalysisIssueCodes.DESIGNATION_MISMATCH,
                 AnalysisIssueCodes.DESIGNATION_MISPLACED
             ]
