@@ -364,7 +364,6 @@ class AnalysisResponse:
     '''
     @:param analysis_result ProcedureResult[]
     '''
-
     def __init__(self, entity_type, analysis_result):
         self.entity_type = entity_type
         self.header = ""
@@ -413,7 +412,7 @@ class AnalysisResponse:
                         issue = self._build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_NON_EXISTENT:
-                        issue = self._build_non_existent_designation_issue(procedure_result, issue_count, issue_idx)
+                        issue = self._build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.WORD_SPECIAL_USE:
                         issue = self._build_word_special_use_issue(procedure_result, issue_count, issue_idx)
