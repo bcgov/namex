@@ -675,9 +675,13 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
                     type=NameActions.HIGHLIGHT
                 ))
 
-
         # Setup boxes
-        # TODO: We need setup boxes for this new stuff...
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
