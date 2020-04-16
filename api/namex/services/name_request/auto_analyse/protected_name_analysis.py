@@ -205,4 +205,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         if not check_designation_misplaced.is_valid:
             results.append(check_designation_misplaced)
 
+        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
+
+        if not check_special_words.is_valid:
+            results.append(check_special_words)
+
         return results
