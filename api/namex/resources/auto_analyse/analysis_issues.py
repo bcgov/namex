@@ -355,7 +355,7 @@ class WordSpecialUse(AnalysisResponseIssue):
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1="The word(s) "+ self._join_list_words(list_special) + " must go to examination ",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -650,7 +650,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
             line1="The " + self._join_list_words(
-                misplaced_end_designation) + " designation(s) cannot be used in a position different to end of the name." ,
+                misplaced_end_designation) + " designation(s) must be at the end of the name.",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -675,9 +675,13 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
                     type=NameActions.HIGHLIGHT
                 ))
 
-
         # Setup boxes
-        # TODO: We need setup boxes for this new stuff...
         issue.setup = self.setup_config
+        for setup_item in issue.setup:
+            # Loop over properties
+            for prop in vars(setup_item):
+                if isinstance(setup_item.__dict__[prop], Template):
+                    # Render the Template string, replacing placeholder vars
+                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute([]))
 
         return issue
