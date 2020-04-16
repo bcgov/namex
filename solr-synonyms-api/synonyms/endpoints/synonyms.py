@@ -16,7 +16,9 @@ from synonyms.models import synonym
 
 from synonyms.services.synonyms import DesignationPositionCodes
 
+
 __all__ = ['api']
+
 
 api = Namespace('Synonyms', description='Synonyms Service - Used by Namex API and Name Processing Service')
 

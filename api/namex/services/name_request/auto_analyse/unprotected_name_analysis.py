@@ -6,9 +6,8 @@ from .name_analysis_director import NameAnalysisDirector
 from . import ProcedureResult
 
 from namex.constants import \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
-
-from namex.services.synonyms import DesignationPositionCodes, LanguageCodes
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
+    DesignationPositionCodes, LanguageCodes
 
 from namex.utils.common import parse_dict_of_lists
 
