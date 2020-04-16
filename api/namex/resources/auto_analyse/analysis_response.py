@@ -365,6 +365,7 @@ class AnalysisResponse:
     '''
     @:param analysis_result ProcedureResult[]
     '''
+
     def __init__(self, entity_type, analysis_result):
         self.entity_type = entity_type
         self.header = ""
@@ -450,6 +451,7 @@ class AnalysisResponse:
     '''
     This is invoked by consumers of this class
     '''
+
     def build_response(self):
         response = self.prepare_payload()
         return response
