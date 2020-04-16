@@ -159,6 +159,15 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     '''
 
     @abc.abstractmethod
+    def check_designation_existence(self, list_name, all_designations_user):
+        return ProcedureResult(is_valid=True)
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+
+    @abc.abstractmethod
     def check_word_special_use(self, list_name, name):
         return ProcedureResult(is_valid=True)
 
