@@ -67,9 +67,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def builder(self, builder):
         self._builder = builder
 
-#    @property
-#    def model(self):
-#        return Synonym
+    #    @property
+    #    def model(self):
+    #        return Synonym
 
     @property
     def entity_type(self):
@@ -118,6 +118,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     name_as_submitted_tokenized tokenize the original name and when there is a compound designation made of more than one
     word, the term is counted as token. For instance, designations such as limited liability company is counted as one token.
     '''
+
     @property
     def name_as_submitted_tokenized(self):
         np_svc = self.name_processing_service
@@ -126,6 +127,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     '''
     Just an alias for name_as_submitted
     '''
+
     @property
     def original_name(self):
         return self.name_as_submitted
@@ -184,6 +186,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     @:prop processed_name The cleaned name
     @:prop name_tokens Word tokens generated from the cleaned name
     '''
+
     def set_name(self, name):
         np_svc = self.name_processing_service
         wc_svc = self.word_classification_service
@@ -203,6 +206,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     Prepare any data required by the analysis builder.
     prepare_data is an abstract method and must be implemented in extending classes.
     '''
+
     def prepare_data(self):
         # Query for whatever data we need to load up here
         self.configure_builder()
@@ -218,6 +222,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     - If you don't want to check to see if a name is well formed first, override check_name_is_well_formed in the supplied builder.
     @:return ProcedureResult[]
     '''
+
     def execute_analysis(self):
         try:
             # Execute analysis using the supplied builder
@@ -240,6 +245,15 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 analysis.append(check_words_to_avoid)
                 return analysis
 
+            results = []
+            check_word_limit = builder.check_word_limit(list_name)
+            if check_word_limit:
+                results.append(check_word_limit)
+
+            check_word_unclassified = builder.check_unclassified_words(list_name, list_none)
+            if check_word_unclassified:
+                results.append(check_word_unclassified)
+
             check_name_is_well_formed = builder.check_name_is_well_formed(
                 self.token_classifier.distinctive_word_tokens,
                 self.token_classifier.descriptive_word_tokens,
@@ -247,8 +261,10 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.name_tokens,
                 self.name_original_tokens
             )
+            if check_name_is_well_formed:
+                results.append(check_name_is_well_formed)
 
-            analysis = analysis + check_name_is_well_formed
+            analysis = analysis + results
 
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
@@ -282,7 +298,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             has_words_to_avoid = self._has_analysis_issue_type(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
             if has_words_to_avoid:
-                matched_words_to_avoid = self._get_analysis_issue_type_issues(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
+                matched_words_to_avoid = self._get_analysis_issue_type_issues(analysis,
+                                                                              AnalysisIssueCodes.WORDS_TO_AVOID)
                 for procedure_result in matched_words_to_avoid:
                     list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
 
@@ -364,5 +381,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     do_analysis is an abstract method and must be implemented in extending classes.
     @:return ProcedureResult[]
     '''
+
     def do_analysis(self):
         raise NotImplementedError('do_analysis must be implemented in extending classes')
