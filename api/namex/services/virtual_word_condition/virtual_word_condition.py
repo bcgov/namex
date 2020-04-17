@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.sql.expression import false, true
 
 from namex.criteria.virtual_word_condition.query_criteria import VirtualWordConditionCriteria
@@ -64,3 +65,20 @@ class VirtualWordConditionService:
         results = model.find_by_criteria(criteria)
         flattened = list(map(str.strip, (list(filter(None, flatten_tuple_results(results))))))
         return flattened
+
+    def get_word(self, word):
+        model = self.get_model()
+
+        filters = [
+            func.lower(model.rc_words).op('~')(r'\y{}\y'.format(word.lower()))
+        ]
+
+        criteria = VirtualWordConditionCriteria(
+            fields=[model.rc_words],
+            filters=filters
+        )
+
+        if model.find_by_criteria(criteria):
+            return word
+
+        return None
