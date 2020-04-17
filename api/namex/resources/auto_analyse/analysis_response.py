@@ -253,15 +253,14 @@ class AnalysisResponse:
         # Tweak the header
         option1.header = "Option 1"
 
-        option2 = change_entity_type_setup()
+        # option2 = None
         # Tweak the header
-        option2.header = "Option 2"
 
         # option3 = None
 
         issue = response_issues(procedure_result.result_code)(self.entity_type, [
             option1,
-            option2,
+            #option2,
             # option3
         ])
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
