@@ -11,9 +11,15 @@ schedule
 
 Flask
 pytest
+pytest-mock
+pysolr
 python-dotenv
 marshmallow==2.20.5
-git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
-
-
-
+jsonpickle
+requests
+httpx
+toolz
+nltk
+werkzeug==0.16.1
+-e git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
+-e git+https://github.com/bcdevlucas/namex-synonyms-api-client-py.git#egg=swagger_client
