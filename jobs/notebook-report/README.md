@@ -59,7 +59,7 @@ to setup your local development environment.
    ```sh
    oc process -f notebook-report-pipeline.json \
         -p TAG_NAME=dev \
-        -p GIT_REPO_URL=https://github.com/bcgov/lear.git \
+        -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
         -p WEBHOOK=github-notebook-report-dev \
         -p JENKINS_FILE=./jenkins/dev.groovy \
     | oc apply -f -
