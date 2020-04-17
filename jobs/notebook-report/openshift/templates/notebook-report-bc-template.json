@@ -56,12 +56,13 @@
             }
         }
     ],
-  "parameters": [
+    "parameters": [
     {
       "name": "GIT_REPO_URL",
       "displayName": "Git Repo URL",
       "description": "The URL to your GIT repo.",
       "required": true,
       "value": "https://github.com/bcgov/namex"
-    }                                                                                                                  +  ]  
+    }
+  ]  
 }
