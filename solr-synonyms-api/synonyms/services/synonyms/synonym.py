@@ -10,7 +10,6 @@ from .mixins.model import SynonymModelMixin
 
 from synonyms.utils.service_utils import get_entity_type_code, get_designation_position_code
 
-
 """
 - Services implement business logic, and NON generic queries. 
 - Services don't have generic model query methods like find, find_one, or find_by_criteria.
@@ -194,8 +193,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_remove_designations(cls, text, internet_domains, designation_all_regex):
-        text = re.sub(r'\b({})\b|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|\b({})\b.?'.format(internet_domains,
-                                                                                                    designation_all_regex),
+        text = re.sub(r'\b({0})\b|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|(?<!\w)({1})(?!\w)(?=.*\s\w+$)'.format(
+            internet_domains,
+            designation_all_regex),
                       '',
                       text,
                       0,
