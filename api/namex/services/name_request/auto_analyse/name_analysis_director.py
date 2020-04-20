@@ -266,6 +266,21 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             analysis = analysis + results
 
+            analysis_issues_sort_order = [
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                AnalysisIssueCodes.TOO_MANY_WORDS,
+                AnalysisIssueCodes.WORDS_TO_AVOID,
+                AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
+                AnalysisIssueCodes.WORD_SPECIAL_USE,
+                AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
+                AnalysisIssueCodes.CORPORATE_CONFLICT,
+                AnalysisIssueCodes.DESIGNATION_MISMATCH,
+                AnalysisIssueCodes.DESIGNATION_MISPLACED
+            ]
+
+            analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
+
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
             # eg. result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
@@ -273,10 +288,10 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             # word in the result.
 
             issues_that_must_be_fixed = [
-                AnalysisIssueCodes.WORDS_TO_AVOID,
-                AnalysisIssueCodes.TOO_MANY_WORDS,
                 AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                AnalysisIssueCodes.WORDS_TO_AVOID,
+                AnalysisIssueCodes.TOO_MANY_WORDS
             ]
 
             issue_must_be_fixed = False
@@ -311,18 +326,18 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
                 analysis = list(map(remove_words_to_avoid, analysis))
 
-            analysis_issues_sort_order = [
-                AnalysisIssueCodes.WORDS_TO_AVOID,
-                AnalysisIssueCodes.TOO_MANY_WORDS,
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
-                AnalysisIssueCodes.WORD_SPECIAL_USE,
-                AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
-                AnalysisIssueCodes.CORPORATE_CONFLICT,
-                AnalysisIssueCodes.DESIGNATION_MISMATCH,
-                AnalysisIssueCodes.DESIGNATION_MISPLACED
-            ]
+            # analysis_issues_sort_order = [
+            #     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+            #     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+            #     AnalysisIssueCodes.WORDS_TO_AVOID,
+            #     AnalysisIssueCodes.TOO_MANY_WORDS,
+            #     AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
+            #     AnalysisIssueCodes.WORD_SPECIAL_USE,
+            #     AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
+            #     AnalysisIssueCodes.CORPORATE_CONFLICT,
+            #     AnalysisIssueCodes.DESIGNATION_MISMATCH,
+            #     AnalysisIssueCodes.DESIGNATION_MISPLACED
+            # ]
 
             analysis = analysis + self.do_analysis()
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
