@@ -139,7 +139,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'length_name': length_name
             }
 
-            return result
+        return result
 
     '''
     Override the abstract / base class method.
@@ -163,7 +163,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'list_none': unclassified_words_list_response
             }
 
-            return result
+        return result
 
     '''
     Override the abstract / base class method.
