@@ -26,9 +26,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
-        #results = []
-        result = ProcedureResult()
-        result.is_valid = True
+        result = None
         # TODO: We're doing two checks for name is well formed, that should probably not be the case
 
         # list_name = ['victoria', 'abc', 'view', 'book']
@@ -119,9 +117,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_dist': list_dist or []
                 }
 
-        #if result:
-        #    results.append(result)
-
         return result
 
     '''
@@ -131,8 +126,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_word_limit(self, list_name):
-        result = ProcedureResult()
-        result.is_valid = True
+        result = None
 
         length_name = len(list_name)
         if length_name > MAX_LIMIT:
@@ -154,8 +148,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_unclassified_words(self, list_name, list_none):
-        result = ProcedureResult()
-        result.is_valid = True
+        result = None
 
         if list_none.__len__() > 0:
             unclassified_words_list_response = []
