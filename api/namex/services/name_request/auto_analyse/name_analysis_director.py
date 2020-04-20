@@ -245,15 +245,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 analysis.append(check_words_to_avoid)
                 return analysis
 
-            results = []
-            check_word_limit = builder.check_word_limit(list_name)
-            if check_word_limit:
-                results.append(check_word_limit)
-
-            check_word_unclassified = builder.check_unclassified_words(list_name, list_none)
-            if check_word_unclassified:
-                results.append(check_word_unclassified)
-
             check_name_is_well_formed = builder.check_name_is_well_formed(
                 self.token_classifier.distinctive_word_tokens,
                 self.token_classifier.descriptive_word_tokens,
@@ -262,24 +253,19 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.name_original_tokens
             )
             if check_name_is_well_formed:
-                results.append(check_name_is_well_formed)
+                analysis.append(check_name_is_well_formed)
+                return analysis
 
-            analysis = analysis + results
+            check_word_limit = builder.check_word_limit(list_name)
+            if check_word_limit:
+                analysis.append(check_word_limit)
+                return analysis
 
-            analysis_issues_sort_order = [
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisIssueCodes.TOO_MANY_WORDS,
-                AnalysisIssueCodes.WORDS_TO_AVOID,
-                AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
-                AnalysisIssueCodes.WORD_SPECIAL_USE,
-                AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
-                AnalysisIssueCodes.CORPORATE_CONFLICT,
-                AnalysisIssueCodes.DESIGNATION_MISMATCH,
-                AnalysisIssueCodes.DESIGNATION_MISPLACED
-            ]
+            check_word_unclassified = builder.check_unclassified_words(list_name, list_none)
+            if check_word_unclassified:
+                analysis.append(check_word_unclassified)
 
-            analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
+            #analysis = analysis + results
 
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
@@ -326,18 +312,18 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
                 analysis = list(map(remove_words_to_avoid, analysis))
 
-            # analysis_issues_sort_order = [
-            #     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-            #     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-            #     AnalysisIssueCodes.WORDS_TO_AVOID,
-            #     AnalysisIssueCodes.TOO_MANY_WORDS,
-            #     AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
-            #     AnalysisIssueCodes.WORD_SPECIAL_USE,
-            #     AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
-            #     AnalysisIssueCodes.CORPORATE_CONFLICT,
-            #     AnalysisIssueCodes.DESIGNATION_MISMATCH,
-            #     AnalysisIssueCodes.DESIGNATION_MISPLACED
-            # ]
+            analysis_issues_sort_order = [
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                AnalysisIssueCodes.WORDS_TO_AVOID,
+                AnalysisIssueCodes.TOO_MANY_WORDS,
+                AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
+                AnalysisIssueCodes.WORD_SPECIAL_USE,
+                AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
+                AnalysisIssueCodes.CORPORATE_CONFLICT,
+                AnalysisIssueCodes.DESIGNATION_MISMATCH,
+                AnalysisIssueCodes.DESIGNATION_MISPLACED
+            ]
 
             analysis = analysis + self.do_analysis()
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
