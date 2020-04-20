@@ -177,3 +177,21 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     @abc.abstractmethod
     def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
         return ProcedureResult(is_valid=True)
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+    @abc.abstractmethod
+    def check_word_limit(self, list_name):
+        return ProcedureResult(is_valid=True)
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+
+    @abc.abstractmethod
+    def check_unclassified_words(self, list_name, list_none):
+        return ProcedureResult(is_valid=True)
+
