@@ -580,7 +580,7 @@ class DesignationNonExistentIssue(AnalysisResponseIssue):
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="Further Action is required. A designation is required. Please select one from Option 1 below.",
+            line1="Further Action. A designation is required. Please select one from Option 1 below.",
             line2=None,
             consenting_body=None,
             designations=correct_designations,
