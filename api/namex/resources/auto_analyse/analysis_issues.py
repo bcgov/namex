@@ -83,11 +83,17 @@ class AnalysisResponseIssue:
         original_tokens = deque(name_original_tokens)
         processed_tokens = deque(name_processed_tokens)
 
+        if len(processed_tokens) == 0:
+            return False, 0
+
         processed_token = processed_tokens.popleft()
         current_processed_token = processed_token
 
         composite_idx_offset = 0
         current_original_token = original_tokens.popleft()
+
+        if current_processed_token == current_original_token:
+            return False, 0
 
         if current_processed_token.find(current_original_token) == -1:
             return False, 0
@@ -104,7 +110,8 @@ class AnalysisResponseIssue:
                 current_processed_token = current_processed_token[len(current_original_token):]
                 token_string += current_original_token
 
-            current_original_token = original_tokens.popleft()
+            if len(original_tokens) > 0:
+                current_original_token = original_tokens.popleft()
 
         if composite_idx_offset:
             return processed_token, composite_idx_offset
@@ -124,35 +131,38 @@ class AnalysisResponseIssue:
 
         while len(original_tokens) > 0:
             # Check to see if we're dealing with a composite, if so, get the offset amount
-            composite_token, composite_idx_offset = self.get_next_token_if_composite(original_tokens, name_tokens)
+            composite_token, composite_idx_offset = self.get_next_token_if_composite(original_tokens, processed_tokens)
 
             if composite_token:
-                composite_token_offset += composite_idx_offset
+                composite_token_offset += composite_idx_offset - 1
                 current_original_token = composite_token
                 for x in range(0, composite_idx_offset):
-                    original_tokens.popleft()
+                    if len(original_tokens) > 0:
+                        original_tokens.popleft()
 
-            else:
-                # Pop the left-most token off the list
-                current_original_token = original_tokens.popleft()
+            # Pop the left-most token off the list
+            current_original_token = original_tokens.popleft()
 
-                # Check for repeated tokens
-                is_repeat_token = False
+            # Check for repeated tokens
+            is_repeat_token = False
 
-                if current_original_token == previous_original_token:
-                    is_repeat_token = True
+            if current_original_token == previous_original_token:
+                is_repeat_token = True
 
-                # TODO: Check index too!
-                if current_original_token not in processed_tokens:
-                    word_idx_offset += 1
-                    continue
+            # TODO: Check index too!
+            if current_original_token not in name_tokens:
+                word_idx_offset += 1
+                continue
 
-                if is_repeat_token:
-                    word_idx_offset += 1
+            if is_repeat_token:
+                word_idx_offset += 1
+
+            if previous_original_token != current_original_token and len(processed_tokens) > 0:
+                processed_tokens.popleft()
 
             previous_original_token = current_original_token
 
-        offset_idx = word_idx + word_idx_offset + composite_token_offset - 1
+        offset_idx = word_idx + word_idx_offset + composite_token_offset
 
         return offset_idx
 
