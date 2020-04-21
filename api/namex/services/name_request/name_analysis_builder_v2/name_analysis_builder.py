@@ -350,14 +350,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
+    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user, all_designation_user_no_periods):
         result = ProcedureResult()
         result.is_valid = True
 
         mismatch_entity_designation_list = []
         for idx, token in enumerate(list_name):
             if any(token in designation for designation in all_designations):
-                if token not in all_designations_user:
+                if token not in all_designation_user_no_periods:
                     mismatch_entity_designation_list.append(token.upper())
 
         if mismatch_entity_designation_list:

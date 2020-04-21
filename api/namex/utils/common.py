@@ -1,3 +1,5 @@
+import re
+
 _parse_csv_line = lambda x: (x.split(','))
 
 
@@ -19,3 +21,14 @@ def parse_dict_of_lists(results):
     for item in results:
         output[item.key] = item.list
     return output
+
+
+def remove_periods_designation(results):
+    designation_list = []
+    for item in results:
+        text = re.sub(r'[\.]', '', item, 0, re.IGNORECASE)
+        designation_list.append(item)
+        if text != item:
+            designation_list.append(text)
+
+    return designation_list
