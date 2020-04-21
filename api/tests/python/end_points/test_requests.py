@@ -320,7 +320,7 @@ def test_add_clean_name_to_nr(client, jwt, app):
     assert "BSJ ENTERPRISES" == data.Name.clean_name
 
 
-
+git
 
 def test_add_new_comment_to_nr(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User, \
