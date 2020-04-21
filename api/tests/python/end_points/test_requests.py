@@ -306,7 +306,7 @@ def test_add_clean_name_to_nr(client, jwt, app):
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'B,S&J ENTERPRISES LTD.'
-    name1.state = 'APPROVED'
+    name1.state = 'INPROGRESSgit '
     nr.names = [name1]
     nr.save_to_db()
 
@@ -314,13 +314,13 @@ def test_add_clean_name_to_nr(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    rv = client.put('/api/v1/requests/NR%200000002/names/1',  data=json.dumps(Name1), headers=headers)
+    rv = client.put('/api/v1/requests/NR%200000002/names/1',  data=json.dumps(name1.as_dict()), headers=headers)
     data = json.loads(rv.data)
     assert rv.status_code == 200
     assert "BSJ ENTERPRISES" == data.Name.clean_name
 
 
-git
+
 
 def test_add_new_comment_to_nr(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User, \

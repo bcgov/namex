@@ -709,6 +709,7 @@ class Request(Resource):
 
                 nrd.names.append(new_name_choice)
 
+
             for nrd_name in nrd.names.all():
 
                 orig_name = nrd_name.as_dict()
@@ -764,7 +765,12 @@ class Request(Resource):
                         nrd_name.name = convert_to_ascii(nrd_name.name)
                         if (nrd_name.name is not None): nrd_name.name = nrd_name.name.upper()
 
-
+                        if(nrd_name.name.state == 'APPROVED'):
+                            service = ProtectedNameAnalysisService()
+                            np_svc = service.name_processing_service
+                            np_svc.set_name(nrd_name.name)
+                            clean_name = np_svc.processed_name
+                            nrd_name.name.clean_name = clean_name.upper()
                         # check if any of the Oracle db fields have changed, so we can send them back
                         # - this is only for editing a name from the Edit NR section, NOT making a decision
                         if nrd_name.name != orig_name['name']:
@@ -1119,15 +1125,6 @@ class NRNames(Resource):
             nrd_name.commentId = comment_instance.id
         else:
             nrd_name.comment = None
-
-        if(nrd_name.state == 'APPROVED'):
-            service = ProtectedNameAnalysisService()
-            np_svc = service.name_processing_service
-            np_svc.set_name(nrd_name.name)
-            clean_name = np_svc.processed_name
-            nrd_name.clean_name = clean_name.upper()
-        else:
-            nrd_name.clean_name = None
 
         nrd_name.save_to_db()
 
