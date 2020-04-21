@@ -29,6 +29,7 @@ from namex.services.name_request import check_ownership, get_or_create_user_by_j
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 import datetime
 from datetime import datetime as dt
@@ -783,8 +784,6 @@ class Request(Resource):
                                     deleted_names[nrd_name.choice - 1] = True
                                 json_input['comments'].append({'comment': 'Name choice 3 changed from {0} to {1}'\
                                                                     .format(orig_name['name'], nrd_name.name)})
-
-
             ### END names ###
 
             ### COMMENTS ###
@@ -1120,6 +1119,15 @@ class NRNames(Resource):
             nrd_name.commentId = comment_instance.id
         else:
             nrd_name.comment = None
+
+        if(nrd_name.state == 'APPROVED'):
+            service = ProtectedNameAnalysisService()
+            np_svc = service.name_processing_service
+            np_svc.set_name(nrd_name.name)
+            clean_name = np_svc.processed_name
+            nrd_name.clean_name = clean_name.upper()
+        else:
+            nrd_name.clean_name = None
 
         nrd_name.save_to_db()
 

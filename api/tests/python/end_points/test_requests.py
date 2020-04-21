@@ -294,6 +294,34 @@ def test_remove_name_from_nr(client, jwt, app):
     assert 200 == rv.status_code
     assert len(data['names']) == 1
 
+def test_add_clean_name_to_nr(client, jwt, app):
+
+
+    # add NR to database
+    from namex.models import Request as RequestDAO, State, Name as NameDAO
+    nr = RequestDAO()
+    nr.nrNum = 'NR 0000002'
+    nr.stateCd = State.APPROVED
+    nr.requestId = 1460775
+    name1 = NameDAO()
+    name1.choice = 1
+    name1.name = 'B,S&J ENTERPRISES LTD.'
+    name1.state = 'APPROVED'
+    nr.names = [name1]
+    nr.save_to_db()
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    rv = client.put('/api/v1/requests/NR%200000002/names/1',  data=json.dumps(Name1), headers=headers)
+    data = json.loads(rv.data)
+    assert rv.status_code == 200
+    assert "BSJ ENTERPRISES" == data.Name.clean_name
+
+
+
+
 def test_add_new_comment_to_nr(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User, \
     Event as EventDAO
