@@ -53,294 +53,43 @@ def response_issues(issue_code):
 
 
 class AnalysisResponse:
-    @classmethod
-    def _has_next_issue(cls, issue_count, issue_idx):
-        return issue_idx + 1 < issue_count
+    @property
+    def analysis_service(self):
+        return self._analysis_service
 
-    @classmethod
-    def _is_only_issue(cls, issue_count, issue_idx):
-        return (issue_idx + 1) == issue_count == 1
+    @analysis_service.setter
+    def analysis_service(self, analysis_service):
+        self._analysis_service = analysis_service
 
-    def _build_unclassified_word_issue(self, procedure_result, issue_count, issue_idx):
-        is_only_issue = self._is_only_issue(issue_count, issue_idx)
-        has_next_issue = self._has_next_issue(issue_count, issue_idx)
+    @property
+    def name_tokens(self):
+        return self.analysis_service.name_tokens
 
-        issue = None
+    @property
+    def name_original_tokens(self):
+        return self.analysis_service.name_original_tokens
 
-        # If there's only one issue, display helpful hint and the examination button
-        if is_only_issue:
-            option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
+    @property
+    def processed_name(self):
+        return self.analysis_service.processed_name
 
-            option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
+    @property
+    def name_as_submitted(self):
+        return self.analysis_service.name_as_submitted
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
-                option1,
-                option2,
-                # option3
-            ])
+    @property
+    def entity_type(self):
+        return self._entity_type
 
-            issue.show_examination_button = True
-        elif has_next_issue:
-            option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
-
-            option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
-
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
-                option1,
-                option2,
-                # option3
-            ])
-        elif not is_only_issue and has_next_issue is False:
-            option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
-
-            option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
-
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
-                option1,
-                option2,
-                # option3
-            ])
-
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_add_distinctive_word_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = add_distinctive_setup()
-        # Tweak the header
-        option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
-
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            # option2,
-            # option3
-        ])
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_add_descriptive_word_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = add_descriptive_setup()
-        # Tweak the header
-        option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
-
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            # option2,
-            # option3
-        ])
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_too_many_words_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = too_many_words_setup()
-        # Tweak the header
-        option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
-
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            # option2 = None
-            # option3 = None
-        ])
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_words_to_avoid_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = remove_setup()
-        # Tweak the header
-        option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
-
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            # option2,
-            # option3
-        ])
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_name_requires_consent_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = remove_or_replace_setup()
-        # Tweak the header
-        option1.header = "Option 1"
-
-        option2 = send_to_examiner_setup()
-        # Tweak the header
-        option2.header = "Option 2"
-
-        option3 = obtain_consent_setup()
-        # Tweak the header
-        option3.header = "Option 3"
-
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            option2,
-            option3
-        ])
-
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_corporate_conflict_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = resolve_conflict_setup()
-        # Tweak the header
-        option1.header = "Option 1"
-
-        option2 = send_to_examiner_setup()
-        # Tweak the header
-        option2.header = "Option 2"
-
-        option3 = conflict_self_consent_setup()
-        # Tweak the header
-        option3.header = "Option 3"
-
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            option2,
-            option3
-        ])
-
-        '''
-        # Quick tests for overriding button behavior
-        if issue_count > 1:
-            issue.show_reserve_button = True
-            issue.show_examination_button = False
-        else:
-            issue.show_reserve_button = True
-            issue.show_examination_button = False
-        '''
-
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_designation_mismatch_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = replace_designation_setup()
-        # Tweak the header
-        option1.header = "Option 1"
-
-        option2 = change_entity_type_setup()
-        # Tweak the header
-        option2.header = "Option 2"
-
-        # option3 = None
-
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            option2,
-            # option3
-        ])
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = change_designation_order_setup()
-        # Tweak the header
-        option1.header = "Option 1"
-
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
-            option1,
-            # option2,
-            # option3
-        ])
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
-
-    def _build_word_special_use_issue(self, procedure_result, issue_count, issue_idx):
-        is_only_issue = self._is_only_issue(issue_count, issue_idx)
-        has_next_issue = self._has_next_issue(issue_count, issue_idx)
-
-        issue = None
-
-        # If there's only one issue, display helpful hint and the examination button
-        if is_only_issue:
-            option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
-
-            option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
-
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
-                option1,
-                option2,
-                # option3
-            ])
-
-            issue.show_examination_button = True
-        elif has_next_issue:
-            option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
-
-            option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
-
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
-                option1,
-                option2,
-                # option3
-            ])
-        elif not is_only_issue and has_next_issue is False:
-            option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
-
-            option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
-
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
-                option1,
-                option2,
-                # option3
-            ])
-
-        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
-        self.executed_procedures.append(procedure_result.result_code)
-
-        return issue
+    @entity_type.setter
+    def entity_type(self, entity_type):
+        self._entity_type = entity_type
 
     '''
     @:param analysis_result ProcedureResult[]
     '''
-    def __init__(self, entity_type, analysis_result):
+    def __init__(self, analysis_service, entity_type, analysis_result):
+        self.analysis_service = analysis_service
         self.entity_type = entity_type
         self.header = ""
         self.status_code = ""
@@ -425,3 +174,287 @@ class AnalysisResponse:
     def build_response(self):
         response = self.prepare_payload()
         return response
+
+    @classmethod
+    def _has_next_issue(cls, issue_count, issue_idx):
+        return issue_idx + 1 < issue_count
+
+    @classmethod
+    def _is_only_issue(cls, issue_count, issue_idx):
+        return (issue_idx + 1) == issue_count == 1
+
+    def _build_unclassified_word_issue(self, procedure_result, issue_count, issue_idx):
+        is_only_issue = self._is_only_issue(issue_count, issue_idx)
+        has_next_issue = self._has_next_issue(issue_count, issue_idx)
+
+        issue = None
+
+        # If there's only one issue, display helpful hint and the examination button
+        if is_only_issue:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self, [
+                option1,
+                option2,
+                # option3
+            ])
+
+            issue.show_examination_button = True
+        elif has_next_issue:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self, [
+                option1,
+                option2,
+                # option3
+            ])
+        elif not is_only_issue and has_next_issue is False:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self, [
+                option1,
+                option2,
+                # option3
+            ])
+
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_add_distinctive_word_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = add_distinctive_setup()
+        # Tweak the header
+        option1.header = "Helpful Tip"
+        # option2 = None
+        # option3 = None
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            # option2,
+            # option3
+        ])
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_add_descriptive_word_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = add_descriptive_setup()
+        # Tweak the header
+        option1.header = "Helpful Tip"
+        # option2 = None
+        # option3 = None
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            # option2,
+            # option3
+        ])
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_too_many_words_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = too_many_words_setup()
+        # Tweak the header
+        option1.header = "Helpful Tip"
+        # option2 = None
+        # option3 = None
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            # option2 = None
+            # option3 = None
+        ])
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_words_to_avoid_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = remove_setup()
+        # Tweak the header
+        option1.header = "Helpful Tip"
+        # option2 = None
+        # option3 = None
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            # option2,
+            # option3
+        ])
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_name_requires_consent_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = remove_or_replace_setup()
+        # Tweak the header
+        option1.header = "Option 1"
+
+        option2 = send_to_examiner_setup()
+        # Tweak the header
+        option2.header = "Option 2"
+
+        option3 = obtain_consent_setup()
+        # Tweak the header
+        option3.header = "Option 3"
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            option2,
+            option3
+        ])
+
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_corporate_conflict_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = resolve_conflict_setup()
+        # Tweak the header
+        option1.header = "Option 1"
+
+        option2 = send_to_examiner_setup()
+        # Tweak the header
+        option2.header = "Option 2"
+
+        option3 = conflict_self_consent_setup()
+        # Tweak the header
+        option3.header = "Option 3"
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            option2,
+            option3
+        ])
+
+        '''
+        # Quick tests for overriding button behavior
+        if issue_count > 1:
+            issue.show_reserve_button = True
+            issue.show_examination_button = False
+        else:
+            issue.show_reserve_button = True
+            issue.show_examination_button = False
+        '''
+
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_designation_mismatch_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = replace_designation_setup()
+        # Tweak the header
+        option1.header = "Option 1"
+
+        option2 = change_entity_type_setup()
+        # Tweak the header
+        option2.header = "Option 2"
+
+        # option3 = None
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            option2,
+            # option3
+        ])
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = change_designation_order_setup()
+        # Tweak the header
+        option1.header = "Option 1"
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            # option2,
+            # option3
+        ])
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def _build_word_special_use_issue(self, procedure_result, issue_count, issue_idx):
+        is_only_issue = self._is_only_issue(issue_count, issue_idx)
+        has_next_issue = self._has_next_issue(issue_count, issue_idx)
+
+        issue = None
+
+        # If there's only one issue, display helpful hint and the examination button
+        if is_only_issue:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self, [
+                option1,
+                option2,
+                # option3
+            ])
+
+            issue.show_examination_button = True
+        elif has_next_issue:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self, [
+                option1,
+                option2,
+                # option3
+            ])
+        elif not is_only_issue and has_next_issue is False:
+            option1 = remove_or_replace_setup()
+            # Tweak the header
+            option1.header = "Option 1"
+
+            option2 = send_to_examiner_setup()
+            # Tweak the header
+            option2.header = "Option 2"
+
+            issue = response_issues(procedure_result.result_code)(self, [
+                option1,
+                option2,
+                # option3
+            ])
+
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue

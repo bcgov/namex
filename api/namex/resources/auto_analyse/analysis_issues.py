@@ -1,6 +1,8 @@
 from datetime import date
 from string import Template
 
+from collections import deque
+
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 from namex.utils.service_utils import get_entity_type_description
@@ -22,8 +24,9 @@ class AnalysisResponseIssue:
     '''
     @:param setup_config Setup[]
     '''
-    def __init__(self, entity_type, setup_config):
-        self.entity_type = entity_type
+    def __init__(self, analysis_response, setup_config):
+        self.analysis_response = analysis_response
+        self.entity_type = analysis_response.entity_type
         self.setup_config = []
         self.set_issue_setups(setup_config)
 
@@ -39,6 +42,119 @@ class AnalysisResponseIssue:
     @classmethod
     def _join_list_words(cls, list_words):
         return "<b>" + ", ".join(list_words) + "</b>"
+
+    # Johnson & Johnson Engineering will return original tokens:
+    # [Johnson, &, Johnson, Engineering]
+    # and return name tokens:
+    # [Johnson, Engineering]
+
+    # Johnson & Johnson & Johnson Engineering will return original tokens:
+    # [Johnson, &, Johnson, &, Johnson, Engineering]
+    # and return name tokens:
+    # [Johnson, Engineering]
+
+    # John Deere Deere Engineering will return original tokens:
+    # [John, Deere, Deere, Engineering]
+    # and return name tokens:
+    # [John, Deere, Engineering]
+
+    # John Deere & Deere Engineering will return original tokens:
+    # [John, Deere, &, Deere, Engineering]
+    # and return name tokens:
+    # [John, Deere, Engineering]
+
+    # John Deere John Engineering will return original tokens:
+    # [John, Deere, John, Engineering]
+    # and return name tokens:
+    # [John, Deere, John, Engineering]
+
+    # J & L Engineering will return original tokens:
+    # [J, &, L, Engineering]
+    # and return name tokens:
+    # [JL, Engineering]
+
+    # J & L & L Engineering will return original tokens:
+    # [J, &, L, &, L, Engineering]
+    # and return name tokens:
+    # [JLL, Engineering]
+    def get_next_token_if_composite(self, name_original_tokens, name_processed_tokens):
+        token_string = ''
+
+        original_tokens = deque(name_original_tokens)
+        processed_tokens = deque(name_processed_tokens)
+
+        processed_token = processed_tokens.popleft()
+        current_processed_token = processed_token
+
+        composite_idx_offset = 0
+        current_original_token = original_tokens.popleft()
+
+        if current_processed_token.find(current_original_token) == -1:
+            return False, 0
+
+        while len(original_tokens) >= 0:
+            if token_string == processed_token:
+                break
+
+            composite_idx_offset += 1
+
+            token_substr_idx = current_processed_token.find(current_original_token)
+            token_is_next_chunk = token_substr_idx == 0
+            if token_is_next_chunk:
+                current_processed_token = current_processed_token[len(current_original_token):]
+                token_string += current_original_token
+
+            current_original_token = original_tokens.popleft()
+
+        if composite_idx_offset:
+            return processed_token, composite_idx_offset
+
+        return False, 0
+
+    def adjust_word_index(self, name_original_tokens, name_tokens, word_idx):
+        token_string = ''
+        original_tokens = deque(name_original_tokens)
+        processed_tokens = deque(name_tokens)
+
+        word_idx_offset = 0
+        composite_token_offset = 0
+
+        previous_original_token = None
+        current_original_token = None
+
+        while len(original_tokens) > 0:
+            # Check to see if we're dealing with a composite, if so, get the offset amount
+            composite_token, composite_idx_offset = self.get_next_token_if_composite(original_tokens, name_tokens)
+
+            if composite_token:
+                composite_token_offset += composite_idx_offset
+                current_original_token = composite_token
+                for x in range(0, composite_idx_offset):
+                    original_tokens.popleft()
+
+            else:
+                # Pop the left-most token off the list
+                current_original_token = original_tokens.popleft()
+
+                # Check for repeated tokens
+                is_repeat_token = False
+
+                if current_original_token == previous_original_token:
+                    is_repeat_token = True
+
+                # TODO: Check index too!
+                if current_original_token not in processed_tokens:
+                    word_idx_offset += 1
+                    continue
+
+                if is_repeat_token:
+                    word_idx_offset += 1
+
+            previous_original_token = current_original_token
+
+        offset_idx = word_idx + word_idx_offset + composite_token_offset - 1
+
+        return offset_idx
 
 
 class CheckIsValid(AnalysisResponseIssue):
@@ -143,7 +259,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         #  If there's a duplicate of an unclassified word, just grabbing the index won't do!
         issue.name_actions = []
         for word in list_none:
-            none_word_idx = list_name.index(word)
+            none_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
@@ -234,6 +350,8 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
         # TODO: Why was this like this before?
         # dist_word_idx = list_name.index(last_dist_word) # if list_dist.__len__() > 0 else 0
         dist_word_idx = list_name.index(last_dist_word) if list_dist.__len__() > 0 else 0
+        dist_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, dist_word_idx)
+
         issue.name_actions = [
             NameAction(
                 type=NameActions.BRACKETS,
@@ -317,7 +435,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
         for word in list_avoid:
-            avoid_word_idx = list_name.index(word)
+            avoid_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.STRIKE,
@@ -369,7 +487,7 @@ class WordSpecialUse(AnalysisResponseIssue):
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
         for word in list_special:
-            list_special_idx = list_name.index(word)
+            list_special_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
@@ -417,7 +535,8 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
         issue.name_actions = []
         for word in list_consent:
-            consent_word_idx = list_name.index(word)
+            consent_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
@@ -496,7 +615,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         if is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
             for word in list_name:
-                name_word_idx = list_name.index(word)
+                name_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
 
                 # Highlight the descriptives
                 # <class 'list'>: ['mountain', 'view']
@@ -520,7 +639,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         if not is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
             for word in list_name:
-                name_word_idx = list_name.index(word)
+                name_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
 
                 # Highlight the descriptives
                 # <class 'list'>: ['mountain', 'view']
@@ -605,7 +724,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_lc:
-            name_word_idx = list_name.index(word)
+            name_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
 
             # Highlight the descriptives
             # <class 'list'>: ['mountain', 'view']
@@ -664,7 +783,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_lc:
-            name_word_idx = list_name.index(word)
+            name_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
 
             # Highlight the descriptives
             # <class 'list'>: ['mountain', 'view']
