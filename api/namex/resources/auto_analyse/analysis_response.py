@@ -56,6 +56,128 @@ def response_issues(issue_code):
 
 
 class AnalysisResponse:
+    @property
+    def analysis_service(self):
+        return self._analysis_service
+
+    @analysis_service.setter
+    def analysis_service(self, analysis_service):
+        self._analysis_service = analysis_service
+
+    @property
+    def name_tokens(self):
+        return self.analysis_service.name_tokens
+
+    @property
+    def name_original_tokens(self):
+        return self.analysis_service.name_original_tokens
+
+    @property
+    def processed_name(self):
+        return self.analysis_service.processed_name
+
+    @property
+    def name_as_submitted(self):
+        return self.analysis_service.name_as_submitted
+
+    @property
+    def entity_type(self):
+        return self._entity_type
+
+    @entity_type.setter
+    def entity_type(self, entity_type):
+        self._entity_type = entity_type
+
+    '''
+    @:param analysis_result ProcedureResult[]
+    '''
+    def __init__(self, analysis_service, entity_type, analysis_result):
+        self.analysis_service = analysis_service
+        self.entity_type = entity_type
+        self.header = ""
+        self.status_code = ""
+        self.issues = []
+        self.executed_procedures = []
+
+        print(repr(analysis_result))
+
+        is_valid_name_request = True
+        issue_count = len(analysis_result)
+        issue_idx = None
+
+        if analysis_result and issue_count > 0:
+            for result_idx, procedure_result in enumerate(analysis_result):
+                if callable(response_issues(procedure_result.result_code)):
+                    # Pass in params?
+                    issue = None
+                    issue_idx = result_idx
+
+                    if procedure_result.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                        issue = self._build_unclassified_word_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.ADD_DISTINCTIVE_WORD:
+                        issue = self._build_add_distinctive_word_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD:
+                        issue = self._build_add_descriptive_word_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.TOO_MANY_WORDS:
+                        issue = self._build_too_many_words_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.WORDS_TO_AVOID:
+                        issue = self._build_words_to_avoid_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.NAME_REQUIRES_CONSENT:
+                        issue = self._build_name_requires_consent_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                        issue = self._build_corporate_conflict_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISMATCH:
+                        issue = self._build_designation_mismatch_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISPLACED:
+                        issue = self._build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.WORD_SPECIAL_USE:
+                        issue = self._build_word_special_use_issue(procedure_result, issue_count, issue_idx)
+
+                    response_issue = None
+
+                    if issue:
+                        response_issue = issue.create_issue(procedure_result)
+                        # TODO: This seems redundant doing this on the backend
+                        if not result_idx == len(analysis_result) - 1:
+                            response_issue.show_next_button = True
+
+                    if response_issue and response_issue.issue_type is not AnalysisIssueCodes.CHECK_IS_VALID:
+                        # We know what the issues are? Now how do we apply the setup types
+                        self.issues.append(response_issue)
+                        is_valid_name_request = False
+
+        # TODO: This is an incomplete implementation! Get returned status codes from ProcedureResult
+        if not is_valid_name_request:
+            self.status_code = AnalysisResponseCodes.FURTHER_ACTION_REQUIRED.value
+            self.header = "Further Action Required"
+        else:
+            self.status_code = AnalysisResponseCodes.AUTO_APPROVED.value
+            self.header = "Available"
+
+    def prepare_payload(self):
+        payload = NameAnalysisResponse(
+            header=self.header,
+            status=self.status_code,
+            issues=self.issues
+        )
+        return payload
+
+    '''
+    This is invoked by consumers of this class
+    '''
+    def build_response(self):
+        response = self.prepare_payload()
+        return response
+
     @classmethod
     def _has_next_issue(cls, issue_count, issue_idx):
         return issue_idx + 1 < issue_count
@@ -80,7 +202,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -96,7 +218,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -110,7 +232,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -128,7 +250,7 @@ class AnalysisResponse:
         # option2 = None
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -145,7 +267,7 @@ class AnalysisResponse:
         # option2 = None
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -162,7 +284,7 @@ class AnalysisResponse:
         # option2 = None
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2 = None
             # option3 = None
@@ -179,7 +301,7 @@ class AnalysisResponse:
         # option2 = None
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -202,7 +324,7 @@ class AnalysisResponse:
         # Tweak the header
         option3.header = "Option 3"
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             option2,
             option3
@@ -226,7 +348,7 @@ class AnalysisResponse:
         # Tweak the header
         option3.header = "Option 3"
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             option2,
             option3
@@ -280,7 +402,7 @@ class AnalysisResponse:
 
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             option2,
             # option3
@@ -295,7 +417,7 @@ class AnalysisResponse:
         # Tweak the header
         option1.header = "Option 1"
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -321,7 +443,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -337,7 +459,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -351,7 +473,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
