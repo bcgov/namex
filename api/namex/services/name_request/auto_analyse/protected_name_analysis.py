@@ -193,24 +193,24 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         if not check_designation_existence.is_valid:
             results.append(check_designation_existence)
+        else:
+            check_designation_mismatch = builder.check_designation_mismatch(
+                self.get_original_name_tokenized(),
+                self.entity_type,
+                self.get_all_designations(),
+                self.get_all_designations_user()
+            )
 
-        check_designation_mismatch = builder.check_designation_mismatch(
-            self.get_original_name_tokenized(),
-            self.entity_type,
-            self.get_all_designations(),
-            self.get_all_designations_user()
-        )
+            if not check_designation_mismatch.is_valid:
+                results.append(check_designation_mismatch)
 
-        if not check_designation_mismatch.is_valid:
-            results.append(check_designation_mismatch)
+            check_designation_misplaced = builder.check_designation_misplaced(
+                self.get_original_name_tokenized(),
+                self.get_misplaced_designation_end()
+            )
 
-        check_designation_misplaced = builder.check_designation_misplaced(
-            self.get_original_name_tokenized(),
-            self.get_misplaced_designation_end()
-        )
-
-        if not check_designation_misplaced.is_valid:
-            results.append(check_designation_misplaced)
+            if not check_designation_misplaced.is_valid:
+                results.append(check_designation_misplaced)
 
         check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
 
