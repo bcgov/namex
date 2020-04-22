@@ -29,6 +29,7 @@ from namex.services.name_request import check_ownership, get_or_create_user_by_j
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 import datetime
 from datetime import datetime as dt
@@ -708,6 +709,7 @@ class Request(Resource):
 
                 nrd.names.append(new_name_choice)
 
+
             for nrd_name in nrd.names.all():
 
                 orig_name = nrd_name.as_dict()
@@ -763,7 +765,6 @@ class Request(Resource):
                         nrd_name.name = convert_to_ascii(nrd_name.name)
                         if (nrd_name.name is not None): nrd_name.name = nrd_name.name.upper()
 
-
                         # check if any of the Oracle db fields have changed, so we can send them back
                         # - this is only for editing a name from the Edit NR section, NOT making a decision
                         if nrd_name.name != orig_name['name']:
@@ -783,8 +784,6 @@ class Request(Resource):
                                     deleted_names[nrd_name.choice - 1] = True
                                 json_input['comments'].append({'comment': 'Name choice 3 changed from {0} to {1}'\
                                                                     .format(orig_name['name'], nrd_name.name)})
-
-
             ### END names ###
 
             ### COMMENTS ###
@@ -1120,6 +1119,20 @@ class NRNames(Resource):
             nrd_name.commentId = comment_instance.id
         else:
             nrd_name.comment = None
+
+        #add clean name for conflict matching in name request
+        if(nrd_name.state == 'APPROVED'):
+            service = ProtectedNameAnalysisService()
+            np_svc = service.name_processing_service
+            np_svc.set_name(nrd_name.name)
+            cleaned_name = np_svc.processed_name.upper()
+            nrd_name.clean_name = cleaned_name
+        else:
+            cleaned_name = None
+            nrd_name.clean_name = cleaned_name
+
+        # Updating existing key's value
+        json_data.update(clean_name=cleaned_name)
 
         nrd_name.save_to_db()
 
