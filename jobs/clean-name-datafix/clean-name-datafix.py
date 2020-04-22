@@ -3,12 +3,8 @@ from datetime import datetime, timedelta
 from flask import Flask, g, current_app
 from namex import db
 from namex.utils.logging import setup_logging
-from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
-
 
 from config import Config
-import zlib, json
-
 
 setup_logging() ## important to do this first
 
@@ -27,7 +23,9 @@ start_time = datetime.utcnow()
 row_count = 0
 MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '10000')
 
+
 try:
+
 
     sql = "select id,name,clean_name " \
           "from names where state='APPROVED' and clean_name is null " + MAX_ROW_LIMIT
@@ -36,10 +34,12 @@ try:
     for id, name in names:
         current_app.logger.debug('processing id: {}'.format(id))
         #add name processing like in names
-        service = ProtectedNameAnalysisService()
-        np_svc = service.name_processing_service
-        np_svc.set_name(name)
-        cleaned_name = np_svc.processed_name.upper()
+        #service = ProtectedNameAnalysisService()
+        #np_svc = service.name_processing_service
+        #np_svc.set_name(name)
+        #cleaned_name = np_svc.processed_name.upper()
+
+        cleaned_name='TEST'
 
 
         update_sql = "update names " \
