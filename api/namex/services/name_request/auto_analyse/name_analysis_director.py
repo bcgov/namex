@@ -232,13 +232,13 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             list_dist, list_desc, list_none = self.word_classification_tokens
 
             analysis = []
-            if list_none and list_none.__len__() > 0:
-                self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
-                    list_dist,
-                    list_desc,
-                    list_none,
-                    list_name
-                )
+            # if list_none and list_none.__len__() > 0:
+            #     self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
+            #         list_dist,
+            #         list_desc,
+            #         list_none,
+            #         list_name
+            #     )
 
             check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
             if not check_words_to_avoid.is_valid:

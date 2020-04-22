@@ -36,10 +36,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         # _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
 
         # Validate possible combinations using available distinctive and descriptive list:
-        if list_dist == list_desc:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name)
+        self._list_none_words= list_none
+        if len(list_dist) > 0 and list_dist == list_desc:
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name,
+                                                                                             list_none)
         else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name, list_dist, list_desc)
+            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name,
+                                                                                        list_dist,
+                                                                                        list_desc
+                                                                                        )
 
         # # First, check to make sure the name doesn't have too many words
         # if len(list_name) > MAX_LIMIT:
@@ -67,7 +72,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         #     results.append(result)
 
         # Now that too many words and unclassified words are handled, handle distinctive and descriptive issues
-        #result = None
+        # result = None
 
         # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
         # the original name should be passed to get the correct index when reporting issues to front end.
@@ -252,7 +257,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                                                             w_desc, list_name, name)
         most_similar_names.extend(
             list({k for k, v in
-                  sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[0:MAX_MATCHES_LIMIT]}))
+                  sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[
+                  0:MAX_MATCHES_LIMIT]}))
 
         for element in most_similar_names:
             response.update({element: dict_highest_detail.get(element, {})})
@@ -350,7 +356,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user, all_designation_user_no_periods):
+    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user,
+                                   all_designation_user_no_periods):
         result = ProcedureResult()
         result.is_valid = True
 

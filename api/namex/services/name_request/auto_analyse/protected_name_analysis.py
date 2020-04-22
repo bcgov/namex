@@ -164,13 +164,15 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     def do_analysis(self):
         builder = self.builder
 
-        list_name = self.name_tokens
+        # list_name = self.name_tokens
         # list_dist, list_desc, list_none = self.word_classification_tokens
+
+        list_name = [element for element in self.name_tokens if element not in builder.get_list_none()]
 
         results = []
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc(), self.name_tokens,
+        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc(), list_name,
                                                    self.processed_name)
 
         if not check_conflicts.is_valid:

@@ -59,7 +59,7 @@ Rules:  1) Before and after slash has to be at least two words to removed string
 
 
 def remove_french(text):
-    text = re.sub(r'(^[A-Z]+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*)/(\w+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*$)+',
+    text = re.sub(r'(^[A-Z]+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*)/(\s*\w+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*$)+',
                   r'\1 ',
                   text,
                   0,
@@ -73,8 +73,9 @@ def remove_stop_words(original_name_list, stop_words):
     return words
 
 
-def list_distinctive_descriptive_same(name_list):
-    queue = collections.deque(name_list)
+def list_distinctive_descriptive_same(name_list, none_list):
+    queue = [element for element in name_list if element not in none_list]
+
     dist_list = []
     desc_list = []
 
@@ -84,7 +85,7 @@ def list_distinctive_descriptive_same(name_list):
     dist_list.reverse()
 
     for dist in dist_list:
-        desc_list.append([i for i in name_list if i not in dist])
+        desc_list.append([i for i in name_list if i not in dist and i not in none_list])
 
     return dist_list, desc_list
 
