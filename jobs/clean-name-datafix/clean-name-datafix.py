@@ -1,6 +1,7 @@
 import sys, os
 from datetime import datetime, timedelta
 from flask import Flask, g, current_app
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex import db
 from namex.utils.logging import setup_logging
 
