@@ -321,7 +321,6 @@ def test_add_clean_name_to_nr(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     rv = client.put('/api/v1/requests/NR%200000002/names/1',  data=json.dumps(name1.as_dict()), headers=headers)
-    data = json.loads(rv.data)
     assert rv.status_code == 200
 
     event_results = EventDAO.query.filter_by(nrId=nr.id).order_by(EventDAO.eventDate.desc()).first_or_404()
