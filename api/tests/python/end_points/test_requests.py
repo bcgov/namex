@@ -295,18 +295,24 @@ def test_remove_name_from_nr(client, jwt, app):
     assert len(data['names']) == 1
 
 def test_add_clean_name_to_nr(client, jwt, app):
-
-
     # add NR to database
-    from namex.models import Request as RequestDAO, State, Name as NameDAO
+    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event as EventDAO
+    # add a user for the comment
+    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+    user.save_to_db()
+
+    user_id = user.id
+
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
-    nr.stateCd = State.APPROVED
+    nr.stateCd = State.INPROGRESS
     nr.requestId = 1460775
+    nr.userId = user_id
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'B,S&J ENTERPRISES LTD.'
-    name1.state = 'INPROGRESSgit '
+    name1.state = State.APPROVED
     nr.names = [name1]
     nr.save_to_db()
 
@@ -317,10 +323,14 @@ def test_add_clean_name_to_nr(client, jwt, app):
     rv = client.put('/api/v1/requests/NR%200000002/names/1',  data=json.dumps(name1.as_dict()), headers=headers)
     data = json.loads(rv.data)
     assert rv.status_code == 200
-    assert "BSJ ENTERPRISES" == data.Name.clean_name
 
+    event_results = EventDAO.query.filter_by(nrId=nr.id).order_by(EventDAO.eventDate.desc()).first_or_404()
+    assert event_results.action == 'put'
 
+    test_string = event_results.eventJson
+    test_dict = json.loads(test_string)
 
+    assert 'B SJ ENTERPRISES' == test_dict['clean_name']
 
 def test_add_new_comment_to_nr(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User, \

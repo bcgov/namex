@@ -1126,6 +1126,20 @@ class NRNames(Resource):
         else:
             nrd_name.comment = None
 
+        #add clean name for conflict matching in name request
+        if(nrd_name.state == 'APPROVED'):
+            service = ProtectedNameAnalysisService()
+            np_svc = service.name_processing_service
+            np_svc.set_name(nrd_name.name)
+            cleaned_name = np_svc.processed_name.upper()
+            nrd_name.clean_name = cleaned_name
+        else:
+            cleaned_name = None
+            nrd_name.clean_name = cleaned_name
+
+        # Updating existing key's value
+        json_data.update(clean_name=cleaned_name)
+
         nrd_name.save_to_db()
 
         EventRecorder.record(user, Event.PUT, nrd, json_data)
