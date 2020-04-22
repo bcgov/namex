@@ -180,7 +180,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
         text = self.regex_numbers_lot(text)
-        text = self.regex_repeated_strings(text)
+        # text = self.regex_repeated_strings(text)
         text = self.regex_separated_ordinals(text, ordinal_suffixes)
         text = self.regex_keep_together_abv(text, exceptions_ws)
         text = self.regex_punctuation(text)
@@ -259,8 +259,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_together_one_letter(cls, text):
-        text = re.sub(r'(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)|^\s+|\s+$',
-                      '',
+        text = re.sub(r'(\b[A-Za-z]{1,2}\b)\s+(?=[a-zA-Z]{1,2}\b)|\s+$',
+                      r'\1',
                       text,
                       0,
                       re.IGNORECASE)
