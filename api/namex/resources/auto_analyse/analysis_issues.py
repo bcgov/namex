@@ -270,6 +270,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         issue.name_actions = []
         for word in list_none:
             none_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
@@ -446,6 +447,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         issue.name_actions = []
         for word in list_avoid:
             avoid_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.STRIKE,
@@ -498,6 +500,7 @@ class WordSpecialUse(AnalysisResponseIssue):
         issue.name_actions = []
         for word in list_special:
             list_special_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
