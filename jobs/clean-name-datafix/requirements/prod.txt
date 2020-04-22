@@ -1,4 +1,4 @@
-ggunicorn
+gunicorn
 Flask
 Flask-Migrate
 Flask-Script
