@@ -100,13 +100,6 @@ class Name(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-@event.listens_for(Name, 'before_update')
-def set_clean_name(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    name = target
-    #if(name.state  == 'APPROVED'):
-
-
-
 class NameSchema(ma.ModelSchema):
     class Meta:
         model = Name
