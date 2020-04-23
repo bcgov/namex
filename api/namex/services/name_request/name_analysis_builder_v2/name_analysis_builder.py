@@ -36,7 +36,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         # _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
 
         # Validate possible combinations using available distinctive and descriptive list:
-        self._list_none_words= list_none
+        self._list_none_words = list_none
         list_name = [element for element in list_name if element not in list_none]
         if len(list_dist) > 0 and list_dist == list_desc:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name,
@@ -364,9 +364,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         mismatch_entity_designation_list = []
         for idx, token in enumerate(list_name):
-            if any(token in designation for designation in all_designations):
-                if token not in all_designation_user_no_periods:
-                    mismatch_entity_designation_list.append(token.upper())
+            if token in all_designations and token not in all_designation_user_no_periods:
+                mismatch_entity_designation_list.append(token.upper())
 
         if mismatch_entity_designation_list:
             result.is_valid = False
