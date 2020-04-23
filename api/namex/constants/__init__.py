@@ -313,3 +313,12 @@ request_type_mapping = [
     ('PA', EntityType.PRIV.value, RequestAction.NEW.value),
     ('PAR', EntityType.PAR.value, RequestAction.NEW.value)
 ]
+
+class NameState(Enum):
+    NOT_EXAMINED = 'NE'
+    APPROVED = 'APPROVED'
+    REJECTED = 'REJECTED'
+    CONDITION = 'CONDITION'
+    # needed for name request reservation before completing the nr
+    RESERVED = 'RESERVED'
+    COND_RESERVE = 'COND-RESERVE'
