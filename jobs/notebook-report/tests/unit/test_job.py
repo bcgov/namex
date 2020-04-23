@@ -39,15 +39,15 @@ def test_connection_succeed():
 
 
 def test_daily_notebook_report():
-    status = processnotebooks("../daily")
+    status = processnotebooks("daily")
 
     assert status == True
 
 
 test_six_month_data = [
-    ("../sixMonth",
-    "[1, 30]",
-    "[1, 7, 12]"),
+    ("sixMonth",
+    "[1, 16]",
+    "[1, 7, 4]"),
 ]
 
 
