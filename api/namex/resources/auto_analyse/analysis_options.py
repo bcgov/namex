@@ -34,7 +34,7 @@ class AddDescriptiveSetup(Setup):
 
 
 def add_descriptive_setup():
-    return AddDistinctiveSetup(
+    return AddDescriptiveSetup(
         type="add_descriptive",
         header=Template("Add Descriptive"),
         line1=Template(

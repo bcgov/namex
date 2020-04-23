@@ -684,6 +684,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         misplaced_all_designation = procedure_result.values['misplaced_all_designation']
 
         list_name_lc = list(map(lambda d: d.lower(), list_name))
+        misplaced_all_designation_lc = list(map(lambda d: d.lower() if isinstance(d, str) else '', misplaced_all_designation))
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -706,7 +707,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
 
             # Highlight the descriptives
             # <class 'list'>: ['mountain', 'view']
-            if word in misplaced_all_designation:
+            if word in misplaced_all_designation_lc:
                 issue.name_actions.append(NameAction(
                     word=word,
                     index=name_word_idx,
