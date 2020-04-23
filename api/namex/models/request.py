@@ -89,6 +89,11 @@ class Request(db.Model):
     _payment_token = db.Column('payment_id', db.String(4096))
     _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
     _source = db.Column('source', db.String(15), default=ValidSources.NRO)
+    tradeMark = db.Column('trade_mark', db.String(100))
+
+
+    #MRAS fields
+    homeJurisNum = db.Column('home_juris_num', db.String(40))
 
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
