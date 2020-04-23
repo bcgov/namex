@@ -37,6 +37,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         # Validate possible combinations using available distinctive and descriptive list:
         self._list_none_words= list_none
+        list_name = [element for element in list_name if element not in list_none]
         if len(list_dist) > 0 and list_dist == list_desc:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name,
                                                                                              list_none)
