@@ -131,8 +131,8 @@ class NameRequest(Resource):
         name_request.request_action_cd= json_data['request_action']
 
 
-        if(json_data['state'] == 'DRAFT'):
-            #get applicant and submiisond etails for draft NR
+        #if(json_data['state'] == 'DRAFT'):
+        #get applicant and submiisond etails for draft NR
 
        #follow the reserved path for auto-approved name (there will only be one name)
         for name in json_data['names']:
@@ -168,7 +168,7 @@ class NameRequest(Resource):
 
             name_request.names.append(submitted_name)
 
-    name_request.names.append(submitted_name)
+        name_request.names.append(submitted_name)
         name_request.save_to_db()
         #TODO: Need to add verification that the save was successful.
 
