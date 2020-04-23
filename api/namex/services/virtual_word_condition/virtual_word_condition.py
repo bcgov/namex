@@ -82,3 +82,20 @@ class VirtualWordConditionService:
             return word
 
         return None
+
+
+
+    def get_word_condition_instructions(self, consent_word):
+        model = self.get_model()
+
+        filters = [
+            model.rc_word.like(consent_word),
+            model.rc_allow_use == true(),
+            model.rc_consent_required == true()
+        ]
+        criteria = VirtualWordConditionCriteria(
+            fields=[model.rc_instructions],
+            filters=filters
+        )
+
+        results = model.find_by_criteria(criteria)
