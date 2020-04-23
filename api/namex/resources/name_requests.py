@@ -14,7 +14,7 @@ setup_logging() ## important to do this first
 from urllib.parse import unquote_plus
 from datetime import datetime
 
-from namex.models import Request, Name, NRNumber, State
+from namex.models import Request, Name, NRNumber, State, User
 
 from namex.services import EventRecorder
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
@@ -72,6 +72,11 @@ def get_request_sequence():
     nr_id = db.engine.execute(seq)
     return nr_id
 
+def get_applicant_sequence():
+    seq = db.Sequence('applicants_party_id_seq')
+    party_id = db.engine.execute(seq)
+    return party_id
+
 
 def generate_nr():
     r = db.session.query(NRNumber).first()
@@ -112,6 +117,8 @@ class NameRequest(Resource):
         if not validate_name_request(json_data['entity_type'], json_data['request_action']):
             return jsonify(message='Incorrect input data provided'), 400
 
+        user_id = User.find_by_username('name_request_service_account')
+
         name_request = Request()
         submitted_name = Name()
         nr_num = generate_nr()
@@ -129,10 +136,59 @@ class NameRequest(Resource):
         name_request.stateCd=json_data['state']
         name_request.entity_type_cd = json_data['entity_type']
         name_request.request_action_cd= json_data['request_action']
+        #set this to name_request_service_account
+        name_request.userId = user_id
 
+        if(json_data['state'] == 'DRAFT'):
 
-        #if(json_data['state'] == 'DRAFT'):
-        #get applicant and submiisond etails for draft NR
+            party_id = get_applicant_sequence()
+
+            name_request.additionalInfo = json_data['additionInfo']
+            name_request.natureBusinessInfo = json_data['natureBusinessInfo']
+            name_request.tradeMark = json_data['tradeMark']
+            name_request.previousRequestId = json_data['previousRequestId']
+            name_request.priorityCd = json_data['priorityCd']
+            if json_data['priortyCd'] == 'Y':
+                    name_request.priorityDate = datetime.utcnow().date()
+
+            if json_data['submit_count'] is None:
+                name_request.submitCount = 1
+            else:
+                name_request.submitCount = + 1
+
+            name_request.submitter_userid = user_id
+
+            # XPRO
+            name_request.xproJurisdiction = json_data['xproJurisdiction']
+
+            # for MRAS participants
+            name_request.homeJurisNum = json_data['homeJurisNum']
+
+            #for existing businesses
+            name_request.corpNum  = json_data['corpNum ']
+
+            #applicant, contact and address info
+            for applicant in json_data['applicants']:
+                name_request.applicants.nrId = nr_id
+                name_request.applicants.lastName = applicant.lastName
+                name_request.applicants.firstName = applicant.firstName
+                name_request.applicants.middleName = applicant.middleName
+                name_request.applicants.partyId = party_id
+                name_request.applicants.contact = applicant.contact
+                name_request.applicants.clientFirstName = applicant.clientFirstName
+                name_request.applicants.clientLastName = applicant.clientLastName
+
+                name_request.applicants.phoneNumber = applicant.phoneNumber
+                name_request.applicants.faxNumber = applicant.faxNumber
+                name_request.applicants.emailAddress = applicant.emailAddress
+
+                name_request.applicants.addrLine1 = applicant.addrLine1
+                name_request.applicants.addrLine2 = applicant.addrLine2
+                name_request.applicants.city = applicant.city
+                name_request.applicants.stateProvinceCd = applicant.stateProvinceCd
+                name_request.applicants.postalCd = applicant.postalCd
+                name_request.applicants.countryTypeCd = applicant.countryTypeCd
+
 
        #follow the reserved path for auto-approved name (there will only be one name)
         for name in json_data['names']:
@@ -142,7 +198,7 @@ class NameRequest(Resource):
             if(name.name_type_code == None):
                 submitted_name.name_type_code = 'CO'
             else:
-                submitted_name.name_type_code = 'AS'
+                submitted_name.name_type_code = name.name_type_cd
 
             if(json_data['state']== State.DRAFT):
                 submitted_name.state = 'NE'
@@ -151,10 +207,13 @@ class NameRequest(Resource):
 
             submitted_name.designation = name.designation
             submitted_name.nrId = nr_id
+
+            #only capturing one conflict
             if (name.conflict1_num != None):
                 submitted_name.conflict1_num = name.conflict1_num
                 submitted_name.conflict1 = name.conflict1
 
+                #conflict text same as Namex
                 decision_text = 'Consent is required from ' + name.conflict1 + '\n' + '\n'
 
             for consent in name.consent_words:
@@ -171,7 +230,6 @@ class NameRequest(Resource):
         name_request.names.append(submitted_name)
         name_request.save_to_db()
         #TODO: Need to add verification that the save was successful.
-
 
         nr_doc = create_solr_doc(name_request)
         update_solr('possible.conflicts',nr_doc)
