@@ -73,8 +73,8 @@ def remove_stop_words(original_name_list, stop_words):
     return words
 
 
-def list_distinctive_descriptive_same(name_list, none_list):
-    queue = [element for element in name_list if element not in none_list]
+def list_distinctive_descriptive_same(name_list):
+    queue = collections.deque(name_list)
 
     dist_list = []
     desc_list = []
@@ -85,7 +85,7 @@ def list_distinctive_descriptive_same(name_list, none_list):
     dist_list.reverse()
 
     for dist in dist_list:
-        desc_list.append([i for i in name_list if i not in dist and i not in none_list])
+        desc_list.append([i for i in name_list if i not in dist])
 
     return dist_list, desc_list
 

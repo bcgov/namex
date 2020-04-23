@@ -21,6 +21,8 @@ from namex.services.virtual_word_condition.virtual_word_condition \
 
 from swagger_client import SynonymsApi as SynonymService
 
+from .name_analysis_utils import list_distinctive_descriptive_same, list_distinctive_descriptive
+
 '''
 This is the director for AutoAnalyseService.
 '''
@@ -232,13 +234,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             list_dist, list_desc, list_none = self.word_classification_tokens
 
             analysis = []
-            # if list_none and list_none.__len__() > 0:
-            #     self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
-            #         list_dist,
-            #         list_desc,
-            #         list_none,
-            #         list_name
-            #     )
 
             check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
             if not check_words_to_avoid.is_valid:
@@ -252,6 +247,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.name_tokens,
                 self.name_original_tokens
             )
+
             if check_name_is_well_formed:
                 analysis.append(check_name_is_well_formed)
                 return analysis
@@ -265,7 +261,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             if check_word_unclassified:
                 analysis.append(check_word_unclassified)
 
-            #analysis = analysis + results
+            # analysis = analysis + results
 
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
@@ -325,6 +321,25 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.DESIGNATION_MISMATCH,
                 AnalysisIssueCodes.DESIGNATION_MISPLACED
             ]
+
+            # Adding unclassified words to distinctive and descriptive if they exist
+            if list_none and list_none.__len__() > 0:
+                list_dist_unclassified, list_desc_unclassified = TokenClassifier.handle_unclassified_words(
+                    list_dist,
+                    list_desc,
+                    list_none,
+                    list_name
+                )
+
+                # Combination of distinctive and descriptive considering unclassified words in distinctive and
+                # descriptive lists to be passed to search_conflicts
+                if len(list_dist_unclassified) > 0 and list_dist_unclassified == list_desc_unclassified:
+                    self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name)
+                else:
+                    self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name,
+                                                                                                list_dist_unclassified,
+                                                                                                list_desc_unclassified
+                                                                                                )
 
             analysis = analysis + self.do_analysis()
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
