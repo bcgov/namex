@@ -59,7 +59,7 @@ Rules:  1) Before and after slash has to be at least two words to removed string
 
 
 def remove_french(text):
-    text = re.sub(r'(^[A-Z]+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*)/(\w+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*$)+',
+    text = re.sub(r'(^[A-Z]+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*)/(\s*\w+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*$)+',
                   r'\1 ',
                   text,
                   0,
@@ -131,7 +131,7 @@ def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
 def list_distinctive_descriptive(name_list, dist_list, desc_list):
     queue_dist = collections.deque(dist_list)
 
-    if dist_list == name_list:
+    if len(name_list) > 0 and dist_list == name_list:
         queue_dist.pop()
 
     dist_list_tmp, dist_list_all, desc_list_tmp, desc_list_all = [], [], [], []

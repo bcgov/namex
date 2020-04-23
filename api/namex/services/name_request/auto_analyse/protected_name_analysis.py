@@ -6,7 +6,7 @@ from namex.constants import \
 
 from .name_analysis_director import NameAnalysisDirector
 
-from namex.utils.common import parse_dict_of_lists
+from namex.utils.common import parse_dict_of_lists, remove_periods_designation
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -50,14 +50,23 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
     def _set_designations_by_input_name(self):
         syn_svc = self.synonym_service
-        original_name = self.get_original_name()
+        np_svc = self.name_processing_service
+
+        # original_name = self.get_original_name()
+        # Get the first section of name when exists slash. For instance, ARMSTRONG PLUMBING LTD./ ARMSTRONG PLUMBING LIMITEE
+        # Just take ARMSTRONG PLUMBING LTD. and perform analysis of designations.
+        name_first_part = np_svc.name_first_part
 
         # These are used when getting the entity type in _set_entity_type_any_designation, _set_entity_type_end_designation
         # for <any> and <end> designations which are properly placed:
-        self._designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
-        self._designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
+        # self._designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
+        # self._designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
 
-        self._all_designations = syn_svc.get_designation_all_in_name(name=original_name).data
+        self._designation_any_list = syn_svc.get_designation_any_in_name(name=name_first_part).data
+        self._designation_end_list = syn_svc.get_designation_end_in_name(name=name_first_part).data
+
+        # self._all_designations = syn_svc.get_designation_all_in_name(name=original_name).data
+        self._all_designations = syn_svc.get_designation_all_in_name(name=name_first_part).data
 
     '''
     Set designations in position <end> found any other place in the company name, these designations are misplaced.
@@ -66,11 +75,11 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     def _set_designations_incorrect_position_by_input_name(self):
         syn_svc = self.synonym_service
         tokenized_name = self.get_original_name_tokenized()
-        correct_designation_end_list = self._designation_end_list_correct
+        correct_designation_end_list = remove_periods_designation(self._designation_end_list_correct)
 
         designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
                                                                                        designation_end_list=correct_designation_end_list).data
-        self._misplaced_designation_end_list = designation_end_misplaced_list
+        self._misplaced_designation_end_list = list(map(lambda x: x.upper(), designation_end_misplaced_list))
 
     def _set_designations_by_entity_type_user(self):
         syn_svc = self.synonym_service
@@ -150,6 +159,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         # Set all designations based on entity type typed by user,'CR' by default
         self._all_designations_user = self._designation_any_list_correct + self._designation_end_list_correct
+        self._all_designations_user_no_periods = remove_periods_designation(self._all_designations_user)
 
         # Set all designations based on company name typed by user
         # self._all_designations = self._designation_any_list + self._designation_end_list
@@ -198,7 +208,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
                 self.get_original_name_tokenized(),
                 self.entity_type,
                 self.get_all_designations(),
-                self.get_all_designations_user()
+                self.get_all_designations_user(),
+                self.get_all_designations_user_no_periods()
             )
 
             if not check_designation_mismatch.is_valid:

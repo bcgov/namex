@@ -6,6 +6,7 @@ class GetDesignationsListsMixin(object):
     _designation_any_list_correct = []
     _designation_end_list_correct = []
     _all_designations_user = []
+    _all_designations_user_no_periods = []
 
     # All designations for entity type typed bu user
     designations_entity_type_user = []
@@ -59,6 +60,9 @@ class GetDesignationsListsMixin(object):
 
     def get_all_designations_user(self):
         return self._all_designations_user
+
+    def get_all_designations_user_no_periods(self):
+        return self._all_designations_user_no_periods
 
     def get_all_designations(self):
         return self._all_designations
