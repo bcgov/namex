@@ -28,6 +28,10 @@ class NameProcessingService(GetSynonymListsMixin):
         return self._name_as_submitted
 
     @property
+    def name_first_part(self):
+        return self._name_first_part
+
+    @property
     def name_as_submitted_tokenized(self):
         return self._name_as_submitted_tokenized
 
@@ -38,6 +42,10 @@ class NameProcessingService(GetSynonymListsMixin):
     @name_as_submitted.setter
     def name_as_submitted(self, val):
         self._name_as_submitted = val
+
+    @name_first_part.setter
+    def name_first_part(self, val):
+        self._name_first_part = val
 
     @name_as_submitted_tokenized.setter
     def name_as_submitted_tokenized(self, val):
@@ -83,6 +91,7 @@ class NameProcessingService(GetSynonymListsMixin):
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.name_as_submitted = None
+        self._name_first_part = None
         self.name_as_submitted_tokenized = None
         self.name_original_tokens = None
         self.processed_name = None
@@ -94,8 +103,10 @@ class NameProcessingService(GetSynonymListsMixin):
     '''
     Set and process a submitted name string using the process_name class method.
     '''
+
     def set_name(self, name):
         self.name_as_submitted = name  # Store the user's submitted name string
+        self.name_first_part = remove_french(name)
         self.name_original_tokens = name.lower().split()
         self._process_name()
 
@@ -106,7 +117,8 @@ class NameProcessingService(GetSynonymListsMixin):
         regex = re.compile(r'(?<!\w)({}|[a-z-A-Z]+)(?!\w)'.format(designation_alternators))
         self.name_as_submitted_tokenized = regex.findall(name.lower())
 
-    def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[], fr_designation_end_list=[], prefix_list=[], number_list=[]):
+    def _clean_name_words(self, text, stop_words=[], designation_any=[], designation_end=[], designation_all=[],
+                          fr_designation_end_list=[], prefix_list=[], number_list=[]):
         if not text or not stop_words or not designation_any or not designation_end or not prefix_list and not number_list:
             warnings.warn("Parameters in clean_name_words function are not set.", Warning)
 
@@ -151,6 +163,7 @@ class NameProcessingService(GetSynonymListsMixin):
     Split a name string into classifiable tokens. Called whenever set_name is invoked.
     @:param string:name
     '''
+
     def _process_name(self):
         try:
             # Prepare any data that we need to pre-process the name
