@@ -14,7 +14,7 @@ setup_logging() ## important to do this first
 from urllib.parse import unquote_plus
 from datetime import datetime
 
-from namex.models import Request, Name, NRNumber, State, User
+from namex.models import Request, Name, NRNumber, State, User, Comment
 
 from namex.services import EventRecorder
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
@@ -142,6 +142,17 @@ class NameRequest(Resource):
         if(json_data['state'] == 'DRAFT'):
 
             party_id = get_applicant_sequence()
+
+            #TO-DO Review additional info stuuf from namex (prev NR for re-applies,no NWPTA?
+
+            if json_data['english']== True:
+                #add a coment for the exmainer that say this is nota ENglihs Name
+                lang_comment = Comment()
+                lang_comment.comment = 'The name(s) are not English. Please examine with this in mind.'
+                lang_comment.examinerId = user_id
+                lang_comment.nrId = nr_id
+                name_request.comments.append(lang_comment)
+
 
             name_request.additionalInfo = json_data['additionInfo']
             name_request.natureBusinessInfo = json_data['natureBusinessInfo']
