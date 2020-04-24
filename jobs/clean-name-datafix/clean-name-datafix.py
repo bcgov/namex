@@ -1,7 +1,6 @@
 import sys, os
 from datetime import datetime, timedelta
 from flask import Flask, g, current_app
-from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex import db
 from namex.utils.logging import setup_logging
 
@@ -18,7 +17,6 @@ def create_app(config=Config):
     current_app.logger.debug('created the Flask App and pushed the App Context')
 
     return app
-
 app = create_app(Config)
 start_time = datetime.utcnow()
 row_count = 0
