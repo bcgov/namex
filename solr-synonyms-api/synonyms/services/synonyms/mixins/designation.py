@@ -98,7 +98,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     def get_designation_any_in_name(self, name):
         en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG)
         designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
-        designation_any_regex = r'\b({})\b(?=\s|$)'.format(designation_any_rgx)
+        designation_any_regex = r'(?<!\w)({0})(?!\w)(?=\s|$)'.format(designation_any_rgx)
 
         # Returns list of tuples
         found_designation_any = re.findall(designation_any_regex, name.lower())
@@ -118,7 +118,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         all_designations.sort(key=len, reverse=True)
 
         all_designations_rgx = '|'.join(map(str, all_designations))
-        all_designations_regex = r'\b({})\b(?=\s|$)'.format(all_designations_rgx)
+        all_designations_regex = r'(?<!\w)({0})(?!\w)(?=\s|$)'.format(all_designations_rgx)
 
         # Returns list of tuples
         found_all_designations = re.findall(all_designations_regex, name.lower())
