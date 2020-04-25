@@ -1,4 +1,6 @@
 import re
+from pattern.text.en import singularize
+from itertools import product
 
 _parse_csv_line = lambda x: (x.split(','))
 
@@ -32,3 +34,19 @@ def remove_periods_designation(results):
             designation_list.append(text)
 
     return designation_list
+
+
+def get_plural_singular_name(name):
+    d = {}
+    for word in name.split():
+        val = []
+        singular = singularize(word.lower())
+        val.extend([singular])
+        val.extend([word.lower()])
+        d[word] = (list(set(val)))
+
+    name_list = []
+    for combination in product(*d.values()):
+        name_list.append(' '.join(combination))
+
+    return name_list
