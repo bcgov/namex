@@ -299,7 +299,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         # Build exception list to avoid separation of numbers and letters when they are part of synonym table such as H20, 4MULA, ACTIV8
         exceptions_ws = []
         for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
-            if self.get_substitutions(word):
+            if self.get_substitutions(word) and bool(re.search(r'\d', word)):
                 exceptions_ws.append(word)
 
         if not exceptions_ws:
