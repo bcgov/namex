@@ -156,7 +156,7 @@ class NameProcessingService(GetSynonymListsMixin):
     def exception_virtual_word_condition(self, text, vwc_svc):
         exceptions_ws = []
         for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
-            if vwc_svc.get_word(word):
+            if vwc_svc.get_word(word) and bool(re.search(r'\d', word)):
                 exceptions_ws.append(word)
 
         if not exceptions_ws:
