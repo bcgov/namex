@@ -312,12 +312,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         for words_consent in all_words_consent_list:
             for name_sin_plural in name_singular_plural_list:
                 if re.search(r'\b{}\b'.format(re.escape(words_consent.lower())), name_sin_plural.lower()):
-                    word_consent_tokenized = words_consent.lower().split()
-                    name_sin_plur_tokenized = name_sin_plural.split()
-                    for word in word_consent_tokenized:
-                        if word.lower() in name_sin_plural:
-                            idx = name_sin_plur_tokenized.index(word.lower())
-                            words_consent_dict[idx] = word
+                    words_consent_dict.update(self.get_position_word_consent(words_consent, name_sin_plural))
 
         words_consent_list_response = []
         for key in sorted(words_consent_dict):
@@ -332,6 +327,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             }
 
         return result
+
+    def get_position_word_consent(self, words_consent, name_sin_plural):
+        word_consent_tokenized = words_consent.lower().split()
+        name_sin_plur_tokenized = name_sin_plural.split()
+        words_consent_dict = {}
+        for word in word_consent_tokenized:
+            if word.lower() in name_sin_plural:
+                idx = name_sin_plur_tokenized.index(word.lower())
+                words_consent_dict[idx] = word
+
+        return words_consent_dict
 
     def check_designation_existence(self, list_name, all_designations, all_designations_user):
         result = ProcedureResult()
