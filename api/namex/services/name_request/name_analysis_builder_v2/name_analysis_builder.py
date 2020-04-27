@@ -10,7 +10,7 @@ from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
-from namex.utils.common import parse_dict_of_lists
+from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
 
 '''
 Sample builder
@@ -67,7 +67,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         #     results.append(result)
 
         # Now that too many words and unclassified words are handled, handle distinctive and descriptive issues
-        #result = None
+        # result = None
 
         # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
         # the original name should be passed to get the correct index when reporting issues to front end.
@@ -252,7 +252,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                                                             w_desc, list_name, name)
         most_similar_names.extend(
             list({k for k, v in
-                  sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[0:MAX_MATCHES_LIMIT]}))
+                  sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[
+                  0:MAX_MATCHES_LIMIT]}))
 
         for element in most_similar_names:
             response.update({element: dict_highest_detail.get(element, {})})
@@ -305,17 +306,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result.is_valid = True
 
         all_words_consent_list = self.word_condition_service.get_words_requiring_consent()
-        words_consent_list = []
+        words_consent_dict = {}
+        name_singular_plural_list = get_plural_singular_name(name)
 
         for words_consent in all_words_consent_list:
-            if re.search(r'\b{}\b'.format(re.escape(words_consent.lower())), name.lower()):
-                words_consent_list.append(words_consent.lower())
+            for name_sin_plural in name_singular_plural_list:
+                if re.search(r'\b{}\b'.format(re.escape(words_consent.lower())), name_sin_plural.lower()):
+                    words_consent_dict.update(self.get_position_word_consent(words_consent, name_sin_plural))
 
         words_consent_list_response = []
-
-        for idx, token in enumerate(list_name):
-            if any(token in word for word in words_consent_list):
-                words_consent_list_response.append(token)
+        for key in sorted(words_consent_dict):
+            words_consent_list_response.append(list_name[key])
 
         if words_consent_list_response:
             result.is_valid = False
@@ -326,6 +327,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             }
 
         return result
+
+    def get_position_word_consent(self, words_consent, name_sin_plural):
+        word_consent_tokenized = words_consent.lower().split()
+        name_sin_plur_tokenized = name_sin_plural.split()
+        words_consent_dict = {}
+        for word in word_consent_tokenized:
+            if word.lower() in name_sin_plural:
+                idx = name_sin_plur_tokenized.index(word.lower())
+                words_consent_dict[idx] = word
+
+        return words_consent_dict
 
     def check_designation_existence(self, list_name, all_designations, all_designations_user):
         result = ProcedureResult()
@@ -350,7 +362,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user, all_designation_user_no_periods):
+    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user,
+                                   all_designation_user_no_periods):
         result = ProcedureResult()
         result.is_valid = True
 

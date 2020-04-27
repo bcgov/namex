@@ -180,7 +180,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
         text = self.regex_numbers_lot(text)
-        # text = self.regex_repeated_strings(text)
+        text = self.regex_repeated_strings(text)
         text = self.regex_separated_ordinals(text, ordinal_suffixes)
         text = self.regex_keep_together_abv(text, exceptions_ws)
         text = self.regex_punctuation(text)
@@ -268,7 +268,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_strip_out_numbers_middle_end(cls, text, ordinal_suffixes, numbers):
-        text = re.sub(r'(?<=[A-Za-z]\b\s)([ 0-9]+({})?|({})\b)'.format(ordinal_suffixes, numbers),
+        text = re.sub(r'(?<=[A-Za-z]\b\s)([ 0-9]+({})?\b|({})\b)'.format(ordinal_suffixes, numbers),
                       '',
                       text,
                       0,
@@ -278,7 +278,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     @classmethod
     def regex_numbers_standalone(cls, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
-            r'\b(?=(\d+(?:{0})?(?:\s+\d+(?:\b{0}\b)?)*|(?:\b({1})\b)(?:\s+(?:\b({1})\b))*))\1(?!\s+(?:{2})\b)\s*'.format(
+            r'\b(?=(\d+(?:{0})?\b(?:\s+\d+(?:\b{0}\b)?)*|(?:\b({1})\b)(?:\s+(?:\b({1})\b))*))\1(?!\s+(?:{2})\b)\s*'.format(
                 ordinal_suffixes, numbers, stand_alone_words),
             '',
             text,
@@ -299,7 +299,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         # Build exception list to avoid separation of numbers and letters when they are part of synonym table such as H20, 4MULA, ACTIV8
         exceptions_ws = []
         for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
-            if self.get_substitutions(word):
+            if self.get_substitutions(word) and bool(re.search(r'\d', word)):
                 exceptions_ws.append(word)
 
         if not exceptions_ws:
