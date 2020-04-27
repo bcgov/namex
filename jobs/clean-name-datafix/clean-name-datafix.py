@@ -1,8 +1,10 @@
 import sys, os
 from datetime import datetime, timedelta
 from flask import Flask, g, current_app
+from sqlalchemy import text
 from namex import db
 from namex.utils.logging import setup_logging
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 from config import Config
 
@@ -25,25 +27,23 @@ MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '10000')
 
 try:
 
-
-    sql = "select id,name,clean_name " \
-          "from names where state='APPROVED' and clean_name is null " + MAX_ROW_LIMIT
+    sql = "select id,name " \
+          "from names where clean_name is null and state='APPROVED'" \
+          " limit " + MAX_ROW_LIMIT
 
     names = db.session.execute(sql)
     for id, name in names:
         current_app.logger.debug('processing id: {}'.format(id))
         #add name processing like in names
-        #service = ProtectedNameAnalysisService()
-        #np_svc = service.name_processing_service
-        #np_svc.set_name(name)
-        #cleaned_name = np_svc.processed_name.upper()
-
-        cleaned_name='TEST'
-
+        service = ProtectedNameAnalysisService()
+        np_svc = service.name_processing_service
+        np_svc.set_name(name)
+        cleaned_name = np_svc.processed_name
+        cleaned_name = cleaned_name.upper()
 
         update_sql = "update names " \
-                     "set clean_name=cleaned_name "  \
-                     "where id={id}".format(id=id)
+                     "set clean_name='{cleaned_name}' " \
+                     "where id={id}".format(id=id, cleaned_name=cleaned_name)
 
         print(update_sql)
 
