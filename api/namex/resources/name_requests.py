@@ -152,9 +152,17 @@ class NameRequest(Resource):
                 lang_comment.examinerId = user_id
                 lang_comment.nrId = nr_id
                 name_request.comments.append(lang_comment)
+                name_request.additional_info = 'The name is English' + '\n' + json_data['additionalInfo']
+            else:
+                name_request.additional_info = 'The name is a foreign language' + '\n'+ json_data['additionalInfo']
 
+            if json_data['nameFlag'] == True:
+                name_comment = Comment()
+                name_comment.comment = 'The name(s) is a person name, coined phrade or trademark'
+                name_comment.examinerId = user_id
+                name_comment.nrId = nr_id
+                name_request.comments.append(name_comment)
 
-            name_request.additionalInfo = json_data['additionInfo']
             name_request.natureBusinessInfo = json_data['natureBusinessInfo']
             name_request.tradeMark = json_data['tradeMark']
             name_request.previousRequestId = json_data['previousRequestId']
@@ -176,7 +184,7 @@ class NameRequest(Resource):
             name_request.homeJurisNum = json_data['homeJurisNum']
 
             #for existing businesses
-            name_request.corpNum  = json_data['corpNum ']
+            name_request.corpNum  = json_data['corpNum']
 
             #applicant, contact and address info
             for applicant in json_data['applicants']:
@@ -206,6 +214,7 @@ class NameRequest(Resource):
 
             submitted_name.choice = name.choice
             submitted_name.name = name.name
+
             if(name.name_type_code == None):
                 submitted_name.name_type_code = 'CO'
             else:
