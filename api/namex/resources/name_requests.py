@@ -1,11 +1,13 @@
 from flask import jsonify, request
-from flask_restplus import Namespace, Resource, cors
+from flask_restplus import Namespace, Resource, cors, fields
 from namex.utils.util import cors_preflight
 from flask import current_app
-from namex.models import db
+from namex.models import db, ValidationError
 from datetime import timedelta
 from pytz import timezone
 import os, pysolr, json
+from flask_jwt_oidc import AuthError
+from namex import jwt
 
 from namex.utils.logging import setup_logging
 setup_logging() ## important to do this first
@@ -97,18 +99,63 @@ def generate_nr():
 @cors_preflight("POST")
 @api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
 class NameRequest(Resource):
-    @staticmethod
-    @cors.crossdomain(origin='*')
-
-    @api.doc(params={
-        'name': 'A company / organization name string inclduing designation',
-        'entity_type': 'An entity type code [ CR, UL, CC ]',
-        'request_action': 'A request action code',
-        'designation': 'The designation if at the end',
-        'state': 'Reservation state [ RESERVED | COND-RESERVE} or DRAFT for Send to Examination',
-        'names': 'One Name for Reserved State and up to three names for DRAFT'
+    applicant_model = api.model('applicant_model',{
+                                    'lastName': fields.String(attribute='lastName'),
+                                    'firstName': fields.String(attribute='firstName'),
+                                    'middleName': fields.String('Applicant middle name or initial'),
+                                    'contact': fields.String('Applicant contact person last and first name'),
+                                    'clientFirstName': fields.String('Client first name'),
+                                    'clientLastName': fields.String('Client last name'),
+                                    'phoneNumber': fields.String('contact phone number'),
+                                    'faxNumber': fields.String('contact fax number'),
+                                    'emailAddress': fields.String('contact email'),
+                                    'addrLine1': fields.String('First address line'),
+                                    'addrLine2': fields.String('Second address line'),
+                                    'city': fields.String('City'),
+                                    'stateProvinceCd': fields.String('Province or state code'),
+                                    'postalCd': fields.String('postal code or zip code'),
+                                    'countryTypeCd': fields.String('country code')
+                                })
+    consent_model = api.model('consent_model',{
+                        'consent_word': fields.String('A word that requires consent')
     })
+    name_model = api.model('name_model',{
+                                    'choice': fields.Integer('Name choice'),
+                                    'name': fields.String('Name'),
+                                    'name_type_cd': fields.String('For company or assume dname', enum=['CO', 'AS']),
+                                    'state': fields.String('The state of the Name'),
+                                    'designation': fields.String('Name designation based on entity type'),
+                                    'conflict1_num': fields.String('the corp_num of teh matching name'),
+                                    'conflict1': fields.String('The mathcing corp name'),
+                                    'consent_words': fields.Nested(consent_model)
+                             })
 
+    a_request = api.model('Request', {'entity_type': fields.String('The entity type'),
+                                      'request_action': fields.String('The action requested by the user'),
+                                      'stateCd': fields.String('The state of the NR'),
+                                      'english': fields.Boolean('Set when the name is English only'),
+                                      'nameFlag': fields.Boolean('Set when the name is a person'),
+                                      'additionalInfo': fields.String('Additional NR Info'),
+                                      'natureBusinessInfo': fields.String('The nature of business'),
+                                      'trademark': fields.String('Registered Trademark'),
+                                      'previousRequestId': fields.Integer('Internal Id for ReApplys'),
+                                      'priorityCd': fields.String('Set to Yes if it is  priority going to examination'),
+                                      'submit_count': fields.Integer(
+                                          'Used to enforce the 3 times only rule for Re-Applys'),
+                                      'xproJurisdiction': fields.String(
+                                          'The province or country code for XPRO requests'),
+                                      'homeJurisNum': fields.String(
+                                          'For MRAS participants, their home jursidtcion corp_num'),
+                                      'corpNum': fields.String(
+                                          'For companies already registered in BC, their BC corp_num'),
+                                      'applicants': fields.Nested(applicant_model),
+                                      'names': fields.Nested(name_model)
+                                 })
+
+
+    @api.expect(a_request)
+    @cors.crossdomain(origin='*')
+    #@jwt.requires_auth
     def post(nr, *args, **kwargs):
         json_data = request.get_json()
         if not json_data:
@@ -129,17 +176,17 @@ class NameRequest(Resource):
         name_request.submittedDate=datetime.utcnow()
         name_request.requestTypeCd = set_request_type(json_data['entity_type'], json_data['request_action'])
         name_request.nrNum=nr_num
-        if(json_data['state'] == 'COND-RESERVE'):
+        if(json_data['stateCd'] == 'COND-RESERVE'):
             name_request.consentFlag =  'Y'
 
         name_request.expirationDate= create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
-        name_request.stateCd=json_data['state']
+        name_request.stateCd=json_data['stateCd']
         name_request.entity_type_cd = json_data['entity_type']
         name_request.request_action_cd= json_data['request_action']
         #set this to name_request_service_account
         name_request.userId = user_id
 
-        if(json_data['state'] == 'DRAFT'):
+        if(json_data['stateCd'] == 'DRAFT'):
 
             party_id = get_applicant_sequence()
 
@@ -158,7 +205,7 @@ class NameRequest(Resource):
 
             if json_data['nameFlag'] == True:
                 name_comment = Comment()
-                name_comment.comment = 'The name(s) is a person name, coined phrade or trademark'
+                name_comment.comment = 'The name(s) is a person name, coined phrase or trademark'
                 name_comment.examinerId = user_id
                 name_comment.nrId = nr_id
                 name_request.comments.append(name_comment)
