@@ -291,7 +291,7 @@ class AnalysisResponse:
 
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -398,8 +398,9 @@ class AnalysisResponse:
     @:param analysis_result ProcedureResult[]
     '''
 
-    def __init__(self, entity_type, analysis_result):
-        self.entity_type = entity_type
+    def __init__(self, analysis_service, analysis_result):
+        self.analysis_service = analysis_service
+        self.entity_type = analysis_service.entity_type
         self.header = ""
         self.status_code = ""
         self.issues = []

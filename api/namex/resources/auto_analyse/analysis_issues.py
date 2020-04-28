@@ -141,21 +141,24 @@ class AnalysisResponseIssue:
                         original_tokens.popleft()
 
             # Pop the left-most token off the list
-            current_original_token = original_tokens.popleft()
+            else:
+                if len(original_tokens) > 0:
+                    current_original_token = original_tokens.popleft()
 
-            # Check for repeated tokens
-            is_repeat_token = False
+                    # Check for repeated tokens
+                    is_repeat_token = False
+                    if current_original_token == previous_original_token:
+                        is_repeat_token = True
 
-            if current_original_token == previous_original_token:
-                is_repeat_token = True
+                    if is_repeat_token:
+                        word_idx_offset += 1
 
-            # TODO: Check index too!
-            if current_original_token not in name_tokens:
-                word_idx_offset += 1
-                continue
-
-            if is_repeat_token:
-                word_idx_offset += 1
+                    # If there are no processed tokens left to deal with, skip this step (handles designations, etc.)
+                    # We don't need to increment the word_idx_offset anymore unless there's a repeated token
+                    if len(processed_tokens) > 0:
+                        if current_original_token not in name_tokens:
+                            word_idx_offset += 1
+                            continue
 
             if previous_original_token != current_original_token and len(processed_tokens) > 0:
                 processed_tokens.popleft()

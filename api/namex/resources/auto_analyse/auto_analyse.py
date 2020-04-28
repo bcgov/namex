@@ -206,7 +206,7 @@ class NameAnalysis(Resource):
         analysis = service.execute_analysis()
 
         # Build the appropriate response for the analysis result
-        analysis_response = AnalysisResponse(service, entity_type, analysis)
+        analysis_response = AnalysisResponse(service, analysis)
         payload = analysis_response.build_response().to_json()
 
         response = make_response(payload, 200)
