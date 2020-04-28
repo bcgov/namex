@@ -93,8 +93,8 @@ class GetDesignationsListsMixin(object):
     def get_entity_type_end_designation(self):
         return self._entity_type_end_designation
 
-    def get_all_entity_type(self):
-        return self._all_entity_type
+    # def get_all_entity_types(self):
+    #    return self._all_entity_types
 
     def get_all_designations_user(self):
         return self._all_designations_user
