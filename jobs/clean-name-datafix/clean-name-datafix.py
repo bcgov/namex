@@ -1,7 +1,7 @@
-import sys, os
+import sys
+import os
 from datetime import datetime, timedelta
 from flask import Flask, g, current_app
-from sqlalchemy import text
 from namex import db
 from namex.utils.logging import setup_logging
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -44,8 +44,6 @@ try:
         update_sql = "update names " \
                      "set clean_name='{cleaned_name}' " \
                      "where id={id}".format(id=id, cleaned_name=cleaned_name)
-
-        print(update_sql)
 
         db.session.execute(update_sql)
         db.session.commit()
