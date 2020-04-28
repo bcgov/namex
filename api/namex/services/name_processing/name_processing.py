@@ -1,6 +1,7 @@
 import re
 import warnings
 
+from . import LanguageCodes
 from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words
 
 # from namex.services.synonyms.synonym import SynonymService
@@ -173,14 +174,19 @@ class NameProcessingService(GetSynonymListsMixin):
         self._stop_words = syn_svc.get_stop_words().data
         self._prefixes = syn_svc.get_prefixes().data
         self._number_words = syn_svc.get_number_words().data
-        self._designated_end_words = syn_svc.get_designated_end_all_words().data
-        self._designated_any_words = syn_svc.get_designated_any_all_words().data
 
-        self._designated_all_words = list(set(self._designated_any_words +
-                                              self._designated_end_words))
+        self._eng_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.ENG.value).data
+        self._eng_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.ENG.value).data
+
+        self._fr_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.FR.value).data
+        self._fr_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.FR.value).data
+
+        self._designated_end_words = self._eng_designated_end_words + self._fr_designated_end_words
+        self._designated_any_words = self._eng_designated_any_words + self._fr_designated_any_words
+
+        self._designated_all_words = list(set(self._designated_any_words + self._designated_end_words))
         self._designated_all_words.sort(key=len, reverse=True)
-        # TODO: Handle french designations
-        self._fr_designation_end_list = []
+
 
     '''
     Split a name string into classifiable tokens. Called whenever set_name is invoked.
