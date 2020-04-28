@@ -314,6 +314,7 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
+        # list_original = procedure_result.values['list_original']
         list_name = procedure_result.values['list_name']
 
         issue.name_actions = [
@@ -344,6 +345,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
+        # list_original = procedure_result.values['list_original']
         list_name = procedure_result.values['list_name']
         list_dist = procedure_result.values['list_dist']
 
@@ -360,7 +362,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
-        last_dist_word = list_dist.pop() if list_dist.__len__() > 0 else None
+        last_dist_word = list_dist[-1] if list_dist.__len__() > 0 else None
         # TODO: Why was this like this before?
         # dist_word_idx = list_name.index(last_dist_word) # if list_dist.__len__() > 0 else 0
         dist_word_idx = list_name.index(last_dist_word) if list_dist.__len__() > 0 else 0

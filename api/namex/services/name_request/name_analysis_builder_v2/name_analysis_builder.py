@@ -78,6 +78,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
             result.values = {
+                'list_original': [],
                 'list_name': [],
                 'list_dist': []
             }
@@ -88,7 +89,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
                 result.values = {
-                    'list_name': list_original_name or [],
+                    'list_original': list_original_name or [],
+                    'list_name': list_name or [],
                     'list_dist': list_dist or []
                 }
             else:
@@ -96,7 +98,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
                 result.values = {
-                    'list_name': list_original_name or [],
+                    'list_original': list_original_name or [],
+                    'list_name': list_name or [],
                     'list_dist': list_dist or []
                 }
         else:
@@ -105,15 +108,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
                 result.values = {
-                    'list_name': list_original_name or [],
-                    'list_dist': []
+                    'list_original': list_original_name or [],
+                    'list_name': list_name or [],
+                    'list_dist': list_dist or []
                 }
             elif list_desc.__len__() == 0 or self._list_desc_words.__len__() == 0:
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
                 result.values = {
-                    'list_name': list_original_name or [],
+                    'list_original': list_original_name or [],
+                    'list_name': list_name or [],
                     'list_dist': list_dist or []
                 }
 
