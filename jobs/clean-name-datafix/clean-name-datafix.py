@@ -53,7 +53,7 @@ try:
 
 except Exception as err:
     db.session.rollback()
-    print('Failed to update events: ', err, err.with_traceback(None), file=sys.stderr)
+    print('Failed to update names: ', err, err.with_traceback(None), file=sys.stderr)
     exit(1)
 
 app.do_teardown_appcontext()
