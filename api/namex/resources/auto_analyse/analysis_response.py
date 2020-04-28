@@ -56,6 +56,38 @@ def response_issues(issue_code):
 
 
 class AnalysisResponse:
+    @property
+    def analysis_service(self):
+        return self._analysis_service
+
+    @analysis_service.setter
+    def analysis_service(self, analysis_service):
+        self._analysis_service = analysis_service
+
+    @property
+    def name_tokens(self):
+        return self.analysis_service.name_tokens
+
+    @property
+    def name_original_tokens(self):
+        return self.analysis_service.name_original_tokens
+
+    @property
+    def processed_name(self):
+        return self.analysis_service.processed_name
+
+    @property
+    def name_as_submitted(self):
+        return self.analysis_service.name_as_submitted
+
+    @property
+    def entity_type(self):
+        return self._entity_type
+
+    @entity_type.setter
+    def entity_type(self, entity_type):
+        self._entity_type = entity_type
+
     @classmethod
     def _has_next_issue(cls, issue_count, issue_idx):
         return issue_idx + 1 < issue_count
@@ -80,7 +112,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -96,7 +128,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -110,7 +142,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -128,7 +160,7 @@ class AnalysisResponse:
         # option2 = None
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -145,7 +177,7 @@ class AnalysisResponse:
         # option2 = None
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -162,7 +194,7 @@ class AnalysisResponse:
         # option2 = None
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2 = None
             # option3 = None
@@ -179,7 +211,7 @@ class AnalysisResponse:
         # option2 = None
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -202,7 +234,7 @@ class AnalysisResponse:
         # Tweak the header
         option3.header = "Option 3"
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             option2,
             option3
@@ -226,7 +258,7 @@ class AnalysisResponse:
         # Tweak the header
         option3.header = "Option 3"
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             option2,
             option3
@@ -259,7 +291,7 @@ class AnalysisResponse:
 
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -280,7 +312,7 @@ class AnalysisResponse:
 
         # option3 = None
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             option2,
             # option3
@@ -295,7 +327,7 @@ class AnalysisResponse:
         # Tweak the header
         option1.header = "Option 1"
 
-        issue = response_issues(procedure_result.result_code)(self.entity_type, [
+        issue = response_issues(procedure_result.result_code)(self, [
             option1,
             # option2,
             # option3
@@ -321,7 +353,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -337,7 +369,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -351,7 +383,7 @@ class AnalysisResponse:
             # Tweak the header
             option2.header = "Option 2"
 
-            issue = response_issues(procedure_result.result_code)(self.entity_type, [
+            issue = response_issues(procedure_result.result_code)(self, [
                 option1,
                 option2,
                 # option3
@@ -366,8 +398,9 @@ class AnalysisResponse:
     @:param analysis_result ProcedureResult[]
     '''
 
-    def __init__(self, entity_type, analysis_result):
-        self.entity_type = entity_type
+    def __init__(self, analysis_service, analysis_result):
+        self.analysis_service = analysis_service
+        self.entity_type = analysis_service.entity_type
         self.header = ""
         self.status_code = ""
         self.issues = []
