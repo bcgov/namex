@@ -93,15 +93,25 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         elif XproUnprotectedNameEntityTypes(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
 
-        any_list = syn_svc.get_designations(entity_type_code=entity_type_code.value,
-                                            position_code=DesignationPositionCodes.ANY.value,
-                                            lang=LanguageCodes.ENG.value).data
-        end_list = syn_svc.get_designations(entity_type_code=entity_type_code.value,
-                                            position_code=DesignationPositionCodes.END.value,
-                                            lang=LanguageCodes.ENG.value).data
+        self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                                                          position_code=DesignationPositionCodes.ANY.value,
+                                                                          lang=LanguageCodes.ENG.value).data
+        self._eng_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                                                          position_code=DesignationPositionCodes.END.value,
+                                                                          lang=LanguageCodes.ENG.value).data
 
-        self._designation_any_list_correct = any_list
-        self._designation_end_list_correct = end_list
+        self._fr_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                                                         position_code=DesignationPositionCodes.ANY.value,
+                                                                         lang=LanguageCodes.FR.value).data
+        self._fr_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
+                                                                         position_code=DesignationPositionCodes.END.value,
+                                                                         lang=LanguageCodes.FR.value).data
+
+        self._designation_any_list_correct = self._eng_designation_any_list_correct + self._fr_designation_any_list_correct
+        self._designation_any_list_correct.sort(key=len, reverse=True)
+
+        self._designation_end_list_correct = self._eng_designation_end_list_correct + self._fr_designation_end_list_correct
+        self._designation_end_list_correct.sort(key=len, reverse=True)
 
     '''
     Set the corresponding entity type for designations <any> found in name

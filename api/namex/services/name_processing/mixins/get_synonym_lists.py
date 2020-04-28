@@ -8,7 +8,12 @@ class GetSynonymListsMixin(object):
     _designated_end_words = []
     _designated_any_words = []
     _designated_all_words = []
-    _fr_designation_end_list = []
+
+    _eng_designated_end_words = []
+    _eng_designated_end_words = []
+
+    _fr_designated_any_words = []
+    _fr_designated_any_words = []
 
     def get_prefixes(self):
         return self._prefixes
@@ -31,5 +36,19 @@ class GetSynonymListsMixin(object):
     def get_designated_any_words(self):
         return self._designated_any_words
 
+    def get_designated_all_words(self):
+        return self._designated_all_words
+
+    def get_eng_designated_end_words(self):
+        return self._eng_designated_end_words
+
+    def get_eng_designated_any_words(self):
+        return self._eng_designated_any_words
+
     def get_fr_designated_end_words(self):
-        return self._fr_designation_end_list
+        return self._fr_designated_end_words
+
+    def get_fr_designated_any_words(self):
+        return self._fr_designated_any_words
+
+
