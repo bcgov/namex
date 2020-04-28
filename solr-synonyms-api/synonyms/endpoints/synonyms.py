@@ -658,14 +658,14 @@ class _TransformText(Resource):
     @api.doc(params={
         'text': '',
         'designation_all': '',
-        # TODO: Deprecate prefix_list
-        'prefix_list': '',  # Deprecate first we don't want to break anything, don't delete this yet!
+        'prefix_list': '',
         'number_list': '',
         'exceptions_ws': '',
     })
     def get():
         text = unquote_plus(request.args.get('text'))
         designation_all = literal_eval(request.args.get('designation_all'))
+        prefix_list = literal_eval(request.args.get('prefix_list'))
         number_list = literal_eval(request.args.get('number_list'))
         exceptions_ws = literal_eval(request.args.get('exceptions_ws')) if request.args.get('exceptions_ws') else []
 
@@ -673,7 +673,7 @@ class _TransformText(Resource):
             return
 
         service = SynonymService()
-        result = service.regex_transform(text, designation_all, number_list, exceptions_ws)
+        result = service.regex_transform(text, designation_all, prefix_list, number_list, exceptions_ws)
 
         return {
             'data': result
