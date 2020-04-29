@@ -22,7 +22,7 @@ from namex.services import EventRecorder
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
 
 
-from namex.constants import request_type_mapping, RequestAction, EntityType,NameState
+from namex.constants import request_type_mapping, RequestAction, EntityTypes
 
 
 # Register a local namespace for the NR reserve
@@ -31,13 +31,15 @@ api = Namespace('nameRequests', description='Public facing Name Requests')
 def validate_name_request(entity_type, request_action):
 
     # Raise error if entity_type is invalid
-    if entity_type not in EntityType.list():
+    if entity_type not in EntityTypes.list():
         raise ValueError('Invalid request action provided')
+    else:
+        return True
 
     # Raise error if request_action is invalid
     if request_action not in RequestAction.list():
         raise ValueError('Invalid request action provided')
-        return True
+
 
 def set_request_type(entity_type, request_action):
     for item in request_type_mapping:
@@ -130,7 +132,7 @@ class NameRequest(Resource):
                                     'consent_words': fields.Nested(consent_model)
                              })
 
-    a_request = api.model('Request', {'entity_type': fields.String('The entity type'),
+    nr_request = api.model('name_request', {'entity_type': fields.String('The entity type'),
                                       'request_action': fields.String('The action requested by the user'),
                                       'stateCd': fields.String('The state of the NR'),
                                       'english': fields.Boolean('Set when the name is English only'),
@@ -153,7 +155,7 @@ class NameRequest(Resource):
                                  })
 
 
-    @api.expect(a_request)
+    @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     #@jwt.requires_auth
     def post(nr, *args, **kwargs):
@@ -161,8 +163,8 @@ class NameRequest(Resource):
         if not json_data:
             return jsonify({'message': 'No input data provided'}), 400
 
-        if not validate_name_request(json_data['entity_type'], json_data['request_action']):
-            return jsonify(message='Incorrect input data provided'), 400
+       # if not validate_name_request(json_data['entity_type'], json_data['request_action']):
+        #    return jsonify(message='Incorrect input data provided'), 400
 
         user_id = User.find_by_username('name_request_service_account')
 
