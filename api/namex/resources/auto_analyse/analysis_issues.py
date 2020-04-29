@@ -26,6 +26,7 @@ class AnalysisResponseIssue:
     '''
     def __init__(self, analysis_response, setup_config):
         self.analysis_response = analysis_response
+        self.name_tokens = analysis_response
         self.entity_type = analysis_response.entity_type
         self.setup_config = []
         self.set_issue_setups(setup_config)
@@ -77,32 +78,36 @@ class AnalysisResponseIssue:
     # [J, &, L, &, L, Engineering]
     # and return name tokens:
     # [JLL, Engineering]
-    def get_next_token_if_composite(self, name_original_tokens, name_processed_tokens):
+    def get_next_token_if_composite(self, str_name, name_original_tokens, name_processed_tokens):
         token_string = ''
+        processed_name_string = ''
 
         original_tokens = deque(name_original_tokens)
         processed_tokens = deque(name_processed_tokens)
 
         if len(processed_tokens) == 0:
-            return False, 0
+            return False, 0, 0, None
 
         processed_token = processed_tokens.popleft()
         current_processed_token = processed_token
 
+        processed_token_count = 0
         composite_idx_offset = 0
         current_original_token = original_tokens.popleft()
 
         if current_processed_token == current_original_token:
-            return False, 0
+            return False, 0, 0, current_original_token
 
         if current_processed_token.find(current_original_token) == -1:
-            return False, 0
+            return False, 0, 0, current_original_token
 
         while len(original_tokens) >= 0:
             if token_string == processed_token:
                 break
 
-            composite_idx_offset += 1
+            processed_token_count += 1
+
+            processed_name_string += current_original_token
 
             token_substr_idx = current_processed_token.find(current_original_token)
             token_is_next_chunk = token_substr_idx == 0
@@ -110,18 +115,33 @@ class AnalysisResponseIssue:
                 current_processed_token = current_processed_token[len(current_original_token):]
                 token_string += current_original_token
 
+            next_char = False
+            # this_char = str_name[len(original_name_string) - 1]
+            if len(str_name) > len(processed_name_string):
+                next_char = str_name[len(processed_name_string)]
+
+            if next_char and next_char == ' ':
+                processed_name_string += ' '
+
+            if next_char and next_char == ' ' or not next_char:
+                composite_idx_offset += 1
+
             if len(original_tokens) > 0:
                 current_original_token = original_tokens.popleft()
 
-        if composite_idx_offset:
-            return processed_token, composite_idx_offset
+        if processed_token_count:
+            return processed_token, processed_token_count, composite_idx_offset, processed_name_string
 
-        return False, 0
+        return False, 0, 0, current_processed_token
 
-    def adjust_word_index(self, name_original_tokens, name_tokens, word_idx):
-        token_string = ''
+    def adjust_word_index(self, original_name_str, name_original_tokens, name_tokens, word_idx):
+        all_designations = self.analysis_response.analysis_service.get_all_designations()
+        # all_designations_user = self.analysis_response.analysis_service.get_all_designations_user()
+
         original_tokens = deque(name_original_tokens)
         processed_tokens = deque(name_tokens)
+
+        target_word = name_tokens[word_idx]
 
         word_idx_offset = 0
         composite_token_offset = 0
@@ -129,45 +149,58 @@ class AnalysisResponseIssue:
         previous_original_token = None
         current_original_token = None
 
+        unprocessed_name_string = original_name_str.lower()
+
         while len(original_tokens) > 0:
             # Check to see if we're dealing with a composite, if so, get the offset amount
-            composite_token, composite_idx_offset = self.get_next_token_if_composite(original_tokens, processed_tokens)
+            composite_token, composite_tokens_processed, composite_idx_offset, processed_name_string = \
+                self.get_next_token_if_composite(unprocessed_name_string, original_tokens, processed_tokens)
 
+            if processed_name_string:
+                unprocessed_name_string = unprocessed_name_string.replace(processed_name_string, '').strip()
+
+            # Handle composite tokens
             if composite_token:
-                composite_token_offset += composite_idx_offset - 1
                 current_original_token = composite_token
-                for x in range(0, composite_idx_offset):
+
+                if composite_idx_offset > 0:
+                    composite_token_offset += composite_idx_offset - 1
+
+                for x in range(0, composite_tokens_processed):
                     if len(original_tokens) > 0:
                         original_tokens.popleft()
 
-            # Pop the left-most token off the list
+            # Handle normal word tokens
             else:
                 if len(original_tokens) > 0:
+                    # Pop the left-most token off the list
                     current_original_token = original_tokens.popleft()
-
-                    # Check for repeated tokens
-                    is_repeat_token = False
-                    if current_original_token == previous_original_token:
-                        is_repeat_token = True
-
-                    if is_repeat_token:
-                        word_idx_offset += 1
 
                     # If there are no processed tokens left to deal with, skip this step (handles designations, etc.)
                     # We don't need to increment the word_idx_offset anymore unless there's a repeated token
                     if len(processed_tokens) > 0:
-                        if current_original_token not in name_tokens:
+                        if current_original_token not in name_tokens or current_original_token in all_designations:
                             word_idx_offset += 1
                             continue
 
+            # Check for repeated tokens
+            if current_original_token == previous_original_token:
+                word_idx_offset += 1
+
             if previous_original_token != current_original_token and len(processed_tokens) > 0:
                 processed_tokens.popleft()
+
+            # We only need to update the index for whatever word we are
+            if current_original_token == target_word:
+                original_tokens.clear()  # Clear the rest of the items to break out of the loop, we're done!
 
             previous_original_token = current_original_token
 
         offset_idx = word_idx + word_idx_offset + composite_token_offset
 
-        return offset_idx
+        print('Adjusted word index for word [' + target_word + '] from [' + str(word_idx) + '] -> [' + str(offset_idx) + ']')
+
+        return offset_idx, word_idx, word_idx_offset, composite_token_offset
 
 
 class CheckIsValid(AnalysisResponseIssue):
@@ -252,7 +285,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         list_none = procedure_result.values['list_none']
 
         issue = NameAnalysisIssue(
@@ -272,13 +305,18 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         #  If there's a duplicate of an unclassified word, just grabbing the index won't do!
         issue.name_actions = []
         for word in list_none:
-            none_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+                self.analysis_response.name_as_submitted,
+                self.analysis_response.name_original_tokens,
+                self.analysis_response.name_tokens,
+                list_name.index(word)
+            )
 
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
                     word=word,
-                    index=none_word_idx
+                    index=offset_idx
                 )
             )
 
@@ -315,7 +353,7 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
         )
 
         # list_original = procedure_result.values['list_original']
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
 
         issue.name_actions = [
             NameAction(
@@ -346,7 +384,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
 
     def create_issue(self, procedure_result):
         # list_original = procedure_result.values['list_original']
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         list_dist = procedure_result.values['list_dist']
 
         issue = NameAnalysisIssue(
@@ -366,7 +404,12 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
         # TODO: Why was this like this before?
         # dist_word_idx = list_name.index(last_dist_word) # if list_dist.__len__() > 0 else 0
         dist_word_idx = list_name.index(last_dist_word) if list_dist.__len__() > 0 else 0
-        dist_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, dist_word_idx)
+        offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+            self.analysis_response.name_as_submitted,
+            self.analysis_response.name_original_tokens,
+            self.analysis_response.name_tokens,
+            dist_word_idx
+        )
 
         issue.name_actions = [
             NameAction(
@@ -374,7 +417,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
                 position=WordPositions.END,
                 message="Add a Descriptive Word Here",
                 word=last_dist_word,
-                index=dist_word_idx
+                index=offset_idx
             )
         ]
 
@@ -432,7 +475,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         list_avoid = procedure_result.values['list_avoid']
 
         issue = NameAnalysisIssue(
@@ -451,13 +494,18 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
         for word in list_avoid:
-            avoid_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+                self.analysis_response.name_as_submitted,
+                self.analysis_response.name_original_tokens,
+                self.analysis_response.name_tokens, 
+                list_name.index(word)
+            )
 
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.STRIKE,
                     word=word,
-                    index=avoid_word_idx
+                    index=offset_idx
                 )
             )
 
@@ -485,7 +533,7 @@ class WordSpecialUse(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         list_special = procedure_result.values['list_special']
 
         issue = NameAnalysisIssue(
@@ -504,13 +552,18 @@ class WordSpecialUse(AnalysisResponseIssue):
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
         for word in list_special:
-            list_special_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+                self.analysis_response.name_as_submitted,
+                self.analysis_response.name_original_tokens,
+                self.analysis_response.name_tokens, 
+                list_name.index(word)
+            )
 
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
                     word=word,
-                    index=list_special_idx
+                    index=offset_idx
                 )
             )
 
@@ -532,7 +585,7 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         list_consent = procedure_result.values['list_consent']
 
         issue = NameAnalysisIssue(
@@ -553,13 +606,18 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
         issue.name_actions = []
         for word in list_consent:
-            consent_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+                self.analysis_response.name_as_submitted,
+                self.analysis_response.name_original_tokens,
+                self.analysis_response.name_tokens, 
+                list_name.index(word)
+            )
 
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
                     word=word,
-                    index=consent_word_idx
+                    index=offset_idx
                 )
             )
 
@@ -587,7 +645,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         list_dist = procedure_result.values['list_dist']
         list_desc = procedure_result.values['list_desc']
         list_conflicts = procedure_result.values['list_conflicts']
@@ -633,40 +691,57 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         if is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
             for word in list_name:
-                name_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+                offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+                    self.analysis_response.name_as_submitted,
+                    self.analysis_response.name_original_tokens,
+                    self.analysis_response.name_tokens,
+                    list_name.index(word)
+                )
 
-                # Highlight the descriptives
-                # <class 'list'>: ['mountain', 'view']
-                if word in list_dist_words:
-                    issue.name_actions.append(NameAction(
-                        word=word,
-                        index=name_word_idx,
-                        type=NameActions.HIGHLIGHT
-                    ))
+                # Highlight the conflict words
+                issue.name_actions.append(NameAction(
+                    word=word,
+                    index=offset_idx,
+                    endIndex=offset_idx,
+                    type=NameActions.HIGHLIGHT
+                ))
 
-                # Strike out the last descriptive word
-                if word in list_desc_words and name_word_idx == list_name.__len__() - 1:
-                    # <class 'list'>: ['growers', 'view']
+                # Strike out the last matching word
+                if list_name.index(word) == list_name.index(list_name[-1]):
                     list_remove.append(word)
                     issue.name_actions.append(NameAction(
                         word=word,
-                        index=name_word_idx,
+                        index=offset_idx,
+                        endIndex=offset_idx,
                         type=NameActions.STRIKE
                     ))
 
         if not is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
             for word in list_name:
-                name_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+                offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+                    self.analysis_response.name_as_submitted,
+                    self.analysis_response.name_original_tokens,
+                    self.analysis_response.name_tokens, 
+                    list_name.index(word)
+                )
 
-                # Highlight the descriptives
-                # <class 'list'>: ['mountain', 'view']
-                if word in list_dist_words:
-                    issue.name_actions.append(NameAction(
-                        word=word,
-                        index=name_word_idx,
-                        type=NameActions.HIGHLIGHT
-                    ))
+                if composite_token_offset and composite_token_offset > 0:
+                    # Highlight the descriptives
+                    # <class 'list'>: ['mountain', 'view']
+                    if word in current_conflict_keys:
+                        issue.name_actions.append(NameAction(
+                            word=word,
+                            index=offset_idx,
+                            type=NameActions.HIGHLIGHT
+                        ))
+                else:
+                    if word in current_conflict_keys:
+                        issue.name_actions.append(NameAction(
+                            word=word,
+                            index=offset_idx,
+                            type=NameActions.HIGHLIGHT
+                        ))
 
                 # Strike out the last descriptive word
                 '''
@@ -712,7 +787,7 @@ class DesignationNonExistentIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         correct_designations = procedure_result.values['correct_designations']
 
         issue = NameAnalysisIssue(
@@ -750,7 +825,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         incorrect_designations = procedure_result.values['incorrect_designations']
         correct_designations = procedure_result.values['correct_designations']
         # TODO: Implement the misplaced designations cases!
@@ -780,14 +855,19 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_lc:
-            name_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+                self.analysis_response.name_as_submitted,
+                self.analysis_response.name_original_tokens,
+                self.analysis_response.name_tokens, 
+                list_name.index(word)
+            )
 
             # Highlight the descriptives
             # <class 'list'>: ['mountain', 'view']
             if word in incorrect_designations_lc:
                 issue.name_actions.append(NameAction(
                     word=word,
-                    index=name_word_idx,
+                    index=offset_idx,
                     type=NameActions.HIGHLIGHT
                 ))
 
@@ -815,7 +895,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         misplaced_any_designation = procedure_result.values['misplaced_any_designation']
         misplaced_end_designation = procedure_result.values['misplaced_end_designation']
         misplaced_all_designation = procedure_result.values['misplaced_all_designation']
@@ -840,14 +920,19 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_lc:
-            name_word_idx = self.adjust_word_index(self.analysis_response.name_original_tokens, self.analysis_response.name_tokens, list_name.index(word))
+            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+                self.analysis_response.name_as_submitted,
+                self.analysis_response.name_original_tokens, 
+                self.analysis_response.name_tokens, 
+                list_name.index(word)
+            )
 
             # Highlight the descriptives
             # <class 'list'>: ['mountain', 'view']
             if word in misplaced_all_designation_lc:
                 issue.name_actions.append(NameAction(
                     word=word,
-                    index=name_word_idx,
+                    index=offset_idx,
                     type=NameActions.HIGHLIGHT
                 ))
 
