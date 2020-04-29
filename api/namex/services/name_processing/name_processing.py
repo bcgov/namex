@@ -119,12 +119,14 @@ class NameProcessingService(GetSynonymListsMixin):
     def set_name(self, name):
         syn_svc = SynonymService()
         self.name_as_submitted = name  # Store the user's submitted name string
+
         self._prefixes = syn_svc.get_prefixes().data
         prefixes = '|'.join(self._prefixes)
         name = syn_svc.get_regex_prefixes(
             text=name,
-            prefixes=prefixes
+            prefixes_str=prefixes
         ).data
+
         self.name_first_part = remove_french(name)
         self.name_original_tokens = name.lower().split()
         self._process_name()
@@ -144,10 +146,11 @@ class NameProcessingService(GetSynonymListsMixin):
         vwc_svc = self.virtual_word_condition_service
 
         words = remove_stop_words(self.name_original_tokens, stop_words)
+
         prefixes = '|'.join(prefix_list)
         words = syn_svc.get_regex_prefixes(
             text=words,
-            prefixes=prefixes
+            prefixes_str=prefixes
         ).data
         words = remove_french(words)
 
@@ -198,7 +201,6 @@ class NameProcessingService(GetSynonymListsMixin):
 
         self._designated_all_words = list(set(self._designated_any_words + self._designated_end_words))
         self._designated_all_words.sort(key=len, reverse=True)
-
 
     '''
     Split a name string into classifiable tokens. Called whenever set_name is invoked.
