@@ -206,7 +206,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_prefixes(cls, text, prefixes):
-        text = re.sub(r'\b({})([ &/.-])([A-Za-z]+)'.format(prefixes),
+        text = re.sub(r'\b({0})([ &/.-])([A-Za-z]+)'.format(prefixes),
                       r'\1\3',
                       text,
                       0,
