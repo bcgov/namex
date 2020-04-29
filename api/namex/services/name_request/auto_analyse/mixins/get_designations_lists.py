@@ -18,6 +18,9 @@ class GetDesignationsListsMixin(object):
     _fr_designation_any_list_correct = []
     _fr_designation_end_list_correct = []
 
+    _eng_designation_all_list_correct = []
+    _fr_designation_all_list_correct = []
+
     _all_designations_user = []
     _all_designations_user_no_periods = []
 

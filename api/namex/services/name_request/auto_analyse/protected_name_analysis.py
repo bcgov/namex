@@ -171,11 +171,15 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # self._set_misplaced_designation_in_input_name()
 
         # Set all designations based on entity type typed by user,'CR' by default
-        self._designation_any_list_correct = self._eng_designation_any_list_correct + self._fr_designation_any_list_correct
-        self._designation_end_list_correct = self._eng_designation_end_list_correct + self._fr_designation_end_list_correct
+        #self._designation_any_list_correct = self._eng_designation_any_list_correct + self._fr_designation_any_list_correct
+        #self._designation_end_list_correct = self._eng_designation_end_list_correct + self._fr_designation_end_list_correct
 
-        self._all_designations_user = self._designation_any_list_correct + self._designation_end_list_correct
-        self._all_designations_user.sort(key=len, reverse=True)
+        self._eng_designation_all_list_correct = self._eng_designation_any_list_correct + self._eng_designation_end_list_correct
+        self._eng_designation_all_list_correct.sort(key=len, reverse=True)
+        self._fr_designation_all_list_correct = self._fr_designation_any_list_correct + self._fr_designation_end_list_correct
+        self._fr_designation_all_list_correct.sort(key=len, reverse=True)
+
+        self._all_designations_user = self._eng_designation_all_list_correct + self._fr_designation_all_list_correct
 
         self._all_designations_user_no_periods = remove_periods_designation(self._all_designations_user)
         self._all_designations_user_no_periods.sort(key=len, reverse=True)
