@@ -707,8 +707,8 @@ class _RegexPrefixes(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
-    @api.response(200, 'SynonymsApi', response_list)
-    @marshal_with(response_list)
+    @api.response(200, 'SynonymsApi', response_string)
+    @marshal_with(response_string)
     @api.doc(params={
         'text': '',
         'prefix_list': ''
@@ -721,8 +721,8 @@ class _RegexPrefixes(Resource):
             return
 
         service = SynonymService()
-        results = service.regex_prefixes(text, prefix_list)
+        result = service.regex_prefixes(text, prefix_list)
 
         return {
-            'data': results
+            'data': result
         }
