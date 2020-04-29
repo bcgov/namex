@@ -120,9 +120,10 @@ class NameProcessingService(GetSynonymListsMixin):
         syn_svc = SynonymService()
         self.name_as_submitted = name  # Store the user's submitted name string
         self._prefixes = syn_svc.get_prefixes().data
+        prefixes = '|'.join(self._prefixes)
         name = syn_svc.get_regex_prefixes(
             text=name,
-            prefix_list=self._prefixes
+            prefixes=prefixes
         ).data
         self.name_first_part = remove_french(name)
         self.name_original_tokens = name.lower().split()
@@ -143,9 +144,10 @@ class NameProcessingService(GetSynonymListsMixin):
         vwc_svc = self.virtual_word_condition_service
 
         words = remove_stop_words(self.name_original_tokens, stop_words)
+        prefixes = '|'.join(prefix_list)
         words = syn_svc.get_regex_prefixes(
             text=words,
-            prefix_list=prefix_list
+            prefixes=prefixes
         ).data
         words = remove_french(words)
 

@@ -711,17 +711,17 @@ class _RegexPrefixes(Resource):
     @marshal_with(response_string)
     @api.doc(params={
         'text': '',
-        'prefix_list': ''
+        'prefixes_str': ''
     })
     def get():
         text = unquote_plus(request.args.get('text'))
-        prefix_list = literal_eval(request.args.get('prefix_list'))
+        prefixes_str = unquote_plus(request.args.get('prefixes_str'))
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        result = service.regex_prefixes(text, prefix_list)
+        result = service.regex_prefixes(text, prefixes_str)
 
         return {
             'data': result
