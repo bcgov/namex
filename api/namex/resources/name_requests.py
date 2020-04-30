@@ -283,7 +283,7 @@ class NameRequest(Resource):
             submitted_name.decision_text = decision_text
             name_request.names.append(submitted_name)
 
-        name_request.names.append(submitted_name)
+
         name_request.save_to_db()
         #TODO: Need to add verification that the save was successful.
 
