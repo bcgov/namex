@@ -134,7 +134,7 @@ class AnalysisResponseIssue:
 
         return False, 0, 0, current_processed_token
 
-    def adjust_word_index(self, original_name_str, name_original_tokens, name_tokens, word_idx):
+    def adjust_word_index(self, original_name_str, name_original_tokens, name_tokens, word_idx, offset_designations=True):
         all_designations = self.analysis_response.analysis_service.get_all_designations()
         # all_designations_user = self.analysis_response.analysis_service.get_all_designations_user()
 
@@ -179,9 +179,14 @@ class AnalysisResponseIssue:
                     # If there are no processed tokens left to deal with, skip this step (handles designations, etc.)
                     # We don't need to increment the word_idx_offset anymore unless there's a repeated token
                     if len(processed_tokens) > 0:
-                        if current_original_token not in name_tokens or current_original_token in all_designations:
-                            word_idx_offset += 1
-                            continue
+                        if offset_designations:
+                            if current_original_token not in name_tokens or current_original_token in all_designations:
+                                word_idx_offset += 1
+                                continue
+                        else:
+                            if current_original_token not in name_tokens:
+                                word_idx_offset += 1
+                                continue
 
             # Check for repeated tokens
             if current_original_token == previous_original_token:
@@ -835,18 +840,14 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
+        list_name = self.analysis_response.name_tokens
+        list_name_incl_designation = self.analysis_response.name_original_tokens
+
         incorrect_designations = procedure_result.values['incorrect_designations']
         correct_designations = procedure_result.values['correct_designations']
-        # TODO: Implement the misplaced designations cases!
-        # TODO: I think we can remove this, misplaced has been moved out into its own procedure!
-        # misplaced_any_designation = procedure_result.values['misplaced_any_designation']
-        # misplaced_end_designation = procedure_result.values['misplaced_end_designation']
 
-        # TODO: If case comes back in upper case for the incorrect designations we won't have a match...
-        # Convert all strings to lower-case before comparing
         incorrect_designations_lc = list(map(lambda d: d.lower() if isinstance(d, str) else '', incorrect_designations))
-        list_name_lc = list(map(lambda d: d.lower(), list_name))
+        list_name_incl_designation_lc = list(map(lambda d: d.lower(), list_name_incl_designation))
 
         entity_type_description = get_entity_type_description(self.entity_type)
 
@@ -864,16 +865,16 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         )
 
         # Loop over the list_name words, we need to decide to do with each word
-        for word in list_name_lc:
+        for word in list_name_incl_designation_lc:
             offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
                 self.analysis_response.name_as_submitted,
                 self.analysis_response.name_original_tokens,
-                self.analysis_response.name_tokens, 
-                list_name.index(word)
+                list_name_incl_designation_lc,
+                list_name_incl_designation.index(word),
+                False
             )
 
-            # Highlight the descriptives
-            # <class 'list'>: ['mountain', 'view']
+            # Highlight the issues
             if word in incorrect_designations_lc:
                 issue.name_actions.append(NameAction(
                     word=word,
@@ -905,13 +906,15 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        misplaced_any_designation = procedure_result.values['misplaced_any_designation']
+        # list_name = self.analysis_response.name_tokens
+        list_name_incl_designation = self.analysis_response.name_original_tokens
+
+        # misplaced_any_designation = procedure_result.values['misplaced_any_designation']
         misplaced_end_designation = procedure_result.values['misplaced_end_designation']
         misplaced_all_designation = procedure_result.values['misplaced_all_designation']
 
-        list_name_lc = list(map(lambda d: d.lower(), list_name))
         misplaced_all_designation_lc = list(map(lambda d: d.lower() if isinstance(d, str) else '', misplaced_all_designation))
+        list_name_incl_designation_lc = list(map(lambda d: d.lower(), list_name_incl_designation))
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -929,16 +932,16 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
 
 
         # Loop over the list_name words, we need to decide to do with each word
-        for word in list_name_lc:
+        for word in list_name_incl_designation_lc:
             offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
                 self.analysis_response.name_as_submitted,
-                self.analysis_response.name_original_tokens, 
-                self.analysis_response.name_tokens, 
-                list_name.index(word)
+                self.analysis_response.name_original_tokens,
+                list_name_incl_designation_lc,
+                list_name_incl_designation.index(word),
+                False
             )
 
-            # Highlight the descriptives
-            # <class 'list'>: ['mountain', 'view']
+            # Highlight the issues
             if word in misplaced_all_designation_lc:
                 issue.name_actions.append(NameAction(
                     word=word,
