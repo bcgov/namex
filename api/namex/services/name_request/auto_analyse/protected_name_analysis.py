@@ -123,10 +123,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # entity_any_designation_dict = self._entity_any_designation_dict
         designation_any_list = self._designation_any_list
 
-        all_end_designations = syn_svc.get_all_end_designations().data
+        all_any_designations = syn_svc.get_all_any_designations().data
 
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
-            entity_any_designation_dict=parse_dict_of_lists(all_end_designations),
+            entity_any_designation_dict=parse_dict_of_lists(all_any_designations),
             all_designation_any_end_list=designation_any_list
         ).data
 
@@ -139,10 +139,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # entity_end_designation_dict = self._entity_end_designation_dict
         designation_end_list = self._designation_end_list
 
-        all_any_designations = syn_svc.get_all_any_designations().data
+        all_end_designations = syn_svc.get_all_end_designations().data
 
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
-            entity_end_designation_dict=parse_dict_of_lists(all_any_designations),
+            entity_end_designation_dict=parse_dict_of_lists(all_end_designations),
             all_designation_any_end_list=designation_end_list
         ).data
 
@@ -169,11 +169,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # self._set_misplaced_designation_in_input_name()
 
         # Set all designations based on entity type typed by user,'CR' by default
-        self._eng_designation_all_list_correct = self._eng_designation_any_list_correct + self._eng_designation_end_list_correct
-        self._eng_designation_all_list_correct.sort(key=len, reverse=True)
-        self._fr_designation_all_list_correct = self._fr_designation_any_list_correct + self._fr_designation_end_list_correct
-        self._fr_designation_all_list_correct.sort(key=len, reverse=True)
-
         self._all_designations_user = self._eng_designation_all_list_correct + self._fr_designation_all_list_correct
 
         self._all_designations_user_no_periods = remove_periods_designation(self._all_designations_user)
