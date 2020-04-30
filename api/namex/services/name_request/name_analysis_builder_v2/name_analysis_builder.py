@@ -163,6 +163,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result = ProcedureResult()
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
+
+            list_name = [x.upper() for x in list_name]
+            unclassified_words_list_response = [x.upper() for x in unclassified_words_list_response]
+
             result.values = {
                 'list_name': list_name or [],
                 'list_none': unclassified_words_list_response
@@ -326,6 +330,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if words_consent_list_response:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.NAME_REQUIRES_CONSENT
+
+            list_name = [x.upper() for x in list_name]
+            words_consent_list_response = [x.upper() for x in words_consent_list_response]
+
             result.values = {
                 'list_name': list_name,
                 'list_consent': words_consent_list_response

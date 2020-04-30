@@ -26,7 +26,7 @@ class AnalysisResponseIssue:
     '''
     def __init__(self, analysis_response, setup_config):
         self.analysis_response = analysis_response
-        self.name_tokens = analysis_response
+        self.name_tokens = analysis_response.name_tokens
         self.entity_type = analysis_response.entity_type
         self.setup_config = []
         self.set_issue_setups(setup_config)

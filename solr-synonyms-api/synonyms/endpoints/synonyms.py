@@ -658,14 +658,14 @@ class _TransformText(Resource):
     @api.doc(params={
         'text': '',
         'designation_all': '',
-        # TODO: Deprecate prefix_list
-        'prefix_list': '',  # Deprecate first we don't want to break anything, don't delete this yet!
+        'prefix_list': '',
         'number_list': '',
         'exceptions_ws': '',
     })
     def get():
         text = unquote_plus(request.args.get('text'))
         designation_all = literal_eval(request.args.get('designation_all'))
+        prefix_list = literal_eval(request.args.get('prefix_list'))
         number_list = literal_eval(request.args.get('number_list'))
         exceptions_ws = literal_eval(request.args.get('exceptions_ws')) if request.args.get('exceptions_ws') else []
 
@@ -673,7 +673,34 @@ class _TransformText(Resource):
             return
 
         service = SynonymService()
-        result = service.regex_transform(text, designation_all, number_list, exceptions_ws)
+        result = service.regex_transform(text, designation_all, prefix_list, number_list, exceptions_ws)
+
+        return {
+            'data': result
+        }
+
+
+@api.route('/regex-prefixes', strict_slashes=False, methods=['GET'])
+class _RegexPrefixes(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    # @api.expect()
+    @api.response(200, 'SynonymsApi', response_string)
+    @marshal_with(response_string)
+    @api.doc(params={
+        'text': '',
+        'prefixes_str': ''
+    })
+    def get():
+        text = unquote_plus(request.args.get('text'))
+        prefixes_str = unquote_plus(request.args.get('prefixes_str'))
+
+        if not validate_request(request.args):
+            return
+
+        service = SynonymService()
+        result = service.regex_prefixes(text, prefixes_str)
 
         return {
             'data': result

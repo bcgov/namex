@@ -12,10 +12,10 @@ from .. import DesignationPositionCodes, LanguageCodes
 
 class SynonymDesignationMixin(SynonymServiceMixin):
     def get_designated_end_all_words(self):
-        return self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
+        return self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG.value)
 
     def get_designated_any_all_words(self):
-        return self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG)
+        return self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG.value)
 
     def get_misplaced_end_designations(self, name, designation_end_entity_type):
         # en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
@@ -64,12 +64,18 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     '''
 
     def get_designation_end_in_name(self, name):
-        en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
-        designation_end_rgx = '(' + '|'.join(map(str, en_designation_end_all_list)) + ')'
+        eng_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END,
+                                                             LanguageCodes.ENG.value)
+        fr_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END,
+                                                            LanguageCodes.FR.value)
+
+        designation_end_all_list = eng_designation_end_all_list + fr_designation_end_all_list
+        designation_end_all_list.sort(key=len, reverse=True)
+        designation_end_rgx = '(' + '|'.join(map(str, designation_end_all_list)) + ')'
         designation_end_regex = r'{0}(?=(\s{0})*$)'.format(designation_end_rgx)
 
         # Returns list of tuples
-        designation_end_list = re.findall(designation_end_regex, name.lower())
+        designation_end_list = [x for d in re.findall(designation_end_regex, name.lower()) for x in d if x]
 
         return designation_end_list
 
@@ -96,8 +102,15 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     '''
 
     def get_designation_any_in_name(self, name):
-        en_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG)
-        designation_any_rgx = '(' + '|'.join(map(str, en_designation_any_all_list)) + ')'
+        eng_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY,
+                                                             LanguageCodes.ENG.value)
+        fr_designation_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY,
+                                                            LanguageCodes.FR.value)
+
+        designation_any_all_list = eng_designation_any_all_list + fr_designation_any_all_list
+        designation_any_all_list.sort(key=len, reverse=True)
+
+        designation_any_rgx = '(' + '|'.join(map(str, designation_any_all_list)) + ')'
         designation_any_regex = r'(?<!\w)({0})(?!\w)(?=\s|$)'.format(designation_any_rgx)
 
         # Returns list of tuples
@@ -110,11 +123,20 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         '''
 
     def get_designation_all_in_name(self, name):
-        all_designations_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
-        all_designations_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG)
+        eng_all_designations_end_all_list = self.get_designations(None, DesignationPositionCodes.END,
+                                                                  LanguageCodes.ENG.value)
+        eng_all_designations_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY,
+                                                                  LanguageCodes.ENG.value)
+
+        fr_all_designations_end_all_list = self.get_designations(None, DesignationPositionCodes.END,
+                                                                 LanguageCodes.FR.value)
+        fr_all_designations_any_all_list = self.get_designations(None, DesignationPositionCodes.ANY,
+                                                                 LanguageCodes.FR.value)
+
+        all_designations_end_all_list = eng_all_designations_end_all_list + fr_all_designations_end_all_list
+        all_designations_any_all_list = eng_all_designations_any_all_list + fr_all_designations_any_all_list
 
         all_designations = list(set(all_designations_end_all_list + all_designations_any_all_list))
-
         all_designations.sort(key=len, reverse=True)
 
         all_designations_rgx = '|'.join(map(str, all_designations))
@@ -141,6 +163,15 @@ class SynonymDesignationMixin(SynonymServiceMixin):
                 DesignationPositionCodes.END,
                 LanguageCodes.ENG
             )
+            eng_designation_end = self.get_designations(entity_type.value, DesignationPositionCodes.END,
+                                                        LanguageCodes.ENG.value)
+            fr_designation_end = self.get_designations(entity_type.value, DesignationPositionCodes.END,
+                                                       LanguageCodes.FR.value)
+
+            designation_end = eng_designation_end + fr_designation_end
+            designation_end.sort(key=len, reverse=True)
+
+            entity_end_designation_dict[entity_type.value] = designation_end
 
         return entity_end_designation_dict
 
@@ -151,11 +182,14 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         entity_any_designation_dict = {}
 
         for entity_type in entity_types:
-            entity_any_designation_dict[entity_type.value] = self.get_designations(
-                entity_type,
-                DesignationPositionCodes.ANY,
-                LanguageCodes.ENG
-            )
+            eng_designation_any = self.get_designations(entity_type, DesignationPositionCodes.ANY,
+                                                        LanguageCodes.ENG.value)
+            fr_designation_any = self.get_designations(entity_type, DesignationPositionCodes.ANY,
+                                                       LanguageCodes.FR.value)
+            designation_any = eng_designation_any + fr_designation_any
+            designation_any.sort(key=len, reverse=True)
+
+            entity_any_designation_dict[entity_type.value] = designation_any
 
         return entity_any_designation_dict
 
