@@ -586,7 +586,9 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
     def create_issue(self, procedure_result):
         list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
+        # TODO: Arturo this list was coming in before as lower case...
         list_consent = procedure_result.values['list_consent']
+        list_consent = [item.lower() for item in list_consent]
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -610,7 +612,7 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
                 self.analysis_response.name_as_submitted,
                 self.analysis_response.name_original_tokens,
                 self.analysis_response.name_tokens, 
-                list_name.index(word)
+                list_name.index(word.lower())
             )
 
             issue.name_actions.append(
