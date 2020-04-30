@@ -60,18 +60,15 @@ def create_expiry_date(start: datetime, expires_in_days: int, expiry_hour: int =
         return date
 
 def create_solr_doc(nrNum, name,submit_date):
-    nr_doc = [{ "id": nrNum ,
-               "name": name,
-               "source": "NR",
-               "start_date": submit_date.strftime("%Y-%m-%dT%H:%M:00Z")
-                 }]
+    nr_doc = {"id": nrNum , "name": name, "source": "NR", "start_date": submit_date.strftime("%Y-%m-%dT%H:%M:00Z")}
+
     return nr_doc
 
 
-def update_solr(core, nr_doc):
+def update_solr(core, nr_doc_json):
     SOLR_URL = os.getenv('SOLR_BASE_URL')
     solr = pysolr.Solr(SOLR_URL+'/solr/'+core+'/', timeout=10)
-    solr.add(nr_doc)
+    solr.add(nr_doc_json)
 
 def get_request_sequence():
     seq = db.Sequence('requests_id_seq')
@@ -304,8 +301,7 @@ class NameRequest(Resource):
 
         if(json_data['stateCd'] in ['RESERVED', 'COND-RESERVE']):
             nr_doc = create_solr_doc(name_request.nrNum,submitted_name.name,name_request.submittedDate)
-            nr_doc_json = json.dumps(nr_doc)
-            update_solr('possible.conflicts',nr_doc_json)
+            update_solr('possible.conflicts',nr_doc)
 
         current_app.logger.debug(name_request.json())
         return jsonify(name_request.json()), 200
