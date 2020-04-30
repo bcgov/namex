@@ -220,10 +220,7 @@ class NameProcessingService(GetSynonymListsMixin):
                 # These properties are mixed in via GetSynonymListsMixin
                 # See the class constructor
                 self._stop_words,
-                # self._designated_any_words,
-                # self._designated_end_words,
                 self._designated_all_words,
-                # self._fr_designation_end_list,
                 self._prefixes,
                 self._number_words
             )
