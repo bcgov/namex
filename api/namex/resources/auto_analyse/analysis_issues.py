@@ -31,6 +31,15 @@ class AnalysisResponseIssue:
         self.setup_config = []
         self.set_issue_setups(setup_config)
 
+    # TODO: Maybe move this to utils? Do as part of code clean up and refactor task
+    @classmethod
+    def _lc_list_items(cls, str_list, convert=False):
+        if not str_list or type(str_list) is not list:
+            return []  # This method should always return a list
+
+        return list(map(lambda d: d.lower() if isinstance(d, str) else '')) \
+            if convert else list(map(lambda d: d.lower(), str_list))
+
     def create_issue(self, procedure_result):
         return self.issue
 
@@ -290,8 +299,8 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        list_none = procedure_result.values['list_none']
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        list_none = self._lc_list_items(procedure_result.values['list_none'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -357,8 +366,7 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
-        # list_original = procedure_result.values['list_original']
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)
 
         issue.name_actions = [
             NameAction(
@@ -388,9 +396,8 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        # list_original = procedure_result.values['list_original']
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        list_dist = procedure_result.values['list_dist']
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        list_dist = self._lc_list_items(procedure_result.values['list_dist'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -480,8 +487,8 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        list_avoid = procedure_result.values['list_avoid']
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        list_avoid = self._lc_list_items(procedure_result.values['list_avoid'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -526,24 +533,18 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         return issue
 
 
-# TODO: Is this even a thing?
-'''
-@:deprecated
-'''
-
-
 class WordSpecialUse(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.WORD_SPECIAL_USE
     status_text = "Further Action Required"
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        list_special = procedure_result.values['list_special']
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        list_special = self._lc_list_items(procedure_result.values['list_special'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) "+ self._join_list_words(list_special) + " must go to examination ",
+            line1="The word(s) " + self._join_list_words(list_special) + " must go to examination ",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -591,9 +592,7 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
     def create_issue(self, procedure_result):
         list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        # TODO: Arturo this list was coming in before as lower case...
-        list_consent = procedure_result.values['list_consent']
-        list_consent = [item.lower() for item in list_consent]
+        list_consent = self._lc_list_items(procedure_result.values['list_consent'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -652,10 +651,10 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        list_dist = procedure_result.values['list_dist']
-        list_desc = procedure_result.values['list_desc']
-        list_conflicts = procedure_result.values['list_conflicts']
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        list_dist = self._lc_list_items(procedure_result.values['list_dist'])
+        list_desc = self._lc_list_items(procedure_result.values['list_desc'])
+        list_conflicts = procedure_result.values['list_conflicts']  # Don't lower case this one it's a dict
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -802,8 +801,8 @@ class DesignationNonExistentIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        correct_designations = procedure_result.values['correct_designations']
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        correct_designations = self._lc_list_items(procedure_result.values['correct_designations'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -846,8 +845,8 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         incorrect_designations = procedure_result.values['incorrect_designations']
         correct_designations = procedure_result.values['correct_designations']
 
-        incorrect_designations_lc = list(map(lambda d: d.lower() if isinstance(d, str) else '', incorrect_designations))
-        list_name_incl_designation_lc = list(map(lambda d: d.lower(), list_name_incl_designation))
+        incorrect_designations_lc = self._lc_list_items(incorrect_designations, True)
+        list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         entity_type_description = get_entity_type_description(self.entity_type)
 
@@ -906,15 +905,15 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        # list_name = self.analysis_response.name_tokens
         list_name_incl_designation = self.analysis_response.name_original_tokens
 
+        # TODO: This was in here but not handled, why?
         # misplaced_any_designation = procedure_result.values['misplaced_any_designation']
         misplaced_end_designation = procedure_result.values['misplaced_end_designation']
         misplaced_all_designation = procedure_result.values['misplaced_all_designation']
 
-        misplaced_all_designation_lc = list(map(lambda d: d.lower() if isinstance(d, str) else '', misplaced_all_designation))
-        list_name_incl_designation_lc = list(map(lambda d: d.lower(), list_name_incl_designation))
+        misplaced_all_designation_lc = self._lc_list_items(misplaced_all_designation, True)
+        list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
