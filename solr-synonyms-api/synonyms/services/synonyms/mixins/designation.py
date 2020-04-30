@@ -115,6 +115,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
         # Returns list of tuples
         found_designation_any = re.findall(designation_any_regex, name.lower())
+        found_designation_any = list(set([x for designation in found_designation_any for x in designation]))
 
         return found_designation_any
 
