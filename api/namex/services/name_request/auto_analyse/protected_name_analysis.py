@@ -96,25 +96,30 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.ANY.value,
                                                                           lang=LanguageCodes.ENG.value).data
-        self._eng_designation_any_list_correct.sort(key=len, reverse=True)
+        #self._eng_designation_any_list_correct.sort(key=len, reverse=True)
 
         self._eng_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.END.value,
                                                                           lang=LanguageCodes.ENG.value).data
-        self._eng_designation_end_list_correct.sort(key=len, reverse=True)
+        #self._eng_designation_end_list_correct.sort(key=len, reverse=True)
 
         self._fr_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                          position_code=DesignationPositionCodes.ANY.value,
                                                                          lang=LanguageCodes.FR.value).data
-        self._fr_designation_any_list_correct.sort(key=len, reverse=True)
+        #self._fr_designation_any_list_correct.sort(key=len, reverse=True)
 
         self._fr_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                          position_code=DesignationPositionCodes.END.value,
                                                                          lang=LanguageCodes.FR.value).data
-        self._fr_designation_end_list_correct.sort(key=len, reverse=True)
+        #self._fr_designation_end_list_correct.sort(key=len, reverse=True)
 
-        self._designation_any_list_correct = self._eng_designation_any_list_correct + self._fr_designation_any_list_correct
-        self._designation_end_list_correct = self._eng_designation_end_list_correct + self._fr_designation_end_list_correct
+        self._eng_designation_all_list_correct = self._eng_designation_any_list_correct + self._eng_designation_end_list_correct
+        self._eng_designation_all_list_correct.sort(key=len, reverse=True)
+        self._fr_designation_all_list_correct = self._fr_designation_any_list_correct + self._fr_designation_end_list_correct
+        self._fr_designation_all_list_correct.sort(key=len, reverse=True)
+
+        #self._designation_any_list_correct = self._eng_designation_any_list_correct + self._fr_designation_any_list_correct
+        #self._designation_end_list_correct = self._eng_designation_end_list_correct + self._fr_designation_end_list_correct
 
     '''
     Set the corresponding entity type for designations <any> found in name
