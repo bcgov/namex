@@ -29,19 +29,6 @@ from namex.constants import request_type_mapping, RequestAction, EntityTypes
 # Register a local namespace for the NR reserve
 api = Namespace('nameRequests', description='Public facing Name Requests')
 
-def validate_name_request(entity_type, request_action):
-
-    # Raise error if entity_type is invalid
-    if entity_type not in EntityTypes.list():
-        raise ValueError('Invalid request action provided')
-    else:
-        return True
-
-    # Raise error if request_action is invalid
-    if request_action not in RequestAction.list():
-        raise ValueError('Invalid request action provided')
-
-
 def set_request_type(entity_type, request_action):
     for item in request_type_mapping:
         if(item[1] == entity_type and item[2] == request_action):
@@ -59,16 +46,11 @@ def create_expiry_date(start: datetime, expires_in_days: int, expiry_hour: int =
 
         return date
 
-def create_solr_doc(nrNum, name,submit_date):
-    nr_doc = {"id": nrNum , "name": name, "source": "NR", "start_date": submit_date.strftime("%Y-%m-%dT%H:%M:00Z")}
 
-    return nr_doc
-
-
-def update_solr(core, nr_doc):
+def update_solr(core,solr_docs):
     SOLR_URL = os.getenv('SOLR_BASE_URL')
     solr = pysolr.Solr(SOLR_URL+'/solr/'+core+'/', timeout=10)
-    solr.add(nr_doc)
+    solr.add(solr_docs,commit=True)
 
 def get_request_sequence():
     seq = db.Sequence('requests_id_seq')
@@ -162,9 +144,6 @@ class NameRequest(Resource):
         if not json_data:
             return jsonify({'message': 'No input data provided'}), 400
 
-       # if not validate_name_request(json_data['entity_type'], json_data['request_action']):
-        #    return jsonify(message='Incorrect input data provided'), 400
-
         restricted = VirtualWordConditionService()
         user = User.find_by_username('name_request_service_account')
         user_id = user.id
@@ -215,77 +194,84 @@ class NameRequest(Resource):
         if(json_data['stateCd'] == 'DRAFT'):
             party_id = get_applicant_sequence()
             #TO-DO Review additional info stuff from NRO/namex (prev NR for re-applies,no NWPTA?
+
             name_request.natureBusinessInfo = json_data['natureBusinessInfo']
-            name_request.tradeMark = json_data['tradeMark']
-            name_request.previousRequestId = json_data['previousRequestId']
+            if json_data['natureBusinessInfo']:  name_request.natureBusinessInfo = json_data['natureBusinessInfo']
+
+            if json_data['additionalInfo']: name_request.additionalInfo = json_data['additionalInfo']
+            if json_data['tradeMark']:  name_request.tradeMark = json_data['tradeMark']
+            if json_data['previousRequestId']: name_request.previousRequestId = json_data['previousRequestId']
             name_request.priorityCd = json_data['priorityCd']
-            if json_data['priortyCd'] == 'Y':
+            if json_data['priorityCd'] == 'Y':
                     name_request.priorityDate = datetime.utcnow().date()
 
             name_request.submitter_userid = user_id
 
             # XPRO
-            name_request.xproJurisdiction = json_data['xproJurisdiction']
+            if json_data['xproJurisdiction']: name_request.xproJurisdiction = json_data['xproJurisdiction']
 
             # for MRAS participants
-            name_request.homeJurisNum = json_data['homeJurisNum']
+            if json_data['homeJurisNum']: name_request.homeJurisNum = json_data['homeJurisNum']
 
             #for existing businesses
-            name_request.corpNum  = json_data['corpNum']
+            if json_data['corpNum']: name_request.corpNum  = json_data['corpNum']
 
             #applicant, contact and address info
             for applicant in json_data.get('applicants', None):
                 name_request.applicants.nrId = nr_id
-                name_request.applicants.lastName = applicant.lastName
-                name_request.applicants.firstName = applicant.firstName
-                name_request.applicants.middleName = applicant.middleName
+                name_request.applicants.lastName = applicant['lastName']
+                name_request.applicants.firstName = applicant['firstName']
+                name_request.applicants.middleName = applicant['middleName']
                 name_request.applicants.partyId = party_id
-                name_request.applicants.contact = applicant.contact
-                name_request.applicants.clientFirstName = applicant.clientFirstName
-                name_request.applicants.clientLastName = applicant.clientLastName
+                name_request.applicants.contact = applicant['contact']
+                name_request.applicants.clientFirstName = applicant['clientFirstName']
+                name_request.applicants.clientLastName = applicant['clientLastName']
 
-                name_request.applicants.phoneNumber = applicant.phoneNumber
-                name_request.applicants.faxNumber = applicant.faxNumber
-                name_request.applicants.emailAddress = applicant.emailAddress
+                name_request.applicants.phoneNumber = applicant['phoneNumber']
+                name_request.applicants.faxNumber = applicant['faxNumber']
+                name_request.applicants.emailAddress = applicant['emailAddress']
 
-                name_request.applicants.addrLine1 = applicant.addrLine1
-                name_request.applicants.addrLine2 = applicant.addrLine2
-                name_request.applicants.city = applicant.city
-                name_request.applicants.stateProvinceCd = applicant.stateProvinceCd
-                name_request.applicants.postalCd = applicant.postalCd
-                name_request.applicants.countryTypeCd = applicant.countryTypeCd
+                name_request.applicants.addrLine1 = applicant['addrLine1']
+                name_request.applicants.addrLine2 = applicant['addrLine2']
+                name_request.applicants.city = applicant['city']
+                name_request.applicants.stateProvinceCd = applicant['stateProvinceCd']
+                name_request.applicants.postalCd = applicant['postalCd']
+                name_request.applicants.countryTypeCd = applicant['countryTypeCd']
 
 
          #follow the reserved path for auto-approved name (there will only be one name)
         for name in json_data.get('names', None):
-
-
+            #need to create a new obkect each time. for each name
             submitted_name.choice = name['choice']
             submitted_name.name = name['name']
 
-            if(name['name_type_cd'] == None):
-                submitted_name.name_type_cd = 'CO'
-            else:
+            if(name['name_type_cd']) :
                 submitted_name.name_type_cd = name['name_type_cd']
+            else:
+                submitted_name.name_type_cd = 'CO'
 
             if(json_data['stateCd']== State.DRAFT):
                 submitted_name.state = 'NE'
             else:
                 submitted_name.state = json_data['stateCd']
 
-            submitted_name.designation = name['designation']
+            if name['designation']: submitted_name.designation = name['designation']
             submitted_name.nrId = nr_id
 
+            decision_text = None
             #only capturing one conflict
-            if (name['conflict1_num'] != None):
+            if (name['conflict1_num']):
                 submitted_name.conflict1_num = name['conflict1_num']
-                submitted_name.conflict1 = name['conflict1']
-
+                if name['conflict1']: submitted_name.conflict1 = name['conflict1']
                 #conflict text same as Namex
                 decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
+            else:
+                submitted_name.conflict1_num=None
+                submitted_name.conflict1=None
+
 
             for consent in name['consent_words']:
-
+                cnd_instructions = None
                 cnd_instructions = restricted.get_word_condition_instructions(consent)
 
                 if(decision_text is None):
@@ -293,15 +279,20 @@ class NameRequest(Resource):
                 else:
                     decision_text +=  consent+'- '+ cnd_instructions + '\n'
 
+
+            submitted_name.decision_text = decision_text
             name_request.names.append(submitted_name)
 
         name_request.names.append(submitted_name)
         name_request.save_to_db()
         #TODO: Need to add verification that the save was successful.
 
+       #update solr for reservation
         if(json_data['stateCd'] in ['RESERVED', 'COND-RESERVE']):
             solr_docs=[]
-            nr_doc = create_solr_doc(name_request.nrNum,submitted_name.name,name_request.submittedDate)
+            nr_doc = {"id": name_request.nrNum, "name": submitted_name.name, "source": "NR",
+                      "start_date": name_request.submittedDate.strftime("%Y-%m-%dT%H:%M:00Z")}
+
             solr_docs.append(nr_doc)
             update_solr('possible.conflicts',solr_docs)
 
