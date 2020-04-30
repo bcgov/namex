@@ -171,14 +171,16 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     10.- Remove extra spaces to have just one space: \s+
     '''
 
-    def regex_transform(self, text, designation_all, number_list, exceptions_ws):
+    def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
         designation_all_regex = '|'.join(designation_all)
+        prefixes = '|'.join(prefix_list)
         numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
         stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
         internet_domains = '.COM|.ORG|.NET|.EDU'
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
+        text = self.regex_prefixes(text, prefixes)
         text = self.regex_numbers_lot(text)
         text = self.regex_repeated_strings(text)
         text = self.regex_separated_ordinals(text, ordinal_suffixes)
@@ -204,7 +206,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_prefixes(cls, text, prefixes):
-        text = re.sub(r'\b({})([ &/.-])([A-Za-z]+)'.format(prefixes),
+        text = re.sub(r'\b({0})([ &/.-])([A-Za-z]+)'.format(prefixes),
                       r'\1\3',
                       text,
                       0,
