@@ -701,12 +701,13 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                 )
 
                 # Highlight the conflict words
-                issue.name_actions.append(NameAction(
-                    word=word,
-                    index=offset_idx,
-                    endIndex=offset_idx,
-                    type=NameActions.HIGHLIGHT
-                ))
+                if list_name.index(word) != list_name.index(list_name[-1]):
+                    issue.name_actions.append(NameAction(
+                        word=word,
+                        index=offset_idx,
+                        endIndex=offset_idx,
+                        type=NameActions.HIGHLIGHT
+                    ))
 
                 # Strike out the last matching word
                 if list_name.index(word) == list_name.index(list_name[-1]):
@@ -728,33 +729,40 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                     list_name.index(word)
                 )
 
+                # This code has duplicate blocks because it allows us to tweak the response for composite token matches separately from normal words if necessary
                 if composite_token_offset and composite_token_offset > 0:
-                    # Highlight the descriptives
                     # <class 'list'>: ['mountain', 'view']
-                    if word in current_conflict_keys:
-                        issue.name_actions.append(NameAction(
-                            word=word,
-                            index=offset_idx,
-                            type=NameActions.HIGHLIGHT
-                        ))
-                else:
-                    if word in current_conflict_keys:
+                    # Highlight the conflict words
+                    if word in current_conflict_keys and current_conflict_keys.index(word) != current_conflict_keys.index(current_conflict_keys[-1]):
                         issue.name_actions.append(NameAction(
                             word=word,
                             index=offset_idx,
                             type=NameActions.HIGHLIGHT
                         ))
 
-                # Strike out the last descriptive word
-                '''
-                if word in list_desc_words and name_word_idx == list_name.__len__() - 1:
-                    # <class 'list'>: ['growers', 'view']
-                    issue.name_actions.append(NameAction(
-                        word=word,
-                        index=name_word_idx,
-                        type=NameActions.STRIKE
-                    ))
-                '''
+                    # Strike out the last matching word
+                    if word in current_conflict_keys and current_conflict_keys.index(word) == current_conflict_keys.index(current_conflict_keys[-1]):
+                        issue.name_actions.append(NameAction(
+                            word=word,
+                            index=offset_idx,
+                            type=NameActions.STRIKE
+                        ))
+                else:
+                    # Highlight the conflict words
+                    if word in current_conflict_keys and current_conflict_keys.index(word) != current_conflict_keys.index(current_conflict_keys[-1]):
+                        issue.name_actions.append(NameAction(
+                            word=word,
+                            index=offset_idx,
+                            type=NameActions.HIGHLIGHT
+                        ))
+
+                    # Strike out the last matching word
+                    if word in current_conflict_keys and current_conflict_keys.index(word) == current_conflict_keys.index(current_conflict_keys[-1]):
+                        issue.name_actions.append(NameAction(
+                            word=word,
+                            index=offset_idx,
+                            type=NameActions.STRIKE
+                        ))
 
         issue.conflicts = []
 
