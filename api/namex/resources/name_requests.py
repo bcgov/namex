@@ -300,8 +300,10 @@ class NameRequest(Resource):
         #TODO: Need to add verification that the save was successful.
 
         if(json_data['stateCd'] in ['RESERVED', 'COND-RESERVE']):
+            solr_docs=[]
             nr_doc = create_solr_doc(name_request.nrNum,submitted_name.name,name_request.submittedDate)
-            update_solr('possible.conflicts',nr_doc)
+            solr_docs.append(nr_doc)
+            update_solr('possible.conflicts',solr_docs)
 
         current_app.logger.debug(name_request.json())
         return jsonify(name_request.json()), 200
