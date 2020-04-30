@@ -13,6 +13,8 @@ from .response_objects.name_action import NameAction, NameActions, WordPositions
 from .response_objects.consenting_body import ConsentingBody
 from .response_objects.conflict import Conflict
 
+from namex.utils.common import remove_periods_designation
+
 
 class AnalysisResponseIssue:
     issue_type = "Issue"  # Maybe get rid of this guy
@@ -194,7 +196,18 @@ class AnalysisResponseIssue:
                     # We don't need to increment the word_idx_offset anymore unless there's a repeated token
                     if len(processed_tokens) > 0:
                         if offset_designations:
-                            if current_original_token not in name_tokens or current_original_token in all_designations:
+                            # Does the current word have any punctuation associated with?
+                            punctuation_char = ''
+                            if len(unprocessed_name_string) > 0 and len(original_tokens) > 0 and unprocessed_name_string[0] == original_tokens[0]:
+                                punctuation_char = original_tokens[0]
+
+                            token_is_designation = (current_original_token + punctuation_char) in all_designations
+                            if token_is_designation:
+                                original_tokens.popleft()
+                                unprocessed_name_string = unprocessed_name_string[1:].strip()
+
+                            # Skip designations
+                            if token_is_designation or current_original_token not in name_tokens:
                                 word_idx_offset += 1
                                 continue
                         else:
@@ -918,6 +931,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         misplaced_all_designation = procedure_result.values['misplaced_all_designation']
 
         misplaced_all_designation_lc = self._lc_list_items(misplaced_all_designation, True)
+        misplaced_all_designation_lc = misplaced_all_designation_lc + remove_periods_designation(misplaced_all_designation_lc)
         list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = NameAnalysisIssue(
