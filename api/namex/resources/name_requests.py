@@ -65,10 +65,10 @@ def create_solr_doc(nrNum, name,submit_date):
     return nr_doc
 
 
-def update_solr(core, nr_doc_json):
+def update_solr(core, nr_doc):
     SOLR_URL = os.getenv('SOLR_BASE_URL')
     solr = pysolr.Solr(SOLR_URL+'/solr/'+core+'/', timeout=10)
-    solr.add(nr_doc_json)
+    solr.add(nr_doc)
 
 def get_request_sequence():
     seq = db.Sequence('requests_id_seq')
