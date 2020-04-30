@@ -37,8 +37,13 @@ class AnalysisResponseIssue:
         if not str_list or type(str_list) is not list:
             return []  # This method should always return a list
 
-        return list(map(lambda d: d.lower() if isinstance(d, str) else '')) \
-            if convert else list(map(lambda d: d.lower(), str_list))
+        try:
+            converted_list = list(map(lambda d: d.lower() if isinstance(d, str) else '', str_list)) \
+                if convert else list(map(lambda d: d.lower(), str_list))
+        except Exception as err:
+            print('List is not a list of strings ' + repr(err))
+
+        return converted_list
 
     def create_issue(self, procedure_result):
         return self.issue
@@ -652,8 +657,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
     def create_issue(self, procedure_result):
         list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
-        list_dist = self._lc_list_items(procedure_result.values['list_dist'])
-        list_desc = self._lc_list_items(procedure_result.values['list_desc'])
+        list_dist = procedure_result.values['list_dist']  # Don't lower case this one it's a list wrapped list
+        list_desc = procedure_result.values['list_desc']  # Don't lower case this one it's a list wrapped list
         list_conflicts = procedure_result.values['list_conflicts']  # Don't lower case this one it's a dict
 
         issue = NameAnalysisIssue(
