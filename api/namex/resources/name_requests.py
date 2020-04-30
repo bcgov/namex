@@ -150,6 +150,7 @@ class NameRequest(Resource):
 
         name_request = Request()
         submitted_name = Name()
+
         nr_num = generate_nr()
         nr_id = get_request_sequence()
 
@@ -241,6 +242,7 @@ class NameRequest(Resource):
 
          #follow the reserved path for auto-approved name (there will only be one name)
         for name in json_data.get('names', None):
+
             #need to create a new obkect each time. for each name
             submitted_name.choice = name['choice']
             submitted_name.name = name['name']
@@ -248,7 +250,7 @@ class NameRequest(Resource):
             if(name['name_type_cd']) :
                 submitted_name.name_type_cd = name['name_type_cd']
             else:
-                submitted_name.name_type_cd = 'CO'
+                submitted_name.name_type_cd= 'CO'
 
             if(json_data['stateCd']== State.DRAFT):
                 submitted_name.state = 'NE'
@@ -282,7 +284,6 @@ class NameRequest(Resource):
 
             submitted_name.decision_text = decision_text
             name_request.names.append(submitted_name)
-
 
         name_request.save_to_db()
         #TODO: Need to add verification that the save was successful.
