@@ -22,6 +22,7 @@ from namex.services import EventRecorder
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
 
 
+
 from namex.constants import request_type_mapping, RequestAction, EntityTypes
 
 
@@ -58,12 +59,13 @@ def create_expiry_date(start: datetime, expires_in_days: int, expiry_hour: int =
 
         return date
 
-def create_solr_doc(name_request):
-    nr_doc = [{ 'id': name_request.nrNum ,
-               'name':  name_request.name,
-               'source': 'NR',
-               'start_date': name_request.submittedDate.strftime("%Y-%m-%dT%H:%M:00Z")
-         }]
+def create_solr_doc(nrNum, name,submit_date):
+    nr_doc = [{ "id": nrNum ,
+               "name": name,
+               "source": "NR",
+               "start_date": submit_date.strftime("%Y-%m-%dT%H:%M:00Z")
+                 }]
+    return nr_doc
 
 
 def update_solr(core, nr_doc):
@@ -166,7 +168,9 @@ class NameRequest(Resource):
        # if not validate_name_request(json_data['entity_type'], json_data['request_action']):
         #    return jsonify(message='Incorrect input data provided'), 400
 
-        user_id = User.find_by_username('name_request_service_account')
+        restricted = VirtualWordConditionService()
+        user = User.find_by_username('name_request_service_account')
+        user_id = user.id
 
         name_request = Request()
         submitted_name = Name()
@@ -188,41 +192,38 @@ class NameRequest(Resource):
         #set this to name_request_service_account
         name_request.userId = user_id
 
+        # add a comment fo tracking user selections
+        lang_comment = Comment()
+        lang_comment.examinerId = user_id
+        lang_comment.nrId = nr_id
+        if json_data['english'] == True:
+            # add a coment for the exmainer that say this is nota ENglihs Name
+            lang_comment.comment = 'The applicant has indicated the name(s) are in English.'
+        else:
+            lang_comment.comment = 'The appliant has indicated the name(s) are not English.'
+        name_request.comments.append(lang_comment)
+
+        if  json_data['nameFlag'] == True:
+            name_comment = Comment()
+            name_comment.comment = 'The name(s) is a person name, coined phrase or trademark'
+            name_comment.examinerId = user_id
+            name_comment.nrId = nr_id
+            name_request.comments.append(name_comment)
+
+        if json_data['submit_count'] is None:
+            name_request.submitCount = 1
+        else:
+            name_request.submitCount = + 1
+
         if(json_data['stateCd'] == 'DRAFT'):
-
             party_id = get_applicant_sequence()
-
-            #TO-DO Review additional info stuuf from namex (prev NR for re-applies,no NWPTA?
-
-            if json_data['english']== True:
-                #add a coment for the exmainer that say this is nota ENglihs Name
-                lang_comment = Comment()
-                lang_comment.comment = 'The name(s) are not English. Please examine with this in mind.'
-                lang_comment.examinerId = user_id
-                lang_comment.nrId = nr_id
-                name_request.comments.append(lang_comment)
-                name_request.additional_info = 'The name is English' + '\n' + json_data['additionalInfo']
-            else:
-                name_request.additional_info = 'The name is a foreign language' + '\n'+ json_data['additionalInfo']
-
-            if json_data['nameFlag'] == True:
-                name_comment = Comment()
-                name_comment.comment = 'The name(s) is a person name, coined phrase or trademark'
-                name_comment.examinerId = user_id
-                name_comment.nrId = nr_id
-                name_request.comments.append(name_comment)
-
+            #TO-DO Review additional info stuff from NRO/namex (prev NR for re-applies,no NWPTA?
             name_request.natureBusinessInfo = json_data['natureBusinessInfo']
             name_request.tradeMark = json_data['tradeMark']
             name_request.previousRequestId = json_data['previousRequestId']
             name_request.priorityCd = json_data['priorityCd']
             if json_data['priortyCd'] == 'Y':
                     name_request.priorityDate = datetime.utcnow().date()
-
-            if json_data['submit_count'] is None:
-                name_request.submitCount = 1
-            else:
-                name_request.submitCount = + 1
 
             name_request.submitter_userid = user_id
 
@@ -236,7 +237,7 @@ class NameRequest(Resource):
             name_request.corpNum  = json_data['corpNum']
 
             #applicant, contact and address info
-            for applicant in json_data['applicants']:
+            for applicant in json_data.get('applicants', None):
                 name_request.applicants.nrId = nr_id
                 name_request.applicants.lastName = applicant.lastName
                 name_request.applicants.firstName = applicant.firstName
@@ -258,41 +259,42 @@ class NameRequest(Resource):
                 name_request.applicants.countryTypeCd = applicant.countryTypeCd
 
 
-       #follow the reserved path for auto-approved name (there will only be one name)
-        for name in json_data['names']:
+         #follow the reserved path for auto-approved name (there will only be one name)
+        for name in json_data.get('names', None):
 
-            submitted_name.choice = name.choice
-            submitted_name.name = name.name
 
-            if(name.name_type_code == None):
-                submitted_name.name_type_code = 'CO'
+            submitted_name.choice = name['choice']
+            submitted_name.name = name['name']
+
+            if(name['name_type_cd'] == None):
+                submitted_name.name_type_cd = 'CO'
             else:
-                submitted_name.name_type_code = name.name_type_cd
+                submitted_name.name_type_cd = name['name_type_cd']
 
-            if(json_data['state']== State.DRAFT):
+            if(json_data['stateCd']== State.DRAFT):
                 submitted_name.state = 'NE'
             else:
-                submitted_name.state = json_data['state']
+                submitted_name.state = json_data['stateCd']
 
-            submitted_name.designation = name.designation
+            submitted_name.designation = name['designation']
             submitted_name.nrId = nr_id
 
             #only capturing one conflict
-            if (name.conflict1_num != None):
-                submitted_name.conflict1_num = name.conflict1_num
-                submitted_name.conflict1 = name.conflict1
+            if (name['conflict1_num'] != None):
+                submitted_name.conflict1_num = name['conflict1_num']
+                submitted_name.conflict1 = name['conflict1']
 
                 #conflict text same as Namex
-                decision_text = 'Consent is required from ' + name.conflict1 + '\n' + '\n'
+                decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
 
-            for consent in name.consent_words:
-                cnd_instructions = VirtualWordConditionService.get_word_condition_instructions(consent)
+            for consent in name['consent_words']:
+
+                cnd_instructions = restricted.get_word_condition_instructions(consent)
 
                 if(decision_text is None):
-                    decision_text = cnd_instructions
+                    decision_text = cnd_instructions + '\n'
                 else:
-                    decision_text += decision_text + '\n' + \
-                        consent+'- '+ cnd_instructions
+                    decision_text +=  consent+'- '+ cnd_instructions + '\n'
 
             name_request.names.append(submitted_name)
 
@@ -300,8 +302,10 @@ class NameRequest(Resource):
         name_request.save_to_db()
         #TODO: Need to add verification that the save was successful.
 
-        nr_doc = create_solr_doc(name_request)
-        update_solr('possible.conflicts',nr_doc)
+        if(json_data['stateCd'] in ['RESERVED', 'COND-RESERVE']):
+            nr_doc = create_solr_doc(name_request.nrNum,submitted_name.name,name_request.submittedDate)
+            nr_doc_json = json.dumps(nr_doc)
+            update_solr('possible.conflicts',nr_doc_json)
 
         current_app.logger.debug(name_request.json())
         return jsonify(name_request.json()), 200
