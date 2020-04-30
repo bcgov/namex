@@ -154,7 +154,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def check_unclassified_words(self, list_name, list_none):
         result = None
-
         if list_none.__len__() > 0:
             unclassified_words_list_response = []
             for idx, token in enumerate(list_name):
