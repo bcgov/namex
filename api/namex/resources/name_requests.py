@@ -243,6 +243,7 @@ class NameRequest(Resource):
          #follow the reserved path for auto-approved name (there will only be one name)
         for name in json_data.get('names', None):
 
+
             #need to create a new obkect each time. for each name
             submitted_name.choice = name['choice']
             submitted_name.name = name['name']
@@ -283,7 +284,15 @@ class NameRequest(Resource):
 
 
             submitted_name.decision_text = decision_text
-            name_request.names.append(submitted_name)
+            if name['choice'] == 1: name_choice_1 = submitted_name
+            if name['choice'] == 2: name_choice_2 = submitted_name
+            if name['choice'] == 3: name_choice_3 = submitted_name
+
+            if name['choice'] == 1: name_choice_1 = name_request.names.append(name_choice_1)
+            if name['choice'] == 2: name_choice_2 = name_request.names.append(name_choice_2)
+            if name['choice'] == 3: name_choice_3 = name_request.names.append(name_choice_3)
+
+            #name_request.names.append(submitted_name)
 
         name_request.save_to_db()
         #TODO: Need to add verification that the save was successful.
