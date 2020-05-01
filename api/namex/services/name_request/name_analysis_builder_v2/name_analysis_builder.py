@@ -367,8 +367,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
-    list_name: original tokenized
-    list_name_designations: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
+    list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
     entity_type_user: Entity type typed by user. 'CR' by default
     all_designations: All Designations found in name (either misplaced or not)
     all_designations_user: All designations for the entity type typed by the user. 
