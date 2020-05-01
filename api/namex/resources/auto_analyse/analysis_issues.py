@@ -669,7 +669,17 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
     issue = None
 
     def create_issue(self, procedure_result):
-        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        name_as_submitted = self.analysis_response.name_as_submitted
+        list_original = self._lc_list_items(self.analysis_response.name_original_tokens)
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)
+
+        all_designations = self._lc_list_items(self.analysis_response.analysis_service.get_all_designations())
+        all_combined_designations = all_designations + remove_periods_designation(all_designations)
+
+        list_name_as_submitted = self._lc_list_items(self.analysis_response.name_as_submitted_tokenized)
+        # Filter out designations from the tokens
+        list_tokens = [item for item in list_name_as_submitted if item not in all_combined_designations]
+
         list_dist = procedure_result.values['list_dist']  # Don't lower case this one it's a list wrapped list
         list_desc = procedure_result.values['list_desc']  # Don't lower case this one it's a list wrapped list
         list_conflicts = procedure_result.values['list_conflicts']  # Don't lower case this one it's a dict
@@ -713,17 +723,21 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         list_remove = []  # These are passed down to the Template
 
         if is_exact_match:
-            # Loop over the list_name words, we need to decide to do with each word
-            for word in list_name:
+            # Loop over the token words, we need to decide to do with each word
+            for token_idx, word in enumerate(list_tokens):
+                # Make sure the token word is in our name tokens
+                if word not in list_name:
+                    continue
+
                 offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                    self.analysis_response.name_as_submitted,
-                    self.analysis_response.name_original_tokens,
-                    self.analysis_response.name_tokens,
-                    list_name.index(word)
+                    name_as_submitted,
+                    list_original,
+                    list_tokens,
+                    token_idx
                 )
 
                 # Highlight the conflict words
-                if list_name.index(word) != list_name.index(list_name[-1]):
+                if list_tokens.index(word) != list_tokens.index(list_tokens[-1]):
                     issue.name_actions.append(NameAction(
                         word=word,
                         index=offset_idx,
@@ -732,7 +746,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                     ))
 
                 # Strike out the last matching word
-                if list_name.index(word) == list_name.index(list_name[-1]):
+                if list_tokens.index(word) == list_tokens.index(list_tokens[-1]):
                     list_remove.append(word)
                     issue.name_actions.append(NameAction(
                         word=word,
@@ -748,7 +762,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                     self.analysis_response.name_as_submitted,
                     self.analysis_response.name_original_tokens,
                     self.analysis_response.name_tokens, 
-                    list_name.index(word)
+                    list_name.index(word),
+                    True
                 )
 
                 # This code has duplicate blocks because it allows us to tweak the response for composite token matches separately from normal words if necessary
