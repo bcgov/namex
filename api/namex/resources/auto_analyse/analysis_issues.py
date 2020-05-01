@@ -156,6 +156,7 @@ class AnalysisResponseIssue:
 
         original_tokens = deque(name_original_tokens)
         processed_tokens = deque(name_tokens)
+        processed_token_count = 0
 
         target_word = name_tokens[word_idx]
 
@@ -173,7 +174,8 @@ class AnalysisResponseIssue:
                 self.get_next_token_if_composite(unprocessed_name_string, original_tokens, processed_tokens)
 
             if processed_name_string:
-                unprocessed_name_string = unprocessed_name_string.replace(processed_name_string, '').strip()
+                # Only replace the first match!
+                unprocessed_name_string = unprocessed_name_string.replace(processed_name_string, '', 1).strip()
 
             # Handle composite tokens
             if composite_token:
@@ -215,16 +217,17 @@ class AnalysisResponseIssue:
                                 word_idx_offset += 1
                                 continue
 
-            # Check for repeated tokens
-            if current_original_token == previous_original_token:
-                word_idx_offset += 1
+            # Check for repeated tokens - this has been moved to get_next_token_if_composite
+            # if current_original_token == previous_original_token:
+                # word_idx_offset += 1
+
+            # We only need to update the index for whatever word we are
+            if current_original_token == target_word and word_idx == processed_token_count:
+                original_tokens.clear()  # Clear the rest of the items to break out of the loop, we're done!
 
             if previous_original_token != current_original_token and len(processed_tokens) > 0:
                 processed_tokens.popleft()
-
-            # We only need to update the index for whatever word we are
-            if current_original_token == target_word:
-                original_tokens.clear()  # Clear the rest of the items to break out of the loop, we're done!
+                processed_token_count += 1
 
             previous_original_token = current_original_token
 
@@ -757,13 +760,16 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         if not is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
-            for word in list_name:
+            for token_idx, word in enumerate(list_tokens):
+                # Make sure the token word is in our name tokens
+                if word not in list_name:
+                    continue
+
                 offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                    self.analysis_response.name_as_submitted,
-                    self.analysis_response.name_original_tokens,
-                    self.analysis_response.name_tokens, 
-                    list_name.index(word),
-                    True
+                    name_as_submitted,
+                    list_original,
+                    list_tokens,
+                    token_idx
                 )
 
                 # This code has duplicate blocks because it allows us to tweak the response for composite token matches separately from normal words if necessary
