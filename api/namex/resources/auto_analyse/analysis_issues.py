@@ -156,7 +156,7 @@ class AnalysisResponseIssue:
 
         original_tokens = deque(name_original_tokens)
         processed_tokens = deque(name_tokens)
-        processed_token_count = 0
+        processed_token_idx = 0
 
         target_word = name_tokens[word_idx]
 
@@ -221,13 +221,13 @@ class AnalysisResponseIssue:
             # if current_original_token == previous_original_token:
                 # word_idx_offset += 1
 
-            # We only need to update the index for whatever word we are
-            if current_original_token == target_word and word_idx == processed_token_count:
+            # We only need to run this until we encounter the specified word
+            if current_original_token == target_word and word_idx == processed_token_idx:
                 original_tokens.clear()  # Clear the rest of the items to break out of the loop, we're done!
 
             if previous_original_token != current_original_token and len(processed_tokens) > 0:
+                processed_token_idx += 1
                 processed_tokens.popleft()
-                processed_token_count += 1
 
             previous_original_token = current_original_token
 
