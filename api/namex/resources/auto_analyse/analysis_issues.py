@@ -199,11 +199,11 @@ class AnalysisResponseIssue:
                     if len(processed_tokens) > 0:
                         if offset_designations:
                             # Does the current word have any punctuation associated with?
-                            punctuation_char = ''
+                            next_char = ''
                             if len(unprocessed_name_string) > 0 and len(original_tokens) > 0 and unprocessed_name_string[0] == original_tokens[0]:
-                                punctuation_char = original_tokens[0]
+                                next_char = original_tokens[0]
 
-                            token_is_designation = (current_original_token + punctuation_char) in all_designations
+                            token_is_designation = (current_original_token + next_char) in all_designations
                             if token_is_designation:
                                 original_tokens.popleft()
                                 unprocessed_name_string = unprocessed_name_string[1:].strip()
@@ -224,8 +224,10 @@ class AnalysisResponseIssue:
             # We only need to run this until we encounter the specified word
             if current_original_token == target_word and word_idx == processed_token_idx:
                 original_tokens.clear()  # Clear the rest of the items to break out of the loop, we're done!
+                continue
 
-            if previous_original_token != current_original_token and len(processed_tokens) > 0:
+            # if previous_original_token != current_original_token and len(processed_tokens) > 0:
+            if len(processed_tokens) > 0:
                 processed_token_idx += 1
                 processed_tokens.popleft()
 
@@ -728,10 +730,6 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         if is_exact_match:
             # Loop over the token words, we need to decide to do with each word
             for token_idx, word in enumerate(list_tokens):
-                # Make sure the token word is in our name tokens
-                if word not in list_name:
-                    continue
-
                 offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
                     name_as_submitted,
                     list_original,
@@ -761,10 +759,6 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         if not is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
             for token_idx, word in enumerate(list_tokens):
-                # Make sure the token word is in our name tokens
-                if word not in list_name:
-                    continue
-
                 offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
                     name_as_submitted,
                     list_original,
