@@ -572,7 +572,7 @@ class WordSpecialUse(AnalysisResponseIssue):
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
-            show_examination_button=True,
+            show_examination_button=False,
             conflicts=None,
             setup=None,
             name_actions=[]
