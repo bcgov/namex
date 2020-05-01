@@ -204,7 +204,7 @@ class AnalysisResponseIssue:
                                 next_char = original_tokens[0]
 
                             token_is_designation = (current_original_token + next_char) in all_designations
-                            if token_is_designation:
+                            if original_tokens and token_is_designation:
                                 original_tokens.popleft()
                                 unprocessed_name_string = unprocessed_name_string[1:].strip()
 
