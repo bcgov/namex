@@ -81,6 +81,10 @@ class AnalysisResponse:
         return self.analysis_service.name_as_submitted
 
     @property
+    def name_as_submitted_tokenized(self):
+        return self.analysis_service.name_as_submitted_tokenized
+
+    @property
     def entity_type(self):
         return self._entity_type
 

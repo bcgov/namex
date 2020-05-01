@@ -678,6 +678,33 @@ class _TransformText(Resource):
         }
 
 
+@api.route('/regex-prefixes', strict_slashes=False, methods=['GET'])
+class _RegexPrefixes(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    # @api.expect()
+    @api.response(200, 'SynonymsApi', response_string)
+    @marshal_with(response_string)
+    @api.doc(params={
+        'text': '',
+        'prefixes_str': ''
+    })
+    def get():
+        text = unquote_plus(request.args.get('text'))
+        prefixes_str = unquote_plus(request.args.get('prefixes_str'))
+
+        if not validate_request(request.args):
+            return
+
+        service = SynonymService()
+        result = service.regex_prefixes(text, prefixes_str)
+
+        return {
+            'data': result
+        }
+
+
 @api.route('/<col>/<term>', strict_slashes=False, methods=['GET'])
 class _Synonyms(Resource):
     @staticmethod

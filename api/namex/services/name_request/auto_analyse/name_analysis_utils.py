@@ -68,7 +68,7 @@ def remove_french(text):
 
 
 def remove_stop_words(original_name_list, stop_words):
-    words = ' '.join([word for x, word in enumerate(original_name_list) if word not in stop_words])
+    words = ' '.join([word for x, word in enumerate(original_name_list) if word and word not in stop_words])
 
     return words
 

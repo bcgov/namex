@@ -128,7 +128,9 @@ class NameProcessingService(GetSynonymListsMixin):
         ).data
 
         self.name_first_part = remove_french(name)
-        self.name_original_tokens = name.lower().split()
+        # self.name_original_tokens = name.lower().split()
+        self.name_original_tokens = [x for x in [x.strip() for x in re.split('(\W)', name.lower())] if x]
+
         self._process_name()
 
     def set_name_tokenized(self, name):

@@ -10,9 +10,9 @@ class GetSynonymListsMixin(object):
     _designated_all_words = []
 
     _eng_designated_end_words = []
-    _eng_designated_end_words = []
+    _eng_designated_any_words = []
 
-    _fr_designated_any_words = []
+    _fr_designated_end_words = []
     _fr_designated_any_words = []
 
     def get_prefixes(self):
