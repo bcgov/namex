@@ -13,7 +13,7 @@ from .response_objects.name_action import NameAction, NameActions, WordPositions
 from .response_objects.consenting_body import ConsentingBody
 from .response_objects.conflict import Conflict
 
-from namex.utils.common import remove_periods_designation
+#from namex.utils.common import remove_periods_designation
 
 
 class AnalysisResponseIssue:
@@ -679,11 +679,11 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         list_name = self._lc_list_items(self.analysis_response.name_tokens)
 
         all_designations = self._lc_list_items(self.analysis_response.analysis_service.get_all_designations())
-        all_combined_designations = all_designations + remove_periods_designation(all_designations)
+        #all_combined_designations = all_designations + remove_periods_designation(all_designations)
 
         list_name_as_submitted = self._lc_list_items(self.analysis_response.name_as_submitted_tokenized)
         # Filter out designations from the tokens
-        list_tokens = [item for item in list_name_as_submitted if item not in all_combined_designations]
+        list_tokens = [item for item in list_name_as_submitted if item not in all_designations]
 
         list_dist = procedure_result.values['list_dist']  # Don't lower case this one it's a list wrapped list
         list_desc = procedure_result.values['list_desc']  # Don't lower case this one it's a list wrapped list
@@ -946,7 +946,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         misplaced_all_designation = procedure_result.values['misplaced_all_designation']
 
         misplaced_all_designation_lc = self._lc_list_items(misplaced_all_designation, True)
-        misplaced_all_designation_lc = misplaced_all_designation_lc + remove_periods_designation(misplaced_all_designation_lc)
+        #misplaced_all_designation_lc = misplaced_all_designation_lc + remove_periods_designation(misplaced_all_designation_lc)
         list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = NameAnalysisIssue(

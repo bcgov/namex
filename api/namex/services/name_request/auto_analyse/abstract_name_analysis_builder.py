@@ -141,7 +141,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
         '''
 
     @abc.abstractmethod
-    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user, all_designation_user_no_periods):
+    def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
         return ProcedureResult(is_valid=True)
 
     '''

@@ -6,7 +6,7 @@ from namex.constants import \
 
 from .name_analysis_director import NameAnalysisDirector
 
-from namex.utils.common import parse_dict_of_lists, remove_periods_designation
+from namex.utils.common import parse_dict_of_lists
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -75,7 +75,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
     def _set_designations_incorrect_position_by_input_name(self):
         syn_svc = self.synonym_service
         tokenized_name = self.get_original_name_tokenized()
-        correct_designation_end_list = remove_periods_designation(self._designation_end_list_correct)
+        #correct_designation_end_list = remove_periods_designation(self._designation_end_list_correct)
+        correct_designation_end_list = self._designation_end_list_correct
 
         designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
                                                                                        designation_end_list=correct_designation_end_list).data
@@ -174,8 +175,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         self._all_designations_user = self._designation_any_list_correct + self._designation_end_list_correct
         self._all_designations_user.sort(key=len, reverse=True)
 
-        self._all_designations_user_no_periods = remove_periods_designation(self._all_designations_user)
-        self._all_designations_user_no_periods.sort(key=len, reverse=True)
+        #self._all_designations_user_no_periods = remove_periods_designation(self._all_designations_user)
+        #self._all_designations_user_no_periods.sort(key=len, reverse=True)
 
         # Set all designations based on company name typed by user
         # self._all_designations = self._designation_any_list + self._designation_end_list
@@ -224,8 +225,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
                 self.get_original_name_tokenized(),
                 self.entity_type,
                 self.get_all_designations(),
-                self.get_all_designations_user(),
-                self.get_all_designations_user_no_periods()
+                self.get_all_designations_user()
+                #self.get_all_designations_user_no_periods()
             )
 
             if not check_designation_mismatch.is_valid:
