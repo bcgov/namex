@@ -367,7 +367,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
-    list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
+    list_name: original tokenized
+    list_name_designations: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
     entity_type_user: Entity type typed by user. 'CR' by default
     all_designations: All Designations found in name (either misplaced or not)
     all_designations_user: All designations for the entity type typed by the user. 
@@ -381,9 +382,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         mismatch_entity_designation_list = []
         for idx, token in enumerate(list_name):
-            if any(token in designation for designation in all_designations):
-                if token not in all_designation_user_no_periods:
-                    mismatch_entity_designation_list.append(token.upper())
+            if token in all_designations and token not in all_designation_user_no_periods:
+                mismatch_entity_designation_list.append(token.upper())
 
         if mismatch_entity_designation_list:
             result.is_valid = False
