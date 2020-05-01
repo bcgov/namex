@@ -16,10 +16,11 @@ setup_logging() ## important to do this first
 from urllib.parse import unquote_plus
 from datetime import datetime
 
-from namex.models import Request, Name, NRNumber, State, User, Comment
+from namex.models import Request, Name, NRNumber, State, User, Comment, Applicant
 
 from namex.services import EventRecorder
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
+from namex.services.name_request import convert_to_ascii
 
 
 
@@ -62,6 +63,10 @@ def get_applicant_sequence():
     party_id = db.engine.execute(seq)
     return party_id
 
+def get_name_sequence():
+    seq = db.Sequence('names_id_seq')
+    name_id = db.engine.execute(seq)
+    return name_id
 
 def generate_nr():
     r = db.session.query(NRNumber).first()
@@ -135,7 +140,6 @@ class NameRequest(Resource):
                                       'names': fields.Nested(name_model)
                                  })
 
-
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     #@jwt.requires_auth
@@ -149,7 +153,6 @@ class NameRequest(Resource):
         user_id = user.id
 
         name_request = Request()
-        submitted_name = Name()
 
         nr_num = generate_nr()
         nr_id = get_request_sequence()
@@ -161,8 +164,9 @@ class NameRequest(Resource):
         name_request.nrNum=nr_num
         if(json_data['stateCd'] == 'COND-RESERVE'):
             name_request.consentFlag =  'Y'
+        if name_request.stateCd in [State.RESERVED, State.COND_RESERVE]:
+            name_request.expirationDate= create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
 
-        name_request.expirationDate= create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
         name_request.stateCd=json_data['stateCd']
         name_request.entity_type_cd = json_data['entity_type']
         name_request.request_action_cd= json_data['request_action']
@@ -217,32 +221,38 @@ class NameRequest(Resource):
             #for existing businesses
             if json_data['corpNum']: name_request.corpNum  = json_data['corpNum']
 
+            name_request.save_to_db()
+            nrd = Request.find_by_nr(name_request.nrNum)
+
             #applicant, contact and address info
+            nrd_app =  Applicant()
             for applicant in json_data.get('applicants', None):
-                name_request.applicants.nrId = nr_id
-                name_request.applicants.lastName = applicant['lastName']
-                name_request.applicants.firstName = applicant['firstName']
-                name_request.applicants.middleName = applicant['middleName']
-                name_request.applicants.partyId = party_id
-                name_request.applicants.contact = applicant['contact']
-                name_request.applicants.clientFirstName = applicant['clientFirstName']
-                name_request.applicants.clientLastName = applicant['clientLastName']
+                nrd_app.nrId = nr_id
+                nrd_app.partyId = party_id
+                nrd_app.lastName = convert_to_ascii(applicant['lastName'])
+                nrd_app.firstName = convert_to_ascii(applicant['firstName'])
+                if applicant['middleName']: nrd_app.middleName = convert_to_ascii(applicant['middleName'])
+                nrd_app.contact = convert_to_ascii(applicant['contact'])
+                if applicant['middleName']: nrd_app.middleName = convert_to_ascii(applicant['middleName'])
+                if nrd_app.clientFirstName: nrd_app.clientFirstName = convert_to_ascii(applicant['clientFirstName'])
+                if nrd_app.clientLastName:  nrd_app.clientLastName= convert_to_ascii(applicant['clientLastName'])
+                if nrd_app.phoneNumber: nrd_app.phoneNumber= convert_to_ascii(applicant['phoneNumber'])
+                if nrd_app.faxNumber: nrd_app.faxNumber = convert_to_ascii(applicant['faxNumber'])
+                nrd_app.emailAddress = convert_to_ascii(applicant['emailAddress'])
+                nrd_app.addrLine1 = convert_to_ascii(applicant['addrLine1'])
+                if nrd_app.addrLine2: nrd_app.addrLine2 = convert_to_ascii(applicant['addrLine2'])
+                nrd_app.city = convert_to_ascii(applicant['city'])
+                nrd_app.stateProvinceCd = applicant['stateProvinceCd']
+                nrd_app.postalCd = convert_to_ascii(applicant['postalCd'])
+                nrd_app.countryTypeCd = applicant['countryTypeCd']
 
-                name_request.applicants.phoneNumber = applicant['phoneNumber']
-                name_request.applicants.faxNumber = applicant['faxNumber']
-                name_request.applicants.emailAddress = applicant['emailAddress']
+                nrd.applicants.append(nrd_app)
 
-                name_request.applicants.addrLine1 = applicant['addrLine1']
-                name_request.applicants.addrLine2 = applicant['addrLine2']
-                name_request.applicants.city = applicant['city']
-                name_request.applicants.stateProvinceCd = applicant['stateProvinceCd']
-                name_request.applicants.postalCd = applicant['postalCd']
-                name_request.applicants.countryTypeCd = applicant['countryTypeCd']
-
-
-         #follow the reserved path for auto-approved name (there will only be one name)
+        #follow the reserved path for auto-approved name (there will only be one name)
         for name in json_data.get('names', None):
-
+            submitted_name = Name()
+            name_id = get_name_sequence()
+            submitted_name.id  = name_id
 
             #need to create a new obkect each time. for each name
             submitted_name.choice = name['choice']
@@ -261,42 +271,34 @@ class NameRequest(Resource):
             if name['designation']: submitted_name.designation = name['designation']
             submitted_name.nrId = nr_id
 
-            decision_text = None
-            #only capturing one conflict
-            if (name['conflict1_num']):
-                submitted_name.conflict1_num = name['conflict1_num']
-                if name['conflict1']: submitted_name.conflict1 = name['conflict1']
-                #conflict text same as Namex
-                decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
-            else:
-                submitted_name.conflict1_num=None
-                submitted_name.conflict1=None
-
-
-            for consent in name['consent_words']:
-                cnd_instructions = None
-                cnd_instructions = restricted.get_word_condition_instructions(consent)
-
-                if(decision_text is None):
-                    decision_text = cnd_instructions + '\n'
+            if name_request.stateCd in [State.RESERVED, State.COND_RESERVE ]:
+                decision_text = None
+                #only capturing one conflict
+                if (name['conflict1_num']):
+                    submitted_name.conflict1_num = name['conflict1_num']
+                    if name['conflict1']: submitted_name.conflict1 = name['conflict1']
+                    #conflict text same as Namex
+                    decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
                 else:
-                    decision_text +=  consent+'- '+ cnd_instructions + '\n'
+                    submitted_name.conflict1_num=None
+                    submitted_name.conflict1=None
 
 
-            submitted_name.decision_text = decision_text
-            if name['choice'] == 1: name_choice_1 = submitted_name
-            if name['choice'] == 2: name_choice_2 = submitted_name
-            if name['choice'] == 3: name_choice_3 = submitted_name
+                for consent in name['consent_words']:
+                    cnd_instructions = None
+                    cnd_instructions = restricted.get_word_condition_instructions(consent)
 
-            if name['choice'] == 1: name_choice_1 = name_request.names.append(name_choice_1)
-            if name['choice'] == 2: name_choice_2 = name_request.names.append(name_choice_2)
-            if name['choice'] == 3: name_choice_3 = name_request.names.append(name_choice_3)
+                    if(decision_text is None):
+                        decision_text = cnd_instructions + '\n'
+                    else:
+                        decision_text +=  consent+'- '+ cnd_instructions + '\n'
 
-            #name_request.names.append(submitted_name)
+                submitted_name.decision_text = decision_text
 
-        name_request.save_to_db()
+            nrd.names.append(submitted_name)
+
+        nrd.save_to_db()
         #TODO: Need to add verification that the save was successful.
-
        #update solr for reservation
         if(json_data['stateCd'] in ['RESERVED', 'COND-RESERVE']):
             solr_docs=[]
