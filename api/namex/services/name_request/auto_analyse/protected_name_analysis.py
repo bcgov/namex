@@ -57,15 +57,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # Just take ARMSTRONG PLUMBING LTD. and perform analysis of designations.
         name_first_part = np_svc.name_first_part
 
-        # These are used when getting the entity type in _set_entity_type_any_designation, _set_entity_type_end_designation
-        # for <any> and <end> designations which are properly placed:
-        # self._designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
-        # self._designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
-
         self._designation_any_list = syn_svc.get_designation_any_in_name(name=name_first_part).data
         self._designation_end_list = syn_svc.get_designation_end_in_name(name=name_first_part).data
 
-        # self._all_designations = syn_svc.get_designation_all_in_name(name=original_name).data
         self._all_designations = syn_svc.get_designation_all_in_name(name=name_first_part).data
 
     '''
@@ -96,6 +90,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.ANY.value,
                                                                           lang=LanguageCodes.ENG.value).data
+
         self._eng_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.END.value,
                                                                           lang=LanguageCodes.ENG.value).data
@@ -103,16 +98,22 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         self._fr_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                          position_code=DesignationPositionCodes.ANY.value,
                                                                          lang=LanguageCodes.FR.value).data
+
         self._fr_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                          position_code=DesignationPositionCodes.END.value,
                                                                          lang=LanguageCodes.FR.value).data
+
+        self._eng_designation_all_list_correct = self._eng_designation_any_list_correct + self._eng_designation_end_list_correct
+        self._eng_designation_all_list_correct.sort(key=len, reverse=True)
+
+        self._fr_designation_all_list_correct = self._fr_designation_any_list_correct + self._fr_designation_end_list_correct
+        self._fr_designation_all_list_correct.sort(key=len, reverse=True)
 
         self._designation_any_list_correct = self._eng_designation_any_list_correct + self._fr_designation_any_list_correct
         self._designation_any_list_correct.sort(key=len, reverse=True)
 
         self._designation_end_list_correct = self._eng_designation_end_list_correct + self._fr_designation_end_list_correct
         self._designation_end_list_correct.sort(key=len, reverse=True)
-
     '''
     Set the corresponding entity type for designations <any> found in name
     '''
@@ -122,10 +123,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # entity_any_designation_dict = self._entity_any_designation_dict
         designation_any_list = self._designation_any_list
 
-        all_end_designations = syn_svc.get_all_end_designations().data
+        all_any_designations = syn_svc.get_all_any_designations().data
 
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
-            entity_any_designation_dict=parse_dict_of_lists(all_end_designations),
+            entity_any_designation_dict=parse_dict_of_lists(all_any_designations),
             all_designation_any_end_list=designation_any_list
         ).data
 
@@ -138,10 +139,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # entity_end_designation_dict = self._entity_end_designation_dict
         designation_end_list = self._designation_end_list
 
-        all_any_designations = syn_svc.get_all_any_designations().data
+        all_end_designations = syn_svc.get_all_end_designations().data
 
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
-            entity_end_designation_dict=parse_dict_of_lists(all_any_designations),
+            entity_end_designation_dict=parse_dict_of_lists(all_end_designations),
             all_designation_any_end_list=designation_end_list
         ).data
 
@@ -168,17 +169,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
         # self._set_misplaced_designation_in_input_name()
 
         # Set all designations based on entity type typed by user,'CR' by default
-        self._designation_any_list_correct = self._eng_designation_any_list_correct + self._fr_designation_any_list_correct
-        self._designation_end_list_correct = self._eng_designation_end_list_correct + self._fr_designation_end_list_correct
-
-        self._all_designations_user = self._designation_any_list_correct + self._designation_end_list_correct
-        self._all_designations_user.sort(key=len, reverse=True)
+        self._all_designations_user = self._eng_designation_all_list_correct + self._fr_designation_all_list_correct
 
         self._all_designations_user_no_periods = remove_periods_designation(self._all_designations_user)
         self._all_designations_user_no_periods.sort(key=len, reverse=True)
-
-        # Set all designations based on company name typed by user
-        # self._all_designations = self._designation_any_list + self._designation_end_list
 
     '''
     do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.

@@ -129,7 +129,7 @@ class NameProcessingService(GetSynonymListsMixin):
 
         self.name_first_part = remove_french(name)
         # self.name_original_tokens = name.lower().split()
-        self.name_original_tokens = [x for x in [x.strip() for x in re.split('(\W)', name.lower())] if x]
+        self.name_original_tokens = [x for x in [x.strip() for x in re.split('([ &/-])', name.lower())] if x]
 
         self._process_name()
 
@@ -220,10 +220,7 @@ class NameProcessingService(GetSynonymListsMixin):
                 # These properties are mixed in via GetSynonymListsMixin
                 # See the class constructor
                 self._stop_words,
-                # self._designated_any_words,
-                # self._designated_end_words,
                 self._designated_all_words,
-                # self._fr_designation_end_list,
                 self._prefixes,
                 self._number_words
             )
