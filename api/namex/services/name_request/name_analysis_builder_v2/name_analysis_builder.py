@@ -381,9 +381,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         mismatch_entity_designation_list = []
         for idx, token in enumerate(list_name):
-            if any(token in designation for designation in all_designations):
-                if token not in all_designation_user_no_periods:
-                    mismatch_entity_designation_list.append(token.upper())
+            if token in all_designations and token not in all_designation_user_no_periods:
+                mismatch_entity_designation_list.append(token.upper())
 
         if mismatch_entity_designation_list:
             result.is_valid = False
