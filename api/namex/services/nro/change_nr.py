@@ -139,13 +139,17 @@ def _update_request(oracle_cursor, nr, event_id, change_flags):
 
         # create new request_instance record
         oracle_cursor.execute("""
-        INSERT INTO request_instance
+        INSERT INTO request_instance(request_instance_id, request_id,priority_cd, request_type_cd,
+        expiration_date, start_event_id, tilma_ind, xpro_jurisdiction,
+        nuans_expiration_date, queue_position, additional_info, nature_business_info,
+        user_note, nuans_num, tilma_transaction_id, assumed_nuans_num, assumed_nuans_name, assumed_nuans_expiration_date,
+        last_nuans_update_role, admin_comment, home_juris_num)
         VALUES (request_instance_seq.nextval, :request_id, :priority_cd, :request_type_cd, 
-                  :expiration_date, :event_id, null, :tilma_ind, :xpro_jurisdiction, 
+                  :expiration_date, :event_id, :tilma_ind, :xpro_jurisdiction, 
                   :nuans_expiration_date, :queue_position, :additional_info, :nature_business_info,
                   :user_note, :nuans_num, :tilma_transaction_id, :assumed_nuans_num, 
                   :assumed_nuans_name, :assumed_nuans_expiration_date, :last_nuans_updated_role, 
-                  :admin_comment)
+                  :admin_comment, :home_juris_num)
         """,
                               request_id=nr.requestId,
                               priority_cd=row[2],
@@ -165,7 +169,8 @@ def _update_request(oracle_cursor, nr, event_id, change_flags):
                               assumed_nuans_name=row[17],
                               assumed_nuans_expiration_date=row[18],
                               last_nuans_updated_role=row[19],
-                              admin_comment=row[20]
+                              admin_comment=row[20],
+                              home_juris_num=row[21]
                               )
 
 
