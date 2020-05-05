@@ -1,3 +1,5 @@
+from datetime import date
+
 from flask import jsonify
 from flask import json
 
@@ -7,7 +9,7 @@ from urllib.parse import quote_plus
 import jsonpickle
 
 from namex.models import User
-from namex.services.name_request.auto_analyse import AnalysisRequestActions, AnalysisResultCodes
+from namex.services.name_request.auto_analyse import AnalysisRequestActions, AnalysisIssueCodes
 
 # from tests.python import integration_oracle_namesdb
 
@@ -38,6 +40,8 @@ claims = {
 
 API_BASE_URI = '/api/v1/'
 ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
+
+
 # params = {
 #   name,
 #   location, one of: [‘bc’, ‘ca’, ‘us’, or ‘it’],
@@ -57,22 +61,22 @@ def assert_issues_count_is(count, issues):
 
 @pytest.mark.skip
 def assert_issues_count_is_gt(count, issues):
-
     print('\n' + 'Issue types:' + '\n')
     for issue in issues:
-        print('- ' + issue.issueType.value + '\n')
+        print('- ' + issue.get('issue_type') + '\n')
     assert issues.__len__() > count
+
 
 @pytest.mark.skip
 def assert_issue_type_is_one_of(types, issue):
-    assert issue.issueType in types
+    assert issue.get('issue_type') in types
 
 
 @pytest.mark.skip
 def assert_has_issue_type(issue_type, issues):
     has_issue = False
     for issue in issues:
-        has_issue = True if issue.issueType == issue_type and issue.issueType.value == issue_type.value else False
+        has_issue = True if issue.get('issue_type') == issue_type.value else False
 
     assert has_issue is True
 
@@ -81,17 +85,29 @@ def assert_has_issue_type(issue_type, issues):
 
 # USE MOUNTAIN VIEW FOOD GROWERS INC.
 
-# @pytest.mark.xfail(raises=ValueError)
+@pytest.mark.xfail(raises=ValueError)
 def test_add_distinctive_word_request_response(client, jwt, app):
+    from namex.models import WordClassification as WordClassificationDAO
+
+    words_list = [{'word': 'GROWERS', 'classification': 'DESC'}]
+
+    for record in words_list:
+        wc = WordClassificationDAO()
+        wc.classification = record['classification']
+        wc.word = record['word']
+        wc.start_dt = date.today()
+        wc.approved_dt = date.today()
+        wc.save_to_db()
+
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'FOOD GROWERS INC.',
+        'name': 'GROWERS INC.',
         'location': 'BC',
-        'entity_type': 'BC',
-        'request_type': 'NEW'
+        'entity_type': 'CR',
+        'request_action': 'NEW'
     }
 
     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
@@ -100,19 +116,18 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     response = client.get(path, headers=headers)
     payload = jsonpickle.decode(response.data)
     print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
+    if isinstance(payload.get('issues'), list):
+        assert_issues_count_is_gt(0, payload.get('issues'))
 
-        for issue in payload.issues:
+        for issue in payload.get('issues'):
             # Make sure only Well Formed name issues are being returned
             assert_issue_type_is_one_of([
-                AnalysisResultCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisResultCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisResultCodes.TOO_MANY_WORDS
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                AnalysisIssueCodes.TOO_MANY_WORDS
             ], issue)
 
-        assert_has_issue_type(AnalysisResultCodes.ADD_DISTINCTIVE_WORD, payload.issues)
-
+        assert_has_issue_type(AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, payload.get('issues'))
 
 # @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_request_response(client, jwt, app):
@@ -139,12 +154,12 @@ def test_add_descriptive_word_request_response(client, jwt, app):
         for issue in payload.issues:
             # Make sure only Well Formed name issues are being returned
             assert_issue_type_is_one_of([
-                AnalysisResultCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisResultCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisResultCodes.TOO_MANY_WORDS
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                AnalysisIssueCodes.TOO_MANY_WORDS
             ], issue)
 
-        assert_has_issue_type(AnalysisResultCodes.ADD_DESCRIPTIVE_WORD, payload.issues)
+        assert_has_issue_type(AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -172,12 +187,12 @@ def test_too_many_words_request_response(client, jwt, app):
         for issue in payload.issues:
             # Make sure only Well Formed name issues are being returned
             assert_issue_type_is_one_of([
-                AnalysisResultCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisResultCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisResultCodes.TOO_MANY_WORDS
+                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                AnalysisIssueCodes.TOO_MANY_WORDS
             ], issue)
 
-        assert_has_issue_type(AnalysisResultCodes.TOO_MANY_WORDS, payload.issues)
+        assert_has_issue_type(AnalysisIssueCodes.TOO_MANY_WORDS, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -201,7 +216,7 @@ def test_contains_words_to_avoid_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisResultCodes.WORD_TO_AVOID, payload.issues)
+        assert_has_issue_type(AnalysisIssueCodes.WORD_TO_AVOID, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -225,7 +240,7 @@ def test_designation_mismatch_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisResultCodes.DESIGNATION_MISMATCH, payload.issues)
+        assert_has_issue_type(AnalysisIssueCodes.DESIGNATION_MISMATCH, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -249,7 +264,7 @@ def test_name_requires_consent_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisResultCodes.NAME_REQUIRES_CONSENT, payload.issues)
+        assert_has_issue_type(AnalysisIssueCodes.NAME_REQUIRES_CONSENT, payload.issues)
 
 
 # @pytest.mark.xfail(raises=ValueError)
@@ -275,7 +290,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisResultCodes.CONTAINS_UNCLASSIFIABLE_WORD, payload.issues)
+        assert_has_issue_type(AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD, payload.issues)
 
 
 # TODO: Pytest uses an empty DB so create a CONFLICTING NAME first before / as part of running this test!!!
@@ -302,4 +317,4 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
     print("Assert that the payload contains issues")
     if isinstance(payload.issues, list):
         assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisResultCodes.CORPORATE_CONFLICT, payload.issues)
+        assert_has_issue_type(AnalysisIssueCodes.CORPORATE_CONFLICT, payload.issues)
