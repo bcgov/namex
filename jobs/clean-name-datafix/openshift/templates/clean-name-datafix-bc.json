@@ -29,7 +29,7 @@
                         "uri": "https://github.com/bcgov/namex",
                         "ref": "master"
                     },
-                    "contextDir": "/jobs"
+                    "contextDir": "/jobs/clean-datafix"
                 },
                 "strategy": {
                     "type": "Source",
