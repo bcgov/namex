@@ -44,7 +44,7 @@
                 "output": {
                     "to": {
                         "kind": "ImageStreamTag",
-                        "name": "inprogress-update:latest"
+                        "name": "clean-name-datafix:latest"
                     }
                 },
                 "resources": {},
