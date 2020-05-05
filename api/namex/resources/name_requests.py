@@ -164,7 +164,7 @@ class NameRequest(Resource):
         name_request.nrNum=nr_num
         if(json_data['stateCd'] == 'COND-RESERVE'):
             name_request.consentFlag =  'Y'
-        if name_request.stateCd in [State.RESERVED, State.COND_RESERVE]:
+        if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
             name_request.expirationDate= create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
 
         name_request.stateCd=json_data['stateCd']
@@ -195,9 +195,11 @@ class NameRequest(Resource):
             name_request.submitCount = 1
         else:
             name_request.submitCount = + 1
+        if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
+            name_request.save_to_db()
+            nrd = Request.find_by_nr(name_request.nrNum)
+        elif json_data['stateCd'] == 'DRAFT':
 
-        if(json_data['stateCd'] == 'DRAFT'):
-            party_id = get_applicant_sequence()
             #TO-DO Review additional info stuff from NRO/namex (prev NR for re-applies,no NWPTA?
 
             name_request.natureBusinessInfo = json_data['natureBusinessInfo']
@@ -227,6 +229,7 @@ class NameRequest(Resource):
             #applicant, contact and address info
             nrd_app =  Applicant()
             for applicant in json_data.get('applicants', None):
+                party_id = get_applicant_sequence()
                 nrd_app.nrId = nr_id
                 nrd_app.partyId = party_id
                 nrd_app.lastName = convert_to_ascii(applicant['lastName'])
@@ -234,13 +237,13 @@ class NameRequest(Resource):
                 if applicant['middleName']: nrd_app.middleName = convert_to_ascii(applicant['middleName'])
                 nrd_app.contact = convert_to_ascii(applicant['contact'])
                 if applicant['middleName']: nrd_app.middleName = convert_to_ascii(applicant['middleName'])
-                if nrd_app.clientFirstName: nrd_app.clientFirstName = convert_to_ascii(applicant['clientFirstName'])
-                if nrd_app.clientLastName:  nrd_app.clientLastName= convert_to_ascii(applicant['clientLastName'])
-                if nrd_app.phoneNumber: nrd_app.phoneNumber= convert_to_ascii(applicant['phoneNumber'])
-                if nrd_app.faxNumber: nrd_app.faxNumber = convert_to_ascii(applicant['faxNumber'])
+                if applicant['clientFirstName']: nrd_app.clientFirstName = convert_to_ascii(applicant['clientFirstName'])
+                if applicant['clientLastName']:  nrd_app.clientLastName= convert_to_ascii(applicant['clientLastName'])
+                if applicant['phoneNumber']: nrd_app.phoneNumber= convert_to_ascii(applicant['phoneNumber'])
+                if applicant['faxNumber']: nrd_app.faxNumber = convert_to_ascii(applicant['faxNumber'])
                 nrd_app.emailAddress = convert_to_ascii(applicant['emailAddress'])
                 nrd_app.addrLine1 = convert_to_ascii(applicant['addrLine1'])
-                if nrd_app.addrLine2: nrd_app.addrLine2 = convert_to_ascii(applicant['addrLine2'])
+                if applicant['addrLine2']: nrd_app.addrLine2 = convert_to_ascii(applicant['addrLine2'])
                 nrd_app.city = convert_to_ascii(applicant['city'])
                 nrd_app.stateProvinceCd = applicant['stateProvinceCd']
                 nrd_app.postalCd = convert_to_ascii(applicant['postalCd'])
