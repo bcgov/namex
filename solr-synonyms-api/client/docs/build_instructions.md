@@ -12,8 +12,6 @@ Then import the client like any other package:
 
 ### Re-building the Swagger Client
 
-The client library uses a Dockerized 
-
 These are the build steps for re-generating the Swagger Client. 
 
 #### Pre-requisites:
@@ -68,3 +66,8 @@ export SYNONYMS_API_CLIENT_REPO_URL="https://github.com/<your-fork>/namex-synony
 - Copy the files from the ```/client/dist``` folder into the root of your Synonyms API Client project.
 
 - Commit the changes and push.
+
+
+#### Modifying the Templates
+
+- Documentation for swagger-codegen [Mustache template variables](https://github.com/swagger-api/swagger-codegen/wiki/Mustache-Template-Variables)
