@@ -4,11 +4,11 @@ apiVersion: "v1"
 metadata:
   name: "clean-name-datafix"
   annotations:
-    description: "Job to update clean_name for all approved names"
+    description: "Job to load clean names in approved names in namex db"
     tags: "job"
 objects:
 - kind: "Job"
-  apiVersion: "batch/v1beta1"
+  apiVersion: "batch/v1"
   metadata:
     name: "clean-name-datafix"
   spec:
@@ -16,32 +16,39 @@ objects:
       spec:
         containers:
         - name: "clean-name-datafix"
-        image: "docker-registry.default.svc:5000/servicebc-ne-tools/clean-name-datafix:${ENV_TAG}"
-        imagePullPolicy: Always
-        args:
-        - /bin/sh
-        - -c
-        - cd /opt/app-root/src; ./run.sh
-        env:
-          - name: DATABASE_USERNAME
-            valueFrom:
-              secretKeyRef:
-                 key: database-user
-                 name: postgresql-${ENV_TAG}
-          - name: DATABASE_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: database-password
-                name: postgresql
-                  - name: DATABASE_NAME
-                    valueFrom:
-                      secretKeyRef:
-                        key: database-name
-                        name: postgresql-${ENV_TAG}
+          image: "docker-registry.default.svc:5000/servicebc-ne-tools/clean-name-datafix:${ENV_TAG}"
+          imagePullPolicy: Always
+          args:
+          - /bin/sh
+          - -c
+          - cd /opt/app-root/src; ./run.sh
+          env:
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: database-user
+                  name: postgresql-${ENV_TAG}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: postgresql-${ENV_TAG}
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  key: DATABASE_NAME
+                  name: namex-api-config
             - name: DATABASE_HOST
-              value: 'postgresql'-${ENV_TAG}
-            - name: DATABASE_PORT
-              value: '5432'
+              valueFrom:
+                configMapKeyRef:
+                  key: DATABASE_HOST
+                  name: namex-api-config
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: DB_PORT
+                  name: namex-api-config
+
         restartPolicy: "Never"
         concurrencyPolicy: "Forbid"
 parameters: [
