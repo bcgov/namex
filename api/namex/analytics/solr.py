@@ -647,7 +647,7 @@ class SolrQueries:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
-        query = solr_synonyms_api_url + '/' + col + '/' + parse.quote(token)
+        query = solr_synonyms_api_url + '/synonyms/' + col + '/' + parse.quote(token)
         current_app.logger.debug('Query: ' + query)
 
         try:
@@ -670,7 +670,7 @@ class SolrQueries:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
-        query = solr_synonyms_api_url + '/' + 'stems_text' + '/' + parse.quote(token)
+        query = solr_synonyms_api_url + '/synonyms/' + 'stems_text' + '/' + parse.quote(token)
         current_app.logger.debug('Query: ' + query)
         try:
             connection = request.urlopen(query)
