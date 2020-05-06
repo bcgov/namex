@@ -84,6 +84,18 @@ def generate_nr():
     #todo add a check that it updated
     return nr_num
 
+def add_language_comment(english_bol, user_id, nr_id):
+    lang_comment = Comment()
+    lang_comment.examinerId = user_id
+    lang_comment.nrId = nr_id
+    if english_bol == True:
+        # add a coment for the exmainer that say this is nota ENglihs Name
+        lang_comment.comment = 'The applicant has indicated the name or names are in English.'
+    else:
+        lang_comment.comment = 'The applicant has indicated the name or names are not English.'
+
+    return lang_comment
+
 @cors_preflight("POST")
 @api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
 class NameRequest(Resource):
@@ -149,6 +161,7 @@ class NameRequest(Resource):
             return jsonify({'message': 'No input data provided'}), 400
 
         restricted = VirtualWordConditionService()
+
         user = User.find_by_username('name_request_service_account')
         user_id = user.id
 
@@ -173,15 +186,7 @@ class NameRequest(Resource):
         #set this to name_request_service_account
         name_request.userId = user_id
 
-        # add a comment fo tracking user selections
-        lang_comment = Comment()
-        lang_comment.examinerId = user_id
-        lang_comment.nrId = nr_id
-        if json_data['english'] == True:
-            # add a coment for the exmainer that say this is nota ENglihs Name
-            lang_comment.comment = 'The applicant has indicated the name(s) are in English.'
-        else:
-            lang_comment.comment = 'The appliant has indicated the name(s) are not English.'
+        lang_comment = add_language_comment(json_data['english'],user_id, nr_id)
         name_request.comments.append(lang_comment)
 
         if  json_data['nameFlag'] == True:
