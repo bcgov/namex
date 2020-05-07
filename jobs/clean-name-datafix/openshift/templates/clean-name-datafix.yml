@@ -41,9 +41,9 @@ objects:
             - name: DATABASE_HOST
               valueFrom:
                 configMapKeyRef:
-                  key: DATABASE_HOST
+                  key: DB_HOST
                   name: namex-api-config
-            - name: DB_PORT
+            - name: DATABASE_PORT
               valueFrom:
                 configMapKeyRef:
                   key: DB_PORT
