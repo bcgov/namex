@@ -5,4 +5,4 @@ export PATH=/opt/app-root/bin:/opt/rh/rh-python35/root/usr/bin::/opt/rh/httpd24/
 
 cd /opt/app-root/src
 echo 'run clean-name-datafix'
-/opt/app-root/bin/python clean-name-data.py
+/opt/app-root/bin/python clean-name-datafix.py
