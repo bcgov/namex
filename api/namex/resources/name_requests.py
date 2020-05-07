@@ -210,7 +210,7 @@ class NameRequest(Resource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     #@jwt.requires_auth
-    def post(nr, *args, **kwargs):
+    def post(self, *args, **kwargs):
         json_data = request.get_json()
         if not json_data:
             return jsonify({'message': 'No input data provided'}), 400
