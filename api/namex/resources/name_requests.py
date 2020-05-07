@@ -149,53 +149,6 @@ def set_applicant_attributes(json_data,nr_id):
         nrd_app.countryTypeCd = applicant['countryTypeCd']
 
     return nrd_app
-def set_name_attributes(nrd,json_data,nr_id):
-    restricted = VirtualWordConditionService()
-    for name in json_data.get('names', None):
-        submitted_name = Name()
-        name_id = get_name_sequence()
-        submitted_name.id = name_id
-
-        submitted_name.choice = name['choice']
-        submitted_name.name = name['name']
-
-        if (name['name_type_cd']):
-            submitted_name.name_type_cd = name['name_type_cd']
-        else:
-            submitted_name.name_type_cd = 'CO'
-
-        if (json_data['stateCd'] == State.DRAFT):
-            submitted_name.state = 'NE'
-        else:
-            submitted_name.state = json_data['stateCd']
-
-        if name['designation']: submitted_name.designation = name['designation']
-        submitted_name.nrId = nr_id
-
-        if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
-            decision_text = None
-            # only capturing one conflict
-            if (name['conflict1_num']):
-                submitted_name.conflict1_num = name['conflict1_num']
-                if name['conflict1']: submitted_name.conflict1 = name['conflict1']
-                # conflict text same as Namex
-                decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
-            else:
-                submitted_name.conflict1_num = None
-                submitted_name.conflict1 = None
-
-            for consent in name['consent_words']:
-                cnd_instructions = None
-                cnd_instructions = restricted.get_word_condition_instructions(consent)
-
-                if (decision_text is None):
-                    decision_text = cnd_instructions + '\n'
-                else:
-                    decision_text += consent + '- ' + cnd_instructions + '\n'
-
-            submitted_name.decision_text = decision_text
-        nrd.names.append(submitted_name)
-        return nrd
 
 
 @cors_preflight("POST")
@@ -262,6 +215,8 @@ class NameRequest(Resource):
         if not json_data:
             return jsonify({'message': 'No input data provided'}), 400
 
+        restricted = VirtualWordConditionService()
+
         user = User.find_by_username('name_request_service_account')
         user_id = user.id
 
@@ -299,6 +254,7 @@ class NameRequest(Resource):
             name_request.submitCount = 1
         else:
             name_request.submitCount = + 1
+
         if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
             name_request.save_to_db()
             nrd = Request.find_by_nr(name_request.nrNum)
@@ -311,7 +267,51 @@ class NameRequest(Resource):
             nrd_app=set_applicant_attributes(json_data,nr_id)
             nrd.applicants.append(nrd_app)
 
-        nrd = set_name_attributes(nrd, json_data, nr_id)
+        for name in json_data.get('names', None):
+            submitted_name = Name()
+            name_id = get_name_sequence()
+            submitted_name.id = name_id
+
+            submitted_name.choice = name['choice']
+            submitted_name.name = name['name']
+
+            if (name['name_type_cd']):
+                submitted_name.name_type_cd = name['name_type_cd']
+            else:
+                submitted_name.name_type_cd = 'CO'
+
+            if (json_data['stateCd'] == State.DRAFT):
+                submitted_name.state = 'NE'
+            else:
+                submitted_name.state = json_data['stateCd']
+
+            if name['designation']: submitted_name.designation = name['designation']
+            submitted_name.nrId = nr_id
+
+            if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
+                decision_text = None
+                # only capturing one conflict
+                if (name['conflict1_num']):
+                    submitted_name.conflict1_num = name['conflict1_num']
+                    if name['conflict1']: submitted_name.conflict1 = name['conflict1']
+                    # conflict text same as Namex
+                    decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
+                else:
+                    submitted_name.conflict1_num = None
+                    submitted_name.conflict1 = None
+
+                for consent in name['consent_words']:
+                    cnd_instructions = None
+                    cnd_instructions = restricted.get_word_condition_instructions(consent)
+
+                    if (decision_text is None):
+                        decision_text = cnd_instructions + '\n'
+                    else:
+                        decision_text += consent + '- ' + cnd_instructions + '\n'
+
+                submitted_name.decision_text = decision_text
+            nrd.names.append(submitted_name)
+        #save names
         nrd.save_to_db()
 
         #TODO: Need to add verification that the save was successful.
