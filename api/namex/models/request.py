@@ -19,7 +19,7 @@ from enum import Enum
 import re
 
 from namex.constants import ValidSources, request_type_mapping, EntityType,EntityTypeXSO, EntityTypeXCP, EntityTypeXULC, \
-EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP
+EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP,NameState
 
 
 # noinspection PyPep8Naming
@@ -300,7 +300,8 @@ class Request(db.Model):
                      EntityType.XCP.value, EntityTypeXCP.XCCP.value, EntityTypeXCP.XRCP.value,
                      EntityType.BC.value
                      ]),
-                Name.state.in_([Name.APPROVED, Name.CONDITION]),
+
+                 Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value]),
 
             ]
 
