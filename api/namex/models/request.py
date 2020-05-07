@@ -91,7 +91,6 @@ class Request(db.Model):
     _source = db.Column('source', db.String(15), default=ValidSources.NRO)
     tradeMark = db.Column('trade_mark', db.String(100))
 
-
     #MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
 
