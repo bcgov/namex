@@ -80,6 +80,7 @@ def assert_has_issue_type(issue_type, issues):
 
     assert has_issue is True
 
+
 # IN THIS SECTION TEST VARIOUS ERROR RESPONSES
 
 
@@ -89,7 +90,8 @@ def assert_has_issue_type(issue_type, issues):
 def test_add_distinctive_word_request_response(client, jwt, app):
     from namex.models import WordClassification as WordClassificationDAO
 
-    words_list = [{'word': 'GROWERS', 'classification': 'DESC'}]
+    words_list = [{'word': 'GROWERS', 'classification': 'DESC'},
+                  {'word': 'AEROENTERPRISES', 'classification': 'DESC'}]
 
     for record in words_list:
         wc = WordClassificationDAO()
@@ -103,31 +105,40 @@ def test_add_distinctive_word_request_response(client, jwt, app):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    test_params = {
-        'name': 'GROWERS INC.',
-        'location': 'BC',
-        'entity_type': 'CR',
-        'request_action': 'NEW'
-    }
+    test_params = [
+        {'name': 'GROWERS INC.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'AEROENTERPRISES INC.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         }
+    ]
 
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.get('issues'), list):
-        assert_issues_count_is_gt(0, payload.get('issues'))
+    for entry in test_params:
+        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
 
-        for issue in payload.get('issues'):
-            # Make sure only Well Formed name issues are being returned
-            assert_issue_type_is_one_of([
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisIssueCodes.TOO_MANY_WORDS
-            ], issue)
+        path = ENDPOINT_PATH + '?' + query
+        print('\n' + 'request: ' + path + '\n')
+        response = client.get(path, headers=headers)
+        payload = jsonpickle.decode(response.data)
+        print("Assert that the payload contains issues")
+        if isinstance(payload.get('issues'), list):
+            assert_issues_count_is_gt(0, payload.get('issues'))
 
-        assert_has_issue_type(AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, payload.get('issues'))
+            for issue in payload.get('issues'):
+                # Make sure only Well Formed name issues are being returned
+                assert_issue_type_is_one_of([
+                    AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                    AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                    AnalysisIssueCodes.TOO_MANY_WORDS
+                ], issue)
+
+            assert_has_issue_type(AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, payload.get('issues'))
+
 
 # @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_request_response(client, jwt, app):
@@ -169,7 +180,8 @@ def test_too_many_words_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS INTERNATIONAL INC.',  # TODO: We need another test to make sure that designations are not being included in too many words (test: clean name)
+        'name': 'MOUNTAIN VIEW FOOD GROWERS INTERNATIONAL INC.',
+        # TODO: We need another test to make sure that designations are not being included in too many words (test: clean name)
         'location': 'BC',
         'entity_type': 'BC',
         'request_type': 'NEW'
