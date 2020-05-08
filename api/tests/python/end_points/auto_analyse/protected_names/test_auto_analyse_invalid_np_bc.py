@@ -1,4 +1,5 @@
 from datetime import date
+from operator import itemgetter
 
 from flask import jsonify
 from flask import json
@@ -83,16 +84,487 @@ def assert_has_issue_type(issue_type, issues):
 
 # IN THIS SECTION TEST VARIOUS ERROR RESPONSES
 
-
-# USE MOUNTAIN VIEW FOOD GROWERS INC.
+# # Showstoppers
+# # 1.- Unique word classified as descriptive
+# @pytest.mark.xfail(raises=ValueError)
+# def test_add_distinctive_word_base_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'GROWERS', 'classification': 'DESC'},
+#                   {'word': 'AEROENTERPRISES', 'classification': 'DESC'}]
+#
+#     save_words_list_classification(words_list_classification)
+#
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {'name': 'GROWERS INC.',
+#          'location': 'BC',
+#          'entity_type': 'CR',
+#          'request_action': 'NEW'
+#          },
+#         {'name': 'AEROENTERPRISES INC.',
+#          'location': 'BC',
+#          'entity_type': 'CR',
+#          'request_action': 'NEW'
+#          }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#
+#             for issue in payload.get('issues'):
+#                 # Make sure only Well Formed name issues are being returned
+#                 assert_issue_type_is_one_of([
+#                     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+#                     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+#                     AnalysisIssueCodes.TOO_MANY_WORDS
+#                 ], issue)
+#
+#             assert_has_issue_type(AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, payload.get('issues'))
+#
+#
+# # 2.- Unique word classified as distinctive
+# @pytest.mark.xfail(raises=ValueError)
+# def test_add_descriptive_word_base_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'ACTIVATIVE', 'classification': 'DIST'}]
+#     save_words_list_classification(words_list_classification)
+#
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'ACTIVATIVE INC.',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#
+#             for issue in payload.get('issues'):
+#                 # Make sure only Well Formed name issues are being returned
+#                 assert_issue_type_is_one_of([
+#                     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+#                     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+#                     AnalysisIssueCodes.TOO_MANY_WORDS
+#                 ], issue)
+#
+#             assert_has_issue_type(AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD, payload.get('issues'))
+#
+#
+# # 3.- Unique word not classified in word_classification
+# @pytest.mark.xfail(raises=ValueError)
+# def test_add_descriptive_word_not_classified_request_response(client, jwt, app):
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'INVINITY INC.',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#
+#             for issue in payload.get('issues'):
+#                 # Make sure only Well Formed name issues are being returned
+#                 assert_issue_type_is_one_of([
+#                     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+#                     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+#                     AnalysisIssueCodes.TOO_MANY_WORDS
+#                 ], issue)
+#
+#             assert_has_issue_type(AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD, payload.get('issues'))
+#
+#
+# # 4.- Unique word classified as distinctive and descriptive
+# @pytest.mark.xfail(raises=ValueError)
+# def test_add_descriptive_word_both_classifications_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'ABBOTSFORD’ ', 'classification': 'DIST'},
+#                   {'word': 'ABBOTSFORD’ ', 'classification': 'DESC'}]
+#     save_words_list_classification(words_list_classification)
+#
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'ABBOTSFORD INC.',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#
+#             for issue in payload.get('issues'):
+#                 # Make sure only Well Formed name issues are being returned
+#                 assert_issue_type_is_one_of([
+#                     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+#                     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+#                     AnalysisIssueCodes.TOO_MANY_WORDS
+#                 ], issue)
+#
+#             assert_has_issue_type(AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD, payload.get('issues'))
+#
+#
+# # 5.- Successful well formed name:
+# @pytest.mark.xfail(raises=ValueError)
+# def test_successful_well_formed_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'ADEPTIO', 'classification': 'DIST'},
+#                   {'word': 'AGRONOMICS', 'classification': 'DESC'}]
+#     save_words_list_classification(words_list_classification)
+#
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'ADEPTIO AGRONOMICS INC.',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload status is Available")
+#         assert ('Available', payload.get('status'))
+#
+#
+# @pytest.mark.xfail(raises=ValueError)
+# def test_contains_one_word_to_avoid_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'ABC', 'classification': 'DIST'},
+#                                  {'word': 'INVESTIGATORS', 'classification': 'DESC'}]
+#     save_words_list_classification(words_list_classification)
+#
+#     words_list_virtual_word_condition = [{'words': 'ICPO, INTERPOL', 'consent_required': False, 'allow_use': False}]
+#     save_words_list_virtual_word_condition(words_list_virtual_word_condition)
+#
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'ABC INTERPOL INVESTIGATORS INC.',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#             assert_has_issue_type(AnalysisIssueCodes.WORDS_TO_AVOID, payload.get('issues'))
+#
+#
+# @pytest.mark.xfail(raises=ValueError)
+# def test_contains_more_than_one_word_to_avoid_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'CANADIAN', 'classification': 'DIST'},
+#                                  {'word': 'CANADIAN', 'classification': 'DESC'},
+#                                  {'word': 'NATIONAL', 'classification': 'DIST'},
+#                                  {'word': 'NATIONAL', 'classification': 'DESC'},
+#                                  {'word': 'INVESTIGATORS', 'classification': 'DESC'}
+#                                  ]
+#     save_words_list_classification(words_list_classification)
+#
+#     words_list_virtual_word_condition = [{'words': 'ICPO, INTERPOL', 'consent_required': False, 'allow_use': False},
+#                                          {'words': 'CANADIAN NATIONAL, CN', 'consent_required': False, 'allow_use': False}]
+#     save_words_list_virtual_word_condition(words_list_virtual_word_condition)
+#
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'CANADIAN NATIONAL INTERPOL INVESTIGATORS INC.',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#             assert_has_issue_type(AnalysisIssueCodes.WORDS_TO_AVOID, payload.get('issues'))
+#
+#
+# @pytest.mark.xfail(raises=ValueError)
+# def test_too_many_words_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'MOUNTAIN', 'classification': 'DIST'},
+#                                  {'word': 'MOUNTAIN', 'classification': 'DESC'},
+#                                  {'word': 'VIEW', 'classification': 'DIST'},
+#                                  {'word': 'VIEW', 'classification': 'DESC'},
+#                                  {'word': 'FOOD', 'classification': 'DIST'},
+#                                  {'word': 'FOOD', 'classification': 'DESC'},
+#                                  {'word': 'GROWERS', 'classification': 'DIST'},
+#                                  {'word': 'GROWERS', 'classification': 'DESC'},
+#                                  {'word': 'CAFE', 'classification': 'DIST'},
+#                                  {'word': 'CAFE', 'classification': 'DESC'}
+#                                  ]
+#     save_words_list_classification(words_list_classification)
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'MOUNTAIN VIEW FOOD GROWERS & CAFE LTD.',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#
+#             for issue in payload.get('issues'):
+#                 # Make sure only Well Formed name issues are being returned
+#                 assert_issue_type_is_one_of([
+#                     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+#                     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+#                     AnalysisIssueCodes.TOO_MANY_WORDS
+#                 ], issue)
+#
+#         assert_has_issue_type(AnalysisIssueCodes.TOO_MANY_WORDS, payload.get('issues'))
+#
+#
+# @pytest.mark.xfail(raises=ValueError)
+# def test_contains_unclassifiable_word_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'FINANCIAL', 'classification': 'DIST'},
+#                                  {'word': 'FINANCIAL', 'classification': 'DESC'},
+#                                  {'word': 'SOLUTIONS', 'classification': 'DIST'},
+#                                  {'word': 'SOLUTIONS', 'classification': 'DESC'}
+#                                  ]
+#     save_words_list_classification(words_list_classification)
+#
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'INVINITY FINANCIAL SOLUTIONS INCORPORATED',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#             assert_has_issue_type(AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD, payload.get('issues'))
+#
+#
+# @pytest.mark.xfail(raises=ValueError)
+# def test_contains_unclassifiable_words_request_response(client, jwt, app):
+#     words_list_classification = [{'word': 'CONSULTING', 'classification': 'DIST'},
+#                                  {'word': 'CONSULTING', 'classification': 'DESC'}
+#                                  ]
+#     save_words_list_classification(words_list_classification)
+#
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = [
+#         {
+#             'name': 'FLERKIN BLUBBLUB CONSULTING INC.',
+#             'location': 'BC',
+#             'entity_type': 'CR',
+#             'request_action': 'NEW'
+#         }
+#     ]
+#
+#     for entry in test_params:
+#         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+#
+#         path = ENDPOINT_PATH + '?' + query
+#         print('\n' + 'request: ' + path + '\n')
+#         response = client.get(path, headers=headers)
+#         payload = jsonpickle.decode(response.data)
+#         print("Assert that the payload contains issues")
+#         if isinstance(payload.get('issues'), list):
+#             assert_issues_count_is_gt(0, payload.get('issues'))
+#             assert_has_issue_type(AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD, payload.get('issues'))
+#
 
 @pytest.mark.xfail(raises=ValueError)
-def test_add_distinctive_word_request_response(client, jwt, app):
+def test_corporate_name_conflict_request_response(client, jwt, app):
+    words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},
+                                 {'word': 'ARMSTRONG', 'classification': 'DESC'},
+                                 {'word': 'PLUMBING', 'classification': 'DIST'},
+                                 {'word': 'PLUMBING', 'classification': 'DESC'}
+                                 ]
+    save_words_list_classification(words_list_classification)
+
+    name_list_db = ['ARMSTRONG PLUMBING & HEATING LTD.']
+    save_words_list_name(name_list_db)
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    test_params = [
+        {
+            'name': 'ARMSTRONG PLUMBING LTD.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        }
+    ]
+
+    for entry in test_params:
+        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+        path = ENDPOINT_PATH + '?' + query
+        print('\n' + 'request: ' + path + '\n')
+        response = client.get(path, headers=headers)
+        payload = jsonpickle.decode(response.data)
+        print("Assert that the payload contains issues")
+        if isinstance(payload.get('issues'), list):
+            assert_issues_count_is_gt(0, payload.get('issues'))
+            assert_has_issue_type(AnalysisIssueCodes.CORPORATE_CONFLICT, payload.get('issues'))
+
+
+# # @pytest.mark.xfail(raises=ValueError)
+# def test_designation_mismatch_request_response(client, jwt, app):
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = {
+#         'name': 'MOUNTAIN VIEW FOOD GROWERS COOP',  # TODO: Test for all designation mismatches
+#         'location': 'BC',
+#         'entity_type': 'BC',
+#         'request_type': 'NEW'
+#     }
+#
+#     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+#     path = ENDPOINT_PATH + '?' + query
+#     print('\n' + 'request: ' + path + '\n')
+#     response = client.get(path, headers=headers)
+#     payload = jsonpickle.decode(response.data)
+#     print("Assert that the payload contains issues")
+#     if isinstance(payload.issues, list):
+#         assert_issues_count_is_gt(0, payload.issues)
+#         assert_has_issue_type(AnalysisIssueCodes.DESIGNATION_MISMATCH, payload.issues)
+#
+#
+# # @pytest.mark.xfail(raises=ValueError)
+# def test_name_requires_consent_request_response(client, jwt, app):
+#     # create JWT & setup header with a Bearer Token using the JWT
+#     token = jwt.create_jwt(claims, token_header)
+#     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+#
+#     test_params = {
+#         'name': 'MOUNTAIN VIEW FOOD ENGINEERING INC.',
+#         'location': 'BC',
+#         'entity_type': 'BC',
+#         'request_type': 'NEW'
+#     }
+#
+#     query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
+#     path = ENDPOINT_PATH + '?' + query
+#     print('\n' + 'request: ' + path + '\n')
+#     response = client.get(path, headers=headers)
+#     payload = jsonpickle.decode(response.data)
+#     print("Assert that the payload contains issues")
+#     if isinstance(payload.issues, list):
+#         assert_issues_count_is_gt(0, payload.issues)
+#         assert_has_issue_type(AnalysisIssueCodes.NAME_REQUIRES_CONSENT, payload.issues)
+#
+#
+
+#
+#
+
+
+def save_words_list_classification(words_list):
     from namex.models import WordClassification as WordClassificationDAO
-
-    words_list = [{'word': 'GROWERS', 'classification': 'DESC'},
-                  {'word': 'AEROENTERPRISES', 'classification': 'DESC'}]
-
     for record in words_list:
         wc = WordClassificationDAO()
         wc.classification = record['classification']
@@ -101,232 +573,41 @@ def test_add_distinctive_word_request_response(client, jwt, app):
         wc.approved_dt = date.today()
         wc.save_to_db()
 
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    test_params = [
-        {'name': 'GROWERS INC.',
-         'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
-         },
-        {'name': 'AEROENTERPRISES INC.',
-         'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
-         }
-    ]
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
-
-        path = ENDPOINT_PATH + '?' + query
-        print('\n' + 'request: ' + path + '\n')
-        response = client.get(path, headers=headers)
-        payload = jsonpickle.decode(response.data)
-        print("Assert that the payload contains issues")
-        if isinstance(payload.get('issues'), list):
-            assert_issues_count_is_gt(0, payload.get('issues'))
-
-            for issue in payload.get('issues'):
-                # Make sure only Well Formed name issues are being returned
-                assert_issue_type_is_one_of([
-                    AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                    AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                    AnalysisIssueCodes.TOO_MANY_WORDS
-                ], issue)
-
-            assert_has_issue_type(AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, payload.get('issues'))
+def save_words_list_virtual_word_condition(words_list):
+    from namex.models import VirtualWordCondition as VirtualWordConditionDAO
+    for record in words_list:
+        vwc = VirtualWordConditionDAO()
+        vwc.rc_words = record['words']
+        vwc.rc_consent_required = record['consent_required']
+        vwc.rc_allow_use = record['allow_use']
+        vwc.save_to_db()
 
 
-# @pytest.mark.xfail(raises=ValueError)
-def test_add_descriptive_word_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+def save_words_list_name(words_list):
+    from namex.models import Request as RequestDAO, State, Name as NameDAO, User
+    num = 0
+    req = 1460775
+    for record in words_list:
+        nr_num_label = 'NR 000000'
+        # add a user for the comment
+        user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+                    'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+        user.save_to_db()
+        user_id = user.id
 
-    test_params = {
-        'name': 'MOUNTAIN VIEW INC.',
-        'location': 'BC',
-        'entity_type': 'BC',
-        'request_type': 'NEW'
-    }
+        nr = RequestDAO()
+        num += 1
+        nr_num = nr_num_label + str(num)
+        nr.nrNum = nr_num
+        nr.stateCd = State.INPROGRESS
+        req += 1
+        nr.requestId = req
 
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-        for issue in payload.issues:
-            # Make sure only Well Formed name issues are being returned
-            assert_issue_type_is_one_of([
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisIssueCodes.TOO_MANY_WORDS
-            ], issue)
-
-        assert_has_issue_type(AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_too_many_words_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS INTERNATIONAL INC.',
-        # TODO: We need another test to make sure that designations are not being included in too many words (test: clean name)
-        'location': 'BC',
-        'entity_type': 'BC',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-
-        for issue in payload.issues:
-            # Make sure only Well Formed name issues are being returned
-            assert_issue_type_is_one_of([
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisIssueCodes.TOO_MANY_WORDS
-            ], issue)
-
-        assert_has_issue_type(AnalysisIssueCodes.TOO_MANY_WORDS, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_contains_words_to_avoid_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW VSC INC.',  # VSC = VANCOUVER STOCK EXCHANGE
-        'location': 'BC',
-        'entity_type': 'BC',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisIssueCodes.WORD_TO_AVOID, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_designation_mismatch_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS COOP',  # TODO: Test for all designation mismatches
-        'location': 'BC',
-        'entity_type': 'BC',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisIssueCodes.DESIGNATION_MISMATCH, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_name_requires_consent_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD ENGINEERING INC.',
-        'location': 'BC',
-        'entity_type': 'BC',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisIssueCodes.NAME_REQUIRES_CONSENT, payload.issues)
-
-
-# @pytest.mark.xfail(raises=ValueError)
-def test_contains_unclassifiable_word_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    # TODO: Insert BLOGGINS into word classification, should fail, because it's unclassified
-    #  This ideally involves separate tests
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD BLOGGINS INC.',
-        'location': 'BC',
-        'entity_type': 'BC',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD, payload.issues)
-
-
-# TODO: Pytest uses an empty DB so create a CONFLICTING NAME first before / as part of running this test!!!
-# @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_request_response(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
-    # TODO: Insert 'name': 'MOUNTAIN VIEW FOOD INC.' as the 1st test!
-    # TODO: Insert 'name': 'MOUNTAIN VIEW GROWERS INC.' as the 2nd test!
-    test_params = {
-        'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',
-        'location': 'BC',
-        'entity_type': 'BC',
-        'request_type': 'NEW'
-    }
-
-    query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in test_params.items())
-    path = ENDPOINT_PATH + '?' + query
-    print('\n' + 'request: ' + path + '\n')
-    response = client.get(path, headers=headers)
-    payload = jsonpickle.decode(response.data)
-    print("Assert that the payload contains issues")
-    if isinstance(payload.issues, list):
-        assert_issues_count_is_gt(0, payload.issues)
-        assert_has_issue_type(AnalysisIssueCodes.CORPORATE_CONFLICT, payload.issues)
+        n = NameDAO()
+        n.nr_id = nr.id
+        n.choice = 1
+        n.name = record
+        n.state = State.APPROVED
+        nr.names = [n]
+        nr.save_to_db()
