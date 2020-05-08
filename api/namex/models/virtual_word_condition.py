@@ -76,6 +76,13 @@ class VirtualWordCondition(db.Model):
         # print(query.statement)
         return query.all()
 
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def save_to_session(self):
+        db.session.add(self)
+
 
 class VirtualWordConditionSchema(ma.ModelSchema):
     class Meta:
