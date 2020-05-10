@@ -36,7 +36,7 @@ objects:
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
-                  key: database_name
+                  key: database-name
                   name: postgresql
             - name: DATABASE_HOST
               value: 'postgresql-${ENV_TAG}'
