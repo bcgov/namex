@@ -46,7 +46,7 @@ objects:
                   key: DB_PORT
                   name: namex-api-config
             - name: SOLR_SYNONYMS_API_URL
-              value: 'http://solr-synonyms-api.servicebc-ne-{$ENV_TAG}.svc:8080/api/v1'
+              value: 'http://solr-synonyms-api.servicebc-ne-dev.svc:8080/api/v1'
         restartPolicy: "Never"
         concurrencyPolicy: "Forbid"
 parameters: [
