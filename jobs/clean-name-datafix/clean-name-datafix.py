@@ -22,7 +22,7 @@ def create_app(config=Config):
 app = create_app(Config)
 start_time = datetime.utcnow()
 row_count = 0
-MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '10000')
+MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '500000')
 
 
 try:
