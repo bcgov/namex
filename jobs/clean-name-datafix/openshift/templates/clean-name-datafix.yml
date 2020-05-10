@@ -35,14 +35,11 @@ objects:
                   name: postgresql-${ENV_TAG}
             - name: DATABASE_NAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   key: DATABASE_NAME
-                  name: namex-api-config
+                  name: postgresql
             - name: DATABASE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  key: DB_HOST
-                  name: namex-api-config
+              value: 'postgresql-${ENV_TAG}'
             - name: DATABASE_PORT
               valueFrom:
                 configMapKeyRef:
