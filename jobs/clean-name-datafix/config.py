@@ -11,6 +11,8 @@ class Config(object):
     MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '100')
     MIN_DELAY_SECONDS = os.getenv('MIN_DELAY_SECONDS', '600')
 
+    SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', '')
+
     SECRET_KEY = 'a secret'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
