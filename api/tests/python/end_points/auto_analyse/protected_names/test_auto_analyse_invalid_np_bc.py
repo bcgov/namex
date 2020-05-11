@@ -801,13 +801,55 @@ def test_designation_mismatch_one_word_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'ARMSTRONG COOP PLUMBING',
+            'name': 'ARMSTRONG PLUMBING COOP',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING COOPERATIVE',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
         },
         {
             'name': '468040 BC COOP',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING LLC',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING LLP',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING SLR',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING SENCRL',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        }
+        {
+            'name': 'ARMSTRONG PLUMBING CCC',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING ULC',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -853,7 +895,19 @@ def test_designation_mismatch_one_word_with_hpyhen_request_response(client, jwt,
             'request_action': 'NEW'
         },
         {
+            'name': 'ARMSTRONG CO-OPERATIVE PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
             'name': 'ARMSTRONG PLUMBING L.L.C.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING LIMITED LIABILITY CO.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -885,13 +939,31 @@ def test_designation_mismatch_more_than_one_word_request_response(client, jwt, a
 
     test_params = [
         {
-            'name': 'ARMSTRONG LIMITED LIABILITY COMPANY PLUMBING',
+            'name': 'ARMSTRONG PLUMBING LIMITED LIABILITY COMPANY',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
         },
         {
             'name': 'ARMSTRONG PLUMBING SOCIETE A RESPONSABILITE LIMITEE',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG  PLUMBING LIMITED LIABILITY PARTNERSHIP',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING COMMUNITY CONTRIBUTION COMPANY',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING UNLIMITED LIABILITY COMPANY',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -931,6 +1003,48 @@ def test_designation_misplaced_request_response(client, jwt, app):
         },
         {
             'name': 'ARMSTRONG INCORPORATED PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG LIMITED PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG INC. PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG CORPORATION PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG CORP PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG LTEE PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG INCORPOREE PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG LIMITEE PLUMBING',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
