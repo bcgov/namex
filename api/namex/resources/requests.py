@@ -875,6 +875,7 @@ class Request(Resource):
 
                 nrd.expirationDate = None
                 nrd.consentFlag = None
+                is_changed__request = True
 
                 change_flags = {
                     'is_changed__request': is_changed__request,
