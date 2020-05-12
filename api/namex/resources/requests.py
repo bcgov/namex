@@ -449,6 +449,8 @@ class Request(Resource):
                 # if we're changing to a completed or cancelled state, clear reset flag on NR record
                 if state in State.COMPLETED_STATE + [State.CANCELLED]:
                     nrd.hasBeenReset = False
+                    if nrd.stateCd == State.CONDITIONAL and nrd.consentFlag is None:
+                        nrd.consentFlag = 'Y'
 
 
                 ### COMMENTS ###
@@ -553,6 +555,11 @@ class Request(Resource):
                 json_input['submittedDate'] = str(datetime.datetime.strptime(
                     str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
+
+            if json_input.get('consent_dt', None):
+                json_input['consent_dt'] = str(datetime.datetime.strptime(
+                    str(json_input['consent_dt'][5:]), '%d %b %Y %H:%M:%S %Z'))
+
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
                 for region in json_input['nwpta']:
@@ -573,6 +580,7 @@ class Request(Resource):
                 warnings = nro.move_control_of_request_from_nro(nrd, user)
                 if warnings:
                     MessageServices.add_message(MessageServices.WARN, 'nro_lock', warnings)
+
 
             ### REQUEST HEADER ###
 
@@ -613,7 +621,7 @@ class Request(Resource):
             # if we're changing to a completed or cancelled state, clear reset flag on NR record
             if state in State.COMPLETED_STATE + [State.CANCELLED]:
                 nrd.hasBeenReset = False
-
+                nrd.consentFlag = None
 
             # check if any of the Oracle db fields have changed, so we can send them back
             is_changed__request = False
@@ -626,6 +634,9 @@ class Request(Resource):
             if nrd.natureBusinessInfo != orig_nrd['natureBusinessInfo']: is_changed__request = True
             if nrd.previousRequestId != orig_nrd['previousRequestId']: is_changed__previous_request = True
             if nrd.stateCd != orig_nrd['state']: is_changed__request_state = True
+
+            if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
+                nrd.consentFlag = None
 
             ### END request header ###
 
@@ -863,7 +874,7 @@ class Request(Resource):
                     MessageServices.add_message('error', 'reset_request_in_NRO', err)
 
                 nrd.expirationDate = None
-                is_changed__request = True
+                nrd.consentFlag = None
 
                 change_flags = {
                     'is_changed__request': is_changed__request,
