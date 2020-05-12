@@ -78,6 +78,14 @@ def assert_has_issue_type(issue_type, issues):
     assert has_issue is True
 
 
+@pytest.mark.skip
+def assert_correct_conflict(issue_type, issues, expected):
+    is_correct = False
+    for issue in issues:
+        is_correct = True if issue.get('issue_type') == issue_type.value and " ".join(value['name'] for value in issue.get('conflicts')) == expected else False
+
+    assert is_correct is True
+
 # IN THIS SECTION TEST VARIOUS ERROR RESPONSES
 
 # Showstoppers
@@ -494,8 +502,14 @@ def test_contains_unclassifiable_words_request_response(client, jwt, app):
             assert_has_issue_type(AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD, payload.get('issues'))
 
 
+@pytest.mark.parametrize("name, expected",
+                         [
+                             ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD.")
+                         ]
+                         )
 @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_request_response(client, jwt, app):
+def test_corporate_name_conflict_request_response(client, jwt, app, name, expected):
     words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},
                                  {'word': 'ARMSTRONG', 'classification': 'DESC'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
@@ -517,13 +531,7 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'ARMSTRONG PLUMBING LTD.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': 'ABC CONSULTING LTD.',
+            'name': name,
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -538,12 +546,27 @@ def test_corporate_name_conflict_request_response(client, jwt, app):
         payload = jsonpickle.decode(response.data)
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
-            assert_issues_count_is_gt(0, payload.get('issues'))
-            assert_has_issue_type(AnalysisIssueCodes.CORPORATE_CONFLICT, payload.get('issues'))
+            payload_lst = payload.get('issues')
+            assert_issues_count_is_gt(0, payload_lst)
+            assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
 
 
+@pytest.mark.parametrize("name, expected",
+                         [
+                             ("NO. 295 CATHEDRAL VENTURES LTD.", "CATHEDRAL HOLDINGS LTD."),
+                             ("NO. 295 SCS NO. 003 VENTURES LTD.", "SCS SOLUTIONS INC."),
+                             ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("ABC TWO PLUMBING ONE INC.", "ABC PLUMBING & HEATING LTD."),
+                             ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."),
+                             ("RE/MAX LUMBY INC.", "REMAX LUMBY"),
+                             ("RE MAX LUMBY INC.", "REMAX LUMBY"),
+                             ("468040 B.C. LTD.", "468040 BC LTD."),
+                             ("S, C & S HOLDINGS INC.", "SCS SOLUTIONS INC."),
+                             ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.")
+                         ]
+                         )
 @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt, app):
+def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt, app,name, expected):
     words_list_classification = [{'word': 'CATHEDRAL', 'classification': 'DIST'},
                                  {'word': 'VENTURES', 'classification': 'DIST'},
                                  {'word': 'VENTURES', 'classification': 'DESC'},
@@ -579,61 +602,7 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
 
     test_params = [
         {
-            'name': 'NO. 295 CATHEDRAL VENTURES LTD.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': 'NO. 295 SCS NO. 003 VENTURES LTD.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': '2000 ARMSTRONG -- PLUMBING 2020 LTD.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': 'ABC TWO PLUMBING ONE INC.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': 'SCS HOLDINGS INC.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': 'RE/MAX LUMBY INC.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': 'RE MAX LUMBY INC.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': '468040 B.C. LTD.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': 'S, C & S HOLDINGS INC.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-        {
-            'name': 'EQTEC ENGINEERING & SOLUTIONS LTD.',
+            'name': name,
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -648,12 +617,18 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
         payload = jsonpickle.decode(response.data)
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
-            assert_issues_count_is_gt(0, payload.get('issues'))
-            assert_has_issue_type(AnalysisIssueCodes.CORPORATE_CONFLICT, payload.get('issues'))
+            payload_lst = payload.get('issues')
+            assert_issues_count_is_gt(0, payload_lst)
+            assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
 
 
+@pytest.mark.parametrize("name, expected",
+                         [
+                             ("ARMSTRONG PLUMBING & HEATING LTD.", "ARMSTRONG PLUMBING & HEATING LTD.")
+                         ]
+                         )
 @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_exact_match_request_response(client, jwt, app):
+def test_corporate_name_conflict_exact_match_request_response(client, jwt, app,name, expected):
     words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},
                                  {'word': 'ARMSTRONG', 'classification': 'DESC'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
@@ -671,7 +646,7 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'ARMSTRONG PLUMBING & HEATING LTD.',
+            'name': name,
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -686,8 +661,9 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app):
         payload = jsonpickle.decode(response.data)
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
-            assert_issues_count_is_gt(0, payload.get('issues'))
-            assert_has_issue_type(AnalysisIssueCodes.CORPORATE_CONFLICT, payload.get('issues'))
+            payload_lst = payload.get('issues')
+            assert_issues_count_is_gt(0, payload_lst)
+            assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
 
 
 @pytest.mark.xfail(raises=ValueError)
