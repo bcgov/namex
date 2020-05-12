@@ -19,7 +19,7 @@ from enum import Enum
 import re
 
 from namex.constants import ValidSources, request_type_mapping, EntityType,EntityTypeXSO, EntityTypeXCP, EntityTypeXULC, \
-EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP
+EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP,NameState
 
 
 # noinspection PyPep8Naming
@@ -89,6 +89,10 @@ class Request(db.Model):
     _payment_token = db.Column('payment_id', db.String(4096))
     _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
     _source = db.Column('source', db.String(15), default=ValidSources.NRO)
+    tradeMark = db.Column('trade_mark', db.String(100))
+
+    #MRAS fields
+    homeJurisNum = db.Column('home_juris_num', db.String(40))
 
     ##### end of table definitions
     REQUEST_FURNISHED = 'Y'
@@ -296,7 +300,8 @@ class Request(db.Model):
                      EntityType.XCP.value, EntityTypeXCP.XCCP.value, EntityTypeXCP.XRCP.value,
                      EntityType.BC.value
                      ]),
-                Name.state.in_([Name.APPROVED, Name.CONDITION]),
+
+                 Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value]),
 
             ]
 

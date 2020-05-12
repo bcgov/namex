@@ -329,7 +329,7 @@ def test_add_clean_name_to_nr(client, jwt, app):
     test_string = event_results.eventJson
     test_dict = json.loads(test_string)
 
-    assert 'B SJ ENTERPRISES' == test_dict['clean_name']
+    assert 'BSJ ENTERPRISES' == test_dict['clean_name']
 
 def test_add_new_comment_to_nr(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User, \

@@ -82,3 +82,23 @@ class VirtualWordConditionService:
             return word
 
         return None
+
+
+
+    def get_word_condition_instructions(self,consent_word):
+        model = self.get_model()
+
+        filters = [
+            func.lower(model.rc_words).op('~')(r'\y{}\y'.format(consent_word.lower())),
+            model.rc_allow_use == true(),
+            model.rc_consent_required == true()
+        ]
+        criteria = VirtualWordConditionCriteria(
+            fields=[model.rc_instructions],
+            filters=filters
+        )
+
+        results = model.find_by_criteria(criteria)
+        flattened = list(map(str.strip, (list(filter(None, flatten_tuple_results(results))))))
+        listToStr = ' '.join(map(str, flattened))
+        return listToStr
