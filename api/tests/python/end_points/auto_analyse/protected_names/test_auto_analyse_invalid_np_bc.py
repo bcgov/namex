@@ -1,9 +1,4 @@
 from datetime import date
-from operator import itemgetter
-
-from flask import jsonify
-from flask import json
-
 import pytest
 
 from urllib.parse import quote_plus
@@ -11,7 +6,7 @@ import jsonpickle
 
 from namex.constants import EntityTypes
 from namex.models import User
-from namex.services.name_request.auto_analyse import AnalysisRequestActions, AnalysisIssueCodes
+from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 # from tests.python import integration_oracle_namesdb
 
@@ -89,8 +84,11 @@ def assert_has_issue_type(issue_type, issues):
 # 1.- Unique word classified as descriptive
 @pytest.mark.xfail(raises=ValueError)
 def test_add_distinctive_word_base_request_response(client, jwt, app):
-    words_list_classification = [{'word': 'GROWERS', 'classification': 'DESC'},
-                  {'word': 'AEROENTERPRISES', 'classification': 'DESC'}]
+    words_list_classification = [
+        {'word': 'GROWERS', 'classification': 'DESC'},
+        {'word': 'AEROENTERPRISES', 'classification': 'DESC'},
+        {'word': 'ADJUSTERS', 'classification': 'DESC'}
+    ]
 
     save_words_list_classification(words_list_classification)
 
@@ -105,6 +103,11 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
          'request_action': 'NEW'
          },
         {'name': 'AEROENTERPRISES INC.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'ADJUSTERS LTD.',
          'location': 'BC',
          'entity_type': 'CR',
          'request_action': 'NEW'
@@ -216,7 +219,7 @@ def test_add_descriptive_word_not_classified_request_response(client, jwt, app):
 @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_both_classifications_request_response(client, jwt, app):
     words_list_classification = [{'word': 'ABBOTSFORD’ ', 'classification': 'DIST'},
-                  {'word': 'ABBOTSFORD’ ', 'classification': 'DESC'}]
+                                 {'word': 'ABBOTSFORD’ ', 'classification': 'DESC'}]
     save_words_list_classification(words_list_classification)
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -258,7 +261,11 @@ def test_add_descriptive_word_both_classifications_request_response(client, jwt,
 @pytest.mark.xfail(raises=ValueError)
 def test_successful_well_formed_request_response(client, jwt, app):
     words_list_classification = [{'word': 'ADEPTIO', 'classification': 'DIST'},
-                  {'word': 'AGRONOMICS', 'classification': 'DESC'}]
+                                 {'word': 'AGRONOMICS', 'classification': 'DESC'},
+                                 {'word': 'ABC', 'classification': 'DIST'},
+                                 {'word': 'PLUMBING', 'classification': 'DIST'},
+                                 {'word': 'PLUMBING', 'classification': 'DESC'}
+                                 ]
     save_words_list_classification(words_list_classification)
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -268,6 +275,12 @@ def test_successful_well_formed_request_response(client, jwt, app):
     test_params = [
         {
             'name': 'ADEPTIO AGRONOMICS INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ABC PLUMBING INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -330,7 +343,8 @@ def test_contains_more_than_one_word_to_avoid_request_response(client, jwt, app)
     save_words_list_classification(words_list_classification)
 
     words_list_virtual_word_condition = [{'words': 'ICPO, INTERPOL', 'consent_required': False, 'allow_use': False},
-                                         {'words': 'CANADIAN NATIONAL, CN', 'consent_required': False, 'allow_use': False}]
+                                         {'words': 'CANADIAN NATIONAL, CN', 'consent_required': False,
+                                          'allow_use': False}]
     save_words_list_virtual_word_condition(words_list_virtual_word_condition)
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -458,6 +472,12 @@ def test_contains_unclassifiable_words_request_response(client, jwt, app):
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
+        },
+        {
+            'name': 'FLERKIN BLUBBLUB BAKERY INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
         }
     ]
 
@@ -531,13 +551,26 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
                                  {'word': 'ARMSTRONG', 'classification': 'DIST'},
                                  {'word': 'ARMSTRONG', 'classification': 'DESC'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
-                                 {'word': 'PLUMBING', 'classification': 'DESC'}
+                                 {'word': 'PLUMBING', 'classification': 'DESC'},
+                                 {'word': 'ABC', 'classification': 'DIST'},
+                                 {'word': 'HOLDINGS', 'classification': 'DIST'},
+                                 {'word': 'HOLDINGS', 'classification': 'DESC'},
+                                 {'word': 'BC', 'classification': 'DIST'},
+                                 {'word': 'BC', 'classification': 'DESC'},
+                                 {'word': '468040', 'classification': 'DIST'},
+                                 {'word': 'EQTEC', 'classification': 'DIST'},
+                                 {'word': 'ENGINEERING', 'classification': 'DIST'},
+                                 {'word': 'ENGINEERING', 'classification': 'DESC'},
+                                 {'word': 'SOLUTIONS', 'classification': 'DIST'},
+                                 {'word': 'SOLUTIONS', 'classification': 'DESC'}
                                  ]
     save_words_list_classification(words_list_classification)
 
     conflict_list_db = ['CATHEDRAL VENTURES TRADING LTD.', 'CATHEDRAL HOLDINGS LTD.',
                         'SCS ENTERPRISES INTERNATIONAL', 'SCS SOLUTIONS INC.',
-                        'ARMSTRONG PLUMBING & HEATING LTD.', 'ARMSTRONG COOLING & WAREHOUSE LTD.']
+                        'ARMSTRONG PLUMBING & HEATING LTD.', 'ARMSTRONG COOLING & WAREHOUSE LTD.',
+                        'ABC PLUMBING & HEATING LTD.', 'REMAX LUMBY', '468040 BC LTD.',
+                        'EQTEC ENGINEERING LTD.', 'EQTEC SOLUTIONS LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -559,6 +592,48 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
         },
         {
             'name': '2000 ARMSTRONG -- PLUMBING 2020 LTD.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ABC TWO PLUMBING ONE INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'SCS HOLDINGS INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'RE/MAX LUMBY INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'RE MAX LUMBY INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': '468040 B.C. LTD.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'S, C & S HOLDINGS INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'EQTEC ENGINEERING & SOLUTIONS LTD.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -621,12 +696,23 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
                                  {'word': 'CANADIAN', 'classification': 'DESC'},
                                  {'word': 'SUMMERS', 'classification': 'DIST'},
                                  {'word': 'GAMES', 'classification': 'DIST'},
-                                 {'word': 'GAMES', 'classification': 'DESC'}]
+                                 {'word': 'GAMES', 'classification': 'DESC'},
+                                 {'word': 'BLAKE', 'classification': 'DIST'},
+                                 {'word': 'ENGINEERING', 'classification': 'DIST'},
+                                 {'word': 'ENGINEERING', 'classification': 'DESC'}
+                                 ]
     save_words_list_classification(words_list_classification)
 
-    words_list_virtual_word_condition = [{
-        'words': 'SUMMER GAMES, WINTER GAMES',
-        'consent_required': True, 'allow_use': True}]
+    words_list_virtual_word_condition = [
+        {
+            'words': 'SUMMER GAMES, WINTER GAMES',
+            'consent_required': True, 'allow_use': True
+        },
+        {
+            'words': 'CONSULTING ENGINEER, ENGINEER, ENGINEERING, INGENIERE, INGENIEUR, INGENIEUR CONSIEL, P ENG, PROFESSIONAL ENGINEER',
+            'consent_required': True, 'allow_use': True
+        }
+    ]
     save_words_list_virtual_word_condition(words_list_virtual_word_condition)
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -636,6 +722,12 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
     test_params = [
         {
             'name': 'CANADIAN SUMMERS GAMES LIMITED',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'BLAKE ENGINEERING LTD.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -825,6 +917,12 @@ def test_designation_mismatch_one_word_request_response(client, jwt, app):
             'request_action': 'NEW'
         },
         {
+            'name': 'ARMSTRONG LLC PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
             'name': 'ARMSTRONG PLUMBING LLP',
             'location': 'BC',
             'entity_type': 'CR',
@@ -841,7 +939,7 @@ def test_designation_mismatch_one_word_request_response(client, jwt, app):
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
-        }
+        },
         {
             'name': 'ARMSTRONG PLUMBING CCC',
             'location': 'BC',
@@ -850,6 +948,12 @@ def test_designation_mismatch_one_word_request_response(client, jwt, app):
         },
         {
             'name': 'ARMSTRONG PLUMBING ULC',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG LTD PLUMBING',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -869,7 +973,7 @@ def test_designation_mismatch_one_word_request_response(client, jwt, app):
 
 
 @pytest.mark.xfail(raises=ValueError)
-def test_designation_mismatch_one_word_with_hpyhen_request_response(client, jwt, app):
+def test_designation_mismatch_one_word_with_hyphen_request_response(client, jwt, app):
     words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},
                                  {'word': 'ARMSTRONG', 'classification': 'DESC'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
@@ -907,6 +1011,12 @@ def test_designation_mismatch_one_word_with_hpyhen_request_response(client, jwt,
             'request_action': 'NEW'
         },
         {
+            'name': 'ARMSTRONG L.L.C. PLUMBING',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
             'name': 'ARMSTRONG PLUMBING LIMITED LIABILITY CO.',
             'location': 'BC',
             'entity_type': 'CR',
@@ -924,6 +1034,7 @@ def test_designation_mismatch_one_word_with_hpyhen_request_response(client, jwt,
         if isinstance(payload.get('issues'), list):
             assert_issues_count_is_gt(0, payload.get('issues'))
             assert_has_issue_type(AnalysisIssueCodes.DESIGNATION_MISMATCH, payload.get('issues'))
+
 
 @pytest.mark.xfail(raises=ValueError)
 def test_designation_mismatch_more_than_one_word_request_response(client, jwt, app):
@@ -1067,12 +1178,20 @@ def test_designation_misplaced_request_response(client, jwt, app):
 def test_name_use_special_words_request_response(client, jwt, app):
     words_list_classification = [{'word': 'BC', 'classification': 'DIST'},
                                  {'word': 'BC', 'classification': 'DESC'},
-                                 {'word': '468040', 'classification': 'DIST'}]
+                                 {'word': '468040', 'classification': 'DIST'},
+                                 {'word': 'COAST', 'classification': 'DIST'},
+                                 {'word': 'COAST', 'classification': 'DESC'},
+                                 {'word': 'TREASURY', 'classification': 'DESC'}
+                                 ]
     save_words_list_classification(words_list_classification)
 
     words_list_virtual_word_condition = [
         {
             'words': 'B C, B C S, BC, BC S, BCPROVINCE, BRITISH COLUMBIA, BRITISHCOLUMBIA, PROVINCIAL',
+            'consent_required': False, 'allow_use': True
+        },
+        {
+            'words': 'TREASURY',
             'consent_required': False, 'allow_use': True
         }
     ]
@@ -1085,6 +1204,12 @@ def test_name_use_special_words_request_response(client, jwt, app):
     test_params = [
         {
             'name': '468040 BC LTD.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'COAST ANGULARS TREASURY INCORPORATED',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -1173,7 +1298,7 @@ def save_words_list_name(words_list):
     num = 0
     req = 1460775
     for record in words_list:
-        nr_num_label = 'NR 000000'
+        nr_num_label = 'NR 00000'
         num += 1
         req += 1
         nr_num = nr_num_label + str(num)
