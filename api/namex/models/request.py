@@ -408,6 +408,7 @@ class RequestsHeaderSchema(ma.ModelSchema):
         # additional = ['stateCd']
         fields = ('additionalInfo'
                   , 'consentFlag'
+                  , 'consent_dt'
                   , 'corpNum'
                   , 'expirationDate'
                   , 'furnished'
@@ -434,6 +435,7 @@ class RequestsSearchSchema(ma.ModelSchema):
         fields = ('additionalInfo'
                   , 'comments'
                   , 'consentFlag'
+                  , 'consent_dt'
                   , 'corpNum'
                   , 'expirationDate'
                   , 'furnished'
