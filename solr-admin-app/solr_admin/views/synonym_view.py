@@ -67,12 +67,12 @@ class SynonymView(SecuredView):
 
         model.stems_text = get_stems(model.synonyms_text)
         self.session.commit()
-        solr.reload_solr_cores()
+        #solr.reload_solr_cores()
 
     # After deleting the data create the audit log.
     def after_model_delete(self, model):
         _create_audit_log(model, 'DELETE')
-        solr.reload_solr_cores()
+        #solr.reload_solr_cores()
 
 
 # Validate the Synonyms Text and ensure it meets our standards.
