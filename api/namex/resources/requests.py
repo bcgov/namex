@@ -602,6 +602,8 @@ class Request(Resource):
             nrd.natureBusinessInfo = convert_to_ascii(json_input.get('natureBusinessInfo', None))
             nrd.stateCd = state
             nrd.userId = user.id
+            nrd.consentFlag = json_input.get('consentFlag',None)
+            nrd.consent_dt = json_input.get('consent_dt',None)
 
             if reset:
                 # set the flag indicating that the NR has been reset
@@ -621,7 +623,7 @@ class Request(Resource):
             # if we're changing to a completed or cancelled state, clear reset flag on NR record
             if state in State.COMPLETED_STATE + [State.CANCELLED]:
                 nrd.hasBeenReset = False
-                nrd.consentFlag = None
+
 
             # check if any of the Oracle db fields have changed, so we can send them back
             is_changed__request = False
@@ -637,6 +639,7 @@ class Request(Resource):
 
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
                 nrd.consentFlag = None
+                nrd.consent_dt = None
 
             ### END request header ###
 
@@ -875,6 +878,7 @@ class Request(Resource):
 
                 nrd.expirationDate = None
                 nrd.consentFlag = None
+                nrd.consent_dt = None
                 is_changed__request = True
 
                 change_flags = {
