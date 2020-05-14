@@ -885,6 +885,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         correct_designations = procedure_result.values['correct_designations']
 
         incorrect_designations_lc = self._lc_list_items(incorrect_designations, True)
+        correct_designations_lc = self._lc_list_items(correct_designations, True)
         list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         entity_type_description = get_entity_type_description(self.entity_type)
@@ -894,7 +895,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
             line1="The " + self._join_list_words(incorrect_designations_lc) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>",
             line2=None,
             consenting_body=None,
-            designations=correct_designations,
+            designations=correct_designations_lc,
             show_reserve_button=False,
             show_examination_button=False,
             conflicts=None,
@@ -930,8 +931,8 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                     # Render the Template string, replacing placeholder vars
                     setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute({
                         'list_name': self._join_list_words(list_name),
-                        'correct_designations': self._join_list_words(correct_designations),
-                        'incorrect_designations': self._join_list_words(incorrect_designations),
+                        'correct_designations': self._join_list_words(correct_designations_lc),
+                        'incorrect_designations': self._join_list_words(incorrect_designations_lc),
                         'entity_type': self.entity_type  # TODO: Map this CODE!
                     }))
 
