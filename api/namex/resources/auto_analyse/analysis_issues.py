@@ -40,8 +40,8 @@ class AnalysisResponseIssue:
             return []  # This method should always return a list
 
         try:
-            converted_list = list(map(lambda d: d.lower() if isinstance(d, str) else '', str_list)) \
-                if convert else list(map(lambda d: d.lower(), str_list))
+            converted_list = list(map(lambda d: d.upper() if isinstance(d, str) else '', str_list)) \
+                if convert else list(map(lambda d: d.upper(), str_list))
         except Exception as err:
             print('List is not a list of strings ' + repr(err))
 
@@ -891,7 +891,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>",
+            line1="The " + self._join_list_words(incorrect_designations_lc) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>",
             line2=None,
             consenting_body=None,
             designations=correct_designations,
@@ -908,7 +908,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                 self.analysis_response.name_as_submitted,
                 self.analysis_response.name_original_tokens,
                 list_name_incl_designation_lc,
-                list_name_incl_designation.index(word),
+                list_name_incl_designation.index(word.lower()),
                 False
             )
 
@@ -952,13 +952,14 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         misplaced_all_designation = procedure_result.values['misplaced_all_designation']
 
         misplaced_all_designation_lc = self._lc_list_items(misplaced_all_designation, True)
+        misplaced_end_designation_lc = self._lc_list_items(misplaced_end_designation, True)
         #misplaced_all_designation_lc = misplaced_all_designation_lc + remove_periods_designation(misplaced_all_designation_lc)
         list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
             line1="The " + self._join_list_words(
-                misplaced_end_designation) + " designation(s) must be at the end of the name.",
+                misplaced_end_designation_lc) + " designation(s) must be at the end of the name.",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -976,7 +977,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
                 self.analysis_response.name_as_submitted,
                 self.analysis_response.name_original_tokens,
                 list_name_incl_designation_lc,
-                list_name_incl_designation.index(word),
+                list_name_incl_designation.index(word.lower()),
                 False
             )
 
