@@ -74,7 +74,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector):
 
         designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
                                                                                        designation_end_list=correct_designation_end_list).data
-        self._misplaced_designation_end_list = list(map(lambda x: x.upper(), designation_end_misplaced_list))
+        self._misplaced_designation_end_list = designation_end_misplaced_list
 
     def _set_designations_by_entity_type_user(self):
         syn_svc = self.synonym_service
