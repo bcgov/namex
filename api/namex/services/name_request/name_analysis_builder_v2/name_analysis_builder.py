@@ -385,9 +385,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.result_code = AnalysisIssueCodes.DESIGNATION_MISPLACED
             result.values = {
                 'list_name': list_name,
-                'misplaced_any_designation': None,
-                'misplaced_end_designation': misplaced_designation_end,
-                'misplaced_all_designation': misplaced_designation_end
+                'misplaced_end_designation': misplaced_designation_end
             }
 
         return result

@@ -949,14 +949,8 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         list_name_incl_designation = self.analysis_response.name_original_tokens
 
-        # TODO: This was in here but not handled, why?
-        # misplaced_any_designation = procedure_result.values['misplaced_any_designation']
         misplaced_end_designation = procedure_result.values['misplaced_end_designation']
-        misplaced_all_designation = procedure_result.values['misplaced_all_designation']
-
-        misplaced_all_designation_lc = self._lc_list_items(misplaced_all_designation, True)
         misplaced_end_designation_lc = self._lc_list_items(misplaced_end_designation, True)
-        #misplaced_all_designation_lc = misplaced_all_designation_lc + remove_periods_designation(misplaced_all_designation_lc)
         list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = NameAnalysisIssue(
@@ -985,7 +979,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
             )
 
             # Highlight the issues
-            if word in misplaced_all_designation_lc:
+            if word in misplaced_end_designation_lc:
                 issue.name_actions.append(NameAction(
                     word=word,
                     index=offset_idx,
