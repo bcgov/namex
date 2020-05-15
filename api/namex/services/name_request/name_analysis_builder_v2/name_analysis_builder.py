@@ -187,24 +187,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         # TODO: Arturo plz check the word against the list, provide it as an input for word_condition_service.get_words_to_avoid()
         all_words_to_avoid_list = self.word_condition_service.get_words_to_avoid()
-        words_to_avoid_list = []
+        all_words_to_avoid_list = [word.lower() for word in all_words_to_avoid_list]
+        all_words_to_avoid_list.sort(key=len, reverse=True)
 
-        for words_to_avoid in all_words_to_avoid_list:
-            if words_to_avoid.lower() in name.lower():
-                words_to_avoid_list.append(words_to_avoid.lower())
+        word_avoid_alternators = '|'.join(map(re.escape, all_words_to_avoid_list))
+        regex = re.compile(r'(?<!\w)({0})(?!\w)'.format(word_avoid_alternators))
+        word_avoid_compound_list = regex.findall(name.lower())
 
-        words_to_avoid_list_response = []
+        word_avoid_tokenized_list = [element.split(' ') for element in word_avoid_compound_list]
+        word_avoid_tokenized_list = [item for sublist in word_avoid_tokenized_list for item in sublist]
 
-        for idx, token in enumerate(list_name):
-            if any(token in word for word in words_to_avoid_list):
-                words_to_avoid_list_response.append(token)
-
-        if words_to_avoid_list_response:
+        if word_avoid_tokenized_list:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.WORDS_TO_AVOID
             result.values = {
                 'list_name': list_name,
-                'list_avoid': words_to_avoid_list_response
+                'list_avoid': word_avoid_tokenized_list,
+                'list_avoid_compound': word_avoid_compound_list
             }
 
         return result
