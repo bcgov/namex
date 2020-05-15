@@ -97,7 +97,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_word_limit(self, list_name):
-        result = None
+        result = ProcedureResult()
+        result.is_valid = True
 
         length_name = len(list_name)
         if length_name > MAX_LIMIT:
@@ -119,7 +120,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_unclassified_words(self, list_name, list_none):
-        result = None
+        result = ProcedureResult()
+        result.is_valid = True
         if list_none.__len__() > 0:
             unclassified_words_list_response = []
             for idx, token in enumerate(list_name):

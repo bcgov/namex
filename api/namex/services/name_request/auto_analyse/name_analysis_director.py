@@ -257,12 +257,12 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 return analysis
 
             check_word_limit = builder.check_word_limit(list_name)
-            if check_word_limit:
+            if not check_word_limit.is_valid:
                 analysis.append(check_word_limit)
                 return analysis
 
             check_word_unclassified = builder.check_unclassified_words(list_name, list_none)
-            if check_word_unclassified:
+            if not check_word_unclassified.is_valid:
                 analysis.append(check_word_unclassified)
 
             #analysis = analysis + results
