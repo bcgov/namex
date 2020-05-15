@@ -27,47 +27,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
         result = None
-        # TODO: We're doing two checks for name is well formed, that should probably not be the case
-
-        # list_name = ['victoria', 'abc', 'view', 'book']
-        # list_dist = ['victoria', 'book']
-        # list_desc = ['victoria', 'abc', 'view']
-        # Returns words in wrong classification following distinctive | descriptive: [{book:3}]
-        # _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
 
         # Validate possible combinations using available distinctive and descriptive list:
         if list_dist == list_desc:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name)
         else:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name, list_dist, list_desc)
-
-        # # First, check to make sure the name doesn't have too many words
-        # if len(list_name) > MAX_LIMIT:
-        #     result = ProcedureResult()
-        #     result.is_valid = False
-        #     result.result_code = AnalysisIssueCodes.TOO_MANY_WORDS
-        #
-        #     results.append(result)
-        #
-        # # Next, we check for unclassified words
-        # if list_none.__len__() > 0:
-        #     unclassified_words_list_response = []
-        #     for idx, token in enumerate(list_name):
-        #         if any(token in word for word in list_none):
-        #             unclassified_words_list_response.append(token)
-        #
-        #     result = ProcedureResult()
-        #     result.is_valid = False
-        #     result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
-        #     result.values = {
-        #         'list_name': list_name or [],
-        #         'list_none': unclassified_words_list_response
-        #     }
-        #
-        #     results.append(result)
-
-        # Now that too many words and unclassified words are handled, handle distinctive and descriptive issues
-        # result = None
 
         # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
         # the original name should be passed to get the correct index when reporting issues to front end.
