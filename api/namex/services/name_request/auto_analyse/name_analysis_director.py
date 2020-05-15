@@ -252,7 +252,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.name_tokens,
                 self.name_original_tokens
             )
-            if check_name_is_well_formed:
+            if not check_name_is_well_formed.is_valid:
                 analysis.append(check_name_is_well_formed)
                 return analysis
 

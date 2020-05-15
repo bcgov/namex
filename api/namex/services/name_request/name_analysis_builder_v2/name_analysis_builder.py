@@ -26,7 +26,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
-        result = None
+        result = ProcedureResult()
+        result.is_valid = True
 
         # Validate possible combinations using available distinctive and descriptive list:
         if list_dist == list_desc:
@@ -162,7 +163,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         word_avoid_tokenized_list = [element.split(' ') for element in word_avoid_compound_list]
         word_avoid_tokenized_list = [item for sublist in word_avoid_tokenized_list for item in sublist]
 
-        if word_avoid_tokenized_list:
+        if word_avoid_tokenized_list.__len__() > 0:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.WORDS_TO_AVOID
             result.values = {
@@ -409,9 +410,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         word_special_compound_list = regex.findall(name.lower())
 
         word_special_tokenized_list = [element.split(' ') for element in word_special_compound_list]
-        word_special_tokenized_list = [item for sublist in word_special_tokenized_list for item in sublist]
+        word_special_tokenized_list = [item for sublist in word_special_tokenized_list for item in sublist if item]
 
-        if word_special_tokenized_list:
+        if word_special_tokenized_list.__len__() > 0:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.WORD_SPECIAL_USE
             result.values = {
