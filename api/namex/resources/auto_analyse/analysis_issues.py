@@ -512,10 +512,11 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
         list_avoid = self._lc_list_items(procedure_result.values['list_avoid'])
+        list_avoid_compound = self._lc_list_items(procedure_result.values['list_avoid_compound'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) " + self._join_list_words(list_avoid) + " cannot be used.",
+            line1="The word(s) " + self._join_list_words(list_avoid_compound) + " cannot be used.",
             line2="",
             consenting_body=None,
             designations=None,
