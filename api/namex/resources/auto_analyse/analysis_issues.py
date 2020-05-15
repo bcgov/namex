@@ -564,10 +564,11 @@ class WordSpecialUse(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
         list_special = self._lc_list_items(procedure_result.values['list_special'])
+        list_special_compound = self._lc_list_items(procedure_result.values['list_special_compound'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) " + self._join_list_words(list_special) + " must go to examination ",
+            line1="The word(s) " + self._join_list_words(list_special_compound) + " must go to examination ",
             line2=None,
             consenting_body=None,
             designations=None,
