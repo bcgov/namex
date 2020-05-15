@@ -151,8 +151,9 @@ def set_applicant_attributes(json_data,nr_id):
     return nrd_app
 
 
+
 @cors_preflight("POST")
-@api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
+@api.route('', methods=['POST', 'OPTIONS'])
 class NameRequest(Resource):
     applicant_model = api.model('applicant_model',{
                                     'lastName': fields.String(attribute='lastName'),
@@ -210,7 +211,7 @@ class NameRequest(Resource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     #@jwt.requires_auth
-    def post(self, *args, **kwargs):
+    def post(*args, **kwargs):
         json_data = request.get_json()
         if not json_data:
             return jsonify({'message': 'No input data provided'}), 400
