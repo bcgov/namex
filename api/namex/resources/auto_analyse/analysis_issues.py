@@ -618,10 +618,11 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         list_consent = self._lc_list_items(procedure_result.values['list_consent'])
+        list_consent_original = self._lc_list_items(procedure_result.values['list_consent_original'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) " + self._join_list_words(list_consent) + " are restricted and may require consent.",
+            line1="The word(s) " + self._join_list_words(list_consent_original) + " are restricted and may require consent.",
             line2="Please check the options below.",
             consenting_body=ConsentingBody(
                 name="",
