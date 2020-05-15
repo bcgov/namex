@@ -437,24 +437,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result.is_valid = True
 
         all_word_special_use_list = self.word_condition_service.get_word_special_use()
-        word_special_use_list = []
+        all_word_special_use_list = [word.lower() for word in all_word_special_use_list]
+        all_word_special_use_list.sort(key=len, reverse=True)
 
-        for words_special in all_word_special_use_list:
-            if words_special.lower() in name.lower():
-                word_special_use_list.append(words_special.lower())
+        word_special_alternators = '|'.join(map(re.escape, all_word_special_use_list))
+        regex = re.compile(r'(?<!\w)({0})(?!\w)'.format(word_special_alternators))
+        word_special_compound_list = regex.findall(name.lower())
 
-        word_special_use_list_response = []
+        word_special_tokenized_list = [element.split(' ') for element in word_special_compound_list]
+        word_special_tokenized_list = [item for sublist in word_special_tokenized_list for item in sublist]
 
-        for idx, token in enumerate(list_name):
-            if any(token in word for word in word_special_use_list):
-                word_special_use_list_response.append(token)
-
-        if word_special_use_list_response:
+        if word_special_tokenized_list:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.WORD_SPECIAL_USE
             result.values = {
                 'list_name': list_name,
-                'list_special': word_special_use_list_response
+                'list_special': word_special_tokenized_list,
+                'list_special_compound': word_special_compound_list
             }
 
         return result
