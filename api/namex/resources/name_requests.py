@@ -397,16 +397,18 @@ class NameRequest(Resource):
                         submitted_name.conflict1_num = None
                         submitted_name.conflict1 = None
                     except Exception as error:
-                        current_app.logger.error("Error on draft emoty conflict info. Error:{0}".format(error))
+                        current_app.logger.error("Error on draft empty conflict info. Error:{0}".format(error))
                         return jsonify({"message": "Error on draft empty conflict info."}), 404
 
 
                 for consent in name['consent_words']:
+                    if consent is None:
+                        break
                     try:
                         cnd_instructions = None
                         cnd_instructions = restricted.get_word_condition_instructions(consent)
                     except Exception as error:
-                        current_app.logger.error("Error on get consent words. Error:{0}".format(error))
+                        current_app.logger.error("Error on get consent word=>Consent Word[0], . Error:{1}".format(consent, error))
                         return jsonify({"message": "Error on get consent words."}), 404
 
                     try:
