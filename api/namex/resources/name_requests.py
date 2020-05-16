@@ -403,10 +403,11 @@ class NameRequest(Resource):
                 consent_list = name['consent_words']
                 if len(consent_list) > 0:
                     for consent in consent_list:
-
                         try:
+                            current_app.logger.error("Info on get consent word. Consent Word:[0], Name:[1]".format(consent, name))
                             cnd_instructions = None
-                            cnd_instructions = restricted.get_word_condition_instructions(consent)
+                            if consent != "" or len(consent) > 0 :
+                                cnd_instructions = restricted.get_word_condition_instructions(consent)
                         except Exception as error:
                             current_app.logger.error("Error on get consent word. Consent Word[0], Name[1]. Error:{2}".format(consent, name,error))
                             return jsonify({"message": "Error on get consent words."}), 404
