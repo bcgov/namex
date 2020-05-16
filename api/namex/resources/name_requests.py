@@ -348,52 +348,90 @@ class NameRequest(Resource):
 
         try:
             for name in json_data.get('names', None):
-                submitted_name = Name()
-                name_id = get_name_sequence()
-                submitted_name.id = name_id
+                try:
+                    submitted_name = Name()
+                    name_id = get_name_sequence()
+                    submitted_name.id = name_id
+                except Exception as error:
+                    current_app.logger.error("Error on submitted Name object. Error:{0}".format(error))
+                    return jsonify({"message": "Error on submitted_name and sequence."}), 404
 
-                submitted_name.choice = name['choice']
-                submitted_name.name = name['name']
+                #common name attributes
+                try:
+                    submitted_name.choice = name['choice']
+                    submitted_name.name = name['name']
 
-                if (name['name_type_cd']):
-                    submitted_name.name_type_cd = name['name_type_cd']
-                else:
-                    submitted_name.name_type_cd = 'CO'
+                    if (name['name_type_cd']):
+                        submitted_name.name_type_cd = name['name_type_cd']
+                    else:
+                        submitted_name.name_type_cd = 'CO'
 
-                if (json_data['stateCd'] == State.DRAFT):
-                    submitted_name.state = 'NE'
-                else:
-                    submitted_name.state = json_data['stateCd']
+                    if (json_data['stateCd'] == State.DRAFT):
+                        submitted_name.state = 'NE'
+                    else:
+                        submitted_name.state = json_data['stateCd']
 
-                if name['designation']: submitted_name.designation = name['designation']
+                    if name['designation']: submitted_name.designation = name['designation']
 
-                submitted_name.nrId = nr_id
+                    submitted_name.nrId = nr_id
+                except Exception as error:
+                    current_app.logger.error("Error on common name attributes. Error:{0}".format(error))
+                    return jsonify({"message": "Error on common name attributes."}), 404
+
                 decision_text = None
 
                 if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
+                    try:
+                        # only capturing one conflict
+                        if (name['conflict1_num']): submitted_name.conflict1_num = name['conflict1_num']
+                        if name['conflict1']: submitted_name.conflict1 = name['conflict1']
+                        #conflict text same as Namex
+                        decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
+                    except Exception as error:
+                        current_app.logger.error("Error on reserved conflict info. Error:{0}".format(error))
+                        return jsonify({"message": "Error on reserved conflict info."}), 404
 
-                    # only capturing one conflict
-                    if (name['conflict1_num']): submitted_name.conflict1_num = name['conflict1_num']
-                    if name['conflict1']: submitted_name.conflict1 = name['conflict1']
-                    #conflict text same as Namex
-                    decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
+
                 else:
-                    submitted_name.conflict1_num = None
-                    submitted_name.conflict1 = None
+                    try:
+                        submitted_name.conflict1_num = None
+                        submitted_name.conflict1 = None
+                    except Exception as error:
+                        current_app.logger.error("Error on draft emoty conflict info. Error:{0}".format(error))
+                        return jsonify({"message": "Error on draft empty conflict info."}), 404
+
 
                 for consent in name['consent_words']:
-                    cnd_instructions = None
-                    cnd_instructions = restricted.get_word_condition_instructions(consent)
+                    try:
+                        cnd_instructions = None
+                        cnd_instructions = restricted.get_word_condition_instructions(consent)
+                    except Exception as error:
+                        current_app.logger.error("Error on get consent words. Error:{0}".format(error))
+                        return jsonify({"message": "Error on get consent words."}), 404
 
-                    if (decision_text is None):
-                        decision_text = cnd_instructions + '\n'
-                    else:
-                        decision_text += consent + '- ' + cnd_instructions + '\n'
+                    try:
+                        if (decision_text is None):
+                            decision_text = cnd_instructions + '\n'
+                        else:
+                            decision_text += consent + '- ' + cnd_instructions + '\n'
 
-                    submitted_name.decision_text = decision_text
-                nrd.names.append(submitted_name)
-            #save names
-            nrd.save_to_db()
+                        submitted_name.decision_text = decision_text
+                    except Exception as error:
+                        current_app.logger.error("Error on adding consent words to decision. Error:{0}".format(error))
+                        return jsonify({"message": "Error on adding consent words to decision text"}), 404
+                try:
+                    nrd.names.append(submitted_name)
+                except Exception as error:
+                    current_app.logger.error("Error appending names. Error:{0}".format(error))
+                    return jsonify({"message": "Error appending names"}), 404
+
+            try:
+                #save names
+                nrd.save_to_db()
+            except Exception as error:
+                current_app.logger.error("Error saving the whole nr and names. Error:{0}".format(error))
+                return jsonify({"message": "Error saving names to the db"}), 404
+
 
         except Exception as error:
             current_app.logger.error("Error setting name. Error:{0}".format(error))
