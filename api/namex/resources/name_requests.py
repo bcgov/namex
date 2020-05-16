@@ -226,29 +226,30 @@ class NameRequest(Resource):
 
             restricted = VirtualWordConditionService()
         except Exception as error:
-            print('Error initializing VirtualWordCondition Service: ' + repr(error))
-            raise
+            current_app.logger.error("'Error initializing VirtualWordCondition Service: Error:{0}".format(error))
+            return jsonify({"message": "Virtual Word Condition Service error"}), 404
+
 
         try:
             user = User.find_by_username('name_request_service_account')
             user_id = user.id
         except Exception as error:
-            print('Error getting user id: ' + repr(error))
-            raise
+            current_app.logger.error("Error getting user id: Error:{0}".format(error))
+            return jsonify({"message": "Get User Error"}), 404
 
 
         try:
          name_request = Request()
         except Exception as error:
-            print('Error initializing up name_request object: ' + repr(error))
-            raise
+            current_app.logger.error("Error initializing name_request object Error:{0}".format(error))
+            return jsonify({"message": "Name Request object error"}), 404
 
         try:
             nr_num = generate_nr()
             nr_id = get_request_sequence()
         except Exception as error:
-            print('Error getting nr number: ' + repr(error))
-            raise
+            current_app.logger.error("Error getting nr number. Error:{0}".format(error))
+            return jsonify({"message": "Error getting nr number"}), 404
 
 
         #set the request attributes
@@ -258,8 +259,9 @@ class NameRequest(Resource):
             name_request.requestTypeCd = set_request_type(json_data['entity_type'], json_data['request_action'])
             name_request.nrNum=nr_num
         except Exception as error:
-            print('Error setting request header attributes: ' + repr(error))
-            raise
+            current_app.logger.error("Error setting request header attributes. Error:{0}".format(error))
+            return jsonify({"message": "Error setting request header attributes"}), 404
+
 
         try:
 
@@ -273,8 +275,9 @@ class NameRequest(Resource):
             name_request.entity_type_cd = json_data['entity_type']
             name_request.request_action_cd= json_data['request_action']
         except Exception as error:
-            print('Error seeting reserve state and expiration date: ' + repr(error))
-            raise
+            current_app.logger.error("Error setting reserve state and expiration date. Error:{0}".format(error))
+            return jsonify({"message": "Error setting reserve state and expiration date"}), 404
+
 
 
         #set this to name_request_service_account
@@ -283,8 +286,8 @@ class NameRequest(Resource):
             lang_comment = add_language_comment(json_data['english'],user_id, nr_id)
             name_request.comments.append(lang_comment)
         except Exception as error:
-            print('Error setting language comment: ' + repr(error))
-            raise
+            current_app.logger.error("Error setting language comment. Error:{0}".format(error))
+            return jsonify({"message": "Error setting language comment."}), 404
 
         try:
             if  json_data['nameFlag'] == True:
@@ -292,8 +295,8 @@ class NameRequest(Resource):
               name_request.comments.append(name_comment)
 
         except Exception as error:
-            print('Error setting name comment: ' + repr(error))
-            raise
+            current_app.logger.error("Error setting person name comment. Error:{0}".format(error))
+            return jsonify({"message": "Error setting person name comment."}), 404
 
         try:
             if json_data['submit_count'] is None:
@@ -301,8 +304,8 @@ class NameRequest(Resource):
             else:
                 name_request.submitCount = + 1
         except Exception as error:
-            print('Error setting submit count: ' + repr(error))
-            raise
+            current_app.logger.error("Error setting submit count. Error:{0}".format(error))
+            return jsonify({"message": "Error setting submit count."}), 404
 
         try:
             if json_data['stateCd'] == State.DRAFT:
@@ -316,12 +319,12 @@ class NameRequest(Resource):
                         nrd.applicants.append(nrd_app)
 
                 except Exception as error:
-                    print('Error setting applicant: ' + repr(error))
-                    raise
+                    current_app.logger.error("Error setting applicant. Error:{0}".format(error))
+                    return jsonify({"message": "Error setting applicant."}), 404
 
         except Exception as error:
-            print('Error setting DRAFT attributes: ' + repr(error))
-            raise
+            current_app.logger.error("Error setting DRAFT attributes. Error:{0}".format(error))
+            return jsonify({"message": "Error setting DRAFT attributes."}), 404
 
         try:
 
@@ -330,14 +333,16 @@ class NameRequest(Resource):
                 nrd = Request.find_by_nr(name_request.nrNum)
 
         except Exception as error:
-            print('Error saving reservation to db: ' + repr(error))
-            raise
+            current_app.logger.error("Error saving reservation to db. Error:{0}".format(error))
+            return jsonify({"message": "Error saving reservation to db."}), 404
+
 
         try:
             nrd = Request.find_by_nr(name_request.nrNum)
         except Exception as error:
-            print('Error retrieving the nr from the db: ' + repr(error))
-            raise
+            current_app.logger.error("Error retrieving the New NR from the db. Error:{0}".format(error))
+            return jsonify({"message": "Error retrieving the New NR from the db."}), 404
+
 
 
 
@@ -391,8 +396,8 @@ class NameRequest(Resource):
             nrd.save_to_db()
 
         except Exception as error:
-            print('Error setting name: ' + repr(error))
-            raise
+            current_app.logger.error("Error setting name. Error:{0}".format(error))
+            return jsonify({"message": "Error setting name."}), 404
 
         #TODO: Need to add verification that the save was successful.
        #update solr for reservation
@@ -406,8 +411,8 @@ class NameRequest(Resource):
                 solr_docs.append(nr_doc)
                 update_solr('possible.conflicts',solr_docs)
         except Exception as error:
-            print('Error updating solr: ' + repr(error))
-            raise
+            current_app.logger.error("Error updating solr for reservation. Error:{0}".format(error))
+            return jsonify({"message": "Error updating solr for reservation."}), 404
 
 
         current_app.logger.debug(name_request.json())
