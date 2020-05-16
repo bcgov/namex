@@ -400,27 +400,27 @@ class NameRequest(Resource):
                         current_app.logger.error("Error on draft empty conflict info. Error:{0}".format(error))
                         return jsonify({"message": "Error on draft empty conflict info."}), 404
 
+                consent_list = name['consent_words']
+                if len(consent_list) > 0:
+                    for consent in consent_list:
 
-                for consent in name['consent_words']:
-                    if consent is None or len(consent) == 0:
-                        break
-                    try:
-                        cnd_instructions = None
-                        cnd_instructions = restricted.get_word_condition_instructions(consent)
-                    except Exception as error:
-                        current_app.logger.error("Error on get consent word=>Consent Word[0], . Error:{1}".format(consent, error))
-                        return jsonify({"message": "Error on get consent words."}), 404
+                        try:
+                            cnd_instructions = None
+                            cnd_instructions = restricted.get_word_condition_instructions(consent)
+                        except Exception as error:
+                            current_app.logger.error("Error on get consent word=>Consent Word[0], . Error:{1}".format(consent, error))
+                            return jsonify({"message": "Error on get consent words."}), 404
 
-                    try:
-                        if (decision_text is None):
-                            decision_text = cnd_instructions + '\n'
-                        else:
-                            decision_text += consent + '- ' + cnd_instructions + '\n'
+                        try:
+                            if (decision_text is None):
+                                decision_text = cnd_instructions + '\n'
+                            else:
+                                decision_text += consent + '- ' + cnd_instructions + '\n'
 
-                        submitted_name.decision_text = decision_text
-                    except Exception as error:
-                        current_app.logger.error("Error on adding consent words to decision. Error:{0}".format(error))
-                        return jsonify({"message": "Error on adding consent words to decision text"}), 404
+                            submitted_name.decision_text = decision_text
+                        except Exception as error:
+                            current_app.logger.error("Error on adding consent words to decision. Error:{0}".format(error))
+                            return jsonify({"message": "Error on adding consent words to decision text"}), 404
                 try:
                     nrd.names.append(submitted_name)
                 except Exception as error:
