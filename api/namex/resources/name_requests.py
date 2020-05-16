@@ -402,7 +402,7 @@ class NameRequest(Resource):
 
 
                 for consent in name['consent_words']:
-                    if consent is None:
+                    if consent is None or len(consent) == 0:
                         break
                     try:
                         cnd_instructions = None
