@@ -293,13 +293,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         all_words_consent_list = self.word_condition_service.get_words_requiring_consent()
         words_consent_dict = {}
         word_consent_original_list=[]
-        name_singular_plural_list = get_plural_singular_name(name)
+        name_singular_plural_list = list(set(get_plural_singular_name(name)))
 
         for words_consent in all_words_consent_list:
             for name_sin_plural in name_singular_plural_list:
                 if re.search(r'\b{}\b'.format(re.escape(words_consent.lower())), name_sin_plural.lower()):
                     words_consent_dict.update(self.get_position_word_consent(words_consent, name_sin_plural))
                     word_consent_original_list.append(words_consent)
+                    break
 
         words_consent_list_response = []
         for key in sorted(words_consent_dict):
