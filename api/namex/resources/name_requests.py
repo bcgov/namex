@@ -152,6 +152,7 @@ def set_applicant_attributes(json_data,nr_id):
 
 
 
+
 @cors_preflight("POST")
 @api.route('', methods=['POST', 'OPTIONS'])
 class NameRequest(Resource):
@@ -193,7 +194,7 @@ class NameRequest(Resource):
                                       'nameFlag': fields.Boolean('Set when the name is a person'),
                                       'additionalInfo': fields.String('Additional NR Info'),
                                       'natureBusinessInfo': fields.String('The nature of business'),
-                                      'trademark': fields.String('Registered Trademark'),
+                                      'tradeMark': fields.String('Registered Trademark'),
                                       'previousRequestId': fields.Integer('Internal Id for ReApplys'),
                                       'priorityCd': fields.String('Set to Yes if it is  priority going to examination'),
                                       'submit_count': fields.Integer(
@@ -208,94 +209,168 @@ class NameRequest(Resource):
                                       'names': fields.Nested(name_model)
                                  })
 
-    @api.expect(nr_request)
+    #@api.expect(applicant_model, validate=True)
+    #@api.expect(consent_model, validate=True)
+    #@api.expect(name_model,validate=True)
+    #@api.expect(nr_request,validate=True)
+
     @cors.crossdomain(origin='*')
-    #@jwt.requires_auth
     def post(*args, **kwargs):
+
         json_data = request.get_json()
         if not json_data:
+            current_app.logger.error("Error when getting json input")
             return jsonify({'message': 'No input data provided'}), 400
 
-        restricted = VirtualWordConditionService()
+        try:
 
-        user = User.find_by_username('name_request_service_account')
-        user_id = user.id
+            restricted = VirtualWordConditionService()
+        except Exception as error:
+            print('Error initializing VirtualWordCondition Service: ' + repr(error))
+            raise
 
-        name_request = Request()
+        try:
+            user = User.find_by_username('name_request_service_account')
+            user_id = user.id
+        except Exception as error:
+            print('Error getting user id: ' + repr(error))
+            raise
 
-        nr_num = generate_nr()
-        nr_id = get_request_sequence()
+
+        try:
+         name_request = Request()
+        except Exception as error:
+            print('Error initializing up name_request object: ' + repr(error))
+            raise
+
+        try:
+            nr_num = generate_nr()
+            nr_id = get_request_sequence()
+        except Exception as error:
+            print('Error getting nr number: ' + repr(error))
+            raise
+
 
         #set the request attributes
-        name_request.id = nr_id
-        name_request.submittedDate=datetime.utcnow()
-        name_request.requestTypeCd = set_request_type(json_data['entity_type'], json_data['request_action'])
-        name_request.nrNum=nr_num
+        try:
+            name_request.id = nr_id
+            name_request.submittedDate=datetime.utcnow()
+            name_request.requestTypeCd = set_request_type(json_data['entity_type'], json_data['request_action'])
+            name_request.nrNum=nr_num
+        except Exception as error:
+            print('Error setting request header attributes: ' + repr(error))
+            raise
 
-        if(json_data['stateCd'] == 'COND-RESERVE'):
-            name_request.consentFlag =  'Y'
+        try:
 
-        if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
-            name_request.expirationDate= create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
-
-        name_request.stateCd=json_data['stateCd']
-        name_request.entity_type_cd = json_data['entity_type']
-        name_request.request_action_cd= json_data['request_action']
-        #set this to name_request_service_account
-        name_request.userId = user_id
-
-        lang_comment = add_language_comment(json_data['english'],user_id, nr_id)
-        name_request.comments.append(lang_comment)
-
-        if  json_data['nameFlag'] == True:
-            name_comment = add_name_comment(user_id, nr_id)
-            name_request.comments.append(name_comment)
-
-        if json_data['submit_count'] is None:
-            name_request.submitCount = 1
-        else:
-            name_request.submitCount = + 1
-
-        if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
-            name_request.save_to_db()
-            nrd = Request.find_by_nr(name_request.nrNum)
-        elif json_data['stateCd'] == 'DRAFT':
-            #set request header attributes
-            name_request = set_draft_attributes(name_request, json_data,user_id)
-            name_request.save_to_db()
-            nrd = Request.find_by_nr(name_request.nrNum)
-            #set applicant attributes
-            nrd_app=set_applicant_attributes(json_data,nr_id)
-            nrd.applicants.append(nrd_app)
-
-        for name in json_data.get('names', None):
-            submitted_name = Name()
-            name_id = get_name_sequence()
-            submitted_name.id = name_id
-
-            submitted_name.choice = name['choice']
-            submitted_name.name = name['name']
-
-            if (name['name_type_cd']):
-                submitted_name.name_type_cd = name['name_type_cd']
-            else:
-                submitted_name.name_type_cd = 'CO'
-
-            if (json_data['stateCd'] == State.DRAFT):
-                submitted_name.state = 'NE'
-            else:
-                submitted_name.state = json_data['stateCd']
-
-            if name['designation']: submitted_name.designation = name['designation']
-            submitted_name.nrId = nr_id
+            if(json_data['stateCd'] == 'COND-RESERVE'):
+                name_request.consentFlag =  'Y'
 
             if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
+                name_request.expirationDate= create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
+
+            name_request.stateCd=json_data['stateCd']
+            name_request.entity_type_cd = json_data['entity_type']
+            name_request.request_action_cd= json_data['request_action']
+        except Exception as error:
+            print('Error seeting reserve state and expiration date: ' + repr(error))
+            raise
+
+
+        #set this to name_request_service_account
+        name_request.userId = user_id
+        try:
+            lang_comment = add_language_comment(json_data['english'],user_id, nr_id)
+            name_request.comments.append(lang_comment)
+        except Exception as error:
+            print('Error setting language comment: ' + repr(error))
+            raise
+
+        try:
+            if  json_data['nameFlag'] == True:
+              name_comment = add_name_comment(user_id, nr_id)
+              name_request.comments.append(name_comment)
+
+        except Exception as error:
+            print('Error setting name comment: ' + repr(error))
+            raise
+
+        try:
+            if json_data['submit_count'] is None:
+                name_request.submitCount = 1
+            else:
+                name_request.submitCount = + 1
+        except Exception as error:
+            print('Error setting submit count: ' + repr(error))
+            raise
+
+        try:
+            if json_data['stateCd'] == State.DRAFT:
+                # set request header attributes
+                name_request = set_draft_attributes(name_request, json_data, user_id)
+                name_request.save_to_db()
+                nrd = Request.find_by_nr(name_request.nrNum)
+                try:
+                       # set applicant attributes
+                        nrd_app = set_applicant_attributes(json_data, nr_id)
+                        nrd.applicants.append(nrd_app)
+
+                except Exception as error:
+                    print('Error setting applicant: ' + repr(error))
+                    raise
+
+        except Exception as error:
+            print('Error setting DRAFT attributes: ' + repr(error))
+            raise
+
+        try:
+
+            if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE, State.DRAFT]:
+                name_request.save_to_db()
+                nrd = Request.find_by_nr(name_request.nrNum)
+
+        except Exception as error:
+            print('Error saving reservation to db: ' + repr(error))
+            raise
+
+        try:
+            nrd = Request.find_by_nr(name_request.nrNum)
+        except Exception as error:
+            print('Error retrieving the nr from the db: ' + repr(error))
+            raise
+
+
+
+        try:
+            for name in json_data.get('names', None):
+                submitted_name = Name()
+                name_id = get_name_sequence()
+                submitted_name.id = name_id
+
+                submitted_name.choice = name['choice']
+                submitted_name.name = name['name']
+
+                if (name['name_type_cd']):
+                    submitted_name.name_type_cd = name['name_type_cd']
+                else:
+                    submitted_name.name_type_cd = 'CO'
+
+                if (json_data['stateCd'] == State.DRAFT):
+                    submitted_name.state = 'NE'
+                else:
+                    submitted_name.state = json_data['stateCd']
+
+                if name['designation']: submitted_name.designation = name['designation']
+
+                submitted_name.nrId = nr_id
                 decision_text = None
-                # only capturing one conflict
-                if (name['conflict1_num']):
-                    submitted_name.conflict1_num = name['conflict1_num']
+
+                if json_data['stateCd'] in [State.RESERVED, State.COND_RESERVE]:
+
+                    # only capturing one conflict
+                    if (name['conflict1_num']): submitted_name.conflict1_num = name['conflict1_num']
                     if name['conflict1']: submitted_name.conflict1 = name['conflict1']
-                    # conflict text same as Namex
+                    #conflict text same as Namex
                     decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
                 else:
                     submitted_name.conflict1_num = None
@@ -310,21 +385,30 @@ class NameRequest(Resource):
                     else:
                         decision_text += consent + '- ' + cnd_instructions + '\n'
 
-                submitted_name.decision_text = decision_text
-            nrd.names.append(submitted_name)
-        #save names
-        nrd.save_to_db()
+                    submitted_name.decision_text = decision_text
+                nrd.names.append(submitted_name)
+            #save names
+            nrd.save_to_db()
+
+        except Exception as error:
+            print('Error setting name: ' + repr(error))
+            raise
 
         #TODO: Need to add verification that the save was successful.
        #update solr for reservation
-        if(json_data['stateCd'] in ['RESERVED', 'COND-RESERVE']):
-            solr_name = nrd.names[0].name
-            solr_docs=[]
-            nr_doc = {"id": name_request.nrNum, "name": solr_name , "source": "NR",
-                      "start_date": name_request.submittedDate.strftime("%Y-%m-%dT%H:%M:00Z")}
+        try:
+            if(json_data['stateCd'] in ['RESERVED', 'COND-RESERVE']):
+                solr_name = nrd.names[0].name
+                solr_docs=[]
+                nr_doc = {"id": name_request.nrNum, "name": solr_name , "source": "NR",
+                          "start_date": name_request.submittedDate.strftime("%Y-%m-%dT%H:%M:00Z")}
 
-            solr_docs.append(nr_doc)
-            update_solr('possible.conflicts',solr_docs)
+                solr_docs.append(nr_doc)
+                update_solr('possible.conflicts',solr_docs)
+        except Exception as error:
+            print('Error updating solr: ' + repr(error))
+            raise
+
 
         current_app.logger.debug(name_request.json())
         return jsonify(name_request.json()), 200
