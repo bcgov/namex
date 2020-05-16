@@ -408,7 +408,7 @@ class NameRequest(Resource):
                             cnd_instructions = None
                             cnd_instructions = restricted.get_word_condition_instructions(consent)
                         except Exception as error:
-                            current_app.logger.error("Error on get consent word=>Consent Word[0], . Error:{1}".format(consent, error))
+                            current_app.logger.error("Error on get consent word. Consent Word[0], Name[1]. Error:{2}".format(consent, name,error))
                             return jsonify({"message": "Error on get consent words."}), 404
 
                         try:
