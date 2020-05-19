@@ -8,6 +8,30 @@ np_svc = service.name_processing_service
 
 @pytest.mark.parametrize("name, expected",
                          [
+                             ('ARMSTRONG PLUMBING LTD./ ARMSTRONG PLUMBING LTEE', 'ARMSTRONG PLUMBING'),
+                             ("VOLVO CARS OF CANADA CORP./LA COMPAGNIE DES AUTOMOBILES VOLVO DU CANADA",
+                              "VOLVO CARS OF CANADA"),
+                             ("MEDIA/PROFESSIONAL INSURANCE SERVICES", "MEDIA PROFESSIONAL INSURANCE SERVICES"),
+                             ("UNITED WAY OF THE CENTRAL & SOUTH OKANAGAN/SIMILKAMEEN",
+                              "UNITED WAY THE CENTRAL SOUTH OKANAGAN SIMILKAMEEN"),  # --> To be fixed
+                             ("TFI TRANSPORT 27, L.P./TRANSPORT TFI 27 S.E.C.", "TFI TRANSPORT 27"),
+                             ('SMITHERS PARENT/SELF ADVOCATE COALITION SOCIETY',
+                              'SMITHERS PARENT SELF ADVOCATE COALITION'),
+                             ('RAPHA F/A & SAFETY SUPPLY LTD.', 'RAPHA FA SAFETY SUPPLY'),
+                             ('KARSCOT DISTRIBUTORS / FUN ZONE', 'KARSCOT DISTRIBUTORS FUN ZONE'),
+                             ('MAPLE RIDGE/PITT MEADOWS YOUTH CENTRE SOCIETY', 'MAPLE RIDGE PITT MEADOWS YOUTH CENTRE')
+
+                         ]
+                         )
+def test_set_name_remove_french(name, expected):
+    np_svc._prepare_data()
+    np_svc.set_name(name)
+    cleaned_name = np_svc.processed_name.upper()
+    assert cleaned_name == expected
+
+
+@pytest.mark.parametrize("name, expected",
+                         [
                              ("ARMSTRONG SOCIETE A RESPONSABILITE LIMITEE PLUMBING", "ARMSTRONG PLUMBING"),
                              ("ARMSTRONG L.L.C. PLUMBING", "ARMSTRONG PLUMBING"),
                              ("LAWYERS-BC.COM SERVICES LTD.", "LAWYERS BC SERVICES"),  # --> To be fixed
@@ -46,6 +70,8 @@ def test_set_name_regex_prefixes(name, expected):
                          [
                              ("BIG MIKE'S FUN FARM INC.", "BIG MIKE FUN FARM"),
                              ("LONDON AIR SERVICES (NO. 8) LIMITED", "LONDON AIR SERVICES"),
+                             ("CATHEDRAL (YR 2008) VENTURES", "CATHEDRAL VENTURES"),
+                             ("CATHEDRAL (ANYTHING 2008) VENTURES", "CATHEDRAL VENTURES"),
                              ("NO. 295 CATHEDRAL VENTURES", "CATHEDRAL VENTURES"),
                              ('DISCOVERY RESIDENTIAL HOLDINGS (LOT 4)', 'DISCOVERY RESIDENTIAL HOLDINGS'),
                              ('RG LOT 3', 'RG'),
