@@ -82,9 +82,21 @@ def assert_has_issue_type(issue_type, issues):
 def assert_correct_conflict(issue_type, issues, expected):
     is_correct = False
     for issue in issues:
-        is_correct = True if issue.get('issue_type') == issue_type.value and " ".join(value['name'] for value in issue.get('conflicts')) == expected else False
+        is_correct = True if issue.get('issue_type') == issue_type.value and " ".join(
+            value['name'] for value in issue.get('conflicts')) == expected else False
 
     assert is_correct is True
+
+
+@pytest.mark.skip
+def assert_additional_conflict_parameters(issue_type, issues):
+    is_correct = False
+    for issue in issues:
+        is_correct = True if issue.get('issue_type') == issue_type.value and (
+        value['corp_num'] and value['consumption_date'] for value in issue.get('conflicts')) else False
+
+    assert is_correct is True
+
 
 # IN THIS SECTION TEST VARIOUS ERROR RESPONSES
 
@@ -566,7 +578,7 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt, app,name, expected):
+def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt, app, name, expected):
     words_list_classification = [{'word': 'CATHEDRAL', 'classification': 'DIST'},
                                  {'word': 'VENTURES', 'classification': 'DIST'},
                                  {'word': 'VENTURES', 'classification': 'DESC'},
@@ -620,6 +632,7 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
             payload_lst = payload.get('issues')
             assert_issues_count_is_gt(0, payload_lst)
             assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
+            assert_additional_conflict_parameters(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)
 
 
 @pytest.mark.parametrize("name, expected",
@@ -628,7 +641,7 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_exact_match_request_response(client, jwt, app,name, expected):
+def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, name, expected):
     words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},
                                  {'word': 'ARMSTRONG', 'classification': 'DESC'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
@@ -664,6 +677,7 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app,n
             payload_lst = payload.get('issues')
             assert_issues_count_is_gt(0, payload_lst)
             assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
+            assert_additional_conflict_parameters(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)
 
 
 @pytest.mark.xfail(raises=ValueError)
@@ -1290,5 +1304,6 @@ def save_words_list_name(words_list):
         name.choice = 1
         name.name = record
         name.state = State.APPROVED
+        name.corpNum = '0652480'
         nr.names = [name]
         nr.save_to_db()
