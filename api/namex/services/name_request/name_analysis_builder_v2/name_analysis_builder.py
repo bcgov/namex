@@ -219,7 +219,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         result = ProcedureResult()
         result.is_valid = False
-        matches_response = []  # Contains all the conflicts from database
+        all_matches_list = []  # Contains all the conflicts from database
         most_similar_names = []
         dict_highest_counter = {}
         dict_highest_detail = {}
@@ -253,18 +253,36 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 # Inject descriptive section into query, execute and add matches to list
                 for desc in desc_synonym_list:
                     matches = Request.get_query_distinctive_descriptive(desc, criteria)
-                    matches_response = list(dict.fromkeys(matches))
+                    all_matches_list.extend(matches)
                     dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
                                                                                             dict_highest_detail,
-                                                                                            matches_response, w_dist,
+                                                                                            matches, w_dist,
                                                                                             w_desc, list_name, name)
         most_similar_names.extend(
             list({k for k, v in
                   sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[
                   0:MAX_MATCHES_LIMIT]}))
 
-        for element in most_similar_names:
-            response.update({element: dict_highest_detail.get(element, {})})
+        if most_similar_names:
+            conflict_name, corp_num, consumption_date = {}, [], []
+            matches_list = []
+
+            for match in all_matches_list:
+                if match not in matches_list:
+                    matches_list.append(match)
+
+            for element in most_similar_names:
+                conflict_name.update({element: dict_highest_detail.get(element, {})})
+                for record in matches_list:
+                    if record.name == element:
+                        corp_num.append(record.corpNum)
+                        consumption_date.append(record.consumptionDate)
+
+            if conflict_name:
+                response = {'names': conflict_name,
+                            'corp_num': corp_num,
+                            'consumption_date': consumption_date,
+                            }
 
         if response:
             result.is_valid = False
@@ -273,7 +291,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'list_name': list_name,
                 'list_dist': list_dist_words,
                 'list_desc': list_desc_words,
-                'list_conflicts': response
+                'list_conflicts': response['names'],
+                'corp_num': response['corp_num'],
+                'consumption_date': response['consumption_date']
             }
         else:
             result.is_valid = True
@@ -465,7 +485,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
             for match in matches:
                 np_svc = service.name_processing_service
-                np_svc.set_name(match)
+                np_svc.set_name(match.name)
                 # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
                 counter = 0
@@ -487,18 +507,19 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
-                    dict_matches_counter.update({match: similarity})
+                    dict_matches_counter.update({match.name: similarity})
 
-            dict_matches_words.update(
-                self.get_details_most_similar(list(dict_matches_counter), dist_subs_dict,
-                                              desc_subs_dict))
-            # Get two highest scores (values) and shortest names (key)
-            dict_highest_counter.update({k: v for k, v in
-                                         sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
-                                         0:MAX_MATCHES_LIMIT]})
+            if dict_matches_counter:
+                dict_matches_words.update(
+                    self.get_details_most_similar(list(dict_matches_counter), dist_subs_dict,
+                                                  desc_subs_dict))
+                # Get highest score (values) and shortest names (key)
+                dict_highest_counter.update({k: v for k, v in
+                                             sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
+                                             0:MAX_MATCHES_LIMIT]})
 
-            for k in dict_highest_counter.keys():
-                dict_highest_detail.update({k: dict_matches_words.get(k)})
+                for k in dict_highest_counter.keys():
+                    dict_highest_detail.update({k: dict_matches_words.get(k)})
 
         return dict_highest_counter, dict_highest_detail
 
