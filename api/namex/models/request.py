@@ -6,7 +6,7 @@ from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import and_, func
+from sqlalchemy import and_, or_, func
 from marshmallow import Schema, fields, post_load, post_dump
 from .nwpta import PartnerNameSystem
 from .user import User, UserSchema
@@ -18,15 +18,15 @@ from datetime import datetime
 from enum import Enum
 import re
 
-from namex.constants import ValidSources, request_type_mapping, EntityType,EntityTypeXSO, EntityTypeXCP, EntityTypeXULC, \
-EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP,NameState
-
+from namex.constants import ValidSources, request_type_mapping, EntityType, EntityTypeXSO, EntityTypeXCP, \
+    EntityTypeXULC, \
+    EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP, NameState
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
 
-class Request(db.Model):
 
+class Request(db.Model):
     __tablename__ = 'requests'
 
     # Field names use a JSON / JavaScript naming pattern,
@@ -91,7 +91,7 @@ class Request(db.Model):
     _source = db.Column('source', db.String(15), default=ValidSources.NRO)
     tradeMark = db.Column('trade_mark', db.String(100))
 
-    #MRAS fields
+    # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
 
     ##### end of table definitions
@@ -164,7 +164,7 @@ class Request(db.Model):
                 'consent_dt': self.consent_dt,
                 'expirationDate': self.expirationDate,
                 'requestTypeCd': self.requestTypeCd,
-                'entity_type_cd':self.entity_type_cd,
+                'entity_type_cd': self.entity_type_cd,
                 'request_action_cd': self.request_action_cd,
                 'priorityCd': self.priorityCd,
                 'priorityDate': self.priorityDate,
@@ -268,47 +268,57 @@ class Request(db.Model):
         return True
 
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
-        # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
+    # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
     def get_general_query(cls):
-        filters = [
-                cls.id == Name.nrId,
-                cls.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
-                cls.requestTypeCd.in_(
-                    [EntityType.PRIV.value,
-                     EntityType.BCORP.value, EntityTypeBCORP.CCR.value,
-                     EntityTypeBCORP.CT.value,
-                     EntityTypeBCORP.RCR.value,
-                     EntityType.CP.value, EntityTypeCP.CCP.value, EntityTypeCP.CTC.value,
-                     EntityTypeCP.RCP.value,
-                     EntityType.FI.value, EntityTypeFI.CFI.value, EntityTypeFI.RFI.value,
-                     EntityType.SO.value, EntityTypeSO.ASO.value, EntityTypeSO.CSO.value,
-                     EntityTypeSO.CSSO.value,
-                     EntityTypeSO.CTSO.value, EntityTypeSO.RSO.value,
-                     EntityType.ULC.value, EntityTypeULC.UC.value, EntityTypeULC.CUL.value,
-                     EntityTypeULC.ULCT.value, EntityTypeULC.RUL.value,
-                     EntityType.XSO.value, EntityTypeXSO.XASO.value, EntityTypeXSO.XCASO.value,
-                     EntityTypeXSO.XCSO.value, EntityTypeXSO.XRSO.value,
-                     EntityType.CCC.value, EntityTypeCCC.CC.value, EntityTypeCCC.CCV.value,
-                     EntityTypeCCC.CCCT.value, EntityTypeCCC.RCC.value,
-                     EntityType.PAR.value,
-                     EntityType.XCORP.value, EntityTypeXCORP.XCCR.value,
-                     EntityTypeXCORP.XRCR.value,
-                     EntityTypeXCORP.AS.value,
-                     EntityType.XULC.value, EntityTypeXULC.UA.value, EntityTypeXULC.XCUL.value,
-                     EntityTypeXULC.XRUL.value,
-                     EntityType.XCP.value, EntityTypeXCP.XCCP.value, EntityTypeXCP.XRCP.value,
-                     EntityType.BC.value
-                     ]),
+        basic_filters = [
+            cls.id == Name.nrId,
+            cls.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
+            cls.requestTypeCd.in_(
+                [EntityType.PRIV.value,
+                 EntityType.BCORP.value, EntityTypeBCORP.CCR.value,
+                 EntityTypeBCORP.CT.value,
+                 EntityTypeBCORP.RCR.value,
+                 EntityType.CP.value, EntityTypeCP.CCP.value, EntityTypeCP.CTC.value,
+                 EntityTypeCP.RCP.value,
+                 EntityType.FI.value, EntityTypeFI.CFI.value, EntityTypeFI.RFI.value,
+                 EntityType.SO.value, EntityTypeSO.ASO.value, EntityTypeSO.CSO.value,
+                 EntityTypeSO.CSSO.value,
+                 EntityTypeSO.CTSO.value, EntityTypeSO.RSO.value,
+                 EntityType.ULC.value, EntityTypeULC.UC.value, EntityTypeULC.CUL.value,
+                 EntityTypeULC.ULCT.value, EntityTypeULC.RUL.value,
+                 EntityType.XSO.value, EntityTypeXSO.XASO.value, EntityTypeXSO.XCASO.value,
+                 EntityTypeXSO.XCSO.value, EntityTypeXSO.XRSO.value,
+                 EntityType.CCC.value, EntityTypeCCC.CC.value, EntityTypeCCC.CCV.value,
+                 EntityTypeCCC.CCCT.value, EntityTypeCCC.RCC.value,
+                 EntityType.PAR.value,
+                 EntityType.XCORP.value, EntityTypeXCORP.XCCR.value,
+                 EntityTypeXCORP.XRCR.value,
+                 EntityTypeXCORP.AS.value,
+                 EntityType.XULC.value, EntityTypeXULC.UA.value, EntityTypeXULC.XCUL.value,
+                 EntityTypeXULC.XRUL.value,
+                 EntityType.XCP.value, EntityTypeXCP.XCCP.value, EntityTypeXCP.XRCP.value,
+                 EntityType.BC.value
+                 ]),
 
-                 Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value]),
+            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value]),
 
-            ]
+        ]
+        not_consumed_filters = [
+            cls.expirationDate > func.current_Date(),
+            Name.corpNum.is_(None),
+            Name.consumptionDate.is_(None)
+        ]
+
+        consumed_filters = [
+            Name.corpNum.isnot(None),
+            # Name.consumptionDate.isnot(None)
+        ]
 
         criteria = RequestConditionCriteria(
-            fields=[Name.name],
-            filters=filters
-            )
+            fields=[Name.name, Name.corpNum, Name.consumptionDate, cls.expirationDate],
+            filters=[basic_filters, consumed_filters, not_consumed_filters]
+        )
 
         return criteria
 
@@ -326,54 +336,56 @@ class Request(db.Model):
         if not distinctive:
             # Reset filter index 5 which contains the descriptive in the previous round.
             # The filter index 4 contains distinctive value
-            if len(criteria.filters) > 5:
-                criteria.filters.pop()
+            if len(criteria.filters[0]) > 5:
+                criteria.filters[0].pop()
             substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
-            criteria.filters.append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
+            criteria.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
         else:
             substitutions = '|'.join(map(str, descriptive_element))
-            criteria.filters.append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
+            criteria.filters[0].append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
             return criteria
 
         results = Request.find_by_criteria(criteria)
-        flattened = [item.strip() for sublist in results for item in sublist]
 
-        return flattened
-
+        return results
 
     @classmethod
     def find_by_criteria(cls, criteria=None):
         RequestConditionCriteria.is_valid_criteria(criteria)
 
         query = cls.query.with_entities(*criteria.fields) \
-            .filter(and_(*criteria.filters))
+            .filter(and_(*criteria.filters[0])) \
+            .filter(or_((and_(*criteria.filters[1])),
+                        (and_(*criteria.filters[2]))))
 
-        # print(query.statement)
+        print(query.statement)
         return query.all()
 
-#set the source from NRO, Societis Online, Name Request
+
+# set the source from NRO, Societis Online, Name Request
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
 def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the source of the NR."""
     request = target
     soc_list = []
-    soc_list = ['SO','ASO','CSO','RSO','CTSO','XSO','XCSO','XRSO','XASO','XCASO','CSSO']
+    soc_list = ['SO', 'ASO', 'CSO', 'RSO', 'CTSO', 'XSO', 'XCSO', 'XRSO', 'XASO', 'XCASO', 'CSSO']
 
     # comes from NRO/Societies Online
-    if(re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd not in soc_list):
+    if (re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd not in soc_list):
         request._source = ValidSources.NRO.value  # pylint: disable=protected-access
     else:
         if (re.match(r"NR [A-Z]+", request.nrNum)):
-             request._source = ValidSources.NAMEREQUEST.value   # pylint: disable=protected-access
+            request._source = ValidSources.NAMEREQUEST.value  # pylint: disable=protected-access
         else:
-            if(request.requestTypeCd in soc_list ):
-             request._source = ValidSources.SO.value   # pylint: disable=protected-access
+            if (request.requestTypeCd in soc_list):
+                request._source = ValidSources.SO.value  # pylint: disable=protected-access
 
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
-def update_request_action_entity_type(mapper, connection, target): # pylint: disable=unused-argument; SQLAlchemy callback signature
+def update_request_action_entity_type(mapper, connection,
+                                      target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
     # needed to break apart  request_type
     request = target
