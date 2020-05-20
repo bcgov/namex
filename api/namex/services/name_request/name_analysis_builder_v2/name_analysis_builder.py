@@ -264,25 +264,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                   0:MAX_MATCHES_LIMIT]}))
 
         if most_similar_names:
-            conflict_name, corp_num, consumption_date = {}, [], []
-            matches_list = []
-
-            for match in all_matches_list:
-                if match not in matches_list:
-                    matches_list.append(match)
-
-            for element in most_similar_names:
-                conflict_name.update({element: dict_highest_detail.get(element, {})})
-                for record in matches_list:
-                    if record.name == element:
-                        corp_num.append(record.corpNum)
-                        consumption_date.append(record.consumptionDate)
-
-            if conflict_name:
-                response = {'names': conflict_name,
-                            'corp_num': corp_num,
-                            'consumption_date': consumption_date,
-                            }
+            response = self.prepare_response(all_matches_list, most_similar_names, dict_highest_detail)
 
         if response:
             result.is_valid = False
@@ -538,3 +520,24 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dict_detail_matches.update({name: dict_words_matches})
 
         return dict_detail_matches
+
+    def prepare_response(self, all_matches_list, most_similar_names, dict_highest_detail):
+        conflict_name, corp_num, consumption_date = {}, [], []
+        matches_list, response = [], []
+
+        matches_list = [match for match in all_matches_list if match not in matches_list]
+
+        for similar_name in most_similar_names:
+            conflict_name.update({similar_name: dict_highest_detail.get(similar_name, {})})
+            for record in matches_list:
+                if record.name == similar_name:
+                    corp_num.append(record.corpNum)
+                    consumption_date.append(record.consumptionDate)
+
+        if conflict_name:
+            response = {'names': conflict_name,
+                        'corp_num': corp_num,
+                        'consumption_date': consumption_date,
+                        }
+
+        return response
