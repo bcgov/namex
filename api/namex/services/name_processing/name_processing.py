@@ -180,6 +180,18 @@ class NameProcessingService(GetSynonymListsMixin):
 
         return exceptions_ws
 
+    def exception_designation(self, text):
+        exceptions_designation = []
+        all_designations = self._designated_all_words
+        designations_with_hyphen = [designation for designation in all_designations if '-' in designation]
+
+        exceptions_designation = [designation for designation in designations_with_hyphen if designation in text]
+
+        if not exceptions_designation:
+            exceptions_designation.append('null')
+
+        return exceptions_designation
+
     def _prepare_data(self):
         syn_svc = self.synonym_service
 
