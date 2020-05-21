@@ -105,8 +105,8 @@ def assert_additional_conflict_parameters(issue_type, issues):
 @pytest.mark.xfail(raises=ValueError)
 def test_add_distinctive_word_base_request_response(client, jwt, app):
     words_list_classification = [
-        {'word': 'GROWERS', 'classification': 'DESC'},
-        {'word': 'AEROENTERPRISES', 'classification': 'DESC'},
+        {'word': 'CARPENTRY', 'classification': 'DESC'},
+        {'word': 'HEATING', 'classification': 'DESC'},
         {'word': 'ADJUSTERS', 'classification': 'DESC'}
     ]
 
@@ -117,12 +117,12 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = [
-        {'name': 'GROWERS INC.',
+        {'name': 'CARPENTRY INC.',
          'location': 'BC',
          'entity_type': 'CR',
          'request_action': 'NEW'
          },
-        {'name': 'AEROENTERPRISES INC.',
+        {'name': 'HEATING LIMITED',
          'location': 'BC',
          'entity_type': 'CR',
          'request_action': 'NEW'
@@ -159,7 +159,7 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
 # 2.- Unique word classified as distinctive
 @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_base_request_response(client, jwt, app):
-    words_list_classification = [{'word': 'ACTIVATIVE', 'classification': 'DIST'}]
+    words_list_classification = [{'word': 'COSTAS', 'classification': 'DIST'}]
     save_words_list_classification(words_list_classification)
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -168,7 +168,7 @@ def test_add_descriptive_word_base_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'ACTIVATIVE INC.',
+            'name': 'COSTAS INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -206,7 +206,7 @@ def test_add_descriptive_word_not_classified_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'INVINITY INC.',
+            'name': 'UNCLASSIFIED INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -280,8 +280,8 @@ def test_add_descriptive_word_both_classifications_request_response(client, jwt,
 # 5.- Successful well formed name:
 @pytest.mark.xfail(raises=ValueError)
 def test_successful_well_formed_request_response(client, jwt, app):
-    words_list_classification = [{'word': 'ADEPTIO', 'classification': 'DIST'},
-                                 {'word': 'AGRONOMICS', 'classification': 'DESC'},
+    words_list_classification = [{'word': 'ADEA', 'classification': 'DIST'},
+                                 {'word': 'HEATING', 'classification': 'DESC'},
                                  {'word': 'ABC', 'classification': 'DIST'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
                                  {'word': 'PLUMBING', 'classification': 'DESC'}
@@ -294,7 +294,7 @@ def test_successful_well_formed_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'ADEPTIO AGRONOMICS INC.',
+            'name': 'ADEA HEATING INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -455,7 +455,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'INVINITY FINANCIAL SOLUTIONS INCORPORATED',
+            'name': 'UNCLASSIFIED FINANCIAL SOLUTIONS INCORPORATED',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
@@ -592,7 +592,7 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
                                  {'word': 'HOLDINGS', 'classification': 'DESC'},
                                  {'word': 'BC', 'classification': 'DIST'},
                                  {'word': 'BC', 'classification': 'DESC'},
-                                 {'word': '468040', 'classification': 'DIST'},
+                                 #{'word': '468040', 'classification': 'DIST'},
                                  {'word': 'EQTEC', 'classification': 'DIST'},
                                  {'word': 'ENGINEERING', 'classification': 'DIST'},
                                  {'word': 'ENGINEERING', 'classification': 'DESC'},
@@ -685,9 +685,11 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
     words_list_classification = [{'word': 'CANADIAN', 'classification': 'DIST'},
                                  {'word': 'CANADIAN', 'classification': 'DESC'},
                                  {'word': 'SUMMERS', 'classification': 'DIST'},
+                                 {'word': 'SUMMERS', 'classification': 'DESC'},
                                  {'word': 'GAMES', 'classification': 'DIST'},
                                  {'word': 'GAMES', 'classification': 'DESC'},
                                  {'word': 'BLAKE', 'classification': 'DIST'},
+                                 {'word': 'BLAKE', 'classification': 'DESC'},
                                  {'word': 'ENGINEERING', 'classification': 'DIST'},
                                  {'word': 'ENGINEERING', 'classification': 'DESC'}
                                  ]
@@ -739,6 +741,7 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
 @pytest.mark.xfail(raises=ValueError)
 def test_name_requires_consent_more_than_one_word_request_response(client, jwt, app):
     words_list_classification = [{'word': 'BLAKE', 'classification': 'DIST'},
+                                 {'word': 'BLAKE', 'classification': 'DESC'},
                                  {'word': 'ENGINEERING', 'classification': 'DIST'},
                                  {'word': 'ENGINEERING', 'classification': 'DESC'},
                                  {'word': 'EQTEC', 'classification': 'DIST'}]
@@ -1168,9 +1171,10 @@ def test_designation_misplaced_request_response(client, jwt, app):
 def test_name_use_special_words_request_response(client, jwt, app):
     words_list_classification = [{'word': 'BC', 'classification': 'DIST'},
                                  {'word': 'BC', 'classification': 'DESC'},
-                                 {'word': '468040', 'classification': 'DIST'},
+                                 #{'word': '468040', 'classification': 'DIST'},
                                  {'word': 'COAST', 'classification': 'DIST'},
                                  {'word': 'COAST', 'classification': 'DESC'},
+                                 {'word': 'TREASURY', 'classification': 'DISC'},
                                  {'word': 'TREASURY', 'classification': 'DESC'}
                                  ]
     save_words_list_classification(words_list_classification)
