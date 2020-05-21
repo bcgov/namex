@@ -273,7 +273,7 @@ class Request(db.Model):
     def get_general_query(cls):
         basic_filters = [
             cls.id == Name.nrId,
-            cls.stateCd.in_([State.APPROVED, State.CONDITIONAL]),
+            cls.stateCd.in_([State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
             cls.requestTypeCd.in_(
                 [EntityType.PRIV.value,
                  EntityType.BCORP.value, EntityTypeBCORP.CCR.value,
@@ -301,7 +301,7 @@ class Request(db.Model):
                  EntityType.BC.value
                  ]),
 
-            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value]),
+            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value, NameState.COND_RESERVE.value]),
 
         ]
         not_consumed_filters = [
