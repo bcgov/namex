@@ -157,19 +157,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if list_none.__len__() > 0:
             unclassified_words_list_response = []
             for idx, token in enumerate(list_name):
-                if any(token in word for word in list_none):
+                if not token.isdigit() and any(token in word for word in list_none):
                     unclassified_words_list_response.append(token)
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
 
-            list_name = [x.upper() for x in list_name]
-            unclassified_words_list_response = [x.upper() for x in unclassified_words_list_response]
+            if unclassified_words_list_response:
+                result = ProcedureResult()
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
 
-            result.values = {
-                'list_name': list_name or [],
-                'list_none': unclassified_words_list_response
-            }
+                list_name = [x.upper() for x in list_name]
+                unclassified_words_list_response = [x.upper() for x in unclassified_words_list_response]
+
+                result.values = {
+                    'list_name': list_name or [],
+                    'list_none': unclassified_words_list_response
+                }
 
         return result
 
