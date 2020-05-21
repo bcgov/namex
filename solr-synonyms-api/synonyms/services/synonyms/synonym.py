@@ -205,12 +205,13 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         return " ".join(text.split())
 
     @classmethod
-    def regex_prefixes(cls, text, prefixes):
-        text = re.sub(r'\b({0})([ &/.-])([A-Za-z]+)'.format(prefixes),
-                      r'\1\3',
-                      text,
-                      0,
-                      re.IGNORECASE)
+    def regex_prefixes(cls, text, prefixes, exception_designation):
+        exception_designation_rx = '|'.join(map(re.escape, exception_designation))
+        ws_generic_rx = r'\b({0})([ &/.-])([A-Za-z]+)'.format(prefixes)
+        designation_rx = re.compile(r'({0})|{1}'.format(exception_designation_rx, ws_generic_rx), re.I)
+
+        text = designation_rx.sub(lambda x: x.group(1) or (x.group(2) + x.group(4)), text)
+
         return " ".join(text.split())
 
     @classmethod
