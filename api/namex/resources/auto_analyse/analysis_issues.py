@@ -688,6 +688,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         list_dist = procedure_result.values['list_dist']  # Don't lower case this one it's a list wrapped list
         list_desc = procedure_result.values['list_desc']  # Don't lower case this one it's a list wrapped list
         list_conflicts = procedure_result.values['list_conflicts']  # Don't lower case this one it's a dict
+        list_corp_num = procedure_result.values['corp_num']
+        list_consumption_date = procedure_result.values['consumption_date']
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
@@ -712,6 +714,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         # Grab the first conflict
         current_conflict_name = list(list_conflicts.keys())[0]  # eg: 'MOUNTAIN VIEW GROWERS INC.'
+        current_corp_num = list_corp_num[0]
+        current_consumption_date = list_consumption_date[0]
         current_conflict = list_conflicts[current_conflict_name]  # eg: {'mountain': ['mountain'], 'view': ['view'], 'growers': ['growers']}
         current_conflict_keys = list(current_conflict.keys()) if current_conflict else []
 
@@ -805,7 +809,9 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         conflict = Conflict(
             name=current_conflict_name,
-            date=date.today()
+            date=date.today(),
+            corp_num= current_corp_num,
+            consumption_date= current_consumption_date
         )
 
         issue.conflicts.append(conflict)
