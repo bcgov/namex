@@ -316,7 +316,7 @@ class Request(db.Model):
         ]
 
         criteria = RequestConditionCriteria(
-            fields=[Name.name, Name.corpNum, Name.consumptionDate, cls.expirationDate],
+            fields=[Name.name, Name.corpNum, Name.consumptionDate, cls.submittedDate],
             filters=[basic_filters, consumed_filters, not_consumed_filters]
         )
 
