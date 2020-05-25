@@ -183,15 +183,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def search_conflicts(self, list_dist_words, list_desc_words, list_name, name):
         result = ProcedureResult()
         result.is_valid = False
-        matches_response = []  # Contains all the conflicts from database
+        all_matches_list = []  # Contains all the conflicts from database
         most_similar_names = []
         dict_highest_counter = {}
         dict_highest_detail = {}
         response = {}
 
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
-            dict_highest_counter, dict_highest_detail = self.get_conflicts(dict_highest_counter, dict_highest_detail,
+            dict_highest_counter, dict_highest_detail, similar_matches = self.get_conflicts(dict_highest_counter, dict_highest_detail,
                                                                            w_dist, w_desc, list_name, name)
+            all_matches_list.extend(similar_matches)
             # If exact match is found stop searching and return response
             if any(score == 1.0 for score in list(dict_highest_counter.values())):
                 break
@@ -201,8 +202,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                   sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[
                   0:MAX_MATCHES_LIMIT]}))
 
-        for element in most_similar_names:
-            response.update({element: dict_highest_detail.get(element, {})})
+        if most_similar_names:
+            response = self.prepare_response(all_matches_list, most_similar_names, dict_highest_detail)
 
         if response:
             result.is_valid = False
@@ -211,7 +212,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'list_name': list_name,
                 'list_dist': list_dist_words,
                 'list_desc': list_desc_words,
-                'list_conflicts': response
+                'list_conflicts': response['names'],
+                'corp_num': response['corp_num'],
+                'consumption_date': response['consumption_date']
             }
         else:
             result.is_valid = True
@@ -223,6 +226,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         syn_svc = self.synonym_service
         dist_substitution_list = []
         desc_synonym_list = []
+        all_matches_list = []
 
         all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
             words=w_dist,
@@ -245,38 +249,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             # Inject descriptive section into query, execute and add matches to list
             for desc in desc_synonym_list:
                 matches = Request.get_query_distinctive_descriptive(desc, criteria)
-                matches_response = list(dict.fromkeys(matches))
-                dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
+                dict_highest_counter, dict_highest_detail, matches_similar = self.get_most_similar_names(dict_highest_counter,
                                                                                         dict_highest_detail,
-                                                                                        matches_response, w_dist,
+                                                                                        matches, w_dist,
                                                                                         w_desc, list_name, name)
+                all_matches_list.extend(matches_similar)
                 if any(score == 1.0 for score in list(dict_highest_counter.values())):
-                    return dict_highest_counter, dict_highest_detail
+                    return dict_highest_counter, dict_highest_detail, all_matches_list
 
-        return dict_highest_counter, dict_highest_detail
-
-    # def search_exact_match(self, preprocess_name, list_name):
-    #     result = ProcedureResult()
-    #     result.is_valid = False
-    #
-    #     criteria = Request.get_general_query()
-    #     exact_match = Request.get_query_exact_match(criteria, preprocess_name)
-    #
-    #     if exact_match:
-    #         result.is_valid = False
-    #         result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
-    #         result.values = {
-    #             'list_name': list_name,
-    #             'list_dist': None,
-    #             'list_desc': None,
-    #             'list_conflicts': exact_match
-    #         }
-    #     else:
-    #         result.is_valid = True
-    #         result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
-    #         result.values = []
-    #
-    #     return result
+        return dict_highest_counter, dict_highest_detail, all_matches_list
 
     '''
     Override the abstract / base class method
@@ -423,7 +404,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
                                list_name, name):
-
+        selected_matches=[]
         if matches:
             syn_svc = self.synonym_service
             service = ProtectedNameAnalysisService()
@@ -460,6 +441,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
+                    selected_matches.append(match)
                     if similarity == 1.0:
                         break
 
@@ -475,7 +457,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 for k in dict_highest_counter.keys():
                     dict_highest_detail.update({k: dict_matches_words.get(k)})
 
-        return dict_highest_counter, dict_highest_detail
+        return dict_highest_counter, dict_highest_detail, selected_matches
 
     def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
         dict_words_matches = {}
