@@ -18,9 +18,10 @@ from datetime import datetime
 
 from namex.models import Request, Name, NRNumber, State, User, Comment, Applicant
 
-from namex.services import EventRecorder
+from namex.services import EventRecorder, MessageServices
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
 from namex.services.name_request import convert_to_ascii
+from namex import nro
 
 
 
@@ -434,9 +435,13 @@ class NameRequest(Resource):
                     current_app.logger.error("Error appending names. Error:{0}".format(error))
                     return jsonify({"message": "Error appending names"}), 404
 
+
             try:
-                #save names
+                #save names to postgres
                 nrd.save_to_db()
+                warnings = nro.add_nr(nrd)
+                if warnings:
+                    MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
             except Exception as error:
                 current_app.logger.error("Error saving the whole nr and names. Error:{0}".format(error))
                 return jsonify({"message": "Error saving names to the db"}), 404
