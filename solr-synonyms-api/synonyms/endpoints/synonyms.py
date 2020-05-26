@@ -189,6 +189,28 @@ class _Prefixes(Resource):
         }
 
 
+@api.route('/stand-alone', strict_slashes=False, methods=['GET'])
+class _StandAlone(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    # @api.expect()
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
+    @api.doc(params={
+    })
+    def get():
+        if not validate_request(request.args):
+            return
+
+        service = SynonymService()
+        results = service.get_standalone()
+
+        return {
+            'data': results
+        }
+
+
 @api.route('/number-words', strict_slashes=False, methods=['GET'])
 class _NumberWords(Resource):
     @staticmethod
