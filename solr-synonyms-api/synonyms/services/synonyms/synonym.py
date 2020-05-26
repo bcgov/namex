@@ -176,7 +176,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         prefixes = '|'.join(prefix_list)
         numbers = '|'.join(number_list)
         ordinal_suffixes = 'ST|[RN]D|TH'
-        stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|INDUSTRIES$'
+        stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|ENTERPRISES$|INDUSTRIES$'
         internet_domains = '.COM|.ORG|.NET|.EDU'
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
