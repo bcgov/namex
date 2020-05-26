@@ -10,11 +10,11 @@ np_svc = service.name_processing_service
                          [
                              ('ARMSTRONG PLUMBING LTD./ ARMSTRONG PLUMBING LTEE', 'ARMSTRONG PLUMBING'),
                              ("VOLVO CARS OF CANADA CORP./LA COMPAGNIE DES AUTOMOBILES VOLVO DU CANADA",
-                              "VOLVO CARS OF CANADA"),
+                              "VOLVO CARS CANADA"),
                              ("MEDIA/PROFESSIONAL INSURANCE SERVICES", "MEDIA PROFESSIONAL INSURANCE SERVICES"),
                              ("UNITED WAY OF THE CENTRAL & SOUTH OKANAGAN/SIMILKAMEEN",
-                              "UNITED WAY THE CENTRAL SOUTH OKANAGAN SIMILKAMEEN"),  # --> To be fixed
-                             ("TFI TRANSPORT 27, L.P./TRANSPORT TFI 27 S.E.C.", "TFI TRANSPORT 27"),
+                              "UNITED WAY CENTRAL SOUTH OKANAGAN SIMILKAMEEN"),
+                             ("TFI TRANSPORT 27, L.P./TRANSPORT TFI 27 S.E.C.", "TFI TRANSPORT LP TRANSPORT TFI SEC"),
                              ('SMITHERS PARENT/SELF ADVOCATE COALITION SOCIETY',
                               'SMITHERS PARENT SELF ADVOCATE COALITION'),
                              ('RAPHA F/A & SAFETY SUPPLY LTD.', 'RAPHA FA SAFETY SUPPLY'),
@@ -34,7 +34,7 @@ def test_set_name_remove_french(name, expected):
                          [
                              ("ARMSTRONG SOCIETE A RESPONSABILITE LIMITEE PLUMBING", "ARMSTRONG PLUMBING"),
                              ("ARMSTRONG L.L.C. PLUMBING", "ARMSTRONG PLUMBING"),
-                             ("LAWYERS-BC.COM SERVICES LTD.", "LAWYERS BC SERVICES"),  # --> To be fixed
+                             ("LAWYERS-BC.COM SERVICES LTD.", "LAWYERS BC SERVICES"),
                              ("THUNDERROAD.ORG INVESTMENTS INC.", "THUNDERROAD INVESTMENTS"),
                              ('ASSOCIATION OF BC SCAFFOLD CONTRACTORS', 'BC SCAFFOLD CONTRACTORS'),
                              ('ROUNDHOUSE CO-OPERATIVE HOUSING ASSOCIATION', 'ROUNDHOUSE HOUSING'),
@@ -56,7 +56,7 @@ def test_set_name_regex_remove_designations(name, expected):
                              ('RE MAX MOTOR SALES', 'REMAX MOTOR SALES'),
                              ("RE/MAX BOB SMITH", "REMAX BOB SMITH"),
                              ('TRADEPRO/PHOENIX ENTERPRISES INC.', 'TRADEPRO PHOENIX ENTERPRISES'),
-                             # ('COAST WIDE HOMECARE/PAINTING NEEDS LTD', 'COAST WIDE HOMECARE PAINTING NEEDS'), --> Different result due to slash
+                             ('COAST WIDE HOMECARE/PAINTING NEEDS LTD', 'COAST WIDE HOMECARE PAINTING NEEDS'),
                              ('RE-MAX BOB SMITH', 'REMAX BOB SMITH'),
                          ]
                          )
@@ -81,7 +81,6 @@ def test_set_name_regex_prefixes(name, expected):
                              ('CRYSTAL LANES (2006)', 'CRYSTAL LANES'),
                              ('PJI PIZZA(POCO)', 'PJI PIZZA POCO'),
                              ("J.J.'S HARDWOOD FLOORS AND DECORATING", 'JJ HARDWOOD FLOORS DECORATING')
-                             # --> not removing 'S in regex_numbers_lot
                          ]
                          )
 def test_set_name_regex_numbers_lot(name, expected):
@@ -146,7 +145,7 @@ def test_set_name_regex_keep_together_abv(name, expected):
                          [
                              ("J & K ENGRAVING", "JK ENGRAVING"),
                              ("D&G WESTCOAST HOMES", "DG WESTCOAST HOMES"),
-                             ("DO & BE COLLECTION RETAIL", "DO BE COLLECTION RETAIL"),
+                             ("DO & BE COLLECTION RETAIL", "DO COLLECTION RETAIL"),
                              # --> be is stop words and removed
                              ('C & C TRAILER LIFT SYSTEMS', 'CC TRAILER LIFT SYSTEMS'),
                              ('C S A DESIGN & DRAFTING SERVICES', 'CSA DESIGN DRAFTING SERVICES'),
@@ -171,7 +170,7 @@ def test_set_name_regex_punctuation(name, expected):
                          [
                              ("J K ENGRAVING", "JK ENGRAVING"),
                              ("D G WESTCOAST HOMES", "DG WESTCOAST HOMES"),
-                             ("DO BE COLLECTION RETAIL", "DO BE COLLECTION RETAIL"),  # --> be is stop words and removed
+                             ("DO BE COLLECTION RETAIL", "DO COLLECTION RETAIL"),  # --> be is stop words and removed
                              ('C C TRAILER LIFT SYSTEMS', 'CC TRAILER LIFT SYSTEMS'),
                              ('C S A DESIGN  DRAFTING SERVICES', 'CSA DESIGN DRAFTING SERVICES'),
                              ('DG ART DESIGN  DRAFTING SERVICES', 'DG ART DESIGN DRAFTING SERVICES'),
@@ -202,10 +201,11 @@ def test_set_name_regex_strip_out_numbers_middle_end(name, expected):
                          [
                              ("654101 BC LTD.", "654101 BC"),
                              ("7308 HOLDINGS LTD.", "7308 HOLDINGS"),
-                             ("13192427 ENTERPRISES INC.", "ENTERPRISES"),
+                             ("13192427 ENTERPRISES INC.", "13192427 ENTERPRISES"),
                              ('1984 VENTURES LTD.', '1984 VENTURES'),
                              ('KKBL NO. 546 VENTURES LTD.', 'KKBL VENTURES'),
-                             ('2020 SOLUTION LTD.', '2020 SOLUTION'),
+                             ('2020 SOLUTION LTD.', 'SOLUTION'),
+                             ('2020 SOLUTIONS LTD.', '2020 SOLUTIONS'),
                              ('1900 INDUSTRIES INC.', '1900 INDUSTRIES'),
                              ('947 FORT HOLDINGS LTD.', 'FORT HOLDINGS'),
                              ('200 INTERCHANGE VENTURES LLP', 'INTERCHANGE VENTURES'),
