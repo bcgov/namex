@@ -63,7 +63,7 @@ def new_nr(nr, ora_cursor):
 
     _create_request_state(ora_cursor, 'D', eid, request_id)
 
-    _create_names(ora_cursor, nr, request_id,eid) #name, name_instace and name state
+    _create_names(ora_cursor, nr, eid) #name, name_instace and name state
     current_app.logger.debug('Created Names in new_nr() for NR:{}'.format(nr_num))
 
     # for completed NRs waiting for the updater set the state to H so no one can change it.
@@ -178,7 +178,7 @@ def  _create_request_state(oracle_cursor, new_state,eid,request_id):
                           start_event_id=eid,
 
                           )
-def  _create_names(oracle_cursor, nr, request_id,eid):
+def  _create_names(oracle_cursor, nr, eid):
     name_count = nr.names.all()
     if name_count == 0:
         current_app.logger.error("Error on getting names for NR:{0}".format(nr.nrNum))
