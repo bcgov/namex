@@ -26,8 +26,8 @@
 from flask import current_app, jsonify
 from .utils import generate_compressed_name
 from namex.services.nro.change_nr import _get_event_id, _create_nro_transaction
-from namex import nro
 from namex.models import State
+import cx_Oracle
 
 
 
@@ -36,17 +36,21 @@ def new_nr(nr, ora_cursor):
     :raises Exception: what ever error we get, let our caller handle, this is here in case we want to wrap it - future
     """
 
-    #nr_num = _generate_nr_num(ora_cursor, nr)
-    nr_num = nr.nrNum
-    request_id = _create_request(ora_cursor, nr_num)
+    nr_num_list = _generate_nr_num(ora_cursor)
+    nr_num = nr_num_list.values[0]
+    #set postgres to real NR #
+    nr.nrNum = nr_num
+
+
+    request_id = _create_request(ora_cursor,nr_num)
     current_app.logger.debug('got to new_nr() for NR:{}'.format(nr_num))
 
     eid = _get_event_id(ora_cursor)
-    current_app.logger.debug('event ID for NR Details edit:{}'.format(eid))
+    current_app.logger.debug('event ID for NR:{1}. event id:{0}'.format(eid,nr_num))
 
     nr.requestId = request_id
     _create_nro_transaction(ora_cursor, nr, eid, transaction_type='NRREQ')
-    current_app.logger.debug('Create the trasnaction for new_nr() for NR:{}'.format(nr_num))
+    current_app.logger.debug('Created the transaction for new_nr() for NR:{}'.format(nr_num))
 
     _create_request_instance(ora_cursor, nr, eid)
     applicantInfo = nr.applicants.one_or_none()
@@ -55,29 +59,39 @@ def new_nr(nr, ora_cursor):
         return jsonify({"Message": "No applicant info"}), 404
 
     _create_request_party(ora_cursor, applicantInfo, eid, request_id) #includes address
+    current_app.logger.debug('Created Request Party and Address in new_nr() for NR:{}'.format(nr_num))
 
-    _create_request_state(ora_cursor, nr, eid, request_id)
+    _create_request_state(ora_cursor, 'D', eid, request_id)
 
     _create_names(ora_cursor, nr, request_id,eid) #name, name_instace and name state
+    current_app.logger.debug('Created Names in new_nr() for NR:{}'.format(nr_num))
 
     # for completed NRs waiting for the updater set the state to H so no one can change it.
     if nr.stateCd in [State.APPROVED, State.CONDITIONAL]:
-        nro.set_request_status_to_h(nr, "name_request_service_account")
+        eid = _get_event_id(ora_cursor)
+        set_request_on_hold(ora_cursor, request_id, eid)
+        current_app.logger.debug('Set State to ONHOLD for Updater to Run in new_nr() for NR:{}'.format(nr_num))
 
     current_app.logger.debug('got to the end of new_nr() for NR:{}'.format(nr_num))
 
 def _create_request(oracle_cursor, nr_num):
-
+    l_output=None
+    l_output = oracle_cursor.var(cx_Oracle.NUMBER)
+    l_request_id = 0
     try:
         # create new request record
         oracle_cursor.execute("""
             INSERT INTO request(request_id, nr_num, submit_count)
-            VALUES (request.nextval, :nr_num, :submit_count)
+            VALUES (request_seq.nextval, :nr_num, :submit_count)
+            RETURNING request_id INTO :out
             """,
                 nr_num=nr_num,
-                submit_count=1
+                submit_count=1,
+                out=l_output
             )
         current_app.logger.debug('request record created')
+        l_request_id = l_output.values[0][0]
+        return int(l_request_id)
 
     except Exception as error:
         current_app.logger.error("Error on adding request record for NR:{0}'. Error:{1}".format(nr_num, error))
@@ -150,19 +164,17 @@ def   _create_request_party(oracle_cursor, applicantInfo, eid, request_id):
                           contact=applicantInfo.contact,
                           client_first_name=applicantInfo.clientFirstName,
                         client_last_name=applicantInfo.clientLastName
-                        )
+                          )
 
-def  _create_request_state(oracle_cursor, nr, eid, request_id):
-    new_state = 'D'
+def  _create_request_state(oracle_cursor, new_state,eid,request_id):
+
     # create new request_state record
     oracle_cursor.execute("""
-            INSERT INTO request_state (request_state_id, request_id, state_type_cd, 
-                start_event_id, state_comment)
-            VALUES (request_state_seq.nextval, :request_id, :state, :start_event_id, 
-                      :examiner_id, NULL, NULL, NULL)
+            INSERT INTO request_state (request_state_id, request_id, state_type_cd, start_event_id, state_comment)
+            VALUES (request_state_seq.nextval, :request_id, :state_type_cd, :start_event_id, NULL)
             """,
-                          request_id=nr.requestId,
-                          state=new_state,
+                          request_id=request_id,
+                          state_type_cd=new_state,
                           start_event_id=eid,
 
                           )
@@ -192,11 +204,38 @@ def  _create_names(oracle_cursor, nr, request_id,eid):
                               start_event_id=eid)
         if name.name:
             oracle_cursor.execute("""
-                   INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name)
-                   VALUES (name_instance_seq.nextval, :name_id, :choice, :name, :start_event_id, :search_name)
+                   INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name, designation)
+                   VALUES (name_instance_seq.nextval, :name_id, :choice, :name, :start_event_id, :search_name, :designation)
                    """,
                               name_id=n_id,
                               choice=name.choice,
                               name=name.name,
                               start_event_id=eid,
-                              search_name=generate_compressed_name(name.name))
+                              search_name=generate_compressed_name(name.name),
+                              designation = name.designation)
+
+def _generate_nr_num(oracle_cursor):
+    nr_num = oracle_cursor.var(cx_Oracle.STRING)
+    oracle_cursor.callfunc("nro_util_pkg.get_new_nr_num", nr_num)
+    return nr_num
+
+def set_request_on_hold(oracle_cursor, request_id,eid):
+    # set the end event for the existing record
+    oracle_cursor.execute("""
+            UPDATE request_state
+            SET end_event_id = :eid
+            WHERE request_id = :request_id
+            AND end_event_id IS NULL
+            """,
+                          end_event_id=eid,
+                          request_id=request_id)
+
+    # create new request_state record
+    oracle_cursor.execute("""
+           INSERT INTO request_state (request_state_id, request_id, state_type_cd, 
+               start_event_id,end_event_id)
+           VALUES (request_state_seq.nextval, :request_id, 'H', :start_event_id,NULL)
+           """,
+                          request_id=request_id,
+                          start_event_id=eid
+                          )
