@@ -103,6 +103,17 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
+    def get_standalone(self):
+        model = self.get_model()
+
+        filters = [
+            func.lower(model.category).op('~')(r'\y{}\y'.format('stand-alone'))
+        ]
+
+        results = self.find_word_synonyms(None, filters)
+        flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
+        return flattened
+
     def get_number_words(self):
         model = self.get_model()
 
@@ -172,12 +183,17 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     '''
 
     def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
+        stand_alone_list = self.get_standalone()
+        stand_alone_list.sort(key=len, reverse=True)
+
         designation_all_regex = '|'.join(designation_all)
+        stand_alone_regex = '$|'.join(stand_alone_list)+'$'
         prefixes = '|'.join(prefix_list)
         numbers = '|'.join(number_list)
+
         ordinal_suffixes = 'ST|[RN]D|TH'
-        stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|ENTERPRISES$|INDUSTRIES$'
         internet_domains = '.COM|.ORG|.NET|.EDU'
+        #stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|ENTERPRISES$|INDUSTRIES$'
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
         # regex_prefixes is called in namex api before remove french
@@ -189,26 +205,26 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = self.regex_punctuation(text)
         text = self.regex_together_one_letter(text)
         text = self.regex_strip_out_numbers_middle_end(text, ordinal_suffixes, numbers)
-        text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_words)
+        text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_regex)
         text = self.regex_remove_extra_spaces(text)
 
         return text
 
     @classmethod
     def regex_remove_designations(cls, text, internet_domains, designation_all_regex):
-        text = re.sub(r'\b({0})\b|(?<=\d),(?=\d)|(?<=[A-Za-z])+[&-](?=[A-Za-z]\b)|(?<!\w)({1})(?!\w)(?=.*$)'.format(
+        text = re.sub(r'\b({0})\b|(?<=\d),(?=\d)|(?<!\w)({1})(?!\w)(?=.*$)'.format(
             internet_domains,
             designation_all_regex),
-                      '',
-                      text,
-                      0,
-                      re.IGNORECASE)
+            '',
+            text,
+            0,
+            re.IGNORECASE)
         return " ".join(text.split())
 
     @classmethod
     def regex_prefixes(cls, text, prefixes, exception_designation):
         exception_designation_rx = '|'.join(map(re.escape, exception_designation))
-        ws_generic_rx = r'\b({0})([ &/.-])([A-Za-z]+)'.format(prefixes)
+        ws_generic_rx = r'(?<![a-zA-Z0-9_.])({0})([ &/.-])([A-Za-z]+)'.format(prefixes)
         designation_rx = re.compile(r'({0})|{1}'.format(exception_designation_rx, ws_generic_rx), re.I)
 
         text = designation_rx.sub(lambda x: x.group(1) or (x.group(2) + x.group(4)), text)
@@ -217,7 +233,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_numbers_lot(cls, text):
-        text = re.sub(r'(?<=[a-zA-Z])\'[Ss]|\(.*\d+.*\)|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &/-]+',
+        text = re.sub(r"(?<=[a-zA-Z.])\'[Ss]|\(.*\d+.*\)|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &-']+",
                       ' ',
                       text,
                       0,
