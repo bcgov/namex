@@ -165,7 +165,7 @@ class NameProcessingService(GetSynonymListsMixin):
         all_designations.sort(key=len, reverse=True)
         designation_alternators = '|'.join(map(re.escape, all_designations))
 
-        name = remove_french(name, designation_alternators)
+        name = remove_french(words, designation_alternators)
         self.name_first_part = name
 
         exceptions_ws = syn_svc.get_exception_regex(text=name).data

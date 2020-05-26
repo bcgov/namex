@@ -59,7 +59,7 @@ Rules:  1) Before and after slash has to be at least two words to removed string
 
 
 def remove_french(text, all_designations_alternators):
-    text = re.sub(r'^(.*(?<!\w)(?:{0})(?!\w).*?)(?:[-/](\s*\w+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*$)+)?$'.format(all_designations_alternators),
+    text = re.sub(r'^(.*(?<!\w)(?:{0})(?!\w).*?)(?:[-/](\s*\w+.*))'.format(all_designations_alternators),
                   r'\1 ',
                   text,
                   0,
