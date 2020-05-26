@@ -376,7 +376,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_word_special_use(self, list_name, name):
+    def check_word_special_use(self, list_name, name_processed):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -386,7 +386,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         word_special_alternators = '|'.join(map(re.escape, all_word_special_use_list))
         regex = re.compile(r'(?<!\w)({0})(?!\w)'.format(word_special_alternators))
-        word_special_compound_list = regex.findall(name.lower())
+        word_special_compound_list = regex.findall(name_processed.lower())
 
         word_special_tokenized_list = [element.split(' ') for element in word_special_compound_list]
         word_special_tokenized_list = [item for sublist in word_special_tokenized_list for item in sublist if item]
