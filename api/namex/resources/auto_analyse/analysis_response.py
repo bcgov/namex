@@ -1,7 +1,7 @@
 # Import DTOs
 from .response_objects.name_analysis_response import NameAnalysisResponse
 from ..auto_analyse.analysis_issues import \
-    CheckIsValid, \
+    CheckIsValidIssue, \
     AddDistinctiveWordIssue, \
     AddDescriptiveWordIssue, \
     ContainsWordsToAvoidIssue, \
@@ -10,8 +10,8 @@ from ..auto_analyse.analysis_issues import \
     NameRequiresConsentIssue, \
     ContainsUnclassifiableWordIssue, \
     CorporateNameConflictIssue, \
-    IncorrectCategory, \
-    WordSpecialUse, \
+    IncorrectCategoryIssue, \
+    WordSpecialUseIssue, \
     DesignationMisplacedIssue, \
     DesignationNonExistentIssue
 
@@ -37,22 +37,22 @@ from .analysis_options import \
 # Execute analysis returns a response strategy code
 def response_issues(issue_code):
     issue_types = {
-        AnalysisIssueCodes.CHECK_IS_VALID: CheckIsValid,
+        AnalysisIssueCodes.CHECK_IS_VALID: CheckIsValidIssue,
         AnalysisIssueCodes.ADD_DISTINCTIVE_WORD: AddDistinctiveWordIssue,
         AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD: AddDescriptiveWordIssue,
         AnalysisIssueCodes.TOO_MANY_WORDS: TooManyWordsIssue,
         AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD: ContainsUnclassifiableWordIssue,
-        AnalysisIssueCodes.INCORRECT_CATEGORY: IncorrectCategory,
+        AnalysisIssueCodes.INCORRECT_CATEGORY: IncorrectCategoryIssue,
         AnalysisIssueCodes.WORDS_TO_AVOID: ContainsWordsToAvoidIssue,
         AnalysisIssueCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisIssueCodes.DESIGNATION_NON_EXISTENT: DesignationNonExistentIssue,
         AnalysisIssueCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
-        AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUse
+        AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue
     }
 
-    return issue_types.get(issue_code, CheckIsValid)
+    return issue_types.get(issue_code, CheckIsValidIssue)
 
 
 class AnalysisResponse:
