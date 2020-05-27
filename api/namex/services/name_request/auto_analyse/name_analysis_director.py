@@ -252,17 +252,17 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.name_tokens,
                 self.name_original_tokens
             )
-            if check_name_is_well_formed:
+            if not check_name_is_well_formed.is_valid:
                 analysis.append(check_name_is_well_formed)
                 return analysis
 
             check_word_limit = builder.check_word_limit(list_name)
-            if check_word_limit:
+            if not check_word_limit.is_valid:
                 analysis.append(check_word_limit)
                 return analysis
 
             check_word_unclassified = builder.check_unclassified_words(list_name, list_none)
-            if check_word_unclassified:
+            if not check_word_unclassified.is_valid:
                 analysis.append(check_word_unclassified)
 
             #analysis = analysis + results

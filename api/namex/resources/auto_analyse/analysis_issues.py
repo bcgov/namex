@@ -40,8 +40,8 @@ class AnalysisResponseIssue:
             return []  # This method should always return a list
 
         try:
-            converted_list = list(map(lambda d: d.lower() if isinstance(d, str) else '', str_list)) \
-                if convert else list(map(lambda d: d.lower(), str_list))
+            converted_list = list(map(lambda d: d.upper() if isinstance(d, str) else '', str_list)) \
+                if convert else list(map(lambda d: d.upper(), str_list))
         except Exception as err:
             print('List is not a list of strings ' + repr(err))
 
@@ -512,10 +512,11 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
         list_avoid = self._lc_list_items(procedure_result.values['list_avoid'])
+        list_avoid_compound = self._lc_list_items(procedure_result.values['list_avoid_compound'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) " + self._join_list_words(list_avoid) + " cannot be used.",
+            line1="The word(s) " + self._join_list_words(list_avoid_compound) + " cannot be used.",
             line2="",
             consenting_body=None,
             designations=None,
@@ -564,10 +565,11 @@ class WordSpecialUse(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
         list_special = self._lc_list_items(procedure_result.values['list_special'])
+        list_special_compound = self._lc_list_items(procedure_result.values['list_special_compound'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) " + self._join_list_words(list_special) + " must go to examination ",
+            line1="The word(s) " + self._join_list_words(list_special_compound) + " must go to examination ",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -616,10 +618,11 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
         list_consent = self._lc_list_items(procedure_result.values['list_consent'])
+        list_consent_original = self._lc_list_items(procedure_result.values['list_consent_original'])
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) " + self._join_list_words(list_consent) + " are restricted and may require consent.",
+            line1="The word(s) " + self._join_list_words(list_consent_original) + " are restricted and may require consent.",
             line2="Please check the options below.",
             consenting_body=ConsentingBody(
                 name="",
@@ -885,16 +888,17 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         correct_designations = procedure_result.values['correct_designations']
 
         incorrect_designations_lc = self._lc_list_items(incorrect_designations, True)
+        correct_designations_lc = self._lc_list_items(correct_designations, True)
         list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         entity_type_description = get_entity_type_description(self.entity_type)
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The " + self._join_list_words(incorrect_designations) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>",
+            line1="The " + self._join_list_words(incorrect_designations_lc) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>",
             line2=None,
             consenting_body=None,
-            designations=correct_designations,
+            designations=correct_designations_lc,
             show_reserve_button=False,
             show_examination_button=False,
             conflicts=None,
@@ -908,7 +912,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                 self.analysis_response.name_as_submitted,
                 self.analysis_response.name_original_tokens,
                 list_name_incl_designation_lc,
-                list_name_incl_designation.index(word),
+                list_name_incl_designation.index(word.lower()),
                 False
             )
 
@@ -930,8 +934,8 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                     # Render the Template string, replacing placeholder vars
                     setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute({
                         'list_name': self._join_list_words(list_name),
-                        'correct_designations': self._join_list_words(correct_designations),
-                        'incorrect_designations': self._join_list_words(incorrect_designations),
+                        'correct_designations': self._join_list_words(correct_designations_lc),
+                        'incorrect_designations': self._join_list_words(incorrect_designations_lc),
                         'entity_type': self.entity_type  # TODO: Map this CODE!
                     }))
 
@@ -946,19 +950,14 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
     def create_issue(self, procedure_result):
         list_name_incl_designation = self.analysis_response.name_original_tokens
 
-        # TODO: This was in here but not handled, why?
-        # misplaced_any_designation = procedure_result.values['misplaced_any_designation']
         misplaced_end_designation = procedure_result.values['misplaced_end_designation']
-        misplaced_all_designation = procedure_result.values['misplaced_all_designation']
-
-        misplaced_all_designation_lc = self._lc_list_items(misplaced_all_designation, True)
-        #misplaced_all_designation_lc = misplaced_all_designation_lc + remove_periods_designation(misplaced_all_designation_lc)
+        misplaced_end_designation_lc = self._lc_list_items(misplaced_end_designation, True)
         list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
             line1="The " + self._join_list_words(
-                misplaced_end_designation) + " designation(s) must be at the end of the name.",
+                misplaced_end_designation_lc) + " designation(s) must be at the end of the name.",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -976,12 +975,12 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
                 self.analysis_response.name_as_submitted,
                 self.analysis_response.name_original_tokens,
                 list_name_incl_designation_lc,
-                list_name_incl_designation.index(word),
+                list_name_incl_designation.index(word.lower()),
                 False
             )
 
             # Highlight the issues
-            if word in misplaced_all_designation_lc:
+            if word in misplaced_end_designation_lc:
                 issue.name_actions.append(NameAction(
                     word=word,
                     index=offset_idx,

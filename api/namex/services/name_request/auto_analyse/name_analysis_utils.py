@@ -58,18 +58,17 @@ Rules:  1) Before and after slash has to be at least two words to removed string
 '''
 
 
-def remove_french(text):
-    text = re.sub(r'(^[A-Z]+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*)/(\s*\w+(?:[^A-Z\n]+[A-Z]+)+[^A-Z\n]*$)+',
+def remove_french(text, all_designations_alternators):
+    text = re.sub(r'^([^-/]*?\b({0})(?!\w)[^-/\n]*)(?:[-/]\s*(.*))?$'.format(all_designations_alternators),
                   r'\1 ',
                   text,
                   0,
                   re.IGNORECASE)
-    return " ".join(text.split())
+    return " ".join(text.lower().split())
 
 
 def remove_stop_words(original_name_list, stop_words):
     words = ' '.join([word for x, word in enumerate(original_name_list) if word and word not in stop_words])
-
     return words
 
 

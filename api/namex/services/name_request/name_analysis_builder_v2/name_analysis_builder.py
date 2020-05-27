@@ -26,48 +26,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
-        result = None
-        # TODO: We're doing two checks for name is well formed, that should probably not be the case
-
-        # list_name = ['victoria', 'abc', 'view', 'book']
-        # list_dist = ['victoria', 'book']
-        # list_desc = ['victoria', 'abc', 'view']
-        # Returns words in wrong classification following distinctive | descriptive: [{book:3}]
-        # _, _, list_incorrect_classification = validate_distinctive_descriptive_lists(list_name, list_dist, list_desc)
+        result = ProcedureResult()
+        result.is_valid = True
 
         # Validate possible combinations using available distinctive and descriptive list:
         if list_dist == list_desc:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name)
         else:
             self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name, list_dist, list_desc)
-
-        # # First, check to make sure the name doesn't have too many words
-        # if len(list_name) > MAX_LIMIT:
-        #     result = ProcedureResult()
-        #     result.is_valid = False
-        #     result.result_code = AnalysisIssueCodes.TOO_MANY_WORDS
-        #
-        #     results.append(result)
-        #
-        # # Next, we check for unclassified words
-        # if list_none.__len__() > 0:
-        #     unclassified_words_list_response = []
-        #     for idx, token in enumerate(list_name):
-        #         if any(token in word for word in list_none):
-        #             unclassified_words_list_response.append(token)
-        #
-        #     result = ProcedureResult()
-        #     result.is_valid = False
-        #     result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
-        #     result.values = {
-        #         'list_name': list_name or [],
-        #         'list_none': unclassified_words_list_response
-        #     }
-        #
-        #     results.append(result)
-
-        # Now that too many words and unclassified words are handled, handle distinctive and descriptive issues
-        # result = None
 
         # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
         # the original name should be passed to get the correct index when reporting issues to front end.
@@ -131,7 +97,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_word_limit(self, list_name):
-        result = None
+        result = ProcedureResult()
+        result.is_valid = True
 
         length_name = len(list_name)
         if length_name > MAX_LIMIT:
@@ -153,7 +120,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def check_unclassified_words(self, list_name, list_none):
-        result = None
+        result = ProcedureResult()
+        result.is_valid = True
         if list_none.__len__() > 0:
             unclassified_words_list_response = []
             for idx, token in enumerate(list_name):
@@ -164,9 +132,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
-
-                list_name = [x.upper() for x in list_name]
-                unclassified_words_list_response = [x.upper() for x in unclassified_words_list_response]
 
                 result.values = {
                     'list_name': list_name or [],
@@ -187,24 +152,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         # TODO: Arturo plz check the word against the list, provide it as an input for word_condition_service.get_words_to_avoid()
         all_words_to_avoid_list = self.word_condition_service.get_words_to_avoid()
-        words_to_avoid_list = []
+        all_words_to_avoid_list = [word.lower() for word in all_words_to_avoid_list]
+        all_words_to_avoid_list.sort(key=len, reverse=True)
 
-        for words_to_avoid in all_words_to_avoid_list:
-            if words_to_avoid.lower() in name.lower():
-                words_to_avoid_list.append(words_to_avoid.lower())
+        word_avoid_alternators = '|'.join(map(re.escape, all_words_to_avoid_list))
+        regex = re.compile(r'(?<!\w)({0})(?!\w)'.format(word_avoid_alternators))
+        word_avoid_compound_list = regex.findall(name.lower())
 
-        words_to_avoid_list_response = []
+        word_avoid_tokenized_list = [element.split(' ') for element in word_avoid_compound_list]
+        word_avoid_tokenized_list = [item for sublist in word_avoid_tokenized_list for item in sublist]
 
-        for idx, token in enumerate(list_name):
-            if any(token in word for word in words_to_avoid_list):
-                words_to_avoid_list_response.append(token)
-
-        if words_to_avoid_list_response:
+        if word_avoid_tokenized_list.__len__() > 0:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.WORDS_TO_AVOID
             result.values = {
                 'list_name': list_name,
-                'list_avoid': words_to_avoid_list_response
+                'list_avoid': word_avoid_tokenized_list,
+                'list_avoid_compound': word_avoid_compound_list
             }
 
         return result
@@ -217,8 +181,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def search_conflicts(self, list_dist_words, list_desc_words, list_name, name):
-        syn_svc = self.synonym_service
-
         result = ProcedureResult()
         result.is_valid = False
         all_matches_list = []  # Contains all the conflicts from database
@@ -228,38 +190,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         response = {}
 
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
-            dist_substitution_list = []
-            desc_synonym_list = []
-            dist_all_permutations = []
+            dict_highest_counter, dict_highest_detail, similar_matches = self.get_conflicts(dict_highest_counter, dict_highest_detail,
+                                                                           w_dist, w_desc, list_name, name)
+            all_matches_list.extend(similar_matches)
+            # If exact match is found stop searching and return response
+            if any(score == 1.0 for score in list(dict_highest_counter.values())):
+                break
 
-            all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-                words=w_dist,
-                words_are_distinctive=True
-            ).data
-
-            dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
-            dist_substitution_list = dist_substitution_dict.values()
-
-            all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-                words=w_desc,
-                words_are_distinctive=False
-            ).data
-
-            desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-            desc_synonym_list = desc_synonym_dict.values()
-
-            # Inject distinctive section in query
-            for dist in dist_substitution_list:
-                criteria = Request.get_general_query()
-                criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
-                # Inject descriptive section into query, execute and add matches to list
-                for desc in desc_synonym_list:
-                    matches = Request.get_query_distinctive_descriptive(desc, criteria)
-                    all_matches_list.extend(matches)
-                    dict_highest_counter, dict_highest_detail = self.get_most_similar_names(dict_highest_counter,
-                                                                                            dict_highest_detail,
-                                                                                            matches, w_dist,
-                                                                                            w_desc, list_name, name)
         most_similar_names.extend(
             list({k for k, v in
                   sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[
@@ -285,28 +222,42 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.values = []
         return result
 
-    def search_exact_match(self, preprocess_name, list_name):
-        result = ProcedureResult()
-        result.is_valid = False
+    def get_conflicts(self, dict_highest_counter, dict_highest_detail, w_dist, w_desc, list_name, name):
+        syn_svc = self.synonym_service
+        dist_substitution_list = []
+        desc_synonym_list = []
+        all_matches_list = []
 
-        criteria = Request.get_general_query()
-        exact_match = Request.get_query_exact_match(criteria, preprocess_name)
+        all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+            words=w_dist,
+            words_are_distinctive=True
+        ).data
 
-        if exact_match:
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
-            result.values = {
-                'list_name': list_name,
-                'list_dist': None,
-                'list_desc': None,
-                'list_conflicts': exact_match
-            }
-        else:
-            result.is_valid = True
-            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
-            result.values = []
+        dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
+        dist_substitution_list = dist_substitution_dict.values()
 
-        return result
+        all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+            words=w_desc,
+            words_are_distinctive=False
+        ).data
+
+        desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
+        desc_synonym_list = desc_synonym_dict.values()
+        for dist in dist_substitution_list:
+            criteria = Request.get_general_query()
+            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
+            # Inject descriptive section into query, execute and add matches to list
+            for desc in desc_synonym_list:
+                matches = Request.get_query_distinctive_descriptive(desc, criteria)
+                dict_highest_counter, dict_highest_detail, matches_similar = self.get_most_similar_names(dict_highest_counter,
+                                                                                        dict_highest_detail,
+                                                                                        matches, w_dist,
+                                                                                        w_desc, list_name, name)
+                all_matches_list.extend(matches_similar)
+                if any(score == 1.0 for score in list(dict_highest_counter.values())):
+                    return dict_highest_counter, dict_highest_detail, all_matches_list
+
+        return dict_highest_counter, dict_highest_detail, all_matches_list
 
     '''
     Override the abstract / base class method
@@ -319,12 +270,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         all_words_consent_list = self.word_condition_service.get_words_requiring_consent()
         words_consent_dict = {}
-        name_singular_plural_list = get_plural_singular_name(name)
+        word_consent_original_list=[]
+        name_singular_plural_list = list(set(get_plural_singular_name(name)))
 
         for words_consent in all_words_consent_list:
             for name_sin_plural in name_singular_plural_list:
                 if re.search(r'\b{}\b'.format(re.escape(words_consent.lower())), name_sin_plural.lower()):
                     words_consent_dict.update(self.get_position_word_consent(words_consent, name_sin_plural))
+                    word_consent_original_list.append(words_consent)
+                    break
 
         words_consent_list_response = []
         for key in sorted(words_consent_dict):
@@ -334,12 +288,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.NAME_REQUIRES_CONSENT
 
-            list_name = [x.upper() for x in list_name]
-            words_consent_list_response = [x.upper() for x in words_consent_list_response]
-
             result.values = {
                 'list_name': list_name,
-                'list_consent': words_consent_list_response
+                'list_consent': words_consent_list_response,
+                'list_consent_original': word_consent_original_list
             }
 
         return result
@@ -385,7 +337,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         mismatch_entity_designation_list = []
         for idx, token in enumerate(list_name):
             if token in all_designations and token not in all_designations_user:
-                mismatch_entity_designation_list.append(token.upper())
+                mismatch_entity_designation_list.append(token)
 
         if mismatch_entity_designation_list:
             result.is_valid = False
@@ -414,9 +366,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.result_code = AnalysisIssueCodes.DESIGNATION_MISPLACED
             result.values = {
                 'list_name': list_name,
-                'misplaced_any_designation': None,
-                'misplaced_end_designation': misplaced_designation_end,
-                'misplaced_all_designation': misplaced_designation_end
+                'misplaced_end_designation': misplaced_designation_end
             }
 
         return result
@@ -426,36 +376,35 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_word_special_use(self, list_name, name):
+    def check_word_special_use(self, list_name, name_processed):
         result = ProcedureResult()
         result.is_valid = True
 
         all_word_special_use_list = self.word_condition_service.get_word_special_use()
-        word_special_use_list = []
+        all_word_special_use_list = [word.lower() for word in all_word_special_use_list]
+        all_word_special_use_list.sort(key=len, reverse=True)
 
-        for words_special in all_word_special_use_list:
-            if words_special.lower() in name.lower():
-                word_special_use_list.append(words_special.lower())
+        word_special_alternators = '|'.join(map(re.escape, all_word_special_use_list))
+        regex = re.compile(r'(?<!\w)({0})(?!\w)'.format(word_special_alternators))
+        word_special_compound_list = regex.findall(name_processed.lower())
 
-        word_special_use_list_response = []
+        word_special_tokenized_list = [element.split(' ') for element in word_special_compound_list]
+        word_special_tokenized_list = [item for sublist in word_special_tokenized_list for item in sublist if item]
 
-        for idx, token in enumerate(list_name):
-            if any(token in word for word in word_special_use_list):
-                word_special_use_list_response.append(token)
-
-        if word_special_use_list_response:
+        if word_special_tokenized_list.__len__() > 0:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.WORD_SPECIAL_USE
             result.values = {
                 'list_name': list_name,
-                'list_special': word_special_use_list_response
+                'list_special': word_special_tokenized_list,
+                'list_special_compound': word_special_compound_list
             }
 
         return result
 
     def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
                                list_name, name):
-
+        selected_matches=[]
         if matches:
             syn_svc = self.synonym_service
             service = ProtectedNameAnalysisService()
@@ -492,6 +441,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
+                    selected_matches.append(match)
+                    if similarity == 1.0:
+                        break
 
             if dict_matches_counter:
                 dict_matches_words.update(
@@ -505,7 +457,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 for k in dict_highest_counter.keys():
                     dict_highest_detail.update({k: dict_matches_words.get(k)})
 
-        return dict_highest_counter, dict_highest_detail
+        return dict_highest_counter, dict_highest_detail, selected_matches
 
     def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
         dict_words_matches = {}

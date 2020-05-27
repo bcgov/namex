@@ -189,6 +189,28 @@ class _Prefixes(Resource):
         }
 
 
+@api.route('/stand-alone', strict_slashes=False, methods=['GET'])
+class _StandAlone(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    # @api.expect()
+    @api.response(200, 'SynonymsApi', response_list)
+    @marshal_with(response_list)
+    @api.doc(params={
+    })
+    def get():
+        if not validate_request(request.args):
+            return
+
+        service = SynonymService()
+        results = service.get_standalone()
+
+        return {
+            'data': results
+        }
+
+
 @api.route('/number-words', strict_slashes=False, methods=['GET'])
 class _NumberWords(Resource):
     @staticmethod
@@ -688,22 +710,24 @@ class _RegexPrefixes(Resource):
     @marshal_with(response_string)
     @api.doc(params={
         'text': '',
-        'prefixes_str': ''
+        'prefixes_str': '',
+        'exception_designation': '',
     })
     def get():
         text = unquote_plus(request.args.get('text'))
         prefixes_str = unquote_plus(request.args.get('prefixes_str'))
+        exception_designation = literal_eval(request.args.get('exception_designation')) \
+            if request.args.get('exception_designation') else []
 
         if not validate_request(request.args):
             return
 
         service = SynonymService()
-        result = service.regex_prefixes(text, prefixes_str)
+        result = service.regex_prefixes(text, prefixes_str, exception_designation)
 
         return {
             'data': result
         }
-
 
 @api.route('/<col>/<term>', strict_slashes=False, methods=['GET'])
 class _Synonyms(Resource):
@@ -727,29 +751,30 @@ class _Synonyms(Resource):
         print(response_list)
         return ('results', response_list), 200
 
+# DO NOT ADD STUFF IS FOR OLD API
 
-@api.route('/regex-prefixes', strict_slashes=False, methods=['GET'])
-class _RegexPrefixes(Resource):
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    # @api.expect()
-    @api.response(200, 'SynonymsApi', response_string)
-    @marshal_with(response_string)
-    @api.doc(params={
-        'text': '',
-        'prefixes_str': ''
-    })
-    def get():
-        text = unquote_plus(request.args.get('text'))
-        prefixes_str = unquote_plus(request.args.get('prefixes_str'))
-
-        if not validate_request(request.args):
-            return
-
-        service = SynonymService()
-        result = service.regex_prefixes(text, prefixes_str)
-
-        return {
-            'data': result
-        }
+# @api.route('/regex-prefixes', strict_slashes=False, methods=['GET'])
+# class _RegexPrefixes(Resource):
+#     @staticmethod
+#     @cors.crossdomain(origin='*')
+#     # @jwt.requires_auth
+#     # @api.expect()
+#     @api.response(200, 'SynonymsApi', response_string)
+#     @marshal_with(response_string)
+#     @api.doc(params={
+#         'text': '',
+#         'prefixes_str': ''
+#     })
+#     def get():
+#         text = unquote_plus(request.args.get('text'))
+#         prefixes_str = unquote_plus(request.args.get('prefixes_str'))
+#
+#         if not validate_request(request.args):
+#             return
+#
+#         service = SynonymService()
+#         result = service.regex_prefixes(text, prefixes_str)
+#
+#         return {
+#             'data': result
+#         }
