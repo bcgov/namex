@@ -1,10 +1,7 @@
-import jsonpickle
-
-
-class Serializable(object):
-    def to_json_test(self):
-        # Allows us to unwrap the response when we're running pytests
-        return jsonpickle.encode(self)
-
-    def to_json(self):
-        return jsonpickle.encode(self, unpicklable=False, warn=True)
+from .conflict import Conflict
+from .consenting_body import ConsentingBody
+from .descriptive_word import DescriptiveWord
+from .name_action import NameActions, NameAction, WordPositions
+from .name_analysis_issue import NameAnalysisIssue
+from .name_analysis_response import NameAnalysisResponse
+from .setup import Setup

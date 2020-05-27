@@ -1,4 +1,4 @@
-from . import Serializable
+from .abstract import Serializable
 
 
 class ConsentingBody(Serializable):
