@@ -224,7 +224,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     @classmethod
     def regex_prefixes(cls, text, prefixes, exception_designation):
         exception_designation_rx = '|'.join(map(re.escape, exception_designation))
-        ws_generic_rx = r'(?<![a-zA-Z0-9_.])({0})([ &/.-])([A-Za-z]+)'.format(prefixes)
+        ws_generic_rx = r'(?<![a-zA-Z0-9_.])({0})\s*([ &/.-])\s*([A-Za-z]+)'.format(prefixes)
         designation_rx = re.compile(r'({0})|{1}'.format(exception_designation_rx, ws_generic_rx), re.I)
 
         text = designation_rx.sub(lambda x: x.group(1) or (x.group(2) + x.group(4)), text)
@@ -233,7 +233,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_numbers_lot(cls, text):
-        text = re.sub(r"(?<=[a-zA-Z.])\'[Ss]|\(.*\d+.*\)|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &-']+",
+        text = re.sub(r'(?<=[a-zA-Z\.])\'[Ss]|\(.*\d+.*\)|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &-\']+',
                       ' ',
                       text,
                       0,
