@@ -69,7 +69,7 @@ def remove_french(text, all_designations_alternators):
 
 def remove_stop_words(original_name_list, stop_words):
     words = ' '.join([word for x, word in enumerate(original_name_list) if word and word not in stop_words])
-    return re.sub(r'\s+([/-])\s+', r'\1', words)
+    return words
 
 
 def list_distinctive_descriptive_same(name_list):
