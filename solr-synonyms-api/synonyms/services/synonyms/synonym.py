@@ -1,4 +1,5 @@
 import re
+import string
 from sqlalchemy import func
 
 from synonyms.models.synonym import Synonym
@@ -233,8 +234,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_numbers_lot(cls, text):
-        text = re.sub(r'(?<=[a-zA-Z\.])\'[Ss]|\(.*\d+.*\)|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?|[^a-zA-Z0-9 &-\']+',
-                      ' ',
+        text = re.sub(r'(?<=[a-zA-Z\.])\'[Ss]|\(.*\d+.*\)|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?',
+                      '',
                       text,
                       0,
                       re.IGNORECASE)
@@ -270,11 +271,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_punctuation(cls, text):
-        text = re.sub(r'[&/-]',
-                      ' ',
-                      text,
-                      0,
-                      re.IGNORECASE)
+        text = re.sub(rf"[{string.punctuation}]", " ", text)
+
         return " ".join(text.split())
 
     @classmethod
