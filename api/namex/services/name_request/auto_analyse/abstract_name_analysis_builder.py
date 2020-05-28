@@ -130,24 +130,23 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     @return ProcedureResult
     '''
 
-    # TODO: Ensure this isn't needed anywhere before replacing it!
-    # @abc.abstractmethod
-    #def check_designation(self, list_name, entity_type_user, all_designations, wrong_designation_place, misplaced_designation_any, misplaced_designation_end, all_designations_user):
-    #    return ProcedureResult(is_valid=True)
-
-    '''
-        This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
-        @return ProcedureResult
-        '''
-
     @abc.abstractmethod
     def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
         return ProcedureResult(is_valid=True)
 
     '''
-        This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
-        @return ProcedureResult
-        '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
+
+    @abc.abstractmethod
+    def check_end_designation_more_than_once(self, list_name, designation_end_list, misplaced_designation_end):
+        return ProcedureResult(is_valid=True)
+
+    '''
+    This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
+    @return ProcedureResult
+    '''
 
     @abc.abstractmethod
     def check_designation_misplaced(self, list_name, misplaced_designation_end):
@@ -175,14 +174,17 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
-    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc, list_name, name):
+    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
+                               list_name, name):
         return ProcedureResult(is_valid=True)
 
     '''
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
         return ProcedureResult(is_valid=True)
@@ -191,6 +193,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
     @return ProcedureResult
     '''
+
     @abc.abstractmethod
     def check_word_limit(self, list_name):
         return ProcedureResult(is_valid=True)
@@ -203,4 +206,3 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     @abc.abstractmethod
     def check_unclassified_words(self, list_name, list_none):
         return ProcedureResult(is_valid=True)
-
