@@ -25,7 +25,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'INVINITY FINANCIAL SOLUTIONS INCORPORATED',
+            'name': 'UNCLASSIFIED FINANCIAL SOLUTIONS INCORPORATED',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'

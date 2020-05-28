@@ -15,9 +15,11 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
     words_list_classification = [{'word': 'CANADIAN', 'classification': 'DIST'},
                                  {'word': 'CANADIAN', 'classification': 'DESC'},
                                  {'word': 'SUMMERS', 'classification': 'DIST'},
+                                 {'word': 'SUMMERS', 'classification': 'DESC'},
                                  {'word': 'GAMES', 'classification': 'DIST'},
                                  {'word': 'GAMES', 'classification': 'DESC'},
                                  {'word': 'BLAKE', 'classification': 'DIST'},
+                                 {'word': 'BLAKE', 'classification': 'DESC'},
                                  {'word': 'ENGINEERING', 'classification': 'DIST'},
                                  {'word': 'ENGINEERING', 'classification': 'DESC'}
                                  ]

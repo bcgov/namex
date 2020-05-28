@@ -14,9 +14,10 @@ from ..common import token_header, claims
 def test_name_use_special_words_request_response(client, jwt, app):
     words_list_classification = [{'word': 'BC', 'classification': 'DIST'},
                                  {'word': 'BC', 'classification': 'DESC'},
-                                 {'word': '468040', 'classification': 'DIST'},
+                                 # {'word': '468040', 'classification': 'DIST'},
                                  {'word': 'COAST', 'classification': 'DIST'},
                                  {'word': 'COAST', 'classification': 'DESC'},
+                                 {'word': 'TREASURY', 'classification': 'DISC'},
                                  {'word': 'TREASURY', 'classification': 'DESC'}
                                  ]
     save_words_list_classification(words_list_classification)

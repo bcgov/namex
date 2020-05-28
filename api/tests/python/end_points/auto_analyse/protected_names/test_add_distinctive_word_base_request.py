@@ -14,8 +14,8 @@ from ..common import token_header, claims
 @pytest.mark.xfail(raises=ValueError)
 def test_add_distinctive_word_base_request_response(client, jwt, app):
     words_list_classification = [
-        {'word': 'GROWERS', 'classification': 'DESC'},
-        {'word': 'AEROENTERPRISES', 'classification': 'DESC'},
+        {'word': 'CARPENTRY', 'classification': 'DESC'},
+        {'word': 'HEATING', 'classification': 'DESC'},
         {'word': 'ADJUSTERS', 'classification': 'DESC'}
     ]
 
@@ -26,12 +26,12 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = [
-        {'name': 'GROWERS INC.',
+        {'name': 'CARPENTRY INC.',
          'location': 'BC',
          'entity_type': 'CR',
          'request_action': 'NEW'
          },
-        {'name': 'AEROENTERPRISES INC.',
+        {'name': 'HEATING LIMITED',
          'location': 'BC',
          'entity_type': 'CR',
          'request_action': 'NEW'

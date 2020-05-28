@@ -25,7 +25,6 @@ def test_end_designation_more_than_once_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'ARMSTRONG PLUMBING COOP',
             'name': 'LTD. ARMSTRONG CORPORATION PLUMBING  INC.',
             'location': 'BC',
             'entity_type': 'CR',
@@ -81,6 +80,7 @@ def test_end_designation_more_than_once_request_response(client, jwt, app):
         },
 
     ]
+
     for entry in test_params:
         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
         path = ENDPOINT_PATH + '?' + query

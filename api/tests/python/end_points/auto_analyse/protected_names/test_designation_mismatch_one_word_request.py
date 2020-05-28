@@ -5,11 +5,13 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_has_word_upper, assert_has_designations_upper, save_words_list_classification, save_words_list_virtual_word_condition
+from ..common import assert_issues_count_is_gt, assert_has_word_upper, assert_has_designations_upper, \
+    save_words_list_classification, save_words_list_virtual_word_condition
 from ..common import ENDPOINT_PATH
 from ..common import token_header, claims
 
 
+# TODO: COOP is also a special word. What if coop is typed in CR entity type. Do we show mismatch designation and special word use?
 @pytest.mark.xfail(raises=ValueError)
 def test_designation_mismatch_one_word_request_response(client, jwt, app):
     words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},

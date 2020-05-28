@@ -13,6 +13,7 @@ from ..common import token_header, claims
 @pytest.mark.xfail(raises=ValueError)
 def test_name_requires_consent_more_than_one_word_request_response(client, jwt, app):
     words_list_classification = [{'word': 'BLAKE', 'classification': 'DIST'},
+                                 {'word': 'BLAKE', 'classification': 'DESC'},
                                  {'word': 'ENGINEERING', 'classification': 'DIST'},
                                  {'word': 'ENGINEERING', 'classification': 'DESC'},
                                  {'word': 'EQTEC', 'classification': 'DIST'}]
