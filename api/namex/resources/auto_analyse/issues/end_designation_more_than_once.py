@@ -9,11 +9,11 @@ from ..response_objects import NameAction, NameActions
 
 
 class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
-    issue_type = AnalysisIssueCodes.DESIGNATION_MORE_THAN_ONE
+    issue_type = AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
             line1="",

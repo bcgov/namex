@@ -8,6 +8,7 @@ from .corporate_name_conflict import BcCorporateNameConflictIssue
 from .designation_mismatch import BcDesignationMismatchIssue
 from .designation_misplaced import BcDesignationMisplacedIssue
 from .designation_non_existent import BcDesignationNonExistentIssue
+from .end_designation_more_than_once import BcEndDesignationMoreThanOnceIssue
 from .incorrect_category import BcIncorrectCategoryIssue as BcIncorrectCategoryIssue
 from .name_requires_consent import BcNameRequiresConsentIssue
 from .too_many_words import BcTooManyWordsIssue
