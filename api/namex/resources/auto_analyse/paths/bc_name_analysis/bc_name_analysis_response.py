@@ -256,6 +256,22 @@ class BcAnalysisResponse(AnalysisResponse):
 
         return issue
 
+    def build_end_designation_more_than_once_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = change_designation_order_setup()
+        # Tweak the header
+        option1.header = "Option 1"
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            # option2,
+            # option3
+        ])
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+
     def build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
         option1 = change_designation_order_setup()
         # Tweak the header
