@@ -367,6 +367,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
+    list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
+    designation_end_list: Correct end designations
+    misplaced_designation_end: Misplaced end designations
     @return ProcedureResult
     '''
     def check_end_designation_more_than_once(self, list_name, designation_end_list, misplaced_designation_end):
