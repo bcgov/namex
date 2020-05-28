@@ -443,12 +443,15 @@ class NameRequest(Resource):
                     warnings = nro.add_nr(nrd)
                     if warnings:
                         MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
-                        return jsonify({"message": "Error updating oracle. You mus re-try"}), 500
+                        return jsonify({"message": "Error updating oracle. You must re-try"}), 500
                     else:
                         #added the oracle request_id in new_nr, need to save it postgres
-                        nrd.save_to_db()
+                        #set the furnished_flag='Y' for approved and conditionally approved
+                        if (json_data['stateCd'] in [State.APPROVED, State.CONDITIONAL]):
+                            nrd.furnished="Y"
 
-                    EventRecorder.record(user, Event.POST, nrd, json_data)
+                        nrd.save_to_db()
+                        EventRecorder.record(user, Event.POST, nrd, json_data)
 
             except Exception as error:
                 current_app.logger.error("Error saving the whole nr and names. Error:{0}".format(error))
