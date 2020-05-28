@@ -16,11 +16,12 @@ setup_logging() ## important to do this first
 from urllib.parse import unquote_plus
 from datetime import datetime
 
-from namex.models import Request, Name, NRNumber, State, User, Comment, Applicant
+from namex.models import Request, Name, NRNumber, State, User, Comment, Applicant, Event
 
-from namex.services import EventRecorder
+from namex.services import EventRecorder, MessageServices
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
 from namex.services.name_request import convert_to_ascii
+from namex import nro
 
 
 
@@ -252,6 +253,7 @@ class NameRequest(Resource):
             return jsonify({"message": "Name Request object error"}), 404
 
         try:
+            #temp Nr # until one is generated in oracle
             nr_num = generate_nr()
             nr_id = get_request_sequence()
         except Exception as error:
@@ -350,9 +352,6 @@ class NameRequest(Resource):
             current_app.logger.error("Error retrieving the New NR from the db. Error:{0}".format(error))
             return jsonify({"message": "Error retrieving the New NR from the db."}), 404
 
-
-
-
         try:
             for name in json_data.get('names', None):
                 try:
@@ -434,9 +433,26 @@ class NameRequest(Resource):
                     current_app.logger.error("Error appending names. Error:{0}".format(error))
                     return jsonify({"message": "Error appending names"}), 404
 
+
             try:
-                #save names
+                #save names to postgres
                 nrd.save_to_db()
+
+                #pnly update Orcale for APPROVED, CONDITIONAL, DRAFT
+                if (json_data['stateCd'] in [State.DRAFT, State.APPROVED, State.CONDITIONAL]):
+                    warnings = nro.add_nr(nrd)
+                    if warnings:
+                        MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
+                        return jsonify({"message": "Error updating oracle. You must re-try"}), 500
+                    else:
+                        #added the oracle request_id in new_nr, need to save it postgres
+                        #set the furnished_flag='Y' for approved and conditionally approved
+                        if (json_data['stateCd'] in [State.APPROVED, State.CONDITIONAL]):
+                            nrd.furnished="Y"
+
+                        nrd.save_to_db()
+                        EventRecorder.record(user, Event.POST, nrd, json_data)
+
             except Exception as error:
                 current_app.logger.error("Error saving the whole nr and names. Error:{0}".format(error))
                 return jsonify({"message": "Error saving names to the db"}), 404
