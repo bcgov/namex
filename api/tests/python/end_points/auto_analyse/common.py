@@ -1,4 +1,5 @@
 import pytest
+from datetime import date
 
 from namex.constants import EntityTypes
 from namex.models import User
@@ -42,24 +43,33 @@ def assert_issues_count_is(count, issues):
 
 @pytest.mark.skip
 def assert_issues_count_is_gt(count, issues):
-
     print('\n' + 'Issue types:' + '\n')
     for issue in issues:
-        print('- ' + issue.issueType.value + '\n')
+        print('- ' + issue.get('issue_type') + '\n')
     assert issues.__len__() > count
 
 @pytest.mark.skip
 def assert_issue_type_is_one_of(types, issue):
-    assert issue.issueType in types
+    assert issue.get('issue_type') in types
 
 
 @pytest.mark.skip
 def assert_has_issue_type(issue_type, issues):
     has_issue = False
     for issue in issues:
-        has_issue = True if issue.issueType == issue_type and issue.issueType.value == issue_type.value else False
+        if issue.get('issue_type') == issue_type.value:
+            has_issue = True
 
     assert has_issue is True
+
+@pytest.mark.skip
+def assert_has_no_issue_type(issue_type, issues):
+    has_issue = False
+    for issue in issues:
+        if issue.get('issue_type') == issue_type.value:
+            has_issue = True
+
+    assert has_issue is False
 
 @pytest.mark.skip
 def assert_has_designations_upper(issue_type, issues):
