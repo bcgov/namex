@@ -4,8 +4,7 @@ from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import validate_distinctive_descriptive_lists, list_distinctive_descriptive, \
-    list_distinctive_descriptive_same, get_all_substitutions
+from ..auto_analyse.name_analysis_utils import get_all_substitutions
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -28,12 +27,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_name_is_well_formed(self, list_dist, list_desc, list_none, list_name, list_original_name):
         result = ProcedureResult()
         result.is_valid = True
-
-        # Validate possible combinations using available distinctive and descriptive list:
-        if list_dist == list_desc:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive_same(list_name)
-        else:
-            self._list_dist_words, self._list_desc_words = list_distinctive_descriptive(list_name, list_dist, list_desc)
 
         # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
         # the original name should be passed to get the correct index when reporting issues to front end.
@@ -78,7 +71,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_name': list_name or [],
                     'list_dist': list_dist or []
                 }
-            elif list_desc.__len__() == 0 or self._list_desc_words.__len__() == 0:
+            elif list_desc.__len__() == 0:
                 result = ProcedureResult()
                 result.is_valid = False
                 result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
@@ -187,8 +180,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         response = {}
 
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
-            dict_highest_counter, dict_highest_detail, similar_matches = self.get_conflicts(dict_highest_counter, dict_highest_detail,
-                                                                           w_dist, w_desc, list_name, name)
+            dict_highest_counter, dict_highest_detail, similar_matches = self.get_conflicts(
+                dict_highest_counter, dict_highest_detail, w_dist, w_desc, list_name, name
+            )
+
             all_matches_list.extend(similar_matches)
             # If exact match is found stop searching and return response
             if any(score == 1.0 for score in list(dict_highest_counter.values())):

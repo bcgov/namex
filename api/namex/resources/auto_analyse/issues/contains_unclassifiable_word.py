@@ -12,15 +12,12 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
     status_text = "Further Action Required"
     issue = None
-
-    def create_issue(self, procedure_result):
-        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
-        list_none = self._lc_list_items(procedure_result.values['list_none'])
-
+    
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) " + self._join_list_words(list_none) + " have not previously been approved for use.",
-            line2="Please check wait times at the top of the screen.",
+            line1="",
+            line2="",
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
@@ -30,8 +27,16 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
-        # TODO: Fix the case eg. 'Asdfadsf Something Asdfadsf Company Ltd.'...
-        #  If there's a duplicate of an unclassified word, just grabbing the index won't do!
+        return issue
+
+    def configure_issue(self, procedure_result):
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        list_none = self._lc_list_items(procedure_result.values['list_none'])
+
+        issue = self.create_issue()
+        issue.line1 = "The word(s) " + self._join_list_words(list_none) + " have not previously been approved for use."
+        issue.line2 = "Please check wait times at the top of the screen."
+
         issue.name_actions = []
         for word in list_none:
             offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(

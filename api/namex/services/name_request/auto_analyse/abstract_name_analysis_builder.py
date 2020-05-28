@@ -150,7 +150,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
         '''
 
     @abc.abstractmethod
-    def check_designation_misplaced(self, list_name, misplaced_designation_any, misplaced_designation_end, misplaced_designation_all):
+    def check_designation_misplaced(self, list_name, misplaced_designation_end):
         return ProcedureResult(is_valid=True)
 
     '''
@@ -159,7 +159,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     '''
 
     @abc.abstractmethod
-    def check_designation_existence(self, list_name, all_designations_user):
+    def check_designation_existence(self, list_name, all_designations, all_designations_user):
         return ProcedureResult(is_valid=True)
 
     '''

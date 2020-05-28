@@ -13,17 +13,10 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
-        list_name_incl_designation = self.analysis_response.name_original_tokens
-
-        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
-        misplaced_end_designation_lc = self._lc_list_items(misplaced_end_designation, True)
-        list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
-
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The " + self._join_list_words(
-                misplaced_end_designation_lc) + " designation(s) must be at the end of the name.",
+            line1="",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -34,6 +27,18 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
             name_actions=[]
         )
 
+        return issue
+
+    def configure_issue(self, procedure_result):
+        list_name_incl_designation = self.analysis_response.name_original_tokens
+
+        misplaced_end_designation = procedure_result.values['misplaced_end_designation']
+        misplaced_end_designation_lc = self._lc_list_items(misplaced_end_designation, True)
+        list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
+
+        issue = self.create_issue()
+        issue.line1 = "The " + self._join_list_words(misplaced_end_designation_lc) + \
+                      " designation(s) must be at the end of the name."
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_incl_designation_lc:

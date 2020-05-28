@@ -12,22 +12,29 @@ class DesignationNonExistentIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
-        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
-        correct_designations = self._lc_list_items(procedure_result.values['correct_designations'])
-
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="Further Action. A designation is required. Please select one from Option 1 below.",
+            line1="",
             line2=None,
             consenting_body=None,
-            designations=correct_designations,
+            designations=None,
             show_reserve_button=False,
             show_examination_button=False,
             conflicts=None,
             setup=None,
             name_actions=[]
         )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        correct_designations = self._lc_list_items(procedure_result.values['correct_designations'])
+
+        issue = self.create_issue()
+        issue.line1 = "Further Action. A designation is required. Please select one from Option 1 below."
+        issue.designations = correct_designations
 
         # Setup boxes
         issue.setup = self.setup_config

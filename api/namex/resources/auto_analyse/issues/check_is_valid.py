@@ -10,7 +10,7 @@ class CheckIsValid(AnalysisResponseIssue):
     status_text = "Approved"
     issue = None
 
-    def create_issue(self, procedure_result):
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
             line1=None,
@@ -23,5 +23,10 @@ class CheckIsValid(AnalysisResponseIssue):
             setup=None,
             name_actions=None
         )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
+        issue = self.create_issue()
 
         return issue

@@ -13,15 +13,11 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
-        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
-        list_consent = self._lc_list_items(procedure_result.values['list_consent'])
-        list_consent_original = self._lc_list_items(procedure_result.values['list_consent_original'])
-
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="The word(s) " + self._join_list_words(list_consent_original) + " are restricted and may require consent.",
-            line2="Please check the options below.",
+            line1="",
+            line2="",
             consenting_body=ConsentingBody(
                 name="",
                 email=""
@@ -33,6 +29,17 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
             setup=None,
             name_actions=[]
         )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
+        list_name = self.analysis_response.name_tokens  # procedure_result.values['list_name']
+        list_consent = self._lc_list_items(procedure_result.values['list_consent'])
+        list_consent_original = self._lc_list_items(procedure_result.values['list_consent_original'])
+
+        issue = self.create_issue()
+        issue.line1 = "The word(s) " + self._join_list_words(list_consent_original) + " are restricted and may require consent."
+        issue.line2 = "Please check the options below."
 
         issue.name_actions = []
         for word in list_consent:

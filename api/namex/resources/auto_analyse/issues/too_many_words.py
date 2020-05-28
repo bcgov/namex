@@ -12,11 +12,11 @@ class TooManyWordsIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="Names longer than three words, not including proper designations, may be sent to examination.",
-            line2="Please check wait times at the top of the screen.",
+            line1="",
+            line2="",
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
@@ -25,6 +25,13 @@ class TooManyWordsIssue(AnalysisResponseIssue):
             setup=None,
             name_actions=None
         )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
+        issue = self.create_issue()
+        issue.line1 = "Names longer than three words, not including proper designations, may be sent to examination."
+        issue.line2 = "Please check wait times at the top of the screen."
 
         # Setup boxes
         issue.setup = self.setup_config

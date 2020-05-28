@@ -12,15 +12,13 @@ from urllib.parse import unquote_plus
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
-from ... import AnalysisResponse
-
+from .xpro_name_analysis_response import XproAnalysisResponse as AnalysisResponse
 from namex.services.name_request.auto_analyse import AnalysisRequestActions
 
 from namex.constants import \
-    ValidLocations, BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
+    ValidLocations, XproUnprotectedNameEntityTypes
 
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
-from namex.services.name_request.auto_analyse.unprotected_name_analysis import UnprotectedNameAnalysisService
 from namex.services.name_request.auto_analyse.xpro_name_analysis import XproNameAnalysisService
 
 setup_logging()  # It's important to do this first
@@ -96,9 +94,9 @@ class XproNameAnalysis(Resource):
     # @api.expect()
     @api.doc(params={
         'name': 'A company / organization name string',
-        'location': 'A location code [ BC | CA | IN ]',
-        'entity_type': 'An entity type code [ CR, UL, CC ]',
-        'request_action': 'A request action code'
+        'location': 'A location code [ CA (only) ]',
+        'entity_type': 'An entity type code [ XCR, RLC ]',
+        'request_action': 'A request action code [ NEW ]'
     })
     def get():
         name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None
