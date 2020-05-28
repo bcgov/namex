@@ -367,6 +367,32 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     '''
     Override the abstract / base class method
+    @return ProcedureResult
+    '''
+    def check_end_designation_more_than_once(self, list_name, designation_end_list, misplaced_designation_end):
+        result = ProcedureResult()
+        result.is_valid = True
+
+        if designation_end_list.__len__() > 1 or misplaced_designation_end.__len__() > 1:
+            correct_end_designations = designation_end_list + list(
+                set(misplaced_designation_end) - set(designation_end_list))
+            corrected_end_designations_sorted = []
+
+            for word in list_name:
+                if word.upper() in correct_end_designations:
+                    corrected_end_designations_sorted.append(word.upper())
+
+            result.is_valid = False
+            result.result_code = AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE
+            result.values = {
+                'list_name': list_name,
+                'correct_end_designations': corrected_end_designations_sorted
+            }
+
+        return result
+
+    '''
+    Override the abstract / base class method
     Just <end> designation can be misplaced in other position, it can be at the beginning, middle or before end in the name
     Note: <any> designation can be anywhere in the name, so to be misplaced is not possible.
     @return ProcedureResult
