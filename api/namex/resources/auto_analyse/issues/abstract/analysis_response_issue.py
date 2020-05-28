@@ -65,8 +65,8 @@ class AnalysisResponseIssue:
         self.setup_config = setup_config
 
     @classmethod
-    def _join_list_words(cls, list_words):
-        return "<b>" + ", ".join(list_words) + "</b>"
+    def _join_list_words(cls, list_words, separator=", "):
+        return "<b>" + separator.join(list_words) + "</b>"
 
     # Johnson & Johnson Engineering will return original tokens:
     # [Johnson, &, Johnson, Engineering]

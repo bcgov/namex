@@ -70,6 +70,7 @@ class AnalysisIssueCodes(str, Enum):
     WORDS_TO_AVOID = 'word_to_avoid'
     WORD_SPECIAL_USE = 'word_special_use'
     DESIGNATION_MISMATCH = 'designation_mismatch'
+    END_DESIGNATION_MORE_THAN_ONCE = 'end_designation_more_than_once'
     DESIGNATION_MISPLACED = 'designation_misplaced'
     NAME_REQUIRES_CONSENT = 'consent_required'
     DESIGNATION_NON_EXISTENT = 'designation_non_existent'
