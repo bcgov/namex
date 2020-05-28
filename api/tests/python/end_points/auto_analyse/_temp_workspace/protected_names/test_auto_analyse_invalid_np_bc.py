@@ -10,41 +10,11 @@ from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 # from tests.python import integration_oracle_namesdb
 
-token_header = {
-    "alg": "RS256",
-    "typ": "JWT",
-    "kid": "flask-jwt-oidc-test-client"
-}
-
-claims = {
-    "iss": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc",
-    "sub": "43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc",
-    "aud": "NameX-Dev",
-    "exp": 31531718745,
-    "iat": 1531718745,
-    "jti": "flask-jwt-oidc-test-support",
-    "typ": "Bearer",
-    "username": "test-user",
-    "realm_access": {
-        "roles": [
-            "{}".format(User.EDITOR),
-            "{}".format(User.APPROVER),
-            "viewer",
-            "user"
-        ]
-    }
-}
-
-API_BASE_URI = '/api/v1/'
-ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
+from ..common import ENDPOINT_PATH
+from ..common import token_header, claims
 
 
-# params = {
-#   name,
-#   location, one of: [‘bc’, ‘ca’, ‘us’, or ‘it’],
-#   entity_type: abbreviation. convention not finalized yet.
-#   request_type, one of: [‘new’, ‘existing’, ‘continuation’]
-# }
+
 
 
 @pytest.mark.skip
