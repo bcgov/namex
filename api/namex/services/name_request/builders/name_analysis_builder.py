@@ -379,8 +379,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             corrected_end_designations_sorted = []
 
             for word in list_name:
-                if word.upper() in correct_end_designations:
-                    corrected_end_designations_sorted.append(word.upper())
+                if word in correct_end_designations:
+                    corrected_end_designations_sorted.append(word)
 
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE
