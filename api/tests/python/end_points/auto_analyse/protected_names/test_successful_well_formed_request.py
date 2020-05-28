@@ -11,8 +11,8 @@ from ..common import token_header, claims
 # 5.- Successful well formed name:
 @pytest.mark.xfail(raises=ValueError)
 def test_successful_well_formed_request_response(client, jwt, app):
-    words_list_classification = [{'word': 'ADEPTIO', 'classification': 'DIST'},
-                                 {'word': 'AGRONOMICS', 'classification': 'DESC'},
+    words_list_classification = [{'word': 'ADEA', 'classification': 'DIST'},
+                                 {'word': 'HEATING', 'classification': 'DESC'},
                                  {'word': 'ABC', 'classification': 'DIST'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
                                  {'word': 'PLUMBING', 'classification': 'DESC'}
@@ -25,7 +25,7 @@ def test_successful_well_formed_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'ADEPTIO AGRONOMICS INC.',
+            'name': 'ADEA HEATING INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'

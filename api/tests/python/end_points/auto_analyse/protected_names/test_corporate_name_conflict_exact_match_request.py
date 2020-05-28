@@ -5,14 +5,19 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, save_words_list_classification
+from ..common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, \
+    save_words_list_classification, assert_additional_conflict_parameters
 from ..common import ENDPOINT_PATH
 from ..common import token_header, claims
 
 
-@pytest.mark.parametrize("name, expected", [("ARMSTRONG PLUMBING & HEATING LTD.", "ARMSTRONG PLUMBING & HEATING LTD.")])
+@pytest.mark.parametrize("name, expected",
+                         [
+                             ("ARMSTRONG PLUMBING & HEATING LTD.", "ARMSTRONG PLUMBING & HEATING LTD.")
+                         ]
+                         )
 @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_exact_match_request_response(client, jwt, app,name, expected):
+def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, name, expected):
     words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},
                                  {'word': 'ARMSTRONG', 'classification': 'DESC'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
@@ -48,3 +53,4 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app,n
             payload_lst = payload.get('issues')
             assert_issues_count_is_gt(0, payload_lst)
             assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
+            assert_additional_conflict_parameters(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)

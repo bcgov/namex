@@ -5,7 +5,8 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_has_word_upper, assert_has_designations_upper, save_words_list_classification, save_words_list_virtual_word_condition
+from ..common import assert_issues_count_is_gt, assert_has_word_upper, assert_has_designations_upper, \
+    save_words_list_classification, save_words_list_virtual_word_condition, assert_has_issue_type
 from ..common import ENDPOINT_PATH
 from ..common import token_header, claims
 
@@ -71,5 +72,4 @@ def test_designation_mismatch_one_word_with_hyphen_request_response(client, jwt,
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
             assert_issues_count_is_gt(0, payload.get('issues'))
-            assert_has_word_upper(AnalysisIssueCodes.DESIGNATION_MISMATCH, payload.get('issues'))
-            assert_has_designations_upper(AnalysisIssueCodes.DESIGNATION_MISMATCH, payload.get('issues'))
+            assert_has_issue_type(AnalysisIssueCodes.DESIGNATION_MISMATCH, payload.get('issues'))

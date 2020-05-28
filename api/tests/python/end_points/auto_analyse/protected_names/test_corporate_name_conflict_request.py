@@ -5,15 +5,18 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, save_words_list_classification
+from ..common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, \
+    save_words_list_classification
 from ..common import ENDPOINT_PATH
 from ..common import token_header, claims
 
 
-@pytest.mark.parametrize("name, expected", [
-    ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-    ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD.")
-])
+@pytest.mark.parametrize("name, expected",
+                         [
+                             ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD.")
+                         ]
+                         )
 @pytest.mark.xfail(raises=ValueError)
 def test_corporate_name_conflict_request_response(client, jwt, app, name, expected):
     words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},

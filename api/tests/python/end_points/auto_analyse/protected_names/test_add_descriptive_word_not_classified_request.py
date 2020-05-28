@@ -19,7 +19,7 @@ def test_add_descriptive_word_not_classified_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'INVINITY INC.',
+            'name': 'UNCLASSIFIED INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'

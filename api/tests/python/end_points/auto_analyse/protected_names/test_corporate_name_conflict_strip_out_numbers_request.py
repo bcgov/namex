@@ -5,25 +5,28 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, save_words_list_classification
+from ..common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, \
+    save_words_list_classification, assert_additional_conflict_parameters
 from ..common import ENDPOINT_PATH
 from ..common import token_header, claims
 
 
-@pytest.mark.parametrize("name, expected", [
-    ("NO. 295 CATHEDRAL VENTURES LTD.", "CATHEDRAL HOLDINGS LTD."),
-    ("NO. 295 SCS NO. 003 VENTURES LTD.", "SCS SOLUTIONS INC."),
-    ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-    ("ABC TWO PLUMBING ONE INC.", "ABC PLUMBING & HEATING LTD."),
-    ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."),
-    ("RE/MAX LUMBY INC.", "REMAX LUMBY"),
-    ("RE MAX LUMBY INC.", "REMAX LUMBY"),
-    ("468040 B.C. LTD.", "468040 BC LTD."),
-    ("S, C & S HOLDINGS INC.", "SCS SOLUTIONS INC."),
-    ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.")
-])
+@pytest.mark.parametrize("name, expected",
+                         [
+                             ("NO. 295 CATHEDRAL VENTURES LTD.", "CATHEDRAL HOLDINGS LTD."),
+                             ("NO. 295 SCS NO. 003 VENTURES LTD.", "SCS SOLUTIONS INC."),
+                             ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("ABC TWO PLUMBING ONE INC.", "ABC PLUMBING & HEATING LTD."),
+                             ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."),
+                             ("RE/MAX LUMBY INC.", "REMAX LUMBY"),
+                             ("RE MAX LUMBY INC.", "REMAX LUMBY"),
+                             ("468040 B.C. LTD.", "468040 BC LTD."),
+                             ("S, C & S HOLDINGS INC.", "SCS SOLUTIONS INC."),
+                             ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.")
+                         ]
+                         )
 @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt, app,name, expected):
+def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt, app, name, expected):
     words_list_classification = [{'word': 'CATHEDRAL', 'classification': 'DIST'},
                                  {'word': 'VENTURES', 'classification': 'DIST'},
                                  {'word': 'VENTURES', 'classification': 'DESC'},
@@ -37,7 +40,7 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
                                  {'word': 'HOLDINGS', 'classification': 'DESC'},
                                  {'word': 'BC', 'classification': 'DIST'},
                                  {'word': 'BC', 'classification': 'DESC'},
-                                 {'word': '468040', 'classification': 'DIST'},
+                                 #{'word': '468040', 'classification': 'DIST'},
                                  {'word': 'EQTEC', 'classification': 'DIST'},
                                  {'word': 'ENGINEERING', 'classification': 'DIST'},
                                  {'word': 'ENGINEERING', 'classification': 'DESC'},
@@ -77,3 +80,4 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
             payload_lst = payload.get('issues')
             assert_issues_count_is_gt(0, payload_lst)
             assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
+            assert_additional_conflict_parameters(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)
