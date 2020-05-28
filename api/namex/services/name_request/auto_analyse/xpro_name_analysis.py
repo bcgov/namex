@@ -65,8 +65,6 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
             if not check_word_unclassified.is_valid:
                 analysis.append(check_word_unclassified)
 
-            # analysis = analysis + results
-
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
             # eg. result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD

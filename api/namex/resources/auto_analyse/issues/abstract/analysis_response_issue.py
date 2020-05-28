@@ -140,7 +140,7 @@ class AnalysisResponseIssue:
                 token_string += current_original_token
 
             next_char = False
-            # this_char = str_name[len(original_name_string) - 1]
+            # To get the current character use something like: this_char = str_name[len(original_name_string) - 1]
             if len(str_name) > len(processed_name_string):
                 next_char = str_name[len(processed_name_string)]
 

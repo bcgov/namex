@@ -40,7 +40,6 @@ class SetDesignationsListsMixin(object):
 
     def _set_entity_type_any_designation(self):
         syn_svc = self.synonym_service
-        # entity_any_designation_dict = self._entity_any_designation_dict
         designation_any_list = self._designation_any_list
 
         all_any_designations = syn_svc.get_all_any_designations().data
