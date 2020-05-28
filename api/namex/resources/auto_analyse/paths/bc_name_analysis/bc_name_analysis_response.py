@@ -12,6 +12,7 @@ from .issues import \
     BcCorporateNameConflictIssue as CorporateNameConflictIssue, \
     BcIncorrectCategoryIssue as IncorrectCategoryIssue, \
     BcWordSpecialUseIssue as WordSpecialUseIssue, \
+    BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue,\
     BcDesignationMisplacedIssue as DesignationMisplacedIssue, \
     BcDesignationNonExistentIssue as DesignationNonExistentIssue
 
@@ -46,6 +47,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisIssueCodes.DESIGNATION_NON_EXISTENT: DesignationNonExistentIssue,
         AnalysisIssueCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
+        AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE: EndDesignationMoreThanOnceIssue,
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
         AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue
