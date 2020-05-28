@@ -1,8 +1,7 @@
 from hamcrest import *
 
 from namex.services.name_request.auto_analyse.auto_analyse import AutoAnalyseService
-from namex.services.name_request.name_analysis_builder_v2.name_analysis_builder import NameAnalysisBuilder
-import pandas as pd
+from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 
 list_dist = ['MOUNTAIN', 'VIEW']
 list_desc = ['FOOD', 'GROWERS']
