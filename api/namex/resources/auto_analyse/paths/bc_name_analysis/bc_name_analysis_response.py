@@ -18,7 +18,6 @@ from .issues import \
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 from ...analysis_options import \
-    helpful_hint_setup, \
     add_distinctive_setup, \
     add_descriptive_setup, \
     too_many_words_setup, \
@@ -74,8 +73,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
-                option2,
-                # option3
+                option2
             ])
 
             issue.show_examination_button = True
@@ -90,8 +88,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
-                option2,
-                # option3
+                option2
             ])
         elif not is_only_issue and has_next_issue is False:
             option1 = remove_or_replace_setup()
@@ -104,8 +101,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
-                option2,
-                # option3
+                option2
             ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -117,13 +113,9 @@ class BcAnalysisResponse(AnalysisResponse):
         option1 = add_distinctive_setup()
         # Tweak the header
         option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
 
         issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            # option2,
-            # option3
+            option1
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -135,13 +127,9 @@ class BcAnalysisResponse(AnalysisResponse):
         option1 = add_descriptive_setup()
         # Tweak the header
         option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
 
         issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            # option2,
-            # option3
+            option1
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -153,13 +141,9 @@ class BcAnalysisResponse(AnalysisResponse):
         option1 = too_many_words_setup()
         # Tweak the header
         option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
 
         issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            # option2 = None
-            # option3 = None
+            option1
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -171,13 +155,9 @@ class BcAnalysisResponse(AnalysisResponse):
         option1 = remove_setup()
         # Tweak the header
         option1.header = "Helpful Tip"
-        # option2 = None
-        # option3 = None
 
         issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            # option2,
-            # option3
+            option1
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -244,21 +224,12 @@ class BcAnalysisResponse(AnalysisResponse):
         return issue
 
     def build_non_existent_designation_issue(self, procedure_result, issue_count, issue_idx):
-        # option1 = replace_designation_setup()
         option1 = add_designation_setup()
-        # option1 = replace_designation_setup()
         # Tweak the header
         option1.header = "Option 1"
 
-        # option2 = None
-        # Tweak the header
-
-        # option3 = None
-
         issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            # option2,
-            # option3
+            option1
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -275,12 +246,9 @@ class BcAnalysisResponse(AnalysisResponse):
         # Tweak the header
         option2.header = "Option 2"
 
-        # option3 = None
-
         issue = response_issues(procedure_result.result_code)(self, [
             option1,
-            option2,
-            # option3
+            option2
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -294,9 +262,7 @@ class BcAnalysisResponse(AnalysisResponse):
         option1.header = "Option 1"
 
         issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            # option2,
-            # option3
+            option1
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -322,8 +288,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
-                option2,
-                # option3
+                option2
             ])
 
             issue.show_examination_button = True
@@ -338,8 +303,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
-                option2,
-                # option3
+                option2
             ])
         elif not is_only_issue and has_next_issue is False:
             option1 = remove_or_replace_setup()
@@ -352,8 +316,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
-                option2,
-                # option3
+                option2
             ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
