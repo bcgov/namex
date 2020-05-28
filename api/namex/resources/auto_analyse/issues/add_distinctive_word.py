@@ -13,10 +13,10 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="Requires a word at the beginning of your name that sets it apart.",
+            line1="",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -26,6 +26,12 @@ class AddDistinctiveWordIssue(AnalysisResponseIssue):
             setup=None,
             name_actions=[]
         )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
+        issue = self.create_issue()
+        issue.line1 = "Requires a word at the beginning of your name that sets it apart."
 
         list_name = self._lc_list_items(self.analysis_response.name_tokens)
 

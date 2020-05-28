@@ -13,10 +13,10 @@ class IncorrectCategory(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="Category of the word is incorrect.",
+            line1="",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -26,6 +26,12 @@ class IncorrectCategory(AnalysisResponseIssue):
             setup=None,
             name_actions=[]
         )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
+        issue = self.create_issue()
+        issue.line1 = "Category of the word is incorrect."
 
         issue.name_actions = [
             NameAction(

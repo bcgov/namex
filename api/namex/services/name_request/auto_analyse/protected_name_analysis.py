@@ -41,14 +41,15 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
     def do_analysis(self):
         builder = self.builder
 
-        list_name = self.name_tokens
-        # list_dist, list_desc, list_none = self.word_classification_tokens
-
         results = []
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc(), self.name_tokens,
-                                                   self.processed_name)
+        check_conflicts = builder.search_conflicts(
+            self.get_list_dist(),
+            self.get_list_desc(),
+            self.name_tokens,
+            self.processed_name
+        )
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
@@ -65,9 +66,11 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         # Set designations and run our check
         self._set_designations()
 
-        check_designation_existence = builder.check_designation_existence(self.get_original_name_tokenized(),
-                                                                          self.get_all_designations(),
-                                                                          self.get_all_designations_user())
+        check_designation_existence = builder.check_designation_existence(
+            self.get_original_name_tokenized(),
+            self.get_all_designations(),
+            self.get_all_designations_user()
+        )
 
         if not check_designation_existence.is_valid:
             results.append(check_designation_existence)
@@ -77,7 +80,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                 self.entity_type,
                 self.get_all_designations(),
                 self.get_all_designations_user()
-                #self.get_all_designations_user_no_periods()
+                # self.get_all_designations_user_no_periods()
             )
 
             if not check_designation_mismatch.is_valid:
@@ -91,7 +94,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
             if not check_designation_misplaced.is_valid:
                 results.append(check_designation_misplaced)
 
-        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_processed_name())
+        check_special_words = builder.check_word_special_use(
+            self.name_tokens,
+            self.get_processed_name()
+        )
 
         if not check_special_words.is_valid:
             results.append(check_special_words)

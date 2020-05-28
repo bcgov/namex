@@ -14,7 +14,23 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
+    def create_issue(self):
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="",
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=None,
+            show_examination_button=False,
+            conflicts=[],
+            setup=None,
+            name_actions=[]
+        )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
         name_as_submitted = self.analysis_response.name_as_submitted
         list_original = self._lc_list_items(self.analysis_response.name_original_tokens)
         list_name = self._lc_list_items(self.analysis_response.name_tokens)
@@ -30,18 +46,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         list_desc = procedure_result.values['list_desc']  # Don't lower case this one it's a list wrapped list
         list_conflicts = procedure_result.values['list_conflicts']  # Don't lower case this one it's a dict
 
-        issue = NameAnalysisIssue(
-            issue_type=self.issue_type,
-            line1="Too similar to an existing name.",
-            line2=None,
-            consenting_body=None,
-            designations=None,
-            show_reserve_button=None,
-            show_examination_button=False,
-            conflicts=[],
-            setup=None,
-            name_actions=[]
-        )
+        issue = self.create_issue()
+        issue.line1 = "Too similar to an existing name."
 
         '''
         eg:

@@ -15,7 +15,23 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
+    def create_issue(self):
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="",
+            line2=None,
+            consenting_body=None,
+            designations=None,
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
         list_name = self.analysis_response.name_tokens
         list_name_incl_designation = self.analysis_response.name_original_tokens
 
@@ -28,18 +44,9 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
         entity_type_description = get_entity_type_description(self.entity_type)
 
-        issue = NameAnalysisIssue(
-            issue_type=self.issue_type,
-            line1="The " + self._join_list_words(incorrect_designations_lc) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>",
-            line2=None,
-            consenting_body=None,
-            designations=correct_designations_lc,
-            show_reserve_button=False,
-            show_examination_button=False,
-            conflicts=None,
-            setup=None,
-            name_actions=[]
-        )
+        issue = self.create_issue()
+        issue.line1 = "The " + self._join_list_words(incorrect_designations_lc) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>."
+        issue.designations = correct_designations_lc
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_incl_designation_lc:

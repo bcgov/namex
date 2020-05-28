@@ -1,4 +1,8 @@
+import abc
 from collections import deque
+
+# Import DTOs
+from ...response_objects import NameAnalysisIssue
 
 
 class AnalysisResponseIssue:
@@ -32,7 +36,26 @@ class AnalysisResponseIssue:
 
         return converted_list
 
-    def create_issue(self, procedure_result):
+    @abc.abstractmethod
+    def create_issue(self):
+        issue = NameAnalysisIssue(
+            issue_type=self.issue_type,
+            line1="",
+            line2="",
+            consenting_body=None,
+            designations=None,
+            show_next_button=False,
+            show_reserve_button=False,
+            show_examination_button=False,
+            conflicts=None,
+            setup=None,
+            name_actions=[]
+        )
+
+        return issue
+
+    @abc.abstractmethod
+    def configure_issue(self, procedure_result):
         return self.issue
 
     '''

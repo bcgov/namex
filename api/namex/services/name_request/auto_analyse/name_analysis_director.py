@@ -4,8 +4,7 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
-# from namex.services.synonyms.synonym \
-#    import SynonymService
+from ..auto_analyse.name_analysis_utils import list_distinctive_descriptive, list_distinctive_descriptive_same
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService
@@ -194,26 +193,30 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc.set_name(name)
         np_svc.set_name_tokenized(np_svc.name_first_part)
 
-        # TODO: Get rid of this when done refactoring!
         self._list_name_words = np_svc.name_tokens
 
         # Classify the tokens that were created by NameProcessingService
         self.token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
-        self.configure_builder()
+    def configure_analysis(self):
+        self._list_dist_words, self._list_desc_words, self._list_none_words = self.word_classification_tokens
 
-    '''
-    Prepare any data required by the analysis builder.
-    prepare_data is an abstract method and must be implemented in extending classes.
-    '''
+        if self.get_list_none() and self.get_list_none().__len__() > 0:
+            self._list_dist_words, self._list_desc_words = \
+                TokenClassifier.handle_unclassified_words(
+                    self.get_list_dist(),
+                    self.get_list_desc(),
+                    self.get_list_none(),
+                    self.name_tokens
+                )
 
-    def prepare_data(self):
-        # Query for whatever data we need to load up here
-        self.configure_builder()
-
-    def configure_builder(self):
-        # Do anything else required to configure the builder
-        pass
+        # Validate possible combinations using available distinctive and descriptive list:
+        if self.get_list_dist() == self.get_list_desc():
+            self._list_dist_words, self._list_desc_words = \
+                list_distinctive_descriptive_same(self.name_tokens)
+        else:
+            self._list_dist_words, self._list_desc_words = \
+                list_distinctive_descriptive(self.name_tokens, self.get_list_dist(), self.get_list_desc())
 
     '''
     This is the main execution call that wraps name analysis checks. 
@@ -225,22 +228,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
     def execute_analysis(self):
         try:
-            # Execute analysis using the supplied builder
             builder = self.builder
 
-            list_name = self.name_tokens
-            list_dist, list_desc, list_none = self.word_classification_tokens
-
             analysis = []
-            if list_none and list_none.__len__() > 0:
-                self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
-                    list_dist,
-                    list_desc,
-                    list_none,
-                    list_name
-                )
 
-            check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
+            # Configure the analysis for the supplied builder
+            self.configure_analysis()
+
+            check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
             if not check_words_to_avoid.is_valid:
                 analysis.append(check_words_to_avoid)
                 return analysis
@@ -256,16 +251,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 analysis.append(check_name_is_well_formed)
                 return analysis
 
-            check_word_limit = builder.check_word_limit(list_name)
+            check_word_limit = builder.check_word_limit(self.name_tokens)
             if not check_word_limit.is_valid:
                 analysis.append(check_word_limit)
                 return analysis
 
-            check_word_unclassified = builder.check_unclassified_words(list_name, list_none)
+            check_word_unclassified = builder.check_unclassified_words(self.name_tokens, self.get_list_none())
             if not check_word_unclassified.is_valid:
                 analysis.append(check_word_unclassified)
-
-            #analysis = analysis + results
 
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
@@ -299,8 +292,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             has_words_to_avoid = self._has_analysis_issue_type(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
             if has_words_to_avoid:
-                matched_words_to_avoid = self._get_analysis_issue_type_issues(analysis,
-                                                                              AnalysisIssueCodes.WORDS_TO_AVOID)
+                matched_words_to_avoid = \
+                    self._get_analysis_issue_type_issues(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
+
                 for procedure_result in matched_words_to_avoid:
                     list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
 

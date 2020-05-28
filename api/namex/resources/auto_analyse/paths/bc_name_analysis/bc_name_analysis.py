@@ -12,7 +12,7 @@ from urllib.parse import unquote_plus
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
-from ... import AnalysisResponse
+from .bc_name_analysis_response import BcAnalysisResponse as AnalysisResponse
 
 from namex.services.name_request.auto_analyse import AnalysisRequestActions
 
@@ -129,9 +129,9 @@ class BcNameAnalysis(Resource):
     # @api.expect()
     @api.doc(params={
         'name': 'A company / organization name string',
-        'location': 'A location code [ BC | CA | IN ]',
+        'location': 'A location code [ BC (only)]',
         'entity_type': 'An entity type code [ CR, UL, CC ]',
-        'request_action': 'A request action code'
+        'request_action': 'A request action code [ NEW ]'
     })
     def get():
         name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None

@@ -13,13 +13,10 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
     status_text = "Further Action Required"
     issue = None
 
-    def create_issue(self, procedure_result):
-        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
-        list_dist = self._lc_list_items(procedure_result.values['list_dist'])
-
+    def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="Requires a word that describes the nature of your business.",
+            line1="",
             line2=None,
             consenting_body=None,
             designations=None,
@@ -29,6 +26,15 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
             setup=None,
             name_actions=[]
         )
+
+        return issue
+
+    def configure_issue(self, procedure_result):
+        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        list_dist = self._lc_list_items(procedure_result.values['list_dist'])
+
+        issue = self.create_issue()
+        issue.line1 = "Requires a word that describes the nature of your business."
 
         last_dist_word = list_dist[-1] if list_dist.__len__() > 0 else None
         # TODO: Why was this like this before?

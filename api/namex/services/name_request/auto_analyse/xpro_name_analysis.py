@@ -2,9 +2,6 @@ from datetime import (datetime)
 
 from .name_analysis_director import NameAnalysisDirector
 
-from namex.services.word_classification.token_classifier \
-    import TokenClassifier
-
 from .mixins.set_designation_lists import SetDesignationsListsMixin
 
 from . import AnalysisIssueCodes
@@ -45,34 +42,26 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
     def execute_analysis(self):
         try:
-            # Execute analysis using the supplied builder
             builder = self.builder
 
-            list_name = self.name_tokens
-            list_dist, list_desc, list_none = self.word_classification_tokens
-
             analysis = []
-            if list_none and list_none.__len__() > 0:
-                self._list_dist_words, self._list_desc_words = TokenClassifier.handle_unclassified_words(
-                    list_dist,
-                    list_desc,
-                    list_none,
-                    list_name
-                )
 
-            check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
+            # Configure the analysis for the supplied builder
+            self.configure_analysis()
+
+            check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
             if not check_words_to_avoid.is_valid:
                 analysis.append(check_words_to_avoid)
                 return analysis
 
             # Normally we'd do the check_name_is_well_formed analysis here... skip it for extra-provincial names
 
-            check_word_limit = builder.check_word_limit(list_name)
+            check_word_limit = builder.check_word_limit(self.name_tokens)
             if not check_word_limit.is_valid:
                 analysis.append(check_word_limit)
                 return analysis
 
-            check_word_unclassified = builder.check_unclassified_words(list_name, list_none)
+            check_word_unclassified = builder.check_unclassified_words(self.name_tokens, self.get_list_none())
             if not check_word_unclassified.is_valid:
                 analysis.append(check_word_unclassified)
 
@@ -108,8 +97,9 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
             has_words_to_avoid = self._has_analysis_issue_type(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
             if has_words_to_avoid:
-                matched_words_to_avoid = self._get_analysis_issue_type_issues(analysis,
-                                                                              AnalysisIssueCodes.WORDS_TO_AVOID)
+                matched_words_to_avoid = \
+                    self._get_analysis_issue_type_issues(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
+
                 for procedure_result in matched_words_to_avoid:
                     list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
 
@@ -149,14 +139,15 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
     def do_analysis(self):
         builder = self.builder
 
-        list_name = self.name_tokens
-        # list_dist, list_desc, list_none = self.word_classification_tokens
-
         results = []
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(builder.get_list_dist(), builder.get_list_desc(), self.name_tokens,
-                                                   self.processed_name)
+        check_conflicts = builder.search_conflicts(
+            self.get_list_dist(),
+            self.get_list_desc(),
+            self.name_tokens,
+            self.processed_name
+        )
 
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
