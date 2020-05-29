@@ -39,14 +39,14 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     Designations, distinctives and descriptives return stems_text
     '''
 
-    def find_word_synonyms(self, word, filters):
+    def find_word_synonyms(self, word, filters, category=False):
         model = self.get_model()
         word = word.lower() if isinstance(word, str) else None
 
         if word:
             filters.append(func.lower(model.synonyms_text).op('~')(r'\y{}\y'.format(word)))
 
-        field = model.stems_text
+        field = model.category if category else model.stems_text
 
         criteria = SynonymQueryCriteria(
             word=word,
