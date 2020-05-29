@@ -22,3 +22,18 @@ class SynonymModelMixin(SynonymServiceMixin):
 
         # Return {'mountain': ['mount', 'mountain', 'mt', 'mtn']} based on list_d
         return dict_subs
+
+    def get_all_categories_synonyms(self, list_d):
+        aux_list = []
+        dict_subs = {}
+
+        for word in list_d:
+            aux_list = self.get_synonyms(word, True)
+            if aux_list:
+                dict_subs.update({word: aux_list})
+            else:
+                dict_subs.update({word: None})
+
+        # Return {'shop': ['beauty', 'store', 'sales', 'reatail'],
+        #         'coffee': ['non-alcoholic-beverages','restaurant']} based on list_d
+        return dict_subs

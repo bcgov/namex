@@ -142,6 +142,39 @@ class _AllSubstitutionsSynonyms(Resource):
         }
 
 
+@api.route('/all-categories-synonyms', strict_slashes=False, methods=['GET'])
+class _AllCategoriesSynonyms(Resource):
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    # @api.expect()
+    @api.response(200, 'SynonymsApi', response_dict_list)
+    @marshal_with(response_dict_list)
+    @api.doc(params={
+        'list_desc': ''
+    })
+    def get():
+        list_desc = literal_eval(request.args.get('list_desc')) \
+            if request.args.get('words') else []
+
+        if not validate_request(request.args):
+            return
+
+        service = SynonymService()
+        results = service.get_all_categories_synonyms(list_desc)
+
+        output = []
+        for key in results:
+            output.append({
+                'key': key,
+                'list': results[key]
+            })
+
+        return {
+            'data': output
+        }
+
+
 @api.route('/stop-words', strict_slashes=False, methods=['GET'])
 class _StopWords(Resource):
     @staticmethod
@@ -728,6 +761,7 @@ class _RegexPrefixes(Resource):
         return {
             'data': result
         }
+
 
 @api.route('/<col>/<term>', strict_slashes=False, methods=['GET'])
 class _Synonyms(Resource):
