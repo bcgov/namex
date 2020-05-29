@@ -166,6 +166,7 @@ class Request(db.Model):
                 'requestTypeCd': self.requestTypeCd,
                 'entity_type_cd': self.entity_type_cd,
                 'request_action_cd': self.request_action_cd,
+                'source': self.source,
                 'priorityCd': self.priorityCd,
                 'priorityDate': self.priorityDate,
                 'xproJurisdiction': self.xproJurisdiction,
@@ -182,6 +183,7 @@ class Request(db.Model):
                         self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
                 'comments': [comment.as_dict() for comment in self.comments.all()],
                 'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
+
                 }
 
     @classmethod
@@ -363,7 +365,6 @@ class Request(db.Model):
 
 
 # set the source from NRO, Societis Online, Name Request
-@event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
 def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the source of the NR."""
@@ -372,15 +373,11 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
     soc_list = ['SO', 'ASO', 'CSO', 'RSO', 'CTSO', 'XSO', 'XCSO', 'XRSO', 'XASO', 'XCASO', 'CSSO']
 
     # comes from NRO/Societies Online
-    if (re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd not in soc_list):
-        request._source = ValidSources.NRO.value  # pylint: disable=protected-access
-    else:
-        if (re.match(r"NR [A-Z]+", request.nrNum)):
-            request._source = ValidSources.NAMEREQUEST.value  # pylint: disable=protected-access
-        else:
-            if (request.requestTypeCd in soc_list):
-                request._source = ValidSources.SO.value  # pylint: disable=protected-access
-
+    if(request._source is None):
+         if(request.requestTypeCd not in soc_list):
+            request._source = ValidSources.NRO.value  # pylint: disable=protected-access
+         if (request.requestTypeCd in soc_list):
+            request._source = ValidSources.SO.value  # pylint: disable=protected-access
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
