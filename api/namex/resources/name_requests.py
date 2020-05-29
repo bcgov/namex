@@ -267,6 +267,7 @@ class NameRequest(Resource):
             name_request.submittedDate=datetime.utcnow()
             name_request.requestTypeCd = set_request_type(json_data['entity_type'], json_data['request_action'])
             name_request.nrNum=nr_num
+            name_request._source = "NAMEREQUEST"
         except Exception as error:
             current_app.logger.error("Error setting request header attributes. Error:{0}".format(error))
             return jsonify({"message": "Error setting request header attributes"}), 404
