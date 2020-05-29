@@ -29,7 +29,7 @@ from namex.services.name_request import check_ownership, get_or_create_user_by_j
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
-#from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 import datetime
 from datetime import datetime as dt
@@ -1137,26 +1137,26 @@ class NRNames(Resource):
             nrd_name.comment = None
 
         #add clean name for conflict matching in name request
-        #if(nrd_name.state == 'APPROVED'):
-        #    try:
-        #        service = ProtectedNameAnalysisService()
-        #        np_svc = service.name_processing_service
-        #        np_svc.set_name(nrd_name.name)
-        #        cleaned_name = np_svc.processed_name.upper()
-        #        nrd_name.clean_name = cleaned_name
-        #    except Exception as error:
-        #        current_app.logger.error("Error on clean name processing. CleanedName[0], Error:{1}".format(cleaned_name, error))
-        #        return jsonify({"message": "Error on clean name."}), 500
-        #else:
-        #    cleaned_name = None
-        #    nrd_name.clean_name = cleaned_name
+        if(nrd_name.state == 'APPROVED'):
+            try:
+                service = ProtectedNameAnalysisService()
+                np_svc = service.name_processing_service
+                np_svc.set_name(nrd_name.name)
+                cleaned_name = np_svc.processed_name.upper()
+                nrd_name.clean_name = cleaned_name
+            except Exception as error:
+                current_app.logger.error("Error on clean name processing. CleanedName[0], Error:{1}".format(cleaned_name, error))
+                return jsonify({"message": "Error on clean name."}), 500
+        else:
+            cleaned_name = None
+            nrd_name.clean_name = cleaned_name
 
         # Updating existing key's value
-        #try:
-        #    json_data.update(clean_name=cleaned_name)
-        #except Exception as error:
-        #    current_app.logger.error("Error on json update for clean_name. CleanedName[0], Error:{1}".format(cleaned_name, error))
-        #    return jsonify({"message": "Error on clean name."}), 500
+        try:
+            json_data.update(clean_name=cleaned_name)
+        except Exception as error:
+            current_app.logger.error("Error on json update for clean_name. CleanedName[0], Error:{1}".format(cleaned_name, error))
+            return jsonify({"message": "Error on clean name."}), 500
 
         try:
             nrd_name.save_to_db()
