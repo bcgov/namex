@@ -12,6 +12,7 @@ from .issues import \
     BcCorporateNameConflictIssue as CorporateNameConflictIssue, \
     BcIncorrectCategoryIssue as IncorrectCategoryIssue, \
     BcWordSpecialUseIssue as WordSpecialUseIssue, \
+    BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue,\
     BcDesignationMisplacedIssue as DesignationMisplacedIssue, \
     BcDesignationNonExistentIssue as DesignationNonExistentIssue
 
@@ -46,6 +47,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisIssueCodes.DESIGNATION_NON_EXISTENT: DesignationNonExistentIssue,
         AnalysisIssueCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
+        AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE: EndDesignationMoreThanOnceIssue,
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
         AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue
@@ -255,6 +257,22 @@ class BcAnalysisResponse(AnalysisResponse):
         self.executed_procedures.append(procedure_result.result_code)
 
         return issue
+
+    def build_end_designation_more_than_once_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = change_designation_order_setup()
+        # Tweak the header
+        option1.header = "Option 1"
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            # option2,
+            # option3
+        ])
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
 
     def build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
         option1 = change_designation_order_setup()

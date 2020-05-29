@@ -75,7 +75,9 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         designation_end_regex = r'{0}(?=(\s{0})*$)'.format(designation_end_rgx)
 
         # Returns list of tuples
-        designation_end_list = [x for d in re.findall(designation_end_regex, name.lower()) for x in d if x]
+        designation_end_list = re.findall(designation_end_regex, name.lower())
+
+        designation_end_list = [designation[0].strip() for designation in designation_end_list if designation[0]]
 
         return designation_end_list
 

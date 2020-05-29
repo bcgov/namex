@@ -6,61 +6,79 @@ from urllib.parse import quote_plus
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 from ..common import assert_issues_count_is_gt, assert_has_word_upper, assert_has_designations_upper, \
-    save_words_list_classification, save_words_list_virtual_word_condition, assert_has_issue_type
+    save_words_list_classification, assert_has_issue_type, assert_has_no_issue_type
 from ..common import ENDPOINT_PATH
 from ..common import token_header, claims
 
 
 @pytest.mark.xfail(raises=ValueError)
-def test_designation_mismatch_one_word_with_hyphen_request_response(client, jwt, app):
+def test_end_designation_more_than_once_request_response(client, jwt, app):
     words_list_classification = [{'word': 'ARMSTRONG', 'classification': 'DIST'},
                                  {'word': 'ARMSTRONG', 'classification': 'DESC'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
                                  {'word': 'PLUMBING', 'classification': 'DESC'}]
     save_words_list_classification(words_list_classification)
 
-    words_list_virtual_word_condition = [
-        {
-            'words': 'CO OP, CO OPERATIVES, COOP, COOPERATIVES',
-            'consent_required': False, 'allow_use': True
-        }
-    ]
-    save_words_list_virtual_word_condition(words_list_virtual_word_condition)
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = [
         {
-            'name': 'ARMSTRONG CO-OP PLUMBING',
+            'name': 'LTD. ARMSTRONG CORPORATION PLUMBING  INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
         },
         {
-            'name': 'ARMSTRONG CO-OPERATIVE PLUMBING',
+            'name': 'ARMSTRONG LTD. CORPORATION PLUMBING  INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
         },
         {
-            'name': 'ARMSTRONG PLUMBING L.L.C.',
+            'name': 'ARMSTRONG LTD. CORPORATION INC. PLUMBING',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
         },
         {
-            'name': 'ARMSTRONG L.L.C. PLUMBING',
+            'name': 'LTD. COOP ARMSTRONG L.L.C. CORPORATION PLUMBING CCC INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
         },
         {
-            'name': 'ARMSTRONG PLUMBING LIMITED LIABILITY CO.',
+            'name': 'ARMSTRONG LTD. COOP L.L.C. CORPORATION LLP INC. PLUMBING  ',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
-        }
+        },
+        {
+            'name': 'ARMSTRONG LTD. COOP L.L.C. CORPORATION LLP PLUMBING INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING LTD. INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING LTD. INC. CORPORATION',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG LIMITED LIABILITY COMPANY PLUMBING COOP LIMITED INC. CORPORATION',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+
     ]
 
     for entry in test_params:
@@ -72,4 +90,5 @@ def test_designation_mismatch_one_word_with_hyphen_request_response(client, jwt,
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
             assert_issues_count_is_gt(0, payload.get('issues'))
-            assert_has_issue_type(AnalysisIssueCodes.DESIGNATION_MISMATCH, payload.get('issues'))
+            assert_has_issue_type(AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE, payload.get('issues'))
+            assert_has_no_issue_type(AnalysisIssueCodes.DESIGNATION_MISPLACED, payload.get('issues'))

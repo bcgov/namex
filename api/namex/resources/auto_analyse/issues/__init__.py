@@ -7,6 +7,7 @@ from .contains_unclassifiable_word import ContainsUnclassifiableWordIssue
 from .contains_words_to_avoid import ContainsWordsToAvoidIssue
 from .corporate_name_conflict import CorporateNameConflictIssue
 from .designation_mismatch import DesignationMismatchIssue
+from .end_designation_more_than_once import EndDesignationMoreThanOnceIssue
 from .designation_misplaced import DesignationMisplacedIssue
 from .designation_non_existent import DesignationNonExistentIssue
 from .incorrect_category import IncorrectCategory as IncorrectCategoryIssue
