@@ -1,3 +1,4 @@
+from namex.utils.common import parse_dict_of_lists
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
@@ -199,6 +200,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
     def configure_analysis(self):
+        syn_svc = self.synonym_service
+        clean_name = self.name_tokens.copy()
+
         self._list_dist_words, self._list_desc_words, self._list_none_words = self.word_classification_tokens
 
         if self.get_list_none() and self.get_list_none().__len__() > 0:
@@ -209,6 +213,45 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     self.get_list_none(),
                     self.name_tokens
                 )
+
+        # Check for synonym word next to other in the same category
+        # We turn a distinctive word to descriptive if in synonym list
+
+        # Rules:
+        # PROPERTIES OF VICTORIA
+        # 1.- Check if the first word is both categories or distinctive and it is a synonym. If it is count it as DESC
+        # 2.- Check each word to see if exists in the synonyms in the same category and are together in the name
+        all_categories = syn_svc.get_all_categories_synonyms(list_desc=clean_name).data
+        category_dict = parse_dict_of_lists(all_categories)
+
+        first = True
+        while clean_name:
+            first_word = clean_name.pop(0)
+            category_first_set = set(category_dict[first_word]) if category_dict[first_word] else None
+            if first and category_first_set:
+                if first_word in self._list_dist_words:
+                    self._list_dist_words.remove(first_word)
+                if first_word not in self._list_desc_words:
+                    self._list_desc_words.extend(first_word)
+                print("First word " + first_word + " found in synonyms, DIST -> DESC")
+            first = False
+            if clean_name:
+                next_word = clean_name[0]
+                category_next_set = set(category_dict[next_word]) if category_dict[next_word] else None
+
+                # The same category
+                if category_first_set and category_next_set and category_first_set.intersection(category_next_set):
+                    if first_word in self._list_dist_words:
+                        self._list_dist_words.remove(first_word)
+                    if next_word in self._list_dist_words:
+                        self._list_dist_words.remove(next_word)
+                    if first_word not in self._list_desc_words:
+                        self._list_desc_words.append(first_word)
+                    if next_word not in self._list_desc_words:
+                        self._list_desc_words.append(next_word)
+                    print(
+                        first_word + " and " + next_word + " found in category: " + str(
+                            category_first_set.intersection(category_next_set)))
 
         # Validate possible combinations using available distinctive and descriptive list:
         if self.get_list_dist() == self.get_list_desc():
@@ -240,15 +283,17 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 analysis.append(check_words_to_avoid)
                 return analysis
 
-            check_name_is_well_formed = builder.check_name_is_well_formed(
-                self.token_classifier.distinctive_word_tokens,
-                self.token_classifier.descriptive_word_tokens,
-                self.token_classifier.unclassified_word_tokens,
-                self.name_tokens,
-                self.name_original_tokens
-            )
-            if not check_name_is_well_formed.is_valid:
-                analysis.append(check_name_is_well_formed)
+            for comb_dist, comb_desc in zip(self._list_dist_words, self._list_desc_words):
+                check_name_is_well_formed = builder.check_name_is_well_formed(
+                    comb_dist,
+                    comb_desc,
+                    self.name_tokens,
+                    self.name_original_tokens
+                )
+                if not check_name_is_well_formed.is_valid:
+                    analysis.append(check_name_is_well_formed)
+
+            if analysis:
                 return analysis
 
             check_word_limit = builder.check_word_limit(self.name_tokens)
