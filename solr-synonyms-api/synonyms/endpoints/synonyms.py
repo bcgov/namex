@@ -155,7 +155,7 @@ class _AllCategoriesSynonyms(Resource):
     })
     def get():
         list_desc = literal_eval(request.args.get('list_desc')) \
-            if request.args.get('words') else []
+            if request.args.get('list_desc') else []
 
         if not validate_request(request.args):
             return
