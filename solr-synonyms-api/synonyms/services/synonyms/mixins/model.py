@@ -28,7 +28,7 @@ class SynonymModelMixin(SynonymServiceMixin):
         dict_subs = {}
 
         for word in list_d:
-            aux_list = self.get_synonyms(word, True)
+            aux_list = list(map(lambda d: d.lower(), self.get_synonyms(word, True)))
             if aux_list:
                 dict_subs.update({word: aux_list})
             else:

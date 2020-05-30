@@ -59,7 +59,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     def get_model(self):
         return self._model
 
-    def get_synonyms(self, word=None):
+    def get_synonyms(self, word=None, category=False):
         model = self.get_model()
 
         filters = [
@@ -67,7 +67,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
             ~func.lower(model.category).op('~')(r'\y{}\y'.format('stop')),
         ]
 
-        results = self.find_word_synonyms(word, filters)
+        results = self.find_word_synonyms(word, filters, category)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
