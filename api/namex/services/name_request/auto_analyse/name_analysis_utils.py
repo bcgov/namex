@@ -76,13 +76,17 @@ def list_distinctive_descriptive_same(name_list):
     dist_list = []
     desc_list = []
 
-    while 1 < len(queue):
+    while len(queue) > 1:
         queue.pop()
         dist_list.append(list(queue))
+
     dist_list.reverse()
 
     for dist in dist_list:
         desc_list.append([i for i in name_list if i not in dist])
+
+    if len(dist_list) == 0 and len(desc_list) == 0:
+        return [name_list], [desc_list]
 
     return dist_list, desc_list
 
@@ -129,8 +133,8 @@ def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
 def list_distinctive_descriptive(name_list, dist_list, desc_list):
     queue_dist = collections.deque(dist_list)
 
-    if len(name_list) > 0 and dist_list == name_list:
-        queue_dist.pop()
+    #if len(name_list) > 0 and dist_list == name_list:
+    #    queue_dist.pop()
 
     dist_list_tmp, dist_list_all, desc_list_tmp, desc_list_all = [], [], [], []
 
@@ -150,6 +154,9 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
         if (dist_list_tmp[idx] + desc_list_tmp[idx]) == name_list:
             dist_list_all.append(dist_list_tmp[idx])
             desc_list_all.append(desc_list_tmp[idx])
+
+    if len(dist_list_all) == 0 and len(desc_list_all) == 0:
+        return [dist_list_all], [desc_list_all]
 
     return dist_list_all, desc_list_all
 
