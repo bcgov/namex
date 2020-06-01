@@ -426,6 +426,7 @@ class Request(Resource):
                         'is_changed__nwpta_ab': False,
                         'is_changed__nwpta_sk': False,
                         'is_changed__request_state': True,
+                        'is_changed_consent': False
                     }
 
                     warnings = nro.change_nr(nrd, change_flags)
@@ -629,6 +630,7 @@ class Request(Resource):
             is_changed__request = False
             is_changed__previous_request = False
             is_changed__request_state = False
+            is_changed_consent = False
             if nrd.requestTypeCd != orig_nrd['requestTypeCd']: is_changed__request = True
             if nrd.expirationDate != orig_nrd['expirationDate']: is_changed__request = True
             if nrd.xproJurisdiction != orig_nrd['xproJurisdiction']: is_changed__request = True
@@ -636,10 +638,13 @@ class Request(Resource):
             if nrd.natureBusinessInfo != orig_nrd['natureBusinessInfo']: is_changed__request = True
             if nrd.previousRequestId != orig_nrd['previousRequestId']: is_changed__previous_request = True
             if nrd.stateCd != orig_nrd['state']: is_changed__request_state = True
+            if nrd.consentFlag != orig_nrd['consentFlag'] : is_changed_consent = True
 
-            if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
-                nrd.consentFlag = None
-                nrd.consent_dt = None
+            #NOT SURE IF WE NEED THIS?
+           # if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
+           #     nrd.consentFlag = None
+           #     nrd.consent_dt = None
+
 
             ### END request header ###
 
@@ -880,6 +885,7 @@ class Request(Resource):
                 nrd.consentFlag = None
                 nrd.consent_dt = None
                 is_changed__request = True
+                is_changed_consent = True
 
                 change_flags = {
                     'is_changed__request': is_changed__request,
@@ -892,6 +898,7 @@ class Request(Resource):
                     'is_changed__nwpta_ab': False,
                     'is_changed__nwpta_sk': False,
                     'is_changed__request_state': is_changed__request_state,
+                    'is_changed_consent':  is_changed_consent
                 }
                 warnings = nro.change_nr(nrd, change_flags)
                 if warnings:
@@ -911,6 +918,7 @@ class Request(Resource):
                         'is_changed__nwpta_ab': is_changed__nwpta_ab,
                         'is_changed__nwpta_sk': is_changed__nwpta_sk,
                         'is_changed__request_state': is_changed__request_state,
+                        'is_changed_consent': is_changed_consent
                     }
 
                     # if any data has changed from an NR Details edit, update it in Oracle
