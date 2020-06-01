@@ -79,6 +79,7 @@ def test_get_nr_from_nro_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.DRAFT
     nr.requestId = 1460775
+    nr._source ='NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -111,6 +112,7 @@ def test_get_inprogress_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -142,6 +144,7 @@ def test_get_next_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -173,6 +176,7 @@ def test_on_hold_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.HOLD
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -204,6 +208,7 @@ def test_expired_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.EXPIRED
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -235,6 +240,7 @@ def test_cancelled_in_nro_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.CANCELLED
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -266,6 +272,7 @@ def test_cancelled_in_namex_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.CANCELLED
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -297,6 +304,7 @@ def test_decision_event_history(client, jwt, app):
         nr.nrNum = 'NR 0000002'
         nr.stateCd = State.REJECTED
         nr.requestId = 1460775
+        nr._source = 'NRO'
         name1 = NameDAO()
         name1.choice = 1
         name1.name = 'TEST NAME ONE'
@@ -329,6 +337,7 @@ def test_edit_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.DRAFT
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -360,6 +369,7 @@ def test_reopen_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.REJECTED
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -394,6 +404,7 @@ def test_edit_inprogress_event_history(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.HOLD
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
