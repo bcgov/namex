@@ -73,6 +73,7 @@ def test_get_next(client, jwt, app):
     nr = RequestDAO()
     nr.nrNum='NR 0000001'
     nr.stateCd = State.DRAFT
+    nr._source = 'NRO'
     nr.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -95,6 +96,7 @@ def test_get_next_no_draft_avail(client, jwt, app):
     nr = RequestDAO()
     nr.nrNum='NR 0000001'
     nr.stateCd = State.APPROVED
+    nr._source = 'NRO'
     nr.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -115,12 +117,14 @@ def test_get_next_oldest(client, jwt, app):
     nr = RequestDAO()
     nr.nrNum='NR 0000001'
     nr.stateCd = State.DRAFT
+    nr._source = 'NRO'
     nr.save_to_db()
 
     for i in range(2,12):
         nr = RequestDAO()
         nr.nrNum = 'NR {0:07d}'.format(i)
         nr.stateCd = State.DRAFT
+        nr._source = 'NRO'
         nr.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -143,6 +147,7 @@ def test_get_next_not_approver(client, jwt, app):
     nr = RequestDAO()
     nr.nrNum='NR 0000001'
     nr.stateCd = State.DRAFT
+    nr._source = 'NRO'
     nr.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -163,6 +168,7 @@ def test_get_nr_view_only(client, jwt, app):
     nr = RequestDAO()
     nr.nrNum='NR 0000001'
     nr.stateCd = State.DRAFT
+    nr._source = 'NRO'
     nr.save_to_db()
     print("Role: {} ".format(claims_viewer.get('realm_access').get('roles')))
 
@@ -224,6 +230,7 @@ def test_add_new_name_to_nr(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'ONE'
@@ -263,6 +270,7 @@ def test_remove_name_from_nr(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'ONE'
@@ -308,6 +316,7 @@ def test_add_clean_name_to_nr(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
     nr.requestId = 1460775
+    nr._source = 'NRO'
     nr.userId = user_id
     name1 = NameDAO()
     name1.choice = 1
@@ -344,6 +353,7 @@ def test_add_new_comment_to_nr(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
@@ -404,6 +414,7 @@ def test_comment_where_no_user(client, jwt, app):
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
     nr.requestId = 1460775
+    nr._source = 'NRO'
     name1 = NameDAO()
     name1.choice = 1
     name1.name = 'TEST NAME ONE'
