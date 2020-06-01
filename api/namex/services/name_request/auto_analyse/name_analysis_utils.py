@@ -66,9 +66,15 @@ def remove_french(text, all_designations_alternators):
     return " ".join(text.lower().split())
 
 
-def remove_stop_words(original_name_list, stop_words):
-    words = ' '.join([word for x, word in enumerate(original_name_list) if word and word not in stop_words])
-    return words
+def remove_stop_words(name, stop_words, exception_stop_word_designation):
+    exception_designation_rx = '|'.join(map(re.escape, exception_stop_word_designation))
+    stop_words_rx = '|'.join(map(re.escape, stop_words))
+    ws_generic_rx = r'\b({0})\b'.format(stop_words_rx)
+    ws_rx = re.compile(r'({0})|{1}'.format(exception_designation_rx, ws_generic_rx), re.I)
+
+    text = ws_rx.sub(lambda x: x.group(1) or "", name)
+
+    return " ".join(text.split())
 
 
 def list_distinctive_descriptive_same(name_list):
@@ -89,6 +95,12 @@ def list_distinctive_descriptive_same(name_list):
         return [name_list], [desc_list]
 
     return dist_list, desc_list
+
+
+'''
+validate_distinctive_descriptive_lists function to be deprecated: This function is not longer useful. The logic was decomposed in 
+list_distinctive_descriptive_same, list_distinctive_descriptive and check_name_is_well_formed.
+'''
 
 
 def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
@@ -132,10 +144,6 @@ def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
 
 def list_distinctive_descriptive(name_list, dist_list, desc_list):
     queue_dist = collections.deque(dist_list)
-
-    #if len(name_list) > 0 and dist_list == name_list:
-    #    queue_dist.pop()
-
     dist_list_tmp, dist_list_all, desc_list_tmp, desc_list_all = [], [], [], []
 
     dist_list_tmp.append(list(queue_dist))
@@ -151,9 +159,14 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
 
     # Validate generation of list of lists of distinctives and descriptives with the correct combinations:
     for idx, element in enumerate(dist_list_tmp):
-        if (dist_list_tmp[idx] + desc_list_tmp[idx]) == name_list:
+        if dist_list_tmp[idx] + desc_list_tmp[idx] == name_list:
             dist_list_all.append(dist_list_tmp[idx])
             desc_list_all.append(desc_list_tmp[idx])
+
+    for idx, element in enumerate(dist_list_all):
+        if len(dist_list_all) > 1 and (len(dist_list_all[idx]) == 0 or len(desc_list_all[idx]) == 0):
+            del dist_list_all[idx]
+            del desc_list_all[idx]
 
     if len(dist_list_all) == 0 and len(desc_list_all) == 0:
         return [dist_list_all], [desc_list_all]
