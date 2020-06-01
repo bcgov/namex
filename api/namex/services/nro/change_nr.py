@@ -31,6 +31,7 @@ def update_nr(nr, ora_cursor, change_flags):
     _update_nro_names(ora_cursor, nr, eid, change_flags)
     _update_nro_address(ora_cursor, nr, eid, change_flags)
     _update_nro_partner_name_system(ora_cursor, nr, eid, change_flags)
+    _update_consent(ora_cursor, nr, eid, change_flags)
 
     current_app.logger.debug('got to the end of update_nr()')
 
@@ -429,3 +430,28 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
                                   partner_jurisdiction_type_cd=nwpta.partnerJurisdictionTypeCd,
                                   partner_name_date=nwpta.partnerNameDate
                                   )
+
+def  _update_consent(oracle_cursor, nr,eid, change_flags):
+    if change_flags['is_changed_consent']:
+        # set the end event for the existing record
+        oracle_cursor.execute("""
+               UPDATE consent
+               SET end_event_id = :event_id
+               WHERE request_id = :request_id 
+               and end_event_id IS NULL
+               """,
+                request_id=nr.requestId,
+                event_id = eid)
+
+        #if it was a reset, no need to insert a new record
+        if nr.consentFlag is not None:
+            # create new consent received/wiaved record record
+            oracle_cursor.execute("""
+                   INSERT INTO consent (consent_id, request_id, consent_type_cd, received_flag, start_event_id) 
+                    VALUES (consent_seq.nextval, :request_id, 'NAME', :consent_flag, :event_id)
+                    """,
+                              request_id=nr.requestId,
+                              consent_flag=nr.consentFlag,
+                              event_id=eid
+                              )
+
