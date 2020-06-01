@@ -5,7 +5,8 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_issue_type_is_one_of, assert_has_word_upper, save_words_list_classification
+from ..common import assert_issues_count_is_gt, assert_issue_type_is_one_of, assert_has_word_upper, \
+    save_words_list_classification
 from ..common import ENDPOINT_PATH
 from ..common import token_header, claims
 
@@ -16,7 +17,44 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
     words_list_classification = [
         {'word': 'CARPENTRY', 'classification': 'DESC'},
         {'word': 'HEATING', 'classification': 'DESC'},
-        {'word': 'ADJUSTERS', 'classification': 'DESC'}
+        {'word': 'ADJUSTERS', 'classification': 'DESC'},
+        {'word': 'PROPERTIES', 'classification': 'DIST'},
+        {'word': 'PROPERTIES', 'classification': 'DESC'},
+        {'word': 'VICTORIA', 'classification': 'DIST'},
+        {'word': 'VICTORIA', 'classification': 'DESC'},
+        {'word': 'COFFEE', 'classification': 'DIST'},
+        {'word': 'COFFEE', 'classification': 'DESC'},
+        {'word': 'SHOP', 'classification': 'DIST'},
+        {'word': 'SHOP', 'classification': 'DESC'},
+        {'word': 'AUTO', 'classification': 'DIST'},
+        {'word': 'AUTO', 'classification': 'DESC'},
+        {'word': 'BODY', 'classification': 'DIST'},
+        {'word': 'BODY', 'classification': 'DESC'},
+        {'word': 'GARAGE', 'classification': 'DIST'},
+        {'word': 'GARAGE', 'classification': 'DESC'},
+        {'word': 'SEWING', 'classification': 'DESC'},
+        {'word': 'SERVICE', 'classification': 'DIST'},
+        {'word': 'SERVICE', 'classification': 'DESC'},
+        {'word': 'MARKET', 'classification': 'DIST'},
+        {'word': 'MARKET', 'classification': 'DESC'},
+        {'word': 'CAFE', 'classification': 'DIST'},
+        {'word': 'CAFE', 'classification': 'DESC'},
+        {'word': 'KITCHEN', 'classification': 'DIST'},
+        {'word': 'KITCHEN', 'classification': 'DESC'},
+        {'word': 'FOOD', 'classification': 'DIST'},
+        {'word': 'FOOD', 'classification': 'DESC'},
+        {'word': 'CAR', 'classification': 'DIST'},
+        {'word': 'CAR', 'classification': 'DESC'},
+        {'word': 'WASH', 'classification': 'DIST'},
+        {'word': 'WASH', 'classification': 'DESC'},
+        {'word': 'CENTRAL', 'classification': 'DIST'},
+        {'word': 'CENTRAL', 'classification': 'DESC'},
+        {'word': 'AUTO', 'classification': 'DIST'},
+        {'word': 'AUTO', 'classification': 'DESC'},
+        {'word': 'BODY', 'classification': 'DIST'},
+        {'word': 'BODY', 'classification': 'DESC'},
+        {'word': 'PACIFIC', 'classification': 'DIST'},
+        {'word': 'PACIFIC', 'classification': 'DESC'},
     ]
 
     save_words_list_classification(words_list_classification)
@@ -40,7 +78,48 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
          'location': 'BC',
          'entity_type': 'CR',
          'request_action': 'NEW'
+         },
+        {'name': 'PROPERTIES OF VICTORIA LTD.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'COFFEE SHOP INC',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'AUTO BODY GARAGE LTD.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'SEWING SERVICE LTD.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'MARKET CAFE LTD.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'KITCHEN FOOD LTD.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'CAR WASH CENTRAL LTD.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'AUTO BODY PACIFIC LTD.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
          }
+
     ]
 
     for entry in test_params:
