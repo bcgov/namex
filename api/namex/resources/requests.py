@@ -640,10 +640,10 @@ class Request(Resource):
             if nrd.stateCd != orig_nrd['state']: is_changed__request_state = True
             if nrd.consentFlag != orig_nrd['consentFlag'] : is_changed_consent = True
 
-            #NOT SURE IF WE NEED THIS?
-           # if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
-           #     nrd.consentFlag = None
-           #     nrd.consent_dt = None
+            #Need this for a re-open
+            if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
+               nrd.consentFlag = None
+               nrd.consent_dt = None
 
 
             ### END request header ###
