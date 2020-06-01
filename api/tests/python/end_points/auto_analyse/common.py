@@ -152,6 +152,7 @@ def save_words_list_name(words_list):
         nr.stateCd = State.APPROVED
         nr.requestId = req
         nr.requestTypeCd = EntityTypes.CORPORATION.value
+        nr._source = 'NAMEREQUEST'
 
         name = NameDAO()
         name.nr_id = nr.id
