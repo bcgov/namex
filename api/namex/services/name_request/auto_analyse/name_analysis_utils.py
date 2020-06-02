@@ -1,5 +1,6 @@
 import re
 import collections
+from collections import OrderedDict
 
 from . import porter
 
@@ -99,7 +100,7 @@ def list_distinctive_descriptive_same(name_list):
 
 '''
 validate_distinctive_descriptive_lists function to be deprecated: This function is not longer useful. The logic was decomposed in 
-list_distinctive_descriptive_same, list_distinctive_descriptive and check_name_is_well_formed.
+list_distinctive_descriptive and check_name_is_well_formed.
 '''
 
 
@@ -218,3 +219,40 @@ def lookahead(iterable):
         last = val
     # Report the last value.
     yield idx + 1, last, False
+
+
+'''
+Rules:
+PROPERTIES OF VICTORIA
+1.- Check if the first word is both categories or distinctive and it is a synonym. If it is count it as DESC
+2.- Check each word to see if exists in the synonyms in the same category and are together in the name
+'''
+
+
+def check_synonyms_category(list_dist_words, list_desc_words, clean_name, category_dict):
+    first = True
+    while clean_name:
+        first_word = clean_name.pop(0)
+        category_first_set = set(category_dict[first_word]) if category_dict[first_word] else None
+        if first and category_first_set:
+            list_dist_words = list(filter(lambda x: x != first_word, list_dist_words))
+            list_desc_words.append(first_word)
+            print("First word " + first_word + " found in synonyms, DIST -> DESC")
+        first = False
+        if clean_name:
+            next_word = clean_name[0]
+            category_next_set = set(category_dict[next_word]) if category_dict[next_word] else None
+
+            if category_first_set and category_next_set and category_first_set.intersection(category_next_set):
+                list_dist_words = list(filter(lambda x: x != first_word, list_dist_words))
+                list_dist_words = list(filter(lambda x: x != next_word, list_dist_words))
+                list_desc_words.append(first_word)
+                list_desc_words.append(next_word)
+                print(
+                    first_word + " and " + next_word + " found in category: " + str(
+                        category_first_set.intersection(category_next_set)))
+
+    list_dist_words = list(OrderedDict.fromkeys(list_dist_words))
+    list_desc_words = list(OrderedDict.fromkeys(list_desc_words))
+
+    return list_dist_words, list_desc_words
