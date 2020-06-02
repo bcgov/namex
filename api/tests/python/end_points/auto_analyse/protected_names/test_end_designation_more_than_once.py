@@ -25,13 +25,19 @@ def test_end_designation_more_than_once_request_response(client, jwt, app):
 
     test_params = [
         {
-            'name': 'LTD. ARMSTRONG CORPORATION PLUMBING  INC.',
+            'name': 'ARMSTRONG LTD. PLUMBING INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
         },
         {
-            'name': 'ARMSTRONG LTD. CORPORATION PLUMBING  INC.',
+            'name': 'LTD. ARMSTRONG CORPORATION PLUMBING INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ARMSTRONG LTD. CORPORATION PLUMBING INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
