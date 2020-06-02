@@ -376,9 +376,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        if designation_end_list.__len__() > 1 or misplaced_designation_end.__len__() > 1:
-            correct_end_designations = designation_end_list + list(
-                set(misplaced_designation_end) - set(designation_end_list))
+        correct_end_designations = designation_end_list + list(
+            set(misplaced_designation_end) - set(designation_end_list))
+
+        if correct_end_designations.__len__() > 1:
             corrected_end_designations_sorted = []
 
             for word in list_name:
