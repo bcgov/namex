@@ -5,7 +5,8 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
-from ..auto_analyse.name_analysis_utils import list_distinctive_descriptive, list_distinctive_descriptive_same
+from ..auto_analyse.name_analysis_utils import list_distinctive_descriptive, list_distinctive_descriptive_same, \
+    check_synonyms_category
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService
@@ -214,52 +215,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     self.name_tokens
                 )
 
-        # Check for synonym word next to other in the same category
-        # We turn a distinctive word to descriptive if in synonym list
-
-        # Rules:
-        # PROPERTIES OF VICTORIA
-        # 1.- Check if the first word is both categories or distinctive and it is a synonym. If it is count it as DESC
-        # 2.- Check each word to see if exists in the synonyms in the same category and are together in the name
         all_categories = syn_svc.get_all_categories_synonyms(list_desc=clean_name).data
         category_dict = parse_dict_of_lists(all_categories)
-
-        first = True
-        while clean_name:
-            first_word = clean_name.pop(0)
-            category_first_set = set(category_dict[first_word]) if category_dict[first_word] else None
-            if first and category_first_set:
-                if first_word in self._list_dist_words:
-                    self._list_dist_words.remove(first_word)
-                if first_word not in self._list_desc_words:
-                    self._list_desc_words.extend(first_word)
-                print("First word " + first_word + " found in synonyms, DIST -> DESC")
-            first = False
-            if clean_name:
-                next_word = clean_name[0]
-                category_next_set = set(category_dict[next_word]) if category_dict[next_word] else None
-
-                # The same category
-                if category_first_set and category_next_set and category_first_set.intersection(category_next_set):
-                    if first_word in self._list_dist_words:
-                        self._list_dist_words.remove(first_word)
-                    if next_word in self._list_dist_words:
-                        self._list_dist_words.remove(next_word)
-                    if first_word not in self._list_desc_words:
-                        self._list_desc_words.append(first_word)
-                    if next_word not in self._list_desc_words:
-                        self._list_desc_words.append(next_word)
-                    print(
-                        first_word + " and " + next_word + " found in category: " + str(
-                            category_first_set.intersection(category_next_set)))
+        self._list_dist_words, self._list_desc_words = check_synonyms_category(self._list_dist_words, self._list_desc_words,
+                                                                               clean_name, category_dict)
 
         # Validate possible combinations using available distinctive and descriptive list:
-        if self.get_list_dist() == self.get_list_desc():
-            self._list_dist_words, self._list_desc_words = \
-                list_distinctive_descriptive_same(self.name_tokens)
-        else:
-            self._list_dist_words, self._list_desc_words = \
-                list_distinctive_descriptive(self.name_tokens, self.get_list_dist(), self.get_list_desc())
+        self._list_dist_words, self._list_desc_words = \
+            list_distinctive_descriptive(self.name_tokens, self.get_list_dist(), self.get_list_desc())
 
     '''
     This is the main execution call that wraps name analysis checks. 
