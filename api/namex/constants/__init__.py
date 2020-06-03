@@ -241,7 +241,7 @@ class LegacyXSOEntityTypes(AbstractEnum):
 
 
 # Request types (legacy) used in search conflicts
-class LegacyEntityTypes(AbstractEnum):
+class LegacyEntityTypes:
     CORPORATION = LegacyBCORPEntityTypes
     UNLIMITED_LIABILITY_COMPANY = LegacyULCEntityTypes
     COOPERATIVE = LegacyCPEntityTypes

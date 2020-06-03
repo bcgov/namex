@@ -153,9 +153,9 @@ class SynonymDesignationMixin(SynonymServiceMixin):
     def get_all_end_designations(self):
         entity_types = [
             XproUnprotectedNameEntityTypes.XPRO_LIMITED_LIABILITY_COMPANY,
-            BCUnprotectedNameEntityTypes.BC_LIMITED_LIABILITY_PARTNERSHIP,
-            BCProtectedNameEntityTypes.BC_UNLIMITED_LIABILITY_COMPANY,
-            BCProtectedNameEntityTypes.BC_CORPORATION
+            BCUnprotectedNameEntityTypes.LIMITED_LIABILITY_PARTNERSHIP,
+            BCProtectedNameEntityTypes.UNLIMITED_LIABILITY_COMPANY,
+            BCProtectedNameEntityTypes.CORPORATION
         ]
 
         entity_end_designation_dict = {}
