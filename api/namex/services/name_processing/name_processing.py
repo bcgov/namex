@@ -147,12 +147,18 @@ class NameProcessingService(GetSynonymListsMixin):
         syn_svc = self.synonym_service
         vwc_svc = self.virtual_word_condition_service
 
+        all_designations = self._designated_all_words
+        all_designations.sort(key=len, reverse=True)
+        designation_alternators = '|'.join(map(re.escape, all_designations))
+
+        exception_designation = self.exception_designation(name)
+        exception_stop_words_designation = list(set(self.exception_designation_stop_word(stop_words, all_designations)))
+        exception_stop_words_designation.sort(key=len, reverse=True)
+
         name_original_tokens = [x for x in [x.strip() for x in re.split('([ &/-])', name.lower())] if x]
         self.name_original_tokens = name_original_tokens
 
-        name = remove_stop_words(name_original_tokens, stop_words)
-
-        exception_designation = self.exception_designation(name)
+        name = remove_stop_words(name, stop_words, exception_stop_words_designation)
 
         prefixes = '|'.join(prefix_list)
         words = syn_svc.get_regex_prefixes(
@@ -160,10 +166,6 @@ class NameProcessingService(GetSynonymListsMixin):
             prefixes_str=prefixes,
             exception_designation=exception_designation
         ).data
-
-        all_designations = self._designated_all_words
-        all_designations.sort(key=len, reverse=True)
-        designation_alternators = '|'.join(map(re.escape, all_designations))
 
         name = remove_french(words, designation_alternators)
         self.name_first_part = name
@@ -205,6 +207,18 @@ class NameProcessingService(GetSynonymListsMixin):
             exceptions_designation.append('null')
 
         return exceptions_designation
+
+    def exception_designation_stop_word(self, stop_words, all_designations):
+        exception_stopword_designation= []
+        for word in stop_words:
+            for designation in all_designations:
+                if bool(re.search(r'\b{0}\b'.format(word), designation)):
+                    exception_stopword_designation.append(designation)
+
+        if not exception_stopword_designation:
+            exception_stopword_designation.append('null')
+
+        return exception_stopword_designation
 
     def _prepare_data(self):
         syn_svc = self.synonym_service

@@ -1,5 +1,6 @@
 import re
 import collections
+from collections import OrderedDict
 
 from . import porter
 
@@ -66,9 +67,15 @@ def remove_french(text, all_designations_alternators):
     return " ".join(text.lower().split())
 
 
-def remove_stop_words(original_name_list, stop_words):
-    words = ' '.join([word for x, word in enumerate(original_name_list) if word and word not in stop_words])
-    return words
+def remove_stop_words(name, stop_words, exception_stop_word_designation):
+    exception_designation_rx = '|'.join(map(re.escape, exception_stop_word_designation))
+    stop_words_rx = '|'.join(map(re.escape, stop_words))
+    ws_generic_rx = r'\b({0})\b'.format(stop_words_rx)
+    ws_rx = re.compile(r'({0})|{1}'.format(exception_designation_rx, ws_generic_rx), re.I)
+
+    text = ws_rx.sub(lambda x: x.group(1) or "", name)
+
+    return " ".join(text.split())
 
 
 def list_distinctive_descriptive_same(name_list):
@@ -76,15 +83,25 @@ def list_distinctive_descriptive_same(name_list):
     dist_list = []
     desc_list = []
 
-    while 1 < len(queue):
+    while len(queue) > 1:
         queue.pop()
         dist_list.append(list(queue))
+
     dist_list.reverse()
 
     for dist in dist_list:
         desc_list.append([i for i in name_list if i not in dist])
 
+    if len(dist_list) == 0 and len(desc_list) == 0:
+        return [name_list], [desc_list]
+
     return dist_list, desc_list
+
+
+'''
+validate_distinctive_descriptive_lists function to be deprecated: This function is not longer useful. The logic was decomposed in 
+list_distinctive_descriptive and check_name_is_well_formed.
+'''
 
 
 def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
@@ -128,10 +145,6 @@ def validate_distinctive_descriptive_lists(list_name, list_dist, list_desc):
 
 def list_distinctive_descriptive(name_list, dist_list, desc_list):
     queue_dist = collections.deque(dist_list)
-
-    if len(name_list) > 0 and dist_list == name_list:
-        queue_dist.pop()
-
     dist_list_tmp, dist_list_all, desc_list_tmp, desc_list_all = [], [], [], []
 
     dist_list_tmp.append(list(queue_dist))
@@ -147,9 +160,17 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
 
     # Validate generation of list of lists of distinctives and descriptives with the correct combinations:
     for idx, element in enumerate(dist_list_tmp):
-        if (dist_list_tmp[idx] + desc_list_tmp[idx]) == name_list:
+        if dist_list_tmp[idx] + desc_list_tmp[idx] == name_list:
             dist_list_all.append(dist_list_tmp[idx])
             desc_list_all.append(desc_list_tmp[idx])
+
+    for idx, element in enumerate(dist_list_all):
+        if len(dist_list_all) > 1 and (len(dist_list_all[idx]) == 0 or len(desc_list_all[idx]) == 0):
+            del dist_list_all[idx]
+            del desc_list_all[idx]
+
+    if len(dist_list_all) == 0 and len(desc_list_all) == 0:
+        return [dist_list_all], [desc_list_all]
 
     return dist_list_all, desc_list_all
 
@@ -198,3 +219,40 @@ def lookahead(iterable):
         last = val
     # Report the last value.
     yield idx + 1, last, False
+
+
+'''
+Rules:
+PROPERTIES OF VICTORIA
+1.- Check if the first word is both categories or distinctive and it is a synonym. If it is count it as DESC
+2.- Check each word to see if exists in the synonyms in the same category and are together in the name
+'''
+
+
+def check_synonyms_category(list_dist_words, list_desc_words, clean_name, category_dict):
+    first = True
+    while clean_name:
+        first_word = clean_name.pop(0)
+        category_first_set = set(category_dict[first_word]) if category_dict[first_word] else None
+        if first and category_first_set:
+            list_dist_words = list(filter(lambda x, value=first_word: x != value, list_dist_words))
+            list_desc_words.append(first_word)
+            print("First word " + first_word + " found in synonyms, DIST -> DESC")
+        first = False
+        if clean_name:
+            next_word = clean_name[0]
+            category_next_set = set(category_dict[next_word]) if category_dict[next_word] else None
+
+            if category_first_set and category_next_set and category_first_set.intersection(category_next_set):
+                list_dist_words = list(filter(lambda x, value=first_word: x != value, list_dist_words))
+                list_dist_words = list(filter(lambda x, value=next_word: x != value, list_dist_words))
+                list_desc_words.append(first_word)
+                list_desc_words.append(next_word)
+                print(
+                    first_word + " and " + next_word + " found in category: " + str(
+                        category_first_set.intersection(category_next_set)))
+
+    list_dist_words = list(OrderedDict.fromkeys(list_dist_words))
+    list_desc_words = list(OrderedDict.fromkeys(list_desc_words))
+
+    return list_dist_words, list_desc_words

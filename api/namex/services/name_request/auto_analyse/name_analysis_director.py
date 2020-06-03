@@ -1,10 +1,12 @@
+from namex.utils.common import parse_dict_of_lists
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
 from . import AnalysisIssueCodes
 
-from ..auto_analyse.name_analysis_utils import list_distinctive_descriptive, list_distinctive_descriptive_same
+from ..auto_analyse.name_analysis_utils import list_distinctive_descriptive, list_distinctive_descriptive_same, \
+    check_synonyms_category
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService
@@ -199,6 +201,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
     def configure_analysis(self):
+        syn_svc = self.synonym_service
+        clean_name = self.name_tokens.copy()
+
         self._list_dist_words, self._list_desc_words, self._list_none_words = self.word_classification_tokens
 
         if self.get_list_none() and self.get_list_none().__len__() > 0:
@@ -210,13 +215,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     self.name_tokens
                 )
 
+        all_categories = syn_svc.get_all_categories_synonyms(list_desc=clean_name).data
+        category_dict = parse_dict_of_lists(all_categories)
+        self._list_dist_words, self._list_desc_words = check_synonyms_category(self._list_dist_words, self._list_desc_words,
+                                                                               clean_name, category_dict)
+
         # Validate possible combinations using available distinctive and descriptive list:
-        if self.get_list_dist() == self.get_list_desc():
-            self._list_dist_words, self._list_desc_words = \
-                list_distinctive_descriptive_same(self.name_tokens)
-        else:
-            self._list_dist_words, self._list_desc_words = \
-                list_distinctive_descriptive(self.name_tokens, self.get_list_dist(), self.get_list_desc())
+        self._list_dist_words, self._list_desc_words = \
+            list_distinctive_descriptive(self.name_tokens, self.get_list_dist(), self.get_list_desc())
 
     '''
     This is the main execution call that wraps name analysis checks. 
@@ -240,15 +246,17 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 analysis.append(check_words_to_avoid)
                 return analysis
 
-            check_name_is_well_formed = builder.check_name_is_well_formed(
-                self.token_classifier.distinctive_word_tokens,
-                self.token_classifier.descriptive_word_tokens,
-                self.token_classifier.unclassified_word_tokens,
-                self.name_tokens,
-                self.name_original_tokens
-            )
-            if not check_name_is_well_formed.is_valid:
-                analysis.append(check_name_is_well_formed)
+            for comb_dist, comb_desc in zip(self._list_dist_words, self._list_desc_words):
+                check_name_is_well_formed = builder.check_name_is_well_formed(
+                    comb_dist,
+                    comb_desc,
+                    self.name_tokens,
+                    self.name_original_tokens
+                )
+                if not check_name_is_well_formed.is_valid:
+                    analysis.append(check_name_is_well_formed)
+
+            if analysis:
                 return analysis
 
             check_word_limit = builder.check_word_limit(self.name_tokens)
