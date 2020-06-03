@@ -36,7 +36,6 @@ class LanguageCodes(AbstractEnum):
     FR = 'FRENCH'
 
 
-# TODO: Confirm that this is correct!
 class ValidLocations(AbstractEnum):
     CA_BC = 'BC'
     CA_NOT_BC = 'CA'
@@ -133,88 +132,78 @@ EntityTypeDescriptions = {
 }
 
 
-# Not a 'todo', just a note for later - these probably correlate to some JSON schemas in the LEAR project
-# bcgov/lear/schemas/src/registry_schemas/schemas for namerequest schema
+'''
+Sole Proprietorship
+Doing Business As
+Corporation
+Unlimited Liability Co.
+Benefit Co.
+General Partnership
+Limited Partnership
+Limited Liability Partnership
+Co-operative
+Community Contribution Co.
+'''
+
+
 class BCProtectedNameEntityTypes(AbstractEnum):
-    CORPORATION = 'CR'
-    UNLIMITED_LIABILITY_COMPANY = 'UL'
+    SOLE_PROPRIETORSHIP = EntityTypes.SOLE_PROPRIETORSHIP.value
+    DOING_BUSINESS_AS = EntityTypes.DOING_BUSINESS_AS.value
+    CORPORATION = EntityTypes.CORPORATION.value
+    UNLIMITED_LIABILITY_COMPANY = EntityTypes.UNLIMITED_LIABILITY_COMPANY.value
+    BENEFIT_COMPANY = EntityTypes.BENEFIT_COMPANY.value
+    GENERAL_PARTNERSHIP = EntityTypes.GENERAL_PARTNERSHIP.value
+    LIMITED_PARTNERSHIP = EntityTypes.LIMITED_PARTNERSHIP.value
+    LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value
+    COOPERATIVE = EntityTypes.COOPERATIVE.value
+    COMMUNITY_CONTRIBUTION_COMPANY = EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value
 
 
+# TODO: Are these still valid for unprotected?
 class BCUnprotectedNameEntityTypes(AbstractEnum):
-    SOLE_PROPRIETORSHIP = 'FR'
-    DOING_BUSINESS_AS = 'DBA'
-    GENERAL_PARTNERSHIP = 'GP'
-    LIMITED_PARTNERSHIP = 'LP'
-    LIMITED_LIABILITY_PARTNERSHIP = 'LL'
+    SOLE_PROPRIETORSHIP = EntityTypes.SOLE_PROPRIETORSHIP.value
+    DOING_BUSINESS_AS = EntityTypes.DOING_BUSINESS_AS.value
+    GENERAL_PARTNERSHIP = EntityTypes.GENERAL_PARTNERSHIP.value
+    LIMITED_PARTNERSHIP = EntityTypes.LIMITED_PARTNERSHIP.value
+    LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value
 
 
 class XproUnprotectedNameEntityTypes(AbstractEnum):
-    XPRO_CORPORATION = 'XCR'
-    XPRO_UNLIMITED_LIABILITY_COMPANY = 'XUL'
-    XPRO_LIMITED_LIABILITY_COMPANY = 'RLC'
-    XPRO_LIMITED_PARTNERSHIP = 'XLP'
-    XPRO_LIMITED_LIABILITY_PARTNERSHIP = 'XLL'
-
-
-# TODO: Refactor this, use code enum KEYS as described in BCProtectedNameEntityTypes, etc.
-#  When complete, merge with EntityTypes, above...
-# Entity Types derived from the legacy request_type
-class EntityType(Enum):
-    # BC Types
-    BCORP = 'CR'
-    ULC = 'UL'
-    SP = 'FR'
-    GP = 'GP'
-    DBA = 'DBA'
-    LP = 'LP'
-    LLP = 'LL'
-    CP = 'CP'
-    BC = 'BC'
-    CCC = 'CC'
-    SO = 'SO'
-    PRIV = 'PA'
-    FI = 'FI'
-    PAR = 'PAR'
-    # XPRO and Foreign Types
-    XCORP = 'XCR'
-    XULC = 'XUL'
-    XLLC = 'RLC'
-    XLP = 'XLP'
-    XLLP = 'XLL'
-    XCP = 'XCP'
-    XSO = 'XSO'
-    # legacy
-    FIRM = 'FIRM'
+    XPRO_CORPORATION = EntityTypes.XPRO_CORPORATION.value
+    XPRO_UNLIMITED_LIABILITY_COMPANY = EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value
+    XPRO_LIMITED_LIABILITY_COMPANY = EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value
+    XPRO_LIMITED_PARTNERSHIP = EntityTypes.XPRO_LIMITED_PARTNERSHIP.value
+    XPRO_LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value
 
 
 # Request types (legacy) used in search conflicts
-class EntityTypeBCORP(AbstractEnum):
+class LegacyBCORPEntityTypes(AbstractEnum):
     CCR = 'CCR'
     CT = 'CT'
     RCR = 'RCR'
 
 
-class EntityTypeULC(AbstractEnum):
+class LegacyULCEntityTypes(AbstractEnum):
     UC = 'UC'
     CUL = 'CUL'
     ULCT = 'ULCT'
     RUL = 'RUL'
 
 
-class EntityTypeCP(AbstractEnum):
+class LegacyCPEntityTypes(AbstractEnum):
     CCP = 'CCP'
     CTC = 'CTC'
     RCP = 'RCP'
 
 
-class EntityTypeCCC(AbstractEnum):
+class LegacyCCCEntityTypes(AbstractEnum):
     CCV = 'CCV'
     CC = 'CCC'
     CCCT = 'CCCT'
     RCC = 'RCC'
 
 
-class EntityTypeSO(AbstractEnum):
+class LegacySOEntityTypes(AbstractEnum):
     ASO = 'ASO'
     CSO = 'CSO'
     RSO = 'RSO'
@@ -222,98 +211,113 @@ class EntityTypeSO(AbstractEnum):
     CSSO = 'CSSO'
 
 
-class EntityTypeFI(AbstractEnum):
+class LegacyFIEntityTypes(AbstractEnum):
     CFI = 'CFI'
     RFI = 'RFI'
 
 
-class EntityTypeXCORP(AbstractEnum):
+class LegacyXCORPEntityTypes(AbstractEnum):
     XCCR = 'XCCR'
     XRCR = 'XRCR'
     AS = 'AS'
 
 
-class EntityTypeXULC(AbstractEnum):
+class LegacyXULCEntityTypes(AbstractEnum):
     UA = 'UA'
     XCUL = 'XCUL'
     XRUL = 'XRUL'
 
 
-class EntityTypeXCP(AbstractEnum):
+class LegacyXCPEntityTypes(AbstractEnum):
     XCCP = 'XCCP'
     XRCP = 'XRCP'
 
 
-class EntityTypeXSO(AbstractEnum):
+class LegacyXSOEntityTypes(AbstractEnum):
     XCSO = 'XCSO'
     XRSO = 'XRSO'
     XASO = 'XASO'
     XCASO = 'XCASO'
 
 
+# Request types (legacy) used in search conflicts
+class LegacyEntityTypes(AbstractEnum):
+    CORPORATION = LegacyBCORPEntityTypes
+    UNLIMITED_LIABILITY_COMPANY = LegacyULCEntityTypes
+    COOPERATIVE = LegacyCPEntityTypes
+    COMMUNITY_CONTRIBUTION_COMPANY = LegacyCCCEntityTypes
+    SOCIETY = LegacySOEntityTypes
+    FINANCIAL_INSTITUTION = LegacyFIEntityTypes
+    XPRO_CORPORATION = LegacyXCORPEntityTypes
+    XPRO_UNLIMITED_LIABILITY_COMPANY = LegacyXULCEntityTypes
+    XPRO_COOPERATIVE = LegacyXCPEntityTypes
+    XPRO_SOCIETY = LegacyXSOEntityTypes
+
+
 request_type_mapping = [
-    ('CR', EntityType.BCORP.value, RequestAction.NEW_AML.value),
-    ('CR', EntityType.BCORP.value, RequestAction.NEW.value),
-    ('CCR', EntityType.BCORP.value, RequestAction.CHG.value),
-    ('CT', EntityType.BCORP.value, RequestAction.MVE.value),
-    ('RCR', EntityType.BCORP.value, RequestAction.REST.value),
-    ('XCR', EntityType.XCORP.value, RequestAction.NEW.value),
-    ('XCCR', EntityType.XCORP.value, RequestAction.CHG.value),
-    ('XRCR', EntityType.XCORP.value, RequestAction.REST.value),
-    ('AS', EntityType.XCORP.value, RequestAction.AS.value),
-    ('LC', EntityType.XLLC.value, RequestAction.NEW.value),
-    ('CLC', EntityType.XLLC.value, RequestAction.CHG.value),
-    ('RLC', EntityType.XLLC.value, RequestAction.REST.value),
-    ('AL', EntityType.XLLC.value, RequestAction.AS.value),
-    ('FR', EntityType.FIRM.value, RequestAction.NEW.value),
-    ('CFR', EntityType.FIRM.value, RequestAction.CHG.value),
-    ('LL', EntityType.LLP.value, RequestAction.NEW.value),
-    ('CLL', EntityType.LLP.value, RequestAction.CHG.value),
-    ('XLL', EntityType.XLLP.value, RequestAction.NEW.value),
-    ('XCLL', EntityType.XLLP.value, RequestAction.CHG.value),
-    ('LP', EntityType.LP.value, RequestAction.NEW.value),
-    ('CLP', EntityType.LP.value, RequestAction.CHG.value),
-    ('XLP', EntityType.XLP.value, RequestAction.NEW.value),
-    ('CXLP', EntityType.XLP.value, RequestAction.CHG.value),
-    ('SO', EntityType.SO.value, RequestAction.NEW.value),
-    ('ASO', EntityType.SO.value, RequestAction.AML.value),
-    ('CSO', EntityType.SO.value, RequestAction.CHG.value),
-    ('RSO', EntityType.SO.value, RequestAction.REST.value),
-    ('CTSO', EntityType.SO.value, RequestAction.MVE.value),
-    ('CSSO', EntityType.SO.value, RequestAction.CNV.value),
-    ('XSO', EntityType.XSO.value, RequestAction.NEW.value),
-    ('XCSO', EntityType.XSO.value, RequestAction.CHG.value),
-    ('XRSO', EntityType.XSO.value, RequestAction.REST.value),
-    ('XASO', EntityType.XSO.value, RequestAction.AS.value),
-    ('XCASO', EntityType.XSO.value, RequestAction.ACHG.value),
-    ('CP', EntityType.CP.value, RequestAction.NEW_AML.value),
-    ('CCP', EntityType.CP.value, RequestAction.CHG.value),
-    ('CTC', EntityType.CP.value, RequestAction.MVE.value),
-    ('RCP', EntityType.CP.value, RequestAction.REST.value),
-    ('XCP', EntityType.XCP.value, RequestAction.NEW.value),
-    ('XCCP', EntityType.XCP.value, RequestAction.CHG.value),
-    ('XRCP', EntityType.XCP.value, RequestAction.REST.value),
-    ('CC', EntityType.CCC.value, RequestAction.NEW_AML.value),
-    ('CCV', EntityType.CCC.value, RequestAction.CNV.value),
-    ('CCC', EntityType.CCC.value, RequestAction.CHG.value),
-    ('CCCT', EntityType.CCC.value, RequestAction.MVE.value),
-    ('RCC', EntityType.CCC.value, RequestAction.REST.value),
-    ('UL', EntityType.ULC.value, RequestAction.NEW.value),
-    ('UC', EntityType.ULC.value, RequestAction.CNV.value),
-    ('CUL', EntityType.ULC.value, RequestAction.CHG.value),
-    ('ULCT', EntityType.ULC.value, RequestAction.MVE.value),
-    ('RUL', EntityType.ULC.value, RequestAction.REST.value),
-    ('UA', EntityType.XULC.value, RequestAction.AS.value),
-    ('XUL', EntityType.XULC.value, RequestAction.NEW.value),
-    ('XCUL', EntityType.XULC.value, RequestAction.CHG.value),
-    ('XRUL', EntityType.XULC.value, RequestAction.REST.value),
-    ('FI', EntityType.FI.value, RequestAction.NEW.value),
-    ('CFI', EntityType.FI.value, RequestAction.CHG.value),
-    ('RFI', EntityType.FI.value, RequestAction.REST.value),
-    ('PA', EntityType.PRIV.value, RequestAction.NEW.value),
-    ('PAR', EntityType.PAR.value, RequestAction.NEW.value),
-    ('BC',  EntityType.BC.value, RequestAction.NEW.value)
+    ('CR', EntityTypes.CORPORATION.value, RequestAction.NEW_AML.value),
+    ('CR', EntityTypes.CORPORATION.value, RequestAction.NEW.value),
+    ('CCR', EntityTypes.CORPORATION.value, RequestAction.CHG.value),
+    ('CT', EntityTypes.CORPORATION.value, RequestAction.MVE.value),
+    ('RCR', EntityTypes.CORPORATION.value, RequestAction.REST.value),
+    ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.NEW.value),
+    ('XCCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.CHG.value),
+    ('XRCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.REST.value),
+    ('AS', EntityTypes.XPRO_CORPORATION.value, RequestAction.AS.value),
+    ('LC', EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value, RequestAction.NEW.value),
+    ('CLC', EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value),
+    ('RLC', EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value, RequestAction.REST.value),
+    ('AL', EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value, RequestAction.AS.value),
+    ('FR', EntityTypes.FIRM.value, RequestAction.NEW.value),
+    ('CFR', EntityTypes.FIRM.value, RequestAction.CHG.value),
+    ('LL', EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value, RequestAction.NEW.value),
+    ('CLL', EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value, RequestAction.CHG.value),
+    ('XLL', EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value, RequestAction.NEW.value),
+    ('XCLL', EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value, RequestAction.CHG.value),
+    ('LP', EntityTypes.LIMITED_PARTNERSHIP.value, RequestAction.NEW.value),
+    ('CLP', EntityTypes.LIMITED_PARTNERSHIP.value, RequestAction.CHG.value),
+    ('XLP', EntityTypes.XPRO_LIMITED_PARTNERSHIP.value, RequestAction.NEW.value),
+    ('CXLP', EntityTypes.XPRO_LIMITED_PARTNERSHIP.value, RequestAction.CHG.value),
+    ('SO', EntityTypes.SOCIETY.value, RequestAction.NEW.value),
+    ('ASO', EntityTypes.SOCIETY.value, RequestAction.AML.value),
+    ('CSO', EntityTypes.SOCIETY.value, RequestAction.CHG.value),
+    ('RSO', EntityTypes.SOCIETY.value, RequestAction.REST.value),
+    ('CTSO', EntityTypes.SOCIETY.value, RequestAction.MVE.value),
+    ('CSSO', EntityTypes.SOCIETY.value, RequestAction.CNV.value),
+    ('XSO', EntityTypes.XPRO_SOCIETY.value, RequestAction.NEW.value),
+    ('XCSO', EntityTypes.XPRO_SOCIETY.value, RequestAction.CHG.value),
+    ('XRSO', EntityTypes.XPRO_SOCIETY.value, RequestAction.REST.value),
+    ('XASO', EntityTypes.XPRO_SOCIETY.value, RequestAction.AS.value),
+    ('XCASO', EntityTypes.XPRO_SOCIETY.value, RequestAction.ACHG.value),
+    ('CP', EntityTypes.COOPERATIVE.value, RequestAction.NEW_AML.value),
+    ('CCP', EntityTypes.COOPERATIVE.value, RequestAction.CHG.value),
+    ('CTC', EntityTypes.COOPERATIVE.value, RequestAction.MVE.value),
+    ('RCP', EntityTypes.COOPERATIVE.value, RequestAction.REST.value),
+    ('XCP', EntityTypes.XPRO_COOPERATIVE.value, RequestAction.NEW.value),
+    ('XCCP', EntityTypes.XPRO_COOPERATIVE.value, RequestAction.CHG.value),
+    ('XRCP', EntityTypes.XPRO_COOPERATIVE.value, RequestAction.REST.value),
+    ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.NEW_AML.value),
+    ('CCV', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CNV.value),
+    ('CCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CHG.value),
+    ('CCCT', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.MVE.value),
+    ('RCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.REST.value),
+    ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.NEW.value),
+    ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CNV.value),
+    ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value),
+    ('ULCT', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.MVE.value),
+    ('RUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.REST.value),
+    ('UA', EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value, RequestAction.AS.value),
+    ('XUL', EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value, RequestAction.NEW.value),
+    ('XCUL', EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value),
+    ('XRUL', EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value, RequestAction.REST.value),
+    ('FI', EntityTypes.FINANCIAL_INSTITUTION.value, RequestAction.NEW.value),
+    ('CFI', EntityTypes.FINANCIAL_INSTITUTION.value, RequestAction.CHG.value),
+    ('RFI', EntityTypes.FINANCIAL_INSTITUTION.value, RequestAction.REST.value),
+    ('PA', EntityTypes.PRIVATE_ACT.value, RequestAction.NEW.value),
+    ('PAR', EntityTypes.PARISH.value, RequestAction.NEW.value),
+    ('BC', EntityTypes.BENEFIT_COMPANY.value, RequestAction.NEW.value)
 ]
+
 
 class NameState(Enum):
     NOT_EXAMINED = 'NE'

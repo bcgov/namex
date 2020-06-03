@@ -15,12 +15,11 @@ from .applicant import Applicant
 from .name import Name, NameSchema
 from .state import State, StateSchema
 from datetime import datetime
-from enum import Enum
 import re
 
-from namex.constants import ValidSources, request_type_mapping, EntityType, EntityTypeXSO, EntityTypeXCP, \
-    EntityTypeXULC, \
-    EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP, NameState
+from namex.constants import ValidSources, NameState,\
+    EntityTypes, LegacyEntityTypes, \
+    request_type_mapping
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -277,30 +276,52 @@ class Request(db.Model):
             cls.id == Name.nrId,
             cls.stateCd.in_([State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
             cls.requestTypeCd.in_(
-                [EntityType.PRIV.value,
-                 EntityType.BCORP.value, EntityTypeBCORP.CCR.value,
-                 EntityTypeBCORP.CT.value,
-                 EntityTypeBCORP.RCR.value,
-                 EntityType.CP.value, EntityTypeCP.CCP.value, EntityTypeCP.CTC.value,
-                 EntityTypeCP.RCP.value,
-                 EntityType.FI.value, EntityTypeFI.CFI.value, EntityTypeFI.RFI.value,
-                 EntityType.SO.value, EntityTypeSO.ASO.value, EntityTypeSO.CSO.value,
-                 EntityTypeSO.CSSO.value,
-                 EntityTypeSO.CTSO.value, EntityTypeSO.RSO.value,
-                 EntityType.ULC.value, EntityTypeULC.UC.value, EntityTypeULC.CUL.value,
-                 EntityTypeULC.ULCT.value, EntityTypeULC.RUL.value,
-                 EntityType.XSO.value, EntityTypeXSO.XASO.value, EntityTypeXSO.XCASO.value,
-                 EntityTypeXSO.XCSO.value, EntityTypeXSO.XRSO.value,
-                 EntityType.CCC.value, EntityTypeCCC.CC.value, EntityTypeCCC.CCV.value,
-                 EntityTypeCCC.CCCT.value, EntityTypeCCC.RCC.value,
-                 EntityType.PAR.value,
-                 EntityType.XCORP.value, EntityTypeXCORP.XCCR.value,
-                 EntityTypeXCORP.XRCR.value,
-                 EntityTypeXCORP.AS.value,
-                 EntityType.XULC.value, EntityTypeXULC.UA.value, EntityTypeXULC.XCUL.value,
-                 EntityTypeXULC.XRUL.value,
-                 EntityType.XCP.value, EntityTypeXCP.XCCP.value, EntityTypeXCP.XRCP.value,
-                 EntityType.BC.value
+                [EntityTypes.PRIVATE_ACT.value,
+                 EntityTypes.CORPORATION.value,
+                 LegacyEntityTypes.CORPORATION.CCR.value,
+                 LegacyEntityTypes.CORPORATION.CT.value,
+                 LegacyEntityTypes.CORPORATION.RCR.value,
+                 EntityTypes.COOPERATIVE.value,
+                 LegacyEntityTypes.COOPERATIVE.CCP.value,
+                 LegacyEntityTypes.COOPERATIVE.CTC.value,
+                 LegacyEntityTypes.COOPERATIVE.RCP.value,
+                 EntityTypes.FINANCIAL_INSTITUTION.value,
+                 LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                 LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                 EntityTypes.SOCIETY.value,
+                 LegacyEntityTypes.SOCIETY.ASO.value,
+                 LegacyEntityTypes.SOCIETY.CSO.value,
+                 LegacyEntityTypes.SOCIETY.CSSO.value,
+                 LegacyEntityTypes.SOCIETY.CTSO.value,
+                 LegacyEntityTypes.SOCIETY.RSO.value,
+                 EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.ULCT.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                 EntityTypes.XPRO_SOCIETY.value,
+                 LegacyEntityTypes.XPRO_SOCIETY.XASO.value,
+                 LegacyEntityTypes.XPRO_SOCIETY.XCASO.value,
+                 LegacyEntityTypes.XPRO_SOCIETY.XCSO.value,
+                 LegacyEntityTypes.XPRO_SOCIETY.XRSO.value,
+                 EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCV.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCCT.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                 EntityTypes.PARISH.value,
+                 EntityTypes.XPRO_CORPORATION.value,
+                 LegacyEntityTypes.XPRO_CORPORATION.XCCR.value,
+                 LegacyEntityTypes.XPRO_CORPORATION.XRCR.value,
+                 LegacyEntityTypes.XPRO_CORPORATION.AS.value,
+                 EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.UA.value,
+                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XCUL.value,
+                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XRUL.value,
+                 EntityTypes.XPRO_COOPERATIVE.value,
+                 LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
+                 LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
+                 EntityTypes.BENEFIT_COMPANY.value
                  ]),
 
             Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value, NameState.COND_RESERVE.value]),
