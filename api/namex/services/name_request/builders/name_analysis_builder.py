@@ -478,7 +478,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                         counter -= 0.2
 
                 similarity = round(counter / length_original, 2)
-                if similarity >= 0.57:
+                if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
                     selected_matches.append(match)
                     if similarity == 1.0:
