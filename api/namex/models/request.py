@@ -1,5 +1,7 @@
 """Request is the main business class that is the real top level object in the system
 """
+import sqlalchemy
+
 from . import db, ma
 from flask import current_app
 from namex.exceptions import BusinessException
@@ -272,6 +274,7 @@ class Request(db.Model):
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
     def get_general_query(cls):
+        criteria = []
         basic_filters = [
             cls.id == Name.nrId,
             cls.stateCd.in_([State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
@@ -324,7 +327,8 @@ class Request(db.Model):
                  EntityTypes.BENEFIT_COMPANY.value
                  ]),
 
-            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value, NameState.COND_RESERVE.value]),
+            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
+                            NameState.COND_RESERVE.value]),
 
         ]
         not_consumed_filters = [
@@ -338,9 +342,16 @@ class Request(db.Model):
             # Name.consumptionDate.isnot(None)
         ]
 
-        criteria = RequestConditionCriteria(
-            fields=[Name.name, Name.corpNum, Name.consumptionDate, cls.submittedDate],
-            filters=[basic_filters, consumed_filters, not_consumed_filters]
+        criteria.append(RequestConditionCriteria(
+            fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('requests_submitted_date'), Name.corpNum,
+                    sqlalchemy.null().label('requests_nr_num')],
+            filters=[basic_filters, consumed_filters]
+        ))
+        criteria.append(RequestConditionCriteria(
+            fields=[Name.name, sqlalchemy.null().label('names_consumption_date'), cls.submittedDate,
+                    sqlalchemy.null().label('names_corp_num'), cls.nrNum],
+            filters=[basic_filters, not_consumed_filters]
+        )
         )
 
         return criteria
@@ -356,33 +367,35 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
-        if not distinctive:
-            # Reset filter index 5 which contains the descriptive in the previous round.
-            # The filter index 4 contains distinctive value
-            if len(criteria.filters[0]) > 5:
-                criteria.filters[0].pop()
-            substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
-            criteria.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
-        else:
-            substitutions = '|'.join(map(str, descriptive_element))
-            criteria.filters[0].append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
-            return criteria
+        for e in criteria:
+            if not distinctive:
+                # Reset filter index 5 which contains the descriptive in the previous round.
+                # The filter index 4 contains distinctive value
+                if len(e.filters[0]) > 5:
+                    e.filters[0].pop()
+                substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
+                e.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
+            else:
+                substitutions = '|'.join(map(str, descriptive_element))
+                e.filters[0].append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
 
+        if distinctive:
+            return criteria
         results = Request.find_by_criteria(criteria)
 
         return results
 
     @classmethod
     def find_by_criteria(cls, criteria=None):
-        RequestConditionCriteria.is_valid_criteria(criteria)
-
-        query = cls.query.with_entities(*criteria.fields) \
-            .filter(and_(*criteria.filters[0])) \
-            .filter(or_((and_(*criteria.filters[1])),
-                        (and_(*criteria.filters[2]))))
-
-        print(query.statement)
-        return query.all()
+        queries = []
+        for e in criteria:
+            RequestConditionCriteria.is_valid_criteria(e)
+            queries.append(
+                cls.query.with_entities(*e.fields).filter(and_(*e.filters[0])).filter(and_(*e.filters[1]))
+            )
+        query_all = queries[0].union(queries[1])
+        print(query_all.statement)
+        return query_all.all()
 
 
 # set the source from NRO, Societis Online, Name Request
@@ -394,11 +407,12 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
     soc_list = ['SO', 'ASO', 'CSO', 'RSO', 'CTSO', 'XSO', 'XCSO', 'XRSO', 'XASO', 'XCASO', 'CSSO']
 
     # comes from NRO/Societies Online
-    if(request._source is None):
-         if(request.requestTypeCd not in soc_list):
+    if (request._source is None):
+        if (request.requestTypeCd not in soc_list):
             request._source = ValidSources.NRO.value  # pylint: disable=protected-access
-         if (request.requestTypeCd in soc_list):
+        if (request.requestTypeCd in soc_list):
             request._source = ValidSources.SO.value  # pylint: disable=protected-access
+
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
