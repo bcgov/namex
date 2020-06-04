@@ -378,7 +378,7 @@ class Request(db.Model):
             else:
                 substitutions = '|'.join(map(str, descriptive_element))
                 e.filters[0].append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
-                # return criteria
+
         if distinctive:
             return criteria
         results = Request.find_by_criteria(criteria)
