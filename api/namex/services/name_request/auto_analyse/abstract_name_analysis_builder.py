@@ -176,8 +176,8 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     '''
 
     @abc.abstractmethod
-    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
-                               list_name, name):
+    def get_most_similar_names(self, dict_highest_counter, matches, list_dist, list_desc,
+                               list_name):
         return ProcedureResult(is_valid=True)
 
     '''
