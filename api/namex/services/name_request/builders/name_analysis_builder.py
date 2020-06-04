@@ -442,8 +442,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_most_similar_names(self, dict_highest_counter, matches, list_dist, list_desc,
                                list_name):
+        list_details=[]
         if matches:
-            selected_matches, list_details, dict_details = [], [], {}
+            selected_matches, dict_details = [], {}
             syn_svc = self.synonym_service
             service = ProtectedNameAnalysisService()
 
