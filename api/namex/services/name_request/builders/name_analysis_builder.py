@@ -442,7 +442,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_most_similar_names(self, dict_highest_counter, matches, list_dist, list_desc,
                                list_name):
-        list_details=[]
+        list_details = []
         if matches:
             selected_matches, dict_details = [], {}
             syn_svc = self.synonym_service
@@ -460,23 +460,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 np_svc.set_name(match.name)
                 # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
-                counter = 0
-                for idx, word in enumerate(match_list):
-                    if length_original > idx and word.lower() == list_name[idx]:
-                        counter += 1
-                    elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
-                        counter += 0.95
-                    elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
-                        counter += 0.9
-                    elif word.lower() in list_name:
-                        counter += 0.8
-                    elif porter.stem(word.lower()) in list_name_stem:
-                        counter += 0.7
-                    elif porter.stem(word.lower()) in all_subs_dict.values():
-                        counter += 0.6
-                    else:
-                        counter -= 0.2
-
+                counter = self.get_score(match_list, length_original, list_name,list_name_stem, all_subs_dict)
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
@@ -532,3 +516,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     list_details.append(dict_details)
 
         return list_details
+
+    def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
+        counter = 0
+        for idx, word in enumerate(match_list):
+            if length_original > idx and word.lower() == list_name[idx]:
+                counter += 1
+            elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
+                counter += 0.95
+            elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
+                counter += 0.9
+            elif word.lower() in list_name:
+                counter += 0.8
+            elif porter.stem(word.lower()) in list_name_stem:
+                counter += 0.7
+            elif porter.stem(word.lower()) in all_subs_dict.values():
+                counter += 0.6
+            else:
+                counter -= 0.2
+
+        return counter
