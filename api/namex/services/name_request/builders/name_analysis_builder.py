@@ -209,24 +209,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return result
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name):
-        syn_svc = self.synonym_service
         dist_substitution_list, desc_synonym_list, selected_matches_list, list_details = [], [], [], []
 
-        all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            words=w_dist,
-            words_are_distinctive=True
-        ).data
+        dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
+        desc_synonym_list = self.get_substitutions_descriptive(w_desc)
 
-        dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
-        dist_substitution_list = dist_substitution_dict.values()
-
-        all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            words=w_desc,
-            words_are_distinctive=False
-        ).data
-
-        desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-        desc_synonym_list = desc_synonym_dict.values()
         for dist in dist_substitution_list:
             criteria = Request.get_general_query()
             criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
@@ -460,7 +447,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 np_svc.set_name(match.name)
                 # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
-                counter = self.get_score(match_list, length_original, list_name,list_name_stem, all_subs_dict)
+                counter = self.get_score(match_list, length_original, list_name, list_name_stem, all_subs_dict)
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
@@ -536,3 +523,36 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 counter -= 0.2
 
         return counter
+
+    def get_subsitutions_distinctive(self, w_dist):
+        syn_svc = self.synonym_service
+        dist_substitution_list = []
+
+        all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+            words=w_dist,
+            words_are_distinctive=True
+        ).data
+
+        dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
+        dist_substitution_list = list(dist_substitution_dict.values())
+
+        dist_substitution_list = dist_substitution_list.append(
+            w_dist) if w_dist not in dist_substitution_list else dist_substitution_list
+
+        return dist_substitution_list
+
+    def get_substitutions_descriptive(self, w_desc):
+        syn_svc = self.synonym_service
+        desc_synonym_list = []
+
+        all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+            words=w_desc,
+            words_are_distinctive=False
+        ).data
+
+        desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
+        desc_synonym_list = list(desc_synonym_dict.values())
+
+        desc_synonym_list = desc_synonym_list.append(w_desc) if w_desc not in desc_synonym_list else desc_synonym_list
+
+        return desc_synonym_list
