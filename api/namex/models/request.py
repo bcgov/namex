@@ -19,7 +19,7 @@ from .state import State, StateSchema
 from datetime import datetime
 import re
 
-from namex.constants import ValidSources, NameState,\
+from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
     request_type_mapping
 
@@ -377,6 +377,9 @@ class Request(db.Model):
                 e.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
             else:
                 substitutions = '|'.join(map(str, descriptive_element))
+                if substitutions.isdigit():
+                    substitutions = '((lot.?)?|(no.?)?)\\s*\\d+'
+
                 e.filters[0].append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
 
         if distinctive:

@@ -507,7 +507,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
         counter = 0
         for idx, word in enumerate(match_list):
-            if length_original > idx and word.lower() == list_name[idx]:
+            if length_original > idx and (word.lower() == list_name[idx] or
+                                          (word.isdigit() and list_name[idx].isdigit())):
                 counter += 1
             elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
                 counter += 0.95
@@ -536,8 +537,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
         dist_substitution_list = list(dist_substitution_dict.values())
 
-        dist_substitution_list = dist_substitution_list.append(
-            w_dist) if w_dist not in dist_substitution_list else dist_substitution_list
+        #dist_substitution_list = dist_substitution_list.append(w_dist) if w_dist not in dist_substitution_list else dist_substitution_list
+
+        for i, dist in enumerate(w_dist):
+            if dist not in dist_substitution_list[i]:
+                dist_substitution_list[i].append(dist)
 
         return dist_substitution_list
 
@@ -553,6 +557,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
         desc_synonym_list = list(desc_synonym_dict.values())
 
-        desc_synonym_list = desc_synonym_list.append(w_desc) if w_desc not in desc_synonym_list else desc_synonym_list
+        #desc_synonym_list = desc_synonym_list.append(w_desc) if w_desc not in desc_synonym_list else desc_synonym_list
+
+        for i, desc in enumerate(w_desc):
+            if desc not in desc_synonym_list[i]:
+                desc_synonym_list[i].append(desc)
 
         return desc_synonym_list
