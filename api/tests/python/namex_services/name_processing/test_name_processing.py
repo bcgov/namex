@@ -72,7 +72,7 @@ def test_set_name_regex_prefixes(name, expected):
                              ("LONDON AIR SERVICES (NO. 8) LIMITED", "LONDON AIR SERVICES"),
                              ("CATHEDRAL (YR 2008) VENTURES", "CATHEDRAL VENTURES"),
                              ("CATHEDRAL (ANYTHING 2008) VENTURES", "CATHEDRAL VENTURES"),
-                             ("NO. 295 CATHEDRAL VENTURES", "CATHEDRAL VENTURES"),
+                             ("NO. 295 CATHEDRAL VENTURES", "295 CATHEDRAL VENTURES"),
                              ('DISCOVERY RESIDENTIAL HOLDINGS (LOT 4)', 'DISCOVERY RESIDENTIAL HOLDINGS'),
                              ('RG LOT 3', 'RG'),
                              ("BEEDIE CH PROPERTY (LOT 3-22)", "BEEDIE CH PROPERTY"),
@@ -146,7 +146,6 @@ def test_set_name_regex_keep_together_abv(name, expected):
                              ("J & K ENGRAVING", "JK ENGRAVING"),
                              ("D&G WESTCOAST HOMES", "DG WESTCOAST HOMES"),
                              ("DO & BE COLLECTION RETAIL", "DO COLLECTION RETAIL"),
-                             # --> be is stop words and removed
                              ('C & C TRAILER LIFT SYSTEMS', 'CC TRAILER LIFT SYSTEMS'),
                              ('C S A DESIGN & DRAFTING SERVICES', 'CSA DESIGN DRAFTING SERVICES'),
                              ('INTERNATIONAL BUSINESS BUY/SELL', 'INTERNATIONAL BUSINESS BUY SELL'),
