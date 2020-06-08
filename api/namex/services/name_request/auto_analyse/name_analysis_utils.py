@@ -256,3 +256,14 @@ def check_synonyms_category(list_dist_words, list_desc_words, clean_name, catego
     list_desc_words = list(OrderedDict.fromkeys(list_desc_words))
 
     return list_dist_words, list_desc_words
+
+
+def check_numbers_beginning(syn_svc, tokens):
+    if tokens[0].isdigit():
+        for idx, token in enumerate(tokens[1:]):
+            if not token.isdigit():
+                if not syn_svc.get_word_synonyms(word=token).data:
+                    tokens = tokens[idx + 1:]
+                    #tokens = [] + tokens
+                break
+    return tokens
