@@ -8,7 +8,7 @@ from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_l
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
-from namex.utils.common import parse_dict_of_lists, get_plural_singular_name, remove_numbers_list, remove_numbers_dict
+from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
 
 '''
 Sample builder
@@ -438,12 +438,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             all_subs_dict, dist_subs_dict, desc_subs_dict = get_all_substitutions(syn_svc, list_dist, list_desc,
                                                                                   list_name)
             list_name_stem = [porter.stem(name.lower()) for name in list_name]
-
-            list_name_not_digit = remove_numbers_list(list_name)
-            list_name_stem_not_digit = remove_numbers_list(list_name_stem)
-            all_subs_dict_not_digit = remove_numbers_dict(all_subs_dict)
-
-            length_original = len(list_name_not_digit)
+            length_original = len(list_name)
 
             dict_matches_counter, dict_matches_words = {}, {}
 
@@ -452,8 +447,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 np_svc.set_name(match.name)
                 # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
-                counter = self.get_score(match_list, length_original, list_name_not_digit, list_name_stem_not_digit,
-                                         all_subs_dict_not_digit)
+                counter = self.get_score(match_list, length_original, list_name,list_name_stem, all_subs_dict)
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
@@ -512,11 +506,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
         counter = 0
-        match_list_not_digit = [match for match in match_list if not match.isdigit()]
-
-        for idx, word in enumerate(match_list_not_digit):
-            if length_original > idx and (word.lower() == list_name[idx] or
-                                          (word.isdigit() and list_name[idx].isdigit())):
+        for idx, word in enumerate(match_list):
+            if length_original > idx and word.lower() == list_name[idx]:
                 counter += 1
             elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
                 counter += 0.95

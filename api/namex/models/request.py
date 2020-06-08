@@ -377,9 +377,6 @@ class Request(db.Model):
                 e.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
             else:
                 substitutions = '|'.join(map(str, descriptive_element))
-                if substitutions.isdigit():
-                    substitutions = '((lot.?)?|(no.?)?)\\s*\\d+'
-
                 e.filters[0].append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
 
         if distinctive:
