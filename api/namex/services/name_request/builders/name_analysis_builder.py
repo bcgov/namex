@@ -3,12 +3,12 @@ from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import get_all_substitutions
+from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
-from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
+from namex.utils.common import parse_dict_of_lists, get_plural_singular_name, remove_numbers_list, remove_numbers_dict
 
 '''
 Sample builder
@@ -438,7 +438,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             all_subs_dict, dist_subs_dict, desc_subs_dict = get_all_substitutions(syn_svc, list_dist, list_desc,
                                                                                   list_name)
             list_name_stem = [porter.stem(name.lower()) for name in list_name]
-            length_original = len(list_name)
+
+            list_name_not_digit = remove_numbers_list(list_name)
+            list_name_stem_not_digit = remove_numbers_list(list_name_stem)
+            all_subs_dict_not_digit = remove_numbers_dict(all_subs_dict)
+
+            length_original = len(list_name_not_digit)
 
             dict_matches_counter, dict_matches_words = {}, {}
 
@@ -447,7 +452,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 np_svc.set_name(match.name)
                 # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
-                counter = self.get_score(match_list, length_original, list_name, list_name_stem, all_subs_dict)
+                counter = self.get_score(match_list, length_original, list_name_not_digit, list_name_stem_not_digit,
+                                         all_subs_dict_not_digit)
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
@@ -506,7 +512,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
         counter = 0
-        for idx, word in enumerate(match_list):
+        match_list_not_digit = [match for match in match_list if not match.isdigit()]
+
+        for idx, word in enumerate(match_list_not_digit):
             if length_original > idx and (word.lower() == list_name[idx] or
                                           (word.isdigit() and list_name[idx].isdigit())):
                 counter += 1
@@ -518,7 +526,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 counter += 0.8
             elif porter.stem(word.lower()) in list_name_stem:
                 counter += 0.7
-            elif porter.stem(word.lower()) in all_subs_dict.values():
+            elif porter.stem(word.lower()) in get_flat_list(all_subs_dict.values()):
                 counter += 0.6
             else:
                 counter -= 0.2
@@ -537,8 +545,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
         dist_substitution_list = list(dist_substitution_dict.values())
 
-        #dist_substitution_list = dist_substitution_list.append(w_dist) if w_dist not in dist_substitution_list else dist_substitution_list
-
         for i, dist in enumerate(w_dist):
             if dist not in dist_substitution_list[i]:
                 dist_substitution_list[i].append(dist)
@@ -556,8 +562,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
         desc_synonym_list = list(desc_synonym_dict.values())
-
-        #desc_synonym_list = desc_synonym_list.append(w_desc) if w_desc not in desc_synonym_list else desc_synonym_list
 
         for i, desc in enumerate(w_desc):
             if desc not in desc_synonym_list[i]:

@@ -50,3 +50,11 @@ def get_plural_singular_name(name):
         name_list.append(' '.join(combination))
 
     return name_list
+
+
+def remove_numbers_list(list_name):
+    return [name for name in list_name if not name.isdigit()]
+
+
+def remove_numbers_dict(d):
+    return {key: value for key, value in d.items() if not key.isdigit()}
