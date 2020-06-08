@@ -40,7 +40,7 @@ class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
         issue.line1 = "There can be only one designation. You must choose either " + self._join_list_words(
             correct_end_designations_lc, "</b>  or  <b>")
 
-        issue.designations = correct_end_designations
+        issue.designations = correct_end_designations_lc
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_incl_designation_lc:
