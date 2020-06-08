@@ -188,7 +188,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         stand_alone_list.sort(key=len, reverse=True)
 
         designation_all_regex = '|'.join(designation_all)
-        stand_alone_regex = '$|'.join(stand_alone_list) + '$'
+        # stand_alone_regex = '$|'.join(stand_alone_list) + '$'
         # prefixes = '|'.join(prefix_list)
         numbers = '|'.join(number_list)
 
