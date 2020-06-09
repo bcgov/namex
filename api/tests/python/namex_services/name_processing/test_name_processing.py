@@ -146,7 +146,6 @@ def test_set_name_regex_keep_together_abv(name, expected):
                              ("J & K ENGRAVING", "JK ENGRAVING"),
                              ("D&G WESTCOAST HOMES", "DG WESTCOAST HOMES"),
                              ("DO & BE COLLECTION RETAIL", "DO COLLECTION RETAIL"),
-                             # --> be is stop words and removed
                              ('C & C TRAILER LIFT SYSTEMS', 'CC TRAILER LIFT SYSTEMS'),
                              ('C S A DESIGN & DRAFTING SERVICES', 'CSA DESIGN DRAFTING SERVICES'),
                              ('INTERNATIONAL BUSINESS BUY/SELL', 'INTERNATIONAL BUSINESS BUY SELL'),
@@ -204,21 +203,20 @@ def test_set_name_regex_strip_out_numbers_middle_end(name, expected):
                              ("13192427 ENTERPRISES INC.", "13192427 ENTERPRISES"),
                              ('1984 VENTURES LTD.', '1984 VENTURES'),
                              ('KKBL NO. 546 VENTURES LTD.', 'KKBL VENTURES'),
-                             ('2020 SOLUTION LTD.', 'SOLUTION'),
                              ('2020 SOLUTIONS LTD.', '2020 SOLUTIONS'),
                              ('1900 INDUSTRIES INC.', '1900 INDUSTRIES'),
                              ('947 FORT HOLDINGS LTD.', 'FORT HOLDINGS'),
                              ('200 INTERCHANGE VENTURES LLP', 'INTERCHANGE VENTURES'),
-                             ('588618 BRITISH COLUMBIA LTD.', 'BRITISH COLUMBIA'),
-                             ('1198430 ALBERTA LTD.', 'ALBERTA'),
-                             ('2705 INVESTMENTS LTD.', 'INVESTMENTS'),
-                             ('4936290 MANITOBA LTD.', 'MANITOBA'),
-                             ('1091064 ONTARIO LIMITED', 'ONTARIO'),
-                             ('3120579 NOVA SCOTIA LTD.', 'NOVA SCOTIA')
+                             ('588618 BRITISH COLUMBIA LTD.', 'BRITISH COLUMBIA'),  # Not part of Stand-Alone
+                             ('1198430 ALBERTA LTD.', '1198430 ALBERTA'),
+                             ('2705 INVESTMENTS LTD.', 'INVESTMENTS'),  # Not part of Stand-Alone
+                             ('4936290 MANITOBA LTD.', '4936290 MANITOBA'),
+                             ('1091064 ONTARIO LIMITED', '1091064 ONTARIO'),
+                             ('3120579 NOVA SCOTIA LTD.', '3120579 NOVA SCOTIA')
 
                          ]
                          )
-def test_set_name_regex_numbers_standalone(name, expected):
+def test_set_name_keep_numbers_beginning(name, expected):
     np_svc.set_name(name)
     cleaned_name = np_svc.processed_name.upper()
     assert cleaned_name == expected

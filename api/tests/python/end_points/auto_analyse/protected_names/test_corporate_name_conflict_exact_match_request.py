@@ -13,7 +13,8 @@ from ..common import token_header, claims
 
 @pytest.mark.parametrize("name, expected",
                          [
-                             ("ARMSTRONG PLUMBING & HEATING LTD.", "ARMSTRONG PLUMBING & HEATING LTD.")
+                             ("ARMSTRONG PLUMBING & HEATING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -22,11 +23,15 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, 
                                  {'word': 'ARMSTRONG', 'classification': 'DESC'},
                                  {'word': 'PLUMBING', 'classification': 'DIST'},
                                  {'word': 'PLUMBING', 'classification': 'DESC'},
-                                 {'word': 'HEATING', 'classification': 'DESC'}
+                                 {'word': 'HEATING', 'classification': 'DESC'},
+                                 {'word': 'CATHEDRAL', 'classification': 'DIST'},
+                                 {'word': 'MINING', 'classification': 'DIST'},
+                                 {'word': 'MINING', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
-    conflict_list_db = ['ARMSTRONG PLUMBING & HEATING LTD.', 'ARMSTRONG COOLING & WAREHOUSE LTD.']
+    conflict_list_db = ['ARMSTRONG PLUMBING & HEATING LTD.', 'ARMSTRONG COOLING & WAREHOUSE LTD.',
+                        'NO. 003 CATHEDRAL MINING LTD.', 'CATHEDRAL MINING LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT

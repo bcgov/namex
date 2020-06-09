@@ -3,7 +3,7 @@ from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import get_all_substitutions
+from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -209,24 +209,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return result
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name):
-        syn_svc = self.synonym_service
         dist_substitution_list, desc_synonym_list, selected_matches_list, list_details = [], [], [], []
 
-        all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            words=w_dist,
-            words_are_distinctive=True
-        ).data
+        dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
+        desc_synonym_list = self.get_substitutions_descriptive(w_desc)
 
-        dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
-        dist_substitution_list = dist_substitution_dict.values()
-
-        all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            words=w_desc,
-            words_are_distinctive=False
-        ).data
-
-        desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-        desc_synonym_list = desc_synonym_dict.values()
         for dist in dist_substitution_list:
             criteria = Request.get_general_query()
             criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
@@ -530,9 +517,45 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 counter += 0.8
             elif porter.stem(word.lower()) in list_name_stem:
                 counter += 0.7
-            elif porter.stem(word.lower()) in all_subs_dict.values():
+            elif porter.stem(word.lower()) in get_flat_list(all_subs_dict.values()):
                 counter += 0.6
             else:
                 counter -= 0.2
 
         return counter
+
+    def get_subsitutions_distinctive(self, w_dist):
+        syn_svc = self.synonym_service
+        dist_substitution_list = []
+
+        all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+            words=w_dist,
+            words_are_distinctive=True
+        ).data
+
+        dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
+        dist_substitution_list = list(dist_substitution_dict.values())
+
+        for i, dist in enumerate(w_dist):
+            if dist not in dist_substitution_list[i]:
+                dist_substitution_list[i].append(dist)
+
+        return dist_substitution_list
+
+    def get_substitutions_descriptive(self, w_desc):
+        syn_svc = self.synonym_service
+        desc_synonym_list = []
+
+        all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+            words=w_desc,
+            words_are_distinctive=False
+        ).data
+
+        desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
+        desc_synonym_list = list(desc_synonym_dict.values())
+
+        for i, desc in enumerate(w_desc):
+            if desc not in desc_synonym_list[i]:
+                desc_synonym_list[i].append(desc)
+
+        return desc_synonym_list

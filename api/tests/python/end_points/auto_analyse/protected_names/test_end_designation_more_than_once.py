@@ -96,5 +96,5 @@ def test_end_designation_more_than_once_request_response(client, jwt, app):
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
             assert_issues_count_is_gt(0, payload.get('issues'))
-            assert_has_issue_type(AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE, payload.get('issues'))
+            assert_has_designations_upper(AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE, payload.get('issues'))
             assert_has_no_issue_type(AnalysisIssueCodes.DESIGNATION_MISPLACED, payload.get('issues'))

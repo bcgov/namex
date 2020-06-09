@@ -2,7 +2,7 @@ import re
 import warnings
 
 from . import LanguageCodes
-from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words
+from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning
 
 # from namex.services.synonyms.synonym import SynonymService
 from namex.services.word_classification.word_classification import WordClassificationService
@@ -182,6 +182,8 @@ class NameProcessingService(GetSynonymListsMixin):
         ).data
 
         tokens = tokens.split()
+
+        tokens = check_numbers_beginning(syn_svc, tokens)
 
         return [x.lower() for x in tokens if x]
 
