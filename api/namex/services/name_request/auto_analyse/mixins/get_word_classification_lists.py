@@ -4,6 +4,7 @@ class GetWordClassificationListsMixin(object):
     _list_desc_words = []
     _list_none_words = []
     _list_incorrect_classification = []
+    _dict_name_words = {}
 
     def get_list_name(self):
         return self._list_name_words
@@ -19,3 +20,6 @@ class GetWordClassificationListsMixin(object):
 
     def get_list_incorrect_classification(self):
         return self._list_incorrect_classification
+
+    def get_dict_name(self):
+        return self._dict_name_words
