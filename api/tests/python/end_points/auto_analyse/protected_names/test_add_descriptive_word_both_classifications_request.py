@@ -13,8 +13,13 @@ from ..common import token_header, claims
 # 4.- Unique word classified as distinctive and descriptive
 @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_both_classifications_request_response(client, jwt, app):
-    words_list_classification = [{'word': 'ABBOTSFORD’ ', 'classification': 'DIST'},
-                                 {'word': 'ABBOTSFORD’ ', 'classification': 'DESC'}]
+    words_list_classification = [{'word': 'ABBOTSFORD', 'classification': 'DIST'},
+                                 {'word': 'ABBOTSFORD', 'classification': 'DESC'},
+                                 {'word': 'ROCKY', 'classification': 'DIST'},
+                                 {'word': 'ROCKY', 'classification': 'DESC'},
+                                 {'word': 'MOUNTAIN', 'classification': 'DIST'},
+                                 {'word': 'MOUNTAIN', 'classification': 'DESC'},
+                                 ]
     save_words_list_classification(words_list_classification)
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -24,6 +29,12 @@ def test_add_descriptive_word_both_classifications_request_response(client, jwt,
     test_params = [
         {
             'name': 'ABBOTSFORD INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'ROCKY MOUNTAIN INC.',
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
