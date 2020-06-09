@@ -1,6 +1,4 @@
--- noinspection SqlNoDataSourceInspectionForFile
-
-CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
+create or replace PACKAGE BODY       namex AS
     -- Action Types
     ACTION_UPDATE CONSTANT VARCHAR2(1) := 'U';
     ACTION_CREATE CONSTANT VARCHAR2(1) := 'C';
@@ -26,12 +24,12 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
         status CHAR(1);
         row_action CHAR(1);
 
-        CURSOR pending_rows IS 
-        SELECT transaction_id 
-        FROM name_transaction 
+        CURSOR pending_rows IS
+        SELECT transaction_id
+        FROM name_transaction
         WHERE status_namex = STATUS_PENDING
         ORDER BY transaction_id;
-        
+
     BEGIN
         OPEN pending_rows;
         LOOP
@@ -40,21 +38,24 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
 
             SELECT transaction_type_cd, request_id, event_id
             INTO row_transaction_type_cd, row_request_id, row_event_id
-            FROM transaction 
+            FROM transaction
             WHERE transaction_id = row_transaction_id;
 
             -- If we don't care about it, mark it as ignored.
             status := STATUS_IGNORED;
 
             -- get the current state, if it's not 'C', 'D', or 'COMPLETED' we're done
+            --adding HISTORICAL for namerequest
             BEGIN
-                SELECT state_type_cd 
-                INTO row_state_type_cd 
-                FROM request_state 
+                SELECT state_type_cd
+                INTO row_state_type_cd
+                FROM request_state
                 WHERE request_id = row_request_id
                 AND end_event_id is NULL
-                AND state_type_cd in ('C', 'D', 'COMPLETED');
-                
+                --AND state_type_cd in ('C', 'D', 'COMPLETED');
+                AND state_type_cd in ('C', 'D', 'COMPLETED', 'HISTORICAL');
+
+
             EXCEPTION
                 WHEN NO_DATA_FOUND THEN
                     row_state_type_cd := NULL;
@@ -65,9 +66,10 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
 			    row_transaction_type_cd IN
 			         ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL', 'MODIF', 'CORRT', 'UPDPR')
 			   ) OR (
-			    row_state_type_cd IN ('COMPLETED') AND row_transaction_type_cd IN ('CONSUME')
+               --added for historical
+			    row_state_type_cd IN ('COMPLETED') AND row_transaction_type_cd IN ('CONSUME','HISTORICAL')
 			    ))
-			  -- (row_state_type_cd = 'COMPLETED' and row_transaction_type_cd = 'EXTEND')
+			
 			THEN
 				SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
 						row_transaction_id;
@@ -79,10 +81,10 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
 
 				IF row_transaction_type_cd in ('NRREQ', 'RESUBMIT') THEN
 					row_action := ACTION_CREATE;
-					
+
 				ELSIF row_transaction_type_cd in ('CANCL') THEN
 					row_action := ACTION_CANCEL;
-					
+
 				ELSE
 					row_action := ACTION_UPDATE;
 				END IF;
@@ -104,4 +106,3 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.namex AS
     END;
 
 END namex;
-/
