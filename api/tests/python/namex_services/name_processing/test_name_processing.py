@@ -72,7 +72,7 @@ def test_set_name_regex_prefixes(name, expected):
                              ("LONDON AIR SERVICES (NO. 8) LIMITED", "LONDON AIR SERVICES"),
                              ("CATHEDRAL (YR 2008) VENTURES", "CATHEDRAL VENTURES"),
                              ("CATHEDRAL (ANYTHING 2008) VENTURES", "CATHEDRAL VENTURES"),
-                             ("NO. 295 CATHEDRAL VENTURES", "295 CATHEDRAL VENTURES"),
+                             ("NO. 295 CATHEDRAL VENTURES", "CATHEDRAL VENTURES"),
                              ('DISCOVERY RESIDENTIAL HOLDINGS (LOT 4)', 'DISCOVERY RESIDENTIAL HOLDINGS'),
                              ('RG LOT 3', 'RG'),
                              ("BEEDIE CH PROPERTY (LOT 3-22)", "BEEDIE CH PROPERTY"),
@@ -207,9 +207,9 @@ def test_set_name_regex_strip_out_numbers_middle_end(name, expected):
                              ('1900 INDUSTRIES INC.', '1900 INDUSTRIES'),
                              ('947 FORT HOLDINGS LTD.', 'FORT HOLDINGS'),
                              ('200 INTERCHANGE VENTURES LLP', 'INTERCHANGE VENTURES'),
-                             ('588618 BRITISH COLUMBIA LTD.', '588618 BRITISH COLUMBIA'),
+                             ('588618 BRITISH COLUMBIA LTD.', 'BRITISH COLUMBIA'),  # Not part of Stand-Alone
                              ('1198430 ALBERTA LTD.', '1198430 ALBERTA'),
-                             ('2705 INVESTMENTS LTD.', '2705 INVESTMENTS'),
+                             ('2705 INVESTMENTS LTD.', 'INVESTMENTS'),  # Not part of Stand-Alone
                              ('4936290 MANITOBA LTD.', '4936290 MANITOBA'),
                              ('1091064 ONTARIO LIMITED', '1091064 ONTARIO'),
                              ('3120579 NOVA SCOTIA LTD.', '3120579 NOVA SCOTIA')

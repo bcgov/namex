@@ -15,7 +15,7 @@ from ..common import token_header, claims
                          [
                              ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."),
-                             ("NO. 001 CATHEDRAL MINING LTD.", "NO. 003 CATHEDRAL MINING LTD."),
+                             ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
