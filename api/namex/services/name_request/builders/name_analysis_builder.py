@@ -9,6 +9,7 @@ from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
+from namex.services.name_request.auto_analyse import DataFrameFields
 
 '''
 Sample builder
@@ -21,6 +22,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Check to see if a provided name is valid
     Override the abstract / base class method
     @return ProcedureResult[] An array of procedure results
+    '''
+    '''
+    To be deprecated: Need to consider change in logic <distinctive><descriptive><distinctive> is valid
+    Another version of the function  was created to handle new logic
     '''
 
     def check_name_is_well_formed(self, list_dist, list_desc, list_name, list_original_name):
@@ -79,6 +84,46 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     'list_name': list_name or [],
                     'list_dist': list_dist or []
                 }
+
+        return result
+
+    '''
+    Check to see if a provided name is valid
+    Override the abstract / base class method
+    @return ProcedureResult[] An array of procedure results
+    '''
+
+    def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name, list_original_name):
+        result = ProcedureResult()
+        result.is_valid = True
+
+        first_word = next(iter(name_dict.values()))
+        valid = False
+        if first_word == DataFrameFields.DISTINCTIVE.value:
+            for i, value in enumerate(name_dict.values()):
+                if i == 0:
+                    pass
+                elif value == DataFrameFields.DESCRIPTIVE.value:
+                    valid = True
+                    break
+            if not valid:
+                result = ProcedureResult()
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
+                result.values = {
+                    'list_original': list_original_name or [],
+                    'list_name': list_name or [],
+                    'list_dist': list_dist or []
+                }
+        else:
+            result = ProcedureResult()
+            result.is_valid = False
+            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
+            result.values = {
+                'list_original': list_original_name or [],
+                'list_name': list_name or [],
+                'list_dist': list_dist or []
+            }
 
         return result
 
@@ -447,7 +492,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 np_svc.set_name(match.name)
                 # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
-                counter = self.get_score(match_list, length_original, list_name,list_name_stem, all_subs_dict)
+                counter = self.get_score(match_list, length_original, list_name, list_name_stem, all_subs_dict)
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})

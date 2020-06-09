@@ -5,8 +5,7 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
-from ..auto_analyse.name_analysis_utils import list_distinctive_descriptive, list_distinctive_descriptive_same, \
-    check_synonyms_category, check_synonyms
+from ..auto_analyse.name_analysis_utils import check_synonyms, get_category_summary
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService
@@ -215,21 +214,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     self.name_tokens
                 )
 
-        '''
-        To be removed: Searching for categories and condition a word to be descriptive based on category of previous
-        word is not longer valid. This logic is updated to check just if the word is in synoyms.
-        '''
-        #all_categories = syn_svc.get_all_categories_synonyms(list_desc=clean_name).data
-        #category_dict = parse_dict_of_lists(all_categories)
-        #self._list_dist_words, self._list_desc_words = check_synonyms_category(self._list_dist_words, self._list_desc_words,
-        #                                                                       clean_name, category_dict)
-
         self._list_dist_words, self._list_desc_words = check_synonyms(syn_svc, self._list_dist_words,
                                                                       self._list_desc_words)
 
-        # Validate possible combinations using available distinctive and descriptive list:
-        self._list_dist_words, self._list_desc_words = \
-            list_distinctive_descriptive(self.name_tokens, self.get_list_dist(), self.get_list_desc())
+        self._dict_name_words = get_category_summary(self.name_tokens, self._list_dist_words, self._list_desc_words)
+
 
     '''
     This is the main execution call that wraps name analysis checks. 
@@ -253,15 +242,15 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 analysis.append(check_words_to_avoid)
                 return analysis
 
-            for comb_dist, comb_desc in zip(self._list_dist_words, self._list_desc_words):
-                check_name_is_well_formed = builder.check_name_is_well_formed(
-                    comb_dist,
-                    comb_desc,
+            check_name_is_well_formed = builder.check_name_is_well_formed(
+                    self._dict_name_words,
+                    self._list_dist_words,
+                    self._list_desc_words,
                     self.name_tokens,
                     self.name_original_tokens
                 )
-                if not check_name_is_well_formed.is_valid:
-                    analysis.append(check_name_is_well_formed)
+            if not check_name_is_well_formed.is_valid:
+                analysis.append(check_name_is_well_formed)
 
             if analysis:
                 return analysis
