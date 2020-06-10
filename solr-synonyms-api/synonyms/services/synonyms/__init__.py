@@ -1,4 +1,8 @@
 from enum import Enum
+from nltk.stem import PorterStemmer
+
+porter = PorterStemmer()
+
 
 # Modes
 MODE_SYNS = 'Syns'
