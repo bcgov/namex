@@ -72,9 +72,6 @@ def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
         elif word in desc_substitution_dict:
             all_substitution_dict[word] = desc_substitution_dict[word]
 
-    for k, v in all_substitution_dict.items():
-        all_substitution_dict[k] = [porter.stem(e.lower()) for e in v]
-
     return all_substitution_dict, dist_substitution_dict, desc_substitution_dict
 
 
