@@ -16,7 +16,7 @@ from ..common import token_header, claims
                              ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."),
                              ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
-                             ("ABC INVESTMENTS LTD." , "ABC CREDIT BUREAU COLLECTIONS LTD.")
+                             ("ABC INVESTMENTS LTD.", "ABC CREDIT BUREAU COLLECTIONS LIMITED")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -40,8 +40,8 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
     conflict_list_db = ['ARMSTRONG PLUMBING & HEATING LTD.', 'ARMSTRONG COOLING & WAREHOUSE LTD.',
                         'ABC PEST MANAGEMENT CONSULTING INC.', 'ABC ALWAYS BETTER CONSULTING INC.',
                         'ABC - AUTISM BEHAVIOUR CONSULTING INCORPORATED', 'ABC INTERNATIONAL CONSULTING LTD.',
-                        'NO. 003 CATHEDRAL MINING LTD.', 'CATHEDRAL MINING LTD.', 'ABC CREDIT BUREAU COLLECTIONS',
-                        'ABC JEWELLERY & LOAN PAWNBROKERS LTD.']
+                        'NO. 003 CATHEDRAL MINING LTD.', 'CATHEDRAL MINING LTD.',
+                        'ABC CREDIT BUREAU COLLECTIONS LIMITED', 'ABC JEWELLERY & LOAN PAWNBROKERS LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
