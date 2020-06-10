@@ -220,13 +220,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
 
-        for w_dist, w_desc in zip(list_dist_words, list_desc_words):
-            list_conflicts.extend(self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name))
-            list_conflicts = [i for n, i in enumerate(list_conflicts) if
+        list_conflicts.extend(self.get_conflicts(dict_highest_counter, list_dist_words, list_desc_words, list_name))
+        list_conflicts = [i for n, i in enumerate(list_conflicts) if
                               i not in list_conflicts[n + 1:]]  # Remove duplicates
-
-            if self.is_exact_match(list_conflicts):
-                break
 
         most_similar_names.extend(
             sorted(list_conflicts, key=lambda item: (-item['score'], len(item['name'])))[
