@@ -30,7 +30,6 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                                  {'word': 'CATHEDRAL', 'classification': 'DIST'},
                                  {'word': 'MINING', 'classification': 'DIST'},
                                  {'word': 'MINING', 'classification': 'DESC'},
-
                                  ]
     save_words_list_classification(words_list_classification)
 
