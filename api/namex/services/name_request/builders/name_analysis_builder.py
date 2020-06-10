@@ -97,13 +97,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        first_word = next(iter(name_dict.values()))
+        first_category = next(iter(name_dict.values()))
+        first_word = next(iter(name_dict))
+        name_dict.pop(first_word)
         valid = False
-        if first_word == DataFrameFields.DISTINCTIVE.value:
+
+        if first_category == DataFrameFields.DISTINCTIVE.value:
             for i, value in enumerate(name_dict.values()):
-                if i == 0:
-                    pass
-                elif value == DataFrameFields.DESCRIPTIVE.value:
+                if value == DataFrameFields.DESCRIPTIVE.value:
                     valid = True
                     break
             if not valid:

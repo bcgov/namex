@@ -201,8 +201,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
     def configure_analysis(self):
         syn_svc = self.synonym_service
-        clean_name = self.name_tokens.copy()
-
         self._list_dist_words, self._list_desc_words, self._list_none_words = self.word_classification_tokens
 
         if self.get_list_none() and self.get_list_none().__len__() > 0:
