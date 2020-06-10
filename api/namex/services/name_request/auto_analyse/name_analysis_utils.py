@@ -117,6 +117,6 @@ def check_synonyms(syn_svc, list_dist_words, list_desc_words):
     return list_dist_words, list_desc_words
 
 
-def get_category_summary(list_name, list_dist_words, list_desc_words):
+def get_classification_summary(list_name, list_dist_words, list_desc_words):
     return {word: DataFrameFields.DISTINCTIVE.value if word in list_dist_words else DataFrameFields.DESCRIPTIVE.value \
         if word in list_desc_words else DataFrameFields.UNCLASSIFIED.value for word in list_name}

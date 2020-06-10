@@ -5,7 +5,7 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
-from ..auto_analyse.name_analysis_utils import check_synonyms, get_category_summary
+from ..auto_analyse.name_analysis_utils import check_synonyms, get_classification_summary
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService
@@ -215,7 +215,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self._list_dist_words, self._list_desc_words = check_synonyms(syn_svc, self._list_dist_words,
                                                                       self._list_desc_words)
 
-        self._dict_name_words = get_category_summary(self.name_tokens, self._list_dist_words, self._list_desc_words)
+        self._dict_name_words = get_classification_summary(self.name_tokens, self._list_dist_words, self._list_desc_words)
 
 
     '''
