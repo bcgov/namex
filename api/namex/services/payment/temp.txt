@@ -1,0 +1,121 @@
+def patch(identifier, filing_id=None):
+    """Cancel the payment and resets the filing status to DRAFT."""
+    if not filing_id:
+        return ({'message':
+                     _('No filing id provided for:') + identifier},
+                HTTPStatus.BAD_REQUEST)
+
+    # check authorization
+    if not authorized(identifier, jwt, action=['edit']):
+        return jsonify({'message':
+                            _('You are not authorized to delete a filing for:') + identifier}), \
+               HTTPStatus.UNAUTHORIZED
+
+    filing = Business.get_filing_by_id(identifier, filing_id)
+
+    if not filing:
+        return jsonify({'message': ('Filing Not Found.')}), \
+               HTTPStatus.NOT_FOUND
+
+    try:
+        payment_svc_url = '{}/{}'.format(current_app.config.get('PAYMENT_SVC_URL'), filing.payment_token)
+        token = jwt.get_token_auth_header()
+        headers = {'Authorization': 'Bearer ' + token}
+        rv = requests.delete(url=payment_svc_url, headers=headers, timeout=20.0)
+        if rv.status_code == HTTPStatus.OK or rv.status_code == HTTPStatus.ACCEPTED:
+            filing.reset_filing_to_draft()
+
+    except (exceptions.ConnectionError, exceptions.Timeout) as err:
+        current_app.logger.error(f'Payment connection failure for {identifier}: filing:{filing.id}', err)
+        return {'errors':
+                    [{'message': 'Unable to cancel payment for the filing.'}]
+                }, HTTPStatus.INTERNAL_SERVER_ERROR
+
+    except BusinessException as err:
+        return {'errors': [{'message': err.error}]}, err.status_code
+
+    return jsonify(filing.json), HTTPStatus.ACCEPTED
+
+
+def _create_invoice(business: Business,  # pylint: disable=too-many-locals
+                    filing: Filing,
+                    filing_types: list,
+                    user_jwt: JwtManager) \
+        -> Tuple[int, dict, int]:
+    """Create the invoice for the filing submission.
+
+    Returns: {
+        int: the paymentToken (id), or None
+        dict: a dict of errors, or None
+        int: the HTTPStatus error code, or None
+    }
+    """
+    payment_svc_url = current_app.config.get('PAYMENT_SVC_URL')
+
+    if filing.filing_type == Filing.FILINGS['incorporationApplication'].get('name'):
+        mailing_address = Address.create_address(
+            filing.json['filing']['incorporationApplication']['offices']['registeredOffice']['mailingAddress'])
+        corp_type = filing.json['filing']['business'].get('legalType', 'BC')
+
+        try:
+            business.legal_name = filing.json['filing']['incorporationApplication']['nameRequest']['legalName']
+        except KeyError:
+            business.legal_name = business.identifier
+
+    else:
+        mailing_address = business.mailing_address.one_or_none()
+        corp_type = business.identifier[:-7]
+
+    payload = {
+        'businessInfo': {
+            'businessIdentifier': f'{business.identifier}',
+            'corpType': f'{corp_type}',
+            'businessName': f'{business.legal_name}',
+            'contactInfo': {'city': mailing_address.city,
+                            'postalCode': mailing_address.postal_code,
+                            'province': mailing_address.region,
+                            'addressLine1': mailing_address.street,
+                            'country': mailing_address.country}
+        },
+        'filingInfo': {
+            'filingTypes': filing_types
+        }
+    }
+
+    folio_number = filing.json['filing']['header'].get('folioNumber', None)
+    if folio_number:
+        payload['filingInfo']['folioNumber'] = folio_number
+
+    if user_jwt.validate_roles([STAFF_ROLE]):
+        routing_slip_number = get_str(filing.filing_json, 'filing/header/routingSlipNumber')
+        if routing_slip_number:
+            payload['accountInfo'] = {'routingSlip': routing_slip_number}
+    try:
+        token = user_jwt.get_token_auth_header()
+        headers = {'Authorization': 'Bearer ' + token,
+                   'Content-Type': 'application/json'}
+        rv = requests.post(url=payment_svc_url,
+                           json=payload,
+                           headers=headers,
+                           timeout=20.0)
+    except (exceptions.ConnectionError, exceptions.Timeout) as err:
+        current_app.logger.error(f'Payment connection failure for {business.identifier}: filing:{filing.id}', err)
+        return {'message': 'unable to create invoice for payment.'}, HTTPStatus.PAYMENT_REQUIRED
+
+    if rv.status_code == HTTPStatus.OK or rv.status_code == HTTPStatus.CREATED:
+        pid = rv.json().get('id')
+        filing.payment_token = pid
+        filing.payment_status_code = rv.json().get('statusCode', '')
+        filing.save()
+        return None, None
+
+    if rv.status_code == HTTPStatus.BAD_REQUEST:
+        # Set payment error type used to retrieve error messages from pay-api
+        error_type = rv.json().get('type')
+        filing.payment_status_code = error_type
+        filing.save()
+
+        return {'payment_error_type': error_type,
+                'message': rv.json().get('detail')}, HTTPStatus.PAYMENT_REQUIRED
+
+    return {'message': 'unable to create invoice for payment.'}, HTTPStatus.PAYMENT_REQUIRED
