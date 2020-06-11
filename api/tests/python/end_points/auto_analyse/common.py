@@ -100,8 +100,9 @@ def assert_has_word_upper(issue_type, issues):
 def assert_correct_conflict(issue_type, issues, expected):
     is_correct = False
     for issue in issues:
-        is_correct = True if issue.get('issue_type') == issue_type.value and " ".join(
-            value['name'] for value in issue.get('conflicts')) == expected else False
+        if issue.get('issue_type') == issue_type.value and " ".join(
+                value['name'] for value in issue.get('conflicts')) == expected:
+            is_correct = True
 
     assert is_correct is True
 
@@ -110,8 +111,9 @@ def assert_correct_conflict(issue_type, issues, expected):
 def assert_additional_conflict_parameters(issue_type, issues):
     is_correct = False
     for issue in issues:
-        is_correct = True if issue.get('issue_type') == issue_type.value and (
-            value['corp_num'] and value['consumption_date'] for value in issue.get('conflicts')) else False
+        if issue.get('issue_type') == issue_type.value and (
+                value['id'] and value['start_date'] and value['source'] for value in issue.get('conflicts')):
+            is_correct = True
 
     assert is_correct is True
 

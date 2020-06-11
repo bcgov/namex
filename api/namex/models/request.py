@@ -1,5 +1,7 @@
 """Request is the main business class that is the real top level object in the system
 """
+import sqlalchemy
+
 from . import db, ma
 from flask import current_app
 from namex.exceptions import BusinessException
@@ -15,12 +17,11 @@ from .applicant import Applicant
 from .name import Name, NameSchema
 from .state import State, StateSchema
 from datetime import datetime
-from enum import Enum
 import re
 
-from namex.constants import ValidSources, request_type_mapping, EntityType, EntityTypeXSO, EntityTypeXCP, \
-    EntityTypeXULC, \
-    EntityTypeXCORP, EntityTypeFI, EntityTypeSO, EntityTypeCCC, EntityTypeCP, EntityTypeULC, EntityTypeBCORP, NameState
+from namex.constants import ValidSources, NameState, \
+    EntityTypes, LegacyEntityTypes, \
+    request_type_mapping
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -273,37 +274,61 @@ class Request(db.Model):
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
     def get_general_query(cls):
+        criteria = []
         basic_filters = [
             cls.id == Name.nrId,
             cls.stateCd.in_([State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
             cls.requestTypeCd.in_(
-                [EntityType.PRIV.value,
-                 EntityType.BCORP.value, EntityTypeBCORP.CCR.value,
-                 EntityTypeBCORP.CT.value,
-                 EntityTypeBCORP.RCR.value,
-                 EntityType.CP.value, EntityTypeCP.CCP.value, EntityTypeCP.CTC.value,
-                 EntityTypeCP.RCP.value,
-                 EntityType.FI.value, EntityTypeFI.CFI.value, EntityTypeFI.RFI.value,
-                 EntityType.SO.value, EntityTypeSO.ASO.value, EntityTypeSO.CSO.value,
-                 EntityTypeSO.CSSO.value,
-                 EntityTypeSO.CTSO.value, EntityTypeSO.RSO.value,
-                 EntityType.ULC.value, EntityTypeULC.UC.value, EntityTypeULC.CUL.value,
-                 EntityTypeULC.ULCT.value, EntityTypeULC.RUL.value,
-                 EntityType.XSO.value, EntityTypeXSO.XASO.value, EntityTypeXSO.XCASO.value,
-                 EntityTypeXSO.XCSO.value, EntityTypeXSO.XRSO.value,
-                 EntityType.CCC.value, EntityTypeCCC.CC.value, EntityTypeCCC.CCV.value,
-                 EntityTypeCCC.CCCT.value, EntityTypeCCC.RCC.value,
-                 EntityType.PAR.value,
-                 EntityType.XCORP.value, EntityTypeXCORP.XCCR.value,
-                 EntityTypeXCORP.XRCR.value,
-                 EntityTypeXCORP.AS.value,
-                 EntityType.XULC.value, EntityTypeXULC.UA.value, EntityTypeXULC.XCUL.value,
-                 EntityTypeXULC.XRUL.value,
-                 EntityType.XCP.value, EntityTypeXCP.XCCP.value, EntityTypeXCP.XRCP.value,
-                 EntityType.BC.value
+                [EntityTypes.PRIVATE_ACT.value,
+                 EntityTypes.CORPORATION.value,
+                 LegacyEntityTypes.CORPORATION.CCR.value,
+                 LegacyEntityTypes.CORPORATION.CT.value,
+                 LegacyEntityTypes.CORPORATION.RCR.value,
+                 EntityTypes.COOPERATIVE.value,
+                 LegacyEntityTypes.COOPERATIVE.CCP.value,
+                 LegacyEntityTypes.COOPERATIVE.CTC.value,
+                 LegacyEntityTypes.COOPERATIVE.RCP.value,
+                 EntityTypes.FINANCIAL_INSTITUTION.value,
+                 LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                 LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                 EntityTypes.SOCIETY.value,
+                 LegacyEntityTypes.SOCIETY.ASO.value,
+                 LegacyEntityTypes.SOCIETY.CSO.value,
+                 LegacyEntityTypes.SOCIETY.CSSO.value,
+                 LegacyEntityTypes.SOCIETY.CTSO.value,
+                 LegacyEntityTypes.SOCIETY.RSO.value,
+                 EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.ULCT.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                 EntityTypes.XPRO_SOCIETY.value,
+                 LegacyEntityTypes.XPRO_SOCIETY.XASO.value,
+                 LegacyEntityTypes.XPRO_SOCIETY.XCASO.value,
+                 LegacyEntityTypes.XPRO_SOCIETY.XCSO.value,
+                 LegacyEntityTypes.XPRO_SOCIETY.XRSO.value,
+                 EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCV.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCCT.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                 EntityTypes.PARISH.value,
+                 EntityTypes.XPRO_CORPORATION.value,
+                 LegacyEntityTypes.XPRO_CORPORATION.XCCR.value,
+                 LegacyEntityTypes.XPRO_CORPORATION.XRCR.value,
+                 LegacyEntityTypes.XPRO_CORPORATION.AS.value,
+                 EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.UA.value,
+                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XCUL.value,
+                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XRUL.value,
+                 EntityTypes.XPRO_COOPERATIVE.value,
+                 LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
+                 LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
+                 EntityTypes.BENEFIT_COMPANY.value
                  ]),
 
-            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value, NameState.COND_RESERVE.value]),
+            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
+                            NameState.COND_RESERVE.value]),
 
         ]
         not_consumed_filters = [
@@ -317,9 +342,16 @@ class Request(db.Model):
             # Name.consumptionDate.isnot(None)
         ]
 
-        criteria = RequestConditionCriteria(
-            fields=[Name.name, Name.corpNum, Name.consumptionDate, cls.submittedDate],
-            filters=[basic_filters, consumed_filters, not_consumed_filters]
+        criteria.append(RequestConditionCriteria(
+            fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('requests_submitted_date'), Name.corpNum,
+                    sqlalchemy.null().label('requests_nr_num')],
+            filters=[basic_filters, consumed_filters]
+        ))
+        criteria.append(RequestConditionCriteria(
+            fields=[Name.name, sqlalchemy.null().label('names_consumption_date'), cls.submittedDate,
+                    sqlalchemy.null().label('names_corp_num'), cls.nrNum],
+            filters=[basic_filters, not_consumed_filters]
+        )
         )
 
         return criteria
@@ -335,33 +367,35 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
-        if not distinctive:
-            # Reset filter index 5 which contains the descriptive in the previous round.
-            # The filter index 4 contains distinctive value
-            if len(criteria.filters[0]) > 5:
-                criteria.filters[0].pop()
-            substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
-            criteria.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
-        else:
-            substitutions = '|'.join(map(str, descriptive_element))
-            criteria.filters[0].append(func.lower(Name.name).op('~')(r'^\s*\W*({})\y\W*\s*'.format(substitutions)))
-            return criteria
+        for e in criteria:
+            if not distinctive:
+                # Reset filter index 5 which contains the descriptive in the previous round.
+                # The filter index 4 contains distinctive value
+                if len(e.filters[0]) > 5:
+                    e.filters[0].pop()
+                substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
+                e.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
+            else:
+                substitutions = '|'.join(map(str, descriptive_element))
+                e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\y\W*\s*'.format(substitutions)))
 
+        if distinctive:
+            return criteria
         results = Request.find_by_criteria(criteria)
 
         return results
 
     @classmethod
     def find_by_criteria(cls, criteria=None):
-        RequestConditionCriteria.is_valid_criteria(criteria)
-
-        query = cls.query.with_entities(*criteria.fields) \
-            .filter(and_(*criteria.filters[0])) \
-            .filter(or_((and_(*criteria.filters[1])),
-                        (and_(*criteria.filters[2]))))
-
-        print(query.statement)
-        return query.all()
+        queries = []
+        for e in criteria:
+            RequestConditionCriteria.is_valid_criteria(e)
+            queries.append(
+                cls.query.with_entities(*e.fields).filter(and_(*e.filters[0])).filter(and_(*e.filters[1]))
+            )
+        query_all = queries[0].union(queries[1])
+        print(query_all.statement)
+        return query_all.all()
 
 
 # set the source from NRO, Societis Online, Name Request
@@ -373,11 +407,12 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
     soc_list = ['SO', 'ASO', 'CSO', 'RSO', 'CTSO', 'XSO', 'XCSO', 'XRSO', 'XASO', 'XCASO', 'CSSO']
 
     # comes from NRO/Societies Online
-    if(request._source is None):
-         if(request.requestTypeCd not in soc_list):
+    if (request._source is None):
+        if (request.requestTypeCd not in soc_list):
             request._source = ValidSources.NRO.value  # pylint: disable=protected-access
-         if (request.requestTypeCd in soc_list):
+        if (request.requestTypeCd in soc_list):
             request._source = ValidSources.SO.value  # pylint: disable=protected-access
+
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')

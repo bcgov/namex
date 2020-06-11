@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 from ..common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, \
-    save_words_list_classification
+    save_words_list_classification, assert_additional_conflict_parameters
 from ..common import ENDPOINT_PATH
 from ..common import token_header, claims
 
@@ -14,7 +14,8 @@ from ..common import token_header, claims
 @pytest.mark.parametrize("name, expected",
                          [
                              ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD.")
+                             ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."),
+                             ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -25,13 +26,18 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                                  {'word': 'PLUMBING', 'classification': 'DESC'},
                                  {'word': 'ABC', 'classification': 'DIST'},
                                  {'word': 'CONSULTING', 'classification': 'DIST'},
-                                 {'word': 'CONSULTING', 'classification': 'DESC'}
+                                 {'word': 'CONSULTING', 'classification': 'DESC'},
+                                 {'word': 'CATHEDRAL', 'classification': 'DIST'},
+                                 {'word': 'MINING', 'classification': 'DIST'},
+                                 {'word': 'MINING', 'classification': 'DESC'},
+
                                  ]
     save_words_list_classification(words_list_classification)
 
     conflict_list_db = ['ARMSTRONG PLUMBING & HEATING LTD.', 'ARMSTRONG COOLING & WAREHOUSE LTD.',
                         'ABC PEST MANAGEMENT CONSULTING INC.', 'ABC ALWAYS BETTER CONSULTING INC.',
-                        'ABC - AUTISM BEHAVIOUR CONSULTING INCORPORATED', 'ABC INTERNATIONAL CONSULTING LTD.']
+                        'ABC - AUTISM BEHAVIOUR CONSULTING INCORPORATED', 'ABC INTERNATIONAL CONSULTING LTD.',
+                        'NO. 003 CATHEDRAL MINING LTD.', 'CATHEDRAL MINING LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -58,3 +64,4 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
             payload_lst = payload.get('issues')
             assert_issues_count_is_gt(0, payload_lst)
             assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
+            assert_additional_conflict_parameters(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)

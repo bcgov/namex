@@ -1,10 +1,9 @@
 import re
-
 from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import get_all_substitutions
+from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -173,29 +172,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def search_conflicts(self, list_dist_words, list_desc_words, list_name, name):
         result = ProcedureResult()
         result.is_valid = False
-        all_matches_list = []  # Contains all the conflicts from database
-        most_similar_names = []
-        dict_highest_counter = {}
-        dict_highest_detail = {}
-        response = {}
+        list_conflicts, most_similar_names = [], []
+        dict_highest_counter, response = {}, {}
 
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
-            dict_highest_counter, dict_highest_detail, similar_matches = self.get_conflicts(
-                dict_highest_counter, dict_highest_detail, w_dist, w_desc, list_name, name
-            )
+            list_conflicts.extend(self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name))
+            list_conflicts = [i for n, i in enumerate(list_conflicts) if
+                              i not in list_conflicts[n + 1:]]  # Remove duplicates
 
-            all_matches_list.extend(similar_matches)
-            # If exact match is found stop searching and return response
-            if any(score == 1.0 for score in list(dict_highest_counter.values())):
+            if self.is_exact_match(list_conflicts):
                 break
 
         most_similar_names.extend(
-            list({k for k, v in
-                  sorted(dict_highest_counter.items(), key=lambda item: (-item[1], len(item[0])))[
-                  0:MAX_MATCHES_LIMIT]}))
+            sorted(list_conflicts, key=lambda item: (-item['score'], len(item['name'])))[
+            0:MAX_MATCHES_LIMIT])
 
         if most_similar_names:
-            response = self.prepare_response(all_matches_list, most_similar_names, dict_highest_detail)
+            response = self.prepare_response(most_similar_names)
 
         if response:
             result.is_valid = False
@@ -205,8 +198,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'list_dist': list_dist_words,
                 'list_desc': list_desc_words,
                 'list_conflicts': response['names'],
-                'corp_num': response['corp_num'],
-                'consumption_date': response['consumption_date']
+                'id': response['id'],
+                'start_date': response['start_date'],
+                'source': response['source']
             }
         else:
             result.is_valid = True
@@ -214,42 +208,27 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.values = []
         return result
 
-    def get_conflicts(self, dict_highest_counter, dict_highest_detail, w_dist, w_desc, list_name, name):
-        syn_svc = self.synonym_service
-        dist_substitution_list = []
-        desc_synonym_list = []
-        all_matches_list = []
+    def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name):
+        dist_substitution_list, desc_synonym_list, selected_matches_list, list_details = [], [], [], []
 
-        all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            words=w_dist,
-            words_are_distinctive=True
-        ).data
+        dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
+        desc_synonym_list = self.get_substitutions_descriptive(w_desc)
 
-        dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
-        dist_substitution_list = dist_substitution_dict.values()
-
-        all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            words=w_desc,
-            words_are_distinctive=False
-        ).data
-
-        desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-        desc_synonym_list = desc_synonym_dict.values()
         for dist in dist_substitution_list:
             criteria = Request.get_general_query()
             criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
             # Inject descriptive section into query, execute and add matches to list
             for desc in desc_synonym_list:
                 matches = Request.get_query_distinctive_descriptive(desc, criteria)
-                dict_highest_counter, dict_highest_detail, matches_similar = self.get_most_similar_names(dict_highest_counter,
-                                                                                        dict_highest_detail,
-                                                                                        matches, w_dist,
-                                                                                        w_desc, list_name, name)
-                all_matches_list.extend(matches_similar)
-                if any(score == 1.0 for score in list(dict_highest_counter.values())):
-                    return dict_highest_counter, dict_highest_detail, all_matches_list
+                list_details.extend(self.get_most_similar_names(
+                    dict_highest_counter,
+                    matches, w_dist,
+                    w_desc, list_name))
 
-        return dict_highest_counter, dict_highest_detail, all_matches_list
+                if self.is_exact_match(list_details):
+                    return list_details
+
+        return list_details
 
     def search_exact_match(self, preprocess_name, list_name):
         result = ProcedureResult()
@@ -285,7 +264,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         all_words_consent_list = self.word_condition_service.get_words_requiring_consent()
         words_consent_dict = {}
-        word_consent_original_list=[]
+        word_consent_original_list = []
         name_singular_plural_list = list(set(get_plural_singular_name(name)))
 
         for words_consent in all_words_consent_list:
@@ -372,6 +351,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     misplaced_designation_end: Misplaced end designations
     @return ProcedureResult
     '''
+
     def check_end_designation_more_than_once(self, list_name, designation_end_list, misplaced_designation_end):
         result = ProcedureResult()
         result.is_valid = True
@@ -447,10 +427,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
-    def get_most_similar_names(self, dict_highest_counter, dict_highest_detail, matches, list_dist, list_desc,
-                               list_name, name):
-        selected_matches = []
+    def get_most_similar_names(self, dict_highest_counter, matches, list_dist, list_desc,
+                               list_name):
+        list_details = []
         if matches:
+            selected_matches, dict_details = [], {}
             syn_svc = self.synonym_service
             service = ProtectedNameAnalysisService()
 
@@ -466,23 +447,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 np_svc.set_name(match.name)
                 # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
-                counter = 0
-                for idx, word in enumerate(match_list):
-                    if length_original > idx and word.lower() == list_name[idx]:
-                        counter += 1
-                    elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
-                        counter += 0.95
-                    elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
-                        counter += 0.9
-                    elif word.lower() in list_name:
-                        counter += 0.8
-                    elif porter.stem(word.lower()) in list_name_stem:
-                        counter += 0.7
-                    elif porter.stem(word.lower()) in all_subs_dict.values():
-                        counter += 0.6
-                    else:
-                        counter -= 0.2
-
+                counter = self.get_score(match_list, length_original, list_name,list_name_stem, all_subs_dict)
                 similarity = round(counter / length_original, 2)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
@@ -491,52 +456,106 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                         break
 
             if dict_matches_counter:
-                dict_matches_words.update(
-                    self.get_details_most_similar(list(dict_matches_counter), dist_subs_dict,
-                                                  desc_subs_dict))
-                # Get highest score (values) and shortest names (key)
+                # Get  N highest score (values) and shortest names (key)
                 dict_highest_counter.update({k: v for k, v in
                                              sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
                                              0:MAX_MATCHES_LIMIT]})
+                list_details = self.get_details_higher_score(dict_highest_counter, selected_matches, all_subs_dict)
 
-                for k in dict_highest_counter.keys():
-                    dict_highest_detail.update({k: dict_matches_words.get(k)})
+        return list_details
 
-        return dict_highest_counter, dict_highest_detail, selected_matches
+    def prepare_response(self, most_similar_names):
+        conflict_name = {}
 
-    def get_details_most_similar(self, list_response, dist_substitution_dict, desc_substitution_dict):
-        dict_words_matches = {}
-        dict_detail_matches = {}
-        for name in list_response:
-            name_list = name.split()
-            for word in name_list:
-                dist_values = dist_substitution_dict.get(word.lower())
-                desc_values = desc_substitution_dict.get(word.lower())
-                if dist_values is not None:
-                    dict_words_matches.update({word.lower(): dist_values})
-                if desc_values is not None:
-                    dict_words_matches.update({word.lower(): desc_values})
-            dict_detail_matches.update({name: dict_words_matches})
-
-        return dict_detail_matches
-
-    def prepare_response(self, all_matches_list, most_similar_names, dict_highest_detail):
-        conflict_name, corp_num, consumption_date = {}, [], []
-        matches_list, response = [], []
-
-        matches_list = [match for match in all_matches_list if match not in matches_list]
-
-        for similar_name in most_similar_names:
-            conflict_name.update({similar_name: dict_highest_detail.get(similar_name, {})})
-            for record in matches_list:
-                if record.name == similar_name:
-                    corp_num.append(record.corpNum)
-                    consumption_date.append(record.consumptionDate)
+        for record in most_similar_names:
+            conflict_name = {record['name']: record['tokens']}
+            id_num = record['corp_num'] if record['corp_num'] else record['nr_num']
+            start_date = record['consumption_date'] if record['corp_num'] else record['submitted_date']
+            source = 'corp' if record['corp_num'] else 'nr'
 
         if conflict_name:
             response = {'names': conflict_name,
-                        'corp_num': corp_num,
-                        'consumption_date': consumption_date,
+                        'id': id_num,
+                        'start_date': start_date,
+                        'source': source
                         }
 
         return response
+
+    def is_exact_match(self, list_conflicts):
+        for record in list_conflicts:
+            if record['score'] == 1.0:
+                return True
+        return False
+
+    def get_details_higher_score(self, dict_highest_counter, selected_matches, all_subs_dict):
+        list_details = []
+        for key, value in dict_highest_counter.items():
+            for record in selected_matches:
+                if record.name == key:
+                    dict_details = {'score': value,
+                                    'name': key,
+                                    'tokens': all_subs_dict,
+                                    'consumption_date': record.consumptionDate,
+                                    'submitted_date': record.requests_submitted_date,
+                                    'corp_num': record.corpNum,
+                                    'nr_num': record.requests_nr_num}
+                    list_details.append(dict_details)
+
+        return list_details
+
+    def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
+        counter = 0
+        for idx, word in enumerate(match_list):
+            if length_original > idx and word.lower() == list_name[idx]:
+                counter += 1
+            elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
+                counter += 0.95
+            elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
+                counter += 0.9
+            elif word.lower() in list_name:
+                counter += 0.8
+            elif porter.stem(word.lower()) in list_name_stem:
+                counter += 0.7
+            elif porter.stem(word.lower()) in get_flat_list(all_subs_dict.values()):
+                counter += 0.6
+            else:
+                counter -= 0.2
+
+        return counter
+
+    def get_subsitutions_distinctive(self, w_dist):
+        syn_svc = self.synonym_service
+        dist_substitution_list = []
+
+        all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+            words=w_dist,
+            words_are_distinctive=True
+        ).data
+
+        dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
+        dist_substitution_list = list(dist_substitution_dict.values())
+
+        for i, dist in enumerate(w_dist):
+            if dist not in dist_substitution_list[i]:
+                dist_substitution_list[i].append(dist)
+
+        return dist_substitution_list
+
+    def get_substitutions_descriptive(self, w_desc):
+        syn_svc = self.synonym_service
+        desc_synonym_list = []
+
+        all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+            words=w_desc,
+            words_are_distinctive=False
+        ).data
+
+        desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
+        desc_synonym_list = list(desc_synonym_dict.values())
+
+        for i, desc in enumerate(w_desc):
+            if desc not in desc_synonym_list[i]:
+                desc_synonym_list[i].append(desc)
+
+        return desc_synonym_list
