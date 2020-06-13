@@ -208,3 +208,16 @@ def change_entity_type_setup():
         line2=Template(""),
         label=Template("Change $entity_type to $correct_designations")
     )
+
+
+class TwoDesignationsSetup(Setup):
+    pass
+
+
+def two_designations_order_setup():
+    return TwoDesignationsSetup(
+        type="two_designations",
+        header=Template("Keep just one designation"),
+        line1=Template("You have selected more than one designation."),
+        line2=Template("")
+    )
