@@ -60,7 +60,13 @@ def test_designation_mismatch_one_word_with_hyphen_request_response(client, jwt,
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
-        }
+        },
+        {
+            'name': 'ARMSTRONG PLUMBING L.L.C. INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
     ]
 
     for entry in test_params:

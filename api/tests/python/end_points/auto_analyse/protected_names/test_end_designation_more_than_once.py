@@ -83,14 +83,7 @@ def test_end_designation_more_than_once_request_response(client, jwt, app):
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
-        },
-        {
-            'name': 'ARMSTRONG PLUMBING L.L.C. INC.',
-            'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
-        },
-
+        }
     ]
 
     for entry in test_params:
