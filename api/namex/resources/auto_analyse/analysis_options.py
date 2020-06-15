@@ -218,6 +218,6 @@ def two_designations_order_setup():
     return TwoDesignationsSetup(
         type="two_designations",
         header=Template("Keep just one designation"),
-        line1=Template("You have selected more than one designation."),
+        line1=Template("Please select one of the designations listed here:"),
         line2=Template("")
     )
