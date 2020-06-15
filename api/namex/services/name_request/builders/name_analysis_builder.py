@@ -394,10 +394,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_end_designation_more_than_once(self, list_name, designation_end_list, misplaced_designation_end):
+    def check_end_designation_more_than_once(self, list_name, all_designation_end_list, correct_designations_user, misplaced_designation_end):
         result = ProcedureResult()
         result.is_valid = True
 
+        designation_end_list = [designation for designation in all_designation_end_list if designation in correct_designations_user]
         correct_end_designations = designation_end_list + list(
             set(misplaced_designation_end) - set(designation_end_list))
 

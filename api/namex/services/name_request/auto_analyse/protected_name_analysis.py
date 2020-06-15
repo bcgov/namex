@@ -89,6 +89,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
             check_designation_more_than_one = builder.check_end_designation_more_than_once(
                 self.get_original_name_tokenized(),
                 self.get_designation_end_list(),
+                self.get_all_designations_user(),
                 self.get_misplaced_designation_end()
             )
 
