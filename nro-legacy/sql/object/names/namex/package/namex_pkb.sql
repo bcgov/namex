@@ -61,16 +61,17 @@ create or replace PACKAGE BODY       namex AS
                     row_state_type_cd := NULL;
             END;
 
-			IF ((row_state_type_cd IN ('C', 'D')
-			    AND
-			    row_transaction_type_cd IN
-			         ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL', 'MODIF', 'CORRT', 'UPDPR')
-			   ) OR (
+	     IF 
+             (row_state_type_cd IN ('C', 'D')  AND   row_transaction_type_cd IN ('ADMIN', 'NRREQ', 'RESUBMIT', 'CANCL', 'MODIF', 'CORRT', 'UPDPR'))
+
+	     OR
                --added for historical
-			    row_state_type_cd IN ('COMPLETED') AND row_transaction_type_cd IN ('CONSUME','HISTORICAL')
-			    ))
-			
-			THEN
+	     ( row_state_type_cd IN ('HISTORICAL') AND row_transaction_type_cd IN ('HISTORICAL'))
+
+              OR
+              ( row_state_type_cd IN ('COMPLETED') AND row_transaction_type_cd IN ('CONSUME'))
+              
+	     THEN
 				SELECT nr_num INTO row_nr_num FROM transaction NATURAL JOIN request WHERE transaction_id =
 						row_transaction_id;
 
