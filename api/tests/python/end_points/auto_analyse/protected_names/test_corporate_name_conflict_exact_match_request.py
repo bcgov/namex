@@ -19,15 +19,16 @@ from ..common import token_header, claims
                              ('J & J HARDWOOD FLOORS AND FLOWERS LTD.', "J.J.'S HARDWOOD FLOORS AND DECORATING LTD."),
                              ('TRADEPRO PHOENIX ENTERPRISES LTD.', 'TRADEPRO/PHOENIX ENTERPRISES INC.'),
                              ("TEANOOK JOHNSON HOLDINGS INC.", "TEANOOK / JOHNSON HOLDINGS INC."),
-                             ('BIG MIKE FUN FARM INC.',"BIG MIKE'S FUN FARM INC."),
-                             ('PJI PIZZA POCO LTD.','PJI PIZZA(POCO) LTD.'),
-                             ("BEEDIE CH PROPERTY INC.",'BEEDIE CH PROPERTY (LOT 3-22) INC.'),
-                             ('DISCOVERY RESIDENTIAL HOLDINGS INC.','DISCOVERY RESIDENTIAL HOLDINGS (LOT 4) INC.'),
-                             ('RR SOLUTIONS LTD.','R R SOLUTIONS LTD.'),
-                             #("ISLAND H SERVICES INC.",'ISLAND H20 SERVICES INC.'),
-                             ('MR RENT A CAR LTD.','MR RENT-A-CAR LTD.'),
+                             ('BIG MIKE FUN FARM INC.', "BIG MIKE'S FUN FARM INC."),
+                             ('PJI PIZZA POCO LTD.', 'PJI PIZZA(POCO) LTD.'),
+                             ("BEEDIE CH PROPERTY INC.", 'BEEDIE CH PROPERTY (LOT 3-22) INC.'),
+                             ('DISCOVERY RESIDENTIAL HOLDINGS INC.', 'DISCOVERY RESIDENTIAL HOLDINGS (LOT 4) INC.'),
+                             ('RR SOLUTIONS LTD.', 'R R SOLUTIONS LTD.'),
+                             # ("ISLAND H SERVICES INC.",'ISLAND H20 SERVICES INC.'),
+                             ('MR RENT A CAR LTD.', 'MR RENT-A-CAR LTD.'),
                              ("ARMSTRONG PLUMBING & HEATING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             ("CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD.")
+                             ("CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
+                             ("MARKET CAFE LTD.", "MARKET CAFE LTD.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -108,6 +109,10 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, 
                                  {'word': 'A', 'classification': 'DESC'},
                                  {'word': 'CAR', 'classification': 'DIST'},
                                  {'word': 'CAR', 'classification': 'DESC'},
+                                 {'word': 'MARKET', 'classification': 'DIST'},
+                                 {'word': 'MARKET', 'classification': 'DESC'},
+                                 {'word': 'CAFE', 'classification': 'DIST'},
+                                 {'word': 'CAFE', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
@@ -118,11 +123,11 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, 
                         'JJ KK TRANSPORT SERVICES INC.', 'J&J TRANSPORTATION SERVICES', 'JJ TRANSPORT',
                         'J & J TRANSPORT',
                         "J.J.'S HARDWOOD FLOORS AND DECORATING LTD.", 'THUNDERROAD.ORG INVESTMENTS INC.',
-                        'TRADEPRO/PHOENIX ENTERPRISES INC.','TEANOOK / JOHNSON HOLDINGS INC.',
+                        'TRADEPRO/PHOENIX ENTERPRISES INC.', 'TEANOOK / JOHNSON HOLDINGS INC.',
                         'COAST WIDE HOMECARE/PAINTING NEEDS LTD.', "BIG MIKE'S FUN FARM INC.",
                         'PJI PIZZA(POCO) LTD.', 'BEEDIE CH PROPERTY (LOT 3-22) INC.',
-                        'DISCOVERY RESIDENTIAL HOLDINGS (LOT 4) INC.', 'R R SOLUTIONS LTD.','ISLAND H20 SERVICES INC.',
-                        'MR RENT-A-CAR LTD.' ]
+                        'DISCOVERY RESIDENTIAL HOLDINGS (LOT 4) INC.', 'R R SOLUTIONS LTD.', 'ISLAND H20 SERVICES INC.',
+                        'MR RENT-A-CAR LTD.', 'MARKET CAFE LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
