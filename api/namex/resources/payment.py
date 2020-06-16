@@ -157,6 +157,7 @@ class Payments(Resource):
         )
 
         payment = create_payment(req)
+
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
         return response
@@ -177,6 +178,7 @@ class Payment(Resource):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
         payment = get_payment(payment_identifier)
+
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
         return response
@@ -205,6 +207,7 @@ class Payment(Resource):
         )
 
         payment = update_payment(payment_identifier, req)
+
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
         return response
@@ -241,6 +244,7 @@ class PaymentFees(Resource):
         )
 
         fees = calculate_fees(req)
+
         data = jsonify(fees.to_dict())
         response = make_response(data, 200)
         return response
@@ -263,6 +267,7 @@ class PaymentInvoices(Resource):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
         invoices = get_invoices(payment_identifier)
+
         data = jsonify(invoices.to_dict())
         response = make_response(data, 200)
         return response
@@ -287,6 +292,7 @@ class PaymentInvoice(Resource):
         invoice_id = unquote_plus(request.args.get('invoice_id').strip()) if request.args.get('invoice_id') else None
 
         invoice = get_invoice(payment_identifier, invoice_id)
+
         data = jsonify(invoice.to_dict())
         response = make_response(data, 200)
         return response
@@ -394,7 +400,11 @@ class PaymentTransaction(Resource):
             redirect_uri=redirect_uri
         )
 
-        return create_transaction(req)
+        transaction = create_transaction(req)
+
+        data = jsonify(transaction.to_dict())
+        response = make_response(data, 200)
+        return response
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -408,8 +418,13 @@ class PaymentTransaction(Resource):
     })
     def put(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-        receipt_number = unquote_plus(request.args.get('receipt_number').strip()) if request.args.get('receipt_number') else None
-        transaction_identifier = unquote_plus(request.args.get('transaction_identifier').strip()) if request.args.get('transaction_identifier') else None
+
+        json_input = json.loads(request.get_json())
+        if not json_input:
+            return jsonify(message='No JSON data provided'), 400
+
+        receipt_number = json_input.get('receipt_number', None)
+        transaction_identifier = json_input.get('transaction_identifier', None)
 
         req = UpdateTransactionRequest(
             payment_identifier=payment_identifier,
@@ -417,7 +432,11 @@ class PaymentTransaction(Resource):
             transaction_identifier=transaction_identifier
         )
 
-        return update_transaction(req)
+        transaction = update_transaction(req)
+
+        data = jsonify(transaction.to_dict())
+        response = make_response(data, 200)
+        return response
 
 
 @cors_preflight('DELETE')

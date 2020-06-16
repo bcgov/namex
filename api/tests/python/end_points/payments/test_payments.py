@@ -50,7 +50,7 @@ def test_get_payment(client, jwt, app):
     # token = jwt.create_jwt(claims, token_header)
     # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    payment_id = 'test'
+    payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id
     test_params = [{}]
 
@@ -92,7 +92,7 @@ def test_update_payment(client, jwt, app):
     # token = jwt.create_jwt(claims, token_header)
     # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    payment_id = 'test'
+    payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id
 
     path = request_uri
@@ -112,7 +112,7 @@ def test_get_invoice(client, jwt, app):
     # token = jwt.create_jwt(claims, token_header)
     # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    payment_id = 'test'
+    payment_id = 'abcd153'
     invoice_id = 'test'
     request_uri = API_BASE_URI + payment_id + '/invoice'
     test_params = [{'invoice_id': invoice_id}]
@@ -136,7 +136,7 @@ def test_get_invoices(client, jwt, app):
     # token = jwt.create_jwt(claims, token_header)
     # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    payment_id = 'test'
+    payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/invoices'
     test_params = [{}]
 
@@ -159,11 +159,11 @@ def test_get_transaction(client, jwt, app):
     # token = jwt.create_jwt(claims, token_header)
     # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    payment_id = 'test'
+    payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/transaction'
     test_params = [{
+        'transaction_identifier': 'test',
         'receipt_number': 'test',
-        'transaction_identifier': 'test'
     }]
 
     query = ''
@@ -179,15 +179,13 @@ def test_get_transaction(client, jwt, app):
 
     payload = json.loads(response.data)
 
-    assert isinstance(payload.get('items'), list) is True
-
 
 def test_get_transactions(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     # token = jwt.create_jwt(claims, token_header)
     # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    payment_id = 'test'
+    payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/transactions'
     test_params = [{}]
 
@@ -207,12 +205,66 @@ def test_get_transactions(client, jwt, app):
     assert isinstance(payload.get('items'), list) is True
 
 
+def test_create_transaction(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    # token = jwt.create_jwt(claims, token_header)
+    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    payment_id = 'abcd153'
+    request_uri = API_BASE_URI + payment_id + '/transaction'
+
+    test_params = [{
+        'redirect_uri': 'http://localhost'
+    }]
+
+    query = ''
+
+    for entry in test_params:
+        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+
+    path = request_uri + '?' + query if len(query) > 0 else request_uri
+    print('\n' + 'request: ' + path + '\n')
+    response = client.post(path)
+    payload = json.loads(response.data)
+
+    assert isinstance(payload.get('items'), list) is True
+
+
+def test_update_transaction(client, jwt, app):
+    # create JWT & setup header with a Bearer Token using the JWT
+    # token = jwt.create_jwt(claims, token_header)
+    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    payment_id = 'abcd153'
+    receipt_number = 'abcd'
+    transaction_id = 'test'
+    request_uri = API_BASE_URI + payment_id + '/transactions'
+
+    test_params = [{}]
+
+    query = ''
+
+    for entry in test_params:
+        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+
+    path = request_uri + '?' + query if len(query) > 0 else request_uri
+    print('\n' + 'request: ' + path + '\n')
+    body = json.dumps({
+        "receipt_number": receipt_number,
+        "transaction_identifier": transaction_id
+    })
+    response = client.put(path, json=body)
+    payload = json.loads(response.data)
+
+    assert isinstance(payload.get('items'), list) is True
+
+
 def test_get_receipt(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     # token = jwt.create_jwt(claims, token_header)
     # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
-    payment_id = 'test'
+    payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/receipt'
     test_params = [{}]
 
@@ -233,7 +285,6 @@ def test_get_receipt(client, jwt, app):
     assert isinstance(payload.get('filing_type'), str) is True
     assert isinstance(payload.get('filing_type_code'), str) is True
     assert isinstance(payload.get('processing_fees'), int) is True
-    assert isinstance(payload.get('processing_fees'), int) is True
     assert isinstance(payload.get('tax'), list) is True
 
 
@@ -253,6 +304,5 @@ def test_calculate_fees(client, jwt, app):
     assert isinstance(payload.get('filing_fees'), int) is True
     assert isinstance(payload.get('filing_type'), str) is True
     assert isinstance(payload.get('filing_type_code'), str) is True
-    assert isinstance(payload.get('processing_fees'), int) is True
     assert isinstance(payload.get('processing_fees'), int) is True
     assert isinstance(payload.get('tax'), list) is True
