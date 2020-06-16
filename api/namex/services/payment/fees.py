@@ -6,6 +6,8 @@ from openapi_client.rest import ApiException
 
 from .request_objects.abstract import Serializable
 
+PAYMENTS_API_HOST = 'http://localhost:4010'
+
 
 class CalculateFeesRequest(Serializable):
     def __init__(self, **kwargs):
@@ -19,6 +21,8 @@ class CalculateFeesRequest(Serializable):
 def calculate_fees(req):
     # Create an instance of the API class
     api_instance = openapi_client.FeesApi()
+    # Set API host URI
+    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
 
     try:
         # Calculate Fees
@@ -33,5 +37,5 @@ def calculate_fees(req):
         pprint(api_response)
         return api_response
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling FeesApi->calculate_fees: %s\n" % e)

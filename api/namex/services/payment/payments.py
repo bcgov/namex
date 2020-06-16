@@ -2,9 +2,12 @@ from __future__ import print_function
 from pprint import pprint
 
 import openapi_client
+from openapi_client.models import Payment
 from openapi_client.rest import ApiException
 
 from .request_objects.abstract import Serializable
+
+PAYMENTS_API_HOST = 'http://localhost:4010'
 
 
 class PaymentInfo(Serializable):
@@ -44,8 +47,38 @@ class ContactInfo(Serializable):
 
 
 class PaymentRequest(Serializable):
+    """
+    Sample request:
+    {
+        "payment_info": {
+            "method_of_payment": "CC"
+        },
+        "business_info": {
+            "business_identifier": "CP1234567",
+            "corp_type": "CP",
+            "business_name": "ABC Corp",
+            "contact_info": {
+                "city": "Victoria",
+                "postal_code": "V8P2P2",
+                "province": "BC",
+                "address_line1": "100 Douglas Street",
+                "country": "CA"
+            }
+        },
+        "filing_info": {
+            "filing_types": [
+                {
+                    "filing_type_code": "OTADD",
+                    "filing_description": "TEST"
+                },
+                {
+                    "filing_type_code": "OTANN"
+                }
+            ]
+        }
+    }
+    """
     def __init__(self, **kwargs):
-        self.payment_identifier = kwargs.get('payment_identifier', None)
         self.payment_info = kwargs.get('payment_info')
         self.filing_info = kwargs.get('filing_info')
         self.business_info = kwargs.get('business_info')
@@ -56,67 +89,52 @@ class GetPaymentRequest(Serializable):
         self.payment_identifier = kwargs.get('payment_identifier')
 
 
-def get_payment(req):
+def get_payment(payment_identifier):
     # Create an instance of the API class
     api_instance = openapi_client.PaymentsApi()
+    # Set API host URI
+    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
 
     try:
         # Get Payment
-        api_response = api_instance.get_payment(
-            req.payment_identifier
-        )
+        api_response = api_instance.get_payment(payment_identifier)
 
         pprint(api_response)
         return api_response
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling PaymentsApi->get_payment: %s\n" % e)
 
 
-def create_payment(req):
+def create_payment(model):
     # Create an instance of the API class
     api_instance = openapi_client.PaymentsApi()
-
-    payment_request = {"paymentInfo": {"methodOfPayment": "CC"},
-                       "businessInfo": {"businessIdentifier": "CP1234567", "corpType": "CP", "businessName": "ABC Corp",
-                                        "contactInfo": {"city": "Victoria", "postal_code": "V8P2P2", "province": "BC",
-                                                        "addressLine1": "100 Douglas Street", "country": "CA"}},
-                       "filingInfo": {"filingTypes": [{"filingTypeCode": "OTADD", "filingDescription": "TEST"},
-                                                      {"filingTypeCode": "OTANN"}]}}  # PaymentRequest
+    # Set API host URI
+    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
 
     try:
         # Create payment records
-        api_response = api_instance.create_payment(
-            req.payment_request
-        )
+        api_response = api_instance.create_payment(model)
 
         pprint(api_response)
         return api_response
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling PaymentsApi->create_payment: %s\n" % e)
 
 
-def update_payment(req):
+def update_payment(payment_identifier, model):
     # Create an instance of the API class
     api_instance = openapi_client.PaymentsApi()
-
-    payment_request = {"paymentInfo": {"methodOfPayment": "CC"},
-                       "businessInfo": {"businessIdentifier": "CP1234567", "corpType": "CP", "businessName": "ABC Corp",
-                                        "contactInfo": {"city": "Victoria", "postalCode": "V8P2P2", "province": "BC",
-                                                        "addressLine1": "100 Douglas Street", "country": "CA"}},
-                       "filingInfo": {"filingTypes": [{"filingTypeCode": "OTADD", "filingDescription": "TEST"},
-                                                      {"filingTypeCode": "OTANN"}]}}  # PaymentRequest
+    # Set API host URI
+    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
 
     try:
         # Update payment records
-        api_response = api_instance.update_payment(
-            req.payment_identifier,
-            req.payment_request
-        )
+        api_response = api_instance.update_payment(payment_identifier, model)
 
         pprint(api_response)
         return api_response
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling PaymentsApi->update_payment: %s\n" % e)

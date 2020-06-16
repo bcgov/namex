@@ -20,5 +20,5 @@ def delete_api_v1_payment_requests_payment_identifier(req, callback):
             req.payment_identifier
         )
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling DefaultApi->delete_api_v1_payment_requests_payment_identifier: %s\n" % e)

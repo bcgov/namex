@@ -1,5 +1,5 @@
 from flask import request, make_response, jsonify
-from flask_restplus import Namespace, Resource, cors, fields, marshal_with
+from flask_restplus import Namespace, Resource, cors, fields, marshal_with, marshal
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
@@ -7,25 +7,21 @@ from namex.utils.util import cors_preflight
 
 from urllib.parse import unquote_plus
 
-from namex.services.payment.fees import \
-    calculate_fees, \
-    CalculateFeesRequest
+import json
 
-from namex.services.payment.invoices import \
-    get_invoices, get_invoice, \
-    GetInvoicesRequest, GetInvoiceRequest
+from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
 
-from namex.services.payment.payments import \
-    get_payment, create_payment, update_payment, \
-    GetPaymentRequest, PaymentRequest
+from namex.services.payment.invoices import get_invoices, get_invoice
 
-from namex.services.payment.receipts import \
-    get_receipt, \
-    GetReceiptRequest
+from namex.services.payment.payments import get_payment, create_payment, update_payment
+
+from namex.services.payment.receipts import get_receipt
 
 from namex.services.payment.transactions import \
     get_transactions, get_transaction, create_transaction, update_transaction, \
     GetTransactionsRequest, GetTransactionRequest, CreateTransactionRequest, UpdateTransactionRequest
+
+from openapi_client.models import PaymentRequest
 
 setup_logging()  # It's important to do this first
 
@@ -105,6 +101,26 @@ calculate_fees_request_schema = payment_api.model('CalculateFeesRequest', {
 })
 
 
+payment_invoice_schema = payment_api.model('PaymentInvoice', {
+    'id': fields.String,
+    'reference_number': fields.String,
+    'status_code': fields.String,
+    'created_by': fields.String,
+    'created_on': fields.String
+})
+
+payment_response_schema = payment_api.model('Payment', {
+    'id': fields.String,
+    'invoices': fields.List(fields.Nested(payment_invoice_schema)),
+    'payment_method': fields.String,
+    'status_code': fields.String,
+    'created_by': fields.String,
+    'created_on': fields.String,
+    'updated_by': fields.String,
+    'updated_on': fields.String
+})
+
+
 @payment_api.errorhandler(AuthError)
 def handle_auth_error(ex):
     response = jsonify(ex.error)
@@ -120,23 +136,13 @@ class Payments(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
-    @payment_api.response(200, 'Success', '')
-    # @marshal_with()
-    def get():
-        req = GetPaymentRequest()
-
-        return get_payment(req)
-
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
     @payment_api.doc(params={
     })
     def post():
-        json_input = request.get_json()
+        json_input = json.loads(request.get_json())
         if not json_input:
             return jsonify(message='No JSON data provided'), 400
 
@@ -150,11 +156,14 @@ class Payments(Resource):
             business_info=business_info
         )
 
-        return create_payment(req)
+        payment = create_payment(req)
+        data = jsonify(payment.to_dict())
+        response = make_response(data, 200)
+        return response
 
 
 @cors_preflight('GET, PUT')
-@payment_api.route('/<payment_identifier>', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
@@ -163,15 +172,14 @@ class Payment(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     @payment_api.response(200, 'Success', '')
-    # @marshal_with()
+    # @marshal_with(payment_response_schema)
     def get(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        req = GetPaymentRequest(
-            payment_identifier=payment_identifier
-        )
-
-        return get_payment(req)
+        payment = get_payment(payment_identifier)
+        data = jsonify(payment.to_dict())
+        response = make_response(data, 200)
+        return response
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -182,7 +190,7 @@ class Payment(Resource):
     def put(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        json_input = request.get_json()
+        json_input = json.loads(request.get_json())
         if not json_input:
             return jsonify(message='No JSON data provided'), 400
 
@@ -191,13 +199,15 @@ class Payment(Resource):
         business_info = json_input.get('business_info')
 
         req = PaymentRequest(
-            payment_identifier=payment_identifier,
             payment_info=payment_info,
             filing_info=filing_info,
             business_info=business_info
         )
 
-        return update_payment(req)
+        payment = update_payment(payment_identifier, req)
+        data = jsonify(payment.to_dict())
+        response = make_response(data, 200)
+        return response
 
 
 @cors_preflight('POST')
@@ -212,7 +222,7 @@ class PaymentFees(Resource):
     @payment_api.doc(params={
     })
     def post():
-        json_input = request.get_json()
+        json_input = json.loads(request.get_json())
         if not json_input:
             return jsonify(message='No JSON data provided'), 400
 
@@ -230,11 +240,14 @@ class PaymentFees(Resource):
             priority=priority
         )
 
-        return calculate_fees(req)
+        fees = calculate_fees(req)
+        data = jsonify(fees.to_dict())
+        response = make_response(data, 200)
+        return response
 
 
 @cors_preflight('GET')
-@payment_api.route('/<payment_identifier>/invoices', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>/invoices', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
@@ -249,15 +262,14 @@ class PaymentInvoices(Resource):
     def get(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        req = GetInvoicesRequest(
-            payment_identifier=payment_identifier
-        )
-
-        return get_invoices(req)
+        invoices = get_invoices(payment_identifier)
+        data = jsonify(invoices.to_dict())
+        response = make_response(data, 200)
+        return response
 
 
 @cors_preflight('GET')
-@payment_api.route('/<payment_identifier>/invoice', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>/invoice', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
@@ -274,16 +286,14 @@ class PaymentInvoice(Resource):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
         invoice_id = unquote_plus(request.args.get('invoice_id').strip()) if request.args.get('invoice_id') else None
 
-        req = GetInvoiceRequest(
-            payment_identifier=payment_identifier,
-            invoice_id=invoice_id
-        )
-
-        return get_invoice(req)
+        invoice = get_invoice(payment_identifier, invoice_id)
+        data = jsonify(invoice.to_dict())
+        response = make_response(data, 200)
+        return response
 
 
 @cors_preflight('GET')
-@payment_api.route('/<payment_identifier>/receipt', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>/receipt', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
@@ -296,15 +306,18 @@ class PaymentReceipt(Resource):
     def get(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        req = GetReceiptRequest(
-            payment_identifier=payment_identifier
-        )
+        receipt = get_receipt(payment_identifier)
 
-        return get_receipt(req)
+        if not receipt:
+            return
+
+        data = jsonify(receipt.to_dict())
+        response = make_response(data, 200)
+        return response
 
 
 @cors_preflight('GET')
-@payment_api.route('/<payment_identifier>/transactions', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>/transactions', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
@@ -321,11 +334,18 @@ class PaymentTransactions(Resource):
             payment_identifier=payment_identifier
         )
 
-        return get_transactions(req)
+        transactions = get_transactions(req)
+
+        if not transactions:
+            return
+
+        data = jsonify(transactions.to_dict())
+        response = make_response(data, 200)
+        return response
 
 
 @cors_preflight('GET, POST, PUT')
-@payment_api.route('/<payment_identifier>/transaction', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>/transaction', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'OPTIONS'])
 class PaymentTransaction(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -347,7 +367,14 @@ class PaymentTransaction(Resource):
             transaction_identifier=transaction_identifier
         )
 
-        return get_transaction(req)
+        transaction = get_transaction(req)
+
+        if not transaction:
+            return
+
+        data = jsonify(transaction.to_dict())
+        response = make_response(data, 200)
+        return response
 
     @staticmethod
     @cors.crossdomain(origin='*')

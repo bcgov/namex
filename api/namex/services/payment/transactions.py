@@ -6,6 +6,8 @@ from openapi_client.rest import ApiException
 
 from .request_objects.abstract import Serializable
 
+PAYMENTS_API_HOST = 'http://localhost:4010'
+
 
 class CreateTransactionRequest(Serializable):
     def __init__(self, **kwargs):
@@ -35,6 +37,8 @@ class UpdateTransactionRequest(Serializable):
 def create_transaction(req):
     # Create an instance of the API class
     api_instance = openapi_client.TransactionsApi()
+    # Set API host URI
+    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
 
     try:
         # Create a transaction
@@ -46,13 +50,15 @@ def create_transaction(req):
         pprint(api_response)
         return api_response
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling TransactionsApi->create_transaction: %s\n" % e)
 
 
 def get_transaction(req):
     # Create an instance of the API class
     api_instance = openapi_client.TransactionsApi()
+    # Set API host URI
+    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
 
     try:
         # Get Transaction
@@ -65,13 +71,15 @@ def get_transaction(req):
         pprint(api_response)
         return api_response
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling TransactionsApi->get_transaction: %s\n" % e)
 
 
 def get_transactions(req):
     # Create an instance of the API class
     api_instance = openapi_client.TransactionsApi()
+    # Set API host URI
+    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
 
     try:
         # Get Transactions
@@ -82,13 +90,15 @@ def get_transactions(req):
         pprint(api_response)
         return api_response
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling TransactionsApi->get_transactions: %s\n" % e)
 
 
 def update_transaction(req):
     # Create an instance of the API class
     api_instance = openapi_client.TransactionsApi()
+    # Set API host URI
+    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
 
     try:
         # Update a transaction
@@ -101,5 +111,5 @@ def update_transaction(req):
         pprint(api_response)
         return api_response
 
-    except ApiException as e:
+    except Exception as e:
         print("Exception when calling TransactionsApi->update_transaction: %s\n" % e)
