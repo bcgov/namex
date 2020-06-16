@@ -102,7 +102,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         first_word = next(iter(name_dict))
         name_dict.pop(first_word)
         valid = False
-        self.director.skip_search_conflicts = True
 
         if first_classification == DataFrameFields.DISTINCTIVE.value:
             for i, value in enumerate(name_dict.values()):
@@ -110,8 +109,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     valid = True
                     break
             if not valid:
-                check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
-                                                                    list_name)
+                check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name, list_name)
                 if check_conflicts.is_valid:
                     result = ProcedureResult()
                     result.is_valid = False
@@ -137,7 +135,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             else:
                 return check_conflicts
 
-        self.director.skip_search_conflicts = False
         return result
 
     '''
