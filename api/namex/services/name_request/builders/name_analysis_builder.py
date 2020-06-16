@@ -3,7 +3,8 @@ from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list
+from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list, list_distinctive_descriptive, \
+    get_conflicts_same_classification
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -93,7 +94,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult[] An array of procedure results
     '''
 
-    def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name, list_original_name):
+    def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name, processed_name, list_original_name):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -108,23 +109,31 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     valid = True
                     break
             if not valid:
+                check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name, list_name)
+                if check_conflicts.is_valid:
+                    result = ProcedureResult()
+                    result.is_valid = False
+                    result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
+                    result.values = {
+                        'list_original': list_original_name or [],
+                        'list_name': list_name or [],
+                        'list_dist': list_dist or []
+                    }
+                else:
+                    return check_conflicts
+        else:
+            check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name, list_name)
+            if check_conflicts.is_valid:
                 result = ProcedureResult()
                 result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
+                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
                 result.values = {
                     'list_original': list_original_name or [],
                     'list_name': list_name or [],
                     'list_dist': list_dist or []
                 }
-        else:
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-            result.values = {
-                'list_original': list_original_name or [],
-                'list_name': list_name or [],
-                'list_dist': list_dist or []
-            }
+            else:
+                return check_conflicts
 
         return result
 
@@ -221,9 +230,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
 
-        list_conflicts.extend(self.get_conflicts(dict_highest_counter, list_dist_words, list_desc_words, list_name))
-        list_conflicts = [i for n, i in enumerate(list_conflicts) if
+        for w_dist, w_desc in zip(list_dist_words, list_desc_words):
+            list_conflicts.extend(self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name))
+            list_conflicts = [i for n, i in enumerate(list_conflicts) if
                               i not in list_conflicts[n + 1:]]  # Remove duplicates
+
+            if self.is_exact_match(list_conflicts):
+                break
 
         most_similar_names.extend(
             sorted(list_conflicts, key=lambda item: (-item['score'], len(item['name'])))[
