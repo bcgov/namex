@@ -214,7 +214,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_remove_designations(cls, text, internet_domains, designation_all_regex):
-        text = re.sub(r'\b({0})\b|(?<=\d),(?=\d)|(?<!\w)({1})(?!\w)(?=.*$)'.format(
+        text = re.sub(r'\b({0})\b|(?<=\d),(?=\d)|(?<!\w)({1})(?![A-Za-z0-9_.])(?=.*$)'.format(
             internet_domains,
             designation_all_regex),
             '',

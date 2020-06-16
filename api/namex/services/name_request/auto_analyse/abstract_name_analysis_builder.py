@@ -140,7 +140,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
     '''
 
     @abc.abstractmethod
-    def check_end_designation_more_than_once(self, list_name, designation_end_list, misplaced_designation_end):
+    def check_end_designation_more_than_once(self, list_name, all_designation_end_list, correct_designations_user, misplaced_designation_end):
         return ProcedureResult(is_valid=True)
 
     '''
