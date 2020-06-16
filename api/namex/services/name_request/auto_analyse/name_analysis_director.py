@@ -137,6 +137,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_as_submitted_tokenized
 
     def __init__(self):
+        self.skip_search_conflicts = False
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
@@ -215,8 +216,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self._list_dist_words, self._list_desc_words = check_synonyms(syn_svc, self._list_dist_words,
                                                                       self._list_desc_words)
 
-        self._dict_name_words = get_classification_summary(self.name_tokens, self._list_dist_words, self._list_desc_words)
-
+        self._dict_name_words = get_classification_summary(self.name_tokens, self._list_dist_words,
+                                                           self._list_desc_words)
 
     '''
     This is the main execution call that wraps name analysis checks. 
@@ -241,14 +242,19 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 return analysis
 
             check_name_is_well_formed = builder.check_name_is_well_formed(
-                    self._dict_name_words,
-                    self._list_dist_words,
-                    self._list_desc_words,
-                    self.name_tokens,
-                    self.name_original_tokens
-                )
-            if not check_name_is_well_formed.is_valid:
+                self._dict_name_words,
+                self._list_dist_words,
+                self._list_desc_words,
+                self.name_tokens,
+                self.processed_name,
+                self.name_original_tokens
+            )
+            if check_name_is_well_formed.result_code in (
+            AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
+                    not check_name_is_well_formed.is_valid:
                 analysis.append(check_name_is_well_formed)
+            elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                self.skip_search_conflicts = True
 
             if analysis:
                 return analysis
@@ -324,6 +330,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             ]
 
             analysis = analysis + self.do_analysis()
+            if self.skip_search_conflicts:
+                analysis.append(check_name_is_well_formed)
+                
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
 
             return analysis
