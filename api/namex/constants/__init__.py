@@ -277,7 +277,7 @@ request_type_mapping = [
     ('LP', EntityTypes.LIMITED_PARTNERSHIP.value, RequestAction.NEW.value),
     ('CLP', EntityTypes.LIMITED_PARTNERSHIP.value, RequestAction.CHG.value),
     ('XLP', EntityTypes.XPRO_LIMITED_PARTNERSHIP.value, RequestAction.NEW.value),
-    ('CXLP', EntityTypes.XPRO_LIMITED_PARTNERSHIP.value, RequestAction.CHG.value),
+    ('XCLP', EntityTypes.XPRO_LIMITED_PARTNERSHIP.value, RequestAction.CHG.value),
     ('SO', EntityTypes.SOCIETY.value, RequestAction.NEW.value),
     ('ASO', EntityTypes.SOCIETY.value, RequestAction.AML.value),
     ('CSO', EntityTypes.SOCIETY.value, RequestAction.CHG.value),
