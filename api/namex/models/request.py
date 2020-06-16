@@ -367,17 +367,18 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
+        special_characters_element= Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
                 # Reset filter index 5 which contains the descriptive in the previous round.
                 # The filter index 4 contains distinctive value
                 if len(e.filters[0]) > 5:
                     e.filters[0].pop()
-                substitutions = ' ?| '.join(map(str, descriptive_element)) + ' ?'
+                substitutions = ' ?| '.join(map(str, special_characters_element)) + ' ?'
                 e.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
             else:
-                substitutions = '|'.join(map(str, descriptive_element))
-                e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\y\W*\s*'.format(substitutions)))
+                substitutions = '|'.join(map(str, special_characters_element))
+                e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\W*\s*'.format(substitutions)))
 
         if distinctive:
             return criteria
@@ -396,6 +397,14 @@ class Request(db.Model):
         query_all = queries[0].union(queries[1])
         print(query_all.statement)
         return query_all.all()
+
+    @classmethod
+    def set_special_characters(cls, list_d):
+        list_special_characters = []
+        for element in list_d:
+            list_special_characters.append('\\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
+
+        return list_special_characters
 
 
 # set the source from NRO, Societis Online, Name Request

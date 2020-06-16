@@ -5,6 +5,7 @@ from sqlalchemy import func
 from synonyms.models.synonym import Synonym
 from synonyms.criteria.synonym.query_criteria import SynonymQueryCriteria
 from . import LanguageCodes
+from . import porter
 
 from .mixins.designation import SynonymDesignationMixin
 from .mixins.model import SynonymModelMixin
@@ -44,7 +45,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         word = word.lower() if isinstance(word, str) else None
 
         if word:
-            filters.append(func.lower(model.synonyms_text).op('~')(r'\y{}\y'.format(word)))
+            filters.append(func.lower(model.stems_text).op('~')(r'\y{}\y'.format(porter.stem(word))))
 
         field = model.category if category else model.stems_text
 
@@ -213,7 +214,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_remove_designations(cls, text, internet_domains, designation_all_regex):
-        text = re.sub(r'\b({0})\b|(?<=\d),(?=\d)|(?<!\w)({1})(?!\w)(?=.*$)'.format(
+        text = re.sub(r'\b({0})\b|(?<=\d),(?=\d)|(?<!\w)({1})(?![A-Za-z0-9_.])(?=.*$)'.format(
             internet_domains,
             designation_all_regex),
             '',

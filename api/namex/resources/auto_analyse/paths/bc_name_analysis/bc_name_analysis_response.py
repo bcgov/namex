@@ -12,7 +12,7 @@ from .issues import \
     BcCorporateNameConflictIssue as CorporateNameConflictIssue, \
     BcIncorrectCategoryIssue as IncorrectCategoryIssue, \
     BcWordSpecialUseIssue as WordSpecialUseIssue, \
-    BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue,\
+    BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue, \
     BcDesignationMisplacedIssue as DesignationMisplacedIssue, \
     BcDesignationNonExistentIssue as DesignationNonExistentIssue
 
@@ -31,7 +31,7 @@ from ...analysis_options import \
     replace_designation_setup, \
     change_entity_type_setup, \
     change_designation_order_setup, \
-    add_designation_setup
+    add_designation_setup, two_designations_order_setup
 
 
 # Execute analysis returns a response strategy code
@@ -259,7 +259,7 @@ class BcAnalysisResponse(AnalysisResponse):
         return issue
 
     def build_end_designation_more_than_once_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = change_designation_order_setup()
+        option1 = two_designations_order_setup()
         # Tweak the header
         option1.header = "Option 1"
 
@@ -272,7 +272,6 @@ class BcAnalysisResponse(AnalysisResponse):
         self.executed_procedures.append(procedure_result.result_code)
 
         return issue
-
 
     def build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
         option1 = change_designation_order_setup()

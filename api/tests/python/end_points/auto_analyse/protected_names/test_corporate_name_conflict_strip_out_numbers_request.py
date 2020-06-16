@@ -18,10 +18,16 @@ from ...common import token_header, claims
                              ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              ("ABC TWO PLUMBING ONE INC.", "ABC PLUMBING & HEATING LTD."),
                              ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."),
+                             # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
+                             # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>
                              ("RE/MAX LUMBY INC.", "REMAX LUMBY"),
+                             # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
+                             # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>
                              ("RE MAX LUMBY INC.", "REMAX LUMBY"),
                              ("468040 B.C. LTD.", "468040 BC LTD."),
                              ("S, C & S HOLDINGS INC.", "SCS SOLUTIONS INC."),
+                             # ENGINEERING not found in synonyms, then considered a distintive, the only match obtained is
+                             # EQTEC SOLUTIONS LTD. which is not close enough with current similarity score (0.6 vs 0.67 -->threshold)
                              ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.")
                          ]
                          )

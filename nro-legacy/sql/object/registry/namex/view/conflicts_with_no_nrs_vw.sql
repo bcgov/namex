@@ -1,8 +1,9 @@
  -- noinspection SqlNoDataSourceInspectionForFile
 
-DROP VIEW NAMEX.conflicts_with_no_nrs;
+DROP VIEW NAMEX.conflicts_with_no_nrs_vw;
 
-CREATE OR REPLACE FORCE VIEW NAMEX.conflicts_with_no_nrs(id, name, corp_name_type_cd, state_type_cd, source, start_date, jurisdiction)
+
+CREATE OR REPLACE FORCE VIEW NAMEX.conflicts_with_no_nrs_vw(id, name, corp_name_type_cd, state_type_cd, source, start_date, jurisdiction)
 AS
 
  SELECT c.corp_num AS id, corp.corp_nme AS name, corp.corp_name_typ_cd AS corp_name_typ_cd, op.state_typ_cd AS state_type_cd,

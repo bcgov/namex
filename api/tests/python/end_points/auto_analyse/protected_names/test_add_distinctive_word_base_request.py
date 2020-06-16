@@ -49,12 +49,12 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
         {'word': 'WASH', 'classification': 'DESC'},
         {'word': 'CENTRAL', 'classification': 'DIST'},
         {'word': 'CENTRAL', 'classification': 'DESC'},
-        {'word': 'AUTO', 'classification': 'DIST'},
-        {'word': 'AUTO', 'classification': 'DESC'},
-        {'word': 'BODY', 'classification': 'DIST'},
-        {'word': 'BODY', 'classification': 'DESC'},
         {'word': 'PACIFIC', 'classification': 'DIST'},
         {'word': 'PACIFIC', 'classification': 'DESC'},
+        {'word': 'CAPITAL', 'classification': 'DIST'},
+        {'word': 'CAPITAL', 'classification': 'DESC'},
+        {'word': 'IDEAS', 'classification': 'DIST'},
+        {'word': 'IDEAS', 'classification': 'DESC'},
     ]
 
     save_words_list_classification(words_list_classification)
@@ -115,6 +115,11 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
          'request_action': 'NEW'
          },
         {'name': 'AUTO BODY PACIFIC LTD.',
+         'location': 'BC',
+         'entity_type': 'CR',
+         'request_action': 'NEW'
+         },
+        {'name': 'CAPITAL IDEAS LTD.',
          'location': 'BC',
          'entity_type': 'CR',
          'request_action': 'NEW'
