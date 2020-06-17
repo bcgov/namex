@@ -52,6 +52,7 @@ class PaymentModelMixin:
             if self._effective_date is None or self._effective_date <= self._payment_completion_date:
                 self._status = COMPLETED_VALUE
         else:
+            # TODO: Handle exceptions
             # raise Exception(
             #    error="Payment Dates cannot set for unlocked filings unless the filing hasn't been saved yet.",
             #    status_code=HTTPStatus.FORBIDDEN
@@ -81,6 +82,7 @@ class PaymentModelMixin:
 
     @staticmethod
     def _raise_default_lock_exception():
+        # TODO: Handle exceptions
         # raise Exception(
         #     error='Entity cannot be changed after the invoice is created.',
         #     status_code=HTTPStatus.FORBIDDEN
