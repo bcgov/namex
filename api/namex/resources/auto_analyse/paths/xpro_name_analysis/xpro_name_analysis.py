@@ -49,7 +49,7 @@ def validate_name_request(location, entity_type, request_action):
     if location == ValidLocations.CA_NOT_BC.list():
         # If XPRO, nothing is protected (for now anyway)
         valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value, AnalysisRequestActions.CNV.value,
-                                 AnalysisRequestActions.MVE.value, AnalysisRequestActions.REH.value)
+                                 AnalysisRequestActions.MVE.value, AnalysisRequestActions.REH.value, AnalysisRequestActions.REN.value)
 
         if entity_type not in XproUnprotectedNameEntityTypes.list():
             raise ValueError('Invalid entity_type provided for an XPRO entity')
