@@ -102,6 +102,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         first_word = next(iter(name_dict))
         name_dict.pop(first_word)
         valid = False
+        self.director.skip_search_conflicts = True
 
         if first_classification == DataFrameFields.DISTINCTIVE.value:
             for i, value in enumerate(name_dict.values()):
@@ -109,7 +110,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     valid = True
                     break
             if not valid:
-                check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name, list_name)
+                check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
+                                                                    list_name)
                 if check_conflicts.is_valid:
                     result = ProcedureResult()
                     result.is_valid = False
@@ -135,6 +137,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             else:
                 return check_conflicts
 
+        self.director.skip_search_conflicts = False
         return result
 
     '''
@@ -269,8 +272,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
         desc_synonym_list = self.get_substitutions_descriptive(w_desc)
 
+        change_filter = True if self.director.skip_search_conflicts else False
+
         for dist in dist_substitution_list:
-            criteria = Request.get_general_query()
+            criteria = Request.get_general_query(change_filter)
             criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
             # Inject descriptive section into query, execute and add matches to list
             for desc in desc_synonym_list:
@@ -407,11 +412,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_end_designation_more_than_once(self, list_name, all_designation_end_list, correct_designations_user, misplaced_designation_end):
+    def check_end_designation_more_than_once(self, list_name, all_designation_end_list, correct_designations_user,
+                                             misplaced_designation_end):
         result = ProcedureResult()
         result.is_valid = True
 
-        designation_end_list = [designation for designation in all_designation_end_list if designation in correct_designations_user]
+        designation_end_list = [designation for designation in all_designation_end_list if
+                                designation in correct_designations_user]
         correct_end_designations = designation_end_list + list(
             set(misplaced_designation_end) - set(designation_end_list))
 

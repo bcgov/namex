@@ -98,6 +98,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self._token_classifier = token_classifier
 
     @property
+    def skip_search_conflicts(self):
+        return self._skip_search_conflicts
+
+    @skip_search_conflicts.setter
+    def skip_search_conflicts(self, skip_search_conflicts):
+        self._skip_search_conflicts = skip_search_conflicts
+
+    @property
     def word_classification_tokens(self):
         return \
             self.token_classifier.distinctive_word_tokens, \
@@ -137,7 +145,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_as_submitted_tokenized
 
     def __init__(self):
-        self.skip_search_conflicts = False
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
@@ -147,6 +154,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.token_classifier = None
 
         self.entity_type = None
+        self.skip_search_conflicts = False
 
     # Call this method from whatever is using this director
     def use_builder(self, builder):
@@ -159,6 +167,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     # Convenience method for extending implementations
     def set_entity_type(self, entity_type):
         self.entity_type = entity_type
+
+    # Convenience method for extending implementations
+    def get_skip_search_conflicts(self):
+        return self._skip_search_conflicts
+
+    # Convenience method for extending implementations
+    def set_skip_search_conflicts(self, skip_search_conflicts):
+        self.skip_search_conflicts = skip_search_conflicts
 
     # API for extending implementations
     def get_name_tokens(self):
