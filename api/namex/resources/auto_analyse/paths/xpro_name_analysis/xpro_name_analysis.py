@@ -9,6 +9,7 @@ from flask_jwt_oidc import AuthError
 
 from urllib.parse import unquote_plus
 
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
@@ -110,7 +111,11 @@ class XproNameAnalysis(Resource):
             return  # TODO: Return invalid response! What is it?
 
         try:
-            if location in (ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value) and entity_type in XproUnprotectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value):
+            if location == ValidLocations.CA_NOT_BC.value and entity_type in XproUnprotectedNameEntityTypes.list() and request_action and request_action == AnalysisRequestActions.MVE.value:
+                # Use ProtectedNameAnalysisService
+                service = ProtectedNameAnalysisService()
+                builder = NameAnalysisBuilder(service)
+            elif location in (ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value) and entity_type in XproUnprotectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value):
                 # Use UnprotectedNameAnalysisService
                 service = XproNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
