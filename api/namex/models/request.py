@@ -273,7 +273,7 @@ class Request(db.Model):
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
-    def get_general_query(cls):
+    def get_general_query(cls, change_filter=False):
         criteria = []
         basic_filters = [
             cls.id == Name.nrId,
@@ -324,6 +324,28 @@ class Request(db.Model):
                  EntityTypes.XPRO_COOPERATIVE.value,
                  LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
                  LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
+                 EntityTypes.BENEFIT_COMPANY.value
+                 ] if not change_filter else [EntityTypes.PRIVATE_ACT.value,
+                 EntityTypes.CORPORATION.value,
+                 LegacyEntityTypes.CORPORATION.CCR.value,
+                 LegacyEntityTypes.CORPORATION.RCR.value,
+                 EntityTypes.COOPERATIVE.value,
+                 LegacyEntityTypes.COOPERATIVE.CCP.value,
+                 LegacyEntityTypes.COOPERATIVE.RCP.value,
+                 EntityTypes.FINANCIAL_INSTITUTION.value,
+                 LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                 LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                 LegacyEntityTypes.SOCIETY.ASO.value,
+                 LegacyEntityTypes.SOCIETY.CSO.value,
+                 LegacyEntityTypes.SOCIETY.RSO.value,
+                 EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                 EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                 EntityTypes.PARISH.value,
                  EntityTypes.BENEFIT_COMPANY.value
                  ]),
 
