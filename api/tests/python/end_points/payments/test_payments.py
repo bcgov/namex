@@ -128,6 +128,7 @@ def test_get_invoice(client, jwt, app):
 
     # TODO: Test the payload
     payload = json.loads(response.data)
+    assert payload is not None
 
 
 def test_get_invoices(client, jwt, app):
@@ -143,8 +144,8 @@ def test_get_invoices(client, jwt, app):
 
     assert response.status_code == 200
 
-    # TODO: Test the payload
     payload = json.loads(response.data)
+    assert payload is not None
 
 
 def test_get_transaction(client, jwt, app):
@@ -162,9 +163,9 @@ def test_get_transaction(client, jwt, app):
     response = client.get(path)
 
     assert response.status_code == 200
-
-    # TODO: Test the payload
+    
     payload = json.loads(response.data)
+    assert payload is not None
 
 
 def test_get_transactions(client, jwt, app):
