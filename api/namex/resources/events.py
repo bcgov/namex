@@ -84,12 +84,6 @@ class Events(Resource):
                 user_action = "Set to Historical by NRO(Migration)"
             if e_dict["stateCd"]==State.COMPLETED and (e_dict["action"] == "post" or e_dict["action"] == "update_from_nro"):
                 user_action = "Migrated by NRO"
-            if "english" in e_dict:
-                if e_dict["action"] == "post" and e_dict["stateCd"] == State.DRAFT:
-                    user_action ="Submitted to Examiners in Name Request"
-
-            if e_dict["action"] == "post" and e_dict["stateCd"] in [State.RESERVED, State.COND_RESERVE]:
-                user_action = "Submitted to Examiners in Name Request"
 
             e_dict_previous = e_dict
             e_dict["user_action"] = user_action
