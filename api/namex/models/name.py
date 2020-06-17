@@ -3,7 +3,7 @@
 from . import db, ma
 from marshmallow import fields
 from sqlalchemy.orm import backref
-from namex.constants import NameState
+
 
 class Name(db.Model):
     __tablename__ = 'names'
@@ -37,6 +37,14 @@ class Name(db.Model):
     # required for name request name analysis
     _name_type_cd = db.Column('name_type_cd', db.String(10))
     _clean_name = db.Column('clean_name', db.String(1024), index=True)
+
+    NOT_EXAMINED = 'NE'
+    APPROVED = 'APPROVED'
+    REJECTED = 'REJECTED'
+    CONDITION = 'CONDITION'
+    # needed for name request reservation before completing the nr
+    RESERVED = 'RESERVED'
+    COND_RESERVE = 'COND-RESERVE'
 
 
     #Properties added for Name Request
