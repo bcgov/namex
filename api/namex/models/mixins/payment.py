@@ -92,6 +92,7 @@ class PaymentModelMixin:
 
     @staticmethod
     def get_by_payment_token(token: str):
+        """Optional member to get a payment using its token id."""
         pass
 
     def reset_filing_to_draft(self, draft_value):
