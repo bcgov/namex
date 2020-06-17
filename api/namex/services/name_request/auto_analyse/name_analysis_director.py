@@ -145,7 +145,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_as_submitted_tokenized
 
     def __init__(self):
-        self.skip_search_conflicts = False
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
