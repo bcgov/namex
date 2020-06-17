@@ -359,6 +359,7 @@ class Request(Resource):
 
         APPROVERS: Can change from almost any state, other than CANCELLED, EXPIRED and ( COMPLETED not yet furnished )
         EDITOR: Can't change to a COMPLETED state (ACCEPTED, REJECTED, CONDITION)
+        SYSTEM: Can consume a Name Request.
         """
 
         # do the cheap check first before the more expensive ones
@@ -383,11 +384,19 @@ class Request(Resource):
 
         try:
 
-            ### STATE ###
-
-            # all these checks to get removed to marshmallow
+            consume = json_input.get('consume', None)
             state = json_input.get('state', None)
-            if state:
+            if consume:
+                # if (new_state in (State.APPROVED,
+                #       State.REJECTED,
+                #       State.CONDITIONAL)) \
+                #  and not jwt.validate_roles([User.APPROVER]):
+                current_app.logger.debug(f'system consuming a NR, in nrd.stateCd:{nrd.stateCd} by: {jwt.validate_roles([User.APPROVER])}')
+
+
+            ### STATE ###
+            # all these checks to get removed to marshmallow
+            elif state:
 
                 if state not in State.VALID_STATES:
                     return jsonify({"message": "not a valid state"}), 406
