@@ -3,8 +3,7 @@ import json
 from urllib.parse import quote_plus
 
 from .common import API_BASE_URI
-# TODO: We will need these later
-# from ..common import token_header, claims
+from ..common import token_header, claims
 
 create_payment_request = {
     "payment_info": {
@@ -57,11 +56,15 @@ def log_request_path(path):
     print('\n' + 'request: ' + path + '\n')
 
 
-def test_get_payment(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+def setup_test_token(client, jwt, app):
+    # Create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
+    return token, headers
+
+
+def test_get_payment(client, jwt, app):
     payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id
     test_params = [{}]
@@ -78,10 +81,6 @@ def test_get_payment(client, jwt, app):
 
 
 def test_create_payment(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     request_uri = API_BASE_URI
 
     path = request_uri
@@ -97,10 +96,6 @@ def test_create_payment(client, jwt, app):
 
 
 def test_update_payment(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id
 
@@ -112,15 +107,12 @@ def test_update_payment(client, jwt, app):
 
     assert isinstance(payload.get('id'), int) is True
     assert isinstance(payload.get('invoices'), list) is True
+    # TODO: Test update fields
     # assert payload.get('updated_by') is not None
     # assert payload.get('updated_on') is not None
 
 
 def test_get_invoice(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     payment_id = 'abcd153'
     invoice_id = 'test'
     request_uri = API_BASE_URI + payment_id + '/invoice'
@@ -134,14 +126,11 @@ def test_get_invoice(client, jwt, app):
 
     assert response.status_code == 200
 
+    # TODO: Test the payload
     payload = json.loads(response.data)
 
 
 def test_get_invoices(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/invoices'
     test_params = [{}]
@@ -154,14 +143,11 @@ def test_get_invoices(client, jwt, app):
 
     assert response.status_code == 200
 
+    # TODO: Test the payload
     payload = json.loads(response.data)
 
 
 def test_get_transaction(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/transaction'
     test_params = [{
@@ -177,14 +163,11 @@ def test_get_transaction(client, jwt, app):
 
     assert response.status_code == 200
 
+    # TODO: Test the payload
     payload = json.loads(response.data)
 
 
 def test_get_transactions(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/transactions'
     test_params = [{}]
@@ -203,10 +186,6 @@ def test_get_transactions(client, jwt, app):
 
 
 def test_create_transaction(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/transaction'
 
@@ -225,10 +204,6 @@ def test_create_transaction(client, jwt, app):
 
 
 def test_update_transaction(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     payment_id = 'abcd153'
     receipt_number = 'abcd'
     transaction_id = 'test'
@@ -251,10 +226,6 @@ def test_update_transaction(client, jwt, app):
 
 
 def test_get_receipt(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id + '/receipt'
     test_params = [{}]
@@ -277,10 +248,6 @@ def test_get_receipt(client, jwt, app):
 
 
 def test_calculate_fees(client, jwt, app):
-    # create JWT & setup header with a Bearer Token using the JWT
-    # token = jwt.create_jwt(claims, token_header)
-    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
-
     request_uri = API_BASE_URI + 'fees'
 
     path = request_uri
