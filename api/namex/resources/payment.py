@@ -28,6 +28,8 @@ setup_logging()  # It's important to do this first
 # Register a local namespace for the NR reserve
 payment_api = Namespace('payments', description='Payment API - Uses Service BC Pay')
 
+MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
+
 
 def validate_request(request):
     return True
@@ -144,7 +146,7 @@ class Payments(Resource):
     def post():
         json_input = json.loads(request.get_json())
         if not json_input:
-            return jsonify(message='No JSON data provided'), 400
+            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
         payment_info = json_input.get('payment_info')
         filing_info = json_input.get('filing_info')
@@ -194,7 +196,7 @@ class Payment(Resource):
 
         json_input = json.loads(request.get_json())
         if not json_input:
-            return jsonify(message='No JSON data provided'), 400
+            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
         payment_info = json_input.get('payment_info')
         filing_info = json_input.get('filing_info')
@@ -227,7 +229,7 @@ class PaymentFees(Resource):
     def post():
         json_input = json.loads(request.get_json())
         if not json_input:
-            return jsonify(message='No JSON data provided'), 400
+            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
         corp_type = json_input.get('corp_type')
         filing_type_code = json_input.get('filing_type_code')
@@ -421,7 +423,7 @@ class PaymentTransaction(Resource):
 
         json_input = json.loads(request.get_json())
         if not json_input:
-            return jsonify(message='No JSON data provided'), 400
+            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
         receipt_number = json_input.get('receipt_number', None)
         transaction_identifier = json_input.get('transaction_identifier', None)
