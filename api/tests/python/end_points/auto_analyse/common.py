@@ -51,6 +51,14 @@ def assert_issues_count_is_gt(count, issues):
 
 
 @pytest.mark.skip
+def assert_issues_count_is_zero(issues):
+    print('\n' + 'Issue types:' + '\n')
+    for issue in issues:
+        print('- ' + issue.get('issue_type') + '\n')
+    assert issues.__len__() == 0
+
+
+@pytest.mark.skip
 def assert_issue_type_is_one_of(types, issue):
     assert issue.get('issue_type') in types
 
