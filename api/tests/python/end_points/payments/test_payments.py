@@ -45,6 +45,15 @@ calculate_fees_request = {
 }
 
 
+def build_test_query(test_params):
+    query = ''
+
+    for entry in test_params:
+        query += '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+
+    return query
+
+
 def test_get_payment(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     # token = jwt.create_jwt(claims, token_header)
@@ -54,10 +63,7 @@ def test_get_payment(client, jwt, app):
     request_uri = API_BASE_URI + payment_id
     test_params = [{}]
 
-    query = ''
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+    query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
     print('\n' + 'request: ' + path + '\n')
@@ -117,10 +123,7 @@ def test_get_invoice(client, jwt, app):
     request_uri = API_BASE_URI + payment_id + '/invoice'
     test_params = [{'invoice_id': invoice_id}]
 
-    query = ''
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+    query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
     print('\n' + 'request: ' + path + '\n')
@@ -140,10 +143,7 @@ def test_get_invoices(client, jwt, app):
     request_uri = API_BASE_URI + payment_id + '/invoices'
     test_params = [{}]
 
-    query = ''
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+    query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
     print('\n' + 'request: ' + path + '\n')
@@ -166,10 +166,7 @@ def test_get_transaction(client, jwt, app):
         'receipt_number': 'test',
     }]
 
-    query = ''
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+    query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
     print('\n' + 'request: ' + path + '\n')
@@ -189,10 +186,7 @@ def test_get_transactions(client, jwt, app):
     request_uri = API_BASE_URI + payment_id + '/transactions'
     test_params = [{}]
 
-    query = ''
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+    query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
     print('\n' + 'request: ' + path + '\n')
@@ -217,10 +211,7 @@ def test_create_transaction(client, jwt, app):
         'redirect_uri': 'http://localhost'
     }]
 
-    query = ''
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+    query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
     print('\n' + 'request: ' + path + '\n')
@@ -242,10 +233,7 @@ def test_update_transaction(client, jwt, app):
 
     test_params = [{}]
 
-    query = ''
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+    query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
     print('\n' + 'request: ' + path + '\n')
@@ -268,10 +256,7 @@ def test_get_receipt(client, jwt, app):
     request_uri = API_BASE_URI + payment_id + '/receipt'
     test_params = [{}]
 
-    query = ''
-
-    for entry in test_params:
-        query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+    query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
     print('\n' + 'request: ' + path + '\n')
