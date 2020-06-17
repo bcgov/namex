@@ -53,6 +53,10 @@ def build_test_query(test_params):
     return query
 
 
+def log_request_path(path):
+    print('\n' + 'request: ' + path + '\n')
+
+
 def test_get_payment(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     # token = jwt.create_jwt(claims, token_header)
@@ -65,7 +69,7 @@ def test_get_payment(client, jwt, app):
     query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     response = client.get(path)
     payload = json.loads(response.data)
 
@@ -81,7 +85,7 @@ def test_create_payment(client, jwt, app):
     request_uri = API_BASE_URI
 
     path = request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     body = json.dumps(create_payment_request)
     response = client.post(path, json=body)
     payload = json.loads(response.data)
@@ -101,7 +105,7 @@ def test_update_payment(client, jwt, app):
     request_uri = API_BASE_URI + payment_id
 
     path = request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     body = json.dumps(create_payment_request)
     response = client.put(path, json=body)
     payload = json.loads(response.data)
@@ -125,7 +129,7 @@ def test_get_invoice(client, jwt, app):
     query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     response = client.get(path)
 
     assert response.status_code == 200
@@ -145,7 +149,7 @@ def test_get_invoices(client, jwt, app):
     query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     response = client.get(path)
 
     assert response.status_code == 200
@@ -168,7 +172,7 @@ def test_get_transaction(client, jwt, app):
     query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     response = client.get(path)
 
     assert response.status_code == 200
@@ -188,7 +192,7 @@ def test_get_transactions(client, jwt, app):
     query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     response = client.get(path)
 
     assert response.status_code == 200
@@ -213,7 +217,7 @@ def test_create_transaction(client, jwt, app):
     query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     response = client.post(path)
     payload = json.loads(response.data)
 
@@ -235,7 +239,7 @@ def test_update_transaction(client, jwt, app):
     query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     body = json.dumps({
         "receipt_number": receipt_number,
         "transaction_identifier": transaction_id
@@ -258,7 +262,7 @@ def test_get_receipt(client, jwt, app):
     query = build_test_query(test_params)
 
     path = request_uri + '?' + query if len(query) > 0 else request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     response = client.get(path)
 
     assert response.status_code == 200
@@ -280,7 +284,7 @@ def test_calculate_fees(client, jwt, app):
     request_uri = API_BASE_URI + 'fees'
 
     path = request_uri
-    print('\n' + 'request: ' + path + '\n')
+    log_request_path(path)
     body = json.dumps(calculate_fees_request)
     response = client.post(path, json=body)
     payload = json.loads(response.data)
