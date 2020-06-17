@@ -3,6 +3,8 @@ from datetime import date, datetime
 from sqlalchemy import desc, event, inspect, or_
 from sqlalchemy.ext.hybrid import hybrid_property
 
+COMPLETED_VALUE = None
+
 
 class PaymentModelMixin:
     _payment_token = None
@@ -42,13 +44,13 @@ class PaymentModelMixin:
         return self._payment_completion_date
 
     @payment_completion_date.setter
-    def payment_completion_date(self, value: datetime, completed_value):
+    def payment_completion_date(self, value: datetime):
 
         if self.locked or self._payment_token:
             self._payment_completion_date = value
 
             if self._effective_date is None or self._effective_date <= self._payment_completion_date:
-                self._status = completed_value
+                self._status = COMPLETED_VALUE
         else:
             # raise Exception(
             #    error="Payment Dates cannot set for unlocked filings unless the filing hasn't been saved yet.",
