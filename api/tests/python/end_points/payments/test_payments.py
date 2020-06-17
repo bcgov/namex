@@ -1,10 +1,9 @@
-import pytest
-import jsonpickle
 import json
 
 from urllib.parse import quote_plus
 
 from .common import API_BASE_URI
+# TODO: We will need these later
 # from ..common import token_header, claims
 
 create_payment_request = {
@@ -129,7 +128,7 @@ def test_get_invoice(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path)
 
-    assert response.status_code is 200
+    assert response.status_code == 200
 
     payload = json.loads(response.data)
 
@@ -149,7 +148,7 @@ def test_get_invoices(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path)
 
-    assert response.status_code is 200
+    assert response.status_code == 200
 
     payload = json.loads(response.data)
 
@@ -172,7 +171,7 @@ def test_get_transaction(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path)
 
-    assert response.status_code is 200
+    assert response.status_code == 200
 
     payload = json.loads(response.data)
 
@@ -192,7 +191,7 @@ def test_get_transactions(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path)
 
-    assert response.status_code is 200
+    assert response.status_code == 200
 
     payload = json.loads(response.data)
 
@@ -262,7 +261,7 @@ def test_get_receipt(client, jwt, app):
     print('\n' + 'request: ' + path + '\n')
     response = client.get(path)
 
-    assert response.status_code is 200
+    assert response.status_code == 200
 
     payload = json.loads(response.data)
 
