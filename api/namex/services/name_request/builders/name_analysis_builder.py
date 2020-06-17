@@ -347,7 +347,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        if not all_designations:
+        if all_designations_user and not all_designations:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.DESIGNATION_NON_EXISTENT
             result.values = {
