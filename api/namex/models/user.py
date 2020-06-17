@@ -18,6 +18,7 @@ class User(db.Model):
     APPROVER='names_approver'
     EDITOR='names_editor'
     VIEWONLY='names_viewer'
+    SYSTEM='system'
 
     def __init__(self, username, firstname, lastname, sub, iss ):
         self.username = username

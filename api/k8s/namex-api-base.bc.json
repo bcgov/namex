@@ -1,0 +1,47 @@
+{
+  "apiVersion": "build.openshift.io/v1",
+  "kind": "BuildConfig",
+  "metadata": {
+    "labels": {
+      "app": "namex-api-base"
+    },
+    "name": "namex-api-base",
+    "namespace": "gl2uos-tools"
+  },
+  "spec": {
+    "failedBuildsHistoryLimit": 5,
+    "nodeSelector": null,
+    "output": {
+      "to": {
+        "kind": "ImageStreamTag",
+        "name": "namex-api-base:latest"
+      }
+    },
+    "postCommit": {},
+    "resources": {},
+    "runPolicy": "Serial",
+    "source": {
+      "contextDir": "/api",
+      "git": {
+        "uri": "https://github.com/bcgov/namex.git"
+      },
+      "type": "Git"
+    },
+    "strategy": {
+      "sourceStrategy": {
+        "from": {
+          "kind": "ImageStreamTag",
+          "name": "python:3.6",
+          "namespace": "openshift"
+        }
+      },
+      "type": "Source"
+    },
+    "successfulBuildsHistoryLimit": 5,
+    "triggers": [
+      {
+        "type": "ConfigChange"
+      }
+    ]
+  }
+}
