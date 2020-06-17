@@ -257,7 +257,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 analysis.append(check_words_to_avoid)
                 return analysis
 
+            self.set_skip_search_conflicts(True)
             check_name_is_well_formed = builder.check_name_is_well_formed(
+                self.skip_search_conflicts,
                 self._dict_name_words,
                 self._list_dist_words,
                 self._list_desc_words,
@@ -266,11 +268,13 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self.name_original_tokens
             )
             if check_name_is_well_formed.result_code in (
-            AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
+                    AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
                     not check_name_is_well_formed.is_valid:
                 analysis.append(check_name_is_well_formed)
             elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
-                self.skip_search_conflicts = True
+                self.set_skip_search_conflicts(True)
+            else:
+                self.set_skip_search_conflicts(False)
 
             if analysis:
                 return analysis
@@ -348,7 +352,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             analysis = analysis + self.do_analysis()
             if self.skip_search_conflicts:
                 analysis.append(check_name_is_well_formed)
-                
+
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
 
             return analysis

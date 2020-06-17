@@ -24,77 +24,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult[] An array of procedure results
     '''
-    '''
-    To be deprecated: Need to consider change in logic <distinctive><descriptive><distinctive> is valid
-    Another version of the function  was created to handle new logic
-    '''
 
-    def check_name_is_well_formed(self, list_dist, list_desc, list_name, list_original_name):
-        result = ProcedureResult()
-        result.is_valid = True
-
-        # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
-        # the original name should be passed to get the correct index when reporting issues to front end.
-        if list_name.__len__() == 0:
-            # If we have no words in our name, obviously we need to add a distinctive... this is kind of redundant as
-            # we shouldn't have a name with no words but we still need to handle the case in our API
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-            result.values = {
-                'list_original': [],
-                'list_name': [],
-                'list_dist': []
-            }
-        elif list_name.__len__() == 1:
-            # If there's only one word and it's distinctive, we need to add a descriptive word
-            if list_dist.__len__() == 1:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
-            else:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
-        else:
-            if list_dist.__len__() == 0:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
-            elif list_desc.__len__() == 0:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
-
-        return result
-
-    '''
-    Check to see if a provided name is valid
-    Override the abstract / base class method
-    @return ProcedureResult[] An array of procedure results
-    '''
-
-    def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name, processed_name, list_original_name):
+    def check_name_is_well_formed(self, skip_search_conflict, name_dict, list_dist, list_desc, list_name,
+                                  processed_name, list_original_name):
         result = ProcedureResult()
         result.is_valid = True
 
@@ -102,7 +34,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         first_word = next(iter(name_dict))
         name_dict.pop(first_word)
         valid = False
-        self.director.skip_search_conflicts = True
 
         if first_classification == DataFrameFields.DISTINCTIVE.value:
             for i, value in enumerate(name_dict.values()):
@@ -113,31 +44,18 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
                                                                     list_name)
                 if check_conflicts.is_valid:
-                    result = ProcedureResult()
-                    result.is_valid = False
-                    result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-                    result.values = {
-                        'list_original': list_original_name or [],
-                        'list_name': list_name or [],
-                        'list_dist': list_dist or []
-                    }
+                    result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
+                                                                     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
                 else:
                     return check_conflicts
         else:
             check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name, list_name)
             if check_conflicts.is_valid:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
+                result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
+                                                                 AnalysisIssueCodes.ADD_DISTINCTIVE_WORD)
             else:
                 return check_conflicts
 
-        self.director.skip_search_conflicts = False
         return result
 
     '''
@@ -622,3 +540,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 desc_synonym_list[i].append(desc)
 
         return desc_synonym_list
+
+    def check_name_is_well_formed_response(self, list_original_name, list_name, list_dist, result_code):
+        result = ProcedureResult()
+        result.is_valid = False
+        result.result_code = result_code
+        result.values = {
+            'list_original': list_original_name or [],
+            'list_name': list_name or [],
+            'list_dist': list_dist or []
+        }
+
+        return result
