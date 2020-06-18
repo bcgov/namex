@@ -25,7 +25,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult[] An array of procedure results
     '''
 
-    def check_name_is_well_formed(self, skip_search_conflict, name_dict, list_dist, list_desc, list_name,
+    def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name,
                                   processed_name, list_original_name):
         result = ProcedureResult()
         result.is_valid = True
