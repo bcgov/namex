@@ -259,7 +259,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             self.set_skip_search_conflicts(True)
             check_name_is_well_formed = builder.check_name_is_well_formed(
-                self.skip_search_conflicts,
                 self._dict_name_words,
                 self._list_dist_words,
                 self._list_desc_words,
