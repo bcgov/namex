@@ -324,7 +324,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY, User.SYSTEM])
     def get(nr):
 
         # return jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
@@ -346,7 +346,7 @@ class Request(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.SYSTEM])
     def patch(nr, *args, **kwargs):
         """  Patches the NR. Currently only handles STATE (with optional comment) and Previous State.
 
@@ -360,6 +360,7 @@ class Request(Resource):
 
         APPROVERS: Can change from almost any state, other than CANCELLED, EXPIRED and ( COMPLETED not yet furnished )
         EDITOR: Can't change to a COMPLETED state (ACCEPTED, REJECTED, CONDITION)
+        SYSTEM: Can consume a Name Request.
         """
 
         # do the cheap check first before the more expensive ones
@@ -401,12 +402,9 @@ class Request(Resource):
                 
                 warnings = nro.consume_nr(nrd, user.username, corp_num)
 
-
             ### STATE ###
-
             # all these checks to get removed to marshmallow
-            state = json_input.get('state', None)
-            if state:
+            elif state:
 
                 if state not in State.VALID_STATES:
                     return jsonify({"message": "not a valid state"}), 406

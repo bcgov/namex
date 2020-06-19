@@ -1,0 +1,50 @@
+{
+  "apiVersion": "build.openshift.io/v1",
+  "kind": "BuildConfig",
+  "metadata": {
+    "name": "namex-api-runtime",
+    "namespace": "gl2uos-tools"
+  },
+  "spec": {
+    "nodeSelector": null,
+    "output": {
+      "to": {
+        "kind": "ImageStreamTag",
+        "name": "namex-api-runtime:latest"
+      }
+    },
+    "postCommit": {},
+    "resources": {},
+    "runPolicy": "Serial",
+    "source": {
+      "dockerfile": "FROM gl2uos-tools/namex-api-base:latest\nCOPY oraclelibs /tmp/.\nUSER root\nRUN id \u0026\u0026 \\\n    chmod 0777 -R /etc/pki/entitlement-host \u0026\u0026 \\\n    chmod 0777 /var/lib/rpm \u0026\u0026 \\\n    yum -y localinstall /tmp/oracle-instantclient*.rpm \u0026\u0026 \\\n    rm -rf /var/cache/yum \u0026\u0026 \\\n    rm -f /tmp/oracle-instantclient*.rpm \u0026\u0026 \\\n    echo /usr/lib/oracle/12.2/client64/lib \u003e /etc/ld.so.conf.d/oracle-instantclient12.2.conf \u0026\u0026 \\\n    ldconfig\n\nUSER 1001",
+      "images": [
+        {
+          "as": null,
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "oracle-client-rpms:12.2",
+            "namespace": "openshift"
+          },
+          "paths": [
+            {
+              "destinationDir": ".",
+              "sourcePath": "/tmp/oraclelibs"
+            }
+          ]
+        }
+      ],
+      "type": "Dockerfile"
+    },
+    "strategy": {
+      "dockerStrategy": {
+        "from": {
+          "kind": "ImageStreamTag",
+          "name": "namex-api-base:latest"
+        }
+      },
+      "type": "Docker"
+    },
+    "triggers": []
+  }
+}
