@@ -67,9 +67,9 @@ def update_datafix_row(ora_con, id, status):
 
 try:
 
-    ora_con = cx_Oracle.connect(Config.ORA_USER,
-                                Config.ORA_PASSWORD,
-                                "{0}:{1}/{2}".format(Config.ORA_HOST, Config.ORA_PORT, Config.ORA_NAME))
+    ora_con = cx_Oracle.connect(Config.NRO_USER,
+                                Config.NRO_PASSWORD,
+                                "{0}:{1}/{2}".format(Config.NRO_HOST, Config.NRO_PORT, Config.NRO_DB_NAME))
 
     result, col_names = job_result_set(ora_con, max_rows)
 
