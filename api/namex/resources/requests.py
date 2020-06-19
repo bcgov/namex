@@ -396,7 +396,7 @@ class Request(Resource):
                     return jsonify({"message": "corpNum is required"}), HTTPStatus.BAD_REQUEST
 
                 current_app.logger.debug(f'system consuming a NR, in nrd.stateCd:{nrd.stateCd} by: {jwt.validate_roles([User.APPROVER])}')
-                if nrd.stateCd not in (new_state in (State.APPROVED, State.CONDITIONAL)) \
+                if nrd.stateCd not in (State.APPROVED, State.CONDITIONAL) \
                     or not jwt.validate_roles([User.SYSTEM]):
                     return jsonify({"message": "either not authorized or not in a valid state to consume"}), HTTPStatus.UNAUTHORIZED
                 
