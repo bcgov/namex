@@ -154,6 +154,6 @@ def get_classification_summary(list_name, list_dist_words, list_desc_words):
 def get_conflicts_same_classification(builder, name_tokens, processed_name, list_dist, list_desc):
     list_dist, list_desc = \
         list_distinctive_descriptive(name_tokens, list_dist, list_desc)
-    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name)
+    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name, True)
 
     return check_conflicts
