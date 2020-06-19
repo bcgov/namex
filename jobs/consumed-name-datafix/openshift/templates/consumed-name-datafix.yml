@@ -1,0 +1,58 @@
+---
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: "consumed-name-datafix"
+  annotations:
+    description: "Job to load consumed names in namex db"
+    tags: "job"
+objects:
+- kind: "Job"
+  apiVersion: "batch/v1"
+  metadata:
+    name: "consumed-name-datafix"
+  spec:
+    template:
+      spec:
+        containers:
+        - name: "consumed-name-datafix"
+          image: "docker-registry.default.svc:5000/servicebc-ne-tools/consumed-name-datafix:${ENV_TAG}"
+          imagePullPolicy: Always
+          args:
+          - /bin/sh
+          - -c
+          - cd /opt/app-root/src; ./run.sh
+          env:
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: database-user
+                  name: postgresql-${ENV_TAG}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: postgresql-${ENV_TAG}
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: database-name
+                  name: postgresql
+            - name: DATABASE_HOST
+              value: 'postgresql-${ENV_TAG}'
+            - name: DATABASE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: DB_PORT
+                  name: namex-api-config
+         restartPolicy: "Never"
+        concurrencyPolicy: "Forbid"
+parameters: [
+        {
+          "name": "ENV_TAG",
+          "displayName": "ENV_TAG",
+          "description": "the tag for the environment that the job image runs from.",
+          "required": true,
+          "value": "dev"
+        },
+]
