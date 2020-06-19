@@ -130,4 +130,4 @@ def _consume_nro_names(oracle_cursor, nr, event_id, corp_num):
             """,
                 name_id=n_id,
                 event_id=event_id,
-                corp_numconsume_corp_num)
+                corp_num=consume_corp_num)
