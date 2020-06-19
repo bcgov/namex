@@ -123,7 +123,7 @@ def _consume_nro_names(oracle_cursor, nr, event_id, corp_num):
             INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, designation,
                                        consumption_date, search_name, start_event_id, end_event_id, corp_num)
             SELECT name_instance_seq.nextval,name_id,choice_number,name,designation,
-                   sysdate,search_name,l_event_id,NULL,:corp_num
+                   sysdate,search_name,:event_id,NULL,:corp_num
             FROM name_instance 
             WHERE name_id=:name_id 
             and end_event_id=:event_id
