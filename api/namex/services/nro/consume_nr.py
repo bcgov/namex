@@ -74,7 +74,7 @@ def _create_nro_transaction(oracle_cursor, nr, event_id, username, transaction_t
         request_id=nr.requestId,
         transaction_type=transaction_type,
         event_id=event_id,
-        username=username
+        username=username[:8]
         )
     current_app.logger.debug('transaction record created')
 
