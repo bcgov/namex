@@ -388,7 +388,7 @@ class Request(db.Model):
         return flattened
 
     @classmethod
-    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
+    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, check_name_is_well_formed=False):
         special_characters_element= Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
@@ -400,7 +400,11 @@ class Request(db.Model):
                 e.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
             else:
                 substitutions = '|'.join(map(str, special_characters_element))
-                e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\W*\s*'.format(substitutions)))
+                if not check_name_is_well_formed:
+                    e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\W*\s*'.format(substitutions)))
+                else:
+                    e.filters[0].append(
+                        func.lower(Name.name).op('~')(r'^\s*\W*({})\W*\s*'.format(substitutions)))
 
         if distinctive:
             return criteria

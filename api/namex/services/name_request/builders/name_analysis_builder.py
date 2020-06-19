@@ -145,14 +145,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name):
+    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name, check_name_is_well_formed=False):
         result = ProcedureResult()
         result.is_valid = False
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
 
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
-            list_conflicts.extend(self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name))
+            list_conflicts.extend(self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed))
             list_conflicts = [i for n, i in enumerate(list_conflicts) if
                               i not in list_conflicts[n + 1:]]  # Remove duplicates
 
@@ -184,19 +184,24 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.values = []
         return result
 
-    def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name):
+    def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed):
         dist_substitution_list, desc_synonym_list, selected_matches_list, list_details = [], [], [], []
 
-        dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
-        desc_synonym_list = self.get_substitutions_descriptive(w_desc)
+        if check_name_is_well_formed:
+            dist_substitution_list.append(w_dist)
+            desc_synonym_list.append(w_desc)
+        else:
+            dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
+            desc_synonym_list = self.get_substitutions_descriptive(w_desc)
 
         change_filter = True if self.director.skip_search_conflicts else False
 
         for dist in dist_substitution_list:
             criteria = Request.get_general_query(change_filter)
-            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
-            # Inject descriptive section into query, execute and add matches to list
+            # Inject distinctive section into query
+            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, check_name_is_well_formed)
             for desc in desc_synonym_list:
+                # Inject descriptive section into query, execute and add matches to list
                 matches = Request.get_query_distinctive_descriptive(desc, criteria)
                 list_details.extend(self.get_most_similar_names(
                     dict_highest_counter,
