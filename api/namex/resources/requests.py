@@ -36,6 +36,7 @@ from datetime import datetime as dt
 import json
 import urllib
 import sys
+from http import HTTPStatus
 
 # Register a local namespace for the requests
 api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
@@ -383,6 +384,24 @@ class Request(Resource):
 
         try:
 
+            consume = json_input.get('consume', None)
+            state = json_input.get('state', None)
+
+            if consume:
+                try:
+                    corp_num = consume['corpNum']
+                    #@TODO add corpnum validation
+                except KeyError:
+                    return jsonify({"message": "corpNum is required"}), HTTPStatus.BAD_REQUEST
+
+                current_app.logger.debug(f'system consuming a NR, in nrd.stateCd:{nrd.stateCd} by: {jwt.validate_roles([User.APPROVER])}')
+                if nrd.stateCd not in (new_state in (State.APPROVED, State.CONDITIONAL)) \
+                    or not jwt.validate_roles([User.SYSTEM]):
+                    return jsonify({"message": "either not authorized or not in a valid state to consume"}), HTTPStatus.UNAUTHORIZED
+                
+                warnings = nro.consume_nr(nrd, user.username, corp_num)
+
+
             ### STATE ###
 
             # all these checks to get removed to marshmallow
@@ -476,13 +495,13 @@ class Request(Resource):
                 ### END comments ###
 
 
-            ### PREVIOUS STATE ###
-            #- None (null) is a valid value for Previous State
-            if 'previousStateCd' in json_input.keys():
-                nrd.previousStateCd = json_input.get('previousStateCd', None)
+                ### PREVIOUS STATE ###
+                #- None (null) is a valid value for Previous State
+                if 'previousStateCd' in json_input.keys():
+                    nrd.previousStateCd = json_input.get('previousStateCd', None)
 
-            # save record
-            nrd.save_to_db()
+                # save record
+                nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
 
         except Exception as err:
