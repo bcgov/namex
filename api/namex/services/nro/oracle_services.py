@@ -8,8 +8,9 @@ import cx_Oracle
 from namex.models import State, Request, User, Event
 from namex.services.nro import NROServicesError
 from namex.services import EventRecorder
-from namex.services.nro.change_nr import update_nr, _get_event_id, _create_nro_transaction
 from namex.services.nro.add_nr import new_nr
+from namex.services.nro.change_nr import update_nr, _get_event_id, _create_nro_transaction
+from namex.services.nro.consume_nr import consume_nr
 
 from .exceptions import NROServicesError
 from .utils import nro_examiner_name
@@ -337,6 +338,36 @@ class NROServices(object):
             # nr.stateCd = State.INPROGRESS
             nr.stateCd = nr_saved_state
             nr.save_to_db()
+
+        return warnings if len(warnings)>0 else None
+
+    def consume_nr(self, nr, username, corp_num):
+
+        warnings = []
+
+        # save the current state, as we'll need to set it back to this before returning
+        nr_saved_state = nr.stateCd
+
+        try:
+
+            con = self.connection
+            con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
+
+            cursor = con.cursor()
+            consume_nr(nr, username, corp_num, cursor)
+
+            con.commit()
+
+            return None
+
+        except Exception as err:
+            warnings.append({'type': 'warn',
+                             'code': 'unable_to_consume_request_in_NRO',
+                             'message': 'Unable to consume the Request in NRO,'
+                                        ' please manually verify record is up to date in NRO before'
+                                        ' continuing.'
+                             })
+            current_app.logger.error(err.with_traceback(None))
 
         return warnings if len(warnings)>0 else None
 
