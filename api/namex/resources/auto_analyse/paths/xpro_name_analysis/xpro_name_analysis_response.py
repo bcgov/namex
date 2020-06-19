@@ -23,6 +23,7 @@ from ...analysis_options import \
     too_many_words_setup, \
     remove_setup, \
     remove_or_replace_setup, \
+    assumed_name_setup, \
     resolve_conflict_setup, \
     send_to_examiner_setup, \
     obtain_consent_setup, \
@@ -188,22 +189,24 @@ class XproAnalysisResponse(AnalysisResponse):
         return issue
 
     def build_corporate_conflict_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = resolve_conflict_setup()
+        """
+        For the XPRO path, corp_conflict issue type Options must change. Option 2 and 3 should be removed.
+        Change the Helpful Hint to:
+        Extra provincial or registration of a foreign entity in BC requires use of an Assumed Name when there is an existing BC entity with a similar name.
+
+        Option 1: (Same text)
+        New setup button: Need a checkbox for assumed_name. The front-end should should turn the checkbox into" I want to send my name to be examined as an Assumed Name.
+        :param procedure_result:
+        :param issue_count:
+        :param issue_idx:
+        :return:
+        """
+        option1 = assumed_name_setup()
         # Tweak the header
         option1.header = "Option 1"
 
-        option2 = send_to_examiner_setup()
-        # Tweak the header
-        option2.header = "Option 2"
-
-        option3 = conflict_self_consent_setup()
-        # Tweak the header
-        option3.header = "Option 3"
-
         issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2,
-            option3
+            option1
         ])
 
         '''
