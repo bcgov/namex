@@ -33,26 +33,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         first_classification = next(iter(name_dict.values()))
         first_word = next(iter(name_dict))
         name_dict.pop(first_word)
-        valid = False
 
         if first_classification == DataFrameFields.DISTINCTIVE.value:
-            for i, value in enumerate(name_dict.values()):
-                if value == DataFrameFields.DESCRIPTIVE.value:
-                    valid = True
-                    break
+            valid = self.check_descriptive(name_dict)
             if not valid:
                 if len(name_dict) > 0:
-                    result = self.check_conflicts_response(self, processed_name, list_original_name, list_name,
-                                                           list_dist,
-                                                           AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
+                    result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name, list_dist,
+                                                                      AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
                     if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
                         return result
                 else:
                     result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
                                                                      AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
         else:
-            result = self.check_conflicts_response(self, processed_name, list_original_name, list_name, list_dist,
-                                                   AnalysisIssueCodes.ADD_DISTINCTIVE_WORD)
+            result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name, list_dist,
+                                                              AnalysisIssueCodes.ADD_DISTINCTIVE_WORD)
             if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
                 return result
 
@@ -560,7 +555,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
-    def check_conflicts_response(self, processed_name, list_original_name, list_name, list_dist, issue):
+    def check_conflict_well_formed_response(self, processed_name, list_original_name, list_name, list_dist, issue):
         check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
                                                             list_name)
         if check_conflicts.is_valid:
@@ -568,3 +563,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                            issue)
         else:
             return check_conflicts
+
+    def check_descriptive(self, name_dict):
+        valid = False
+        for i, value in enumerate(name_dict.values()):
+            if value == DataFrameFields.DESCRIPTIVE.value:
+                valid = True
+                break
+
+        return valid
