@@ -14,7 +14,7 @@ class XproCorporateNameConflictIssue(CorporateNameConflictIssue):
             designations=None,
             show_reserve_button=None,
             # Set the show_examination_button to TRUE for all Xpro issues
-            show_examination_button=True,
+            show_examination_button=False,
             conflicts=[],
             setup=None,
             name_actions=[]

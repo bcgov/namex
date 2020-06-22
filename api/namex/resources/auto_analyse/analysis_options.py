@@ -111,6 +111,20 @@ def resolve_conflict_setup():
     )
 
 
+class AssumedNameSetup(Setup):
+    pass
+
+
+def assumed_name_setup():
+    return AssumedNameSetup(
+        type="assumed_name",
+        header=Template("Assumed Name"),
+        line1=Template("Send name to be examined as an Assumed Name."),
+        action=Template("I want to send my name to be examined as an Assumed Name."),
+        checkbox=Template("I want to send my name to be examined as an Assumed Name.")
+    )
+
+
 class SendToExaminerSetup(Setup):
     pass
 
