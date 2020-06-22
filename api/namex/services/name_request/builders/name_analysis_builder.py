@@ -41,13 +41,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     valid = True
                     break
             if not valid:
-                check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
-                                                                    list_name)
-                if check_conflicts.is_valid:
+                if len(name_dict) > 0:
+                    check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
+                                                                        list_name)
+                    if check_conflicts.is_valid:
+                        result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
+                                                                         AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
+                    else:
+                        return check_conflicts
+                else:
                     result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
                                                                      AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
-                else:
-                    return check_conflicts
         else:
             check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name, list_name)
             if check_conflicts.is_valid:
@@ -152,12 +156,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         dict_highest_counter, response = {}, {}
 
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
-            list_conflicts.extend(self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed))
-            list_conflicts = [i for n, i in enumerate(list_conflicts) if
-                              i not in list_conflicts[n + 1:]]  # Remove duplicates
+            if w_dist and w_desc:
+                list_conflicts.extend(
+                    self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed))
+                list_conflicts = [i for n, i in enumerate(list_conflicts) if
+                                  i not in list_conflicts[n + 1:]]  # Remove duplicates
 
-            if self.is_exact_match(list_conflicts):
-                break
+                if self.is_exact_match(list_conflicts):
+                    break
 
         most_similar_names.extend(
             sorted(list_conflicts, key=lambda item: (-item['score'], len(item['name'])))[
