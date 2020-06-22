@@ -42,23 +42,19 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     break
             if not valid:
                 if len(name_dict) > 0:
-                    check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
-                                                                        list_name)
-                    if check_conflicts.is_valid:
-                        result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
-                                                                         AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
-                    else:
-                        return check_conflicts
+                    result = self.check_conflicts_response(self, processed_name, list_original_name, list_name,
+                                                           list_dist,
+                                                           AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
+                    if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                        return result
                 else:
                     result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
                                                                      AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
         else:
-            check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name, list_name)
-            if check_conflicts.is_valid:
-                result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
-                                                                 AnalysisIssueCodes.ADD_DISTINCTIVE_WORD)
-            else:
-                return check_conflicts
+            result = self.check_conflicts_response(self, processed_name, list_original_name, list_name, list_dist,
+                                                   AnalysisIssueCodes.ADD_DISTINCTIVE_WORD)
+            if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                return result
 
         return result
 
@@ -563,3 +559,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         }
 
         return result
+
+    def check_conflicts_response(self, processed_name, list_original_name, list_name, list_dist, issue):
+        check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
+                                                            list_name)
+        if check_conflicts.is_valid:
+            return self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
+                                                           issue)
+        else:
+            return check_conflicts
