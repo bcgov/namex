@@ -13,7 +13,8 @@ from ..common import token_header, claims
 # 2.- Unique word classified as distinctive
 @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_base_request_response(client, jwt, app):
-    words_list_classification = [{'word': 'COSTAS', 'classification': 'DIST'}]
+    words_list_classification = [{'word': 'COSTAS', 'classification': 'DIST'},
+                                 {'word': 'ABC', 'classification': 'DIST'}]
     save_words_list_classification(words_list_classification)
 
     # create JWT & setup header with a Bearer Token using the JWT
