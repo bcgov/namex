@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
     # get the service account user to save Requests
     user = User.find_by_username(current_app.config['NRO_SERVICE_ACCOUNT'])
+
     max_rows = get_ops_params()
     processed = 0
 

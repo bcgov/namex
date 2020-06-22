@@ -1,5 +1,4 @@
 from flask import Flask, g, current_app
-from flask_marshmallow import Marshmallow
 from config import Config
 
 from namex import db
@@ -7,8 +6,7 @@ from namex.services import EventRecorder
 from namex.services.nro import NROServices
 from namex.services.nro.utils import ora_row_to_dict
 from namex.models import Request, Event, State
-
-from .utils.logging import setup_logging
+from extractor.utils.logging import setup_logging
 
 
 setup_logging()
@@ -45,7 +43,7 @@ def job_result_set(ora_con, max_rows):
     result_set = ora_cursor.execute("""
         SELECT ID, NR_NUM, STATUS
         FROM namex.namex_datafix
-        where status != 'COMPLETE' AND rownum <= :max_rows
+        where status IS NULL AND rownum <= :max_rows
         """
                                 , max_rows=max_rows
                                 )
@@ -65,6 +63,7 @@ def update_datafix_row(ora_con, id, status):
             where id = :id
             """
             ,id=id
+            ,status=status
         )
 
         print('rows updated',ora_cursor.rowcount)

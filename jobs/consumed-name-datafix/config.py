@@ -4,31 +4,41 @@ from dotenv import load_dotenv, find_dotenv
 #this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
-
-class Config(object):
+class BaseConfig(object):
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
     MAX_ROW_LIMIT = os.getenv('MAX_ROWS','100')
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    SQLALCHEMY_MAX_OVERFLOW = 10
+
     # POSTGRESQL
-    PG_USER = os.getenv('PG_USER', '')
-    PG_PASSWORD = os.getenv('PG_PASSWORD','')
-    PG_NAME = os.getenv('PG_DB_NAME','')
-    PG_HOST = os.getenv('PG_HOST','')
-    PG_PORT = os.getenv('PG_PORT','5432')
+    DB_USER = os.getenv('PG_USER', '')
+    DB_PASSWORD = os.getenv('PG_PASSWORD','')
+    DB_NAME = os.getenv('PG_NAME','')
+    DB_HOST = os.getenv('PG_HOST','')
+    DB_PORT = os.getenv('PG_PORT','5432')
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-         user=PG_USER,
-         password=PG_PASSWORD,
-         host=PG_HOST,
-         port=int(PG_PORT),
-         name=PG_NAME,
+         user=DB_USER,
+         password=DB_PASSWORD,
+         host=DB_HOST,
+         port=int(DB_PORT),
+         name=DB_NAME,
     )
 
-    # ORACLE
-    ORA_USER = os.getenv('ORA_USER', '')
-    ORA_PASSWORD = os.getenv('ORA_PASSWORD', '')
-    ORA_NAME = os.getenv('ORA_DB_NAME', '')
-    ORA_HOST = os.getenv('ORA_HOST', '')
-    ORA_PORT = os.getenv('ORA_PORT', '1521')
+    NRO_USER = os.getenv('NRO_USER', '')
+    NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
+    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
+    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
+    NRO_HOST = os.getenv('NRO_HOST', '')
+    NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
+
+
+class Config(BaseConfig):
+    DEBUG = False
+    TESTING = False
