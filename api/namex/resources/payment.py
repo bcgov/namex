@@ -29,6 +29,8 @@ setup_logging()  # It's important to do this first
 payment_api = Namespace('payments', description='Payment API - Uses Service BC Pay')
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
+MSG_SERVER_ERROR = 'Server Error!'
+MSG_NOT_FOUND = 'Resource not found'
 
 
 def validate_request(request):
@@ -144,7 +146,7 @@ class Payments(Resource):
     @payment_api.doc(params={
     })
     def post():
-        json_input = json.loads(request.get_json())
+        json_input = request.get_json()
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
@@ -158,7 +160,13 @@ class Payments(Resource):
             business_info=business_info
         )
 
-        payment = create_payment(req)
+        try:
+            payment = create_payment(req)
+            if not payment:
+                raise Exception('Could not create / update resource')
+
+        except Exception as err:
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
 
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
@@ -179,7 +187,13 @@ class Payment(Resource):
     def get(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        payment = get_payment(payment_identifier)
+        try:
+            payment = get_payment(payment_identifier)
+        except Exception as err:
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+
+        if not payment:
+            return jsonify(message=MSG_NOT_FOUND), 404
 
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
@@ -194,7 +208,7 @@ class Payment(Resource):
     def put(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        json_input = json.loads(request.get_json())
+        json_input = request.get_json()
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
@@ -208,7 +222,12 @@ class Payment(Resource):
             business_info=business_info
         )
 
-        payment = update_payment(payment_identifier, req)
+        try:
+            payment = update_payment(payment_identifier, req)
+            if not payment:
+                raise Exception('Could not create / update resource')
+        except Exception as err:
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
 
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
@@ -227,7 +246,7 @@ class PaymentFees(Resource):
     @payment_api.doc(params={
     })
     def post():
-        json_input = json.loads(request.get_json())
+        json_input = request.get_json()
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
@@ -245,7 +264,12 @@ class PaymentFees(Resource):
             priority=priority
         )
 
-        fees = calculate_fees(req)
+        try:
+            fees = calculate_fees(req)
+            if not fees:
+                raise Exception('Could not create / update resource')
+        except Exception as err:
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
 
         data = jsonify(fees.to_dict())
         response = make_response(data, 200)
@@ -268,7 +292,13 @@ class PaymentInvoices(Resource):
     def get(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        invoices = get_invoices(payment_identifier)
+        try:
+            invoices = get_invoices(payment_identifier)
+        except Exception as err:
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+
+        if not invoices:
+            return jsonify(message=MSG_NOT_FOUND), 404
 
         data = jsonify(invoices.to_dict())
         response = make_response(data, 200)
@@ -293,7 +323,13 @@ class PaymentInvoice(Resource):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
         invoice_id = unquote_plus(request.args.get('invoice_id').strip()) if request.args.get('invoice_id') else None
 
-        invoice = get_invoice(payment_identifier, invoice_id)
+        try:
+            invoice = get_invoice(payment_identifier, invoice_id)
+        except Exception as err:
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+
+        if not invoice:
+            return jsonify(message=MSG_NOT_FOUND), 404
 
         data = jsonify(invoice.to_dict())
         response = make_response(data, 200)
@@ -314,10 +350,13 @@ class PaymentReceipt(Resource):
     def get(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        receipt = get_receipt(payment_identifier)
+        try:
+            receipt = get_receipt(payment_identifier)
+        except Exception as err:
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
 
         if not receipt:
-            return
+            return jsonify(message=MSG_NOT_FOUND), 404
 
         data = jsonify(receipt.to_dict())
         response = make_response(data, 200)
@@ -421,7 +460,7 @@ class PaymentTransaction(Resource):
     def put(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
 
-        json_input = json.loads(request.get_json())
+        json_input = request.get_json()
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
