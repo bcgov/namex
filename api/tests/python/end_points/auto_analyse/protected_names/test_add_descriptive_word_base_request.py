@@ -26,6 +26,12 @@ def test_add_descriptive_word_base_request_response(client, jwt, app):
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
+        },
+        {
+            'name': 'ABC INC.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
         }
     ]
 
