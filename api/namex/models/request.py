@@ -440,13 +440,15 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
     request = target
     soc_list = []
     soc_list = ['SO', 'ASO', 'CSO', 'RSO', 'CTSO', 'XSO', 'XCSO', 'XRSO', 'XASO', 'XCASO', 'CSSO']
+    so_source = ValidSources.SO.value
+    nro_source = ValidSources.NRO.value
 
     # comes from NRO/Societies Online
     if (request._source is None):
         if (request.requestTypeCd not in soc_list):
-            request._source = ValidSources.NRO.value  # pylint: disable=protected-access
+            request._source = nro_source  # pylint: disable=protected-access
         if (request.requestTypeCd in soc_list):
-            request._source = ValidSources.SO.value  # pylint: disable=protected-access
+            request._source = so_source  # pylint: disable=protected-access
 
 
 @event.listens_for(Request, 'before_insert')
