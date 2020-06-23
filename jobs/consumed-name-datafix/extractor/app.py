@@ -92,7 +92,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
             nr_num = row['nr_num']
 
             nr = Request.find_by_nr(nr_num)
-            nr['source'] = 'NRO'
+
 
 
             current_app.logger.debug('processing: {}, NameX state: {}'
@@ -105,6 +105,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
             try:
                 nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num, name_request=nr)
 
+                nr._source='NRO'
                 namex_db.session.add(nr)
                 EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, {}, save_to_session=True)
                 current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
