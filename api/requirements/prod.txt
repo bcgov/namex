@@ -18,7 +18,7 @@ pronouncing
 requests
 toolz
 nltk==3.4.5
+inflect
 werkzeug==0.16.1
 pysolr
-pattern
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
