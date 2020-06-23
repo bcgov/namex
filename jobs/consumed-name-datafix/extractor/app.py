@@ -90,7 +90,9 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
             row = ora_row_to_dict(col_names, r)
 
             nr_num = row['nr_num']
+
             nr = Request.find_by_nr(nr_num)
+            nr.source = 'NRO'
 
 
             current_app.logger.debug('processing: {}, NameX state: {}'
