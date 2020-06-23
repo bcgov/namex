@@ -35,10 +35,6 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
         {'word': 'SEWING', 'classification': 'DESC'},
         {'word': 'SERVICE', 'classification': 'DIST'},
         {'word': 'SERVICE', 'classification': 'DESC'},
-        {'word': 'MARKET', 'classification': 'DIST'},
-        {'word': 'MARKET', 'classification': 'DESC'},
-        {'word': 'CAFE', 'classification': 'DIST'},
-        {'word': 'CAFE', 'classification': 'DESC'},
         {'word': 'KITCHEN', 'classification': 'DIST'},
         {'word': 'KITCHEN', 'classification': 'DESC'},
         {'word': 'FOOD', 'classification': 'DIST'},
@@ -95,11 +91,6 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
          'request_action': 'NEW'
          },
         {'name': 'SEWING SERVICE LTD.',
-         'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
-         },
-        {'name': 'MARKET CAFE LTD.',
          'location': 'BC',
          'entity_type': 'CR',
          'request_action': 'NEW'

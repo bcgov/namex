@@ -50,6 +50,38 @@ def remove_stop_words(name, stop_words, exception_stop_word_designation):
     return " ".join(text.split())
 
 
+def list_distinctive_descriptive(name_list, dist_list, desc_list):
+    queue_dist = collections.deque(dist_list)
+    dist_list_tmp, dist_list_all, desc_list_tmp, desc_list_all = [], [], [], []
+
+    dist_list_tmp.append(list(queue_dist))
+
+    while len(queue_dist) > 1:
+        queue_dist.pop()
+        dist_list_tmp.append(list(queue_dist))
+
+    dist_list_tmp.reverse()
+
+    for dist in dist_list_tmp:
+        desc_list_tmp.append([i for i in name_list if i not in dist and i in desc_list])
+
+    # Validate generation of list of lists of distinctives and descriptives with the correct combinations:
+    for idx, element in enumerate(dist_list_tmp):
+        if dist_list_tmp[idx] + desc_list_tmp[idx] == name_list:
+            dist_list_all.append(dist_list_tmp[idx])
+            desc_list_all.append(desc_list_tmp[idx])
+
+    for idx, element in enumerate(dist_list_all):
+        if len(dist_list_all) > 1 and (len(dist_list_all[idx]) == 0 or len(desc_list_all[idx]) == 0):
+            del dist_list_all[idx]
+            del desc_list_all[idx]
+
+    if len(dist_list_all) == 0 and len(desc_list_all) == 0:
+        return [dist_list_all], [desc_list_all]
+
+    return dist_list_all, desc_list_all
+
+
 def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
     all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
         words=list_dist,
@@ -117,3 +149,11 @@ def check_synonyms(syn_svc, list_dist_words, list_desc_words):
 def get_classification_summary(list_name, list_dist_words, list_desc_words):
     return {word: DataFrameFields.DISTINCTIVE.value if word in list_dist_words else DataFrameFields.DESCRIPTIVE.value \
         if word in list_desc_words else DataFrameFields.UNCLASSIFIED.value for word in list_name}
+
+
+def get_conflicts_same_classification(builder, name_tokens, processed_name, list_dist, list_desc):
+    list_dist, list_desc = \
+        list_distinctive_descriptive(name_tokens, list_dist, list_desc)
+    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name, True)
+
+    return check_conflicts
