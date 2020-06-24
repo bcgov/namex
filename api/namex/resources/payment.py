@@ -9,6 +9,8 @@ from urllib.parse import unquote_plus
 
 import json
 
+from namex.models import Request
+
 from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
 
 from namex.services.payment.invoices import get_invoices, get_invoice
@@ -150,10 +152,22 @@ class Payments(Resource):
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
+        # TODO: This would be better implemented as a PaymentService factory
+        # Grab the info we need off the request
+        # We can use the input from the request
         payment_info = json_input.get('payment_info')
         filing_info = json_input.get('filing_info')
         business_info = json_input.get('business_info')
 
+        # Or we can grab the existing name request from the db
+        # Again, we can grab the request by NR or ID
+        # name_req_draft = Request.find_by_nr(name_req_num)
+        # name_req_draft = Request.query.get(12345)
+        name_req_draft = Request.query.get(2262450)
+
+        # Update the name request if necessary (set status or whatever)
+
+        # Create our payment request
         req = PaymentRequest(
             payment_info=payment_info,
             filing_info=filing_info,
@@ -165,8 +179,13 @@ class Payments(Resource):
             if not payment:
                 raise Exception('Could not create / update resource')
 
+            # Update the name request with the payment id
+            name_req_draft.paymentToken = payment.id
+            # Save the name request
+            name_req_draft.save_to_db()
+
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
@@ -190,7 +209,7 @@ class Payment(Resource):
         try:
             payment = get_payment(payment_identifier)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
         if not payment:
             return jsonify(message=MSG_NOT_FOUND), 404
@@ -212,10 +231,22 @@ class Payment(Resource):
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
+        # TODO: This would be better implemented as a PaymentService factory
+        # Grab the info we need off the request
+        # We can use the input from the request
         payment_info = json_input.get('payment_info')
         filing_info = json_input.get('filing_info')
         business_info = json_input.get('business_info')
 
+        # Or we can grab the existing name request from the db
+        # Again, we can grab the request by NR or ID
+        # name_req_draft = Request.find_by_nr(name_req_num)
+        # name_req_draft = Request.query.get(12345)
+        name_req_draft = Request.query.get(2262450)
+
+        # Update the name request if necessary (set status or whatever)
+
+        # Create our payment request
         req = PaymentRequest(
             payment_info=payment_info,
             filing_info=filing_info,
@@ -226,8 +257,14 @@ class Payment(Resource):
             payment = update_payment(payment_identifier, req)
             if not payment:
                 raise Exception('Could not create / update resource')
+
+            # Update the name request with the payment id
+            name_req_draft.paymentToken = payment.id
+            # Save the name request
+            name_req_draft.save_to_db()
+
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
@@ -241,7 +278,9 @@ class PaymentFees(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     @payment_api.expect(calculate_fees_request_schema)
-    @payment_api.response(200, 'Success', '')
+    @payment_api.response(200, 'Success')
+    @payment_api.response(400, 'Bad Request')
+    @payment_api.response(500, 'Internal Server Error')
     # @marshal_with()
     @payment_api.doc(params={
     })
@@ -269,7 +308,7 @@ class PaymentFees(Resource):
             if not fees:
                 raise Exception('Could not create / update resource')
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
         data = jsonify(fees.to_dict())
         response = make_response(data, 200)
@@ -295,7 +334,7 @@ class PaymentInvoices(Resource):
         try:
             invoices = get_invoices(payment_identifier)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
         if not invoices:
             return jsonify(message=MSG_NOT_FOUND), 404
@@ -326,7 +365,7 @@ class PaymentInvoice(Resource):
         try:
             invoice = get_invoice(payment_identifier, invoice_id)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
         if not invoice:
             return jsonify(message=MSG_NOT_FOUND), 404
@@ -353,7 +392,7 @@ class PaymentReceipt(Resource):
         try:
             receipt = get_receipt(payment_identifier)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + repr(err)), 500
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
         if not receipt:
             return jsonify(message=MSG_NOT_FOUND), 404

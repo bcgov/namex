@@ -1,0 +1,7 @@
+import os
+
+PAYMENT_API_URL = os.getenv('PAYMENT_API_URL')
+
+AUTH_SVC_URL = os.getenv('AUTH_SVC_URL')
+AUTH_SVC_CLIENT_ID = os.getenv('AUTH_SVC_CLIENT_ID')
+AUTH_SVC_CLIENT_SECRET = os.getenv('AUTH_SVC_CLIENT_SECRET')

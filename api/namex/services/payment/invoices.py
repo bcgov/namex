@@ -2,11 +2,14 @@ from __future__ import print_function
 from pprint import pprint
 
 import openapi_client
-from openapi_client.rest import ApiException
+# Other stuff you can import...
+# from openapi_client.models import Invoice
+# from openapi_client.rest import ApiException
+
+from . import PAYMENT_API_URL, AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, AUTH_SVC_CLIENT_SECRET
+from namex.utils.util import get_client_credentials
 
 from .request_objects.abstract import Serializable
-
-PAYMENTS_API_HOST = 'http://localhost:4010'
 
 
 class GetInvoiceRequest(Serializable):
@@ -23,8 +26,14 @@ class GetInvoicesRequest(Serializable):
 def get_invoice(payment_identifier, invoice_id):
     # Create an instance of the API class
     api_instance = openapi_client.InvoicesApi()
+
+    authenticated, token = get_client_credentials(AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, AUTH_SVC_CLIENT_SECRET)
+    if not authenticated:
+        raise Exception('Client credentials request failed')
+    api_instance.api_client.set_default_header('Authorization', 'Bearer ' + token)
+
     # Set API host URI
-    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
+    api_instance.api_client.configuration.host = PAYMENT_API_URL
 
     try:
         # Get Invoice
@@ -40,8 +49,14 @@ def get_invoice(payment_identifier, invoice_id):
 def get_invoices(payment_identifier):
     # Create an instance of the API class
     api_instance = openapi_client.InvoicesApi()
+
+    authenticated, token = get_client_credentials(AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, AUTH_SVC_CLIENT_SECRET)
+    if not authenticated:
+        raise Exception('Client credentials request failed')
+    api_instance.api_client.set_default_header('Authorization', 'Bearer ' + token)
+
     # Set API host URI
-    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
+    api_instance.api_client.configuration.host = PAYMENT_API_URL
 
     try:
         # Get Invoices

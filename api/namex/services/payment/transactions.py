@@ -2,11 +2,14 @@ from __future__ import print_function
 from pprint import pprint
 
 import openapi_client
-from openapi_client.rest import ApiException
+# Other stuff you can import...
+# from openapi_client.models import Transaction
+# from openapi_client.rest import ApiException
+
+from . import PAYMENT_API_URL, AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, AUTH_SVC_CLIENT_SECRET
+from namex.utils.util import get_client_credentials
 
 from .request_objects.abstract import Serializable
-
-PAYMENTS_API_HOST = 'http://localhost:4010'
 
 
 class CreateTransactionRequest(Serializable):
@@ -37,8 +40,14 @@ class UpdateTransactionRequest(Serializable):
 def create_transaction(req):
     # Create an instance of the API class
     api_instance = openapi_client.TransactionsApi()
+
+    authenticated, token = get_client_credentials(AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, AUTH_SVC_CLIENT_SECRET)
+    if not authenticated:
+        raise Exception('Client credentials request failed')
+    api_instance.api_client.set_default_header('Authorization', 'Bearer ' + token)
+
     # Set API host URI
-    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
+    api_instance.api_client.configuration.host = PAYMENT_API_URL
 
     try:
         # Create a transaction
@@ -57,8 +66,14 @@ def create_transaction(req):
 def get_transaction(req):
     # Create an instance of the API class
     api_instance = openapi_client.TransactionsApi()
+
+    authenticated, token = get_client_credentials(AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, AUTH_SVC_CLIENT_SECRET)
+    if not authenticated:
+        raise Exception('Client credentials request failed')
+    api_instance.api_client.set_default_header('Authorization', 'Bearer ' + token)
+
     # Set API host URI
-    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
+    api_instance.api_client.configuration.host = PAYMENT_API_URL
 
     try:
         # Get Transaction
@@ -78,8 +93,14 @@ def get_transaction(req):
 def get_transactions(req):
     # Create an instance of the API class
     api_instance = openapi_client.TransactionsApi()
+
+    authenticated, token = get_client_credentials(AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, AUTH_SVC_CLIENT_SECRET)
+    if not authenticated:
+        raise Exception('Client credentials request failed')
+    api_instance.api_client.set_default_header('Authorization', 'Bearer ' + token)
+
     # Set API host URI
-    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
+    api_instance.api_client.configuration.host = PAYMENT_API_URL
 
     try:
         # Get Transactions
@@ -97,8 +118,14 @@ def get_transactions(req):
 def update_transaction(req):
     # Create an instance of the API class
     api_instance = openapi_client.TransactionsApi()
+
+    authenticated, token = get_client_credentials(AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, AUTH_SVC_CLIENT_SECRET)
+    if not authenticated:
+        raise Exception('Client credentials request failed')
+    api_instance.api_client.set_default_header('Authorization', 'Bearer ' + token)
+
     # Set API host URI
-    api_instance.api_client.configuration.host = PAYMENTS_API_HOST
+    api_instance.api_client.configuration.host = PAYMENT_API_URL
 
     try:
         # Update a transaction
