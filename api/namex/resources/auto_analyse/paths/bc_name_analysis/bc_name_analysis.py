@@ -56,7 +56,7 @@ def validate_name_request(location, entity_type, request_action):
 
         if entity_type in BCProtectedNameEntityTypes.list():
             is_protected = True
-            valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.AML.value)
+            valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.CHG.value, AnalysisRequestActions.DBA.value)
 
         elif entity_type in BCUnprotectedNameEntityTypes.list():
             is_unprotected = True
@@ -145,7 +145,8 @@ class BcNameAnalysis(Resource):
             return  # TODO: Return invalid response! What is it?
 
         try:
-            if location == ValidLocations.CA_BC.value and entity_type in BCProtectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.AML.value):
+            if location == ValidLocations.CA_BC.value and entity_type in BCProtectedNameEntityTypes.list() and request_action in \
+                    (AnalysisRequestActions.NEW.value, AnalysisRequestActions.CHG.value, AnalysisRequestActions.DBA.value):
                 # Use ProtectedNameAnalysisService
                 service = ProtectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)

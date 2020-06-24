@@ -1,5 +1,5 @@
 import re
-from pattern.text.en import singularize
+import inflect
 from itertools import product
 
 _parse_csv_line = lambda x: (x.split(','))
@@ -38,10 +38,12 @@ def remove_periods_designation(results):
 
 def get_plural_singular_name(name):
     d = {}
+    p = inflect.engine()
     for word in name.split():
         val = []
-        singular = singularize(word.lower())
-        val.extend([singular])
+        singular = p.singular_noun(word)
+        if singular is not False:
+            val.extend([singular])
         val.extend([word.lower()])
         d[word] = (list(set(val)))
 

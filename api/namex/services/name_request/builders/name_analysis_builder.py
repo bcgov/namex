@@ -3,7 +3,8 @@ from . import porter
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list
+from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list, list_distinctive_descriptive, \
+    get_conflicts_same_classification
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -23,108 +24,32 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     Override the abstract / base class method
     @return ProcedureResult[] An array of procedure results
     '''
-    '''
-    To be deprecated: Need to consider change in logic <distinctive><descriptive><distinctive> is valid
-    Another version of the function  was created to handle new logic
-    '''
 
-    def check_name_is_well_formed(self, list_dist, list_desc, list_name, list_original_name):
-        result = ProcedureResult()
-        result.is_valid = True
-
-        # list_name contains the clean name. For instance, the name 'ONE TWO THREE CANADA' is just 'CANADA'. Then,
-        # the original name should be passed to get the correct index when reporting issues to front end.
-        if list_name.__len__() == 0:
-            # If we have no words in our name, obviously we need to add a distinctive... this is kind of redundant as
-            # we shouldn't have a name with no words but we still need to handle the case in our API
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-            result.values = {
-                'list_original': [],
-                'list_name': [],
-                'list_dist': []
-            }
-        elif list_name.__len__() == 1:
-            # If there's only one word and it's distinctive, we need to add a descriptive word
-            if list_dist.__len__() == 1:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
-            else:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
-        else:
-            if list_dist.__len__() == 0:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
-            elif list_desc.__len__() == 0:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
-
-        return result
-
-    '''
-    Check to see if a provided name is valid
-    Override the abstract / base class method
-    @return ProcedureResult[] An array of procedure results
-    '''
-
-    def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name, list_original_name):
+    def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name,
+                                  processed_name, list_original_name):
         result = ProcedureResult()
         result.is_valid = True
 
         first_classification = next(iter(name_dict.values()))
         first_word = next(iter(name_dict))
         name_dict.pop(first_word)
-        valid = False
 
         if first_classification == DataFrameFields.DISTINCTIVE.value:
-            for i, value in enumerate(name_dict.values()):
-                if value == DataFrameFields.DESCRIPTIVE.value:
-                    valid = True
-                    break
+            valid = self.check_descriptive(name_dict)
             if not valid:
-                result = ProcedureResult()
-                result.is_valid = False
-                result.result_code = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-                result.values = {
-                    'list_original': list_original_name or [],
-                    'list_name': list_name or [],
-                    'list_dist': list_dist or []
-                }
+                if len(name_dict) > 0:
+                    result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name, list_dist,
+                                                                      AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
+                    if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                        return result
+                else:
+                    result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
+                                                                     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
         else:
-            result = ProcedureResult()
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.ADD_DISTINCTIVE_WORD
-            result.values = {
-                'list_original': list_original_name or [],
-                'list_name': list_name or [],
-                'list_dist': list_dist or []
-            }
+            result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name, list_dist,
+                                                              AnalysisIssueCodes.ADD_DISTINCTIVE_WORD)
+            if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                return result
 
         return result
 
@@ -215,15 +140,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name):
+    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name, check_name_is_well_formed=False):
         result = ProcedureResult()
         result.is_valid = False
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
 
-        list_conflicts.extend(self.get_conflicts(dict_highest_counter, list_dist_words, list_desc_words, list_name))
-        list_conflicts = [i for n, i in enumerate(list_conflicts) if
-                              i not in list_conflicts[n + 1:]]  # Remove duplicates
+        for w_dist, w_desc in zip(list_dist_words, list_desc_words):
+            if w_dist and w_desc:
+                list_conflicts.extend(
+                    self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed))
+                list_conflicts = [i for n, i in enumerate(list_conflicts) if
+                                  i not in list_conflicts[n + 1:]]  # Remove duplicates
+
+                if self.is_exact_match(list_conflicts):
+                    break
 
         most_similar_names.extend(
             sorted(list_conflicts, key=lambda item: (-item['score'], len(item['name'])))[
@@ -250,17 +181,24 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             result.values = []
         return result
 
-    def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name):
+    def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed):
         dist_substitution_list, desc_synonym_list, selected_matches_list, list_details = [], [], [], []
 
-        dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
-        desc_synonym_list = self.get_substitutions_descriptive(w_desc)
+        if check_name_is_well_formed:
+            dist_substitution_list.append(w_dist)
+            desc_synonym_list.append(w_desc)
+        else:
+            dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
+            desc_synonym_list = self.get_substitutions_descriptive(w_desc)
+
+        change_filter = True if self.director.skip_search_conflicts else False
 
         for dist in dist_substitution_list:
-            criteria = Request.get_general_query()
-            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True)
-            # Inject descriptive section into query, execute and add matches to list
+            criteria = Request.get_general_query(change_filter)
+            # Inject distinctive section into query
+            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, check_name_is_well_formed)
             for desc in desc_synonym_list:
+                # Inject descriptive section into query, execute and add matches to list
                 matches = Request.get_query_distinctive_descriptive(desc, criteria)
                 list_details.extend(self.get_most_similar_names(
                     dict_highest_counter,
@@ -347,7 +285,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        if not all_designations:
+        if all_designations_user and not all_designations:
             result.is_valid = False
             result.result_code = AnalysisIssueCodes.DESIGNATION_NON_EXISTENT
             result.values = {
@@ -394,11 +332,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def check_end_designation_more_than_once(self, list_name, all_designation_end_list, correct_designations_user, misplaced_designation_end):
+    def check_end_designation_more_than_once(self, list_name, all_designation_end_list, correct_designations_user,
+                                             misplaced_designation_end):
         result = ProcedureResult()
         result.is_valid = True
 
-        designation_end_list = [designation for designation in all_designation_end_list if designation in correct_designations_user]
+        designation_end_list = [designation for designation in all_designation_end_list if
+                                designation in correct_designations_user]
         correct_end_designations = designation_end_list + list(
             set(misplaced_designation_end) - set(designation_end_list))
 
@@ -602,3 +542,33 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 desc_synonym_list[i].append(desc)
 
         return desc_synonym_list
+
+    def check_name_is_well_formed_response(self, list_original_name, list_name, list_dist, result_code):
+        result = ProcedureResult()
+        result.is_valid = False
+        result.result_code = result_code
+        result.values = {
+            'list_original': list_original_name or [],
+            'list_name': list_name or [],
+            'list_dist': list_dist or []
+        }
+
+        return result
+
+    def check_conflict_well_formed_response(self, processed_name, list_original_name, list_name, list_dist, issue):
+        check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
+                                                            list_name)
+        if check_conflicts.is_valid:
+            return self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
+                                                           issue)
+        else:
+            return check_conflicts
+
+    def check_descriptive(self, name_dict):
+        valid = False
+        for i, value in enumerate(name_dict.values()):
+            if value == DataFrameFields.DESCRIPTIVE.value:
+                valid = True
+                break
+
+        return valid

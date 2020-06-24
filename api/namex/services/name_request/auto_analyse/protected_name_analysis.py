@@ -44,15 +44,16 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         results = []
 
         # Return any combination of these checks
-        check_conflicts = builder.search_conflicts(
-            self.get_list_dist(),
-            self.get_list_desc(),
-            self.name_tokens,
-            self.processed_name
-        )
+        if not self.skip_search_conflicts:
+            check_conflicts = builder.search_conflicts(
+                [self.get_list_dist()],
+                [self.get_list_desc()],
+                self.name_tokens,
+                self.processed_name
+            )
 
-        if not check_conflicts.is_valid:
-            results.append(check_conflicts)
+            if not check_conflicts.is_valid:
+                results.append(check_conflicts)
 
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct

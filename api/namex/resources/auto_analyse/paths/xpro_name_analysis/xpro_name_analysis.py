@@ -9,6 +9,7 @@ from flask_jwt_oidc import AuthError
 
 from urllib.parse import unquote_plus
 
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
@@ -45,9 +46,10 @@ def validate_name_request(location, entity_type, request_action):
         raise ValueError('Invalid request action provided')
 
     # Throw any errors related to invalid entity_type or request_action for a location
-    if location in (ValidLocations.CA_NOT_BC.list(), ValidLocations.INTL.list()):
+    if location == ValidLocations.CA_NOT_BC.list():
         # If XPRO, nothing is protected (for now anyway)
-        valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value)
+        valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value, AnalysisRequestActions.CNV.value,
+                                 AnalysisRequestActions.MVE.value, AnalysisRequestActions.REH.value, AnalysisRequestActions.REN.value)
 
         if entity_type not in XproUnprotectedNameEntityTypes.list():
             raise ValueError('Invalid entity_type provided for an XPRO entity')
@@ -110,7 +112,12 @@ class XproNameAnalysis(Resource):
             return  # TODO: Return invalid response! What is it?
 
         try:
-            if location in (ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value) and entity_type in XproUnprotectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value):
+            if location == ValidLocations.CA_NOT_BC.value and entity_type in XproUnprotectedNameEntityTypes.list() and request_action == AnalysisRequestActions.MVE.value:
+                # Use ProtectedNameAnalysisService
+                service = ProtectedNameAnalysisService()
+                builder = NameAnalysisBuilder(service)
+            elif location == ValidLocations.CA_NOT_BC.value and entity_type in XproUnprotectedNameEntityTypes.list() and \
+                    request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value, AnalysisRequestActions.CNV.value, AnalysisRequestActions.REH.value):
                 # Use UnprotectedNameAnalysisService
                 service = XproNameAnalysisService()
                 builder = NameAnalysisBuilder(service)

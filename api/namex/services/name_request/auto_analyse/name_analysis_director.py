@@ -98,6 +98,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self._token_classifier = token_classifier
 
     @property
+    def skip_search_conflicts(self):
+        return self._skip_search_conflicts
+
+    @skip_search_conflicts.setter
+    def skip_search_conflicts(self, skip_search_conflicts):
+        self._skip_search_conflicts = skip_search_conflicts
+
+    @property
     def word_classification_tokens(self):
         return \
             self.token_classifier.distinctive_word_tokens, \
@@ -146,6 +154,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.token_classifier = None
 
         self.entity_type = None
+        self.skip_search_conflicts = False
 
     # Call this method from whatever is using this director
     def use_builder(self, builder):
@@ -158,6 +167,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     # Convenience method for extending implementations
     def set_entity_type(self, entity_type):
         self.entity_type = entity_type
+
+    # Convenience method for extending implementations
+    def get_skip_search_conflicts(self):
+        return self._skip_search_conflicts
+
+    # Convenience method for extending implementations
+    def set_skip_search_conflicts(self, skip_search_conflicts):
+        self.skip_search_conflicts = skip_search_conflicts
 
     # API for extending implementations
     def get_name_tokens(self):
@@ -215,8 +232,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self._list_dist_words, self._list_desc_words = check_synonyms(syn_svc, self._list_dist_words,
                                                                       self._list_desc_words)
 
-        self._dict_name_words = get_classification_summary(self.name_tokens, self._list_dist_words, self._list_desc_words)
-
+        self._dict_name_words = get_classification_summary(self.name_tokens, self._list_dist_words,
+                                                           self._list_desc_words)
 
     '''
     This is the main execution call that wraps name analysis checks. 
@@ -240,15 +257,23 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 analysis.append(check_words_to_avoid)
                 return analysis
 
+            self.set_skip_search_conflicts(True)
             check_name_is_well_formed = builder.check_name_is_well_formed(
-                    self._dict_name_words,
-                    self._list_dist_words,
-                    self._list_desc_words,
-                    self.name_tokens,
-                    self.name_original_tokens
-                )
-            if not check_name_is_well_formed.is_valid:
+                self._dict_name_words,
+                self._list_dist_words,
+                self._list_desc_words,
+                self.name_tokens,
+                self.processed_name,
+                self.name_original_tokens
+            )
+            if check_name_is_well_formed.result_code in (
+                    AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
+                    not check_name_is_well_formed.is_valid:
                 analysis.append(check_name_is_well_formed)
+            elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                self.set_skip_search_conflicts(True)
+            else:
+                self.set_skip_search_conflicts(False)
 
             if analysis:
                 return analysis
@@ -324,6 +349,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             ]
 
             analysis = analysis + self.do_analysis()
+            if self.skip_search_conflicts:
+                analysis.append(check_name_is_well_formed)
+
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
 
             return analysis

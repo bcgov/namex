@@ -144,49 +144,9 @@ def _update_request(oracle_cursor, nr, event_id, change_flags):
                               event_id=event_id,
                               req_inst_id=req_inst_id)
 
-        # create curosr for env
-        test_env = 'prod'
-        #create curosr for env
-        if test_env in app_config:
-            oracle_cursor.execute("""
-                    INSERT INTO request_instance(request_instance_id, request_id,priority_cd, request_type_cd,
-                    expiration_date, start_event_id, tilma_ind, xpro_jurisdiction,
-                    nuans_expiration_date, queue_position, additional_info, nature_business_info,
-                    user_note, nuans_num, tilma_transaction_id, assumed_nuans_num, assumed_nuans_name, assumed_nuans_expiration_date,
-                    last_nuans_update_role, admin_comment)
-                    VALUES (request_instance_seq.nextval, :request_id, :priority_cd, :request_type_cd, 
-                              :expiration_date, :event_id, :tilma_ind, :xpro_jurisdiction, 
-                              :nuans_expiration_date, :queue_position, :additional_info, :nature_business_info,
-                              :user_note, :nuans_num, :tilma_transaction_id, :assumed_nuans_num, 
-                              :assumed_nuans_name, :assumed_nuans_expiration_date, :last_nuans_updated_role, 
-                              :admin_comment)
-                    """,
-                                  request_id=nr.requestId,
-                                  priority_cd=row[2],
-                                  request_type_cd=nr.requestTypeCd,
-                                  expiration_date=nr.expirationDate,
-                                  event_id=event_id,
-                                  tilma_ind=row[7],
-                                  xpro_jurisdiction=nr.xproJurisdiction,
-                                  nuans_expiration_date=row[9],
-                                  queue_position=row[10],
-                                  additional_info=nr.additionalInfo,
-                                  nature_business_info=nr.natureBusinessInfo,
-                                  user_note=row[13],
-                                  nuans_num=row[14],
-                                  tilma_transaction_id=row[15],
-                                  assumed_nuans_num=row[16],
-                                  assumed_nuans_name=row[17],
-                                  assumed_nuans_expiration_date=row[18],
-                                  last_nuans_updated_role=row[19],
-                                  admin_comment=row[20]
-                                  )
-
-
-        else:
-
-            # create new request_instance record
-            oracle_cursor.execute("""
+        # create cursor for env
+        # create new request_instance record
+        oracle_cursor.execute("""
             INSERT INTO request_instance(request_instance_id, request_id,priority_cd, request_type_cd,
             expiration_date, start_event_id, tilma_ind, xpro_jurisdiction,
             nuans_expiration_date, queue_position, additional_info, nature_business_info,

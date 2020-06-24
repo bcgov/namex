@@ -273,7 +273,7 @@ class Request(db.Model):
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
-    def get_general_query(cls):
+    def get_general_query(cls, change_filter=False):
         criteria = []
         basic_filters = [
             cls.id == Name.nrId,
@@ -325,6 +325,28 @@ class Request(db.Model):
                  LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
                  LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
                  EntityTypes.BENEFIT_COMPANY.value
+                 ] if not change_filter else [EntityTypes.PRIVATE_ACT.value,
+                 EntityTypes.CORPORATION.value,
+                 LegacyEntityTypes.CORPORATION.CCR.value,
+                 LegacyEntityTypes.CORPORATION.RCR.value,
+                 EntityTypes.COOPERATIVE.value,
+                 LegacyEntityTypes.COOPERATIVE.CCP.value,
+                 LegacyEntityTypes.COOPERATIVE.RCP.value,
+                 EntityTypes.FINANCIAL_INSTITUTION.value,
+                 LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                 LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                 LegacyEntityTypes.SOCIETY.ASO.value,
+                 LegacyEntityTypes.SOCIETY.CSO.value,
+                 LegacyEntityTypes.SOCIETY.RSO.value,
+                 EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                 EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                 EntityTypes.PARISH.value,
+                 EntityTypes.BENEFIT_COMPANY.value
                  ]),
 
             Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
@@ -366,7 +388,7 @@ class Request(db.Model):
         return flattened
 
     @classmethod
-    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False):
+    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, check_name_is_well_formed=False):
         special_characters_element= Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
@@ -378,7 +400,11 @@ class Request(db.Model):
                 e.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
             else:
                 substitutions = '|'.join(map(str, special_characters_element))
-                e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\W*\s*'.format(substitutions)))
+                if not check_name_is_well_formed:
+                    e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\W*\s*'.format(substitutions)))
+                else:
+                    e.filters[0].append(
+                        func.lower(Name.name).op('~')(r'^\s*\W*({})\W*\s*'.format(substitutions)))
 
         if distinctive:
             return criteria
@@ -406,7 +432,6 @@ class Request(db.Model):
 
         return list_special_characters
 
-
 # set the source from NRO, Societis Online, Name Request
 @event.listens_for(Request, 'before_update')
 def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
@@ -414,14 +439,15 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
     request = target
     soc_list = []
     soc_list = ['SO', 'ASO', 'CSO', 'RSO', 'CTSO', 'XSO', 'XCSO', 'XRSO', 'XASO', 'XCASO', 'CSSO']
+    so_source = ValidSources.SO.value
+    nro_source = ValidSources.NRO.value
 
     # comes from NRO/Societies Online
     if (request._source is None):
         if (request.requestTypeCd not in soc_list):
-            request._source = ValidSources.NRO.value  # pylint: disable=protected-access
+            request._source = nro_source  # pylint: disable=protected-access
         if (request.requestTypeCd in soc_list):
-            request._source = ValidSources.SO.value  # pylint: disable=protected-access
-
+            request._source = so_source  # pylint: disable=protected-access
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')

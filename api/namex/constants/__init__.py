@@ -315,9 +315,14 @@ request_type_mapping = [
     ('RFI', EntityTypes.FINANCIAL_INSTITUTION.value, RequestAction.REST.value),
     ('PA', EntityTypes.PRIVATE_ACT.value, RequestAction.NEW.value),
     ('PAR', EntityTypes.PARISH.value, RequestAction.NEW.value),
-    ('BC', EntityTypes.BENEFIT_COMPANY.value, RequestAction.NEW.value)
-]
-
+    ('BC', EntityTypes.BENEFIT_COMPANY.value, RequestAction.NEW.value),
+    ('BEAM', EntityTypes.BENEFIT_COMPANY.value, RequestAction.AML.value),
+    ('BEC', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CHG.value),
+    ('BECT', EntityTypes.BENEFIT_COMPANY.value, RequestAction.MVE.value),
+    ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REST.value),
+    ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value),
+    ('BECR', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value)
+    ]
 
 class NameState(Enum):
     NOT_EXAMINED = 'NE'
