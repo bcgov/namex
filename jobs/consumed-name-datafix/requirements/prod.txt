@@ -22,4 +22,4 @@ inflect
 werkzeug==0.16.1
 pysolr
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
-git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
+
