@@ -15,7 +15,7 @@ from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
 
 from namex.services.payment.invoices import get_invoices, get_invoice
 
-from namex.services.payment.payments import get_payment, create_payment, update_payment
+from namex.services.payment.payments import get_payment, create_payment, update_payment, CreatePaymentRequest, UpdatePaymentRequest
 
 from namex.services.payment.receipts import get_receipt
 
@@ -39,65 +39,80 @@ def validate_request(request):
     return True
 
 
-dictionary_list = payment_api.model('DictionaryList', {
+# Define our DTO models
+# Generic model types
+dictionary_list_model = payment_api.model('DictionaryList', {
     'key': fields.String,
     'list': fields.List(fields.String)
 })
 
-# Define our response object
-response_dict_list = payment_api.model('ResponseDictionaryList', {
-    'data': fields.List(fields.Nested(dictionary_list))
+dict_list_model = payment_api.model('DictionaryListList', {
+    'data': fields.List(fields.Nested(dictionary_list_model))
 })
 
-# Define our response object
-response_list = payment_api.model('List', {
+list_model = payment_api.model('List', {
     'data': fields.List(fields.String)
 })
 
-# Define our response object
-response_string = payment_api.model('String', {
+string_model = payment_api.model('String', {
     'data': fields.String
 })
 
-
+# Custom model types
 payment_info_schema = payment_api.model('PaymentInfo', {
-    'method_of_payment': fields.String
+    'methodOfPayment': fields.String
 })
 
 filing_type_schema = payment_api.model('FilingType', {
-    'filing_type_code': fields.String,
+    'filingTypeCode': fields.String,
     'priority': fields.Boolean,
-    'filing_description': fields.String
+    'filingDescription': fields.String
 })
 
 filing_info_schema = payment_api.model('FilingInfo', {
-    'corp_type': fields.String,
+    'corpType': fields.String,
     'date': fields.String,
-    'filing_types': fields.List(fields.Nested(filing_type_schema)),
+    'filingTypes': fields.List(fields.Nested(filing_type_schema)),
 })
 
 contact_info_schema = payment_api.model('ContactInfo', {
-    'first_name': fields.String,
-    'last_name': fields.String,
-    'address': fields.String,
+    # 'firstName': fields.String,
+    # 'lastName': fields.String,
+    'addressLine1': fields.String,
     'city': fields.String,
     'province': fields.String,
-    'postal_code': fields.String,
+    'country': fields.String,
+    'postalCode': fields.String,
 })
 
 business_info_schema = payment_api.model('BusinessInfo', {
-    'business_identifier': fields.String,
-    'business_name': fields.String,
-    'contact_info': fields.Nested(contact_info_schema)
-})
-
-payment_request_schema = payment_api.model('PaymentRequest', {
-    'payment_info': fields.Nested(payment_info_schema),
-    'business_info': fields.Nested(business_info_schema),
-    'filing_info': fields.Nested(filing_info_schema)
+    'businessIdentifier': fields.String,
+    'businessName': fields.String,
+    'contactInfo': fields.Nested(contact_info_schema)
 })
 
 
+payment_invoice_schema = payment_api.model('PaymentInvoice', {
+    'id': fields.String,
+    'referenceNumber': fields.String,
+    'statusCode': fields.String,
+    'createdBy': fields.String,
+    'createdOn': fields.String
+})
+
+payment_response_schema = payment_api.model('Payment', {
+    'id': fields.String,
+    'invoices': fields.List(fields.Nested(payment_invoice_schema)),
+    'paymentMethod': fields.String,
+    'statusCode': fields.String,
+    'createdBy': fields.String,
+    'createdOn': fields.String,
+    'updatedBy': fields.String,
+    'updatedOn': fields.String
+})
+
+# Define our request objects
+# Snake case as these are GET params
 calculate_fees_request_schema = payment_api.model('CalculateFeesRequest', {
     'corp_type': fields.String,
     'filing_type_code': fields.String,
@@ -106,24 +121,11 @@ calculate_fees_request_schema = payment_api.model('CalculateFeesRequest', {
     'priority': fields.String
 })
 
-
-payment_invoice_schema = payment_api.model('PaymentInvoice', {
-    'id': fields.String,
-    'reference_number': fields.String,
-    'status_code': fields.String,
-    'created_by': fields.String,
-    'created_on': fields.String
-})
-
-payment_response_schema = payment_api.model('Payment', {
-    'id': fields.String,
-    'invoices': fields.List(fields.Nested(payment_invoice_schema)),
-    'payment_method': fields.String,
-    'status_code': fields.String,
-    'created_by': fields.String,
-    'created_on': fields.String,
-    'updated_by': fields.String,
-    'updated_on': fields.String
+# These are POSTED use camelCase
+payment_request_schema = payment_api.model('PaymentRequest', {
+    'paymentInfo': fields.Nested(payment_info_schema),
+    'businessInfo': fields.Nested(business_info_schema),
+    'filingInfo': fields.Nested(filing_info_schema)
 })
 
 
@@ -155,9 +157,9 @@ class Payments(Resource):
         # TODO: This would be better implemented as a PaymentService factory
         # Grab the info we need off the request
         # We can use the input from the request
-        payment_info = json_input.get('payment_info')
-        filing_info = json_input.get('filing_info')
-        business_info = json_input.get('business_info')
+        payment_info = json_input.get('paymentInfo')
+        filing_info = json_input.get('filingInfo')
+        business_info = json_input.get('businessInfo')
 
         # Or we can grab the existing name request from the db
         # Again, we can grab the request by NR or ID
@@ -180,12 +182,12 @@ class Payments(Resource):
                 raise Exception('Could not create / update resource')
 
             # Update the name request with the payment id
-            name_req_draft.paymentToken = payment.id
+            name_req_draft.paymentToken = str(payment.id)
             # Save the name request
             name_req_draft.save_to_db()
 
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
+            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), err.status if err.status else err
 
         data = jsonify(payment.to_dict())
         response = make_response(data, 200)
@@ -234,9 +236,9 @@ class Payment(Resource):
         # TODO: This would be better implemented as a PaymentService factory
         # Grab the info we need off the request
         # We can use the input from the request
-        payment_info = json_input.get('payment_info')
-        filing_info = json_input.get('filing_info')
-        business_info = json_input.get('business_info')
+        payment_info = json_input.get('paymentInfo')
+        filing_info = json_input.get('filingInfo')
+        business_info = json_input.get('businessInfo')
 
         # Or we can grab the existing name request from the db
         # Again, we can grab the request by NR or ID
@@ -246,7 +248,7 @@ class Payment(Resource):
 
         # Update the name request if necessary (set status or whatever)
 
-        # Create our payment request
+        # Update our payment request
         req = PaymentRequest(
             payment_info=payment_info,
             filing_info=filing_info,
@@ -295,6 +297,8 @@ class PaymentFees(Resource):
         date = json_input.get('date', None)
         priority = json_input.get('priority', None)
 
+        # Params are snake_case for this POST
+        # Response data is also snake_case
         req = CalculateFeesRequest(
             corp_type=corp_type,
             filing_type_code=filing_type_code,

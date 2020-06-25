@@ -10,21 +10,26 @@ echo ${ROOT_DIR}
 # Grab our environment variables
 source ${SCRIPT_DIR}/.env
 
-# Set the URL for the OpenApi spec
-echo "Please enter the URL for the OpenApi spec to use or press enter to use the defaults:"
-if [[ -z ${API_SPEC_URL} ]]
+function is_url () {
+    if [[ `curl -s --head "$1" | head -n 1 | grep "HTTP/[1-3].[0-9] [23].."` ]]
+    then echo "true"; fi
+}
+
+# Set the source for the OpenApi spec
+echo "Please enter the URL / file name for the OpenApi spec to use or press enter to use the defaults:"
+if [[ -z ${API_SPEC_SRC} ]]
 then
     echo "[default: none]"
 else
-    echo "[default: "${API_SPEC_URL}"]"
+    echo "[default: "${API_SPEC_SRC}"]"
 fi
 
-read OAPI_SPEC_URL
+read OAPI_SPEC_SRC
 
-if [[ -z ${OAPI_SPEC_URL} ]]
+if [[ -z ${OAPI_SPEC_SRC} ]]
 then
-    echo "No URL provided, using defaults from .env"
-    OAPI_SPEC_URL=${API_SPEC_URL}
+    echo "No URL / file name provided, using defaults from .env"
+    OAPI_SPEC_SRC=${API_SPEC_SRC}
 fi
 
 # Set the VERSION of the OpenApi spec
@@ -52,7 +57,7 @@ else
 fi
 
 read SPEC_FORMAT
-if [[ -z ${DEFAULT_SPEC_FORMAT} ]]
+if [[ -z ${SPEC_FORMAT} ]]
 then
     SPEC_FORMAT=${DEFAULT_SPEC_FORMAT}
 fi
@@ -79,7 +84,7 @@ then
 
 fi
 
-echo "Generating python client for spec at [${OAPI_SPEC_URL}] using the ${TEMPLATE_DIR} template"
+echo "Generating python client for spec at [${OAPI_SPEC_SRC}] using the ${TEMPLATE_DIR} template"
 
 # Clean the dist folder
 echo "Clearing the dist folder"
@@ -89,26 +94,35 @@ echo "-----------------------------------"
 echo "Generating new API client"
 echo "-----------------------------------"
 
-# Download to the OpenApi spec JSON
-# TODO: Support other formats
-echo "Downloading API spec..."
-curl -o ${SCRIPT_DIR}/target-api-spec.${SPEC_FORMAT} ${OAPI_SPEC_URL}
-# Run swagger-codegen-cli against our client template for Python
-echo "Downloading API spec..."
-
-if [[ ${OPEN_API_VERSION} == '2' ]]
-    then
-        echo "docker run -P --rm -v ${SCRIPT_DIR}:/local swaggerapi/swagger-codegen-cli generate -i /local/target-api-spec.${SPEC_FORMAT}  -l python -t /local/template/${TEMPLATE_DIR} -o /local/dist"
-        docker run -P --rm -v ${SCRIPT_DIR}:/local swaggerapi/swagger-codegen-cli generate -i /local/target-api-spec.${SPEC_FORMAT}  -l python -t /local/template/${TEMPLATE_DIR} -o /local/dist
-elif [[ ${OPEN_API_VERSION} == '3' ]]
-    then
-        echo "run -P --rm -v ${SCRIPT_DIR}:/local openapitools/openapi-generator-cli generate -i /local/target-api-spec.${SPEC_FORMAT} -g python -t /local/template/${TEMPLATE_DIR} -o /local/dist"
-        docker run -P --rm -v ${SCRIPT_DIR}:/local openapitools/openapi-generator-cli generate -i /local/target-api-spec.${SPEC_FORMAT} -g python -t /local/template/${TEMPLATE_DIR} -o /local/dist
+SPEC_FILE_NAME="downloaded-api-spec"
+IS_VALID_URL=$(is_url ${OAPI_SPEC_SRC})
+if [[ ${IS_VALID_URL} == true ]]
+then
+    # Download the OpenApi spec JSON
+    echo "Downloading API spec..."
+    curl -vo ${SCRIPT_DIR}/specs/${SPEC_FILE_NAME}.${SPEC_FORMAT} ${OAPI_SPEC_SRC}
+else
+    SPEC_FILE_NAME=${OAPI_SPEC_SRC}
+    echo "Using API spec [${SCRIPT_DIR}/specs/${SPEC_FILE_NAME}.${SPEC_FORMAT}]"
 fi
 
-# Remove the downloaded swagger.json
-echo "Cleaning up distribution files"
-rm -f ${SCRIPT_DIR}/target-api-spec.${SPEC_FORMAT}
+# Run swagger-codegen-cli against our client template for Python
+if [[ ${OPEN_API_VERSION} == '2' ]]
+    then
+        echo "docker run -P --rm -v ${SCRIPT_DIR}:/local swaggerapi/swagger-codegen-cli generate -i /local/specs/${SPEC_FILE_NAME}.${SPEC_FORMAT}  -l python -t /local/template/${TEMPLATE_DIR} -o /local/dist"
+        docker run -P --rm -v ${SCRIPT_DIR}:/local swaggerapi/swagger-codegen-cli generate -i "/local/specs/${SPEC_FILE_NAME}.${SPEC_FORMAT}"  -l python -t "/local/template/${TEMPLATE_DIR}" -o "/local/dist"
+elif [[ ${OPEN_API_VERSION} == '3' ]]
+    then
+        echo "run -P --rm -v ${SCRIPT_DIR}:/local openapitools/openapi-generator-cli generate -i /local/specs/${SPEC_FILE_NAME}.${SPEC_FORMAT} -g python -t /local/template/${TEMPLATE_DIR} -o /local/dist"
+        docker run -P --rm -v ${SCRIPT_DIR}:/local openapitools/openapi-generator-cli generate -i "/local/specs/${SPEC_FILE_NAME}.${SPEC_FORMAT}" -g python -t "/local/template/${TEMPLATE_DIR}" -o "/local/dist"
+fi
+
+if [[ ${IS_VALID_URL} == true ]]
+then
+    # Remove the downloaded swagger.json
+    echo "Cleaning up distribution files"
+    rm -f ${SCRIPT_DIR}/specs/${SPEC_FILE_NAME}.${SPEC_FORMAT}
+fi
 
 # Clean out unnecessary files from the distribution
 rm -rfv ${SCRIPT_DIR}/dist/.git

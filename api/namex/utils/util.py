@@ -32,8 +32,8 @@ def get_client_credentials(auth_url, client_id, secret):
     # Return the auth response if an error occurs
     if auth.status_code != 200:
         # TODO: This is mocked out
-        return True, 'asdf-asdf-asdf-adsf'
-        # return False, auth.json()
+        # return True, 'asdf-asdf-asdf-adsf'
+        return False, auth.json()
 
     token = dict(auth.json())['access_token']
     return True, token
