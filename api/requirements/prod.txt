@@ -21,5 +21,7 @@ nltk==3.4.5
 inflect
 werkzeug==0.16.1
 pysolr
+asyncio-nats-client==0.10.0
+asyncio-nats-streaming==0.4.0
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
 git+https://github.com/bcdevlucas/sbc-pay-py-client.git@dev#egg=openapi_client
