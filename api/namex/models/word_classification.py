@@ -53,6 +53,17 @@ class WordClassification(db.Model):
         print(list(map(lambda x: x.classification, results)))
         return results
 
+    @classmethod
+    def find_word_by_classification(cls, word, classification):
+        results = db.session.query(cls.word, cls.classification) \
+            .filter(func.lower(cls.word) == func.lower(word)) \
+            .filter(cls.classification == func.lower(classification))\
+            .filter(cls.end_dt == None) \
+            .filter(cls.start_dt <= date.today()) \
+            .filter(cls.approved_dt <= date.today()).all()
+        print(word)
+        print(list(map(lambda x: x.classification, results)))
+        return results
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
