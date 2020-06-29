@@ -1,5 +1,5 @@
 from namex.models import db, WordClassification, WordClassificationSchema
-
+from datetime import datetime
 from .token_classifier import TokenClassifier
 
 
@@ -10,51 +10,45 @@ class WordClassificationService:
     def find_one(self, word=None):
         return WordClassification.find_word_classification(word)
 
-    def create(self, word_classification):
-        entity = self.find_one(word_classification.word) or None
+    def find_one_by_class(self, word=None, classification=None):
+        return WordClassification.find_word_by_classification(word, classification)
 
-        if not entity:
+    def create(self, word_classification):
+
             entity = WordClassification()
             entity.word = word_classification['word']
             entity.classification = word_classification['classification']
-            entity.lastNameUsed = word_classification['lastNameUsed']
-            entity.lastPrepName = word_classification['lastPrepName']
-            entity.frequency = word_classification['frequency']
-            entity.approvedBy = word_classification['approvedBy']
-            entity.approvedDate = word_classification['approvedDate']
-            entity.startDate = word_classification['startDate']
-            entity.endDate = word_classification['endDate']
-            entity.lastUpdatedBy = word_classification['lastUpdatedBy']
-            entity.lastUpdatedDate = word_classification['lastUpdatedDate']
+            entity.lastNameUsed = word_classification['name']
+            entity.lastPrepName = word_classification['name']
+            entity.frequency = 1
+            entity.approvedBy = word_classification['examiner']
+            entity.approvedDate = datetime.utcnow
+            entity.startDate = datetime.utcnow
+
+            entity.lastUpdatedBy = word_classification['examiner']
+            entity.lastUpdatedDate = datetime.utcnow
             entity.save_to_db()
 
             return entity
 
-        return None
 
-    def update(self, word_classification):
-        entity = self.find_one(word_classification.word) or None
 
-        if entity:
-            entity.word = word_classification['word']
-            entity.classification = word_classification['classification']
-            entity.lastNameUsed = word_classification['lastNameUsed']
-            entity.lastPrepName = word_classification['lastPrepName']
-            entity.frequency = word_classification['frequency']
-            entity.approvedBy = word_classification['approvedBy']
-            entity.approvedDate = word_classification['approvedDate']
-            entity.startDate = word_classification['startDate']
-            entity.endDate = word_classification['endDate']
-            entity.lastUpdatedBy = word_classification['lastUpdatedBy']
-            entity.lastUpdatedDate = word_classification['lastUpdatedDate']
-            entity.save_to_db()
+    def update(self, word_classification,entity):
 
-            return entity
 
-        return None
+        entity.lastNameUsed = word_classification['name']
+        entity.lastPrepName = word_classification['name']
+        entity.frequency = entity.frequency + 1
+
+        entity.lastUpdatedBy = word_classification['examiner']
+        entity.lastUpdatedDate = datetime.utcnow
+        entity.save_to_db()
+
+        return entity
+
 
     def create_or_update(self, word_classification):
-        entity = self.find_one(word_classification.word) or None
+        entity = self.find_one_by_class(word_classification.word,word_classification.classification) or None
 
         if not entity:
             return self.create(word_classification)
