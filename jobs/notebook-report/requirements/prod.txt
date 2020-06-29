@@ -15,6 +15,8 @@ pytest-mock
 pysolr
 python-dotenv
 marshmallow==2.20.5
+flask-marshmallow==0.9.0
+inflect==4.1.0
 jsonpickle
 requests
 httpx
