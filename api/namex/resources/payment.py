@@ -1,4 +1,4 @@
-from flask import request, make_response, jsonify
+from flask import request, make_response, send_file, jsonify
 from flask_restplus import Namespace, Resource, cors, fields, marshal_with, marshal
 from flask_jwt_oidc import AuthError
 
@@ -380,10 +380,11 @@ class PaymentInvoice(Resource):
 
 
 @cors_preflight('GET')
-@payment_api.route('/<string:payment_identifier>/receipt/<int:invoice_id>', strict_slashes=False, methods=['POST', 'OPTIONS'])
+# @payment_api.route('/<string:payment_identifier>/receipt/<int:invoice_id>', strict_slashes=False, methods=['POST', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>/receipt', strict_slashes=False, methods=['POST', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': '',
-    'invoice_id': '[required]'
+    # 'invoice_id': '[required]'
 })
 class PaymentReceipt(Resource):
     @staticmethod
@@ -391,9 +392,10 @@ class PaymentReceipt(Resource):
     # @jwt.requires_auth
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
-    def post(payment_identifier, invoice_id):
+    # def post(payment_identifier, invoice_id):
+    def post(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-        invoice_id = invoice_id if invoice_id else None
+        # invoice_id = invoice_id if invoice_id else None
 
         json_input = request.get_json()
         if not json_input:
@@ -416,16 +418,15 @@ class PaymentReceipt(Resource):
         )
 
         try:
-            receipt = get_receipt(payment_identifier, invoice_id, req)
+            receipt = get_receipt(payment_identifier, req)
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
         if not receipt:
             return jsonify(message=MSG_NOT_FOUND), 404
 
-        data = jsonify(receipt.to_dict())
-        response = make_response(data, 200)
-        return response
+        # data = jsonify(receipt.to_dict())
+        return send_file(receipt, mimetype='application/pdf', as_attachment=True)
 
 
 @cors_preflight('GET')

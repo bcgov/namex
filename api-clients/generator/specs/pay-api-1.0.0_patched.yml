@@ -932,12 +932,12 @@ paths:
           required: true
           schema:
             type: string
-        - name: invoice_id
-          in: path
-          description: Unique Identifier for the invoice
-          required: true
-          schema:
-            type: integer
+        # - name: invoice_id
+        #   in: path
+        #   description: Unique Identifier for the invoice
+        #   required: true
+        #   schema:
+        #     type: integer
       requestBody:
         content:
           application/json:
@@ -965,12 +965,12 @@ paths:
         required: true
         schema:
           type: string
-      - name: invoice_id
-        in: path
-        description: Unique Identifier for the invoice
-        required: true
-        schema:
-          type: integer
+      # - name: invoice_id
+      #   in: path
+      #   description: Unique Identifier for the invoice
+      #   required: true
+      #   schema:
+      #     type: integer
 components:
   schemas:
     ErrorResponse:
