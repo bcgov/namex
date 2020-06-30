@@ -17,7 +17,7 @@ class GetReceiptRequest(Serializable):
         self.payment_identifier = kwargs.get('payment_identifier')
 
 
-def get_receipt(payment_identifier):
+def get_receipt(payment_identifier, invoice_id, model):
     # Create an instance of the API class
     api_instance = openapi_client.ReceiptsApi()
 
@@ -31,7 +31,8 @@ def get_receipt(payment_identifier):
 
     try:
         # Get receipt for the payment
-        api_response = api_instance.get_receipt(payment_identifier)
+        api_response = api_instance.get_receipt(payment_identifier, invoice_id, model)
+        # api_response = api_instance.get_receipt(payment_identifier, invoice_id)
 
         pprint(api_response)
         return api_response

@@ -820,7 +820,7 @@ paths:
           description: Unique Identifier for the invoice
           required: true
           schema:
-            type: string
+            type: integer
       responses:
         '200':
           description: Success
@@ -914,12 +914,12 @@ paths:
         required: true
         schema:
           format: string
-          type: string
+          type: integer
         examples:
           payment_1:
             value: 152
   '/api/v1/payment-requests/{payment_identifier}/receipts':
-    get:
+    post:
       tags:
         - Receipts
       summary: Get receipt for the payment
@@ -932,6 +932,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: invoice_id
+          in: path
+          description: Unique Identifier for the invoice
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentReceiptInput'
+        required: true
       responses:
         '200':
           description: Receipt PDF file
@@ -947,11 +959,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     parameters:
-      - schema:
-          type: string
-        name: payment_identifier
+      - name: payment_identifier
         in: path
+        description: Unique Identifier for the payment
         required: true
+        schema:
+          type: string
+      - name: invoice_id
+        in: path
+        description: Unique Identifier for the invoice
+        required: true
+        schema:
+          type: integer
 components:
   schemas:
     ErrorResponse:
@@ -1004,18 +1023,18 @@ components:
         total:
           type: number
           description: Total including tax
-    PaymentLineItem:
+    LineItem:
       type: object
       properties:
         id:
           type: integer
           description: Unique identifier for payment line item
-        invoiceId:
-          type: integer
-          description: Unique identifier for invoice
-        feeScheduleId:
-          type: integer
-          description: Fee schedule id
+        # invoiceId:
+        #   type: integer
+        #   description: Unique identifier for invoice
+        # feeScheduleId:
+        #   type: integer
+        #   description: Fee schedule id
         quantity:
           type: integer
           description: Quantity of fee
@@ -1025,6 +1044,12 @@ components:
         serviceFees:
           type: number
           description: Applicable service fees
+        futureEffectiveFees:
+          type: number
+          description: Future effective fees
+        priorityFees:
+          type: number
+          description: Applicable processing fees
         processingFees:
           type: number
           description: Applicable processing fees
@@ -1119,7 +1144,7 @@ components:
         #   description: Contact last name
         addressLine1:
           type: string
-          description: Addres line 1
+          description: Address line 1
         city:
           type: string
           description: City
@@ -1159,6 +1184,9 @@ components:
         paymentMethod:
           type: string
           description: code of payment method
+        paymentSystem:
+          type: string
+          description: payment system
         statusCode:
           type: string
           description: Status of payment.
@@ -1177,6 +1205,21 @@ components:
         updatedOn:
           type: string
           description: payment update date
+    PaymentReceiptInput:
+      type: object
+      properties:
+        corpName:
+          type: string
+        businessNumber:
+          type: string
+        recognitionDateTime:
+          type: string
+        filingIdentifier:
+          type: string
+        filingDateTime:
+          type: string
+        fileName:
+          type: string
     Invoice:
       type: object
       properties:
@@ -1187,35 +1230,65 @@ components:
         id:
           type: integer
           description: Unique identifier for invoice
-        accountId:
-          type: integer
-          description: id of the account
+        # accountId:
+        #   type: integer
+        #   description: id of the account
         createdBy:
+          type: string
+          description: username of the account
+        # TODO: Is this a property that's going to be removed?
+        createdName:
           type: string
           description: username of the account
         createdOn:
           type: string
-          description: invoice creation date
-        paymentDate:
+          description: invoice created date
+        updatedName:
           type: string
-          description: date made payment
-        paymentId:
-          type: integer
-          description: payment identifier
-        paid:
-          type: number
-          description: amount paid
+          description: username of the account
+        updatedOn:
+          type: string
+          description: invoice update date
+        # This looks like it's been removed
+        # paymentId:
+        #   type: integer
+        #   description: payment identifier
+        # This looks like it's been removed
+        # paymentDate:
+        #   type: string
+        #   description: date made payment
+        #   $ref: '#/components/schemas/PaymentDate'
+        # This is not being returned is it not in use?
         lineItems:
           type: array
           items:
-            $ref: '#/components/schemas/PaymentLineItem'
-        referenceNumber:
-          type: string
-          description: reference number
+            $ref: '#/components/schemas/LineItem'
+        paid:
+          type: number
+          description: amount paid
+        refund:
+          type: number
+          description: refund amount
+        serviceFees:
+          type: number
+          description: service fees amount
+        total:
+          type: number
+          description: total amount
+        # receipts:
+        #   type: array
+        #   items:
+        #     $ref: '#/components/schemas/Receipt'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceReference'
         statusCode:
           type: string
           description: Status of payment.
+          # TODO: Double check status codes
           enum:
+            - PAID
             - DRAFT
             - IN_PROGRESS
             - CREATED
@@ -1231,6 +1304,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Invoice'
+    InvoiceReference:
+      type: object
+      properties:
+        id:
+          type: string
+        invoiceNumber:
+          type: string
+        referenceNumber:
+          type: string
+        statusCode:
+          type: string
     Transaction:
       type: object
       properties:

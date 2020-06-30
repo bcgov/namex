@@ -23,7 +23,7 @@ from namex.services.payment.transactions import \
     get_transactions, get_transaction, create_transaction, update_transaction, \
     GetTransactionsRequest, GetTransactionRequest, CreateTransactionRequest, UpdateTransactionRequest
 
-from openapi_client.models import PaymentRequest
+from openapi_client.models import PaymentRequest, PaymentReceiptInput
 
 setup_logging()  # It's important to do this first
 
@@ -349,7 +349,7 @@ class PaymentInvoices(Resource):
 
 
 @cors_preflight('GET')
-@payment_api.route('/<string:payment_identifier>/invoice', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>/invoice/<int:invoice_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
@@ -362,9 +362,9 @@ class PaymentInvoice(Resource):
     @payment_api.doc(params={
         'invoice_id': '[required]'
     })
-    def get(payment_identifier):
+    def get(payment_identifier, invoice_id):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-        invoice_id = unquote_plus(request.args.get('invoice_id').strip()) if request.args.get('invoice_id') else None
+        invoice_id = invoice_id if invoice_id else None
 
         try:
             invoice = get_invoice(payment_identifier, invoice_id)
@@ -380,9 +380,10 @@ class PaymentInvoice(Resource):
 
 
 @cors_preflight('GET')
-@payment_api.route('/<string:payment_identifier>/receipt', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>/receipt/<int:invoice_id>', strict_slashes=False, methods=['POST', 'OPTIONS'])
 @payment_api.doc(params={
-    'payment_identifier': ''
+    'payment_identifier': '',
+    'invoice_id': '[required]'
 })
 class PaymentReceipt(Resource):
     @staticmethod
@@ -390,11 +391,32 @@ class PaymentReceipt(Resource):
     # @jwt.requires_auth
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
-    def get(payment_identifier):
+    def post(payment_identifier, invoice_id):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        invoice_id = invoice_id if invoice_id else None
+
+        json_input = request.get_json()
+        if not json_input:
+            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+
+        corp_name = json_input.get('corpName', None)
+        business_number = json_input.get('businessNumber', None)
+        recognition_date_time = json_input.get('recognitionDateTime', None)
+        filing_identifier = json_input.get('filingIdentifier', None)
+        filing_date_time = json_input.get('filingDateTime', None)
+        file_name = json_input.get('fileName', None)
+
+        req = PaymentReceiptInput(
+            corp_name=corp_name,
+            business_number=business_number,
+            recognition_date_time=recognition_date_time,
+            filing_identifier=filing_identifier,
+            filing_date_time=filing_date_time,
+            file_name=file_name
+        )
 
         try:
-            receipt = get_receipt(payment_identifier)
+            receipt = get_receipt(payment_identifier, invoice_id, req)
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
