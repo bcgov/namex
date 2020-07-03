@@ -7,8 +7,6 @@ from namex.utils.util import cors_preflight
 
 from urllib.parse import unquote_plus
 
-import json
-
 from namex.models import Request
 
 from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
@@ -137,7 +135,7 @@ def handle_auth_error(ex):
 
 
 @cors_preflight('GET, POST')
-@payment_api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
+@payment_api.route('/<string:nr_num>', strict_slashes=False, methods=['POST', 'OPTIONS'])
 @payment_api.doc(params={
 })
 class Payments(Resource):
@@ -148,26 +146,26 @@ class Payments(Resource):
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
     @payment_api.doc(params={
+        'nr_num': 'Name Request number'
     })
-    def post():
+    def post(nr_num):
+        # TODO: Validate NR string format
+        # if not Request.validNRFormat(nr_num):
+        #    return None, None, jsonify(message='NR number is not in a valid format \'NR 9999999\''), 400
+
+        nr_draft = Request.find_by_nr(nr_num)
+        if not nr_draft:
+            # Should this be a 400 or 404... hmmm
+            return None, None, jsonify(message='{nr_num} not found'.format(nr_num=nr_num)), 400
+
         json_input = request.get_json()
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
-        # TODO: This would be better implemented as a PaymentService factory
         # Grab the info we need off the request
-        # We can use the input from the request
         payment_info = json_input.get('paymentInfo')
         filing_info = json_input.get('filingInfo')
         business_info = json_input.get('businessInfo')
-
-        # Or we can grab the existing name request from the db
-        # Again, we can grab the request by NR or ID
-        # name_req_draft = Request.find_by_nr(name_req_num)
-        # name_req_draft = Request.query.get(12345)
-        name_req_draft = Request.query.get(2262450)
-
-        # Update the name request if necessary (set status or whatever)
 
         # Create our payment request
         req = PaymentRequest(
@@ -182,9 +180,10 @@ class Payments(Resource):
                 raise Exception('Could not create / update resource')
 
             # Update the name request with the payment id
-            name_req_draft.paymentToken = str(payment.id)
+            # nr_draft.paymentToken = str(payment.id)
+            nr_draft.payment_token = str(payment.id)
             # Save the name request
-            name_req_draft.save_to_db()
+            nr_draft.save_to_db()
 
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), err.status if err.status else err
@@ -195,7 +194,7 @@ class Payments(Resource):
 
 
 @cors_preflight('GET, PUT')
-@payment_api.route('/<string:payment_identifier>', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'OPTIONS'])
+@payment_api.route('/<string:payment_identifier>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
@@ -233,20 +232,10 @@ class Payment(Resource):
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
 
-        # TODO: This would be better implemented as a PaymentService factory
         # Grab the info we need off the request
-        # We can use the input from the request
         payment_info = json_input.get('paymentInfo')
         filing_info = json_input.get('filingInfo')
         business_info = json_input.get('businessInfo')
-
-        # Or we can grab the existing name request from the db
-        # Again, we can grab the request by NR or ID
-        # name_req_draft = Request.find_by_nr(name_req_num)
-        # name_req_draft = Request.query.get(12345)
-        name_req_draft = Request.query.get(2262450)
-
-        # Update the name request if necessary (set status or whatever)
 
         # Update our payment request
         req = PaymentRequest(
@@ -259,11 +248,6 @@ class Payment(Resource):
             payment = update_payment(payment_identifier, req)
             if not payment:
                 raise Exception('Could not create / update resource')
-
-            # Update the name request with the payment id
-            name_req_draft.paymentToken = payment.id
-            # Save the name request
-            name_req_draft.save_to_db()
 
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500

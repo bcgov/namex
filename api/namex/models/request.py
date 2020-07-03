@@ -99,21 +99,24 @@ class Request(db.Model):
     REQUEST_FURNISHED = 'Y'
 
     # properties
-    @hybrid_property
+    @property
     def payment_token(self):
         """Property containing the payment token."""
         return self._payment_token
 
     @payment_token.setter
-    def payment_token(self, token: int):
-        if self.locked:
-            self._raise_default_lock_exception()
+    def payment_token(self, token: str):
         self._payment_token = token
 
-    @hybrid_property
+    @property
     def payment_completion_date(self):
         """Property containing the date the payment cleared."""
         return self._payment_completion_date
+
+    @payment_completion_date.setter
+    def payment_completion_date(self, date):
+        """Property containing the date the payment cleared."""
+        self._payment_completion_date = date
 
     @property
     def source(self):
