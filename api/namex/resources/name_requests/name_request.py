@@ -3,15 +3,17 @@ from flask_restplus import Namespace, Resource, fields
 from flask import current_app
 from pytz import timezone
 
-from namex.utils.logging import setup_logging
-
 from datetime import datetime
+
+from namex import nro
+
+from namex.utils.logging import setup_logging
 
 from namex.constants import NameState
 
-from namex.models import Request, Name, State, User
+from namex.models import Request, Name, State, User, Event
 
-# from namex.services import EventRecorder, MessageServices
+from namex.services import EventRecorder, MessageServices
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
 
 from .abstract import AbstractNameRequestMixin, \
@@ -279,20 +281,18 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
                 # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
                 if next_state in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
-                    # TODO: Uncomment this block
-                    # warnings = nro.add_nr(nrd)
-                    # if warnings:
-                    #     MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
-                    #     return jsonify({'message': 'Error updating oracle. You must re-try'}), 500
-                    # else:
-                    # added the oracle request_id in new_nr, need to save it postgres
-                    # set the furnished_flag='Y' for approved and conditionally approved
-                    #     if request_data['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
-                    #         name_request.furnished='Y'
-
-                    #     name_request.save_to_db()
-                    #     EventRecorder.record(user, Event.POST, nrd, request_data)
-                    pass
+                    # Note: Comment out this block to run locally, or you will get Oracle errors
+                    warnings = nro.add_nr(name_request)
+                    if warnings:
+                        MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
+                        return jsonify({'message': 'Error updating oracle. You must re-try'}), 500
+                    else:
+                        # added the oracle request_id in new_nr, need to save it postgres
+                        # set the furnished_flag='Y' for approved and conditionally approved
+                        if self.request_data['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
+                            name_request.furnished = 'Y'
+                            name_request.save_to_db()
+                            EventRecorder.record(self.user, Event.POST, name_request, self.request_data)
 
             except Exception as err:
                 return handle_exception(err, 'Error saving nr and names.', 500)
