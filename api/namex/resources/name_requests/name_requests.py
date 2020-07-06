@@ -17,7 +17,7 @@ setup_logging()  # Important to do this first
 
 
 @cors_preflight('POST')
-@api.route('/', methods=['POST', 'OPTIONS'])
+@api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
 class NameRequests(BaseNameRequest):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
@@ -55,7 +55,7 @@ class NameRequests(BaseNameRequest):
 
 
 @cors_preflight('PUT')
-@api.route('/<string:nr_num>', methods=['PUT', 'OPTIONS'])
+@api.route('/<string:nr_num>', strict_slashes=False, methods=['PUT', 'OPTIONS'])
 class NameRequest(BaseNameRequest):
     # REST Method Handlers
     @api.expect(nr_request)
