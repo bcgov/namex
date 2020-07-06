@@ -382,7 +382,6 @@ class PaymentReceipt(Resource):
     # def post(payment_identifier, invoice_id):
     def post(payment_identifier):
         payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-        # invoice_id = invoice_id if invoice_id else None
 
         json_input = request.get_json()
         if not json_input:
@@ -412,7 +411,6 @@ class PaymentReceipt(Resource):
         if not receipt:
             return jsonify(message=MSG_NOT_FOUND), 404
 
-        # data = jsonify(receipt.to_dict())
         return send_file(receipt, mimetype='application/pdf', as_attachment=True)
 
 

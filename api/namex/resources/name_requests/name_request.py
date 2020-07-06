@@ -254,6 +254,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         except Exception as err:
             return handle_exception(err, 'Error saving request [' + next_state + '].', 500)
 
+        # TODO: Did I re-implement this yet?
         # try:
         #     if next_state in [State.RESERVED, State.COND_RESERVE, State.DRAFT]:
         #         name_request.save_to_db()

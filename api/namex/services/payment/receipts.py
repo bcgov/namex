@@ -34,7 +34,6 @@ def get_receipt(payment_identifier, model):
     try:
         # Get receipt for the payment
         api_response = api_instance.get_receipt(payment_identifier, model)
-        # api_response = api_instance.get_receipt(payment_identifier, invoice_id)
 
         pprint(api_response)
         return api_response
