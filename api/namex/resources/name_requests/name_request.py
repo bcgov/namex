@@ -119,7 +119,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
     def _validate_config(cls):
         app_config = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
         if not app_config:
-            log_error('ENV is not set')
+            log_error('ENV is not set', None)
             return None, 'Internal server error', 500
 
         test_env = 'prod'
@@ -132,7 +132,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         self.request_data = request.get_json()
         if not self.request_data:
-            log_error('Error when getting json input')
+            log_error('Error when getting json input', None)
             return jsonify({'message': 'No input data provided'}), 400
 
     def create_name_request(self):
