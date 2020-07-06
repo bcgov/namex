@@ -371,7 +371,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         else:
             submitted_name.name_type_cd = 'CO'
 
-        if nexwt_state == State.DRAFT:
+        if next_state == State.DRAFT:
             submitted_name.state = NameState.NOT_EXAMINED.value
         else:
             submitted_name.state = next_state
