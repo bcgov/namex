@@ -33,7 +33,7 @@ payment_api = Namespace('payments', description='Payment API - Uses Service BC P
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
-MSG_ERROR_CREATING_RESOURCE = MSG_ERROR_CREATING_RESOURCE
+MSG_ERROR_CREATING_RESOURCE = 'Could not create / update resource'
 
 
 def validate_request(request):
