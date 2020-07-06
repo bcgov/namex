@@ -8,7 +8,7 @@ import openapi_client
 
 from . import PAYMENT_SVC_URL, PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET
 from .utils import set_api_client_auth_header, set_api_client_request_host
-from namex.utils.util import get_client_credentials
+from namex.utils.util import get_client_credentials, MSG_CLIENT_CREDENTIALS_REQ_FAILED
 
 from .request_objects.abstract import Serializable
 
@@ -107,7 +107,7 @@ def get_payment(payment_identifier):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise Exception('Client credentials request failed')
+        raise Exception(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -131,7 +131,7 @@ def create_payment(model):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise Exception('Client credentials request failed')
+        raise Exception(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -155,7 +155,7 @@ def update_payment(payment_identifier, model):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise Exception('Client credentials request failed')
+        raise Exception(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI

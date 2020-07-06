@@ -15,6 +15,9 @@ def cors_preflight(methods):
     return wrapper
 
 
+MSG_CLIENT_CREDENTIALS_REQ_FAILED = 'Client credentials request failed'
+
+
 def get_client_credentials(auth_url, client_id, secret):
     auth = requests.post(
         auth_url,
