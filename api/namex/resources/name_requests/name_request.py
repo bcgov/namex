@@ -82,6 +82,7 @@ NAME_REQUEST_SOURCE = 'NAMEREQUEST'
 
 
 class BaseNameRequest(Resource, AbstractNameRequestMixin):
+    # TODO: Fix this!
     # def __init__(self, *args, **kwargs):
     #    super(Resource, self).__init__()
     #    self._restricted_word_service = None
@@ -97,8 +98,10 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
                 self._restricted_word_service = VirtualWordConditionService()
         except Exception as err:
             log_error('Error initializing VirtualWordCondition Service: Error:{0}', err)
-            raise
+            # TODO: Make sure these exceptions are being handled properly
             # return jsonify({'message': 'Virtual Word Condition Service error'}), 404
+            raise
+
         return self._restricted_word_service
 
     @property
@@ -368,7 +371,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         else:
             submitted_name.name_type_cd = 'CO'
 
-        if next_state == State.DRAFT:
+        if nexwt_state == State.DRAFT:
             submitted_name.state = NameState.NOT_EXAMINED.value
         else:
             submitted_name.state = next_state
