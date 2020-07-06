@@ -4,7 +4,7 @@ import openapi_client
 # Other stuff you can import...
 # from openapi_client.rest import ApiException
 
-from . import PAYMENT_SVC_URL, PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET
+from . import PAYMENT_SVC_URL, PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET, PaymentServiceException
 from .utils import set_api_client_auth_header, set_api_client_request_host
 from namex.utils.util import get_client_credentials, MSG_CLIENT_CREDENTIALS_REQ_FAILED
 
@@ -22,7 +22,7 @@ def delete_api_v1_payment_requests_payment_identifier(req, callback):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise Exception(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise PaymentServiceException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     try:
