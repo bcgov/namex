@@ -345,7 +345,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
                         cnd_instructions = self.restricted_word_service.get_word_condition_instructions(consent)
                 except Exception as err:
                     # TODO: Acceot a lambda as param for handle_exception
-                    log_error('Error on get consent word. Consent Word[0], Error:{1}'.format(consent, err), err)
+                    log_error('Error on get consent word. Consent Word[0]'.format(consent), err)
                     return jsonify({'message': 'Error on get consent words.'}), 500
 
                 try:

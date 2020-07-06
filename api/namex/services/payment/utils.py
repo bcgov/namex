@@ -1,5 +1,5 @@
 def set_api_client_auth_header(api_instance, token):
-    set_api_client_auth_header(api_instance, token)
+    set_api_client_request_header(api_instance, 'Authorization', 'Bearer ' + token)
 
 
 def set_api_client_request_header(api_instance, key, value):
