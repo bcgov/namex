@@ -9,6 +9,8 @@ from urllib.parse import unquote_plus
 
 from namex.models import Request
 
+from namex.services.payment import PaymentServiceException
+
 from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
 
 from namex.services.payment.invoices import get_invoices, get_invoice
@@ -31,6 +33,7 @@ payment_api = Namespace('payments', description='Payment API - Uses Service BC P
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
+MSG_ERROR_CREATING_RESOURCE = MSG_ERROR_CREATING_RESOURCE
 
 
 def validate_request(request):
@@ -177,7 +180,7 @@ class Payments(Resource):
         try:
             payment = create_payment(req)
             if not payment:
-                raise Exception('Could not create / update resource')
+                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
 
             # Update the name request with the payment id
             # nr_draft.paymentToken = str(payment.id)
@@ -247,7 +250,7 @@ class Payment(Resource):
         try:
             payment = update_payment(payment_identifier, req)
             if not payment:
-                raise Exception('Could not create / update resource')
+                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
 
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
@@ -294,7 +297,7 @@ class PaymentFees(Resource):
         try:
             fees = calculate_fees(req)
             if not fees:
-                raise Exception('Could not create / update resource')
+                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
