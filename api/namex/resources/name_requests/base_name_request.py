@@ -1,9 +1,10 @@
-from flask import jsonify, request
+from pytz import timezone
+import os, pysolr
+from datetime import datetime
+
+from flask import request
 from flask_restplus import Namespace, Resource, fields
 from flask import current_app
-from pytz import timezone
-
-from datetime import datetime
 
 from namex import nro
 
@@ -11,17 +12,16 @@ from namex.utils.logging import setup_logging
 
 from namex.constants import NameState
 
-from namex.models import Request, Name, State, User, Event
+from namex.models import Request, Name, State, User, Event, Comment, Applicant
 
-from namex.services import EventRecorder, MessageServices
+from namex.services import MessageServices
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
+from namex.services.name_request import convert_to_ascii
 
-from .abstract import AbstractNameRequestMixin, \
-    log_error, handle_exception, \
-    set_request_type, create_expiry_date, update_solr, \
-    get_name_sequence, \
-    build_language_comment, build_name_comment, \
-    map_request_attributes
+from .abstract_name_request import AbstractNameRequestMixin
+from .utils import log_error
+
+from .exceptions import *
 
 setup_logging()  # Important to do this first
 
@@ -83,36 +83,77 @@ nr_request = api.model('name_request', {
 NAME_REQUEST_SOURCE = 'NAMEREQUEST'
 
 
-class BaseNameRequest(Resource, AbstractNameRequestMixin):
-    # TODO: Fix this!
-    # def __init__(self, *args, **kwargs):
-    #    super(Resource, self).__init__()
-    #    self._restricted_word_service = None
-    #    self._request_data = None
-    #    self._next_state_code = None
-    #    self._nr_num = None
-    #    self._nr_id = None
+def build_language_comment(english_bol, user_id, nr_id):
+    lang_comment = Comment()
+    lang_comment.examinerId = user_id
+    lang_comment.nrId = nr_id
+    if english_bol is True:
+        # Add a comment for the examiner that says this is not an english name
+        lang_comment.comment = 'The applicant has indicated the submitted name or names are in English.'
+    else:
+        lang_comment.comment = 'The applicant has indicated the submitted name or names are not English.'
+    return lang_comment
 
+
+def build_name_comment(user_id, nr_id):
+    name_comment = Comment()
+    name_comment.examinerId = user_id
+    name_comment.nrId = nr_id
+    name_comment.comment = 'The submitted name or names is a person name, coined phrase or trademark'
+    return name_comment
+
+
+def build_request_applicant(nr_id, party_id, request_applicant):
+    # Applicant, contact and address info
+    applicant = Applicant()
+    party_id = party_id
+    applicant.nrId = nr_id
+    applicant.partyId = party_id
+    applicant.lastName = convert_to_ascii(request_applicant['lastName'])
+    applicant.firstName = convert_to_ascii(request_applicant['firstName'])
+    if request_applicant['middleName']:
+        applicant.middleName = convert_to_ascii(request_applicant['middleName'])
+    applicant.contact = convert_to_ascii(request_applicant['contact'])
+    if request_applicant['middleName']:
+        applicant.middleName = convert_to_ascii(request_applicant['middleName'])
+    if request_applicant['clientFirstName']:
+        applicant.clientFirstName = convert_to_ascii(request_applicant['clientFirstName'])
+    if request_applicant['clientLastName']:
+        applicant.clientLastName = convert_to_ascii(request_applicant['clientLastName'])
+    if request_applicant['phoneNumber']:
+        applicant.phoneNumber = convert_to_ascii(request_applicant['phoneNumber'])
+    if request_applicant['faxNumber']:
+        applicant.faxNumber = convert_to_ascii(request_applicant['faxNumber'])
+    applicant.emailAddress = convert_to_ascii(request_applicant['emailAddress'])
+    applicant.addrLine1 = convert_to_ascii(request_applicant['addrLine1'])
+    if request_applicant['addrLine2']:
+        applicant.addrLine2 = convert_to_ascii(request_applicant['addrLine2'])
+    applicant.city = convert_to_ascii(request_applicant['city'])
+    applicant.stateProvinceCd = request_applicant['stateProvinceCd']
+    applicant.postalCd = convert_to_ascii(request_applicant['postalCd'])
+    applicant.countryTypeCd = request_applicant['countryTypeCd']
+
+    return applicant
+
+
+class BaseNameRequest(Resource, AbstractNameRequestMixin):
     @property
     def restricted_word_service(self):
         try:
             if not self._restricted_word_service:
                 self._restricted_word_service = VirtualWordConditionService()
         except Exception as err:
-            log_error('Error initializing VirtualWordCondition Service: Error:{0}', err)
-            # TODO: Make sure these exceptions are being handled properly
-            # return jsonify({'message': 'Virtual Word Condition Service error'}), 404
-            raise
+            log_error('Error initializing VirtualWordCondition Service. Error: {0}', err)
+            raise VirtualWordContidionServiceError()
 
         return self._restricted_word_service
 
     @property
     def user_id(self):
-        # Get the user
         try:
             user = User.find_by_username('name_request_service_account')
         except Exception as err:
-            return handle_exception(err, 'Error getting user id.', 500)
+            raise GetUserIdError(err)
 
         return user.id
 
@@ -122,28 +163,26 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         app_config = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
         if not app_config:
             log_error('ENV is not set', None)
-            return None, 'Internal server error', 500
+            raise Exception('Internal server error')
 
         test_env = 'prod'
         if test_env in app_config:
-            log_error('Someone is trying to post a new request. Not available.', None)
-            return jsonify({'message': 'Not Implemented in the current environment'}), 501
+            return NotImplementedError()
 
     def _before_create_or_update(self):
         self._validate_config()
 
         self.request_data = request.get_json()
         if not self.request_data:
-            log_error('Error when getting json input', None)
-            return jsonify({'message': 'No input data provided'}), 400
+            log_error('Error getting json input.', None)
+            raise InvalidInputError()
 
     def create_name_request(self):
         try:
             name_request = Request()
+            self.generate_nr_keys()
         except Exception as err:
-            return handle_exception(err, 'Error initializing name_request object.', 500)
-
-        self.generate_nr_keys()
+            raise CreateNameRequestError(err)
 
         return name_request
 
@@ -164,7 +203,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         name_request.id = nr_id
         name_request.submittedDate = datetime.utcnow()
-        name_request.requestTypeCd = set_request_type(request_entity, request_action)
+        name_request.requestTypeCd = self.set_request_type(request_entity, request_action)
         name_request.nrNum = nr_num
         name_request._source = NAME_REQUEST_SOURCE
 
@@ -191,6 +230,36 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         return name_request
 
+    def map_request_attributes(self, name_request, request_data, user_id):
+        # TODO: Review additional info stuff from NRO/namex (prev NR for re-applies,no NWPTA?
+        name_request.natureBusinessInfo = request_data['natureBusinessInfo']
+        if request_data['natureBusinessInfo']:
+            name_request.natureBusinessInfo = request_data['natureBusinessInfo']
+
+        if request_data['additionalInfo']:
+            name_request.additionalInfo = request_data['additionalInfo']
+        if request_data['tradeMark']:
+            name_request.tradeMark = request_data['tradeMark']
+        if request_data['previousRequestId']:
+            name_request.previousRequestId = request_data['previousRequestId']
+        name_request.priorityCd = request_data['priorityCd']
+        if request_data['priorityCd'] == 'Y':
+            name_request.priorityDate = datetime.utcnow().date()
+
+        name_request.submitter_userid = user_id
+
+        # XPRO
+        if request_data['xproJurisdiction']:
+            name_request.xproJurisdiction = request_data['xproJurisdiction']
+        # For MRAS participants
+        if request_data['homeJurisNum']:
+            name_request.homeJurisNum = request_data['homeJurisNum']
+        # For existing businesses
+        if request_data['corpNum']:
+            name_request.corpNum = request_data['corpNum']
+
+        return name_request
+
     def map_request_data(self, name_request):
         user_id = self.user_id
         next_state = self.next_state_code
@@ -202,20 +271,20 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         try:
             name_request = self.map_request_attrs(name_request)
         except Exception as err:
-            return handle_exception(err, 'Error setting request header attributes.', 500)
+            raise MapRequestAttributesError(err)
 
         try:
             if next_state == State.COND_RESERVE:
                 name_request.consentFlag = 'Y'
 
             if next_state in [State.RESERVED, State.COND_RESERVE]:
-                name_request.expirationDate = create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
+                name_request.expirationDate = self.create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
 
             name_request.stateCd = next_state
             name_request.entity_type_cd = request_entity
             name_request.request_action_cd = request_action
         except Exception as err:
-            return handle_exception(err, 'Error setting reserve state and expiration date.', 500)
+            raise RequestStateChangeError(err)
 
         # Set this to name_request_service_account
         name_request.userId = user_id
@@ -223,99 +292,68 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         try:
             name_request = self.map_request_language_comments(name_request)
         except Exception as err:
-            return handle_exception(err, 'Error setting language comment.', 500)
+            raise MapLanguageCommentError(err)
 
         try:
             self.map_request_person_name_comments(name_request)
         except Exception as err:
-            return handle_exception(err, 'Error setting person name comment.', 500)
+            raise MapPersonCommentError(err)
 
         try:
             name_request = self.update_request_submit_count(name_request)
         except Exception as err:
-            return handle_exception(err, 'Error setting submit count.', 500)
+            raise UpdateSubmitCountError(err)
 
         if next_state == State.DRAFT:
             try:
                 # Set name request header attributes
-                name_request = map_request_attributes(name_request, request_data, user_id)
+                name_request = self.map_request_attributes(name_request, request_data, user_id)
             except Exception as err:
-                return handle_exception(err, 'Error setting request DRAFT attributes.', 500)
+                raise RequestStateChangeError(err)
 
         return name_request
 
-    # CRUD methods
-    def save_request(self, name_request, on_success):
-        next_state = self.next_state_code
+    def map_request_applicants(self, name_request):
+        request_data = self.request_data
+        nr_id = self.nr_id
 
-        try:
-            name_request.save_to_db()
-            on_success()
-        except Exception as err:
-            return handle_exception(err, 'Error saving request [' + next_state + '].', 500)
+        applicants = []
+        for request_applicant in request_data.get('applicants', []):
+            applicant = build_request_applicant(nr_id, self.get_applicant_sequence(), request_applicant)
+            applicants.append(applicant)
 
-        # TODO: Did I re-implement this yet?
-        # try:
-        #     if next_state in [State.RESERVED, State.COND_RESERVE, State.DRAFT]:
-        #         name_request.save_to_db()
-        # except Exception as err:
-        #     return handle_exception(err, 'Error saving reservation to db.', 500)
+        name_request.applicants = applicants
 
-    def create_or_update_names(self, name_request):
-        next_state = self.next_state_code
+        return name_request
 
+    def map_request_names(self, name_request):
         if not self.request_names:
-            # TODO: Raise error here!
-            return
+            raise MapRequestNamesError()
 
         try:
             for name in self.request_names:
-                submitted_name = self._create_or_update_name(name)
-
-                try:
-                    name_request.names.append(submitted_name)
-                except Exception as err:
-                    return handle_exception(err, 'Error appending names.', 500)
-            try:
-                # Save names to postgres
-                name_request.save_to_db()
-
-                # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
-                if next_state in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
-                    # Note: Comment out this block to run locally, or you will get Oracle errors
-                    warnings = nro.add_nr(name_request)
-                    if warnings:
-                        MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
-                        return jsonify({'message': 'Error updating oracle. You must re-try'}), 500
-                    else:
-                        # added the oracle request_id in new_nr, need to save it postgres
-                        # set the furnished_flag='Y' for approved and conditionally approved
-                        if self.request_data['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
-                            name_request.furnished = 'Y'
-                            name_request.save_to_db()
-                            EventRecorder.record(self.user, Event.POST, name_request, self.request_data)
-
-            except Exception as err:
-                return handle_exception(err, 'Error saving nr and names.', 500)
-
+                submitted_name = self.map_submitted_name(name)
+                name_request.names.append(submitted_name)
         except Exception as err:
-            return handle_exception(err, 'Error setting name.', 500)
+            raise MapRequestNamesError(err)
 
-    def _create_or_update_name(self, name):
+        return name_request
+
+    def map_submitted_name(self, name):
         next_state = self.next_state_code
 
         try:
             submitted_name = Name()
-            name_id = get_name_sequence()
+            name_id = self.get_name_sequence()
             submitted_name.id = name_id
         except Exception as err:
-            return handle_exception(err, 'Error on submitted_name and / or sequence.', 500)
+            raise MapRequestNamesError(err, 'Error setting submitted_name and / or sequence.')
 
         # Common name attributes
         try:
-            submitted_name = self._map_submitted_name_attrs(submitted_name, name)
+            submitted_name = self.map_submitted_name_attrs(submitted_name, name)
         except Exception as err:
-            return handle_exception(err, 'Error on common name attributes.', 500)
+            raise MapRequestNamesError(err, 'Error setting common name attributes.')
 
         decision_text = None
 
@@ -329,13 +367,13 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
                 # Conflict text same as Namex
                 decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
             except Exception as err:
-                return handle_exception(err, 'Error on reserved conflict info.', 500)
+                raise MapRequestNamesError(err, 'Error on reserved conflict info.')
         else:
             try:
                 submitted_name.conflict1_num = None
                 submitted_name.conflict1 = None
             except Exception as err:
-                return handle_exception(err, 'Error on draft empty conflict info.', 500)
+                raise MapRequestNamesError(err, 'Error on draft empty conflict info.')
 
         consent_list = name['consent_words']
         if len(consent_list) > 0:
@@ -345,9 +383,8 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
                     if consent != '' or len(consent) > 0:
                         cnd_instructions = self.restricted_word_service.get_word_condition_instructions(consent)
                 except Exception as err:
-                    # TODO: Acceot a lambda as param for handle_exception
                     log_error('Error on get consent word. Consent Word[0]'.format(consent), err)
-                    return jsonify({'message': 'Error on get consent words.'}), 500
+                    raise MapRequestNamesError('Error mapping consent words.')
 
                 try:
                     if decision_text is None:
@@ -357,11 +394,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
                     submitted_name.decision_text = decision_text
                 except Exception as err:
-                    return handle_exception(err, 'Error adding consent words to decision.', 500)
+                    raise MapRequestNamesError(err, 'Error adding consent words to decision.')
 
         return submitted_name
 
-    def _map_submitted_name_attrs(self, submitted_name, name):
+    def map_submitted_name_attrs(self, submitted_name, name):
         next_state = self.next_state_code
 
         submitted_name.choice = name['choice']
@@ -384,6 +421,39 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         return submitted_name
 
+    # CRUD methods
+    def save_request(self, name_request, on_success=None):
+        try:
+            name_request.save_to_db()
+            if on_success:
+                on_success()
+
+        except Exception as err:
+            raise SaveNameRequestError(err)
+
+    def save_request_to_nro(self, name_request, next_state_code):
+        next_state = next_state_code if next_state_code else self.next_state_code
+
+        # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
+        if next_state in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
+            # Note: Comment out this block to run locally, or you will get Oracle errors
+            warnings = nro.add_nr(name_request)
+            if warnings:
+                MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
+                raise NROUpdateError()
+            else:
+                # added the oracle request_id in new_nr, need to save it postgres
+                # set the furnished_flag='Y' for approved and conditionally approved
+                if self.request_data['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
+                    name_request.furnished = 'Y'
+
+        return name_request
+
+    def update_solr(self, core, solr_docs):
+        SOLR_URL = os.getenv('SOLR_BASE_URL')
+        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
+        solr.add(solr_docs, commit=True)
+
     def update_solr_doc(self, updated_nr, name_request):
         next_state = self.next_state_code
         # TODO: Need to add verification that the save was successful.
@@ -396,6 +466,6 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
                           'start_date': name_request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')}
 
                 solr_docs.append(nr_doc)
-                update_solr('possible.conflicts', solr_docs)
+                self.update_solr('possible.conflicts', solr_docs)
         except Exception as err:
-            return handle_exception(err, 'Error updating solr for reservation.', 500)
+            raise SolrUpdateError(err)
