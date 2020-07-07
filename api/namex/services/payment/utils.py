@@ -3,7 +3,7 @@ def set_api_client_auth_header(api_instance, token):
 
 
 def set_api_client_request_header(api_instance, key, value):
-    api_instance.api_client.set_default_header(api_instance, key, value)
+    api_instance.api_client.set_default_header(key, value)
 
 
 def set_api_client_request_host(api_instance, url):
