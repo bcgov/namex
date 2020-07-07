@@ -401,10 +401,10 @@ class Request(db.Model):
             else:
                 substitutions = '|'.join(map(str, special_characters_element))
                 if not check_name_is_well_formed:
-                    e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\W*\s*'.format(substitutions)))
+                    e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({})\W*\s*\y'.format(substitutions)))
                 else:
                     e.filters[0].append(
-                        func.lower(Name.name).op('~')(r'^\s*\W*({})\W*\s*'.format(substitutions)))
+                        func.lower(Name.name).op('~')(r'^\s*\W*({})\W*\s*\y'.format(substitutions)))
 
         if distinctive:
             return criteria

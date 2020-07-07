@@ -432,6 +432,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 match_list = np_svc.name_tokens
                 counter = self.get_score(match_list, length_original, list_name, list_name_stem, all_subs_dict)
                 similarity = round(counter / length_original, 2)
+                print("similarity: ", similarity)
                 if similarity >= 0.67:
                     dict_matches_counter.update({match.name: similarity})
                     selected_matches.append(match)
