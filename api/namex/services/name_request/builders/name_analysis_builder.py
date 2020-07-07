@@ -444,8 +444,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             vector1_dist = self.text_to_vector(list_dist)
             vector1_desc = self.text_to_vector(list_desc)
             for match in matches:
-                if match.name == 'PACIFIC INDUSTRIAL HOLDINGS LTD.':
-                    print("None")
+                np_svc = service.name_processing_service
                 np_svc.set_name(match.name)
                 match_list = np_svc.name_tokens
                 #get_classification(self.director, service, syn_svc, match_list, token_svc)
