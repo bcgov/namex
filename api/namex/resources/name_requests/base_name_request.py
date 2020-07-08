@@ -437,6 +437,8 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             if on_success:
                 on_success()
 
+            return Request.find_by_nr(name_request.nrNum)
+
         except Exception as err:
             raise SaveNameRequestError(err)
 
