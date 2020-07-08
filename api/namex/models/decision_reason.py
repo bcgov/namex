@@ -2,6 +2,7 @@
 """
 from . import db, ma
 
+
 class DecisionReason(db.Model):
     __tablename__ = 'decision_reason'
 
@@ -11,7 +12,6 @@ class DecisionReason(db.Model):
 
     def json(self):
         return {"id": self.id, "name": self.name, "reason": self.reason}
-
 
     @classmethod
     def find_by_name(cls, name):

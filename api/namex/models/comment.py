@@ -17,6 +17,7 @@ class Comment(db.Model):
 
     # Relationships - Users
     examiner = db.relationship("User", backref=backref("examiner_comments"), foreign_keys=[examinerId])
+
     # NRComments = db.relationship('Request', backref=backref("comments", uselist=False), foreign_keys=[nrId])
 
     def as_dict(self):
@@ -34,13 +35,16 @@ class Comment(db.Model):
     def delete_from_db(self):
         pass
 
+
 class CommentSchema(ma.ModelSchema):
     class Meta:
         model = Comment
         fields = ('comment', 'timestamp', 'examiner', 'id')
-    examiner = ma.Nested(UserSchema, many=False,  only='username')
+
+    examiner = ma.Nested(UserSchema, many=False, only='username')
+
 
 class NameCommentSchema(ma.ModelSchema):
     class Meta:
         model = Comment
-        fields = ('comment', )
+        fields = ('comment',)

@@ -70,22 +70,23 @@ class Applicant(db.Model):
 class ApplicantSchema(ma.ModelSchema):
     class Meta:
         model = Applicant
-        fields = ('lastName'
-                 ,'firstName'
-                 ,'middleName'
-                 ,'phoneNumber'
-                 ,'faxNumber'
-                 ,'emailAddress'
-                 ,'contact'
-                 ,'clientFirstName'
-                 ,'clientLastName'
-                 ,'declineNotificationInd'
-                 ,'addrLine1'
-                 ,'addrLine2'
-                 ,'addrLine3'
-                 ,'city'
-                 ,'postalCd'
-                 ,'stateProvinceCd'
-                 ,'countryTypeCd'
-                 )
-
+        fields = (
+            'partyId',
+            'lastName',
+            'firstName',
+            'middleName',
+            'phoneNumber',
+            'faxNumber',
+            'emailAddress',
+            'contact',
+            'clientFirstName',
+            'clientLastName',
+            'declineNotificationInd',
+            'addrLine1',
+            'addrLine2',
+            'addrLine3',
+            'city',
+            'postalCd',
+            'stateProvinceCd',
+            'countryTypeCd'
+        )

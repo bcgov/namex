@@ -28,6 +28,7 @@ class VirtualWordCondition(db.Model):
     rc_allow_use = db.Column(db.Boolean(), default=True)
 '''
 
+
 # The class that corresponds to the database table for decision reasons audits.
 class DecisionReasonAudit(db.Model):
     __tablename__ = 'decision_reason_audit'
@@ -81,6 +82,7 @@ class RestrictedConditionAudit(db.Model):
         self.consenting_body = consenting_body
         self.instructions = instructions
         self.allow_use = allow_use
+
 
 # The class that corresponds to the database table for synonym audits.
 class SynonymAudit(db.Model):

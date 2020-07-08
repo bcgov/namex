@@ -12,7 +12,7 @@ from namex.utils.logging import setup_logging
 
 from namex.constants import NameState
 
-from namex.models import Request, Name, State, User, Event, Comment, Applicant
+from namex.models import Request, Name, State, User, Comment, Applicant
 
 from namex.services import MessageServices
 from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
@@ -29,6 +29,7 @@ setup_logging()  # Important to do this first
 api = Namespace('nameRequests', description='Public facing Name Requests')
 
 applicant_model = api.model('applicant_model', {
+    'partyId': fields.Integer('partyId'),
     'lastName': fields.String(attribute='lastName'),
     'firstName': fields.String(attribute='firstName'),
     'middleName': fields.String('Applicant middle name or initial'),
@@ -51,6 +52,7 @@ consent_model = api.model('consent_model', {
 })
 
 name_model = api.model('name_model', {
+    'id': fields.Integer('id'),
     'choice': fields.Integer('Name choice'),
     'name': fields.String('Name'),
     'name_type_cd': fields.String('For company or assumed name', enum=['CO', 'AS']),
@@ -62,6 +64,8 @@ name_model = api.model('name_model', {
 })
 
 nr_request = api.model('name_request', {
+    'id': fields.Integer('id'),
+    'nrNum': fields.Integer('nrNum'),
     'entity_type': fields.String('The entity type'),
     'request_action': fields.String('The action requested by the user'),
     'stateCd': fields.String('The state of the NR'),
@@ -271,7 +275,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
     def map_request_data(self, name_request):
         user_id = self.user_id
-        next_state = self.next_state_code
+        next_state = self.request_state_code
         request_data = self.request_data
         request_entity = self.request_entity
         request_action = self.request_action
@@ -313,12 +317,12 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         except Exception as err:
             raise UpdateSubmitCountError(err)
 
-        if next_state == State.DRAFT:
-            try:
+        try:
+            if next_state == State.DRAFT:
                 # Set name request header attributes
                 name_request = self.map_request_attributes(name_request, request_data, user_id)
-            except Exception as err:
-                raise RequestStateChangeError(err)
+        except Exception as err:
+            raise RequestStateChangeError(err)
 
         return name_request
 
@@ -349,7 +353,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_submitted_name(self, name):
-        next_state = self.next_state_code
+        next_state = self.request_state_code
 
         try:
             submitted_name = Name()
@@ -408,7 +412,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return submitted_name
 
     def map_submitted_name_attrs(self, submitted_name, name):
-        next_state = self.next_state_code
+        next_state = self.request_state_code
 
         submitted_name.choice = name['choice']
         submitted_name.name = name['name']
@@ -442,8 +446,8 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         except Exception as err:
             raise SaveNameRequestError(err)
 
-    def save_request_to_nro(self, name_request, next_state_code):
-        next_state = next_state_code if next_state_code else self.next_state_code
+    def save_request_to_nro(self, name_request, request_state_code):
+        next_state = request_state_code if request_state_code else self.request_state_code
 
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if next_state in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
@@ -466,7 +470,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         solr.add(solr_docs, commit=True)
 
     def update_solr_doc(self, updated_nr, name_request):
-        next_state = self.next_state_code
+        next_state = self.request_state_code
         # TODO: Need to add verification that the save was successful.
         # Update solr for reservation
         try:

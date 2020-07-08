@@ -22,7 +22,7 @@ class AbstractNameRequestMixin(object):
         self._request_data = data
 
     @property
-    def next_state_code(self):
+    def request_state_code(self):
         return self.request_data.get('stateCd', None)
 
     @property

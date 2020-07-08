@@ -26,7 +26,7 @@ class NameRequests(BaseNameRequest):
         self._before_create_or_update()
 
         name_request = self.map_request_data(self.create_name_request())
-        next_state_code = self.next_state_code
+        request_state_code = self.request_state_code
 
         name_request = self.save_request(name_request)
 
@@ -45,7 +45,7 @@ class NameRequests(BaseNameRequest):
 
         try:
             # Save the request to NRO
-            nr_model = self.save_request_to_nro(nr_model, next_state_code)
+            nr_model = self.save_request_to_nro(nr_model, request_state_code)
             nr_model = self.save_request(nr_model)
             EventRecorder.record(self.user, Event.POST, name_request, self.request_data)
         except Exception as err:
@@ -82,7 +82,7 @@ class NameRequest(BaseNameRequest):
             self.nr_id = existing_name_request.id
 
             name_request = self.map_request_data(existing_name_request)
-            next_state_code = self.next_state_code
+            request_state_code = self.request_state_code
 
             name_request = self.save_request(name_request)
 
@@ -103,7 +103,7 @@ class NameRequest(BaseNameRequest):
 
             try:
                 # Save the request to NRO
-                nr_model = self.save_request_to_nro(nr_model, next_state_code)
+                nr_model = self.save_request_to_nro(nr_model, request_state_code)
                 nr_model = self.save_request(nr_model)
                 # TOD: Update this event recorder!
                 EventRecorder.record(self.user, Event.POST, name_request, self.request_data)

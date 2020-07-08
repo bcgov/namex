@@ -1,19 +1,7 @@
 """The tables used to track data sent back to the legacy NRO system
    By convention, we add all data items to core models held here
 """
-from . import db, ma
-from flask import current_app
-from namex.exceptions import BusinessException
-from sqlalchemy import Sequence
-from sqlalchemy.orm import backref
-from marshmallow import Schema, fields, post_load, post_dump
-from .nwpta import PartnerNameSystem
-from .user import User, UserSchema
-from .comment import Comment, CommentSchema
-from .applicant import Applicant
-from .name import Name, NameSchema
-from .state import State, StateSchema
-from datetime import datetime
+from . import db
 
 
 # noinspection PyPep8Naming

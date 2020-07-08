@@ -99,4 +99,3 @@ class PaymentModelMixin:
         """Reset Filing to draft and remove payment token."""
         self._status = draft_value
         self._payment_token = None
-
