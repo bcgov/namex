@@ -146,6 +146,14 @@ def check_synonyms(syn_svc, list_dist_words, list_desc_words):
     return list_dist_words, list_desc_words
 
 
+def change_descriptive(list_dist_words, list_desc_words, list_name):
+    for idx, word in enumerate(list_name[1:],start=1):
+        if word in list_dist_words and list_name[idx - 1] in list_desc_words:
+            list_desc_words.remove(list_name[idx - 1])
+            list_dist_words.insert(idx - 1,list_name[idx - 1])
+    return list_dist_words, list_desc_words
+
+
 def get_classification_summary(list_name, list_dist_words, list_desc_words):
     return {word: DataFrameFields.DISTINCTIVE.value if word in list_dist_words else DataFrameFields.DESCRIPTIVE.value \
         if word in list_desc_words else DataFrameFields.UNCLASSIFIED.value for word in list_name}
