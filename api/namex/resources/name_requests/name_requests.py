@@ -5,7 +5,7 @@ from flask import current_app
 
 from namex.utils.logging import setup_logging
 
-from namex.models import Request, Event
+from namex.models import Request, Event, State
 
 from namex.services import EventRecorder
 
@@ -45,7 +45,7 @@ class NameRequests(BaseNameRequest):
 
         try:
             # Save the request to NRO
-            nr_model = self.save_request_to_nro(nr_model, request_state_code)
+            # nr_model = self.save_request_to_nro(nr_model, request_state_code)
             nr_model = self.save_request(nr_model)
             EventRecorder.record(self.user, Event.POST, name_request, self.request_data)
         except Exception as err:
@@ -99,14 +99,23 @@ class NameRequest(BaseNameRequest):
             nr_model = self.map_request_names(nr_model)
             nr_model = self.save_request(nr_model)
 
-            # Check for successful payment id before updating nro to use REAL NR Num
+            # Update the request's state
+            # Check for successful payment id
+            if nr_model.payment_token is not None:
+                if nr_model.stateCd in [State.COND_RESERVE]:
+                    nr_model.stateCd = State.CONDITIONAL
+            elif nr_model.stateCd in [State.RESERVED]:
+                # TODO: Are we sure we want to do this in all cases here?
+                nr_model.stateCd = State.APPROVED
+
+            # TODO: Update nro to use REAL NR Num
 
             try:
                 # Save the request to NRO
-                nr_model = self.save_request_to_nro(nr_model, request_state_code)
+                # nr_model = self.save_request_to_nro(nr_model, request_state_code)
                 nr_model = self.save_request(nr_model)
                 # TOD: Update this event recorder!
-                EventRecorder.record(self.user, Event.POST, name_request, self.request_data)
+                EventRecorder.record(self.user, Event.PUT, name_request, self.request_data)
             except Exception as err:
                 return handle_exception(err, 'Error saving nr and names.', 500)
 

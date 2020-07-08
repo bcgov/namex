@@ -346,7 +346,8 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         try:
             for name in self.request_names:
                 submitted_name = self.map_submitted_name(name)
-                name_request.names.append(submitted_name)
+                if not name.get('id'):
+                    name_request.names.append(submitted_name)
         except Exception as err:
             raise MapRequestNamesError(err)
 
@@ -373,12 +374,12 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         if next_state in [State.RESERVED, State.COND_RESERVE]:
             try:
                 # Only capturing one conflict
-                if name['conflict1_num']:
-                    submitted_name.conflict1_num = name['conflict1_num']
-                if name['conflict1']:
-                    submitted_name.conflict1 = name['conflict1']
+                if name.get('conflict1_num'):
+                    submitted_name.conflict1_num = name.get('conflict1_num')
+                if name.get('conflict1'):
+                    submitted_name.conflict1 = name.get('conflict1')
                 # Conflict text same as Namex
-                decision_text = 'Consent is required from ' + name['conflict1'] + '\n' + '\n'
+                decision_text = 'Consent is required from ' + name.get('conflict1') + '\n' + '\n'
             except Exception as err:
                 raise MapRequestNamesError(err, 'Error on reserved conflict info.')
         else:
@@ -388,37 +389,38 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             except Exception as err:
                 raise MapRequestNamesError(err, 'Error on draft empty conflict info.')
 
-        consent_list = name['consent_words']
-        if len(consent_list) > 0:
-            for consent in consent_list:
-                try:
-                    cnd_instructions = None
-                    if consent != '' or len(consent) > 0:
-                        cnd_instructions = self.restricted_word_service.get_word_condition_instructions(consent)
-                except Exception as err:
-                    log_error('Error on get consent word. Consent Word[0]'.format(consent), err)
-                    raise MapRequestNamesError('Error mapping consent words.')
+        if name.get('consent_words', False):
+            consent_list = name.get('consent_words')
+            if len(consent_list) > 0:
+                for consent in consent_list:
+                    try:
+                        cnd_instructions = None
+                        if consent != '' or len(consent) > 0:
+                            cnd_instructions = self.restricted_word_service.get_word_condition_instructions(consent)
+                    except Exception as err:
+                        log_error('Error on get consent word. Consent Word[0]'.format(consent), err)
+                        raise MapRequestNamesError('Error mapping consent words.')
 
-                try:
-                    if decision_text is None:
-                        decision_text = cnd_instructions + '\n'
-                    else:
-                        decision_text += consent + '- ' + cnd_instructions + '\n'
+                    try:
+                        if decision_text is None:
+                            decision_text = cnd_instructions + '\n'
+                        else:
+                            decision_text += consent + '- ' + cnd_instructions + '\n'
 
-                    submitted_name.decision_text = decision_text
-                except Exception as err:
-                    raise MapRequestNamesError(err, 'Error adding consent words to decision.')
+                        submitted_name.decision_text = decision_text
+                    except Exception as err:
+                        raise MapRequestNamesError(err, 'Error adding consent words to decision.')
 
         return submitted_name
 
     def map_submitted_name_attrs(self, submitted_name, name):
         next_state = self.request_state_code
 
-        submitted_name.choice = name['choice']
-        submitted_name.name = name['name']
+        submitted_name.choice = name.get('choice', 1)
+        submitted_name.name = name.get('name', '')
 
-        if name['name_type_cd']:
-            submitted_name.name_type_cd = name['name_type_cd']
+        if name.get('name_type_cd'):
+            submitted_name.name_type_cd = name.get('name_type_cd')
         else:
             submitted_name.name_type_cd = 'CO'
 
@@ -427,8 +429,8 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         else:
             submitted_name.state = next_state
 
-        if name['designation']:
-            submitted_name.designation = name['designation']
+        if name.get('designation'):
+            submitted_name.designation = name.get('designation')
 
         submitted_name.nrId = self.nr_id
 
