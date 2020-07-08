@@ -187,6 +187,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed):
         dist_substitution_list, desc_synonym_list, selected_matches_list, list_details = [], [], [], []
+        stop_word_list = self.name_processing_service._stop_words
+        stop_words = '|'.join(stop_word_list)
 
         if check_name_is_well_formed:
             dist_substitution_list.append(w_dist)
@@ -200,7 +202,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         for dist in dist_substitution_list:
             criteria = Request.get_general_query(change_filter)
             # Inject distinctive section into query
-            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, check_name_is_well_formed)
+            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, stop_words, check_name_is_well_formed)
             for desc in desc_synonym_list:
                 # Inject descriptive section into query, execute and add matches to list
                 matches = Request.get_query_distinctive_descriptive(desc, criteria)
