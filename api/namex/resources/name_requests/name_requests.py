@@ -52,7 +52,7 @@ class NameRequests(BaseNameRequest):
             return handle_exception(err, 'Error saving nr and names.', 500)
 
         # Update SOLR
-        # self.update_solr_doc(nr_model, name_request)
+        self.update_solr_doc(nr_model, name_request)
 
         current_app.logger.debug(nr_model.json())
         return jsonify(nr_model.json()), 200
@@ -99,16 +99,19 @@ class NameRequest(BaseNameRequest):
             nr_model = self.map_request_names(nr_model)
             nr_model = self.save_request(nr_model)
 
+            # Check for successful payment id before updating nro to use REAL NR Num
+
             try:
                 # Save the request to NRO
                 nr_model = self.save_request_to_nro(nr_model, next_state_code)
                 nr_model = self.save_request(nr_model)
+                # TOD: Update this event recorder!
                 EventRecorder.record(self.user, Event.POST, name_request, self.request_data)
             except Exception as err:
                 return handle_exception(err, 'Error saving nr and names.', 500)
 
             # Update SOLR
-            # self.update_solr_doc(nr_model, name_request)
+            self.update_solr_doc(nr_model, name_request)
 
             current_app.logger.debug(nr_model.json())
             return jsonify(nr_model.json()), 200
