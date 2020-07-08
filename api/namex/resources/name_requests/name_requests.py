@@ -52,7 +52,7 @@ class NameRequests(BaseNameRequest):
             return handle_exception(err, 'Error saving nr and names.', 500)
 
         # Update SOLR
-        self.update_solr_doc(nr_model, name_request)
+        # self.update_solr_doc(nr_model, name_request)
 
         current_app.logger.debug(nr_model.json())
         return jsonify(nr_model.json()), 200
@@ -103,7 +103,7 @@ class NameRequest(BaseNameRequest):
             self.save_request(nr_model)
 
             # Update SOLR
-            self.update_solr_doc(nr_model, name_request)
+            # self.update_solr_doc(nr_model, name_request)
 
             current_app.logger.debug(nr_model.json())
             return jsonify(nr_model.json()), 200

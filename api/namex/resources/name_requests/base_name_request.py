@@ -157,6 +157,15 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         return user.id
 
+    @property
+    def user(self):
+        try:
+            user = User.find_by_username('name_request_service_account')
+        except Exception as err:
+            raise GetUserIdError(err)
+
+        return user
+
     # Initialization methods
     @classmethod
     def _validate_config(cls):
