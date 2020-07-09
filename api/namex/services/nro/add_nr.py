@@ -38,11 +38,11 @@ def new_nr(nr, ora_cursor):
 
     nr_num_list = _generate_nr_num(ora_cursor)
     nr_num = nr_num_list.values[0]
-    #set postgres to real NR #
+    # Set postgres to real NR #
     nr.nrNum = nr_num
 
-
     request_id = _create_request(ora_cursor,nr_num)
+    nr.requestId = request_id
     current_app.logger.debug('got to new_nr() for NR:{}'.format(nr_num))
 
     eid = _get_event_id(ora_cursor)

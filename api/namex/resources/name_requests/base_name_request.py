@@ -361,9 +361,10 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             for name in self.request_names:
                 name_id = name.get('id')
                 if name_id:
-                    submitted_name = Name.query.get(name_id)
-                    submitted_name = self.map_submitted_name(submitted_name, name)
-                    name_request.names.append(submitted_name)
+                    existing_names = []
+                    for idx, existing_name in enumerate(name_request.names):
+                        existing_names.append(self.map_submitted_name(existing_name, name))
+                    name_request.names = existing_names
                 else:
                     submitted_name = self.create_name()
                     submitted_name = self.map_submitted_name(submitted_name, name)
