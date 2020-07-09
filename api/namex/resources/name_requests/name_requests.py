@@ -26,8 +26,6 @@ class NameRequests(BaseNameRequest):
         self._before_create_or_update()
 
         name_request = self.map_request_data(self.create_name_request())
-        request_state_code = self.request_state_code
-
         name_request = self.save_request(name_request)
 
         try:
@@ -45,14 +43,15 @@ class NameRequests(BaseNameRequest):
 
         try:
             # Save the request to NRO
+            # request_state_code = self.request_state_code
             # nr_model = self.save_request_to_nro(nr_model, request_state_code)
             nr_model = self.save_request(nr_model)
-            EventRecorder.record(self.user, Event.POST, name_request, self.request_data)
+            EventRecorder.record(self.user, Event.POST, nr_model, self.request_data)
         except Exception as err:
             return handle_exception(err, 'Error saving nr and names.', 500)
 
         # Update SOLR
-        self.update_solr_doc(nr_model, name_request)
+        self.create_or_update_solr_doc(nr_model)
 
         current_app.logger.debug(nr_model.json())
         return jsonify(nr_model.json()), 200
@@ -113,12 +112,13 @@ class NameRequest(BaseNameRequest):
                 # request_state_code = self.request_state_code
                 # nr_model = self.save_request_to_nro(nr_model, request_state_code)
                 # TOD: Update this event recorder!
-                EventRecorder.record(self.user, Event.PUT, name_request, self.request_data)
+                EventRecorder.record(self.user, Event.PUT, nr_model, self.request_data)
             except Exception as err:
                 return handle_exception(err, 'Error saving nr and names.', 500)
 
             # Update SOLR
-            self.update_solr_doc(nr_model, name_request)
+            if nr_model.stateCd in [State.RESERVED, State.COND_RESERVE]:
+                self.create_or_update_solr_doc(nr_model)
 
             current_app.logger.debug(nr_model.json())
             return jsonify(nr_model.json()), 200

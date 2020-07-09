@@ -86,6 +86,7 @@ nr_request = api.model('name_request', {
 
 NAME_REQUEST_SOURCE = 'NAMEREQUEST'
 
+SOLR_URL = os.getenv('SOLR_BASE_URL')
 
 def build_language_comment(english_bol, user_id, nr_id):
     lang_comment = Comment()
@@ -495,7 +496,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             # Check for payment
             if nr.payment_token is None:
                 raise Exception('Transition error, payment token is not defined')
-            
+
             nr.stateCd = State.CONDITIONAL
             return nr
 
@@ -518,23 +519,42 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             State.APPROVED: to_approved
         }.get(next_state)(name_request)
 
-    def update_solr(self, core, solr_docs):
-        SOLR_URL = os.getenv('SOLR_BASE_URL')
+    def add_solr_doc(self, core, solr_docs):
         solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
-        solr.add(solr_docs, commit=True)
+        result = solr.add(solr_docs, commit=True)
+        return result
 
-    def update_solr_doc(self, updated_nr, name_request):
-        request_state = self.request_state_code
-        # TODO: Need to add verification that the save was successful.
-        # Update solr for reservation
+    def delete_solr_doc(self, core, doc_id):
+        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
+        result = solr.delete(doc_id.replace(' ', '\\ '), commit=True)
+        return result
+
+    def find_solr_doc(self, core, doc_id):
+        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
+        # Escape whitespace or query will fail
+        results = solr.search('id:' + doc_id.replace(' ', '\\ '))
+        return results
+
+    def create_or_update_solr_doc(self, name_request):
+        solr_core = 'possible.conflicts'
         try:
-            if request_state in [State.RESERVED, State.COND_RESERVE]:
-                solr_name = updated_nr.names[0].name
-                solr_docs = []
-                nr_doc = {'id': name_request.nrNum, 'name': solr_name, 'source': 'NR',
-                          'start_date': name_request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')}
+            # Try to find a matching document
+            matching_docs = self.find_solr_doc(solr_core, name_request.nrNum)
+            if matching_docs:
+                self.delete_solr_doc(solr_core, name_request.nrNum)
 
-                solr_docs.append(nr_doc)
-                self.update_solr('possible.conflicts', solr_docs)
+            # Create a new solr doc
+            solr_name = name_request.names[0].name
+            solr_docs = []
+            nr_doc = {
+                'id': name_request.nrNum,
+                'name': solr_name,
+                'source': 'NR',
+                'start_date': name_request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
+            }
+
+            solr_docs.append(nr_doc)
+            self.add_solr_doc(solr_core, solr_docs)
+
         except Exception as err:
             raise SolrUpdateError(err)
