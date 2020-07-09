@@ -241,6 +241,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         nr_id = self.nr_id
 
         if request_data['nameFlag'] is True:
+            # If the person name comment exists, we don't need to add it again
             name_comment = build_name_comment(user_id, nr_id)
             matching_comments = list(filter(lambda x: x.comment == name_comment.comment, list(name_request.comments)))
             if len(matching_comments) == 0:
