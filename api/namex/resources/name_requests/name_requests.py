@@ -82,8 +82,6 @@ class NameRequest(BaseNameRequest):
             self.nr_id = existing_name_request.id
 
             name_request = self.map_request_data(existing_name_request)
-            request_state_code = self.request_state_code
-
             name_request = self.save_request(name_request)
 
             try:
@@ -92,26 +90,27 @@ class NameRequest(BaseNameRequest):
                 return handle_exception(err, 'Error retrieving the Updated NR from the db.', 500)
 
             # Map applicants from the request data to the name request
-            nr_model = self.map_request_applicants(nr_model)
-            nr_model = self.save_request(nr_model)
-
-            # Map any submitted names and save the request
-            nr_model = self.map_request_names(nr_model)
-            nr_model = self.save_request(nr_model)
-
-            # Update the request's state
-            # Check for successful payment id
             if nr_model.payment_token is not None:
+                # Update the request's state
+                # We don't need to map request applicants or names,
+                # we will have those already, and can ignore them
                 if nr_model.stateCd in [State.COND_RESERVE]:
                     nr_model.stateCd = State.CONDITIONAL
-            elif nr_model.stateCd in [State.RESERVED]:
-                # TODO: Are we sure we want to do this in all cases here?
-                nr_model.stateCd = State.APPROVED
+                elif nr_model.stateCd in [State.RESERVED]:
+                    nr_model.stateCd = State.APPROVED
+            else:
+                nr_model = self.map_request_applicants(nr_model)
+                nr_model = self.save_request(nr_model)
 
+                # Map any submitted names and save the request
+                nr_model = self.map_request_names(nr_model)
+
+            nr_model = self.save_request(nr_model)
             # TODO: Update nro to use REAL NR Num
 
             try:
                 # Save the request to NRO
+                # request_state_code = self.request_state_code
                 # nr_model = self.save_request_to_nro(nr_model, request_state_code)
                 nr_model = self.save_request(nr_model)
                 # TOD: Update this event recorder!
