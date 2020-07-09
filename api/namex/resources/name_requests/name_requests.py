@@ -17,44 +17,61 @@ from .exceptions import *
 setup_logging()  # Important to do this first
 
 
+def on_nro_save_success(name_request):
+    # Added the oracle request_id in new_nr, need to save it postgres
+    # set the furnished_flag='Y' for approved and conditionally approved
+    if name_request.stateCd in [State.APPROVED, State.CONDITIONAL]:
+        name_request.furnished = 'Y'
+
+
 @cors_preflight('POST')
 @api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
 class NameRequests(BaseNameRequest):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     def post(self):
-        self._before_create_or_update()
-
-        name_request = self.map_request_data(self.create_name_request())
-        name_request = self.save_request(name_request)
-
         try:
-            nr_model = Request.find_by_nr(name_request.nrNum)
-        except Exception as err:
-            return handle_exception(err, 'Error retrieving the New NR from the db.', 500)
+            self._before_create_or_update()
 
-        # Map applicants from the request data to the name request
-        nr_model = self.map_request_applicants(nr_model)
-        nr_model = self.save_request(nr_model)
+            # Create a new DRAFT name request
+            nr_model = self.create_name_request()
 
-        # Map any submitted names and save the request
-        nr_model = self.map_request_names(nr_model)
-        nr_model = self.save_request(nr_model)
+            def create_model_collections(nr, resource):
+                """
+                :param nr: The name request model
+                :return:
+                """
+                # Map the request data and save so we have a name request ID to use for collection ops
+                nr = self.map_request_data(nr, True)  # Set map_draft_attrs to True
+                nr = self.save_request(nr)
+                # Map applicants from the request data to the name request
+                nr = self.map_request_applicants(nr)
+                # Map any submitted names from the request data to the name request
+                nr = self.map_request_names(nr)
+                # Save
+                nr = self.save_request(nr)
+                return nr
 
-        try:
-            # Save the request to NRO
-            # request_state_code = self.request_state_code
-            # nr_model = self.save_request_to_nro(nr_model, request_state_code)
+            # Transition the DRAFT to the state specified in the request:
+            # eg. one of [State.DRAFT, State.COND_RESERVE, State.RESERVED]
+            self.apply_state_change(nr_model, self.request_state_code, create_model_collections)
+
+            # Save the request to NRO and back to postgres
+            if nr_model.stateCd in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
+                nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
+
             nr_model = self.save_request(nr_model)
+
+            # Record the event
             EventRecorder.record(self.user, Event.POST, nr_model, self.request_data)
-        except Exception as err:
-            return handle_exception(err, 'Error saving nr and names.', 500)
 
-        # Update SOLR
-        self.create_or_update_solr_doc(nr_model)
+            # Update SOLR
+            self.create_or_update_solr_doc(nr_model)
 
-        current_app.logger.debug(nr_model.json())
-        return jsonify(nr_model.json()), 200
+            current_app.logger.debug(nr_model.json())
+            return jsonify(nr_model.json()), 200
+        except NameRequestException as err:
+            return handle_exception(err, err.message, 500)
 
 
 @cors_preflight('GET, PUT')
@@ -76,45 +93,50 @@ class NameRequest(BaseNameRequest):
         try:
             self._before_create_or_update()
 
-            existing_name_request = Request.find_by_nr(nr_num)
-            self.nr_num = existing_name_request.nrNum
-            self.nr_id = existing_name_request.id
+            nr_model = Request.find_by_nr(nr_num)
+            self.nr_num = nr_model.nrNum
+            self.nr_id = nr_model.id
 
-            name_request = self.map_request_data(existing_name_request)
-            name_request = self.save_request(name_request)
+            def update_model_collections(nr, resource):
+                """
+                :param nr: The name request model
+                :return:
+                """
+                nr = self.map_request_data(nr, False)
+                # Map applicants from the request data to the name request
+                nr = self.map_request_applicants(nr)
+                # Map any submitted names from the request data to the name request
+                nr = self.map_request_names(nr)
+                # Save
+                nr = self.save_request(nr)
+                return nr
 
-            try:
-                nr_model = Request.find_by_nr(name_request.nrNum)
-            except Exception as err:
-                return handle_exception(err, 'Error retrieving the Updated NR from the db.', 500)
+            def update_reserved_names_state(nr):
+                nr = self.map_request_names(nr)
+                nr = self.save_request(nr)
+                return nr
 
             # If there's no payment token, just update the data
             if nr_model.payment_token is None:
-                # Map applicants from the request data to the name request
-                nr_model = self.map_request_applicants(nr_model)
-                nr_model = self.save_request(nr_model)
+                # If no payment token...
+                if nr_model.stateCd in [State.DRAFT, State.COND_RESERVE, State.RESERVED]:
+                    self.apply_state_change(nr_model, nr_model.stateCd, update_model_collections)
 
-                # Map any submitted names and save the request
-                nr_model = self.map_request_names(nr_model)
-                nr_model = self.save_request(nr_model)
-            else:
-                # If there IS a payment token, update the name request state
+            # If there IS a payment token, we need to update the name request state and the request names state
+            if nr_model.payment_token:
                 if nr_model.stateCd == State.COND_RESERVE:
-                    self.apply_state_change(nr_model, State.CONDITIONAL)
+                    self.apply_state_change(nr_model, State.CONDITIONAL, update_reserved_names_state)
                 if nr_model.stateCd == State.RESERVED:
-                    self.apply_state_change(nr_model, State.APPROVED)
+                    self.apply_state_change(nr_model, State.APPROVED, update_reserved_names_state)
 
-                nr_model = self.save_request(nr_model)
+            # Save the request to NRO and back to postgres
+            if nr_model.stateCd in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
+                nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
 
-            # TODO: Update nro to use REAL NR Num
-            try:
-                # Save the request to NRO
-                # request_state_code = self.request_state_code
-                # nr_model = self.save_request_to_nro(nr_model, request_state_code)
-                # TOD: Update this event recorder!
-                EventRecorder.record(self.user, Event.PUT, nr_model, self.request_data)
-            except Exception as err:
-                return handle_exception(err, 'Error saving nr and names.', 500)
+            nr_model = self.save_request(nr_model)
+
+            # Record the event
+            EventRecorder.record(self.user, Event.PUT, nr_model, self.request_data)
 
             # Update SOLR
             if nr_model.stateCd in [State.RESERVED, State.COND_RESERVE]:

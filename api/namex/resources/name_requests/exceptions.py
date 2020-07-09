@@ -15,8 +15,18 @@ class CreateNameRequestError(NameRequestException):
         super().__init__(wrapped_err, message)
 
 
-class MapRequestAttributesError(NameRequestException):
+class MapRequestDataError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Error setting reserve state."):
+        super().__init__(wrapped_err, message)
+
+
+class MapRequestHeaderAttributesError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error setting request header attributes."):
+        super().__init__(wrapped_err, message)
+
+
+class MapRequestAttributesError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Error setting request attributes."):
         super().__init__(wrapped_err, message)
 
 
@@ -35,18 +45,8 @@ class UpdateSubmitCountError(NameRequestException):
         super().__init__(wrapped_err, message)
 
 
-class MapRequestAttributesError(NameRequestException):
-    def __init__(self, wrapped_err=None, message="Error setting request attributes."):
-        super().__init__(wrapped_err, message)
-
-
 class MapRequestNamesError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error setting names."):
-        super().__init__(wrapped_err, message)
-
-
-class RequestStateChangeError(NameRequestException):
-    def __init__(self, wrapped_err=None, message="Error setting reserve state."):
         super().__init__(wrapped_err, message)
 
 
