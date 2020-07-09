@@ -6,7 +6,8 @@ from namex.services import EventRecorder
 from namex.services.nro import NROServices
 from namex.services.nro.utils import ora_row_to_dict
 from namex.models import Request, Event, State
-from extractor.utils.logging import setup_logging
+from consumed.utils.logging import setup_logging
+
 
 
 setup_logging()
@@ -43,7 +44,7 @@ def job_result_set(ora_con, max_rows):
     result_set = ora_cursor.execute("""
         SELECT ID, NR_NUM, STATUS
         FROM namex.namex_datafix
-        where status IS NULL AND rownum <= :max_rows
+        where status IS NULL AND rownum <= :max_rows order by ID
         """
                                 , max_rows=max_rows
                                 )

@@ -7,7 +7,7 @@ from namex.utils.logging import setup_logging
 from namex.models import User
 
 from config import Config
-from extractor.app import create_app, db, nro, job
+from consumed.app import create_app, db, nro, job
 
 
 setup_logging() # important to do this first
@@ -24,7 +24,7 @@ def get_ops_params():
 
 if __name__ == "__main__":
     start_time = datetime.utcnow()
-    print('nro-extractor: starting job: {}'.format(start_time))
+    print('consumed sync: starting job: {}'.format(start_time))
 
     # setup Flask, push a context, initialize db & nro connections
     app = create_app(Config)
@@ -44,10 +44,10 @@ if __name__ == "__main__":
 
     # report out
     if processed < 0:
-        print("nro-extractor: errored out: no rows process; completed in:{}".format(end_time - start_time)
+        print("consumed sync: errored out: no rows process; completed in:{}".format(end_time - start_time)
               ,file=sys.stderr)
         exit(1)
 
-    print("nro-extractor: finished - requests processed: {0} completed in:{1}".format(processed, end_time-start_time),
+    print("consumed sync: finished - requests processed: {0} completed in:{1}".format(processed, end_time-start_time),
           file=sys.stderr)
     exit(0)
