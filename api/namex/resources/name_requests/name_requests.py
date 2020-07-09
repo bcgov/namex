@@ -89,30 +89,29 @@ class NameRequest(BaseNameRequest):
             except Exception as err:
                 return handle_exception(err, 'Error retrieving the Updated NR from the db.', 500)
 
-            # Map applicants from the request data to the name request
-            if nr_model.payment_token is not None:
-                # Update the request's state
-                # We don't need to map request applicants or names,
-                # we will have those already, and can ignore them
-                if nr_model.stateCd in [State.COND_RESERVE]:
-                    nr_model.stateCd = State.CONDITIONAL
-                elif nr_model.stateCd in [State.RESERVED]:
-                    nr_model.stateCd = State.APPROVED
-            else:
+            # If there's no payment token, just update the data
+            if nr_model.payment_token is None:
+                # Map applicants from the request data to the name request
                 nr_model = self.map_request_applicants(nr_model)
                 nr_model = self.save_request(nr_model)
 
                 # Map any submitted names and save the request
                 nr_model = self.map_request_names(nr_model)
+                nr_model = self.save_request(nr_model)
+            else:
+                # If there IS a payment token, update the name request state
+                if nr_model.stateCd == State.COND_RESERVE:
+                    self.apply_state_change(nr_model, State.CONDITIONAL)
+                if nr_model.stateCd == State.RESERVED:
+                    self.apply_state_change(nr_model, State.APPROVED)
 
-            nr_model = self.save_request(nr_model)
+                nr_model = self.save_request(nr_model)
+
             # TODO: Update nro to use REAL NR Num
-
             try:
                 # Save the request to NRO
                 # request_state_code = self.request_state_code
                 # nr_model = self.save_request_to_nro(nr_model, request_state_code)
-                nr_model = self.save_request(nr_model)
                 # TOD: Update this event recorder!
                 EventRecorder.record(self.user, Event.PUT, name_request, self.request_data)
             except Exception as err:

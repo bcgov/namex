@@ -281,7 +281,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
     def map_request_data(self, name_request):
         user_id = self.user_id
-        next_state = self.request_state_code
+        request_state = self.request_state_code
         request_data = self.request_data
         request_entity = self.request_entity
         request_action = self.request_action
@@ -293,13 +293,13 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             raise MapRequestAttributesError(err)
 
         try:
-            if next_state == State.COND_RESERVE:
+            if request_state == State.COND_RESERVE:
                 name_request.consentFlag = 'Y'
 
-            if next_state in [State.RESERVED, State.COND_RESERVE]:
+            if request_state in [State.RESERVED, State.COND_RESERVE]:
                 name_request.expirationDate = self.create_expiry_date(start=name_request.submittedDate, expires_in_days=56, tz=timezone('UTC'))
 
-            name_request.stateCd = next_state
+            name_request.stateCd = request_state
             name_request.entity_type_cd = request_entity
             name_request.request_action_cd = request_action
         except Exception as err:
@@ -324,7 +324,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             raise UpdateSubmitCountError(err)
 
         try:
-            if next_state == State.DRAFT:
+            if request_state == State.DRAFT:
                 # Set name request header attributes
                 name_request = self.map_request_attributes(name_request, request_data, user_id)
         except Exception as err:
@@ -360,7 +360,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_submitted_name(self, name):
-        next_state = self.request_state_code
+        request_state = self.request_state_code
 
         try:
             submitted_name = Name()
@@ -377,7 +377,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         decision_text = None
 
-        if next_state in [State.RESERVED, State.COND_RESERVE]:
+        if request_state in [State.RESERVED, State.COND_RESERVE]:
             try:
                 # Only capturing one conflict
                 if name.get('conflict1_num'):
@@ -420,7 +420,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return submitted_name
 
     def map_submitted_name_attrs(self, submitted_name, name):
-        next_state = self.request_state_code
+        request_state = self.request_state_code
 
         submitted_name.choice = name.get('choice', 1)
         submitted_name.name = name.get('name', '')
@@ -430,10 +430,10 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         else:
             submitted_name.name_type_cd = 'CO'
 
-        if next_state == State.DRAFT:
+        if request_state == State.DRAFT:
             submitted_name.state = NameState.NOT_EXAMINED.value
         else:
-            submitted_name.state = next_state
+            submitted_name.state = request_state
 
         if name.get('designation'):
             submitted_name.designation = name.get('designation')
@@ -455,10 +455,10 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             raise SaveNameRequestError(err)
 
     def save_request_to_nro(self, name_request, request_state_code):
-        next_state = request_state_code if request_state_code else self.request_state_code
+        request_state = request_state_code if request_state_code else self.request_state_code
 
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
-        if next_state in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
+        if request_state in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
             # Note: Comment out this block to run locally, or you will get Oracle errors
             warnings = nro.add_nr(name_request)
             if warnings:
@@ -472,17 +472,63 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         return name_request
 
+    def apply_state_change(self, name_request, next_state):
+        def to_draft(nr):
+            if nr.stateCd == State.DRAFT:
+                nr.stateCd = State.DRAFT
+                return nr
+
+        def to_reserved(nr):
+            if nr.stateCd == State.DRAFT:
+                nr.stateCd = State.RESERVED
+                return nr
+
+        def to_cond_reserved(nr):
+            if nr.stateCd == State.DRAFT:
+                nr.stateCd = State.COND_RESERVE
+                return nr
+
+        def to_conditional(nr):
+            if nr.stateCd != State.COND_RESERVE:
+                raise Exception('Invalid state transition')
+
+            # Check for payment
+            if nr.payment_token is None:
+                raise Exception('Transition error, payment token is not defined')
+            
+            nr.stateCd = State.CONDITIONAL
+            return nr
+
+        def to_approved(nr):
+            if nr.stateCd != State.RESERVED:
+                raise Exception('Invalid state transition')
+
+            # Check for payment
+            if nr.payment_token is None:
+                raise Exception('Transition error, payment token is not defined')
+
+            nr.stateCd = State.APPROVED
+            return nr
+
+        return {
+            State.DRAFT: to_draft,
+            State.RESERVED: to_reserved,
+            State.COND_RESERVE: to_cond_reserved,
+            State.CONDITIONAL: to_conditional,
+            State.APPROVED: to_approved
+        }.get(next_state)(name_request)
+
     def update_solr(self, core, solr_docs):
         SOLR_URL = os.getenv('SOLR_BASE_URL')
         solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
         solr.add(solr_docs, commit=True)
 
     def update_solr_doc(self, updated_nr, name_request):
-        next_state = self.request_state_code
+        request_state = self.request_state_code
         # TODO: Need to add verification that the save was successful.
         # Update solr for reservation
         try:
-            if next_state in [State.RESERVED, State.COND_RESERVE]:
+            if request_state in [State.RESERVED, State.COND_RESERVE]:
                 solr_name = updated_nr.names[0].name
                 solr_docs = []
                 nr_doc = {'id': name_request.nrNum, 'name': solr_name, 'source': 'NR',
