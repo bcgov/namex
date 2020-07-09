@@ -58,7 +58,8 @@ class NameRequests(BaseNameRequest):
 
             # Save the request to NRO and back to postgres
             if nr_model.stateCd in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
-                nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
+                # nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
+                pass
 
             nr_model = self.save_request(nr_model)
 
@@ -111,7 +112,7 @@ class NameRequest(BaseNameRequest):
                 nr = self.save_request(nr)
                 return nr
 
-            def update_reserved_names_state(nr):
+            def update_reserved_names_state(nr, resource):
                 nr = self.map_request_names(nr)
                 nr = self.save_request(nr)
                 return nr
@@ -131,7 +132,8 @@ class NameRequest(BaseNameRequest):
 
             # Save the request to NRO and back to postgres
             if nr_model.stateCd in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
-                nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
+                # nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
+                pass
 
             nr_model = self.save_request(nr_model)
 
