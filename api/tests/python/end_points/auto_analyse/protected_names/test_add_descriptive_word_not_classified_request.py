@@ -5,9 +5,9 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_issue_type_is_one_of, assert_has_word_upper
+from ...common import assert_issues_count_is_gt, assert_issue_type_is_one_of, assert_has_word_upper
 from ..common import ENDPOINT_PATH
-from ..common import token_header, claims
+from ...common import token_header, claims
 
 
 # 3.- Unique word not classified in word_classification

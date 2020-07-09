@@ -25,7 +25,7 @@ from namex.services.name_request.auto_analyse.xpro_name_analysis import XproName
 setup_logging()  # It's important to do this first
 
 # Register a local namespace for the requests
-api = Namespace('xproNameAnalysis', description='Xpro Name Analysis API for analysing a Extra-Provincial Names')
+api = Namespace('xproNameAnalysis', description='Xpro Name Analysis API for analysing Extra-Provincial Names')
 
 
 @api.errorhandler(AuthError)

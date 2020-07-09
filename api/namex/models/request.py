@@ -99,21 +99,24 @@ class Request(db.Model):
     REQUEST_FURNISHED = 'Y'
 
     # properties
-    @hybrid_property
+    @property
     def payment_token(self):
         """Property containing the payment token."""
         return self._payment_token
 
     @payment_token.setter
-    def payment_token(self, token: int):
-        if self.locked:
-            self._raise_default_lock_exception()
+    def payment_token(self, token: str):
         self._payment_token = token
 
-    @hybrid_property
+    @property
     def payment_completion_date(self):
         """Property containing the date the payment cleared."""
         return self._payment_completion_date
+
+    @payment_completion_date.setter
+    def payment_completion_date(self, date):
+        """Property containing the date the payment cleared."""
+        self._payment_completion_date = date
 
     @property
     def source(self):
@@ -142,7 +145,6 @@ class Request(db.Model):
         pass
 
     def json(self):
-
         # get previous NR number from legacy requestId and previousRequestId fields
         previousNr = None
         if self.previousRequestId:
@@ -153,39 +155,38 @@ class Request(db.Model):
         except:
             previousNr = None
 
-        return {'id': self.id,
-                'submittedDate': self.submittedDate,
-                'lastUpdate': self.lastUpdate,
-                'userId': '' if (self.activeUser is None) else self.activeUser.username,
-                'submitter_userid': '' if (self.submitter is None) else self.submitter.username,
-                'state': self.stateCd,
-                'previousStateCd': self.previousStateCd,
-                'nrNum': self.nrNum,
-                'consentFlag': self.consentFlag,
-                'consent_dt': self.consent_dt,
-                'expirationDate': self.expirationDate,
-                'requestTypeCd': self.requestTypeCd,
-                'entity_type_cd': self.entity_type_cd,
-                'request_action_cd': self.request_action_cd,
-                'source': self.source,
-                'priorityCd': self.priorityCd,
-                'priorityDate': self.priorityDate,
-                'xproJurisdiction': self.xproJurisdiction,
-                'additionalInfo': self.additionalInfo,
-                'natureBusinessInfo': self.natureBusinessInfo,
-                'furnished': self.furnished if (self.furnished is not None) else 'N',
-                'hasBeenReset': self.hasBeenReset,
-                'previousRequestId': self.previousRequestId,
-                'previousNr': previousNr,
-                'submitCount': self.submitCount,
-                'corpNum': self.corpNum,
-                'names': [name.as_dict() for name in self.names.all()],
-                'applicants': '' if (
-                        self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
-                'comments': [comment.as_dict() for comment in self.comments.all()],
-                'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
-
-                }
+        return {
+            'id': self.id,
+            'submittedDate': self.submittedDate,
+            'lastUpdate': self.lastUpdate,
+            'userId': '' if (self.activeUser is None) else self.activeUser.username,
+            'submitter_userid': '' if (self.submitter is None) else self.submitter.username,
+            'state': self.stateCd,
+            'previousStateCd': self.previousStateCd,
+            'nrNum': self.nrNum,
+            'consentFlag': self.consentFlag,
+            'consent_dt': self.consent_dt,
+            'expirationDate': self.expirationDate,
+            'requestTypeCd': self.requestTypeCd,
+            'entity_type_cd': self.entity_type_cd,
+            'request_action_cd': self.request_action_cd,
+            'source': self.source,
+            'priorityCd': self.priorityCd,
+            'priorityDate': self.priorityDate,
+            'xproJurisdiction': self.xproJurisdiction,
+            'additionalInfo': self.additionalInfo,
+            'natureBusinessInfo': self.natureBusinessInfo,
+            'furnished': self.furnished if (self.furnished is not None) else 'N',
+            'hasBeenReset': self.hasBeenReset,
+            'previousRequestId': self.previousRequestId,
+            'previousNr': previousNr,
+            'submitCount': self.submitCount,
+            'corpNum': self.corpNum,
+            'names': [name.as_dict() for name in self.names.all()],
+            'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
+            'comments': [comment.as_dict() for comment in self.comments.all()],
+            'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
+        }
 
     @classmethod
     def find_by_nr(cls, nr):
@@ -203,17 +204,19 @@ class Request(db.Model):
 
     def delete_from_db(self):
         # TODO: Add listener onto the SQLALchemy event to block deletes
-        raise BusinessException({"code": "cannot_delete_nr",
-                                 "description":
-                                     "NRs cannot be deleted, maybe try cancelling instead"},
-                                403)
+        raise BusinessException({
+            "code": "cannot_delete_nr",
+            "description":
+            "NRs cannot be deleted, maybe try cancelling instead"
+        }, 403)
 
     @classmethod
     def get_queued_oldest(cls, userObj):
-        """Gets the Next NR# from the database
-           It sets the STATUS == INPROGRESS
-           and then returns the NR or
-           error out with a SQLAlchemy Error type
+        """
+        Gets the Next NR# from the database
+        It sets the STATUS == INPROGRESS
+        and then returns the NR or
+        error out with a SQLAlchemy Error type
         """
         existing_nr = Request.get_inprogress(userObj)
 
@@ -241,10 +244,9 @@ class Request(db.Model):
 
     @classmethod
     def get_inprogress(cls, userObj):
-        """Gets the Next NR# from the database
-           where the STATUS == INPROGRESS
-           and assigned to the user
-           this assumes that a user can ONLY EVER have 1 Request in progress at a time.
+        """
+        Gets the Next NR# from the database where the STATUS == INPROGRESS and assigned to the user
+        this assumes that a user can ONLY EVER have 1 Request in progress at a time.
         """
         existing_nr = db.session.query(Request). \
             filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS). \
@@ -258,8 +260,7 @@ class Request(db.Model):
 
     @classmethod
     def validNRFormat(cls, nr):
-        '''NR should be of the format "NR 1234567"
-        '''
+        """NR should be of the format 'NR 1234567'"""
         if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':
             return False
 
@@ -271,83 +272,83 @@ class Request(db.Model):
         return True
 
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
-    # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
     def get_general_query(cls, change_filter=False):
         criteria = []
         basic_filters = [
             cls.id == Name.nrId,
             cls.stateCd.in_([State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
-            cls.requestTypeCd.in_(
-                [EntityTypes.PRIVATE_ACT.value,
-                 EntityTypes.CORPORATION.value,
-                 LegacyEntityTypes.CORPORATION.CCR.value,
-                 LegacyEntityTypes.CORPORATION.CT.value,
-                 LegacyEntityTypes.CORPORATION.RCR.value,
-                 EntityTypes.COOPERATIVE.value,
-                 LegacyEntityTypes.COOPERATIVE.CCP.value,
-                 LegacyEntityTypes.COOPERATIVE.CTC.value,
-                 LegacyEntityTypes.COOPERATIVE.RCP.value,
-                 EntityTypes.FINANCIAL_INSTITUTION.value,
-                 LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
-                 LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
-                 EntityTypes.SOCIETY.value,
-                 LegacyEntityTypes.SOCIETY.ASO.value,
-                 LegacyEntityTypes.SOCIETY.CSO.value,
-                 LegacyEntityTypes.SOCIETY.CSSO.value,
-                 LegacyEntityTypes.SOCIETY.CTSO.value,
-                 LegacyEntityTypes.SOCIETY.RSO.value,
-                 EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
-                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
-                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
-                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.ULCT.value,
-                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
-                 EntityTypes.XPRO_SOCIETY.value,
-                 LegacyEntityTypes.XPRO_SOCIETY.XASO.value,
-                 LegacyEntityTypes.XPRO_SOCIETY.XCASO.value,
-                 LegacyEntityTypes.XPRO_SOCIETY.XCSO.value,
-                 LegacyEntityTypes.XPRO_SOCIETY.XRSO.value,
-                 EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
-                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
-                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCV.value,
-                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCCT.value,
-                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
-                 EntityTypes.PARISH.value,
-                 EntityTypes.XPRO_CORPORATION.value,
-                 LegacyEntityTypes.XPRO_CORPORATION.XCCR.value,
-                 LegacyEntityTypes.XPRO_CORPORATION.XRCR.value,
-                 LegacyEntityTypes.XPRO_CORPORATION.AS.value,
-                 EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
-                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.UA.value,
-                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XCUL.value,
-                 LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XRUL.value,
-                 EntityTypes.XPRO_COOPERATIVE.value,
-                 LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
-                 LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
-                 EntityTypes.BENEFIT_COMPANY.value
-                 ] if not change_filter else [EntityTypes.PRIVATE_ACT.value,
-                 EntityTypes.CORPORATION.value,
-                 LegacyEntityTypes.CORPORATION.CCR.value,
-                 LegacyEntityTypes.CORPORATION.RCR.value,
-                 EntityTypes.COOPERATIVE.value,
-                 LegacyEntityTypes.COOPERATIVE.CCP.value,
-                 LegacyEntityTypes.COOPERATIVE.RCP.value,
-                 EntityTypes.FINANCIAL_INSTITUTION.value,
-                 LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
-                 LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
-                 LegacyEntityTypes.SOCIETY.ASO.value,
-                 LegacyEntityTypes.SOCIETY.CSO.value,
-                 LegacyEntityTypes.SOCIETY.RSO.value,
-                 EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
-                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
-                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
-                 LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
-                 EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
-                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
-                 LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
-                 EntityTypes.PARISH.value,
-                 EntityTypes.BENEFIT_COMPANY.value
-                 ]),
+            cls.requestTypeCd.in_([
+                EntityTypes.PRIVATE_ACT.value,
+                EntityTypes.CORPORATION.value,
+                LegacyEntityTypes.CORPORATION.CCR.value,
+                LegacyEntityTypes.CORPORATION.CT.value,
+                LegacyEntityTypes.CORPORATION.RCR.value,
+                EntityTypes.COOPERATIVE.value,
+                LegacyEntityTypes.COOPERATIVE.CCP.value,
+                LegacyEntityTypes.COOPERATIVE.CTC.value,
+                LegacyEntityTypes.COOPERATIVE.RCP.value,
+                EntityTypes.FINANCIAL_INSTITUTION.value,
+                LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                EntityTypes.SOCIETY.value,
+                LegacyEntityTypes.SOCIETY.ASO.value,
+                LegacyEntityTypes.SOCIETY.CSO.value,
+                LegacyEntityTypes.SOCIETY.CSSO.value,
+                LegacyEntityTypes.SOCIETY.CTSO.value,
+                LegacyEntityTypes.SOCIETY.RSO.value,
+                EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.ULCT.value,
+                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                EntityTypes.XPRO_SOCIETY.value,
+                LegacyEntityTypes.XPRO_SOCIETY.XASO.value,
+                LegacyEntityTypes.XPRO_SOCIETY.XCASO.value,
+                LegacyEntityTypes.XPRO_SOCIETY.XCSO.value,
+                LegacyEntityTypes.XPRO_SOCIETY.XRSO.value,
+                EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCV.value,
+                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCCT.value,
+                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                EntityTypes.PARISH.value,
+                EntityTypes.XPRO_CORPORATION.value,
+                LegacyEntityTypes.XPRO_CORPORATION.XCCR.value,
+                LegacyEntityTypes.XPRO_CORPORATION.XRCR.value,
+                LegacyEntityTypes.XPRO_CORPORATION.AS.value,
+                EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+                LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.UA.value,
+                LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XCUL.value,
+                LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XRUL.value,
+                EntityTypes.XPRO_COOPERATIVE.value,
+                LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
+                LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
+                EntityTypes.BENEFIT_COMPANY.value
+            ] if not change_filter else [
+                EntityTypes.PRIVATE_ACT.value,
+                EntityTypes.CORPORATION.value,
+                LegacyEntityTypes.CORPORATION.CCR.value,
+                LegacyEntityTypes.CORPORATION.RCR.value,
+                EntityTypes.COOPERATIVE.value,
+                LegacyEntityTypes.COOPERATIVE.CCP.value,
+                LegacyEntityTypes.COOPERATIVE.RCP.value,
+                EntityTypes.FINANCIAL_INSTITUTION.value,
+                LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                LegacyEntityTypes.SOCIETY.ASO.value,
+                LegacyEntityTypes.SOCIETY.CSO.value,
+                LegacyEntityTypes.SOCIETY.RSO.value,
+                EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                EntityTypes.PARISH.value,
+                EntityTypes.BENEFIT_COMPANY.value
+            ]),
 
             Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
                             NameState.COND_RESERVE.value]),
@@ -373,8 +374,7 @@ class Request(db.Model):
             fields=[Name.name, sqlalchemy.null().label('names_consumption_date'), cls.submittedDate,
                     sqlalchemy.null().label('names_corp_num'), cls.nrNum],
             filters=[basic_filters, not_consumed_filters]
-        )
-        )
+        ))
 
         return criteria
 
@@ -389,7 +389,7 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, check_name_is_well_formed=False):
-        special_characters_element= Request.set_special_characters(descriptive_element)
+        special_characters_element = Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
                 # Reset filter index 5 which contains the descriptive in the previous round.
@@ -432,7 +432,8 @@ class Request(db.Model):
 
         return list_special_characters
 
-# set the source from NRO, Societis Online, Name Request
+
+# set the source from NRO, Societies Online, Name Request
 @event.listens_for(Request, 'before_update')
 def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the source of the NR."""
@@ -443,20 +444,20 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
     nro_source = ValidSources.NRO.value
 
     # comes from NRO/Societies Online
-    if (request._source is None):
-        if (request.requestTypeCd not in soc_list):
+    if request._source is None:
+        if request.requestTypeCd not in soc_list:
             request._source = nro_source  # pylint: disable=protected-access
-        if (request.requestTypeCd in soc_list):
+        if request.requestTypeCd in soc_list:
             request._source = so_source  # pylint: disable=protected-access
+
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
-def update_request_action_entity_type(mapper, connection,
-                                      target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+def update_request_action_entity_type(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
     # needed to break apart  request_type
     request = target
-    if (re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None):
+    if re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None:
         # todo: handle assumed name as it is a name type and not currently a request action?
         # map the legacy request_type to the new Entity_type and Request_action
         new_value = request.requestTypeCd
@@ -490,25 +491,26 @@ class RequestsHeaderSchema(ma.ModelSchema):
         model = Request
         # sqla_session = db.scoped_session
         # additional = ['stateCd']
-        fields = ('additionalInfo'
-                  , 'consentFlag'
-                  , 'consent_dt'
-                  , 'corpNum'
-                  , 'expirationDate'
-                  , 'furnished'
-                  , 'hasBeenReset'
-                  , 'id'
-                  , 'natureBusinessInfo'
-                  , 'nrNum'
-                  , 'nroLastUpdate'
-                  , 'priorityCd'
-                  , 'requestTypeCd'
-                  , 'stateCd'
-                  , 'previousStateCd'
-                  , 'submitCount'
-                  , 'submittedDate'
-                  , 'xproJurisdiction'
-                  )
+        fields = (
+            'additionalInfo',
+            'consentFlag',
+            'consent_dt',
+            'corpNum',
+            'expirationDate',
+            'furnished',
+            'hasBeenReset',
+            'id',
+            'natureBusinessInfo',
+            'nrNum',
+            'nroLastUpdate',
+            'priorityCd',
+            'requestTypeCd',
+            'stateCd',
+            'previousStateCd',
+            'submitCount',
+            'submittedDate',
+            'xproJurisdiction',
+        )
 
 
 class RequestsSearchSchema(ma.ModelSchema):
@@ -516,27 +518,28 @@ class RequestsSearchSchema(ma.ModelSchema):
         model = Request
         # sqla_session = db.scoped_session
         # additional = ['stateCd']
-        fields = ('additionalInfo'
-                  , 'comments'
-                  , 'consentFlag'
-                  , 'consent_dt'
-                  , 'corpNum'
-                  , 'expirationDate'
-                  , 'furnished'
-                  , 'lastUpdate'
-                  , 'natureBusinessInfo'
-                  , 'nrNum'
-                  , 'nroLastUpdate'
-                  , 'priorityCd'
-                  , 'priorityDate'
-                  , 'requestTypeCd'
-                  , 'stateCd'
-                  , 'submitCount'
-                  , 'submittedDate'
-                  , 'xproJurisdiction'
-                  , 'names'
-                  , 'activeUser'
-                  )
+        fields = (
+            'additionalInfo',
+            'comments',
+            'consentFlag',
+            'consent_dt',
+            'corpNum',
+            'expirationDate',
+            'furnished',
+            'lastUpdate',
+            'natureBusinessInfo',
+            'nrNum',
+            'nroLastUpdate',
+            'priorityCd',
+            'priorityDate',
+            'requestTypeCd',
+            'stateCd',
+            'submitCount',
+            'submittedDate',
+            'xproJurisdiction',
+            'names',
+            'activeUser'
+        )
 
     names = ma.Nested(NameSchema, many=True)
     activeUser = ma.Nested(UserSchema, many=False, only='username')

@@ -322,9 +322,10 @@ request_type_mapping = [
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REST.value),
     ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value),
     ('BECR', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value)
-    ]
+]
 
-class NameState(Enum):
+
+class NameState(AbstractEnum):
     NOT_EXAMINED = 'NE'
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'

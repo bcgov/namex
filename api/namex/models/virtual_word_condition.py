@@ -66,6 +66,7 @@ class VirtualWordCondition(db.Model):
 
         return None
     '''
+
     @classmethod
     def find_by_criteria(cls, criteria=None):
         VirtualWordConditionCriteria.is_valid_criteria(criteria)

@@ -5,9 +5,9 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_has_word_upper, save_words_list_classification
+from ...common import assert_issues_count_is_gt, assert_has_word_upper, save_words_list_classification
 from ..common import ENDPOINT_PATH
-from ..common import token_header, claims
+from ...common import token_header, claims
 
 
 @pytest.mark.xfail(raises=ValueError)

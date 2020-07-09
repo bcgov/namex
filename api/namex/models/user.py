@@ -1,6 +1,6 @@
 from . import db, ma
 from flask import current_app
-from marshmallow import Schema, fields, post_load
+# from marshmallow import Schema, fields, post_load
 from datetime import datetime
 
 
@@ -15,11 +15,11 @@ class User(db.Model):
     iss = db.Column(db.String(1024))
     creationDate = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
 
-    APPROVER='names_approver'
-    EDITOR='names_editor'
-    VIEWONLY='names_viewer'
+    APPROVER = 'names_approver'
+    EDITOR = 'names_editor'
+    VIEWONLY = 'names_viewer'
 
-    def __init__(self, username, firstname, lastname, sub, iss ):
+    def __init__(self, username, firstname, lastname, sub, iss):
         self.username = username
         self.firstname = firstname
         self.lastname = lastname
@@ -28,7 +28,7 @@ class User(db.Model):
 
     def json(self):
         return {"username": self.username, "firstname": self.firstname, "lastname": self.lastname,
-                "sub": self.sub, "iss": self.iss }
+                "sub": self.sub, "iss": self.iss}
 
     @classmethod
     def find_by_jwtToken(cls, token):
@@ -42,11 +42,11 @@ class User(db.Model):
             # u = s.load(data=token, partial=True)
             user = User(
                 # username = token.get('username', None),
-                username = token.get('preferred_username', None),
-                firstname = token.get('given_name', None),
-                lastname = token.get('family_name', None),
-                iss = token['iss'],
-                sub = token['sub']
+                username=token.get('preferred_username', None),
+                firstname=token.get('given_name', None),
+                lastname=token.get('family_name', None),
+                iss=token['iss'],
+                sub=token['sub']
             )
             current_app.logger.debug('Creating user from JWT:{}; User:{}'.format(token, user))
             db.session.add(user)
@@ -73,6 +73,7 @@ class User(db.Model):
         # db.session.delete(self)
         # db.session.commit()
 
+
 class UserSchema(ma.ModelSchema):
     class Meta:
         model = User
@@ -95,7 +96,6 @@ class UserSchema(ma.ModelSchema):
     #                 lastname=data['lastname'],
     #                 sub=data['sub'],
     #                 iss=data['iss'])
-
 
 # class KeycloakUserSchema(Schema):
 #     id = fields.Int(dump_only=True)

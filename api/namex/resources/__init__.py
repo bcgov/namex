@@ -11,6 +11,9 @@ from .name_requests import api as name_request_api
 
 from .auto_analyse.paths import bc_name_analysis_api, xpro_name_analysis_api
 
+from .payment import payment_api
+
+
 # This will add the Authorize button to the swagger docs
 # TODO oauth2 & openid may not yet be supported by restplus <- check on this
 authorizations = {
@@ -39,3 +42,5 @@ api.add_namespace(name_request_api, path='/namerequests')
 
 api.add_namespace(bc_name_analysis_api, path='/name-analysis')
 api.add_namespace(xpro_name_analysis_api, path='/xpro-name-analysis')
+
+api.add_namespace(payment_api, path='/payments')
