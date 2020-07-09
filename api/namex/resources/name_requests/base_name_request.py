@@ -227,8 +227,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         user_id = self.user_id
         nr_id = self.nr_id
 
+        # If the language comment exists, we don't need to add it again
         lang_comment = build_language_comment(request_data['english'], user_id, nr_id)
-        name_request.comments.append(lang_comment)
+        matching_comments = list(filter(lambda x: x.comment == lang_comment.comment, list(name_request.comments)))
+        if len(matching_comments) == 0:
+            name_request.comments.append(lang_comment)
 
         return name_request
 
@@ -239,7 +242,9 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         if request_data['nameFlag'] is True:
             name_comment = build_name_comment(user_id, nr_id)
-            name_request.comments.append(name_comment)
+            matching_comments = list(filter(lambda x: x.comment == name_comment.comment, list(name_request.comments)))
+            if len(matching_comments) == 0:
+                name_request.comments.append(name_comment)
 
         return name_request
 
