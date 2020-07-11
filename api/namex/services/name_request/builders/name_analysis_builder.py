@@ -561,7 +561,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 counter = SUBS_W
             else:
                 counter = OTHER_W
-            # print(type(k))
             vector1[k] = counter
         return vector1
 
