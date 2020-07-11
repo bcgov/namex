@@ -60,6 +60,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self._name_processing_service = svc
 
     @property
+    def token_classifier_service(self):
+        return self._token_classifier_service
+
+    @token_classifier_service.setter
+    def token_classifier_service(self, svc):
+        self._token_classifier_service = svc
+
+    @property
     def builder(self):
         return self._builder
 
@@ -149,6 +157,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
         self.name_processing_service = NameProcessingService()
+        self.token_classifier_service = TokenClassifier(self.synonym_service)
 
         self.builder = None
         self.token_classifier = None
