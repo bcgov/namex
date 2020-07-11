@@ -1,10 +1,16 @@
 import re
-from . import porter
+from . import porter, STEM_W, OTHER_W, SUBS_W, STEM_COS_W, SUBS_COS_W
+import math
+from collections import Counter
+
+# from ...word_classification import token_classifier
+
+WORD = re.compile(r"\w+")
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list, list_distinctive_descriptive, \
-    get_conflicts_same_classification
+    get_conflicts_same_classification, get_classification
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -38,7 +44,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             valid = self.check_descriptive(name_dict)
             if not valid:
                 if len(name_dict) > 0:
-                    result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name, list_dist,
+                    result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name,
+                                                                      list_dist,
                                                                       AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
                     if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
                         return result
@@ -202,7 +209,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         for dist in dist_substitution_list:
             criteria = Request.get_general_query(change_filter)
             # Inject distinctive section into query
-            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, stop_words, check_name_is_well_formed)
+            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, stop_words,
+                                                                 check_name_is_well_formed)
             for desc in desc_synonym_list:
                 # Inject descriptive section into query, execute and add matches to list
                 matches = Request.get_query_distinctive_descriptive(desc, criteria)
@@ -423,26 +431,39 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             selected_matches, dict_details = [], {}
             syn_svc = self.synonym_service
             service = ProtectedNameAnalysisService()
+            np_svc = service.name_processing_service
+            wc_svc = service.word_classification_service
+            token_svc = service.token_classifier_service
 
             all_subs_dict, dist_subs_dict, desc_subs_dict = get_all_substitutions(syn_svc, list_dist, list_desc,
                                                                                   list_name)
-            list_name_stem = [porter.stem(name.lower()) for name in list_name]
-            length_original = len(list_name)
+            list_dist_stem = [porter.stem(name.lower()) for name in list_dist]
+            list_desc_stem = [porter.stem(name.lower()) for name in list_desc]
 
             dict_matches_counter, dict_matches_words = {}, {}
-
+            vector1_dist = self.text_to_vector(list_dist)
+            vector1_desc = self.text_to_vector(list_desc)
             for match in matches:
-                np_svc = service.name_processing_service
+                if match.name == 'PACIFIC INDUSTRIAL HOLDINGS LTD.':
+                    print("None")
                 np_svc.set_name(match.name)
-                # TODO: Get rid of this when done refactoring!
                 match_list = np_svc.name_tokens
-                counter = self.get_score(match_list, length_original, list_name, list_name_stem, all_subs_dict)
-                similarity = round(counter / length_original, 2)
-                print("similarity: ", similarity)
-                if similarity >= 0.67:
-                    dict_matches_counter.update({match.name: similarity})
+                #get_classification(self.director, service, syn_svc, match_list, token_svc)
+                get_classification(self.director, service, syn_svc, match_list, wc_svc, token_svc)
+                # TODO: Get rid of this when done refactoring!
+                vector2_dist = self.get_score_by_classification(service.get_list_dist(), list_dist, list_dist_stem,
+                                                                dist_subs_dict)
+                vector2_desc = self.get_score_by_classification(service.get_list_desc(), list_desc, list_desc_stem,
+                                                                desc_subs_dict)
+                cosine_dist = self.get_cosine(vector1_dist, vector2_dist)
+                cosine_desc = self.get_cosine(vector1_desc, vector2_desc)
+                cosine = round((cosine_dist + cosine_desc) / 2, 2)
+                print(cosine)
+
+                if cosine >= 0.67:
+                    dict_matches_counter.update({match.name: cosine})
                     selected_matches.append(match)
-                    if similarity == 1.0:
+                    if cosine == 1.0:
                         break
 
             if dict_matches_counter:
@@ -494,25 +515,50 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details
 
-    def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
-        counter = 0
-        for idx, word in enumerate(match_list):
-            if length_original > idx and word.lower() == list_name[idx]:
-                counter += 1
-            elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
-                counter += 0.95
-            elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
-                counter += 0.9
-            elif word.lower() in list_name:
-                counter += 0.8
-            elif porter.stem(word.lower()) in list_name_stem:
-                counter += 0.7
-            elif porter.stem(word.lower()) in get_flat_list(all_subs_dict.values()):
-                counter += 0.6
-            else:
-                counter -= 0.2
+    # def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
+    #     counter = 0
+    #     for idx, word in enumerate(match_list):
+    #         if length_original > idx and word.lower() == list_name[idx]:
+    #             counter += 1
+    #         elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
+    #             counter += 0.95
+    #         elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
+    #             counter += 0.9
+    #         elif word.lower() in list_name:
+    #             counter += 0.8
+    #         elif porter.stem(word.lower()) in list_name_stem:
+    #             counter += 0.7
+    #         elif porter.stem(word.lower()) in get_flat_list(all_subs_dict.values()):
+    #             counter += 0.6
+    #         else:
+    #             counter -= 0.2
+    #
+    #     return counter
 
-        return counter
+    '''
+    
+    '''
+
+    def get_score_by_classification(self, conflict_class_list, original_class_list, original_class_stem,
+                                    class_subs_dict):
+        vector1 = dict()
+        for idx, word in enumerate(conflict_class_list):
+            word_stem = porter.stem(word.lower())
+            k = word.lower()
+            if word.lower() in original_class_list:
+                counter = 1
+            elif word_stem in original_class_stem:
+                idx = original_class_stem.index(word_stem)
+                k = original_class_list[idx]
+                counter = STEM_W
+            elif word_stem in get_flat_list(class_subs_dict.values()):
+                k = ''.join([key for (key, value) in class_subs_dict.items() if word_stem in value])
+                counter = SUBS_W
+            else:
+                counter = OTHER_W
+            # print(type(k))
+            vector1[k] = counter
+        return vector1
 
     def get_subsitutions_distinctive(self, w_dist):
         syn_svc = self.synonym_service
@@ -579,3 +625,48 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 break
 
         return valid
+
+    def text_to_vector(self, list_name):
+        return Counter(list_name)
+
+    def get_cosine(self, vec1, vec2):
+        intersection = set(vec1.keys()) & set(vec2.keys())
+        numerator = sum([vec1[x] * vec2[x] for x in intersection])
+        # numerator = 0
+        # sum1 = 0
+        # sum2 = 0
+        #
+        # for x in intersection:
+        #     print(x)
+        #     print("vec1[x]: ", vec1[x])
+        #     print("vec2[x]: ", vec2[x])
+        #     tmp = vec1[x] * vec2[x]
+        #     numerator += tmp
+
+        sum1 = sum([vec1[x] ** 2 for x in list(vec1.keys())])
+        sum2 = sum([vec2[x] ** 2 for x in list(vec2.keys())])
+        #print("**************")
+        # for x in list(vec1.keys()):
+        #     print(x)
+        #     print("vec1[x]: ", vec1[x])
+        #     print("vec1[x] **2: ", vec1[x] ** 2)
+        #     tmp1 = vec1[x] ** 2
+        #     sum1 += tmp1
+        #
+        # for x in list(vec2.keys()):
+        #     print(x)
+        #     print("vec2[x]: ", vec2[x])
+        #     print("vec2[x] **2: ", vec2[x] ** 2)
+        #     tmp2 = vec2[x] ** 2
+        #     if vec2[x] == STEM_W:
+        #         tmp2 *= STEM_COS_W
+        #     elif vec2[x] == SUBS_W:
+        #         tmp2 *= SUBS_COS_W
+        #     sum2 += tmp2
+
+        denominator = math.sqrt(sum1) * math.sqrt(sum2)
+
+        if not denominator:
+            return 0.0
+        else:
+            return float(numerator) / denominator
