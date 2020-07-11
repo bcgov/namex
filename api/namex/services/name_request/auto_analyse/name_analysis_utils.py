@@ -107,6 +107,28 @@ def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
     return all_substitution_dict, dist_substitution_dict, desc_substitution_dict
 
 
+def get_distinctive_substitutions(syn_svc, list_dist):
+    all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+        words=list_dist,
+        words_are_distinctive=True
+    ).data
+
+    dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
+
+    return dist_substitution_dict
+
+
+def get_descriptive_substitutions(syn_svc, list_desc):
+    all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
+        words=list_desc,
+        words_are_distinctive=False
+    ).data
+
+    desc_substitution_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
+
+    return desc_substitution_dict
+
+
 def lookahead(iterable):
     """Pass through all values from the given iterable, augmented by the
     information if there are more values to come after the current one
@@ -147,10 +169,15 @@ def check_synonyms(syn_svc, list_dist_words, list_desc_words):
 
 
 def change_descriptive(list_dist_words, list_desc_words, list_name):
-    for idx, word in enumerate(list_name[1:],start=1):
-        if word in list_dist_words and list_name[idx - 1] in list_desc_words:
-            list_desc_words.remove(list_name[idx - 1])
-            list_dist_words.insert(idx - 1,list_name[idx - 1])
+    for idx, word in enumerate(list_name[1:], start=1):
+        pos = idx - 1
+        if word in list_dist_words and list_name[pos] in list_desc_words:
+            # Update to distinctive all elements before
+            while pos >= 0:
+                list_desc_words.remove(list_name[pos])
+                list_dist_words.insert(pos, list_name[pos])
+                pos -= 1
+        break
     return list_dist_words, list_desc_words
 
 
@@ -165,3 +192,29 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, list
     check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name, True)
 
     return check_conflicts
+
+
+def get_classification(director, service, syn_svc, match, wc_svc, token_svc):
+    service.token_classifier = wc_svc.classify_tokens(match)
+    service._list_dist_words, service._list_desc_words, service._list_none_words = service.word_classification_tokens
+
+    if service.get_list_none() and service.get_list_none().__len__() > 0:
+        service._list_dist_words, service._list_desc_words = \
+            token_svc.handle_unclassified_words(
+                service.get_list_dist(),
+                service.get_list_desc(),
+                service.get_list_none(),
+                service.name_tokens
+            )
+
+    service._list_dist_words, service._list_desc_words = check_synonyms(syn_svc,
+                                                                        service.get_list_dist(),
+                                                                        service.get_list_desc())
+
+    service._list_dist_words, service._list_desc_words = change_descriptive(service.get_list_dist(),
+                                                                            service.get_list_desc(),
+                                                                            service.name_tokens)
+
+    service._dict_name_words = get_classification_summary(service.name_tokens,
+                                                          service.get_list_dist(),
+                                                          service.get_list_desc())
