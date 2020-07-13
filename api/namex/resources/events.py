@@ -9,7 +9,7 @@ setup_logging() ## important to do this first
 from namex.models import Event as EventDAO, Request as RequestDAO, User,  State
 
 # Register a local namespace for the event history
-api = Namespace('Events', description='Audit trail of events for a name request')
+api = Namespace('events', description='Audit trail of events for a Name Request')
 @cors_preflight("GET")
 @api.route('/<string:nr>', methods=['GET','OPTIONS'])
 class Events(Resource):
