@@ -8,6 +8,11 @@ class WordClassificationService:
         pass
 
     @classmethod
+    def find_one(cls, word=None):
+        results = WordClassification.find_one(word)
+        return results[0] if len(results) > 0 else None
+
+    @classmethod
     def create(cls, word_classification):
         entity = WordClassification()
         entity.word = word_classification['word'].upper()
