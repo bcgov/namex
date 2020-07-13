@@ -194,7 +194,7 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, list
     return check_conflicts
 
 
-def get_classification(director, service, syn_svc, match, wc_svc, token_svc):
+def get_classification(service, syn_svc, match, wc_svc, token_svc):
     service.token_classifier = wc_svc.classify_tokens(match)
     service._list_dist_words, service._list_desc_words, service._list_none_words = service.word_classification_tokens
 
