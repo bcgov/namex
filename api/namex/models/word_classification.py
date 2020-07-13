@@ -44,32 +44,49 @@ class WordClassification(db.Model):
 
     @classmethod
     def find_word_classification(cls, word):
-        results = db.session.query(cls.word, cls.classification) \
-            .filter(func.lower(cls.word) == func.lower(word)) \
-            .filter(cls.end_dt == None) \
-            .filter(cls.start_dt <= date.today()) \
-            .filter(cls.approved_dt <= date.today()).all()
+        results = cls.query.filter(func.lower(cls.word) == func.lower(word)) \
+            .filter(cls.end_dt == None).all()
+
+        # .filter(cls.start_dt <= date.today()).all()
+        # .filter(cls.approved_dt <= date.today()).all()
+
         print(word)
         print(list(map(lambda x: x.classification, results)))
         return results
 
     @classmethod
     def find_word_by_classification(cls, word, classification):
-        results = db.session.query(cls.word, cls.classification) \
-            .filter(func.lower(cls.word) == func.lower(word)) \
-            .filter(cls.classification == func.lower(classification))\
-            .filter(cls.end_dt == None) \
-            .filter(cls.start_dt <= date.today()) \
-            .filter(cls.approved_dt <= date.today()).all()
+        results = cls.query.filter(func.lower(cls.word) == func.lower(word)) \
+            .filter(func.lower(cls.classification) == func.lower(classification))\
+            .filter(cls.end_dt == None).all()
+
+        # .filter(cls.start_dt <= datetime.now()).all()
+        # .filter(cls.approved_dt <= date.today()).all()
+
         print(word)
         print(list(map(lambda x: x.classification, results)))
         return results
+
+    @classmethod
+    def find_one(cls, word=None):
+        results = WordClassification.find_word_classification(word)
+        return results[0] if len(results) > 0 else None
+
+    @classmethod
+    def find_one_by_class(cls, word=None, classification=None):
+        results = WordClassification.find_word_by_classification(word, classification)
+        return results[0] if len(results) > 0 else None
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
 
     def save_to_session(self):
         db.session.add(self)
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
 
 
 class WordClassificationSchema(ma.ModelSchema):
