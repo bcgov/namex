@@ -561,7 +561,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 counter = SUBS_W
             else:
                 counter = OTHER_W
-            # print(type(k))
             vector1[k] = counter
         return vector1
 
@@ -637,37 +636,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_cosine(self, vec1, vec2):
         intersection = set(vec1.keys()) & set(vec2.keys())
         numerator = sum([vec1[x] * vec2[x] for x in intersection])
-        # numerator = 0
-        # sum1 = 0
-        # sum2 = 0
-        #
-        # for x in intersection:
-        #     print(x)
-        #     print("vec1[x]: ", vec1[x])
-        #     print("vec2[x]: ", vec2[x])
-        #     tmp = vec1[x] * vec2[x]
-        #     numerator += tmp
 
         sum1 = sum([vec1[x] ** 2 for x in list(vec1.keys())])
         sum2 = sum([vec2[x] ** 2 for x in list(vec2.keys())])
-        # print("**************")
-        # for x in list(vec1.keys()):
-        #     print(x)
-        #     print("vec1[x]: ", vec1[x])
-        #     print("vec1[x] **2: ", vec1[x] ** 2)
-        #     tmp1 = vec1[x] ** 2
-        #     sum1 += tmp1
-        #
-        # for x in list(vec2.keys()):
-        #     print(x)
-        #     print("vec2[x]: ", vec2[x])
-        #     print("vec2[x] **2: ", vec2[x] ** 2)
-        #     tmp2 = vec2[x] ** 2
-        #     if vec2[x] == STEM_W:
-        #         tmp2 *= STEM_COS_W
-        #     elif vec2[x] == SUBS_W:
-        #         tmp2 *= SUBS_COS_W
-        #     sum2 += tmp2
 
         denominator = math.sqrt(sum1) * math.sqrt(sum2)
 
