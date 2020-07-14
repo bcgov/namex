@@ -467,10 +467,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 if cosine >= MINIMUM_SIMILARITY:
                     dict_matches_counter.update({match.name: cosine})
                     selected_matches.append(match)
-                    if len(matches) >= HIGH_CONFLICT_RECORDS and cosine >= HIGH_SIMILARITY:
-                        forced = True
-                        break
-                    elif len(matches) < HIGH_CONFLICT_RECORDS and cosine >= EXACT_MATCH:
+                    if (len(matches) >= HIGH_CONFLICT_RECORDS and cosine >= HIGH_SIMILARITY) or (len(matches) < HIGH_CONFLICT_RECORDS and cosine >= EXACT_MATCH):
                         forced = True
                         break
 
@@ -501,11 +498,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return response
 
-    # def is_match(self, list_conflicts, forced):
-    #     for record in list_conflicts:
-    #         if record['score'] == 1.0:
-    #             return True
-    #     return False
+    def is_match(self, list_conflicts, forced):
+        for record in list_conflicts:
+            if record['score'] == 1.0:
+                return True
+        return False
 
     def get_details_higher_score(self, dict_highest_counter, selected_matches, all_subs_dict):
         list_details = []
@@ -523,25 +520,25 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details
 
-    # def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
-    #     counter = 0
-    #     for idx, word in enumerate(match_list):
-    #         if length_original > idx and word.lower() == list_name[idx]:
-    #             counter += 1
-    #         elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
-    #             counter += 0.95
-    #         elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
-    #             counter += 0.9
-    #         elif word.lower() in list_name:
-    #             counter += 0.8
-    #         elif porter.stem(word.lower()) in list_name_stem:
-    #             counter += 0.7
-    #         elif porter.stem(word.lower()) in get_flat_list(all_subs_dict.values()):
-    #             counter += 0.6
-    #         else:
-    #             counter -= 0.2
-    #
-    #     return counter
+    def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
+        counter = 0
+        for idx, word in enumerate(match_list):
+            if length_original > idx and word.lower() == list_name[idx]:
+                counter += 1
+            elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
+                counter += 0.95
+            elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
+                counter += 0.9
+            elif word.lower() in list_name:
+                counter += 0.8
+            elif porter.stem(word.lower()) in list_name_stem:
+                counter += 0.7
+            elif porter.stem(word.lower()) in get_flat_list(all_subs_dict.values()):
+                counter += 0.6
+            else:
+                counter -= 0.2
+
+        return counter
 
     '''
     
@@ -640,37 +637,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_cosine(self, vec1, vec2):
         intersection = set(vec1.keys()) & set(vec2.keys())
         numerator = sum([vec1[x] * vec2[x] for x in intersection])
-        # numerator = 0
-        # sum1 = 0
-        # sum2 = 0
-        #
-        # for x in intersection:
-        #     print(x)
-        #     print("vec1[x]: ", vec1[x])
-        #     print("vec2[x]: ", vec2[x])
-        #     tmp = vec1[x] * vec2[x]
-        #     numerator += tmp
 
         sum1 = sum([vec1[x] ** 2 for x in list(vec1.keys())])
         sum2 = sum([vec2[x] ** 2 for x in list(vec2.keys())])
-        # print("**************")
-        # for x in list(vec1.keys()):
-        #     print(x)
-        #     print("vec1[x]: ", vec1[x])
-        #     print("vec1[x] **2: ", vec1[x] ** 2)
-        #     tmp1 = vec1[x] ** 2
-        #     sum1 += tmp1
-        #
-        # for x in list(vec2.keys()):
-        #     print(x)
-        #     print("vec2[x]: ", vec2[x])
-        #     print("vec2[x] **2: ", vec2[x] ** 2)
-        #     tmp2 = vec2[x] ** 2
-        #     if vec2[x] == STEM_W:
-        #         tmp2 *= STEM_COS_W
-        #     elif vec2[x] == SUBS_W:
-        #         tmp2 *= SUBS_COS_W
-        #     sum2 += tmp2
 
         denominator = math.sqrt(sum1) * math.sqrt(sum2)
 
