@@ -538,6 +538,31 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return counter
 
     '''
+    
+    '''
+
+    def get_score_by_classification(self, conflict_class_list, original_class_list, original_class_stem,
+                                    class_subs_dict):
+        vector1 = dict()
+        for idx, word in enumerate(conflict_class_list):
+            word_stem = porter.stem(word.lower())
+            k = word.lower()
+            if word.lower() in original_class_list:
+                counter = 1
+            elif word_stem in original_class_stem:
+                idx = original_class_stem.index(word_stem)
+                k = original_class_list[idx]
+                counter = STEM_W
+            elif word_stem in get_flat_list(class_subs_dict.values()):
+                k = ''.join([key for (key, value) in class_subs_dict.items() if word_stem in value])
+                counter = SUBS_W
+            else:
+                counter = OTHER_W
+            # print(type(k))
+            vector1[k] = counter
+        return vector1
+
+    '''
 
     '''
 
