@@ -87,6 +87,7 @@ nr_request = api.model('name_request', {
 NAME_REQUEST_SOURCE = 'NAMEREQUEST'
 
 SOLR_URL = os.getenv('SOLR_BASE_URL')
+SOLR_API_URL = SOLR_URL + '/solr/'
 
 
 def build_language_comment(english_bol, user_id, nr_id):
@@ -668,7 +669,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
     @classmethod
     def find_solr_doc(cls, solr_core, doc_id):
-        solr = pysolr.Solr(SOLR_URL + '/solr/' + solr_core + '/', timeout=10)
+        solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
         # Escape whitespace or query will fail
         results = solr.search('id:' + doc_id.replace(' ', '\\ '))
         return results
@@ -676,7 +677,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
     @classmethod
     def add_solr_doc(cls, solr_core, solr_docs):
         try:
-            solr = pysolr.Solr(SOLR_URL + '/solr/' + solr_core + '/', timeout=10)
+            solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
             result = solr.add(solr_docs, commit=True)
         except Exception as err:
             raise SolrUpdateError(err)
@@ -689,7 +690,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             # Try to find a matching document
             matching_docs = cls.find_solr_doc(solr_core, doc_id)
             if matching_docs:
-                solr = pysolr.Solr(SOLR_URL + '/solr/' + solr_core + '/', timeout=10)
+                solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
                 result = solr.delete(doc_id.replace(' ', '\\ '), commit=True)
 
                 return result
