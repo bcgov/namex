@@ -13,10 +13,10 @@ from ...common import token_header, claims
 
 @pytest.mark.parametrize("name, expected",
                          [
-                             # ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              # # ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."), #Under evaluation
-                             # ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
-                             # ("ARMSTRONG PLUMBING & CAFE INC.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
+                             ("ARMSTRONG PLUMBING & CAFE INC.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."),
                              ("LE BLUE CAFE LTD.", "LE BLUE RESTAURANT LTD.")
                          ]
