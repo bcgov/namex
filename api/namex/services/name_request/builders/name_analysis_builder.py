@@ -146,9 +146,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
 
+        # Can we write a custom Exception here (raise Exception('Blah blah') so that if list_dist_words is not coming back like:
+        # [['my', 'words']] (list of lists) we throw an error because this procedure expects a list of lists...
+
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
             if w_dist and w_desc:
                 list_conflicts.extend(
+                    # This part here w_dist, w_desc is what is being supplied as a word instead of a list...
                     self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed))
                 list_conflicts = [i for n, i in enumerate(list_conflicts) if
                                   i not in list_conflicts[n + 1:]]  # Remove duplicates
