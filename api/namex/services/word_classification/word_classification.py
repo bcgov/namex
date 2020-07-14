@@ -11,7 +11,7 @@ class WordClassificationService:
     def find_one(self, word=None):
         return WordClassification.find_word_classification(word)
 
-    def find_one_by_class(self, word=None, classification=None):
+    def find_one_by_class(word=None, classification=None):
         return WordClassification.find_word_by_classification(word, classification)
 
     @classmethod
@@ -45,7 +45,7 @@ class WordClassificationService:
 
     @classmethod
     def create_or_update(cls, word_classification):
-        entity = cls.find_one_by_class(cls,
+        entity = cls.find_one_by_class(
             word_classification['word'],
             word_classification['classification']
         ) or None
