@@ -116,7 +116,7 @@ class XproNameAnalysis(Resource):
                 # Use ProtectedNameAnalysisService
                 service = ProtectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
-            elif location == ValidLocations.CA_NOT_BC.value and entity_type in XproUnprotectedNameEntityTypes.list() and \
+            elif location in [ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value] and entity_type in XproUnprotectedNameEntityTypes.list() and \
                     request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value, AnalysisRequestActions.CNV.value, AnalysisRequestActions.REH.value):
                 # Use UnprotectedNameAnalysisService
                 service = XproNameAnalysisService()
