@@ -630,41 +630,26 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
     def save_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
-        if name_request.stateCd not in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            warnings = nro.add_nr(name_request)
+        if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
+            warnings = None  # TODO: We've faked out the NR generation!
+            # warnings = nro.add_nr(name_request)
             if warnings:
                 MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
                 raise NROUpdateError()
             else:
+                # This handler updates the name request
+                if name_request.stateCd in [State.CONDITIONAL, State.APPROVED]:
+                    # TODO: Do something here to set the new nrNum! We've faked this out for now...
+                    name_request.nrNum = str(name_request.nrNum).replace('NR L', 'NR ', 1)
+
+                # Execute the callback handler
                 if on_success:
                     return on_success(name_request, self)
         else:
             raise Exception('Invalid state exception')
 
-    def add_solr_doc(self, core, solr_docs):
-        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
-        result = solr.add(solr_docs, commit=True)
-        return result
-
-    def delete_solr_doc(self, core, doc_id):
-        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
-        result = solr.delete(doc_id.replace(' ', '\\ '), commit=True)
-        return result
-
-    def find_solr_doc(self, core, doc_id):
-        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
-        # Escape whitespace or query will fail
-        results = solr.search('id:' + doc_id.replace(' ', '\\ '))
-        return results
-
-    def create_or_replace_solr_doc(self, name_request):
-        solr_core = 'possible.conflicts'
+    def create_solr_nr_doc(self, solr_core, name_request):
         try:
-            # Try to find a matching document
-            matching_docs = self.find_solr_doc(solr_core, name_request.nrNum)
-            if matching_docs:
-                self.delete_solr_doc(solr_core, name_request.nrNum)
-
             # Create a new solr doc
             solr_name = name_request.names[0].name
             solr_docs = []
@@ -678,5 +663,35 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             solr_docs.append(nr_doc)
             self.add_solr_doc(solr_core, solr_docs)
 
+        except Exception as err:
+            raise SolrUpdateError(err)
+
+    @classmethod
+    def find_solr_doc(cls, solr_core, doc_id):
+        solr = pysolr.Solr(SOLR_URL + '/solr/' + solr_core + '/', timeout=10)
+        # Escape whitespace or query will fail
+        results = solr.search('id:' + doc_id.replace(' ', '\\ '))
+        return results
+
+    @classmethod
+    def add_solr_doc(cls, solr_core, solr_docs):
+        try:
+            solr = pysolr.Solr(SOLR_URL + '/solr/' + solr_core + '/', timeout=10)
+            result = solr.add(solr_docs, commit=True)
+        except Exception as err:
+            raise SolrUpdateError(err)
+
+        return result
+
+    @classmethod
+    def delete_solr_doc(cls, solr_core, doc_id):
+        try:
+            # Try to find a matching document
+            matching_docs = cls.find_solr_doc(solr_core, doc_id)
+            if matching_docs:
+                solr = pysolr.Solr(SOLR_URL + '/solr/' + solr_core + '/', timeout=10)
+                result = solr.delete(doc_id.replace(' ', '\\ '), commit=True)
+
+                return result
         except Exception as err:
             raise SolrUpdateError(err)

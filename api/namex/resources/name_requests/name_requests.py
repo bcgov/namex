@@ -16,6 +16,7 @@ from .exceptions import *
 
 setup_logging()  # Important to do this first
 
+SOLR_CORE = 'possible.conflicts'
 
 @cors_preflight('POST')
 @api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
@@ -48,7 +49,13 @@ class NameRequests(BaseNameRequest):
                 # Return the updated name request
                 return nr
 
-            def on_nro_save_success(nr):
+            def on_nro_save_success(nr, resource):
+                """
+                :param nr:
+                :param resource:
+                :return:
+                """
+                nr = resource.save_request(nr)
                 # Return the updated name request
                 return nr
 
@@ -59,16 +66,15 @@ class NameRequests(BaseNameRequest):
             # Save the request to NRO and back to postgres
             # We aren't handling CONDITIONAL or APPROVED here, those states are handled in the PUT
             if nr_model.stateCd in [State.DRAFT]:
-                # TODO: Make sure the fake NR is replaced with the real NR... we probably only need to do that in the PUT though...
-                # nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
-                pass
+                # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
+                nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
 
             # Record the event
             EventRecorder.record(self.user, Event.POST, nr_model, self.request_data)
 
             # Update Solr - note that we don't save DRAFT name requests to Solr
             if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED]:
-                self.create_or_replace_solr_doc(nr_model)
+                self.create_solr_nr_doc(SOLR_CORE, nr_model)
 
             current_app.logger.debug(nr_model.json())
             return jsonify(nr_model.json()), 200
@@ -174,19 +180,26 @@ class NameRequest(BaseNameRequest):
                     # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
                     nr_model = self.apply_state_change(nr_model, State.APPROVED, handle_name_request_approval)
 
+            temp_nr_num = None
             # Save the request to NRO and back to postgres ONLY if the state is DRAFT, CONDITIONAL, or APPROVED
             if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-                # TODO: Make sure the fake NR is replaced with the real NR
-                # Make sure on_nro_save_success returns the nr_model with the UPDATED, REAL nr num
-                # nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
-                pass
+                existing_nr_num = nr_model.nrNum
+                # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
+                nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
+                # Set the temp NR number if its different
+                if nr_model.nrNum != existing_nr_num:
+                    temp_nr_num = existing_nr_num
 
             # Record the event
             EventRecorder.record(self.user, Event.PUT, nr_model, self.request_data)
 
             # Update SOLR
             if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
-                self.create_or_replace_solr_doc(nr_model)
+                if temp_nr_num:
+                    # This performs a safe delete, we check to see if the temp ID exists before deleting
+                    self.delete_solr_doc(SOLR_CORE, temp_nr_num)
+
+                self.create_solr_nr_doc(SOLR_CORE, nr_model)
 
             current_app.logger.debug(nr_model.json())
             return jsonify(nr_model.json()), 200
