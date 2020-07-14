@@ -4,8 +4,6 @@ from . import porter, STEM_W, OTHER_W, SUBS_W, STEM_COS_W, SUBS_COS_W, EXACT_MAT
 import math
 from collections import Counter
 
-# from ...word_classification import token_classifier
-
 WORD = re.compile(r"\w+")
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
