@@ -452,7 +452,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     cosine = EXACT_MATCH
                 else:
                     match_list = np_svc.name_tokens
-                    # get_classification(self.director, service, syn_svc, match_list, token_svc)
                     get_classification(service, syn_svc, match_list, wc_svc, token_svc)
 
                     # TODO: Get rid of this when done refactoring!
@@ -468,9 +467,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 if cosine >= MINIMUM_SIMILARITY:
                     dict_matches_counter.update({match.name: cosine})
                     selected_matches.append(match)
-                    if (len(matches) >= HIGH_CONFLICT_RECORDS and cosine >= HIGH_SIMILARITY) or (len(matches) < HIGH_CONFLICT_RECORDS and cosine >= EXACT_MATCH):
-                        forced = True
-                        break
+                if (len(matches) >= HIGH_CONFLICT_RECORDS and cosine >= HIGH_SIMILARITY) or (len(matches) < HIGH_CONFLICT_RECORDS and cosine >= EXACT_MATCH):
+                    forced = True
+                    break
 
             if dict_matches_counter:
                 # Get  N highest score (values) and shortest names (key)
