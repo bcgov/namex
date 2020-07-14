@@ -17,10 +17,10 @@ setup_logging()  # important to do this first
 api = Namespace('wordClassification', description='Word Classification - Core API for Word Classifications')
 
 word_request = api.model('word_classification_request', {
-    'word': fields.String,
     'classification': fields.String,
+    'examiner': fields.String,
     'name': fields.String,
-    'examiner': fields.String
+    'word': fields.String
 })
 
 word_classification = api.model('word_classification', {
