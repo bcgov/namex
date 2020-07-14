@@ -87,6 +87,7 @@ nr_request = api.model('name_request', {
 NAME_REQUEST_SOURCE = 'NAMEREQUEST'
 
 SOLR_URL = os.getenv('SOLR_BASE_URL')
+SOLR_API_URL = SOLR_URL + '/solr/'
 
 
 def build_language_comment(english_bol, user_id, nr_id):
@@ -207,6 +208,13 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
     # Methods used to map request data
     def map_request_data(self, name_request, map_draft_attrs=False):
+        """
+        This method maps data from the HTTP request data over to the name request.
+        We use this to set draft attributes, header attributes, and comments...
+        :param name_request:
+        :param map_draft_attrs:
+        :return:
+        """
         new_state_code = self.next_state_code if self.next_state_code else self.request_state_code
 
         # Set the request attributes
@@ -236,6 +244,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_draft_attrs(self, name_request):
+        """
+        Used internally by map_request_data.
+        :param name_request:
+        :return:
+        """
         try:
             user_id = self.user_id
             request_entity = self.request_entity
@@ -253,6 +266,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_request_attrs(self, name_request):
+        """
+        Used internally by map_request_data.
+        :param name_request:
+        :return:
+        """
         try:
             nr_id = self.nr_id
             nr_num = self.nr_num
@@ -266,6 +284,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_request_header_attrs(self, name_request):
+        """
+        Used internally by map_request_data.
+        :param name_request:
+        :return:
+        """
         user_id = self.user_id
         request_data = self.request_data
 
@@ -302,12 +325,22 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_request_comments(self, name_request):
+        """
+        Used internally by map_request_data. Execute any logic required to map comments here.
+        :param name_request:
+        :return:
+        """
         name_request = self.map_request_language_comments(name_request)
         name_request = self.map_request_person_name_comments(name_request)
 
         return name_request
 
     def map_request_language_comments(self, name_request):
+        """
+        Used internally by map_request_comments.
+        :param name_request:
+        :return:
+        """
         try:
             request_data = self.request_data
             user_id = self.user_id
@@ -324,6 +357,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_request_person_name_comments(self, name_request):
+        """
+        Used internally by map_request_comments.
+        :param name_request:
+        :return:
+        """
         try:
             request_data = self.request_data
             user_id = self.user_id
@@ -341,6 +379,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_request_applicants(self, name_request):
+        """
+        This method maps applicants from the HTTP request data over to the name request.
+        :param name_request:
+        :return:
+        """
         request_data = self.request_data
         nr_id = self.nr_id
 
@@ -354,6 +397,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_request_names(self, name_request):
+        """
+        This method maps names from the HTTP request data over to the name request.
+        :param name_request:
+        :return:
+        """
         if not self.request_names:
             raise MapRequestNamesError()
 
@@ -376,6 +424,12 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return name_request
 
     def map_submitted_name(self, submitted_name, name):
+        """
+        Used internally by map_request_names.
+        :param submitted_name:
+        :param name:
+        :return:
+        """
         new_state_code = self.next_state_code if self.next_state_code else self.request_state_code
 
         # Common name attributes
@@ -393,6 +447,12 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return submitted_name
 
     def map_submitted_name_attrs(self, submitted_name, name):
+        """
+        Used internally by map_submitted_name.
+        :param submitted_name:
+        :param name:
+        :return:
+        """
         new_state_code = self.next_state_code if self.next_state_code else self.request_state_code
 
         try:
@@ -423,6 +483,12 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return submitted_name
 
     def map_submitted_name_conflicts(self, submitted_name, name):
+        """
+        Used internally by map_submitted_name.
+        :param submitted_name:
+        :param name:
+        :return:
+        """
         try:
             # Only capturing one conflict
             if name.get('conflict1_num'):
@@ -437,6 +503,12 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return submitted_name
 
     def clear_submitted_name_conflicts(self, submitted_name):
+        """
+        Used internally by map_submitted_name.
+        :param submitted_name:
+        :param name:
+        :return:
+        """
         try:
             submitted_name.conflict1_num = None
             submitted_name.conflict1 = None
@@ -446,6 +518,12 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return submitted_name
 
     def map_submitted_name_consent_words(self, submitted_name, consent_list):
+        """
+        Used internally by map_submitted_name.
+        :param submitted_name:
+        :param name:
+        :return:
+        """
         decision_text = submitted_name.decision_text
         for consent in consent_list:
             try:
@@ -469,6 +547,15 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
         return submitted_name
 
     def apply_state_change(self, name_request, next_state, on_success=None):
+        """
+        This is where we handle entity state changes.
+        We ONLY change entity state from within this procedure to avoid
+        accidental or undesired state mutation.
+        :param name_request:
+        :param next_state:
+        :param on_success:
+        :return:
+        """
         def to_draft(resource, nr, on_success_cb=None):
             if nr.stateCd in [State.DRAFT]:
                 resource.nr_state_code = State.DRAFT
@@ -544,41 +631,26 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
     def save_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
-        if name_request.stateCd not in [State.DRAFT, State.APPROVED, State.CONDITIONAL]:
-            warnings = nro.add_nr(name_request)
+        if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
+            warnings = None  # TODO: We've faked out the NR generation!
+            # warnings = nro.add_nr(name_request)
             if warnings:
                 MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
                 raise NROUpdateError()
             else:
+                # This handler updates the name request
+                if name_request.stateCd in [State.CONDITIONAL, State.APPROVED]:
+                    # TODO: Do something here to set the new nrNum! We've faked this out for now...
+                    name_request.nrNum = str(name_request.nrNum).replace('NR L', 'NR ', 1)
+
+                # Execute the callback handler
                 if on_success:
-                    return on_success(name_request)
+                    return on_success(name_request, self)
         else:
             raise Exception('Invalid state exception')
 
-    def add_solr_doc(self, core, solr_docs):
-        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
-        result = solr.add(solr_docs, commit=True)
-        return result
-
-    def delete_solr_doc(self, core, doc_id):
-        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
-        result = solr.delete(doc_id.replace(' ', '\\ '), commit=True)
-        return result
-
-    def find_solr_doc(self, core, doc_id):
-        solr = pysolr.Solr(SOLR_URL + '/solr/' + core + '/', timeout=10)
-        # Escape whitespace or query will fail
-        results = solr.search('id:' + doc_id.replace(' ', '\\ '))
-        return results
-
-    def create_or_update_solr_doc(self, name_request):
-        solr_core = 'possible.conflicts'
+    def create_solr_nr_doc(self, solr_core, name_request):
         try:
-            # Try to find a matching document
-            matching_docs = self.find_solr_doc(solr_core, name_request.nrNum)
-            if matching_docs:
-                self.delete_solr_doc(solr_core, name_request.nrNum)
-
             # Create a new solr doc
             solr_name = name_request.names[0].name
             solr_docs = []
@@ -592,5 +664,35 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             solr_docs.append(nr_doc)
             self.add_solr_doc(solr_core, solr_docs)
 
+        except Exception as err:
+            raise SolrUpdateError(err)
+
+    @classmethod
+    def find_solr_doc(cls, solr_core, doc_id):
+        solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
+        # Escape whitespace or query will fail
+        results = solr.search('id:' + doc_id.replace(' ', '\\ '))
+        return results
+
+    @classmethod
+    def add_solr_doc(cls, solr_core, solr_docs):
+        try:
+            solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
+            result = solr.add(solr_docs, commit=True)
+        except Exception as err:
+            raise SolrUpdateError(err)
+
+        return result
+
+    @classmethod
+    def delete_solr_doc(cls, solr_core, doc_id):
+        try:
+            # Try to find a matching document
+            matching_docs = cls.find_solr_doc(solr_core, doc_id)
+            if matching_docs:
+                solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
+                result = solr.delete(doc_id.replace(' ', '\\ '), commit=True)
+
+                return result
         except Exception as err:
             raise SolrUpdateError(err)
