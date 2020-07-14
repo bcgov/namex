@@ -156,11 +156,10 @@ class NameRequest(BaseNameRequest):
             """
             This is the handler for a regular PUT from the frontend.
             """
-            if nr_model.payment_token is None:
-                # If no payment token...
-                if nr_model.stateCd in [State.DRAFT, State.COND_RESERVE, State.RESERVED]:
-                    # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-                    nr_model = self.apply_state_change(nr_model, nr_model.stateCd, handle_name_request_update)
+            # If no payment token...
+            if nr_model.payment_token is None and nr_model.stateCd in [State.DRAFT, State.COND_RESERVE, State.RESERVED]:
+                # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+                nr_model = self.apply_state_change(nr_model, nr_model.stateCd, handle_name_request_update)
 
             """
             This is the handler for a special PUT case where a payment has been received 
@@ -170,15 +169,14 @@ class NameRequest(BaseNameRequest):
             2b. If the entity is in a RESERVED state, update its state to APPROVED.
             3. Execute the callback handler (do any custom update logic and save the name request here).
             """
-            if nr_model.payment_token:
-                # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
-                if nr_model.stateCd == State.COND_RESERVE:
-                    # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-                    nr_model = self.apply_state_change(nr_model, State.CONDITIONAL, handle_name_request_approval)
+            # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
+            if nr_model.payment_token and nr_model.stateCd == State.COND_RESERVE:
+                # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+                nr_model = self.apply_state_change(nr_model, State.CONDITIONAL, handle_name_request_approval)
                 # If the state is RESERVED update state to APPROVED, and update the name request as required
-                if nr_model.stateCd == State.RESERVED:
-                    # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-                    nr_model = self.apply_state_change(nr_model, State.APPROVED, handle_name_request_approval)
+            elif nr_model.payment_token and nr_model.stateCd == State.RESERVED:
+                # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+                nr_model = self.apply_state_change(nr_model, State.APPROVED, handle_name_request_approval)
 
             temp_nr_num = None
             # Save the request to NRO and back to postgres ONLY if the state is DRAFT, CONDITIONAL, or APPROVED
