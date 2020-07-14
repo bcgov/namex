@@ -8,7 +8,8 @@ from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
 from namex.services.word_classification.word_classification import WordClassificationService
-from namex.models.word_classification import WordClassificationSchema
+from namex.models import User
+from namex import jwt
 
 setup_logging()  # important to do this first
 
@@ -29,11 +30,11 @@ word_classification = api.model('word_classification', {
     'lastNameUsed': fields.String,
     'lastPrepName': fields.String,
     'frequency': fields.Integer,
-    'approvedBy': fields.String,
-    'approvedDate': fields.String,
-    'startDate': fields.String,
-    'lastUpdatedBy': fields.String,
-    'lastUpdatedDate': fields.String
+    'approvedBy': fields.Integer,
+    'approvedDate': fields.DateTime,
+    'startDate': fields.DateTime,
+    'lastUpdatedBy': fields.Integer,
+    'lastUpdatedDate': fields.DateTime
 })
 
 
@@ -49,8 +50,7 @@ def handle_auth_error(ex):
 class WordClassification(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    # @api.expect()
+    @api.expect(word_request)
     def get(word):
         try:
             service = WordClassificationService()
@@ -68,7 +68,6 @@ class WordClassification(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
-    # @api.marshal_with(word_classification)
     @api.expect(word_request)
     def post(word):
         json_input = request.get_json()
@@ -92,7 +91,7 @@ class WordClassification(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
+    #@jwt.requires_roles([User.APPROVER])
     # @api.marshal_with(word_classification)
     @api.expect(word_request)
     def put(word):
@@ -106,9 +105,6 @@ class WordClassification(Resource):
 
             if not entity:
                 raise ValueError('WordClassificationService did not return a result')
-
-            # TODO: Why are we not using the model schema...
-            # model_schema = WordClassificationSchema().dump(entity)
             data = entity.json()
             return jsonify(data), HTTPStatus.OK
         except ValueError as err:
