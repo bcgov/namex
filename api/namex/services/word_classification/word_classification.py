@@ -11,7 +11,7 @@ class WordClassificationService:
     def find_one(self, word=None):
         return WordClassification.find_word_classification(word)
 
-    def find_one_by_class(word=None, classification=None):
+    def find_one_by_class(self, word=None, classification=None):
         return WordClassification.find_word_by_classification(word, classification)
 
     @classmethod
@@ -37,7 +37,7 @@ class WordClassificationService:
             word.frequency = word.frequency + 1
             word.last_name_used = word_classification['name'].upper()
             word.last_prep_name = word_classification['name'].upper()
-            word.lastUpdatedBy = user_id
+            word.last_updated_by = user_id
 
         word.save_to_db()
 
@@ -45,7 +45,7 @@ class WordClassificationService:
 
     @classmethod
     def create_or_update(cls, word_classification):
-        entity = cls.find_one_by_class(
+        entity = cls.find_one_by_class(cls,
             word_classification['word'],
             word_classification['classification']
         ) or None
