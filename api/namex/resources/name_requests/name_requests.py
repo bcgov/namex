@@ -59,6 +59,9 @@ class NameRequests(BaseNameRequest):
                 # Return the updated name request
                 return nr
 
+            # Handle state changes
+            # Use apply_state_change to change state, as it enforces the State change pattern
+
             # Transition the DRAFT to the state specified in the request:
             # eg. one of [State.DRAFT, State.COND_RESERVE, State.RESERVED]
             nr_model = self.apply_state_change(nr_model, self.request_state_code, handle_name_request_creation)
@@ -152,6 +155,9 @@ class NameRequest(BaseNameRequest):
                 nr = resource.save_request(nr)
                 # Return the updated name request
                 return nr
+
+            # Handle state changes
+            # Use apply_state_change to change state, as it enforces the State change pattern
 
             """
             This is the handler for a regular PUT from the frontend.
