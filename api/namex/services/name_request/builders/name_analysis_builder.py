@@ -467,7 +467,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 if cosine >= MINIMUM_SIMILARITY:
                     dict_matches_counter.update({match.name: cosine})
                     selected_matches.append(match)
-                if (len(matches) >= HIGH_CONFLICT_RECORDS and cosine >= HIGH_SIMILARITY) or (len(matches) < HIGH_CONFLICT_RECORDS and cosine >= EXACT_MATCH):
+                if self.stop_search(self, cosine, matches):
                     forced = True
                     break
 
@@ -647,3 +647,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             return 0.0
         else:
             return float(numerator) / denominator
+
+    def stop_search(self, cosine, matches):
+        if (len(matches) >= HIGH_CONFLICT_RECORDS and cosine >= HIGH_SIMILARITY) or (
+                len(matches) < HIGH_CONFLICT_RECORDS and cosine >= EXACT_MATCH):
+            return True
+        return False
