@@ -55,7 +55,7 @@ objects:
                     value: '[sbc_itoperationssupport@gov.bc.ca, steven.chen@gov.bc.ca]'
                   - name: DAILY_REPORT_RECIPIENTS
                     value: '[Debbie.Blyth@gov.bc.ca, Sinead.OCallaghan@gov.bc.ca, steven.chen@gov.bc.ca]'
-                  - name: MONTHLY_REPORT_RECIPIENTS
+                  - name: WEEKLY_REPORT_RECIPIENTS
                     value: '[Debbie.Blyth@gov.bc.ca, Sinead.OCallaghan@gov.bc.ca, Karla.Maria.Ramirez@gov.bc.ca, steven.chen@gov.bc.ca]'  
                   - name: EMAIL_SMTP
                     value: 'apps.smtp.gov.bc.ca'  
@@ -65,8 +65,8 @@ objects:
                     value: '600'                      
                   - name: ENVIRONMENT
                     value: '${ENV_TAG}'  
-                  - name: MONTH_REPORT_DATES
-                    value: '[1]'                  
+                  - name: WEEK_REPORT_DATE
+                    value: '[0]'                  
             restartPolicy: "Never"
             concurrencyPolicy: "Forbid"
 parameters: [
