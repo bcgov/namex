@@ -149,9 +149,7 @@ class NameRequest(BaseNameRequest):
                 :param resource:
                 :return:
                 """
-                # Set the furnished_flag='Y' for APPROVED and CONDITIONAL
-                if nr.stateCd in [State.APPROVED, State.CONDITIONAL]:
-                    nr.furnished = 'Y'
+
                 nr = resource.save_request(nr)
                 # Return the updated name request
                 return nr
@@ -186,7 +184,7 @@ class NameRequest(BaseNameRequest):
 
             temp_nr_num = None
             # Save the request to NRO and back to postgres ONLY if the state is DRAFT, CONDITIONAL, or APPROVED
-            if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
+            if nr_model.stateCd in [State.CONDITIONAL, State.APPROVED]:
                 existing_nr_num = nr_model.nrNum
                 # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
                 nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)

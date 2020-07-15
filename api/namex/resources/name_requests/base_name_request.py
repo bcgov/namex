@@ -434,11 +434,14 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         # Common name attributes
         submitted_name = self.map_submitted_name_attrs(submitted_name, name)
-
-        if new_state_code in [State.RESERVED, State.COND_RESERVE]:
-            submitted_name = self.map_submitted_name_conflicts(submitted_name, name)
+        test_conflict = name.get('conflict1')
+        if len(test_conflict) > 0 :
+            conflict_flag = 'Y'
         else:
-            submitted_name = self.clear_submitted_name_conflicts(submitted_name)
+            conflict_flag='N'
+
+        if new_state_code in [State.COND_RESERVE] and conflict_flag=='Y':
+            submitted_name = self.map_submitted_name_conflicts(submitted_name, name)
 
         consent_words_list = name.get('consent_words', None)
         if consent_words_list and len(consent_words_list) > 0:
@@ -603,7 +606,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             if nr.payment_token is None:
                 raise Exception('Transition error, payment token is not defined')
 
-            resource.next_state_code = State.DRAFT
+            resource.next_state_code = State.APPROVED
             nr.stateCd = State.APPROVED
             if on_success_cb:
                 nr = on_success_cb(nr, resource)
@@ -632,17 +635,11 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
     def save_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            warnings = None  # TODO: We've faked out the NR generation!
-            # warnings = nro.add_nr(name_request)
+            warnings = nro.add_nr(name_request)
             if warnings:
                 MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
                 raise NROUpdateError()
             else:
-                # This handler updates the name request
-                if name_request.stateCd in [State.CONDITIONAL, State.APPROVED]:
-                    # TODO: Do something here to set the new nrNum! We've faked this out for now...
-                    name_request.nrNum = str(name_request.nrNum).replace('NR L', 'NR ', 1)
-
                 # Execute the callback handler
                 if on_success:
                     return on_success(name_request, self)
