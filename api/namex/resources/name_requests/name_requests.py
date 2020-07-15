@@ -49,28 +49,12 @@ class NameRequests(BaseNameRequest):
                 # Return the updated name request
                 return nr
 
-            #def on_nro_save_success(nr, resource):
-            #    """
-            #    :param nr:
-            #    :param resource:
-            #    :return:
-            #    """
-            #    nr = resource.save_request(nr)
-            #    # Return the updated name request
-            #    return nr
-
             # Handle state changes
             # Use apply_state_change to change state, as it enforces the State change pattern
 
             # Transition the DRAFT to the state specified in the request:
             # eg. one of [State.DRAFT, State.COND_RESERVE, State.RESERVED]
             nr_model = self.apply_state_change(nr_model, self.request_state_code, handle_name_request_creation)
-
-            # Save the request to NRO and back to postgres
-            # We aren't handling CONDITIONAL or APPROVED here, those states are handled in the PUT
-            #if nr_model.stateCd in [State.DRAFT]:
-            #    # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
-            #    nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
 
             # Record the event
             EventRecorder.record(self.user, Event.POST, nr_model, self.request_data)

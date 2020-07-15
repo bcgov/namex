@@ -665,13 +665,6 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             raise SolrUpdateError(err)
 
     @classmethod
-    def find_solr_doc(cls, solr_core, doc_id):
-        solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
-        # Escape whitespace or query will fail
-        results = solr.search('id:' + doc_id.replace(' ', '\\ '))
-        return results
-
-    @classmethod
     def add_solr_doc(cls, solr_core, solr_docs):
         try:
             solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
@@ -684,12 +677,10 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
     @classmethod
     def delete_solr_doc(cls, solr_core, doc_id):
         try:
-            # Try to find a matching document
-            matching_docs = cls.find_solr_doc(solr_core, doc_id)
-            if matching_docs:
-                solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
-                result = solr.delete(doc_id.replace(' ', '\\ '), commit=True)
+            solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
+            result = solr.delete(id=doc_id, commit=True)
 
-                return result
         except Exception as err:
             raise SolrUpdateError(err)
+
+        return result
