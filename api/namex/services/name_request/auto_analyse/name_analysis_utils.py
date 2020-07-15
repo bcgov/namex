@@ -218,3 +218,5 @@ def get_classification(service, syn_svc, match, wc_svc, token_svc):
     service._dict_name_words = get_classification_summary(service.name_tokens,
                                                           service.get_list_dist(),
                                                           service.get_list_desc())
+    print(service.get_dict_name())
+
