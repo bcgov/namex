@@ -47,42 +47,35 @@ def validate_name_request(location, entity_type, request_action):
         raise ValueError('Invalid request action provided')
 
     # Throw any errors related to invalid entity_type or request_action for a location
-    if location == ValidLocations.CA_BC.value:
-        is_protected = False
-        is_unprotected = False
+    if location != ValidLocations.CA_BC.value:
+        raise ValueError('Invalid location provided')
 
-        # Determine what request actions are valid
-        valid_request_actions = ()
+    is_protected = False
+    is_unprotected = False
+    valid_request_actions = []
 
-        if entity_type in BCProtectedNameEntityTypes.list():
-            is_protected = True
-            valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.CHG.value, AnalysisRequestActions.DBA.value)
-
-        elif entity_type in BCUnprotectedNameEntityTypes.list():
-            is_unprotected = True
-            valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value)
-
-        if is_protected and is_unprotected:
-            raise ValueError('An entity name cannot be both protected and unprotected')
-
-        if is_protected and entity_type not in BCProtectedNameEntityTypes.list():
-            raise ValueError('Invalid entity_type provided for a protected BC entity name')
-
-        if is_unprotected and entity_type not in BCUnprotectedNameEntityTypes.list():
-            raise ValueError('Invalid entity_type provided for an unprotected BC entity name')
-
-        if request_action not in valid_request_actions:
-            raise Exception('Operation not currently supported')
-
-    elif location in (ValidLocations.CA_NOT_BC.list(), ValidLocations.INTL.list()):
-        # If XPRO, nothing is protected (for now anyway)
+    if entity_type in BCProtectedNameEntityTypes.list():
+        is_protected = True
+        valid_request_actions = [
+            AnalysisRequestActions.NEW.value,
+            AnalysisRequestActions.CHG.value,
+            AnalysisRequestActions.DBA.value
+        ]
+    elif entity_type in BCUnprotectedNameEntityTypes.list():
+        is_unprotected = True
         valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value)
 
-        if entity_type not in XproUnprotectedNameEntityTypes.list():
-            raise ValueError('Invalid entity_type provided for an XPRO entity')
+    if is_protected and is_unprotected:
+        raise ValueError('An entity name cannot be both protected and unprotected')
 
-        if request_action not in valid_request_actions:
-            raise Exception('Operation not currently supported')
+    if is_protected and entity_type not in BCProtectedNameEntityTypes.list():
+        raise ValueError('Invalid entity_type provided for a protected BC entity name')
+
+    if is_unprotected and entity_type not in BCUnprotectedNameEntityTypes.list():
+        raise ValueError('Invalid entity_type provided for an unprotected BC entity name')
+
+    if request_action not in valid_request_actions:
+        raise Exception('Operation not currently supported')
 
     return True
 
@@ -144,14 +137,19 @@ class BcNameAnalysis(Resource):
         if not validate_name_request(location, entity_type, request_action):
             return  # TODO: Return invalid response! What is it?
 
+        valid_location = location == ValidLocations.CA_BC.value
+        valid_protected_entity_type = entity_type in BCProtectedNameEntityTypes.list()
+        valid_unprotected_entity_type = entity_type in BCUnprotectedNameEntityTypes.list()
+        is_protected_action = request_action in [AnalysisRequestActions.NEW.value, AnalysisRequestActions.CHG.value, AnalysisRequestActions.DBA.value]
+        is_unprotected_action = request_action in [AnalysisRequestActions.NEW.value]
+
         try:
-            if location == ValidLocations.CA_BC.value and entity_type in BCProtectedNameEntityTypes.list() and request_action in \
-                    (AnalysisRequestActions.NEW.value, AnalysisRequestActions.CHG.value, AnalysisRequestActions.DBA.value):
+            if valid_location and valid_protected_entity_type and is_protected_action:
                 # Use ProtectedNameAnalysisService
                 service = ProtectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
 
-            elif location == ValidLocations.CA_BC.value and entity_type in BCUnprotectedNameEntityTypes.list() and request_action in (AnalysisRequestActions.NEW.value):
+            elif valid_location and valid_unprotected_entity_type and is_unprotected_action:
                 # Use UnprotectedNameAnalysisService
                 service = UnprotectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)

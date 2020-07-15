@@ -39,6 +39,7 @@ class AnalysisRequestActions(str, Enum):
     CNV = 'CNV'  # Convert to another structure
     REH = 'REH'  # Restore from historical business
     REN = 'REN'  # Restore by starting a new business
+    REST = 'REST'  # NOT 100% sure what this is
 
     @classmethod
     def list(cls):
