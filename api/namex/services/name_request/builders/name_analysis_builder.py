@@ -455,12 +455,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     get_classification(service, syn_svc, match_list, wc_svc, token_svc)
 
                     # TODO: Get rid of this when done refactoring!
-                    vector2_dist = self.get_score_by_classification(service.get_list_dist(), list_dist, list_dist_stem,
-                                                                    dist_subs_dict)
-                    vector2_desc = self.get_score_by_classification(service.get_list_desc(), list_desc, list_desc_stem,
-                                                                    desc_subs_dict)
-                    cosine_dist = self.get_cosine(vector1_dist, vector2_dist)
-                    cosine_desc = self.get_cosine(vector1_desc, vector2_desc)
+                    vector2_dist, entropy_dist = self.get_score_by_classification(service.get_list_dist(), list_dist,
+                                                                                  list_dist_stem,
+                                                                                  dist_subs_dict)
+                    vector2_desc, entropy_desc = self.get_score_by_classification(service.get_list_desc(), list_desc,
+                                                                                  list_desc_stem,
+                                                                                  desc_subs_dict)
+                    cosine_dist = self.get_cosine(vector1_dist, vector2_dist) * entropy_dist
+                    cosine_desc = self.get_cosine(vector1_desc, vector2_desc) * entropy_desc
                     cosine = round((cosine_dist + cosine_desc) / 2, 2)
                     print(cosine)
 
@@ -547,22 +549,26 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_score_by_classification(self, conflict_class_list, original_class_list, original_class_stem,
                                     class_subs_dict):
         vector1 = dict()
+        entropy = 0.0
         for idx, word in enumerate(conflict_class_list):
             word_stem = porter.stem(word.lower())
             k = word.lower()
             if word.lower() in original_class_list:
                 counter = 1
+                entropy = 1
             elif word_stem in original_class_stem:
                 idx = original_class_stem.index(word_stem)
                 k = original_class_list[idx]
-                counter = STEM_W
+                counter = 1
+                entropy = STEM_W
             elif word_stem in get_flat_list(class_subs_dict.values()):
                 k = ''.join([key for (key, value) in class_subs_dict.items() if word_stem in value])
-                counter = SUBS_W
+                counter = 1
+                entropy = SUBS_W
             else:
                 counter = OTHER_W
             vector1[k] = counter
-        return vector1
+        return vector1, entropy
 
     def get_subsitutions_distinctive(self, w_dist):
         syn_svc = self.synonym_service
