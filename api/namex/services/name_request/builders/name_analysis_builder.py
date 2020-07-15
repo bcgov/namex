@@ -457,12 +457,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     # TODO: Get rid of this when done refactoring!
                     vector2_dist, entropy_dist = self.get_score_by_classification(service.get_list_dist(), list_dist,
                                                                                   list_dist_stem,
-                                                                                  dist_subs_dict)
+                                                                                  dist_subs_dict, True)
+                    cosine_dist = self.get_cosine(vector1_dist, vector2_dist) * entropy_dist
                     vector2_desc, entropy_desc = self.get_score_by_classification(service.get_list_desc(), list_desc,
                                                                                   list_desc_stem,
-                                                                                  desc_subs_dict)
-                    cosine_dist = self.get_cosine(vector1_dist, vector2_dist) * entropy_dist
-                    cosine_desc = self.get_cosine(vector1_desc, vector2_desc) * entropy_desc
+                                                                                  desc_subs_dict, False, cosine_dist)
+                    cosine_desc = self.get_cosine(vector1_desc, vector2_desc) * entropy_desc if cosine_dist == 1.0 else \
+                        self.get_cosine(vector1_desc, vector2_desc)
                     cosine = round((cosine_dist + cosine_desc) / 2, 2)
                     print(cosine)
 
@@ -547,7 +548,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def get_score_by_classification(self, conflict_class_list, original_class_list, original_class_stem,
-                                    class_subs_dict):
+                                    class_subs_dict, dist=False, cosine_dist=None):
         vector1 = dict()
         entropy = 0.0
         for idx, word in enumerate(conflict_class_list):
@@ -567,7 +568,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 entropy = SUBS_W
             else:
                 counter = OTHER_W
-            vector1[k] = counter
+            if dist or cosine_dist == 1.0:
+                vector1[k] = counter
+            else:
+                vector1[word] = counter
         return vector1, entropy
 
     def get_subsitutions_distinctive(self, w_dist):
