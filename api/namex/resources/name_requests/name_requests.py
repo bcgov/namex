@@ -198,11 +198,10 @@ class NameRequest(BaseNameRequest):
 
             # Update SOLR
             if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
+                self.create_solr_nr_doc(SOLR_CORE, nr_model)
                 if temp_nr_num:
                     # This performs a safe delete, we check to see if the temp ID exists before deleting
                     self.delete_solr_doc(SOLR_CORE, temp_nr_num)
-
-                self.create_solr_nr_doc(SOLR_CORE, nr_model)
 
             current_app.logger.debug(nr_model.json())
             return jsonify(nr_model.json()), 200
