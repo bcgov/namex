@@ -22,11 +22,13 @@ class WordClassification(db.Model):
     start_dt = db.Column('start_dt', db.DateTime(timezone=True))
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    last_updated_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_updated_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,
+                                onupdate=datetime.utcnow)
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approved_by])
-    updater = db.relationship('User', backref=backref('user_word_updater', uselist=False), foreign_keys=[last_updated_by])
+    updater = db.relationship('User', backref=backref('user_word_updater', uselist=False),
+                              foreign_keys=[last_updated_by])
 
     def json(self):
         return {"id": self.id, "classification": self.classification, "word": self.word,
@@ -47,12 +49,12 @@ class WordClassification(db.Model):
             .filter(cls.end_dt == None) \
             .filter(cls.start_dt <= date.today()) \
             .filter(cls.approved_dt <= date.today()).all()
-        print(word)
-        print(list(map(lambda x: x.classification, results)))
+        # print(word)
+        # print(list(map(lambda x: x.classification, results)))
         return results
 
     @classmethod
-    def find_word_by_classification(cls,word, classification):
+    def find_word_by_classification(cls, word, classification):
         results = db.session.query(cls) \
             .filter(func.lower(cls.word) == func.lower(word)) \
             .filter(func.lower(cls.classification) == func.lower(classification)) \
@@ -60,11 +62,6 @@ class WordClassification(db.Model):
             .filter(cls.start_dt <= date.today()) \
             .filter(cls.approved_dt <= date.today()).all()
         return results
-
-
-
-
-
 
     def save_to_db(self):
         db.session.add(self)
