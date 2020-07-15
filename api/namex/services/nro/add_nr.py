@@ -223,11 +223,11 @@ def set_request_on_hold(oracle_cursor, request_id,eid):
     # set the end event for the existing record
     oracle_cursor.execute("""
             UPDATE request_state
-            SET end_event_id = :eid
+            SET end_event_id = :event_id
             WHERE request_id = :request_id
             AND end_event_id IS NULL
             """,
-                          end_event_id=eid,
+                          event_id=eid,
                           request_id=request_id)
 
     # create new request_state record
