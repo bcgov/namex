@@ -41,6 +41,13 @@ def new_nr(nr, ora_cursor):
     # Set postgres to real NR #
     nr.nrNum = nr_num
 
+    #set the oracle version of the priority code
+    priority = None
+    if nr.priorityCd == 'Y':
+        priority = 'PQ'
+    else:
+        priority = 'RQ'
+
     request_id = _create_request(ora_cursor,nr_num)
     nr.requestId = request_id
     current_app.logger.debug('got to new_nr() for NR:{}'.format(nr_num))
@@ -52,7 +59,7 @@ def new_nr(nr, ora_cursor):
     _create_nro_transaction(ora_cursor, nr, eid, transaction_type='NRREQ')
     current_app.logger.debug('Created the transaction for new_nr() for NR:{}'.format(nr_num))
 
-    _create_request_instance(ora_cursor, nr, eid)
+    _create_request_instance(ora_cursor, nr, eid,priority)
     applicantInfo = nr.applicants.one_or_none()
     if not applicantInfo:
         current_app.logger.error("Error on getting applicant info.")
@@ -97,7 +104,7 @@ def _create_request(oracle_cursor, nr_num):
         current_app.logger.error("Error on adding request record for NR:{0}'. Error:{1}".format(nr_num, error))
         return jsonify({"Message": "Error on adding request record in oracle"}), 404
 
-def  _create_request_instance(oracle_cursor, nr, eid):
+def  _create_request_instance(oracle_cursor, nr, eid,priority):
     try:
         oracle_cursor.execute("""
                     INSERT INTO request_instance(request_instance_id, request_id,priority_cd, request_type_cd,
@@ -106,7 +113,7 @@ def  _create_request_instance(oracle_cursor, nr, eid):
                       :expiration_date, :start_event_id, :xpro_jurisdiction, :additional_info, :nature_business_info, :home_juris_num)
                 """,
                           request_id=nr.requestId,
-                          priority_cd=nr.priorityCd,
+                          priority_cd=priority,
                           request_type_cd=nr.requestTypeCd,
                           expiration_date=nr.expirationDate,
                           start_event_id=eid,

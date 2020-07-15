@@ -49,15 +49,15 @@ class NameRequests(BaseNameRequest):
                 # Return the updated name request
                 return nr
 
-            def on_nro_save_success(nr, resource):
-                """
-                :param nr:
-                :param resource:
-                :return:
-                """
-                nr = resource.save_request(nr)
-                # Return the updated name request
-                return nr
+            #def on_nro_save_success(nr, resource):
+            #    """
+            #    :param nr:
+            #    :param resource:
+            #    :return:
+            #    """
+            #    nr = resource.save_request(nr)
+            #    # Return the updated name request
+            #    return nr
 
             # Handle state changes
             # Use apply_state_change to change state, as it enforces the State change pattern
@@ -68,9 +68,9 @@ class NameRequests(BaseNameRequest):
 
             # Save the request to NRO and back to postgres
             # We aren't handling CONDITIONAL or APPROVED here, those states are handled in the PUT
-            if nr_model.stateCd in [State.DRAFT]:
-                # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
-                nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
+            #if nr_model.stateCd in [State.DRAFT]:
+            #    # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
+            #    nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
 
             # Record the event
             EventRecorder.record(self.user, Event.POST, nr_model, self.request_data)
@@ -184,7 +184,8 @@ class NameRequest(BaseNameRequest):
 
             temp_nr_num = None
             # Save the request to NRO and back to postgres ONLY if the state is DRAFT, CONDITIONAL, or APPROVED
-            if nr_model.stateCd in [State.CONDITIONAL, State.APPROVED]:
+            # this is after fees are accepted
+            if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
                 existing_nr_num = nr_model.nrNum
                 # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
                 nr_model = self.save_request_to_nro(nr_model, on_nro_save_success)
