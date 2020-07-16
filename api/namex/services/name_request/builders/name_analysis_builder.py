@@ -458,17 +458,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     vector2_dist, entropy_dist = self.get_score_by_classification(service.get_list_dist(), list_dist,
                                                                                   list_dist_stem,
                                                                                   dist_subs_dict, True)
-                    cosine_dist = self.get_cosine(vector1_dist, vector2_dist) * entropy_dist
+                    similarity_dist = self.get_similarity(vector1_dist, vector2_dist, entropy_dist, 1.0)
                     vector2_desc, entropy_desc = self.get_score_by_classification(service.get_list_desc(), list_desc,
                                                                                   list_desc_stem,
-                                                                                  desc_subs_dict, False, cosine_dist)
-                    cosine_desc = self.get_cosine(vector1_desc, vector2_desc) * entropy_desc if cosine_dist == 1.0 else \
-                        self.get_cosine(vector1_desc, vector2_desc)
-                    cosine = round((cosine_dist + cosine_desc) / 2, 2)
-                    print(cosine)
+                                                                                  desc_subs_dict, False, similarity_dist)
+                    similarity_desc = self.get_similarity(vector1_desc, vector2_desc, entropy_dist, similarity_dist)
+                    similarity = round((similarity_dist + similarity_desc) / 2, 2)
+                    print(similarity)
 
-                if cosine >= MINIMUM_SIMILARITY:
-                    dict_matches_counter.update({match.name: cosine})
+                if similarity >= MINIMUM_SIMILARITY:
+                    dict_matches_counter.update({match.name: similarity})
                     selected_matches.append(match)
                 if self.stop_search(cosine, matches):
                     forced = True
@@ -656,6 +655,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             return 0.0
         else:
             return float(numerator) / denominator
+
+    def get_similarity(self, vector1, vector2, entropy, similarity):
+        return self.get_cosine(vector1, vector2) * entropy if similarity == 1.0 else self.get_cosine(vector1, vector2)
 
     def stop_search(self, cosine, matches):
         if (len(matches) >= HIGH_CONFLICT_RECORDS and cosine >= HIGH_SIMILARITY) or (

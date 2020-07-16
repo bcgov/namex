@@ -49,8 +49,6 @@ class WordClassification(db.Model):
             .filter(cls.end_dt == None) \
             .filter(cls.start_dt <= date.today()) \
             .filter(cls.approved_dt <= date.today()).all()
-        # print(word)
-        # print(list(map(lambda x: x.classification, results)))
         return results
 
     @classmethod
