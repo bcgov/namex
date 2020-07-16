@@ -1,15 +1,17 @@
-from flask import jsonify
+from flask import request, jsonify
 from flask_restplus import cors
-from namex.utils.util import cors_preflight
 from flask import current_app
+from sqlalchemy import func
 
 from namex.utils.logging import setup_logging
+from namex.utils.util import cors_preflight
 
 from namex.models import Request, Event, State
+from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
 
-from .utils import handle_exception
+from .utils import handle_exception, get_query_param_str, query_result_to_dict, query_results_to_dict
 from .base_name_request import api, BaseNameRequest, nr_request
 
 from .exceptions import *
@@ -18,9 +20,62 @@ setup_logging()  # Important to do this first
 
 SOLR_CORE = 'possible.conflicts'
 
-@cors_preflight('POST')
-@api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
+
+@cors_preflight('GET, POST')
+@api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
 class NameRequests(BaseNameRequest):
+    @cors.crossdomain(origin='*')
+    @api.doc(params={
+        'nrNum': 'NR Number',
+        'phoneNumber': 'The applicant\'s phone number',
+        'emailAddress': 'The applicant\'s email address'
+    })
+    def get(self):
+        try:
+            filters = []
+
+            if len(request.args) == 0:
+                raise InvalidInputError(message='No query parameters were specified in the request')
+
+            nr_num = get_query_param_str('nrNum')
+
+            phone_number = get_query_param_str('phoneNumber')
+            email_address = get_query_param_str('emailAddress')
+
+            if nr_num:
+                # fields.append(Request.nrNum)
+                filters.append(func.lower(Request.nrNum) == nr_num.lower())
+            if phone_number:
+                # TODO: We'll need something extra if we want to filter on nested associations
+                # fields.append(Request.applicants.phoneNumber)
+                # filters.append(Request.applicants.phoneNumber == phone_number)
+                pass
+            if email_address:
+                # TODO: We'll need something extra if we want to filter on nested associations
+                # fields.append(Request.applicants.emailAddress)
+                # filters.append(Request.applicants.emailAddress == email_address)
+                pass
+
+            criteria = RequestQueryCriteria(
+                nr_num=nr_num,
+                filters=filters
+            )
+
+            results = Request.find_by_criteria(criteria)
+
+            if not results:
+                results = []
+
+        except InvalidInputError as err:
+            return handle_exception(err, err.message, 400)
+        except Exception as err:
+            return handle_exception(err, 'Error retrieving the NR from the db.', 500)
+
+        if nr_num and len(results) == 1:
+            return jsonify(results[0].json()), 200
+        elif len(results) > 0:
+            return jsonify(list(map(lambda result: result.json(), results))), 200
+    
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     def post(self):

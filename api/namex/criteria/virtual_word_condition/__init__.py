@@ -1,0 +1,1 @@
+from .query_criteria import VirtualWordConditionCriteria as VirtualWordConditionQueryCriteria

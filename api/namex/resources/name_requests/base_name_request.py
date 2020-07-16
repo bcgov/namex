@@ -156,7 +156,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
                 self._restricted_word_service = VirtualWordConditionService()
         except Exception as err:
             log_error('Error initializing VirtualWordCondition Service. Error: {0}', err)
-            raise VirtualWordContidionServiceError()
+            raise VirtualWordConditionServiceError()
 
         return self._restricted_word_service
 

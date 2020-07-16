@@ -1,5 +1,5 @@
 class NameRequestException(Exception):
-    def __init__(self, wrapped_err, message="Error setting request header attributes."):
+    def __init__(self, wrapped_err, message="Name request error."):
         self.err = wrapped_err
         self.message = message
         super().__init__(self.message)
@@ -70,6 +70,6 @@ class GetUserIdError(NameRequestException):
         super().__init__(wrapped_err, message)
 
 
-class VirtualWordContidionServiceError(NameRequestException):
+class VirtualWordConditionServiceError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error initializing VirtualWordCondition Service."):
         super().__init__(wrapped_err, message)
