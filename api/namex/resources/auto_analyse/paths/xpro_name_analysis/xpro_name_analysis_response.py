@@ -203,7 +203,7 @@ class XproAnalysisResponse(AnalysisResponse):
         """
         option1 = assumed_name_setup()
         # Tweak the header
-        option1.header = "Option 1"
+        option1.header = "Helpful Hint"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
