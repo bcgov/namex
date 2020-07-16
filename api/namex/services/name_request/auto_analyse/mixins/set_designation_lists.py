@@ -62,12 +62,14 @@ class SetDesignationsListsMixin(object):
         entity_type = self.entity_type
 
         entity_type_code = None
-        if BCProtectedNameEntityTypes(entity_type):
+        if BCProtectedNameEntityTypes.has_value(entity_type) and BCProtectedNameEntityTypes(entity_type):
             entity_type_code = BCProtectedNameEntityTypes(entity_type)
-        elif BCUnprotectedNameEntityTypes(entity_type):
+        elif BCUnprotectedNameEntityTypes.has_value(entity_type) and BCUnprotectedNameEntityTypes(entity_type):
             entity_type_code = BCUnprotectedNameEntityTypes(entity_type)
-        elif XproUnprotectedNameEntityTypes(entity_type):
+        elif XproUnprotectedNameEntityTypes.has_value(entity_type) and XproUnprotectedNameEntityTypes(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
+        else:
+            raise Exception('Could not set entity type user designations - entity type [' + entity_type + '] was not found in BC or XPRO entity types!')
 
         self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.ANY.value,
