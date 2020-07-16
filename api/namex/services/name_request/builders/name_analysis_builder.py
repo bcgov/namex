@@ -445,7 +445,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dict_matches_counter, dict_matches_words = {}, {}
             vector1_dist = self.text_to_vector(list_dist)
             vector1_desc = self.text_to_vector(list_desc)
-            cosine = 0.0
+            similarity = 0.0
             for match in matches:
                 np_svc.set_name(match.name)
                 if np_svc.name_tokens == list_name:
@@ -469,7 +469,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 if similarity >= MINIMUM_SIMILARITY:
                     dict_matches_counter.update({match.name: similarity})
                     selected_matches.append(match)
-                if self.stop_search(cosine, matches):
+                if self.stop_search(similarity, matches):
                     forced = True
                     break
 
