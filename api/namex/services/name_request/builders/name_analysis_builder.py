@@ -458,11 +458,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     vector2_dist, entropy_dist = self.get_score_by_classification(service.get_list_dist(), list_dist,
                                                                                   list_dist_stem,
                                                                                   dist_subs_dict, True)
-                    similarity_dist = self.get_similarity(vector1_dist, vector2_dist, entropy_dist, 1.0)
+                    similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist, 1.0),2)
                     vector2_desc, entropy_desc = self.get_score_by_classification(service.get_list_desc(), list_desc,
                                                                                   list_desc_stem,
                                                                                   desc_subs_dict, False, similarity_dist)
-                    similarity_desc = self.get_similarity(vector1_desc, vector2_desc, entropy_dist, similarity_dist)
+                    similarity_desc = round(self.get_similarity(vector1_desc, vector2_desc, entropy_dist, similarity_dist),2)
                     similarity = round((similarity_dist + similarity_desc) / 2, 2)
                     print(similarity)
 
