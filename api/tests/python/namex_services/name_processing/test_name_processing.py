@@ -17,7 +17,7 @@ np_svc = service.name_processing_service
                              ("TFI TRANSPORT 27, L.P./TRANSPORT TFI 27 S.E.C.", "TFI TRANSPORT LP TRANSPORT TFI SEC"),
                              ('SMITHERS PARENT/SELF ADVOCATE COALITION SOCIETY',
                               'SMITHERS PARENT SELF ADVOCATE COALITION'),
-                             ('RAPHA F/A & SAFETY SUPPLY LTD.', 'RAPHA FA SAFETY SUPPLY'),
+                             ('RAPHA F/A & SAFETY SUPPLY LTD.', 'RAPHA F SAFETY SUPPLY'),
                              ('KARSCOT DISTRIBUTORS / FUN ZONE', 'KARSCOT DISTRIBUTORS FUN ZONE'),
                              ('MAPLE RIDGE/PITT MEADOWS YOUTH CENTRE SOCIETY', 'MAPLE RIDGE PITT MEADOWS YOUTH CENTRE')
 
@@ -147,7 +147,7 @@ def test_set_name_regex_keep_together_abv(name, expected):
                              ("D&G WESTCOAST HOMES", "DG WESTCOAST HOMES"),
                              ("DO & BE COLLECTION RETAIL", "DO COLLECTION RETAIL"),
                              ('C & C TRAILER LIFT SYSTEMS', 'CC TRAILER LIFT SYSTEMS'),
-                             ('C S A DESIGN & DRAFTING SERVICES', 'CSA DESIGN DRAFTING SERVICES'),
+                             ('C S A DESIGN & DRAFTING SERVICES', 'CS DESIGN DRAFTING SERVICES'),
                              ('INTERNATIONAL BUSINESS BUY/SELL', 'INTERNATIONAL BUSINESS BUY SELL'),
                              ('GRAHAM/WALL CONSULTING', 'GRAHAM WALL CONSULTING'),
                              ('IBI/HB ARCHITECTS', 'IBI HB ARCHITECTS'),
@@ -155,7 +155,7 @@ def test_set_name_regex_keep_together_abv(name, expected):
                              ('JILLY-BEAN SWEETS & SAVORIES', 'JILLY BEAN SWEETS SAVORIES'),
                              ('VIDICO - DATA INTEGRATION', 'VIDICO DATA INTEGRATION'),
                              ('KA-CHEE ENTERPRISES', 'KA CHEE ENTERPRISES'),
-                             ('MR RENT-A-CAR', 'MR RENT A CAR')
+                             ('MR RENT-A-CAR', 'MR RENT CAR')
 
                          ]
                          )
@@ -171,7 +171,7 @@ def test_set_name_regex_punctuation(name, expected):
                              ("D G WESTCOAST HOMES", "DG WESTCOAST HOMES"),
                              ("DO BE COLLECTION RETAIL", "DO COLLECTION RETAIL"),  # --> be is stop words and removed
                              ('C C TRAILER LIFT SYSTEMS', 'CC TRAILER LIFT SYSTEMS'),
-                             ('C S A DESIGN  DRAFTING SERVICES', 'CSA DESIGN DRAFTING SERVICES'),
+                             ('C S A DESIGN  DRAFTING SERVICES', 'CS DESIGN DRAFTING SERVICES'),
                              ('DG ART DESIGN  DRAFTING SERVICES', 'DG ART DESIGN DRAFTING SERVICES'),
 
                          ]

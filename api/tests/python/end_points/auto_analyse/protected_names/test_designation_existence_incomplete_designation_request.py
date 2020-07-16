@@ -39,4 +39,4 @@ def test_designation_existence_incomplete_designation_request_response(client, j
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
             assert_issues_count_is_gt(0, payload.get('issues'))
-            assert_has_issue_type(AnalysisIssueCodes.TOO_MANY_WORDS, payload.get('issues'))
+            assert_has_issue_type(AnalysisIssueCodes.DESIGNATION_NON_EXISTENT, payload.get('issues'))
