@@ -449,7 +449,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             for match in matches:
                 np_svc.set_name(match.name)
                 if np_svc.name_tokens == list_name:
-                    cosine = EXACT_MATCH
+                    similarity = EXACT_MATCH
                 else:
                     match_list = np_svc.name_tokens
                     get_classification(service, syn_svc, match_list, wc_svc, token_svc)
