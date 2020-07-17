@@ -38,8 +38,8 @@ class NameRequests(BaseNameRequest):
                 raise InvalidInputError(message='No query parameters were specified in the request')
 
             nr_num_str = get_query_param_str('nrNum')
-            nr_num = normalize_nr_num(nr_num_str)
-            if not nr_num:
+            nr_num = normalize_nr_num(nr_num_str) if nr_num_str else None
+            if nr_num_str and not nr_num:
                 raise InvalidInputError(message='Invalid NR number format provided')
 
             phone_number = get_query_param_str('phoneNumber')
@@ -51,13 +51,11 @@ class NameRequests(BaseNameRequest):
             if phone_number:
                 # TODO: We'll need something extra if we want to filter on nested associations
                 # fields.append(Request.applicants.phoneNumber)
-                # filters.append(Request.applicants.phoneNumber == phone_number)
-                pass
+                filters.append(Request.applicants.any(phoneNumber=phone_number))
             if email_address:
                 # TODO: We'll need something extra if we want to filter on nested associations
                 # fields.append(Request.applicants.emailAddress)
-                # filters.append(Request.applicants.emailAddress == email_address)
-                pass
+                filters.append(Request.applicants.any(emailAddress=email_address))
 
             criteria = RequestQueryCriteria(
                 nr_num=nr_num,

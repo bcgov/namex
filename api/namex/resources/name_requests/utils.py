@@ -50,4 +50,4 @@ def normalize_nr_num(nr_num_str):
         if nr_type == 'NRL':
             return 'NR L' + digits
 
-    return False
+    return None
