@@ -11,7 +11,7 @@ from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
 
-from .utils import handle_exception, get_query_param_str, query_result_to_dict, query_results_to_dict
+from .utils import handle_exception, get_query_param_str, normalize_nr_num, query_result_to_dict, query_results_to_dict
 from .base_name_request import api, BaseNameRequest, nr_request
 
 from .exceptions import *
@@ -37,7 +37,10 @@ class NameRequests(BaseNameRequest):
             if len(request.args) == 0:
                 raise InvalidInputError(message='No query parameters were specified in the request')
 
-            nr_num = get_query_param_str('nrNum')
+            nr_num_str = get_query_param_str('nrNum')
+            nr_num = normalize_nr_num(nr_num_str)
+            if not nr_num:
+                raise InvalidInputError(message='Invalid NR number format provided')
 
             phone_number = get_query_param_str('phoneNumber')
             email_address = get_query_param_str('emailAddress')
@@ -75,6 +78,8 @@ class NameRequests(BaseNameRequest):
             return jsonify(results[0].json()), 200
         elif len(results) > 0:
             return jsonify(list(map(lambda result: result.json(), results))), 200
+
+        return jsonify(results), 200
     
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
