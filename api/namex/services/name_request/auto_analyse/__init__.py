@@ -66,6 +66,7 @@ class AnalysisIssueCodes(str, Enum):
     CONTAINS_UNCLASSIFIABLE_WORD = 'unclassified_word'  # To examiner
     # Stop if error
     CORPORATE_CONFLICT = 'corp_conflict'
+    QUEUE_CONFLICT = "queue_conflict"
     # Stop if error
     # TODO: What about these other guys?
     WORDS_TO_AVOID = 'word_to_avoid'
