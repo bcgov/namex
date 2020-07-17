@@ -174,6 +174,7 @@ class XproUnprotectedNameEntityTypes(AbstractEnum):
     XPRO_LIMITED_LIABILITY_COMPANY = EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value
     XPRO_LIMITED_PARTNERSHIP = EntityTypes.XPRO_LIMITED_PARTNERSHIP.value
     XPRO_LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value
+    XPRO_COOPERATIVE = EntityTypes.XPRO_COOPERATIVE.value
 
 
 # Request types (legacy) used in search conflicts
