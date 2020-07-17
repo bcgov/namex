@@ -1,7 +1,5 @@
-import jsonpickle
-
-from flask import request, jsonify, g, current_app, get_flashed_messages, make_response
-from flask_restplus import Namespace, Resource, fields, cors
+from flask import jsonify, make_response, request
+from flask_restplus import Namespace, Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
 from http import HTTPStatus
@@ -10,11 +8,34 @@ from namex.utils.util import cors_preflight
 from namex.utils.logging import setup_logging
 
 from namex.services.word_classification.word_classification import WordClassificationService
+from namex.models import User
+from namex import jwt
 
-setup_logging() ## important to do this first
+setup_logging()  # important to do this first
 
 # Register a local namespace for the requests
 api = Namespace('wordClassification', description='Word Classification - Core API for Word Classifications')
+
+word_request = api.model('word_classification_request', {
+    'classification': fields.String,
+    'examiner': fields.String,
+    'name': fields.String,
+    'word': fields.String
+})
+
+word_classification = api.model('word_classification', {
+    'id': fields.Integer,
+    'word': fields.String,
+    'classification': fields.String,
+    'lastNameUsed': fields.String,
+    'lastPrepName': fields.String,
+    'frequency': fields.Integer,
+    'approvedBy': fields.Integer,
+    'approvedDate': fields.DateTime,
+    'startDate': fields.DateTime,
+    'lastUpdatedBy': fields.Integer,
+    'lastUpdatedDate': fields.DateTime
+})
 
 
 @api.errorhandler(AuthError)
@@ -24,113 +45,84 @@ def handle_auth_error(ex):
     return response
 
 
-@cors_preflight('GET, POST, DELETE')
-@api.route('/<string:word>', strict_slashes=False, methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
+@cors_preflight('GET, POST, PUT, DELETE')
+@api.route('/<string:word>', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 class WordClassification(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    # @api.expect()
+    @api.expect(word_request)
     def get(word):
-        response = None
+        try:
+            service = WordClassificationService()
+            entity = service.find_one(word)
 
-        if request.is_json:
-            try:
-                service = WordClassificationService()
-                # Execute analysis using the supplied builder
-                entity = service.find_one(word)
+            if not entity:
+                raise ValueError('WordClassificationService did not return a result')
 
-                if not entity:
-                    raise ValueError('WordClassificationService did not return a result')
-
-                payload = jsonpickle.encode(entity)
-
-                response = make_response(payload, HTTPStatus.OK)
-            except Exception as error:
-                print('Error: ' + repr(error))
-                raise
-        else:
-            response = make_response(HTTPStatus.BAD_REQUEST)
-
-        return response
+            return jsonify({'word': word}), HTTPStatus.OK
+        except ValueError as err:
+            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+        except Exception as err:
+            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
-    # @api.expect()
-    def post():
-        response = None
+    @api.expect(word_request)
+    def post(word):
+        json_input = request.get_json()
+        if not json_input:
+            return jsonify('No input data provided'), HTTPStatus.BAD_REQUEST
 
-        if request.is_json:
-            try:
-                service = WordClassificationService()
-                # Execute analysis using the supplied builder
-                entity = service.create(request.json)
+        try:
+            service = WordClassificationService()
+            entity = service.create(json_input)
+            if not entity:
+                raise ValueError('WordClassificationService did not return a result')
 
-                if not entity:
-                    raise ValueError('WordClassificationService did not return a result')
-
-                payload = jsonpickle.encode(entity)
-
-                response = make_response(payload, HTTPStatus.CREATED)
-            except Exception as error:
-                print('Error: ' + repr(error))
-                raise
-        else:
-            response = make_response(HTTPStatus.BAD_REQUEST)
-
-        return response
+            # TODO: Why are we not using the model schema...
+            # model_schema = WordClassificationSchema().dump(entity)
+            data = entity.json()
+            return jsonify(data), HTTPStatus.OK
+        except ValueError as err:
+            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+        except Exception as err:
+            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    # @api.expect()
-    def put():
-        response = None
+    #@jwt.requires_roles([User.APPROVER])
+    # @api.marshal_with(word_classification)
+    @api.expect(word_request)
+    def put(word):
+        json_input = request.get_json()
+        if not json_input:
+            return jsonify('No input data provided'), HTTPStatus.BAD_REQUEST
 
-        if request.is_json:
-            try:
-                service = WordClassificationService()
-                # Execute analysis using the supplied builder
-                entity = service.create_or_update(request.json)
+        try:
+            service = WordClassificationService()
+            entity = service.create_or_update(json_input)
 
-                if not entity:
-                    raise ValueError('WordClassificationService did not return a result')
-
-                payload = jsonpickle.encode(entity)
-
-                response = make_response(payload, HTTPStatus.OK)
-            except Exception as error:
-                print('Error: ' + repr(error))
-                raise
-        else:
-            response = make_response(HTTPStatus.BAD_REQUEST)
-
-        return response
+            if not entity:
+                raise ValueError('WordClassificationService did not return a result')
+            data = entity.json()
+            return jsonify(data), HTTPStatus.OK
+        except ValueError as err:
+            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+        except Exception as err:
+            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
     def delete(word):
-        response = None
+        try:
+            service = WordClassificationService()
+            service.delete(word)
 
-        if request.is_json:
-            try:
-                service = WordClassificationService()
-                # Execute analysis using the supplied builder
-                entity = service.delete(word)
-
-                if not entity:
-                    raise ValueError('WordClassificationService did not return a result')
-
-                payload = jsonpickle.encode(entity)
-
-                response = make_response(payload, HTTPStatus.NO_CONTENT)
-            except Exception as error:
-                print('Error: ' + repr(error))
-                raise
-        else:
-            response = make_response(HTTPStatus.BAD_REQUEST)
-
-        return response
+            return make_response({}, HTTPStatus.OK)
+        # except ValueError as err:
+        #    return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+        except Exception as err:
+            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR

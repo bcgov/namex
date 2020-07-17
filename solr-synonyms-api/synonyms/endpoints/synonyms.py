@@ -762,7 +762,6 @@ class _RegexPrefixes(Resource):
             'data': result
         }
 
-
 @api.route('/<col>/<term>', strict_slashes=False, methods=['GET'])
 class _Synonyms(Resource):
     @staticmethod

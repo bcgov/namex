@@ -25,7 +25,7 @@ from namex.services.name_request.auto_analyse.xpro_name_analysis import XproName
 setup_logging()  # It's important to do this first
 
 # Register a local namespace for the requests
-api = Namespace('xproNameAnalysis', description='Xpro Name Analysis API for analysing a Extra-Provincial Names')
+api = Namespace('xproNameAnalysis', description='Xpro Name Analysis API for analysing Extra-Provincial Names')
 
 
 @api.errorhandler(AuthError)
@@ -46,16 +46,26 @@ def validate_name_request(location, entity_type, request_action):
         raise ValueError('Invalid request action provided')
 
     # Throw any errors related to invalid entity_type or request_action for a location
-    if location == ValidLocations.CA_NOT_BC.list():
-        # If XPRO, nothing is protected (for now anyway)
-        valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value, AnalysisRequestActions.CNV.value,
-                                 AnalysisRequestActions.MVE.value, AnalysisRequestActions.REH.value, AnalysisRequestActions.REN.value)
+    valid_location = location in [ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value]
+    valid_request_actions = [
+        AnalysisRequestActions.NEW.value,
+        AnalysisRequestActions.CHG.value,
+        AnalysisRequestActions.CNV.value,
+        AnalysisRequestActions.DBA.value,
+        AnalysisRequestActions.MVE.value,
+        AnalysisRequestActions.REH.value,
+        AnalysisRequestActions.REST.value,
+        AnalysisRequestActions.REN.value
+    ]
 
-        if entity_type not in XproUnprotectedNameEntityTypes.list():
-            raise ValueError('Invalid entity_type provided for an XPRO entity')
+    if not valid_location:
+        raise ValueError('Invalid location provided')
 
-        if request_action not in valid_request_actions:
-            raise Exception('Operation not currently supported')
+    if entity_type not in XproUnprotectedNameEntityTypes.list():
+        raise ValueError('Invalid entity_type provided for an XPRO entity')
+
+    if request_action not in valid_request_actions:
+        raise Exception('Operation not currently supported')
 
     return True
 
@@ -111,13 +121,25 @@ class XproNameAnalysis(Resource):
         if not validate_name_request(location, entity_type, request_action):
             return  # TODO: Return invalid response! What is it?
 
+        valid_location = location in [ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value]
+        valid_entity_type = entity_type in XproUnprotectedNameEntityTypes.list()
+        is_mve_action = request_action == AnalysisRequestActions.MVE.value
+        is_other_action = request_action in [
+            AnalysisRequestActions.NEW.value,
+            AnalysisRequestActions.CHG.value,
+            AnalysisRequestActions.CNV.value,
+            AnalysisRequestActions.DBA.value,
+            AnalysisRequestActions.REH.value,
+            AnalysisRequestActions.REST.value,
+            AnalysisRequestActions.REN.value
+        ]
+
         try:
-            if location == ValidLocations.CA_NOT_BC.value and entity_type in XproUnprotectedNameEntityTypes.list() and request_action == AnalysisRequestActions.MVE.value:
+            if valid_location and valid_entity_type and is_mve_action:
                 # Use ProtectedNameAnalysisService
                 service = ProtectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
-            elif location == ValidLocations.CA_NOT_BC.value and entity_type in XproUnprotectedNameEntityTypes.list() and \
-                    request_action in (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value, AnalysisRequestActions.CNV.value, AnalysisRequestActions.REH.value):
+            elif valid_location and valid_entity_type and is_other_action:
                 # Use UnprotectedNameAnalysisService
                 service = XproNameAnalysisService()
                 builder = NameAnalysisBuilder(service)

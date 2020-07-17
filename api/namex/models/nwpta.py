@@ -1,6 +1,4 @@
 from . import db, ma
-from datetime import datetime
-from sqlalchemy.orm import backref
 
 
 class PartnerNameSystem(db.Model):
@@ -57,4 +55,3 @@ class PartnerNameSystem(db.Model):
 class PartnerNameSystemSchema(ma.ModelSchema):
     class Meta:
         model = PartnerNameSystem
-

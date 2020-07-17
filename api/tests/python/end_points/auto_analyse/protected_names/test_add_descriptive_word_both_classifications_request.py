@@ -5,9 +5,10 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_issue_type_is_one_of, assert_has_word_upper, save_words_list_classification
+from ...common import assert_issues_count_is_gt, assert_issue_type_is_one_of, assert_has_word_upper, \
+    save_words_list_classification
 from ..common import ENDPOINT_PATH
-from ..common import token_header, claims
+from ...common import token_header, claims
 
 
 # 4.- Unique word classified as distinctive and descriptive
@@ -19,6 +20,13 @@ def test_add_descriptive_word_both_classifications_request_response(client, jwt,
                                  {'word': 'ROCKY', 'classification': 'DESC'},
                                  {'word': 'MOUNTAIN', 'classification': 'DIST'},
                                  {'word': 'MOUNTAIN', 'classification': 'DESC'},
+                                 {'word': 'PROPERTIES', 'classification': 'DIST'},
+                                 {'word': 'PROPERTIES', 'classification': 'DESC'},
+                                 {'word': 'VICTORIA', 'classification': 'DIST'},
+                                 {'word': 'VICTORIA', 'classification': 'DESC'},
+                                 {'word': 'SEWING', 'classification': 'DESC'},
+                                 {'word': 'SERVICE', 'classification': 'DIST'},
+                                 {'word': 'SERVICE', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
@@ -38,7 +46,19 @@ def test_add_descriptive_word_both_classifications_request_response(client, jwt,
             'location': 'BC',
             'entity_type': 'CR',
             'request_action': 'NEW'
-        }
+        },
+        {
+            'name': 'PROPERTIES OF VICTORIA LTD.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
+        {
+            'name': 'SEWING SERVICE LTD.',
+            'location': 'BC',
+            'entity_type': 'CR',
+            'request_action': 'NEW'
+        },
     ]
 
     for entry in test_params:

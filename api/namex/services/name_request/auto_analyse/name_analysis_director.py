@@ -5,7 +5,8 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 
 from . import AnalysisIssueCodes
 
-from ..auto_analyse.name_analysis_utils import check_synonyms, get_classification_summary
+from ..auto_analyse.name_analysis_utils import check_synonyms, get_classification_summary, change_descriptive, \
+    get_classification
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService
@@ -58,6 +59,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     @name_processing_service.setter
     def name_processing_service(self, svc):
         self._name_processing_service = svc
+
+    @property
+    def token_classifier_service(self):
+        return self._token_classifier_service
+
+    @token_classifier_service.setter
+    def token_classifier_service(self, svc):
+        self._token_classifier_service = svc
 
     @property
     def builder(self):
@@ -149,6 +158,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
         self.name_processing_service = NameProcessingService()
+        self.token_classifier_service = TokenClassifier(self.synonym_service)
 
         self.builder = None
         self.token_classifier = None
@@ -232,6 +242,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self._list_dist_words, self._list_desc_words = check_synonyms(syn_svc, self._list_dist_words,
                                                                       self._list_desc_words)
 
+        self._list_dist_words, self._list_desc_words = change_descriptive(self._list_dist_words, self._list_desc_words, self.name_tokens)
+
         self._dict_name_words = get_classification_summary(self.name_tokens, self._list_dist_words,
                                                            self._list_desc_words)
 
@@ -246,11 +258,15 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def execute_analysis(self):
         try:
             builder = self.builder
+            syn_svc = self.synonym_service
+            wc_svc = self.word_classification_service
+            token_svc = self.token_classifier_service
 
             analysis = []
 
             # Configure the analysis for the supplied builder
-            self.configure_analysis()
+            #self.configure_analysis()
+            get_classification(self, syn_svc, self.name_tokens, wc_svc, token_svc)
 
             check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
             if not check_words_to_avoid.is_valid:

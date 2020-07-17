@@ -119,9 +119,9 @@ def assumed_name_setup():
     return AssumedNameSetup(
         type="assumed_name",
         header=Template("Assumed Name"),
-        line1=Template("Send name to be examined as an Assumed Name."),
+        line1=Template("Extra provincial or registration of a foreign entity in BC requires use of an Assumed Name when there is an existing BC entity with a similar name."),
         action=Template("I want to send my name to be examined as an Assumed Name."),
-        checkbox=Template("I want to send my name to be examined as an Assumed Name.")
+        # checkbox=Template("I want to send my name to be examined as an Assumed Name.")
     )
 
 

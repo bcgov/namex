@@ -5,10 +5,10 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_issue_type_is_one_of, assert_has_word_upper, \
+from ...common import assert_issues_count_is_gt, assert_issue_type_is_one_of, assert_has_word_upper, \
     save_words_list_classification
 from ..common import ENDPOINT_PATH
-from ..common import token_header, claims
+from ...common import token_header, claims
 
 
 # 1.- Unique word classified as descriptive
@@ -18,10 +18,6 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
         {'word': 'CARPENTRY', 'classification': 'DESC'},
         {'word': 'HEATING', 'classification': 'DESC'},
         {'word': 'ADJUSTERS', 'classification': 'DESC'},
-        {'word': 'PROPERTIES', 'classification': 'DIST'},
-        {'word': 'PROPERTIES', 'classification': 'DESC'},
-        {'word': 'VICTORIA', 'classification': 'DIST'},
-        {'word': 'VICTORIA', 'classification': 'DESC'},
         {'word': 'COFFEE', 'classification': 'DIST'},
         {'word': 'COFFEE', 'classification': 'DESC'},
         {'word': 'SHOP', 'classification': 'DIST'},
@@ -32,9 +28,6 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
         {'word': 'BODY', 'classification': 'DESC'},
         {'word': 'GARAGE', 'classification': 'DIST'},
         {'word': 'GARAGE', 'classification': 'DESC'},
-        {'word': 'SEWING', 'classification': 'DESC'},
-        {'word': 'SERVICE', 'classification': 'DIST'},
-        {'word': 'SERVICE', 'classification': 'DESC'},
         {'word': 'KITCHEN', 'classification': 'DIST'},
         {'word': 'KITCHEN', 'classification': 'DESC'},
         {'word': 'FOOD', 'classification': 'DIST'},
@@ -75,11 +68,13 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
          'entity_type': 'CR',
          'request_action': 'NEW'
          },
-        {'name': 'PROPERTIES OF VICTORIA LTD.',
-         'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
-         },
+        # When checking synonyms dist=['victoria'], desc=['properties']. Because if there are descriptive items before distinctive, these become distinctive as well:
+        # dist=['victoria','properties']. There are no conflicts, then a descriptive is missing, not a distinctive. This test case is moved to test_add_descriptive_word_both_classification_request.py
+        # {'name': 'PROPERTIES OF VICTORIA LTD.',
+        #  'location': 'BC',
+        #  'entity_type': 'CR',
+        #  'request_action': 'NEW'
+        #  },
         {'name': 'COFFEE SHOP INC',
          'location': 'BC',
          'entity_type': 'CR',
@@ -90,11 +85,13 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
          'entity_type': 'CR',
          'request_action': 'NEW'
          },
-        {'name': 'SEWING SERVICE LTD.',
-         'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
-         },
+        # When checking synonyms dist=['service'], desc=['sewing']. Because if there are descriptive items before distinctive, these become distinctive as well:
+        # dist=['sewing','service']. There are no conflicts, then a descriptive is missing, not a distinctive. This test case is moved to test_add_descriptive_word_both_classification_request.py
+        # {'name': 'SEWING SERVICE LTD.',
+        #  'location': 'BC',
+        #  'entity_type': 'CR',
+        #  'request_action': 'NEW'
+        #  },
         {'name': 'KITCHEN FOOD LTD.',
          'location': 'BC',
          'entity_type': 'CR',

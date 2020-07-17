@@ -5,18 +5,20 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, \
+from ...common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, \
     save_words_list_classification, assert_additional_conflict_parameters
 from ..common import ENDPOINT_PATH
-from ..common import token_header, claims
+from ...common import token_header, claims
 
 
 @pytest.mark.parametrize("name, expected",
                          [
                              ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."),
+                             # # ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."), #Under evaluation
                              ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
-                             ("ABC INVESTMENTS LTD.", "ABC CREDIT BUREAU COLLECTIONS LIMITED")
+                             ("ARMSTRONG PLUMBING & CAFE INC.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."),
+                             ("LE BLUE CAFE LTD.", "LE BLUE RESTAURANT LTD.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -33,7 +35,24 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                                  {'word': 'MINING', 'classification': 'DESC'},
                                  {'word': 'INVESTMENTS', 'classification': 'DIST'},
                                  {'word': 'INVESTMENTS', 'classification': 'DESC'},
-
+                                 {'word': 'CAFE', 'classification': 'DIST'},
+                                 {'word': 'CAFE', 'classification': 'DESC'},
+                                 {'word': 'PACIFIC', 'classification': 'DIST'},
+                                 {'word': 'PACIFIC', 'classification': 'DESC'},
+                                 {'word': 'BLUE', 'classification': 'DIST'},
+                                 {'word': 'ENGINEERING', 'classification': 'DIST'},
+                                 {'word': 'ENGINEERING', 'classification': 'DESC'},
+                                 {'word': 'ENTERPRISES', 'classification': 'DIST'},
+                                 {'word': 'ENTERPRISES', 'classification': 'DESC'},
+                                 {'word': 'HOLDINGS', 'classification': 'DIST'},
+                                 {'word': 'HOLDINGS', 'classification': 'DESC'},
+                                 {'word': 'WATER', 'classification': 'DIST'},
+                                 {'word': 'WATER', 'classification': 'DESC'},
+                                 {'word': 'VENTURES', 'classification': 'DIST'},
+                                 {'word': 'VENTURES', 'classification': 'DESC'},
+                                 {'word': 'PETER', 'classification': 'DIST'},
+                                 {'word': 'LE', 'classification': 'DIST'},
+                                 {'word': 'LE', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
@@ -41,7 +60,10 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                         'ABC PEST MANAGEMENT CONSULTING INC.', 'ABC ALWAYS BETTER CONSULTING INC.',
                         'ABC - AUTISM BEHAVIOUR CONSULTING INCORPORATED', 'ABC INTERNATIONAL CONSULTING LTD.',
                         'NO. 003 CATHEDRAL MINING LTD.', 'CATHEDRAL MINING LTD.',
-                        'ABC CREDIT BUREAU COLLECTIONS LIMITED', 'ABC JEWELLERY & LOAN PAWNBROKERS LTD.']
+                        'ABC CREDIT BUREAU COLLECTIONS LIMITED', 'ABC JEWELLERY & LOAN PAWNBROKERS LTD.',
+                        'PACIFIC BLUE ENTERPRISES LTD.', 'PACIFIC ENGINEERING LTD.', 'PACIFIC HOLDINGS LTD.',
+                        'BLUE PETER HOLDINGS INC.', 'BLUE WATER VENTURES LTD.', 'LE BLUE FOX CAFE INC.',
+                        'LE BLUE RESTAURANT LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT

@@ -174,6 +174,7 @@ class XproUnprotectedNameEntityTypes(AbstractEnum):
     XPRO_LIMITED_LIABILITY_COMPANY = EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value
     XPRO_LIMITED_PARTNERSHIP = EntityTypes.XPRO_LIMITED_PARTNERSHIP.value
     XPRO_LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value
+    XPRO_COOPERATIVE = EntityTypes.XPRO_COOPERATIVE.value
 
 
 # Request types (legacy) used in search conflicts
@@ -322,9 +323,10 @@ request_type_mapping = [
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REST.value),
     ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value),
     ('BECR', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value)
-    ]
+]
 
-class NameState(Enum):
+
+class NameState(AbstractEnum):
     NOT_EXAMINED = 'NE'
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'

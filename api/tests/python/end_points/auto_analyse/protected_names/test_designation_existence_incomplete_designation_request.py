@@ -5,9 +5,9 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ..common import assert_issues_count_is_gt, assert_has_issue_type, save_words_list_classification
+from ...common import assert_issues_count_is_gt, assert_has_issue_type, save_words_list_classification
 from ..common import ENDPOINT_PATH
-from ..common import token_header, claims
+from ...common import token_header, claims
 
 
 @pytest.mark.xfail(raises=ValueError)
@@ -39,4 +39,4 @@ def test_designation_existence_incomplete_designation_request_response(client, j
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
             assert_issues_count_is_gt(0, payload.get('issues'))
-            assert_has_issue_type(AnalysisIssueCodes.TOO_MANY_WORDS, payload.get('issues'))
+            assert_has_issue_type(AnalysisIssueCodes.DESIGNATION_NON_EXISTENT, payload.get('issues'))

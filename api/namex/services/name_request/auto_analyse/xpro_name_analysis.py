@@ -5,6 +5,7 @@ from .name_analysis_director import NameAnalysisDirector
 from .mixins.set_designation_lists import SetDesignationsListsMixin
 
 from . import AnalysisIssueCodes
+from .name_analysis_utils import get_classification
 
 '''
 The XproNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -43,11 +44,15 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
     def execute_analysis(self):
         try:
             builder = self.builder
+            syn_svc = self.synonym_service
+            wc_svc = self.word_classification_service
+            token_svc = self.token_classifier_service
 
             analysis = []
 
             # Configure the analysis for the supplied builder
-            self.configure_analysis()
+            #self.configure_analysis()
+            get_classification(self, syn_svc, self.name_tokens, wc_svc, token_svc)
 
             check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
             if not check_words_to_avoid.is_valid:
@@ -141,8 +146,8 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(
-            self.get_list_dist(),
-            self.get_list_desc(),
+            [self.get_list_dist()],
+            [self.get_list_desc()],
             self.name_tokens,
             self.processed_name
         )
@@ -161,7 +166,7 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
         # We don't need to check for designations, so we're skipping that here...
 
-        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
+        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_processed_name())
 
         if not check_special_words.is_valid:
             results.append(check_special_words)
