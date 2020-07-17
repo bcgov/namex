@@ -125,7 +125,7 @@ class AnalysisResponseIssue:
         if current_processed_token.find(current_original_token) == -1:
             return False, 0, 0, current_original_token
 
-        while len(original_tokens) >= 0:
+        while len(original_tokens) > 0:
             if token_string == processed_token:
                 break
 

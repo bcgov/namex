@@ -52,6 +52,7 @@ def validate_name_request(location, entity_type, request_action):
         AnalysisRequestActions.CHG.value,
         AnalysisRequestActions.CNV.value,
         AnalysisRequestActions.DBA.value,
+        AnalysisRequestActions.MVE.value,
         AnalysisRequestActions.REH.value,
         AnalysisRequestActions.REST.value,
         AnalysisRequestActions.REN.value
