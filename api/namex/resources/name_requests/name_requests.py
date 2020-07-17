@@ -22,6 +22,14 @@ setup_logging()  # Important to do this first
 SOLR_CORE = 'possible.conflicts'
 
 
+def parse_nr_num(nr_num_str):
+    nr_num = normalize_nr_num(nr_num_str) if nr_num_str else None
+    if nr_num_str and not nr_num:
+        raise InvalidInputError(message='Invalid NR number format provided')
+
+    return nr_num
+
+
 @cors_preflight('GET, POST')
 @api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
 class NameRequests(BaseNameRequest):
@@ -39,10 +47,7 @@ class NameRequests(BaseNameRequest):
             if len(request.args) == 0:
                 raise InvalidInputError(message='No query parameters were specified in the request')
 
-            nr_num_str = get_query_param_str('nrNum')
-            nr_num = normalize_nr_num(nr_num_str) if nr_num_str else None
-            if nr_num_str and not nr_num:
-                raise InvalidInputError(message='Invalid NR number format provided')
+            nr_num = parse_nr_num(get_query_param_str('nrNum'))
 
             phone_number = get_query_param_str('phoneNumber')
             email_address = get_query_param_str('emailAddress')
@@ -149,6 +154,7 @@ class NameRequest(BaseNameRequest):
     @cors.crossdomain(origin='*')
     def get(self, nr_num):
         try:
+            nr_num = parse_nr_num(nr_num)
             name_request = Request.find_by_nr(nr_num)
         except Exception as err:
             return handle_exception(err, 'Error retrieving the NR from the db.', 500)
@@ -164,6 +170,7 @@ class NameRequest(BaseNameRequest):
             self._before_create_or_update()
 
             # Find the existing name request
+            nr_num = parse_nr_num(nr_num)
             nr_model = Request.find_by_nr(nr_num)
             self.nr_num = nr_model.nrNum
             self.nr_id = nr_model.id
