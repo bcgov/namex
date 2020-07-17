@@ -92,7 +92,7 @@ def send_email(subject, filename, emailtype, errormessage):
     server.quit()
 
 
-def processnotebooks(notebookdirectory, days=[], months=[]):
+def processnotebooks(notebookdirectory):
     status = False    
     weekno = datetime.now().weekday()
     date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
