@@ -22,7 +22,6 @@ setup_logging()  # Important to do this first
 SOLR_CORE = 'possible.conflicts'
 
 
-
 @cors_preflight('GET, POST')
 @api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
 class NameRequests(BaseNameRequest):
