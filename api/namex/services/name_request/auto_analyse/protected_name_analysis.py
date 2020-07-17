@@ -60,6 +60,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
             [self.get_list_desc()],
             self.name_tokens,
             self.processed_name,
+            False,
             True
         )
 

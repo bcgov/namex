@@ -399,7 +399,7 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, stop_words=None,
-                                          check_name_is_well_formed=False):
+                                          check_name_is_well_formed=False, queue=False):
         special_characters_element = Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
