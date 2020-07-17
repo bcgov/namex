@@ -11,6 +11,7 @@ import logging
 import papermill as pm
 import shutil
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -56,7 +57,10 @@ def send_email(subject, filename, emailtype, errormessage):
         recipients = os.getenv('ERROR_EMAIL_RECIPIENTS', '')
         message.attach(MIMEText("ERROR!!! \n" + errormessage, "plain"))
     else:
-        recipients = os.getenv('REPORT_RECIPIENTS', '')
+        if subject.startswith("Daily"):
+            recipients = os.getenv('DAILY_REPORT_RECIPIENTS', '')
+        if subject.startswith("Weekly"):
+            recipients = os.getenv('WEEKLY_REPORT_RECIPIENTS', '')    
         # Add body to email
         message.attach(MIMEText("Please see attached.", "plain"))
 
@@ -88,9 +92,9 @@ def send_email(subject, filename, emailtype, errormessage):
     server.quit()
 
 
-def processnotebooks(notebookdirectory, days=[], months=[]):
-    status = False
-    now = datetime.now()
+def processnotebooks(notebookdirectory):
+    status = False    
+    weekno = datetime.now().weekday()
     date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
     ext = ''
     if not os.getenv('ENVIRONMENT', '') == 'prod':
@@ -99,9 +103,8 @@ def processnotebooks(notebookdirectory, days=[], months=[]):
     try:
         retry_times = int(os.getenv('RETRY_TIMES', '1'))
         retry_interval = int(os.getenv('RETRY_INTERVAL', '60'))
-        if notebookdirectory == 'sixMonth':
-            days = ast.literal_eval(os.getenv('SIX_MONTH_REPORT_DATES', ''))
-            months = ast.literal_eval(os.getenv('SIX_MONTH_REPORT_MONTHS', ''))
+        if notebookdirectory == 'weekly':            
+            weekreportday = ast.literal_eval(os.getenv('WEEK_REPORT_DATE', ''))                    
     except Exception:
         logging.exception("Error processing notebook for {}.".format(notebookdirectory))
         # we failed all the attempts
@@ -110,11 +113,11 @@ def processnotebooks(notebookdirectory, days=[], months=[]):
         send_email(subject, filename, "ERROR", traceback.format_exc())
         return status
 
-    # For six months tasks, we only run on the specified days and month
-    # (or for others if no days are specified)
-    if ( notebookdirectory == 'daily' or (notebookdirectory == 'sixMonth' and len(months) > 0 and now.month in months and len(days) > 0 and now.day in days)): 
+    # For weekly tasks, we only run on the specified days
+    # Only run weekly report on Monday (index is 0) for previous 7 days data
+    if ( notebookdirectory == 'daily' or (notebookdirectory == 'weekly' and weekno in weekreportday)): 
 
-        logging.info('Processing: ' + notebookdirectory)
+        logging.info('Processing: ' + notebookdirectory)      
 
         # Each time a notebook is processed a snapshot is saved to a snapshot sub-directory
         # This checks the sub-directory exists and creates it if not
@@ -138,9 +141,9 @@ def processnotebooks(notebookdirectory, days=[], months=[]):
                     if nbfile == 'daily':
                         subject = "Daily NameX Stats for " + date + ext
                         filename = 'daily_totals_' + date + '.csv'
-                    elif nbfile == 'sixMonth':
-                        subject = "Six Months NameX Stats till " + date + ext
-                        filename = 'six_month_totals_till_' + date + '.csv'
+                    elif nbfile == 'weekly':
+                        subject = "Weekly NameX Stats till " + date + ext
+                        filename = 'weekly_totals_till_' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') +'.csv'
 
                     # send email to receivers and remove files/directories which we don't want to keep
                     send_email(subject, filename, "", "")
@@ -170,19 +173,14 @@ def processnotebooks(notebookdirectory, days=[], months=[]):
 
 
 if __name__ == '__main__':
-    start_time = datetime.utcnow()
-    weekno = datetime.now().weekday()
+    start_time = datetime.utcnow()    
 
-    # Check if the subfolders for notebooks exist, and create them if they don't
-    # for directory in ['daily', 'sixMonth']:
-    for directory in ['daily', 'sixMonth']:
+    # Check if the subfolders for notebooks exist, and create them if they don't    
+    for directory in ['daily', 'weekly']:  
         if not os.path.isdir(directory):
             os.mkdir(directory)
-        # We don't need to run 'daily' report on Monday (index is 0) for Sunday's data or Sunday (index is 6)
-        # for Saturday's data
-        if((weekno != 0 and weekno != 6) and directory == 'daily') or directory == 'sixMonth':
-            processnotebooks(directory)
-
+    
+        processnotebooks(directory)        
     end_time = datetime.utcnow()
     logging.info("job - jupyter notebook report completed in: {}".format(end_time - start_time))
     exit(0)
