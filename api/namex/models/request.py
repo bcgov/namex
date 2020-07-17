@@ -208,7 +208,7 @@ class Request(db.Model):
         raise BusinessException({
             "code": "cannot_delete_nr",
             "description":
-            "NRs cannot be deleted, maybe try cancelling instead"
+                "NRs cannot be deleted, maybe try cancelling instead"
         }, 403)
 
     @classmethod
@@ -274,59 +274,62 @@ class Request(db.Model):
 
     # START NEW NAME_REQUEST SERVICE METHODS, WE WILL REFACTOR THESE SHORTLY
     @classmethod
-    def get_general_query(cls, change_filter=False):
+    def get_general_query(cls, change_filter=False, queue=False):
         criteria = []
         basic_filters = [
             cls.id == Name.nrId,
-            cls.stateCd.in_([State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
+            cls.stateCd.in_(
+                [State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED] if not queue else [State.DRAFT,
+                                                                                                           State.HOLD,
+                                                                                                           State.INPROGRESS]),
             cls.requestTypeCd.in_([
-                EntityTypes.PRIVATE_ACT.value,
-                EntityTypes.CORPORATION.value,
-                LegacyEntityTypes.CORPORATION.CCR.value,
-                LegacyEntityTypes.CORPORATION.CT.value,
-                LegacyEntityTypes.CORPORATION.RCR.value,
-                EntityTypes.COOPERATIVE.value,
-                LegacyEntityTypes.COOPERATIVE.CCP.value,
-                LegacyEntityTypes.COOPERATIVE.CTC.value,
-                LegacyEntityTypes.COOPERATIVE.RCP.value,
-                EntityTypes.FINANCIAL_INSTITUTION.value,
-                LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
-                LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
-                EntityTypes.SOCIETY.value,
-                LegacyEntityTypes.SOCIETY.ASO.value,
-                LegacyEntityTypes.SOCIETY.CSO.value,
-                LegacyEntityTypes.SOCIETY.CSSO.value,
-                LegacyEntityTypes.SOCIETY.CTSO.value,
-                LegacyEntityTypes.SOCIETY.RSO.value,
-                EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
-                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
-                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
-                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.ULCT.value,
-                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
-                EntityTypes.XPRO_SOCIETY.value,
-                LegacyEntityTypes.XPRO_SOCIETY.XASO.value,
-                LegacyEntityTypes.XPRO_SOCIETY.XCASO.value,
-                LegacyEntityTypes.XPRO_SOCIETY.XCSO.value,
-                LegacyEntityTypes.XPRO_SOCIETY.XRSO.value,
-                EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
-                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
-                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCV.value,
-                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCCT.value,
-                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
-                EntityTypes.PARISH.value,
-                EntityTypes.XPRO_CORPORATION.value,
-                LegacyEntityTypes.XPRO_CORPORATION.XCCR.value,
-                LegacyEntityTypes.XPRO_CORPORATION.XRCR.value,
-                LegacyEntityTypes.XPRO_CORPORATION.AS.value,
-                EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
-                LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.UA.value,
-                LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XCUL.value,
-                LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XRUL.value,
-                EntityTypes.XPRO_COOPERATIVE.value,
-                LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
-                LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
-                EntityTypes.BENEFIT_COMPANY.value
-            ] if not change_filter else [
+                                      EntityTypes.PRIVATE_ACT.value,
+                                      EntityTypes.CORPORATION.value,
+                                      LegacyEntityTypes.CORPORATION.CCR.value,
+                                      LegacyEntityTypes.CORPORATION.CT.value,
+                                      LegacyEntityTypes.CORPORATION.RCR.value,
+                                      EntityTypes.COOPERATIVE.value,
+                                      LegacyEntityTypes.COOPERATIVE.CCP.value,
+                                      LegacyEntityTypes.COOPERATIVE.CTC.value,
+                                      LegacyEntityTypes.COOPERATIVE.RCP.value,
+                                      EntityTypes.FINANCIAL_INSTITUTION.value,
+                                      LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                                      LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                                      EntityTypes.SOCIETY.value,
+                                      LegacyEntityTypes.SOCIETY.ASO.value,
+                                      LegacyEntityTypes.SOCIETY.CSO.value,
+                                      LegacyEntityTypes.SOCIETY.CSSO.value,
+                                      LegacyEntityTypes.SOCIETY.CTSO.value,
+                                      LegacyEntityTypes.SOCIETY.RSO.value,
+                                      EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                                      LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                                      LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                                      LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.ULCT.value,
+                                      LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                                      EntityTypes.XPRO_SOCIETY.value,
+                                      LegacyEntityTypes.XPRO_SOCIETY.XASO.value,
+                                      LegacyEntityTypes.XPRO_SOCIETY.XCASO.value,
+                                      LegacyEntityTypes.XPRO_SOCIETY.XCSO.value,
+                                      LegacyEntityTypes.XPRO_SOCIETY.XRSO.value,
+                                      EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                                      LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                                      LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCV.value,
+                                      LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCCT.value,
+                                      LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                                      EntityTypes.PARISH.value,
+                                      EntityTypes.XPRO_CORPORATION.value,
+                                      LegacyEntityTypes.XPRO_CORPORATION.XCCR.value,
+                                      LegacyEntityTypes.XPRO_CORPORATION.XRCR.value,
+                                      LegacyEntityTypes.XPRO_CORPORATION.AS.value,
+                                      EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+                                      LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.UA.value,
+                                      LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XCUL.value,
+                                      LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XRUL.value,
+                                      EntityTypes.XPRO_COOPERATIVE.value,
+                                      LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
+                                      LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
+                                      EntityTypes.BENEFIT_COMPANY.value
+                                  ] if not change_filter else [
                 EntityTypes.PRIVATE_ACT.value,
                 EntityTypes.CORPORATION.value,
                 LegacyEntityTypes.CORPORATION.CCR.value,
@@ -366,16 +369,23 @@ class Request(db.Model):
             # Name.consumptionDate.isnot(None)
         ]
 
-        criteria.append(RequestConditionCriteria(
-            fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('requests_submitted_date'), Name.corpNum,
-                    sqlalchemy.null().label('requests_nr_num')],
-            filters=[basic_filters, consumed_filters]
-        ))
-        criteria.append(RequestConditionCriteria(
-            fields=[Name.name, sqlalchemy.null().label('names_consumption_date'), cls.submittedDate,
-                    sqlalchemy.null().label('names_corp_num'), cls.nrNum],
-            filters=[basic_filters, not_consumed_filters]
-        ))
+        if queue:
+            criteria.append(RequestConditionCriteria(
+                fields=[Name.name, Name.consumptionDate, cls.submittedDate, cls.submittedDate, Name.corpNum, cls.nrNum],
+                filters=[basic_filters]
+            ))
+        else:
+            criteria.append(RequestConditionCriteria(
+                fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('requests_submitted_date'),
+                        Name.corpNum,
+                        sqlalchemy.null().label('requests_nr_num')],
+                filters=[basic_filters, consumed_filters]
+            ))
+            criteria.append(RequestConditionCriteria(
+                fields=[Name.name, sqlalchemy.null().label('names_consumption_date'), cls.submittedDate,
+                        sqlalchemy.null().label('names_corp_num'), cls.nrNum],
+                filters=[basic_filters, not_consumed_filters]
+            ))
 
         return criteria
 
@@ -389,8 +399,9 @@ class Request(db.Model):
         return flattened
 
     @classmethod
-    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, stop_words=None, check_name_is_well_formed=False):
-        special_characters_element= Request.set_special_characters(descriptive_element)
+    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, stop_words=None,
+                                          check_name_is_well_formed=False):
+        special_characters_element = Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
                 # Reset filter index 5 which contains the descriptive in the previous round.
@@ -402,10 +413,12 @@ class Request(db.Model):
             else:
                 substitutions = '|'.join(map(str, special_characters_element))
                 if not check_name_is_well_formed:
-                    e.filters[0].append(func.lower(Name.name).op('~')(r'^(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)))
+                    e.filters[0].append(func.lower(Name.name).op('~')(
+                        r'^(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)))
                 else:
                     e.filters[0].append(
-                        func.lower(Name.name).op('~')(r'^\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)))
+                        func.lower(Name.name).op('~')(
+                            r'^\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)))
 
         if distinctive:
             return criteria
@@ -471,7 +484,8 @@ def set_source(mapper, connection, target):  # pylint: disable=unused-argument; 
 
 @event.listens_for(Request, 'before_insert')
 @event.listens_for(Request, 'before_update')
-def update_request_action_entity_type(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+def update_request_action_entity_type(mapper, connection,
+                                      target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
     # needed to break apart  request_type
     request = target
