@@ -11,7 +11,7 @@ from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
 
-from .utils import handle_exception, get_query_param_str, normalize_nr_num, query_result_to_dict, query_results_to_dict
+from .utils import handle_exception, get_query_param_str, normalize_nr_num
 from .base_name_request import api, BaseNameRequest, nr_request
 
 from .exceptions import *
@@ -19,6 +19,7 @@ from .exceptions import *
 setup_logging()  # Important to do this first
 
 SOLR_CORE = 'possible.conflicts'
+
 
 
 @cors_preflight('GET, POST')
@@ -46,15 +47,10 @@ class NameRequests(BaseNameRequest):
             email_address = get_query_param_str('emailAddress')
 
             if nr_num:
-                # fields.append(Request.nrNum)
                 filters.append(func.lower(Request.nrNum) == nr_num.lower())
             if phone_number:
-                # TODO: We'll need something extra if we want to filter on nested associations
-                # fields.append(Request.applicants.phoneNumber)
                 filters.append(Request.applicants.any(phoneNumber=phone_number))
             if email_address:
-                # TODO: We'll need something extra if we want to filter on nested associations
-                # fields.append(Request.applicants.emailAddress)
                 filters.append(Request.applicants.any(emailAddress=email_address))
 
             criteria = RequestQueryCriteria(
