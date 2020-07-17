@@ -399,7 +399,7 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, stop_words=None,
-                                          check_name_is_well_formed=False):
+                                          check_name_is_well_formed=False, queue=False):
         special_characters_element = Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
@@ -421,19 +421,28 @@ class Request(db.Model):
 
         if distinctive:
             return criteria
-        results = Request.find_by_criteria(criteria)
+        results = Request.find_by_criteria(criteria, queue)
 
         return results
 
     @classmethod
-    def find_by_criteria(cls, criteria=None):
+    def find_by_criteria(cls, criteria=None, queue=False):
         queries = []
         for e in criteria:
             RequestConditionCriteria.is_valid_criteria(e)
-            queries.append(
-                cls.query.with_entities(*e.fields).filter(and_(*e.filters[0])).filter(and_(*e.filters[1]))
-            )
-        query_all = queries[0].union(queries[1])
+            if queue:
+                queries.append(
+                    cls.query.with_entities(*e.fields).filter(and_(*e.filters[0]))
+                )
+            else:
+                queries.append(
+                    cls.query.with_entities(*e.fields).filter(and_(*e.filters[0])).filter(and_(*e.filters[1]))
+                )
+        if queue:
+            query_all = queries[0]
+        else:
+            query_all = queries[0].union(queries[1])
+
         print(query_all.statement)
         return query_all.all()
 
