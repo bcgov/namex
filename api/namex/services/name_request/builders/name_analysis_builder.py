@@ -146,17 +146,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name, check_name_is_well_formed=False,
-                         queue=False):
+    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name, check_name_is_well_formed=False, queue=False):
         result = ProcedureResult()
         result.is_valid = False
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
 
-        if queue:
-            print("Search conflicts in queue for DRAFT, HOLD, INPROGRESS")
-        else:
+        if not queue:
             print("Search conflicts for APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
+        else:
+            print("Search conflicts in queue for DRAFT, HOLD, INPROGRESS")
 
         # Can we write a custom Exception here (raise Exception('Blah blah') so that if list_dist_words is not coming back like:
         # [['my', 'words']] (list of lists) we throw an error because this procedure expects a list of lists...
@@ -179,7 +178,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             response = self.prepare_response(most_similar_names)
 
         if response and not queue:
-            result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
+            result_code= AnalysisIssueCodes.CORPORATE_CONFLICT
             self.get_response_search_conflicts_queue(result, list_name, list_dist_words, list_desc_words, response,
                                                      result_code)
         elif response and queue:
@@ -215,7 +214,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                                  check_name_is_well_formed)
             for desc in desc_synonym_list:
                 # Inject descriptive section into query, execute and add matches to list
-                matches = Request.get_query_distinctive_descriptive(desc, criteria, False, None, False, queue)
+                matches = Request.get_query_distinctive_descriptive(desc, criteria)
                 list_conflicts_details, forced = self.get_most_similar_names(
                     dict_highest_counter,
                     matches, w_dist,
@@ -460,13 +459,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     vector2_dist, entropy_dist = self.get_score_by_classification(service.get_list_dist(), list_dist,
                                                                                   list_dist_stem,
                                                                                   dist_subs_dict, True)
-                    similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist, 1.0), 2)
+                    similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist, 1.0),2)
                     vector2_desc, entropy_desc = self.get_score_by_classification(service.get_list_desc(), list_desc,
                                                                                   list_desc_stem,
-                                                                                  desc_subs_dict, False,
-                                                                                  similarity_dist)
-                    similarity_desc = round(
-                        self.get_similarity(vector1_desc, vector2_desc, entropy_dist, similarity_dist), 2)
+                                                                                  desc_subs_dict, False, similarity_dist)
+                    similarity_desc = round(self.get_similarity(vector1_desc, vector2_desc, entropy_dist, similarity_dist),2)
                     similarity = round((similarity_dist + similarity_desc) / 2, 2)
                     print(similarity)
 
@@ -519,9 +516,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                     'name': key,
                                     'tokens': all_subs_dict,
                                     'consumption_date': record.consumptionDate,
-                                    'submitted_date': record.submittedDate,
+                                    'submitted_date': record.requests_submitted_date,
                                     'corp_num': record.corpNum,
-                                    'nr_num': record.nrNum}
+                                    'nr_num': record.requests_nr_num}
                     list_details.append(dict_details)
 
         return list_details
@@ -669,8 +666,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             return True
         return False
 
-    def get_response_search_conflicts_queue(self, result, list_name, list_dist_words, list_desc_words, response,
-                                            result_code):
+    def get_response_search_conflicts_queue(self, result, list_name, list_dist_words, list_desc_words, response, result_code):
         result.is_valid = False
         result.result_code = result_code
         result.values = {
