@@ -166,6 +166,7 @@ class BCUnprotectedNameEntityTypes(AbstractEnum):
     GENERAL_PARTNERSHIP = EntityTypes.GENERAL_PARTNERSHIP.value
     LIMITED_PARTNERSHIP = EntityTypes.LIMITED_PARTNERSHIP.value
     LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value
+    XPRO_COOPERATIVE = EntityTypes.XPRO_COOPERATIVE.value
 
 
 class XproUnprotectedNameEntityTypes(AbstractEnum):
