@@ -6,8 +6,7 @@ from . import db, ma
 from flask import current_app
 from namex.exceptions import BusinessException
 from sqlalchemy import event
-from sqlalchemy.orm import backref, lazyload
-from sqlalchemy.dialects import postgresql
+from sqlalchemy.orm import backref
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import and_, or_, func
 from marshmallow import Schema, fields, post_load, post_dump
@@ -371,19 +370,19 @@ class Request(db.Model):
 
         if queue:
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, Name.consumptionDate, cls.submittedDate, Name.corpNum, cls.nrNum],
+                fields=[Name.name, Name.consumptionDate, cls.submittedDate, cls.submittedDate, Name.corpNum, cls.nrNum],
                 filters=[basic_filters]
             ))
         else:
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('submittedDate'),
+                fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('requests_submitted_date'),
                         Name.corpNum,
-                        sqlalchemy.null().label('nrNum')],
+                        sqlalchemy.null().label('requests_nr_num')],
                 filters=[basic_filters, consumed_filters]
             ))
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
-                        sqlalchemy.null().label('corpNum'), cls.nrNum],
+                fields=[Name.name, sqlalchemy.null().label('names_consumption_date'), cls.submittedDate,
+                        sqlalchemy.null().label('names_corp_num'), cls.nrNum],
                 filters=[basic_filters, not_consumed_filters]
             ))
 
@@ -400,7 +399,7 @@ class Request(db.Model):
 
     @classmethod
     def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, stop_words=None,
-                                          check_name_is_well_formed=False, queue=False):
+                                          check_name_is_well_formed=False):
         special_characters_element = Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
