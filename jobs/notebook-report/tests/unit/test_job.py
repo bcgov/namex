@@ -44,19 +44,8 @@ def test_daily_notebook_report():
     assert status == True
 
 
-test_six_month_data = [
-    ("sixMonth",
-    "[1, 16]",
-    "[1, 7, 4]"),
-]
-
-
-@pytest.mark.parametrize("report_type, report_days_list, report_months_list", test_six_month_data)
-def test_six_month_notebook_report(report_type, report_days_list, report_months_list):
-    test_days = ast.literal_eval(report_days_list)
-    test_months = ast.literal_eval(report_months_list)
-    status = processnotebooks(report_type, days=test_days,
-                     months=test_months)
+def test_weekly_notebook_report():    
+    status = processnotebooks("weekly")
 
     assert status == True
 
