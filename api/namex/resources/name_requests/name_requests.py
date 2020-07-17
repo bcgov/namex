@@ -1,3 +1,4 @@
+import re
 from flask import request, jsonify
 from flask_restplus import cors
 from flask import current_app
@@ -6,7 +7,7 @@ from sqlalchemy import func
 from namex.utils.logging import setup_logging
 from namex.utils.util import cors_preflight
 
-from namex.models import Request, Event, State
+from namex.models import Request, Event, State, Applicant
 from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
@@ -29,7 +30,8 @@ class NameRequests(BaseNameRequest):
     @api.doc(params={
         'nrNum': 'NR Number',
         'phoneNumber': 'The applicant\'s phone number',
-        'emailAddress': 'The applicant\'s email address'
+        'emailAddress': 'The applicant\'s email address',
+        'addrLine1': 'The applicant\'s address'
     })
     def get(self):
         try:
@@ -45,13 +47,32 @@ class NameRequests(BaseNameRequest):
 
             phone_number = get_query_param_str('phoneNumber')
             email_address = get_query_param_str('emailAddress')
+            address_line = get_query_param_str('addrLine1')
 
             if nr_num:
                 filters.append(func.lower(Request.nrNum) == nr_num.lower())
             if phone_number:
-                filters.append(Request.applicants.any(phoneNumber=phone_number))
+                strip_phone_number_chars_regex = r'[(\-)(\+)(\s)(\(|\))]'
+                filters.append(
+                    Request.applicants.any(
+                        func.regexp_replace(Applicant.phoneNumber, strip_phone_number_chars_regex, '').contains(re.sub(strip_phone_number_chars_regex, '', phone_number))
+                    )
+                )
+
             if email_address:
-                filters.append(Request.applicants.any(emailAddress=email_address))
+                filters.append(
+                    Request.applicants.any(
+                        func.lower(Applicant.emailAddress).startswith(email_address.lower())
+                    )
+                )
+
+            if address_line:
+                # Addresses are all in uppercase cast
+                filters.append(
+                    Request.applicants.any(
+                        func.lower(Applicant.addrLine1).startswith(address_line.lower())
+                    )
+                )
 
             criteria = RequestQueryCriteria(
                 nr_num=nr_num,
