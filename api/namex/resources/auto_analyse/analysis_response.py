@@ -16,7 +16,8 @@ from ..auto_analyse.analysis_issues import \
     WordSpecialUseIssue, \
     DesignationMisplacedIssue, \
     EndDesignationMoreThanOnceIssue, \
-    DesignationNonExistentIssue, QueueNameConflictIssue
+    DesignationNonExistentIssue, \
+    QueueNameConflictIssue
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisResponseCodes
 
