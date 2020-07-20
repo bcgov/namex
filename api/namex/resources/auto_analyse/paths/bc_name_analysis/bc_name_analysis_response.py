@@ -227,6 +227,35 @@ class BcAnalysisResponse(AnalysisResponse):
 
         return issue
 
+    def build_queue_conflict_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = resolve_conflict_setup()
+        # Tweak the header
+        option1.header = "Option 1"
+
+        option2 = conflict_self_consent_setup()
+        # Tweak the header
+        option2.header = "Option 2"
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            option2,
+        ])
+
+        '''
+        # Quick tests for overriding button behavior
+        if issue_count > 1:
+            issue.show_reserve_button = True
+            issue.show_examination_button = False
+        else:
+            issue.show_reserve_button = True
+            issue.show_examination_button = False
+        '''
+
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
     def build_non_existent_designation_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_designation_setup()
         # Tweak the header
