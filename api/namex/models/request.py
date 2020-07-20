@@ -371,19 +371,19 @@ class Request(db.Model):
 
         if queue:
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, Name.consumptionDate, cls.submittedDate, cls.submittedDate, Name.corpNum, cls.nrNum],
+                fields=[Name.name, Name.consumptionDate, cls.submittedDate, Name.corpNum, cls.nrNum],
                 filters=[basic_filters]
             ))
         else:
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('requests_submitted_date'),
+                fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('submittedDate'),
                         Name.corpNum,
-                        sqlalchemy.null().label('requests_nr_num')],
+                        sqlalchemy.null().label('nrNum')],
                 filters=[basic_filters, consumed_filters]
             ))
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, sqlalchemy.null().label('names_consumption_date'), cls.submittedDate,
-                        sqlalchemy.null().label('names_corp_num'), cls.nrNum],
+                fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
+                        sqlalchemy.null().label('corpNum'), cls.nrNum],
                 filters=[basic_filters, not_consumed_filters]
             ))
 
