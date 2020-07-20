@@ -139,7 +139,7 @@ def save_words_list_virtual_word_condition(words_list):
         vwc.save_to_db()
 
 
-def save_words_list_name(words_list):
+def save_words_list_name(words_list, queue=False):
     from namex.models import Request as RequestDAO, State, Name as NameDAO
     num = 0
     req = 1460775
@@ -151,7 +151,10 @@ def save_words_list_name(words_list):
 
         nr = RequestDAO()
         nr.nrNum = nr_num
-        nr.stateCd = State.APPROVED
+        if queue:
+            nr.stateCd = State.DRAFT
+        else:
+            nr.stateCd = State.APPROVED
         nr.requestId = req
         nr.requestTypeCd = EntityTypes.CORPORATION.value
         nr._source = 'NAMEREQUEST'
