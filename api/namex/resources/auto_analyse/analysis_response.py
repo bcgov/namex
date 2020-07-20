@@ -118,6 +118,10 @@ class AnalysisResponse:
         return None
 
     @abc.abstractmethod
+    def build_queue_conflict_issue(self, procedure_result, issue_count, issue_idx):
+        return None
+
+    @abc.abstractmethod
     def build_non_existent_designation_issue(self, procedure_result, issue_count, issue_idx):
         return None
 
@@ -185,7 +189,7 @@ class AnalysisResponse:
                         issue = self.build_corporate_conflict_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.QUEUE_CONFLICT:
-                        issue = self.build_corporate_conflict_issue(procedure_result, issue_count, issue_idx)
+                        issue = self.build_queue_conflict_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISMATCH:
                         issue = self.build_designation_mismatch_issue(procedure_result, issue_count, issue_idx)
