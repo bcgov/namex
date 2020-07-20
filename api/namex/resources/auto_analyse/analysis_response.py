@@ -16,7 +16,7 @@ from ..auto_analyse.analysis_issues import \
     WordSpecialUseIssue, \
     DesignationMisplacedIssue, \
     EndDesignationMoreThanOnceIssue, \
-    DesignationNonExistentIssue
+    DesignationNonExistentIssue, QueueNameConflictIssue
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisResponseCodes
 
@@ -37,6 +37,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE: EndDesignationMoreThanOnceIssue,
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
+        AnalysisIssueCodes.QUEUE_CONFLICT: QueueNameConflictIssue,
         AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue
     }
 
@@ -181,6 +182,9 @@ class AnalysisResponse:
                         issue = self.build_name_requires_consent_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                        issue = self.build_corporate_conflict_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.QUEUE_CONFLICT:
                         issue = self.build_corporate_conflict_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISMATCH:
