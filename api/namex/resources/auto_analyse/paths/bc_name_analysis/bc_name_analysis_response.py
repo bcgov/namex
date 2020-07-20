@@ -1,3 +1,4 @@
+from ... import QueueNameConflictIssue
 from ...analysis_response import AnalysisResponse
 
 from .issues import \
@@ -50,6 +51,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE: EndDesignationMoreThanOnceIssue,
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
+        AnalysisIssueCodes.QUEUE_CONFLICT: QueueNameConflictIssue,
         AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue
     }
 

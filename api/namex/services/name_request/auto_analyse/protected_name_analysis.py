@@ -65,7 +65,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         )
 
         if not check_conflicts_queue.is_valid:
-            results.append(check_conflicts)
+             results.append(check_conflicts_queue)
 
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
