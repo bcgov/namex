@@ -519,9 +519,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                     'name': key,
                                     'tokens': all_subs_dict,
                                     'consumption_date': record.consumptionDate,
-                                    'submitted_date': record.requests_submitted_date,
+                                    'submitted_date': record.submittedDate,
                                     'corp_num': record.corpNum,
-                                    'nr_num': record.requests_nr_num}
+                                    'nr_num': record.nrNum}
                     list_details.append(dict_details)
 
         return list_details
