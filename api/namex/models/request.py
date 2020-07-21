@@ -422,7 +422,7 @@ class Request(db.Model):
 
         if distinctive:
             return criteria
-        results = Request.find_by_criteria_array(criteria)
+        results = Request.find_by_criteria_array(criteria, queue)
 
         return results
 
@@ -430,14 +430,14 @@ class Request(db.Model):
     def find_by_criteria_array(cls, criteria_arr=None, queue=False):
         queries = []
         for criteria in criteria_arr:
-            RequestConditionCriteria.is_valid_criteria(e)
+            RequestConditionCriteria.is_valid_criteria(criteria)
             if queue:
                 queries.append(
-                    cls.query.with_entities(*e.fields).filter(and_(*e.filters[0]))
+                    cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters[0]))
                 )
             else:
                 queries.append(
-                    cls.query.with_entities(*e.fields).filter(and_(*e.filters[0])).filter(and_(*e.filters[1]))
+                    cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters[0])).filter(and_(*criteria.filters[1]))
                 )
         if queue:
             query_all = queries[0]
