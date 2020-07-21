@@ -7,6 +7,7 @@ from flask import current_app
 from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref, lazyload
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import and_, or_, func
 from marshmallow import Schema, fields, post_load, post_dump
@@ -433,9 +434,13 @@ class Request(db.Model):
             query = query.with_entities(*criteria.fields)
 
         query = query.filter(and_(*criteria.filters))
+        query = query.limit(limit)
 
-        # print(query.statement)
-        return query.limit(limit).all()
+        # Dump the query
+        query_str = '\n' + str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
+        current_app.logger.debug(query_str)
+
+        return query.all()
 
     @classmethod
     def set_special_characters(cls, list_d):
