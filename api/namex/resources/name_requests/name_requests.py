@@ -35,22 +35,30 @@ def parse_nr_num(nr_num_str):
 class NameRequests(BaseNameRequest):
     @cors.crossdomain(origin='*')
     @api.doc(params={
-        'nrNum': 'NR Number',
-        'phoneNumber': 'The applicant\'s phone number',
-        'emailAddress': 'The applicant\'s email address',
-        'addrLine1': 'The applicant\'s address'
+        'nrNum': 'NR Number - nrNum or emailAddress is required',
+        'emailAddress': 'The applicant\'s email address - emailAddress or nrNum is required',
+        'phoneNumber': 'The applicant\'s phone number - optional',
+        'addrLine1': 'The applicant\'s address - optional'
     })
     def get(self):
         try:
             filters = []
 
+            # Validate the request
             if len(request.args) == 0:
                 raise InvalidInputError(message='No query parameters were specified in the request')
 
-            nr_num = parse_nr_num(get_query_param_str('nrNum'))
+            nr_num_query_str = get_query_param_str('nrNum')
+            email_address_query_str = get_query_param_str('emailAddress')
+
+            if not nr_num_query_str and not email_address_query_str:
+                raise InvalidInputError(message='Either an nrNum or emailAddress must be provided')
+
+            # Continue
+            nr_num = parse_nr_num(nr_num_query_str)
+            email_address = email_address_query_str
 
             phone_number = get_query_param_str('phoneNumber')
-            email_address = get_query_param_str('emailAddress')
             address_line = get_query_param_str('addrLine1')
 
             if nr_num:
