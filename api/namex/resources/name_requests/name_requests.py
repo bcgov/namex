@@ -1,15 +1,18 @@
-from flask import jsonify
+import re
+from flask import request, jsonify
 from flask_restplus import cors
-from namex.utils.util import cors_preflight
 from flask import current_app
+from sqlalchemy import func
 
 from namex.utils.logging import setup_logging
+from namex.utils.util import cors_preflight
 
-from namex.models import Request, Event, State
+from namex.models import Request, Event, State, Applicant
+from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
 
-from .utils import handle_exception
+from .utils import handle_exception, get_query_param_str, normalize_nr_num
 from .base_name_request import api, BaseNameRequest, nr_request
 
 from .exceptions import *
@@ -18,9 +21,100 @@ setup_logging()  # Important to do this first
 
 SOLR_CORE = 'possible.conflicts'
 
-@cors_preflight('POST')
-@api.route('/', strict_slashes=False, methods=['POST', 'OPTIONS'])
+
+def parse_nr_num(nr_num_str):
+    nr_num = normalize_nr_num(nr_num_str) if nr_num_str else None
+    if nr_num_str and not nr_num:
+        raise InvalidInputError(message='Invalid NR number format provided')
+
+    return nr_num
+
+
+@cors_preflight('GET, POST')
+@api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
 class NameRequests(BaseNameRequest):
+    @cors.crossdomain(origin='*')
+    @api.doc(params={
+        'nrNum': 'NR Number - This field is required',
+        'emailAddress': 'The applicant\'s email address - an emailAddress or a phoneNumber is required',
+        'phoneNumber': 'The applicant\'s phone number - a phoneNumber or an emailAddress is required',
+        # 'addrLine1': 'The applicant\'s address - optional'
+    })
+    def get(self):
+        try:
+            filters = []
+
+            # Validate the request
+            if len(request.args) == 0:
+                raise InvalidInputError(message='No query parameters were specified in the request')
+
+            nr_num_query_str = get_query_param_str('nrNum')
+            email_address_query_str = get_query_param_str('emailAddress')
+            phone_number_query_str = get_query_param_str('phoneNumber')
+
+            if not nr_num_query_str:
+                raise InvalidInputError(message='An nrNum must be provided')
+            else:
+                if not email_address_query_str and not phone_number_query_str:
+                    raise InvalidInputError(message='Either an emailAddress or phoneNumber must be provided')
+
+            # Continue
+            nr_num = parse_nr_num(nr_num_query_str)
+            email_address = email_address_query_str
+
+            phone_number = get_query_param_str('phoneNumber')
+            # Filter on addresses
+            # address_line = get_query_param_str('addrLine1')
+
+            if nr_num:
+                filters.append(func.lower(Request.nrNum) == nr_num.lower())
+            if phone_number:
+                strip_phone_number_chars_regex = r"[^0-9]"
+                filters.append(
+                    Request.applicants.any(
+                        func.regexp_replace(Applicant.phoneNumber, strip_phone_number_chars_regex, '', 'g').contains(re.sub(strip_phone_number_chars_regex, '', phone_number))
+                    )
+                )
+
+            if email_address:
+                filters.append(
+                    Request.applicants.any(
+                        func.lower(Applicant.emailAddress).startswith(email_address.lower())
+                    )
+                )
+
+            '''
+            Filter on addresses
+            if address_line:
+                filters.append(
+                    Request.applicants.any(
+                        func.lower(Applicant.addrLine1).startswith(address_line.lower())
+                    )
+                )
+            '''
+
+            criteria = RequestQueryCriteria(
+                nr_num=nr_num,
+                filters=filters
+            )
+
+            results = Request.find_by_criteria(criteria)
+
+            if not results:
+                results = []
+
+        except InvalidInputError as err:
+            return handle_exception(err, err.message, 400)
+        except Exception as err:
+            return handle_exception(err, 'Error retrieving the NR from the db.', 500)
+
+        if nr_num and len(results) == 1:
+            return jsonify(results[0].json()), 200
+        elif len(results) > 0:
+            return jsonify(list(map(lambda result: result.json(), results))), 200
+
+        return jsonify(results), 200
+    
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     def post(self):
@@ -75,6 +169,7 @@ class NameRequest(BaseNameRequest):
     @cors.crossdomain(origin='*')
     def get(self, nr_num):
         try:
+            nr_num = parse_nr_num(nr_num)
             name_request = Request.find_by_nr(nr_num)
         except Exception as err:
             return handle_exception(err, 'Error retrieving the NR from the db.', 500)
@@ -90,6 +185,7 @@ class NameRequest(BaseNameRequest):
             self._before_create_or_update()
 
             # Find the existing name request
+            nr_num = parse_nr_num(nr_num)
             nr_model = Request.find_by_nr(nr_num)
             self.nr_num = nr_model.nrNum
             self.nr_id = nr_model.id

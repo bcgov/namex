@@ -6,7 +6,8 @@ from . import db, ma
 from flask import current_app
 from namex.exceptions import BusinessException
 from sqlalchemy import event
-from sqlalchemy.orm import backref
+from sqlalchemy.orm import backref, lazyload
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import and_, or_, func
 from marshmallow import Schema, fields, post_load, post_dump
@@ -382,7 +383,7 @@ class Request(db.Model):
     def get_query_exact_match(cls, criteria, prep_name):
         criteria.filters.append(func.lower(Name.name) == func.lower(prep_name))
 
-        results = Request.find_by_criteria(criteria)
+        results = Request.find_by_criteria_array(criteria)
         flattened = [item.strip() for sublist in results for item in sublist]
 
         return flattened
@@ -408,21 +409,38 @@ class Request(db.Model):
 
         if distinctive:
             return criteria
-        results = Request.find_by_criteria(criteria)
+        results = Request.find_by_criteria_array(criteria)
 
         return results
 
     @classmethod
-    def find_by_criteria(cls, criteria=None):
+    def find_by_criteria_array(cls, criteria_arr=None):
         queries = []
-        for e in criteria:
-            RequestConditionCriteria.is_valid_criteria(e)
+        for criteria in criteria_arr:
+            RequestConditionCriteria.is_valid_criteria(criteria)
             queries.append(
-                cls.query.with_entities(*e.fields).filter(and_(*e.filters[0])).filter(and_(*e.filters[1]))
+                cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters[0])).filter(and_(*criteria.filters[1]))
             )
         query_all = queries[0].union(queries[1])
         print(query_all.statement)
         return query_all.all()
+
+    @classmethod
+    def find_by_criteria(cls, criteria=None, limit=10):
+        RequestConditionCriteria.is_valid_criteria(criteria)
+
+        query = cls.query
+        if len(criteria.fields) > 0:
+            query = query.with_entities(*criteria.fields)
+
+        query = query.filter(and_(*criteria.filters))
+        query = query.limit(limit)
+
+        # Dump the query
+        query_str = '\n' + str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
+        current_app.logger.debug(query_str)
+
+        return query.all()
 
     @classmethod
     def set_special_characters(cls, list_d):

@@ -83,9 +83,7 @@ class VirtualWordConditionService:
 
         return None
 
-
-
-    def get_word_condition_instructions(self,consent_word):
+    def get_word_condition_instructions(self, consent_word):
         model = self.get_model()
 
         filters = [
