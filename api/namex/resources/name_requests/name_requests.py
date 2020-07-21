@@ -69,10 +69,10 @@ class NameRequests(BaseNameRequest):
             if nr_num:
                 filters.append(func.lower(Request.nrNum) == nr_num.lower())
             if phone_number:
-                strip_phone_number_chars_regex = r'[(\-)(\+)(\s)(\(|\))]'
+                strip_phone_number_chars_regex = r"[^0-9]"
                 filters.append(
                     Request.applicants.any(
-                        func.regexp_replace(Applicant.phoneNumber, strip_phone_number_chars_regex, '').contains(re.sub(strip_phone_number_chars_regex, '', phone_number))
+                        func.regexp_replace(Applicant.phoneNumber, strip_phone_number_chars_regex, '', 'g').contains(re.sub(strip_phone_number_chars_regex, '', phone_number))
                     )
                 )
 
