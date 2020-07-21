@@ -35,10 +35,10 @@ def parse_nr_num(nr_num_str):
 class NameRequests(BaseNameRequest):
     @cors.crossdomain(origin='*')
     @api.doc(params={
-        'nrNum': 'NR Number - nrNum or emailAddress is required',
-        'emailAddress': 'The applicant\'s email address - emailAddress or nrNum is required',
-        'phoneNumber': 'The applicant\'s phone number - optional',
-        'addrLine1': 'The applicant\'s address - optional'
+        'nrNum': 'NR Number - This field is required',
+        'emailAddress': 'The applicant\'s email address - an emailAddress or a phoneNumber is required',
+        'phoneNumber': 'The applicant\'s phone number - a phoneNumber or an emailAddress is required',
+        # 'addrLine1': 'The applicant\'s address - optional'
     })
     def get(self):
         try:
@@ -50,16 +50,21 @@ class NameRequests(BaseNameRequest):
 
             nr_num_query_str = get_query_param_str('nrNum')
             email_address_query_str = get_query_param_str('emailAddress')
+            phone_number_query_str = get_query_param_str('phoneNumber')
 
-            if not nr_num_query_str and not email_address_query_str:
-                raise InvalidInputError(message='Either an nrNum or emailAddress must be provided')
+            if not nr_num_query_str:
+                raise InvalidInputError(message='An nrNum must be provided')
+            else:
+                if not email_address_query_str and not phone_number_query_str:
+                    raise InvalidInputError(message='Either an emailAddress or phoneNumber must be provided')
 
             # Continue
             nr_num = parse_nr_num(nr_num_query_str)
             email_address = email_address_query_str
 
             phone_number = get_query_param_str('phoneNumber')
-            address_line = get_query_param_str('addrLine1')
+            # Filter on addresses
+            # address_line = get_query_param_str('addrLine1')
 
             if nr_num:
                 filters.append(func.lower(Request.nrNum) == nr_num.lower())
@@ -78,13 +83,15 @@ class NameRequests(BaseNameRequest):
                     )
                 )
 
+            '''
+            Filter on addresses
             if address_line:
-                # Addresses are all in uppercase cast
                 filters.append(
                     Request.applicants.any(
                         func.lower(Applicant.addrLine1).startswith(address_line.lower())
                     )
                 )
+            '''
 
             criteria = RequestQueryCriteria(
                 nr_num=nr_num,
