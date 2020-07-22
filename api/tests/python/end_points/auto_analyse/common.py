@@ -5,19 +5,20 @@ from namex.constants import EntityTypes
 
 
 @pytest.mark.skip
+def assert_issues_count_is(count, issues):
+    if issues.__len__() > count:
+        print('\n' + 'Issue types:' + '\n')
+        for issue in issues:
+            print('- ' + issue.issueType.value + '\n')
+    assert issues.__len__() == count
+
+
+@pytest.mark.skip
 def assert_issues_count_is_gt(count, issues):
     print('\n' + 'Issue types:' + '\n')
     for issue in issues:
         print('- ' + issue.get('issue_type') + '\n')
     assert issues.__len__() > count
-
-
-@pytest.mark.skip
-def assert_issues_count_is_zero(issues):
-    print('\n' + 'Issue types:' + '\n')
-    for issue in issues:
-        print('- ' + issue.get('issue_type') + '\n')
-    assert issues.__len__() == 0
 
 
 @pytest.mark.skip
