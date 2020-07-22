@@ -6,7 +6,6 @@ from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 # Import DTOs
 from tests.python.end_points.auto_analyse.protected_names import QUEUE_CONFLICT_MESSAGE
 from .abstract import AnalysisResponseIssue
-from ..paths.bc_name_analysis.issues import CORP_CONFLICT_MESSAGE
 from ..response_objects import NameAnalysisIssue
 from ..response_objects import NameAction, NameActions, Conflict
 
@@ -52,9 +51,9 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         issue = self.create_issue()
         if issue.issue_type == AnalysisIssueCodes.CORPORATE_CONFLICT:
-            issue.line1 = CORP_CONFLICT_MESSAGE
+            issue.line1 = "Too similar to an existing name."
         else:
-            issue.line1 = QUEUE_CONFLICT_MESSAGE
+            issue.line1 = "Too similar to an existing name in queue."
 
         '''
         eg:
