@@ -101,14 +101,6 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return self._restricted_word_service
 
-    def _before_create_or_update(self):
-        self._validate_config(current_app)
-
-        self.request_data = request.get_json()
-        if not self.request_data:
-            log_error('Error getting json input.', None)
-            raise InvalidInputError()
-
     def create_name_request(self):
         """
         # !Important! All new name requests should be initially set to the DRAFT state.

@@ -23,6 +23,69 @@ SOLR_CORE = 'possible.conflicts'
 # Register a local namespace for the NR reserve
 api = Namespace('nameRequests', description='Public facing Name Requests')
 
+
+def parse_nr_num(nr_num_str):
+    nr_num = normalize_nr_num(nr_num_str) if nr_num_str else None
+    if nr_num_str and not nr_num:
+        raise InvalidInputError(message='Invalid NR number format provided')
+
+    return nr_num
+
+
+class AbstractNameRequestResource(Resource):
+    """
+    Just a base class for NameRequest Resource so we have somewhere to put our common logic.
+    """
+    _nr_service = None
+    _request_data = None
+
+    @property
+    def nr_service(self):
+        return self._service
+
+    @nr_service.setter
+    def nr_service(self, service):
+        self._nr_service = service
+
+    @property
+    def request_data(self):
+        return self._request_data
+
+    @request_data.setter
+    def request_data(self, data):
+        self._request_data = data
+
+    def _initialize(self):
+        self.nr_service = NameRequestService()
+
+        self._validate_config(current_app)
+
+        # Store a copy of the request data to our class instance
+        self.request_data = request.get_json()
+
+        if not self.request_data:
+            self.log_error('Error getting json input.', None)
+            raise InvalidInputError()
+
+        # Set the request data to the service
+        self.nr_service.request_data = self.request_data
+
+    @classmethod
+    def _validate_config(cls, app):
+        app_config = app.config.get('SOLR_SYNONYMS_API_URL', None)
+        if not app_config:
+            cls.log_error('ENV is not set', None)
+            raise Exception('Internal server error')
+
+        test_env = 'prod'
+        if test_env in app_config:
+            return NotImplementedError()
+
+    @staticmethod
+    def log_error(msg, err):
+        return msg.format(err)
+
+
 applicant_model = api.model('applicant_model', {
     'partyId': fields.Integer('partyId'),
     'lastName': fields.String(attribute='lastName'),
@@ -78,51 +141,6 @@ nr_request = api.model('name_request', {
     'applicants': fields.Nested(applicant_model),
     'names': fields.Nested(name_model)
 })
-
-
-def parse_nr_num(nr_num_str):
-    nr_num = normalize_nr_num(nr_num_str) if nr_num_str else None
-    if nr_num_str and not nr_num:
-        raise InvalidInputError(message='Invalid NR number format provided')
-
-    return nr_num
-
-
-class AbstractNameRequestResource(Resource):
-    _nr_service = None
-
-    @property
-    def nr_service(self):
-        return self._service
-
-    @nr_service.setter
-    def nr_service(self, service):
-        self._nr_service = service
-
-    def _initialize(self):
-        self.nr_service = NameRequestService()
-
-        self._validate_config(current_app)
-
-        self.request_data = request.get_json()
-        if not self.request_data:
-            self.log_error('Error getting json input.', None)
-            raise InvalidInputError()
-
-    @classmethod
-    def _validate_config(cls, app):
-        app_config = app.config.get('SOLR_SYNONYMS_API_URL', None)
-        if not app_config:
-            cls.log_error('ENV is not set', None)
-            raise Exception('Internal server error')
-
-        test_env = 'prod'
-        if test_env in app_config:
-            return NotImplementedError()
-
-    @staticmethod
-    def log_error(msg, err):
-        return msg.format(err)
 
 
 @cors_preflight('GET, POST')
@@ -214,36 +232,18 @@ class NameRequests(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
     def post(self):
         try:
+            # Creates a new NameRequestService, validates the app config, and sets the request data to the NameRequestService instance
             self._initialize()
             nr_svc = self.nr_service
 
             # Create a new DRAFT name request
             nr_model = self.create_name_request()
 
-            def handle_name_request_creation(nr, svc):
-                """
-                All logic for creating the name request goes inside this handler, which is invoked on successful state change.
-                :param nr: The name request model
-                :param svc A reference to the current Resource instance (this controller)
-                """
-                # Map the request data and save so we have a name request ID to use for collection ops
-                nr = svc.map_request_data(nr, True)  # Set map_draft_attrs to True
-                nr = svc.save_request(nr)
-                # Map applicants from the request data to the name request
-                nr = svc.map_request_applicants(nr)
-                # Map any submitted names from the request data to the name request
-                nr = svc.map_request_names(nr)
-                # Save
-                nr = svc.save_request(nr)
-                # Return the updated name request
-                return nr
-
             # Handle state changes
             # Use apply_state_change to change state, as it enforces the State change pattern
-
             # Transition the DRAFT to the state specified in the request:
             # eg. one of [State.DRAFT, State.COND_RESERVE, State.RESERVED]
-            nr_model = nr_svc.apply_state_change(nr_model, nr_svc.request_state_code, handle_name_request_creation)
+            nr_model = nr_svc.apply_state_change(nr_model, nr_svc.request_state_code, NameRequests.handle_name_request_creation)
 
             # Record the event
             EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_svc.request_data)
@@ -256,6 +256,30 @@ class NameRequests(AbstractNameRequestResource):
             return jsonify(nr_model.json()), 200
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
+
+    """
+    These Event callback 'actions' are fired off when Name Request state change is triggered.
+    They are defined as static methods so we can easily test NameRequestService independently of this Resource (endpoint).
+    """
+
+    @staticmethod
+    def handle_name_request_creation(nr, svc):
+        """
+        All logic for creating the name request goes inside this handler, which is invoked on successful state change.
+        :param nr: The name request model
+        :param svc A reference to the current Resource instance (this controller)
+        """
+        # Map the request data and save so we have a name request ID to use for collection ops
+        nr = svc.map_request_data(nr, True)  # Set map_draft_attrs to True
+        nr = svc.save_request(nr)
+        # Map applicants from the request data to the name request
+        nr = svc.map_request_applicants(nr)
+        # Map any submitted names from the request data to the name request
+        nr = svc.map_request_names(nr)
+        # Save
+        nr = svc.save_request(nr)
+        # Return the updated name request
+        return nr
 
 
 @cors_preflight('GET, PUT')
@@ -276,6 +300,7 @@ class NameRequest(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
     def put(self, nr_num):
         try:
+            # Creates a new NameRequestService, validates the app config, and sets the request data to the NameRequestService instance
             self._initialize()
             nr_svc = self.nr_service
 
@@ -285,60 +310,15 @@ class NameRequest(AbstractNameRequestResource):
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
-            # Declare our update handlers functions
-
-            def handle_name_request_update(nr, svc):
-                """
-                Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
-                :param nr: The name request model
-                :param svc A reference to the current Resource instance (this controller)
-                :return:
-                """
-                nr = svc.map_request_data(nr, False)
-                # Map applicants from the request data to the name request
-                nr = svc.map_request_applicants(nr)
-                # Map any submitted names from the request data to the name request
-                nr = svc.map_request_names(nr)
-                # Save
-                nr = svc.save_request(nr)
-                # Return the updated name request
-                return nr
-
-            def handle_name_request_approval(nr, svc):
-                """
-                This method is for updating certain parts of the name request eg. its STATE when a payment token is present in the request.
-                :param nr:
-                :param svc:
-                :return:
-                """
-                # Update the names, we can ignore everything else as this is only
-                # invoked when we're completing a payment.
-                nr = svc.map_request_names(nr)
-                nr = svc.save_request(nr)
-                # Return the updated name request
-                return nr
-
-            def on_nro_save_success(nr, svc):
-                """
-                :param nr:
-                :param svc:
-                :return:
-                """
-
-                nr = svc.save_request(nr)
-                # Return the updated name request
-                return nr
-
             # Handle state changes
             # Use apply_state_change to change state, as it enforces the State change pattern
-
             """
             This is the handler for a regular PUT from the frontend.
             """
             # If no payment token...
             if nr_model.payment_token is None and nr_model.stateCd in [State.DRAFT, State.COND_RESERVE, State.RESERVED]:
                 # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-                nr_model = nr_svc.apply_state_change(nr_model, nr_model.stateCd, handle_name_request_update)
+                nr_model = nr_svc.apply_state_change(nr_model, nr_model.stateCd, NameRequest.handle_name_request_update)
 
             """
             This is the handler for a special PUT case where a payment has been received 
@@ -351,11 +331,11 @@ class NameRequest(AbstractNameRequestResource):
             # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
             if nr_model.payment_token and nr_model.stateCd == State.COND_RESERVE:
                 # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-                nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, handle_name_request_approval)
+                nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, NameRequest.handle_name_request_approval)
                 # If the state is RESERVED update state to APPROVED, and update the name request as required
             elif nr_model.payment_token and nr_model.stateCd == State.RESERVED:
                 # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-                nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, handle_name_request_approval)
+                nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, NameRequest.handle_name_request_approval)
 
             temp_nr_num = None
             # Save the request to NRO and back to postgres ONLY if the state is DRAFT, CONDITIONAL, or APPROVED
@@ -363,7 +343,7 @@ class NameRequest(AbstractNameRequestResource):
             if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
                 existing_nr_num = nr_model.nrNum
                 # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
-                nr_model = nr_svc.save_request_to_nro(nr_model, on_nro_save_success)
+                nr_model = nr_svc.save_request_to_nro(nr_model, NameRequest.on_nro_save_success)
                 # Set the temp NR number if its different
                 if nr_model.nrNum != existing_nr_num:
                     temp_nr_num = existing_nr_num
@@ -382,3 +362,53 @@ class NameRequest(AbstractNameRequestResource):
             return jsonify(nr_model.json()), 200
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
+
+    """
+    These Event callback 'actions' are fired off when Name Request state change is triggered.
+    They are defined as static methods so we can easily test NameRequestService independently of this Resource (endpoint).
+    """
+
+    @staticmethod
+    def handle_name_request_update(nr, svc):
+        """
+        Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
+        :param nr: The name request model
+        :param svc A reference to the current Resource instance (this controller)
+        :return:
+        """
+        nr = svc.map_request_data(nr, False)
+        # Map applicants from the request data to the name request
+        nr = svc.map_request_applicants(nr)
+        # Map any submitted names from the request data to the name request
+        nr = svc.map_request_names(nr)
+        # Save
+        nr = svc.save_request(nr)
+        # Return the updated name request
+        return nr
+
+    @staticmethod
+    def handle_name_request_approval(nr, svc):
+        """
+        This method is for updating certain parts of the name request eg. its STATE when a payment token is present in the request.
+        :param nr:
+        :param svc:
+        :return:
+        """
+        # Update the names, we can ignore everything else as this is only
+        # invoked when we're completing a payment.
+        nr = svc.map_request_names(nr)
+        nr = svc.save_request(nr)
+        # Return the updated name request
+        return nr
+
+    @staticmethod
+    def on_nro_save_success(nr, svc):
+        """
+        :param nr:
+        :param svc:
+        :return:
+        """
+
+        nr = svc.save_request(nr)
+        # Return the updated name request
+        return nr
