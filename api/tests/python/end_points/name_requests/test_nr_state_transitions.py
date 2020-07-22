@@ -6,6 +6,10 @@ from .configuration import API_BASE_URI
 from ..common.http import build_test_query, build_request_uri
 from ..common.logging import log_request_path
 
+from .test_setup_utils import create_nr, get_nr_request_uri
+
+from namex.models import State
+
 
 def test_draft_to_reserved(client, jwt, app):
     """
@@ -15,7 +19,10 @@ def test_draft_to_reserved(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.DRAFT)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -38,7 +45,10 @@ def test_draft_to_conditionally_reserved(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.DRAFT)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -61,7 +71,10 @@ def test_conditionally_reserved_to_conditional(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.COND_RESERVE)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -84,7 +97,10 @@ def test_reserved_to_approved(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.RESERVED)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -107,7 +123,10 @@ def test_conditional_to_hold(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.CONDITIONAL)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -130,7 +149,10 @@ def test_approved_to_hold(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.APPROVED)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -153,7 +175,10 @@ def test_conditional_to_cancelled(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.CONDITIONAL)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -176,7 +201,10 @@ def test_approved_to_cancelled(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.APPROVED)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -199,7 +227,10 @@ def test_conditional_to_rejected(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.CONDITIONAL)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
@@ -222,7 +253,10 @@ def test_approved_to_rejected(client, jwt, app):
     :param app:
     :return:
     """
-    request_uri = API_BASE_URI
+    # Set up our test data
+    nr = create_nr(State.APPROVED)
+
+    request_uri = API_BASE_URI + nr.nrNum
     test_params = [{}]
 
     query = build_test_query(test_params)
