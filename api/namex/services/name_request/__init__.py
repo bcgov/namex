@@ -3,6 +3,8 @@ from namex import jwt
 from namex.models import State, User, Request
 from namex.services import ServicesError
 
+from .name_request import NameRequestService
+
 
 def check_ownership(nrd, user):
     if nrd.stateCd == State.INPROGRESS and nrd.userId == user.id:

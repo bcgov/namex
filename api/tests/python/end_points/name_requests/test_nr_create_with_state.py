@@ -1,3 +1,7 @@
+"""
+Integration tests for creating Name Requests in various states.
+"""
+
 import json
 
 from .configuration import API_BASE_URI
@@ -9,7 +13,7 @@ from ..common.logging import log_request_path
 
 def test_create_draft_nr(client, jwt, app):
     """
-    Test
+    Create a basic draft NR
     :param client:
     :param jwt:
     :param app:
@@ -32,7 +36,7 @@ def test_create_draft_nr(client, jwt, app):
 
 def test_create_conditional_nr(client, jwt, app):
     """
-    Test
+    Create a basic conditional NR
     :param client:
     :param jwt:
     :param app:
@@ -55,7 +59,7 @@ def test_create_conditional_nr(client, jwt, app):
 
 def test_create_reserved_nr(client, jwt, app):
     """
-    Test
+    Create a basic reserved NR
     :param client:
     :param jwt:
     :param app:

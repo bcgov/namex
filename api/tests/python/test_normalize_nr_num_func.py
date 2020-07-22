@@ -1,5 +1,5 @@
 import re
-from namex.resources.name_requests.utils import normalize_nr_num, nr_regex
+from namex.services.name_request.utils import normalize_nr_num, nr_regex
 
 
 def test_normalize_nr_num_pattern():

@@ -5,28 +5,16 @@ from namex.constants import request_type_mapping
 
 from namex.models import db, NRNumber, User
 
-from .utils import handle_exception, log_error
+from namex.services.name_request.utils import handle_exception, log_error
 
 from namex.utils.logging import setup_logging
 
-from .exceptions import *
+from namex.services.name_request.exceptions import *
 
 setup_logging()  # Important to do this first
 
 
 class AbstractNameRequestMixin(object):
-    # Initialization methods
-    @classmethod
-    def _validate_config(cls, current_app):
-        app_config = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
-        if not app_config:
-            log_error('ENV is not set', None)
-            raise Exception('Internal server error')
-
-        test_env = 'prod'
-        if test_env in app_config:
-            return NotImplementedError()
-
     @property
     def user_id(self):
         try:
@@ -44,6 +32,7 @@ class AbstractNameRequestMixin(object):
             raise GetUserIdError(err)
 
         return user
+
     @property
     def request_data(self):
         return self._request_data

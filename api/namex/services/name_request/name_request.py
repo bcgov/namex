@@ -1,9 +1,9 @@
-from pytz import timezone
-import os, pysolr
+import os
+import pysolr
 from datetime import datetime
+from pytz import timezone
 
 from flask import request
-from flask_restplus import Namespace, Resource, fields
 from flask import current_app
 
 from namex import nro
@@ -19,70 +19,11 @@ from namex.services.virtual_word_condition.virtual_word_condition import Virtual
 from namex.services.name_request import convert_to_ascii
 
 from .abstract_name_request import AbstractNameRequestMixin
-
+from .name_request_state import apply_nr_state_change
 from .exceptions import *
 from .utils import log_error
 
 setup_logging()  # Important to do this first
-
-# Register a local namespace for the NR reserve
-api = Namespace('nameRequests', description='Public facing Name Requests')
-
-applicant_model = api.model('applicant_model', {
-    'partyId': fields.Integer('partyId'),
-    'lastName': fields.String(attribute='lastName'),
-    'firstName': fields.String(attribute='firstName'),
-    'middleName': fields.String('Applicant middle name or initial'),
-    'contact': fields.String('Applicant contact person last and first name'),
-    'clientFirstName': fields.String('Client first name'),
-    'clientLastName': fields.String('Client last name'),
-    'phoneNumber': fields.String('Contact phone number'),
-    'faxNumber': fields.String('Contact fax number'),
-    'emailAddress': fields.String('Contact email'),
-    'addrLine1': fields.String('First address line'),
-    'addrLine2': fields.String('Second address line'),
-    'city': fields.String('City'),
-    'stateProvinceCd': fields.String('Province or state code'),
-    'postalCd': fields.String('Postal code or zip code'),
-    'countryTypeCd': fields.String('Country code')
-})
-
-consent_model = api.model('consent_model', {
-    'consent_word': fields.String('A word that requires consent')
-})
-
-name_model = api.model('name_model', {
-    'id': fields.Integer('id'),
-    'choice': fields.Integer('Name choice'),
-    'name': fields.String('Name'),
-    'name_type_cd': fields.String('For company or assumed name', enum=['CO', 'AS']),
-    'state': fields.String('The state of the Name'),
-    'designation': fields.String('Name designation based on entity type'),
-    'conflict1_num': fields.String('The corp_num of the matching name'),
-    'conflict1': fields.String('The matching corp name'),
-    'consent_words': fields.Nested(consent_model)
-})
-
-nr_request = api.model('name_request', {
-    'id': fields.Integer('id'),
-    'nrNum': fields.Integer('nrNum'),
-    'entity_type': fields.String('The entity type'),
-    'request_action': fields.String('The action requested by the user'),
-    'stateCd': fields.String('The state of the NR'),
-    'english': fields.Boolean('Set when the name is English only'),
-    'nameFlag': fields.Boolean('Set when the name is a person'),
-    'additionalInfo': fields.String('Additional NR Info'),
-    'natureBusinessInfo': fields.String('The nature of business'),
-    'tradeMark': fields.String('Registered Trademark'),
-    'previousRequestId': fields.Integer('Internal Id for Re-Applys'),
-    'priorityCd': fields.String('Set to Yes if it is  priority going to examination'),
-    'submit_count': fields.Integer('Used to enforce the 3 times only rule for Re-Applys'),
-    'xproJurisdiction': fields.String('The province or country code for XPRO requests'),
-    'homeJurisNum': fields.String('For MRAS participants, their home jurisdiction corp_num'),
-    'corpNum': fields.String('For companies already registered in BC, their BC corp_num'),
-    'applicants': fields.Nested(applicant_model),
-    'names': fields.Nested(name_model)
-})
 
 NAME_REQUEST_SOURCE = 'NAMEREQUEST'
 
@@ -143,7 +84,7 @@ def build_request_applicant(nr_id, party_id, request_applicant):
     return applicant
 
 
-class BaseNameRequest(Resource, AbstractNameRequestMixin):
+class NameRequestService(AbstractNameRequestMixin):
     _restricted_word_service = None
     _nr_id = None
     _nr_num = None
@@ -552,73 +493,13 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
     def apply_state_change(self, name_request, next_state, on_success=None):
         """
         This is where we handle entity state changes.
-        We ONLY change entity state from within this procedure to avoid
-        accidental or undesired state mutation.
+        This just wraps .state.apply_nr_state_change located in this module.
         :param name_request:
         :param next_state:
         :param on_success:
         :return:
         """
-        def to_draft(resource, nr, on_success_cb=None):
-            if nr.stateCd in [State.DRAFT]:
-                resource.nr_state_code = State.DRAFT
-                nr.stateCd = State.DRAFT
-
-                if on_success_cb:
-                    nr = on_success_cb(nr, resource)
-                return nr
-
-        def to_cond_reserved(resource, nr, on_success_cb):
-            if nr.stateCd in [State.DRAFT, State.COND_RESERVE]:
-                resource.nr_state_code = State.COND_RESERVE
-                nr.stateCd = State.COND_RESERVE
-                if on_success_cb:
-                    nr = on_success_cb(nr, resource)
-                return nr
-
-        def to_reserved(resource, nr, on_success_cb):
-            if nr.stateCd in [State.DRAFT, State.RESERVED]:
-                resource.nr_state_code = State.RESERVED
-                nr.stateCd = State.RESERVED
-                if on_success_cb:
-                    nr = on_success_cb(nr, resource)
-                return nr
-
-        def to_conditional(resource, nr, on_success_cb):
-            if nr.stateCd != State.COND_RESERVE:
-                raise Exception('Invalid state transition')
-
-            # Check for payment
-            if nr.payment_token is None:
-                raise Exception('Transition error, payment token is not defined')
-
-            resource.next_state_code = State.CONDITIONAL
-            nr.stateCd = State.CONDITIONAL
-            if on_success_cb:
-                nr = on_success_cb(nr, resource)
-            return nr
-
-        def to_approved(resource, nr, on_success_cb):
-            if nr.stateCd != State.RESERVED:
-                raise Exception('Invalid state transition')
-
-            # Check for payment
-            if nr.payment_token is None:
-                raise Exception('Transition error, payment token is not defined')
-
-            resource.next_state_code = State.APPROVED
-            nr.stateCd = State.APPROVED
-            if on_success_cb:
-                nr = on_success_cb(nr, resource)
-            return nr
-
-        return {
-            State.DRAFT: to_draft,
-            State.RESERVED: to_reserved,
-            State.COND_RESERVE: to_cond_reserved,
-            State.CONDITIONAL: to_conditional,
-            State.APPROVED: to_approved
-        }.get(next_state)(self, name_request, on_success)
+        return apply_nr_state_change(self, name_request, next_state, on_success)
 
     # CRUD methods
     def save_request(self, name_request, on_success=None):
