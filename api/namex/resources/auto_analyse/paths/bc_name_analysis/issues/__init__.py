@@ -14,3 +14,6 @@ from .incorrect_category import BcIncorrectCategoryIssue as BcIncorrectCategoryI
 from .name_requires_consent import BcNameRequiresConsentIssue
 from .too_many_words import BcTooManyWordsIssue
 from .word_special_use import BcWordSpecialUseIssue as BcWordSpecialUseIssue
+
+CORP_CONFLICT_MESSAGE = "Too similar to an existing name."
+QUEUE_CONFLICT_MESSAGE = "Too similar to an existing name in the queue."
