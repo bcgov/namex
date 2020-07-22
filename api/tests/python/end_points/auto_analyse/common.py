@@ -3,9 +3,6 @@ from datetime import date
 
 from namex.constants import EntityTypes
 
-API_BASE_URI = '/api/v1/'
-ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
-
 
 @pytest.mark.skip
 def assert_issues_count_is_gt(count, issues):

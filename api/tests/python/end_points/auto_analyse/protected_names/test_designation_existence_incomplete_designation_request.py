@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 from ..common import assert_issues_count_is_gt, assert_has_issue_type, save_words_list_classification
-from ..common import ENDPOINT_PATH
+from ..configuration import ENDPOINT_PATH
 from ...common import token_header, claims
 
 
