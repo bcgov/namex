@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 from ...common import assert_issues_count_is_gt, assert_correct_conflict, save_words_list_name, \
-    save_words_list_classification, assert_additional_conflict_parameters
+    save_words_list_classification, assert_additional_conflict_parameters, assert_conflict_message
 from ..common import ENDPOINT_PATH
 from ...common import token_header, claims
 
@@ -155,3 +155,4 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, 
             assert_issues_count_is_gt(0, payload_lst)
             assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
             assert_additional_conflict_parameters(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)
+            assert_conflict_message(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)
