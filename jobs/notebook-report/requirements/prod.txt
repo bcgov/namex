@@ -25,3 +25,4 @@ nltk
 werkzeug==0.16.1
 -e git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
 -e git+https://github.com/bcdevlucas/namex-synonyms-api-client-py.git#egg=swagger_client
+-e git+https://github.com/bcgov/namex-payment-api-py-client.git@dev#egg=openapi_client
