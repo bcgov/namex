@@ -358,6 +358,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.WORD_SPECIAL_USE,
                 AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
                 AnalysisIssueCodes.CORPORATE_CONFLICT,
+                AnalysisIssueCodes.QUEUE_CONFLICT,
                 AnalysisIssueCodes.DESIGNATION_NON_EXISTENT,
                 AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE,
                 AnalysisIssueCodes.DESIGNATION_MISPLACED,

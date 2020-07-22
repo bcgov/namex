@@ -6,6 +6,7 @@ from .check_is_valid import CheckIsValid as CheckIsValidIssue
 from .contains_unclassifiable_word import ContainsUnclassifiableWordIssue
 from .contains_words_to_avoid import ContainsWordsToAvoidIssue
 from .corporate_name_conflict import CorporateNameConflictIssue
+from .queue_name_conflict import QueueNameConflictIssue
 from .designation_mismatch import DesignationMismatchIssue
 from .end_designation_more_than_once import EndDesignationMoreThanOnceIssue
 from .designation_misplaced import DesignationMisplacedIssue

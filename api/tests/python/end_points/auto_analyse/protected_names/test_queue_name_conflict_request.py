@@ -14,8 +14,7 @@ from ...common import token_header, claims
 @pytest.mark.parametrize("name, expected",
                          [
                              ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             # # ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."), #Under evaluation
-                             ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
+                             ("NO. 001 CATHEDRAL MINING LTD.", "NO. 003 CATHEDRAL MINING LTD."),
                              ("ARMSTRONG PLUMBING & CAFE INC.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."),
                              ("LE BLUE CAFE LTD.", "LE BLUE RESTAURANT LTD.")
@@ -64,7 +63,7 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                         'PACIFIC BLUE ENTERPRISES LTD.', 'PACIFIC ENGINEERING LTD.', 'PACIFIC HOLDINGS LTD.',
                         'BLUE PETER HOLDINGS INC.', 'BLUE WATER VENTURES LTD.', 'LE BLUE FOX CAFE INC.',
                         'LE BLUE RESTAURANT LTD.']
-    save_words_list_name(conflict_list_db)
+    save_words_list_name(conflict_list_db, True)
 
     # create JWT & setup header with a Bearer Token using the JWT
     token = jwt.create_jwt(claims, token_header)
@@ -89,6 +88,6 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
         if isinstance(payload.get('issues'), list):
             payload_lst = payload.get('issues')
             assert_issues_count_is_gt(0, payload_lst)
-            assert_correct_conflict(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst, expected)
-            assert_additional_conflict_parameters(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)
-            assert_conflict_message(AnalysisIssueCodes.CORPORATE_CONFLICT, payload_lst)
+            assert_correct_conflict(AnalysisIssueCodes.QUEUE_CONFLICT, payload_lst, expected)
+            assert_additional_conflict_parameters(AnalysisIssueCodes.QUEUE_CONFLICT, payload_lst)
+            assert_conflict_message(AnalysisIssueCodes.QUEUE_CONFLICT, payload_lst, queue=True)

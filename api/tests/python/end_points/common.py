@@ -1,8 +1,9 @@
 import pytest
-from datetime import date
+import datetime
 
 from namex.constants import EntityTypes
 from namex.models import User
+from tests.python.end_points.auto_analyse.protected_names import QUEUE_CONFLICT_MESSAGE, CORP_CONFLICT_MESSAGE
 
 API_BASE_URI = '/api/v1/'
 ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
@@ -118,14 +119,28 @@ def assert_additional_conflict_parameters(issue_type, issues):
     assert is_correct is True
 
 
+def assert_conflict_message(issue_type, issues, queue=False):
+    is_correct = False
+    for issue in issues:
+        if queue:
+            if issue.get('issue_type') == issue_type.value and (value['line1'] == QUEUE_CONFLICT_MESSAGE for value in
+                                                                issue.get('conflicts')):
+                is_correct = True
+        else:
+            if issue.get('issue_type') == issue_type.value and (value['line1'] == CORP_CONFLICT_MESSAGE for value in
+                                                                issue.get('conflicts')):
+                is_correct = True
+    assert is_correct is True
+
+
 def save_words_list_classification(words_list):
     from namex.models import WordClassification as WordClassificationDAO
     for record in words_list:
         wc = WordClassificationDAO()
         wc.classification = record['classification']
         wc.word = record['word']
-        wc.start_dt = date.today()
-        wc.approved_dt = date.today()
+        wc.start_dt = datetime.date.today()
+        wc.approved_dt = datetime.date.today()
         wc.save_to_db()
 
 
@@ -139,7 +154,7 @@ def save_words_list_virtual_word_condition(words_list):
         vwc.save_to_db()
 
 
-def save_words_list_name(words_list):
+def save_words_list_name(words_list, queue=False):
     from namex.models import Request as RequestDAO, State, Name as NameDAO
     num = 0
     req = 1460775
@@ -151,7 +166,11 @@ def save_words_list_name(words_list):
 
         nr = RequestDAO()
         nr.nrNum = nr_num
-        nr.stateCd = State.APPROVED
+        if queue:
+            nr.stateCd = State.DRAFT
+            nr.expirationDate = datetime.date.today() + datetime.timedelta(days=1)
+        else:
+            nr.stateCd = State.APPROVED
         nr.requestId = req
         nr.requestTypeCd = EntityTypes.CORPORATION.value
         nr._source = 'NAMEREQUEST'
