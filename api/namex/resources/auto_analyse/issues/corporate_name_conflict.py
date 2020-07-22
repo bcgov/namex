@@ -49,7 +49,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         source = procedure_result.values['source']
 
         issue = self.create_issue()
-        if issue.issue_type == 'corporate_conflict':
+        if issue.issue_type == AnalysisIssueCodes.CORPORATE_CONFLICT:
             issue.line1 = "Too similar to an existing name."
         else:
             issue.line1 = "Too similar to an existing name in the queue."
