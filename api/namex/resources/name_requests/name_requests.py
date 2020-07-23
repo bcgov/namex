@@ -158,17 +158,8 @@ class NameRequests(NameRequestResource):
     def handle_nr_creation(self, nr, svc):
         """
         All logic for creating the name request goes inside this handler, which is invoked on successful state change.
+        By default just call the inherited post_nr method.
         :param nr: The name request model
-        :param svc A reference to the current Resource instance (this controller)
+        :param svc A NameRequestService instance
         """
-        # Map the request data and save so we have a name request ID to use for collection ops
-        nr = svc.map_request_data(nr, True)  # Set map_draft_attrs to True
-        nr = svc.save_request(nr)
-        # Map applicants from the request data to the name request
-        nr = svc.map_request_applicants(nr)
-        # Map any submitted names from the request data to the name request
-        nr = svc.map_request_names(nr)
-        # Save
-        nr = svc.save_request(nr)
-        # Return the updated name request
-        return nr
+        self.post_nr(nr, svc)

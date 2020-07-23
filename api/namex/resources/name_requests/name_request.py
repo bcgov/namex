@@ -245,83 +245,34 @@ class NameRequest(NameRequestResource):
 
         return nr_model
 
-    """
-    These Event callback 'actions' are fired off when Name Request state change is triggered.
-    """
-
     def handle_nr_update(self, nr, svc):
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
+        By default just call the inherited put_nr method.
         :param nr: The name request model
-        :param svc A reference to the current Resource instance (this controller)
+        :param svc A NameRequestService instance
         :return:
         """
-        nr = svc.map_request_data(nr, False)
-        # Map applicants from request_data to the name request
-        nr = svc.map_request_applicants(nr)
-        # Map any submitted names from request_data to the name request
-        nr = svc.map_request_names(nr)
-        # Save
-        nr = svc.save_request(nr)
-        # Return the updated name request
-        return nr
+        self.put_nr(nr, svc)
 
     def handle_nr_patch(self, nr, svc):
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
+        By default just call the inherited patch_nr method.
         :param nr: The name request model
-        :param svc A reference to the current Resource instance (this controller)
+        :param svc A NameRequestService instance
         :return:
         """
-
         request_data = self.request_data  # Valid request data
 
-        cleared = request_data.get('cleared', [])  # Clear first
-        changed = request_data.get('changed', [])  # Then process changes
-
-        # TODO: This needs more work (in progress)
-        if cleared:
-            nr = svc.map_request_data(nr, False)
-
-        is_changed = len(changed) > 0
-        has_applicants = changed.get('applicants', None)
-        has_names = changed.get('names', None)
-
-        if is_changed:
-            # Map data from request_data to the name request
-            nr = svc.map_request_data(nr, False)
-        if has_applicants:
-            # Map applicants from request_data to the name request
-            nr = svc.map_request_applicants(nr)
-        if has_names:
-            # Map any submitted names from request_data to the name request
-            nr = svc.map_request_names(nr)
-        # Save
-        nr = svc.save_request(nr)
-        # Return the updated name request
-        return nr
+        self.patch_nr(nr, request_data, svc)
 
     def handle_nr_approval(self, nr, svc):
         """
         This method is for updating certain parts of the name request eg. its STATE when a payment token is present in the request.
+        By default just call the inherited on_nr_approved method.
         :param nr:
         :param svc:
         :return:
         """
-        # Update the names, we can ignore everything else as this is only
-        # invoked when we're completing a payment.
-        nr = svc.map_request_names(nr)
-        nr = svc.save_request(nr)
-        # Return the updated name request
-        return nr
-
-    def on_nro_save_success(self, nr, svc):
-        """
-        Just save. Nothing else to do here.
-        :param nr:
-        :param svc:
-        :return:
-        """
-        nr = svc.save_request(nr)
-        # Return the updated name request
-        return nr
+        self.on_nr_approved(nr, svc)
