@@ -98,6 +98,15 @@ class NameRequestResource(Resource):
     instantiate a NameRequestResource.
     """
 
+    def handle_nr_creation(self, nr, svc):
+        """
+        All logic for creating the name request goes inside this handler, which is invoked on successful state change.
+        By default just call the inherited post_nr method.
+        :param nr: The name request model
+        :param svc A NameRequestService instance
+        """
+        self.post_nr(nr, svc)
+
     def handle_nr_update(self, nr, svc):
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.

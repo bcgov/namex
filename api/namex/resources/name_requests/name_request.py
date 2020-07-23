@@ -244,35 +244,3 @@ class NameRequest(NameRequestResource):
             nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
 
         return nr_model
-
-    def handle_nr_update(self, nr, svc):
-        """
-        Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
-        By default just call the inherited put_nr method.
-        :param nr: The name request model
-        :param svc A NameRequestService instance
-        :return:
-        """
-        self.put_nr(nr, svc)
-
-    def handle_nr_patch(self, nr, svc):
-        """
-        Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
-        By default just call the inherited patch_nr method.
-        :param nr: The name request model
-        :param svc A NameRequestService instance
-        :return:
-        """
-        request_data = self.request_data  # Valid request data
-
-        self.patch_nr(nr, request_data, svc)
-
-    def handle_nr_approval(self, nr, svc):
-        """
-        This method is for updating certain parts of the name request eg. its STATE when a payment token is present in the request.
-        By default just call the inherited on_nr_approved method.
-        :param nr:
-        :param svc:
-        :return:
-        """
-        self.on_nr_approved(nr, svc)

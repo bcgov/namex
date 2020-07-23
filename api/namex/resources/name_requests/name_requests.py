@@ -150,16 +150,3 @@ class NameRequests(NameRequestResource):
             return jsonify(response_data), 200
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
-
-    """
-    These Event callback 'actions' are fired off when Name Request state change is triggered.
-    """
-
-    def handle_nr_creation(self, nr, svc):
-        """
-        All logic for creating the name request goes inside this handler, which is invoked on successful state change.
-        By default just call the inherited post_nr method.
-        :param nr: The name request model
-        :param svc A NameRequestService instance
-        """
-        self.post_nr(nr, svc)
