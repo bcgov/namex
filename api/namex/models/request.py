@@ -373,7 +373,7 @@ class Request(db.Model):
             criteria.append(RequestConditionCriteria(
                 fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
                         sqlalchemy.null().label('corpNum'), cls.nrNum],
-                filters=[basic_filters, not_consumed_filters]
+                filters=[basic_filters]
             ))
         else:
             criteria.append(RequestConditionCriteria(
