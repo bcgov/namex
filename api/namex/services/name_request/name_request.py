@@ -3,9 +3,6 @@ import pysolr
 from datetime import datetime
 from pytz import timezone
 
-from flask import request
-from flask import current_app
-
 from namex import nro
 
 from namex.utils.logging import setup_logging
@@ -20,7 +17,12 @@ from namex.services.name_request import convert_to_ascii
 
 from .abstract_name_request import AbstractNameRequestMixin
 from .name_request_state import apply_nr_state_change
-from .exceptions import *
+
+from .exceptions import \
+    NameRequestException, CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
+    MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError, \
+    VirtualWordConditionServiceError, NROUpdateError, SolrUpdateError
+
 from .utils import log_error
 
 setup_logging()  # Important to do this first
