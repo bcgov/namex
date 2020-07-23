@@ -28,7 +28,7 @@ from openapi_client.models import PaymentRequest, PaymentReceiptInput
 setup_logging()  # It's important to do this first
 
 # Register a local namespace for the NR reserve
-payment_api = Namespace('payments', description='Payment API - Uses Service BC Pay')
+payment_api = Namespace('payments', description='API for Making Payments Using SBC Pay')
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'

@@ -14,7 +14,7 @@ from namex import jwt
 setup_logging()  # important to do this first
 
 # Register a local namespace for the requests
-api = Namespace('wordClassification', description='Word Classification - Core API for Word Classifications')
+api = Namespace('wordClassification', description='API for Word Classifications')
 
 word_request = api.model('word_classification_request', {
     'classification': fields.String,

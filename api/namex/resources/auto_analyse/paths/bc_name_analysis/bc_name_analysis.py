@@ -26,7 +26,7 @@ from namex.services.name_request.auto_analyse.unprotected_name_analysis import U
 setup_logging()  # It's important to do this first
 
 # Register a local namespace for the requests
-api = Namespace('bcNameAnalysis', description='BC Name Analysis API for analysing BC Names')
+api = Namespace('bcNameAnalysis', description='API for Analysing BC Names')
 
 
 @api.errorhandler(AuthError)

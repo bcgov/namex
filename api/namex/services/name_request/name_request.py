@@ -1,5 +1,5 @@
 import os
-import pysolr
+
 from datetime import datetime
 from pytz import timezone
 
@@ -9,24 +9,18 @@ from namex.constants import NameState
 
 from namex.models import Request, Name, State, Comment, Applicant
 
-from namex.services import MessageServices
-
 from .abstract_name_request import AbstractNameRequestMixin
 from .name_request_state import apply_nr_state_change
 
 from .exceptions import \
-    NameRequestException, CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
-    MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError, \
-    NROUpdateError, SolrUpdateError
+    CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
+    MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError
 
 from .utils import log_error, convert_to_ascii
 
 setup_logging()  # Important to do this first
 
 NAME_REQUEST_SOURCE = 'NAMEREQUEST'
-
-SOLR_URL = os.getenv('SOLR_BASE_URL')
-SOLR_API_URL = SOLR_URL + '/solr/'
 
 
 def build_language_comment(english_bol, user_id, nr_id):
@@ -82,19 +76,10 @@ def build_request_applicant(nr_id, party_id, request_applicant):
 
 
 class NameRequestService(AbstractNameRequestMixin):
-    _nro_service = None
     _virtual_wc_service = None
     _nr_id = None
     _nr_num = None
     _next_state_code = None
-
-    @property
-    def nro_service(self):
-        return self._nro_service
-
-    @nro_service.setter
-    def nro_service(self, service):
-        self._nro_service = service
 
     @property
     def virtual_wc_service(self):
@@ -507,57 +492,3 @@ class NameRequestService(AbstractNameRequestMixin):
 
         except Exception as err:
             raise SaveNameRequestError(err)
-
-    def save_request_to_nro(self, name_request, on_success=None):
-        # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
-        if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            # TODO: Re-enable NRO update, might be a good idea to set an env var for this...
-            warnings = None  # self.nro_service.add_nr(name_request)
-            if warnings:
-                MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
-                raise NROUpdateError()
-            else:
-                # Execute the callback handler
-                if on_success:
-                    return on_success(name_request, self)
-        else:
-            raise NameRequestException(message='Invalid state exception')
-
-    def create_solr_nr_doc(self, solr_core, name_request):
-        try:
-            # Create a new solr doc
-            solr_name = name_request.names[0].name
-            solr_docs = []
-            nr_doc = {
-                'id': name_request.nrNum,
-                'name': solr_name,
-                'source': 'NR',
-                'start_date': name_request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
-            }
-
-            solr_docs.append(nr_doc)
-            self.add_solr_doc(solr_core, solr_docs)
-
-        except Exception as err:
-            raise SolrUpdateError(err)
-
-    @classmethod
-    def add_solr_doc(cls, solr_core, solr_docs):
-        try:
-            solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
-            result = solr.add(solr_docs, commit=True)
-        except Exception as err:
-            raise SolrUpdateError(err)
-
-        return result
-
-    @classmethod
-    def delete_solr_doc(cls, solr_core, doc_id):
-        try:
-            solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
-            result = solr.delete(id=doc_id, commit=True)
-
-        except Exception as err:
-            raise SolrUpdateError(err)
-
-        return result

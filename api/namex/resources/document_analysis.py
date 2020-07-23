@@ -8,7 +8,7 @@ import enum
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS
 
-api = Namespace('documents', description='Name Request System - OPS checks')
+api = Namespace('namexDocuments', description='Name Request System - OPS checks')
 
 
 class DocumentType(enum.Enum):
