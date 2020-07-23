@@ -9,7 +9,7 @@ from namex.services.name_request.utils import handle_exception, log_error
 
 from namex.utils.logging import setup_logging
 
-from namex.services.name_request.exceptions import *
+from namex.services.name_request.exceptions import GetUserIdError
 
 setup_logging()  # Important to do this first
 

@@ -13,7 +13,7 @@ from namex.criteria.request import RequestQueryCriteria
 from namex.services import EventRecorder
 
 from namex.services.name_request.utils import handle_exception, get_query_param_str, normalize_nr_num
-from namex.services.name_request.exceptions import *
+from namex.services.name_request.exceptions import NameRequestException, InvalidInputError
 from namex.services.name_request import NameRequestService
 
 setup_logging()  # Important to do this first
@@ -75,7 +75,7 @@ class AbstractNameRequestResource(Resource):
         app_config = app.config.get('SOLR_SYNONYMS_API_URL', None)
         if not app_config:
             cls.log_error('ENV is not set', None)
-            raise Exception('Internal server error')
+            raise NameRequestException('Internal server error')
 
         test_env = 'prod'
         if test_env in app_config:

@@ -1,4 +1,5 @@
 from namex.models import State
+from .exceptions import NameRequestException
 
 
 def to_draft(resource, nr, on_success_cb=None):
@@ -31,11 +32,11 @@ def to_reserved(resource, nr, on_success_cb):
 
 def to_conditional(resource, nr, on_success_cb):
     if nr.stateCd != State.COND_RESERVE:
-        raise Exception('Invalid state transition')
+        raise NameRequestException('Invalid state transition')
 
     # Check for payment
     if nr.payment_token is None:
-        raise Exception('Transition error, payment token is not defined')
+        raise NameRequestException('Transition error, payment token is not defined')
 
     resource.next_state_code = State.CONDITIONAL
     nr.stateCd = State.CONDITIONAL
@@ -46,11 +47,11 @@ def to_conditional(resource, nr, on_success_cb):
 
 def to_approved(resource, nr, on_success_cb):
     if nr.stateCd != State.RESERVED:
-        raise Exception('Invalid state transition')
+        raise NameRequestException('Invalid state transition')
 
     # Check for payment
     if nr.payment_token is None:
-        raise Exception('Transition error, payment token is not defined')
+        raise NameRequestException('Transition error, payment token is not defined')
 
     resource.next_state_code = State.APPROVED
     nr.stateCd = State.APPROVED
