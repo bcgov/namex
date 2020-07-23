@@ -54,7 +54,6 @@ def build_name_comment(user_id, nr_id):
 def build_request_applicant(nr_id, party_id, request_applicant):
     # Applicant, contact and address info
     applicant = Applicant()
-    party_id = party_id
     applicant.nrId = nr_id
     applicant.partyId = party_id
     applicant.lastName = convert_to_ascii(request_applicant['lastName'])
