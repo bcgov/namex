@@ -521,7 +521,7 @@ class NameRequestService(AbstractNameRequestMixin):
                 if on_success:
                     return on_success(name_request, self)
         else:
-            raise NameRequestException('Invalid state exception')
+            raise NameRequestException(message='Invalid state exception')
 
     def create_solr_nr_doc(self, solr_core, name_request):
         try:

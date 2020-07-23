@@ -32,11 +32,11 @@ def to_reserved(resource, nr, on_success_cb):
 
 def to_conditional(resource, nr, on_success_cb):
     if nr.stateCd != State.COND_RESERVE:
-        raise NameRequestException('Invalid state transition')
+        raise NameRequestException(message='Invalid state transition')
 
     # Check for payment
     if nr.payment_token is None:
-        raise NameRequestException('Transition error, payment token is not defined')
+        raise NameRequestException(message='Transition error, payment token is not defined')
 
     resource.next_state_code = State.CONDITIONAL
     nr.stateCd = State.CONDITIONAL
@@ -47,11 +47,11 @@ def to_conditional(resource, nr, on_success_cb):
 
 def to_approved(resource, nr, on_success_cb):
     if nr.stateCd != State.RESERVED:
-        raise NameRequestException('Invalid state transition')
+        raise NameRequestException(message='Invalid state transition')
 
     # Check for payment
     if nr.payment_token is None:
-        raise NameRequestException('Transition error, payment token is not defined')
+        raise NameRequestException(message='Transition error, payment token is not defined')
 
     resource.next_state_code = State.APPROVED
     nr.stateCd = State.APPROVED
