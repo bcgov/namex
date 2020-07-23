@@ -13,8 +13,11 @@ from namex.criteria.request import RequestQueryCriteria
 from namex.services import EventRecorder
 
 from namex.services.name_request.utils import handle_exception, get_query_param_str, normalize_nr_num
-from namex.services.name_request.exceptions import NameRequestException, InvalidInputError
+from namex.services.name_request.exceptions import NameRequestException, InvalidInputError, VirtualWordConditionServiceError
 from namex.services.name_request import NameRequestService
+from namex.services.virtual_word_condition import VirtualWordConditionService
+
+from namex import nro
 
 setup_logging()  # Important to do this first
 
@@ -36,16 +39,40 @@ class AbstractNameRequestResource(Resource):
     """
     Just a base class for NameRequest Resource so we have somewhere to put our common logic.
     """
+    _nro_service = nro
     _nr_service = None
+    _virtual_wc_service = None
     _request_data = None
 
     @property
-    def nr_service(self):
-        return self._service
+    def nro_service(self):
+        try:
+            if not self._nro_service:
+                self._nro_service = nro
+        except Exception as err:
+            raise NameRequestException(err, message='Error initializing NROService')
 
-    @nr_service.setter
-    def nr_service(self, service):
-        self._nr_service = service
+        return self._nro_service
+
+    @property
+    def nr_service(self):
+        try:
+            if not self._nr_service:
+                self._nr_service = NameRequestService()
+        except Exception as err:
+            raise NameRequestException(err, message='Error initializing NameRequestService')
+
+        return self._nr_service
+
+    @property
+    def virtual_wc_service(self):
+        try:
+            if not self._virtual_wc_service:
+                self._virtual_wc_service = VirtualWordConditionService()
+        except Exception as err:
+            raise VirtualWordConditionServiceError()
+
+        return self._virtual_wc_service
 
     @property
     def request_data(self):
@@ -56,9 +83,10 @@ class AbstractNameRequestResource(Resource):
         self._request_data = data
 
     def _initialize(self):
-        self.nr_service = NameRequestService()
-
         self._validate_config(current_app)
+
+        # Pass the NRO service instance to NameRequestService
+        self.nr_service.nro_service = self.nro_service
 
         # Store a copy of the request data to our class instance
         self.request_data = request.get_json()
@@ -237,7 +265,7 @@ class NameRequests(AbstractNameRequestResource):
             nr_svc = self.nr_service
 
             # Create a new DRAFT name request
-            nr_model = self.create_name_request()
+            nr_model = nr_svc.create_name_request()
 
             # Handle state changes
             # Use apply_state_change to change state, as it enforces the State change pattern

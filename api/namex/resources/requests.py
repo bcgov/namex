@@ -25,7 +25,7 @@ from namex.models import DecisionReason
 
 from namex.services import ServicesError, MessageServices, EventRecorder
 
-from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition, convert_to_ascii
+from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition, convert_to_ascii
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError

@@ -3,8 +3,6 @@ import pysolr
 from datetime import datetime
 from pytz import timezone
 
-from namex import nro
-
 from namex.utils.logging import setup_logging
 
 from namex.constants import NameState
@@ -12,8 +10,6 @@ from namex.constants import NameState
 from namex.models import Request, Name, State, Comment, Applicant
 
 from namex.services import MessageServices
-from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
-from namex.services.name_request import convert_to_ascii
 
 from .abstract_name_request import AbstractNameRequestMixin
 from .name_request_state import apply_nr_state_change
@@ -21,9 +17,9 @@ from .name_request_state import apply_nr_state_change
 from .exceptions import \
     NameRequestException, CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
     MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError, \
-    VirtualWordConditionServiceError, NROUpdateError, SolrUpdateError
+    NROUpdateError, SolrUpdateError
 
-from .utils import log_error
+from .utils import log_error, convert_to_ascii
 
 setup_logging()  # Important to do this first
 
@@ -86,21 +82,27 @@ def build_request_applicant(nr_id, party_id, request_applicant):
 
 
 class NameRequestService(AbstractNameRequestMixin):
-    _restricted_word_service = None
+    _nro_service = None
+    _virtual_wc_service = None
     _nr_id = None
     _nr_num = None
     _next_state_code = None
 
     @property
-    def restricted_word_service(self):
-        try:
-            if not self._restricted_word_service:
-                self._restricted_word_service = VirtualWordConditionService()
-        except Exception as err:
-            log_error('Error initializing VirtualWordCondition Service. Error: {0}', err)
-            raise VirtualWordConditionServiceError()
+    def nro_service(self):
+        return self._nro_service
 
-        return self._restricted_word_service
+    @nro_service.setter
+    def nro_service(self, service):
+        self._nro_service = service
+
+    @property
+    def virtual_wc_service(self):
+        return self._virtual_wc_service
+
+    @virtual_wc_service.setter
+    def virtual_wc_service(self, service):
+        self._virtual_wc_service = service
 
     def create_name_request(self):
         """
@@ -466,7 +468,7 @@ class NameRequestService(AbstractNameRequestMixin):
             try:
                 cnd_instructions = None
                 if consent != '' or len(consent) > 0:
-                    cnd_instructions = self.restricted_word_service.get_word_condition_instructions(consent)
+                    cnd_instructions = self.virtual_wc_service.get_word_condition_instructions(consent)
             except Exception as err:
                 log_error('Error on get consent word. Consent Word[0]'.format(consent), err)
                 raise MapRequestNamesError('Error mapping consent words.')
@@ -509,7 +511,8 @@ class NameRequestService(AbstractNameRequestMixin):
     def save_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            warnings = nro.add_nr(name_request)
+            # TODO: Re-enable NRO update, might be a good idea to set an env var for this...
+            warnings = None  # self.nro_service.add_nr(name_request)
             if warnings:
                 MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
                 raise NROUpdateError()
