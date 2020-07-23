@@ -10,7 +10,7 @@ from namex.constants import NameState
 from namex.models import Request, Name, State, Comment, Applicant
 
 from .abstract_name_request import AbstractNameRequestMixin
-from .name_request_state import apply_nr_state_change
+from .name_request_state import apply_nr_state_change, get_nr_state_actions
 
 from .exceptions import \
     CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
@@ -77,9 +77,6 @@ def build_request_applicant(nr_id, party_id, request_applicant):
 
 class NameRequestService(AbstractNameRequestMixin):
     _virtual_wc_service = None
-    _nr_id = None
-    _nr_num = None
-    _next_state_code = None
 
     @property
     def virtual_wc_service(self):
@@ -479,7 +476,18 @@ class NameRequestService(AbstractNameRequestMixin):
         :param on_success:
         :return:
         """
-        return apply_nr_state_change(self, name_request, next_state, on_success)
+        def on_success_cb(nr, resource):
+            new_state = next_state
+
+            # TODO: Try / except here?
+            if on_success:
+                nr = on_success(nr, resource)
+
+            # Set the actions corresponding to the new Name Request state
+            self.current_state_actions = get_nr_state_actions(new_state)
+            return nr
+
+        return apply_nr_state_change(self, name_request, next_state, on_success_cb)
 
     # CRUD methods
     def save_request(self, name_request, on_success=None):

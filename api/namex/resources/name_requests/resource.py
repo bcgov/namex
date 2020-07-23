@@ -68,7 +68,7 @@ class NameRequestResource(Resource):
         self._request_data = data
 
     def initialize(self):
-        self._validate_config(current_app)
+        self.validate_config(current_app)
 
         # Store a copy of the request data to our class instance
         self.request_data = request.get_json()
@@ -81,7 +81,7 @@ class NameRequestResource(Resource):
         self.nr_service.request_data = self.request_data
 
     @classmethod
-    def _validate_config(cls, app):
+    def validate_config(cls, app):
         app_config = app.config.get('SOLR_SYNONYMS_API_URL', None)
         if not app_config:
             cls.log_error('ENV is not set', None)
@@ -164,10 +164,13 @@ class NameRequestResource(Resource):
 
         # Update SOLR
         if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
-            self.create_solr_nr_doc(SOLR_CORE, nr_model)
+            # TODO: Solr might be down...
+            # self.create_solr_nr_doc(SOLR_CORE, nr_model)
             if temp_nr_num:
                 # This performs a safe delete, we check to see if the temp ID exists before deleting
-                self.delete_solr_doc(SOLR_CORE, temp_nr_num)
+                # TODO: Solr might be down...
+                # self.delete_solr_doc(SOLR_CORE, temp_nr_num)
+                pass
 
     @staticmethod
     def log_error(msg, err):

@@ -1,5 +1,35 @@
+from namex.constants import \
+    NameRequestDraftActions, NameRequestReservedActions, NameRequestActiveActions, NameRequestCancelledActions, \
+    NameRequestHoldActions, NameRequestInProgressActions, NameRequestExpiredActions, NameRequestConsumedActions, \
+    NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions
+
 from namex.models import State
+
 from .exceptions import NameRequestException
+
+
+def get_nr_state_actions(next_state):
+    """
+    Get the corresponding actions for a particular Name Request state
+    :param next_state:
+    :return:
+    """
+
+    return {
+        State.DRAFT: NameRequestDraftActions.list(),
+        State.RESERVED: NameRequestReservedActions.list(),
+        State.COND_RESERVE: NameRequestReservedActions.list(),
+        # Not expired
+        State.CONDITIONAL: NameRequestActiveActions.list(),
+        State.APPROVED: NameRequestActiveActions.list(),
+        # TODO: What if CONDITIONAL or APPROVED is expired, we need to be able to handle that here!
+        State.INPROGRESS: NameRequestInProgressActions.list(),
+        State.HOLD: NameRequestHoldActions.list(),
+        State.HISTORICAL: NameRequestHistoricalActions.list(),
+        State.CANCELLED: NameRequestCancelledActions.list(),
+        State.REJECTED: NameRequestActiveRejectedActions.list()
+        # TODO: What if REJECTED is expired, we need to be able to handle that here!
+    }.get(next_state)
 
 
 def to_draft(resource, nr, on_success_cb=None):

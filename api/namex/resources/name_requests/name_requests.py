@@ -12,6 +12,7 @@ from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
 from namex.services.name_request.utils import handle_exception, get_query_param_str
+from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError
 
@@ -103,10 +104,19 @@ class NameRequests(NameRequestResource):
             return handle_exception(err, 'Error retrieving the NR from the db.', 500)
 
         if nr_num and len(results) == 1:
-            return jsonify(results[0].json()), 200
+            response_data = results[0].json()
+            # Add the list of valid Name Request actions for the given state to the response
+            response_data['actions'] = get_nr_state_actions(get_nr_state_actions(results[0].stateCd))
+            return jsonify(response_data), 200
         elif len(results) > 0:
+            # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
+            # If the user / client accessing this data needs the Name Request actions, GET the individual record using NameRequest.get
+            # This method, NameRequests.get is for Existing NR Search
             return jsonify(list(map(lambda result: result.json(), results))), 200
 
+        # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
+        # If the user / client accessing this data needs the Name Request actions, GET the individual record using NameRequest.get
+        # This method, NameRequests.get is for Existing NR Search
         return jsonify(results), 200
 
     @api.expect(nr_request)
@@ -134,17 +144,18 @@ class NameRequests(NameRequestResource):
                 self.create_solr_nr_doc(SOLR_CORE, nr_model)
 
             current_app.logger.debug(nr_model.json())
-            return jsonify(nr_model.json()), 200
+            response_data = nr_model.json()
+            # Add the list of valid Name Request actions for the given state to the response
+            response_data['actions'] = nr_svc.current_state_actions
+            return jsonify(response_data), 200
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
 
     """
     These Event callback 'actions' are fired off when Name Request state change is triggered.
-    They are defined as static methods so we can easily test NameRequestService independently of this Resource (endpoint).
     """
 
-    @staticmethod
-    def handle_nr_creation(nr, svc):
+    def handle_nr_creation(self, nr, svc):
         """
         All logic for creating the name request goes inside this handler, which is invoked on successful state change.
         :param nr: The name request model

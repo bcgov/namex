@@ -331,6 +331,118 @@ class NameState(AbstractEnum):
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'
     CONDITION = 'CONDITION'
-    # needed for name request reservation before completing the nr
+    # Needed for name request reservation before completing the NR
     RESERVED = 'RESERVED'
     COND_RESERVE = 'COND-RESERVE'
+
+
+class NameRequestActions(AbstractEnum):
+    EDIT = 'EDIT'
+    UPGRADE = 'UPGRADE'  # Upgrade priority
+    CANCEL = 'CANCEL'
+    REFUND = 'REFUND'  # Cancel with refund
+    RECEIPT = 'RECEIPT'
+    # Needed for name request reservation before completing the NR
+    REAPPLY = 'RESERVED'
+    RESEND = 'RESEND'  # Re-send notification
+
+
+class NameRequestDraftActions(AbstractEnum):
+    EDIT = NameRequestActions.EDIT.value
+    UPGRADE = NameRequestActions.UPGRADE.value
+    # CANCEL = NameRequestActions.CANCEL.value
+    REFUND = NameRequestActions.REFUND.value
+    RECEIPT = NameRequestActions.RECEIPT.value  # TODO: Is this even possible? I don't think we can can a receipt if it's a draft...
+    # REAPPLY = NameRequestActions.REAPPLY.value
+    # RESEND = NameRequestActions.RESEND.value
+
+
+# TODO: What about these? I don't see them in the spreadsheet...
+class NameRequestReservedActions(AbstractEnum):
+    EDIT = NameRequestActions.EDIT.value
+    UPGRADE = NameRequestActions.UPGRADE.value
+    # CANCEL = NameRequestActions.CANCEL.value
+    REFUND = NameRequestActions.REFUND.value
+    RECEIPT = NameRequestActions.RECEIPT.value  # TODO: Is this even possible? I don't think we can can a receipt if it's a draft...
+    # REAPPLY = NameRequestActions.REAPPLY.value
+    # RESEND = NameRequestActions.RESEND.value
+
+
+class NameRequestActiveActions(AbstractEnum):
+    """
+    Actions available when an NR is 'active' eg. in an APPROVED or CONDITIONAL state, NOT expired, and NOT consumed.
+    """
+    EDIT = NameRequestActions.EDIT.value
+    # UPGRADE = NameRequestActions.UPGRADE.value
+    CANCEL = NameRequestActions.CANCEL.value  # TODO: Confirm
+    RECEIPT = NameRequestActions.RECEIPT.value
+    REAPPLY = NameRequestActions.REAPPLY.value
+    RESEND = NameRequestActions.RESEND.value
+
+
+class NameRequestHoldActions(AbstractEnum):
+    pass
+
+
+class NameRequestInProgressActions(AbstractEnum):
+    pass
+
+
+class NameRequestExpiredActions(AbstractEnum):
+    """
+    Actions available when an NR is in an APPROVED or CONDITIONAL state, expired, and NOT consumed.
+    """
+    EDIT = NameRequestActions.EDIT.value
+    # UPGRADE = NameRequestActions.UPGRADE.value  # TODO: Confirm
+    # CANCEL = NameRequestActions.CANCEL.value
+    RECEIPT = NameRequestActions.RECEIPT.value
+    # REAPPLY = NameRequestActions.REAPPLY.value
+    RESEND = NameRequestActions.RESEND.value
+
+
+class NameRequestConsumedActions(AbstractEnum):
+    """
+    Actions available when an NR is in an APPROVED or CONDITIONAL state, and consumed.
+    """
+    # EDIT = NameRequestActions.EDIT.value
+    # UPGRADE = NameRequestActions.UPGRADE.value
+    # CANCEL = NameRequestActions.CANCEL.value
+    RECEIPT = NameRequestActions.RECEIPT.value
+    # REAPPLY = NameRequestActions.REAPPLY.value
+    RESEND = NameRequestActions.RESEND.value
+
+
+class NameRequestHistoricalActions(AbstractEnum):
+    # EDIT = NameRequestActions.EDIT.value
+    # UPGRADE = NameRequestActions.UPGRADE.value
+    # CANCEL = NameRequestActions.CANCEL.value
+    RECEIPT = NameRequestActions.RECEIPT.value
+    # REAPPLY = NameRequestActions.REAPPLY.value
+    # RESEND = NameRequestActions.RESEND.value
+
+
+class NameRequestCancelledActions(AbstractEnum):
+    EDIT = NameRequestActions.EDIT.value
+    # UPGRADE = NameRequestActions.UPGRADE.value
+    # CANCEL = NameRequestActions.CANCEL.value
+    RECEIPT = NameRequestActions.RECEIPT.value
+    # REAPPLY = NameRequestActions.REAPPLY.value
+    # RESEND = NameRequestActions.RESEND.value  # TODO: Confirm
+
+
+class NameRequestActiveRejectedActions(AbstractEnum):
+    # EDIT = NameRequestActions.EDIT.value
+    # UPGRADE = NameRequestActions.UPGRADE.value
+    # CANCEL = NameRequestActions.CANCEL.value
+    # RECEIPT = NameRequestActions.RECEIPT.value
+    # REAPPLY = NameRequestActions.REAPPLY.value
+    RESEND = NameRequestActions.RESEND.value
+
+
+class NameRequestExpiredRejectedActions(AbstractEnum):
+    # EDIT = NameRequestActions.EDIT.value
+    # UPGRADE = NameRequestActions.UPGRADE.value
+    # CANCEL = NameRequestActions.CANCEL.value
+    # RECEIPT = NameRequestActions.RECEIPT.value
+    # REAPPLY = NameRequestActions.REAPPLY.value
+    RESEND = NameRequestActions.RESEND.value

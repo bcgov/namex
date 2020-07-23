@@ -17,6 +17,12 @@ setup_logging()  # Important to do this first
 
 
 class AbstractNameRequestMixin(object):
+    _request_data = None
+    _nr_id = None
+    _nr_num = None
+    _next_state_code = None
+    _state_actions = None
+
     @property
     def user_id(self):
         try:
@@ -58,6 +64,14 @@ class AbstractNameRequestMixin(object):
     @property
     def request_names(self):
         return self.request_data.get('names', None)
+
+    @property
+    def current_state_actions(self):
+        return self._state_actions
+
+    @current_state_actions.setter
+    def current_state_actions(self, data):
+        self._state_actions = data
 
     @property
     def nr_num(self):
