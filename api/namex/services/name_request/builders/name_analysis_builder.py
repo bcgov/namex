@@ -1,5 +1,6 @@
 import re
-from . import porter, STEM_W, OTHER_W, SUBS_W, EXACT_MATCH, MINIMUM_SIMILARITY, \
+import itertools
+from . import porter, STEM_W, OTHER_W, SUBS_W, STEM_COS_W, SUBS_COS_W, EXACT_MATCH, MINIMUM_SIMILARITY, \
     HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY
 import math
 from collections import Counter
@@ -195,29 +196,67 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed, queue):
         dist_substitution_list, desc_synonym_list, selected_matches_list, list_details = [], [], [], []
-        stop_word_list = self.name_processing_service._stop_words
-        stop_words = '|'.join(stop_word_list)
+        dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict= {}, {}, {}
+        # stop_word_list = self.name_processing_service._stop_words
+        # stop_words = '|'.join(stop_word_list)
         forced = False
 
         if check_name_is_well_formed:
             dist_substitution_list.append(w_dist)
             desc_synonym_list.append(w_desc)
         else:
-            dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
-            desc_synonym_list = self.get_substitutions_descriptive(w_desc)
+            # dist_substitution_list = self.get_subsitutions_distinctive(w_dist)
+            # desc_synonym_list = self.get_substitutions_descriptive(w_desc)
+            dist_substitution_dict = self.get_subsitutions_distinctive(w_dist)
+            desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
+
+            dist_substitution_compound_dict, desc_synonym_compound_dict = self.compound_words(dist_substitution_dict, desc_synonym_dict, list_name)
 
         change_filter = True if self.director.skip_search_conflicts else False
+        list_details, forced = self.search_conflicts_db(dist_substitution_dict, desc_synonym_dict, dict_highest_counter,
+                                                        change_filter, list_name, check_name_is_well_formed, queue)
+        if not list_details and not forced:
+            return self.search_conflicts_db(dist_substitution_compound_dict, desc_synonym_compound_dict,
+                                            dict_highest_counter,
+                                            change_filter, list_name, check_name_is_well_formed,
+                                            queue)
 
-        for dist in dist_substitution_list:
+        # for dist in dist_substitution_dict.values():
+        #     criteria = Request.get_general_query(change_filter, queue)
+        #     # Inject distinctive section into query
+        #     criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, stop_words,
+        #                                                          check_name_is_well_formed)
+        #     for desc in desc_synonym_dict.values():
+        #         # Inject descriptive section into query, execute and add matches to list
+        #         matches = Request.get_query_distinctive_descriptive(desc, criteria, False, None, False, queue)
+        #
+        #         list_conflicts_details, forced = self.get_most_similar_names(
+        #             dict_highest_counter,
+        #             matches, w_dist,
+        #             w_desc, list_name)
+        #         list_details.extend(list_conflicts_details)
+        #
+        #         if forced:
+        #             return list_details, forced
+        #
+        # return list_details, forced
+
+    def search_conflicts_db(self, dist_substitution_dict, desc_synonym_dict, dict_highest_counter, change_filter,
+                            list_name, check_name_is_well_formed, queue):
+        stop_word_list = self.name_processing_service._stop_words
+        stop_words = '|'.join(stop_word_list)
+        list_details = []
+        forced = False
+        for dist in dist_substitution_dict.values():
             criteria = Request.get_general_query(change_filter, queue)
             criteria = Request.get_distinctive_query(dist, criteria, stop_words, check_name_is_well_formed)
-            for desc in desc_synonym_list:
+            for desc in desc_synonym_dict.values():
                 criteria = Request.get_descriptive_query(desc, criteria, queue)
                 matches = Request.find_by_criteria_array(criteria, queue)
                 list_conflicts_details, forced = self.get_most_similar_names(
                     dict_highest_counter,
-                    matches, w_dist,
-                    w_desc, list_name)
+                    matches, list(dist_substitution_dict.keys()),
+                    list(desc_synonym_dict.keys()), list_name)
                 list_details.extend(list_conflicts_details)
 
                 if forced:
@@ -577,7 +616,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_subsitutions_distinctive(self, w_dist):
         syn_svc = self.synonym_service
-        dist_substitution_list = []
+        # dist_substitution_list = []
 
         all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
             words=w_dist,
@@ -585,17 +624,18 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         ).data
 
         dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
-        dist_substitution_list = list(dist_substitution_dict.values())
+        # dist_substitution_list = list(dist_substitution_dict.values())
 
-        for i, dist in enumerate(w_dist):
-            if dist not in dist_substitution_list[i]:
-                dist_substitution_list[i].append(dist)
-
-        return dist_substitution_list
+        # for i, dist in enumerate(w_dist):
+        #     if dist not in dist_substitution_list[i]:
+        #         dist_substitution_list[i].append(dist)
+        #
+        # return dist_substitution_list
+        return dist_substitution_dict
 
     def get_substitutions_descriptive(self, w_desc):
         syn_svc = self.synonym_service
-        desc_synonym_list = []
+        # desc_synonym_list = []
 
         all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
             words=w_desc,
@@ -603,13 +643,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         ).data
 
         desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-        desc_synonym_list = list(desc_synonym_dict.values())
-
-        for i, desc in enumerate(w_desc):
-            if desc not in desc_synonym_list[i]:
-                desc_synonym_list[i].append(desc)
-
-        return desc_synonym_list
+        # desc_synonym_list = list(desc_synonym_dict.values())
+        #
+        # for i, desc in enumerate(w_desc):
+        #     if desc not in desc_synonym_list[i]:
+        #         desc_synonym_list[i].append(desc)
+        #
+        # return desc_synonym_list
+        return desc_synonym_dict
 
     def check_name_is_well_formed_response(self, list_original_name, list_name, list_dist, result_code):
         result = ProcedureResult()
@@ -681,3 +722,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             'source': response['source']
         }
         return result
+
+    def compound_words(self, dict_dist, dict_descriptive, list_name):
+        dict_compound_dist = {}
+        dict_desc = dict(dict_descriptive)
+        for idx, elem in enumerate(list_name[:-1]):
+            try:
+                a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else dict_desc[list_name[idx]]
+            except KeyError:
+                idx +=1
+                a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else dict_desc[list_name[idx]]
+            b = dict_dist[list_name[idx + 1]] if list_name[idx + 1] in dict_dist else dict_desc[list_name[idx + 1]]
+            if a in dict_dist.values():
+                compound = []
+                for item in itertools.product(a, b):
+                    compound.append(''.join(item))
+                    dict_compound_dist[list_name[idx]] = compound
+                if list_name[idx + 1] in dict_desc:
+                    del dict_desc[list_name[idx + 1]]
+
+        return dict_compound_dist, dict_desc
