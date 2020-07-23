@@ -44,7 +44,7 @@ def job_result_set(ora_con, max_rows):
     result_set = ora_cursor.execute("""
         SELECT ID, NR_NUM, STATUS
         FROM namex.namex_datafix
-        where status IS NULL AND rownum <= :max_rows order by ID
+        where status IS NULL AND rownum <= :max_rows and msg != 'Skipped because it is a BC numbered company or FD jurisdiction' order by ID
         """
                                 , max_rows=max_rows
                                 )
@@ -79,6 +79,7 @@ def update_datafix_row(ora_con, id, status):
 def job(app, namex_db, nro_connection, user, max_rows=100):
 
     row_count = 0
+    datafix_status = None
 
     try:
         ora_con = nro_connection
@@ -94,8 +95,6 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
 
             nr = Request.find_by_nr(nr_num)
 
-
-
             current_app.logger.debug('processing: {}, NameX state: {}'
                                      .format(
                 nr_num,
@@ -107,13 +106,20 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num, name_request=nr)
 
                 nr._source='NRO'
+                nr.furnished = 'Y'
                 namex_db.session.add(nr)
                 EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, {}, save_to_session=True)
                 current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
 
+
+                if nr.stateCd == 'HISTORICAL':
+                    datafix_status = 'HISTORICAL'
+                else:
+                    datafix_status = 'COMPLETE'
+
                 success = update_datafix_row(ora_con
                                             , id=row['id']
-                                            , status='COMPLETE'
+                                            , status=datafix_status
                                             )
 
                 if success:
