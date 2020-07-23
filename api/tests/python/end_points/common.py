@@ -166,11 +166,7 @@ def save_words_list_name(words_list, queue=False):
 
         nr = RequestDAO()
         nr.nrNum = nr_num
-        if queue:
-            nr.stateCd = State.DRAFT
-            nr.expirationDate = datetime.date.today() + datetime.timedelta(days=1)
-        else:
-            nr.stateCd = State.APPROVED
+        nr.stateCd = State.DRAFT if queue else State.APPROVED
         nr.requestId = req
         nr.requestTypeCd = EntityTypes.CORPORATION.value
         nr._source = 'NAMEREQUEST'
