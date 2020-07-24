@@ -79,7 +79,7 @@ class NameRequestService(AbstractNameRequestMixin):
     """
     Basic usage:
 
-    1. Create or retrieve an NR
+    # 1. Create or retrieve an NR
     nr_model = Request()
 
     # Sample method to generate a new NR number
@@ -96,22 +96,22 @@ class NameRequestService(AbstractNameRequestMixin):
         r.nrNum = nr_num
         r.save_to_db()
 
-    2. Set the initial state of the NR
+    # 2. Set the initial state of the NR
     nr_model.stateCd = State.DRAFT
 
-    3. Create an instance of this service
+    # 3. Create an instance of this service
     nr_svc = NameRequestService()
 
-    3a. Important! Set the nr_num property on the service
-    nr_svc.nr_num = nr_model.nrNum
+    # 3a. Important! Set the nr_num property on the service
+    nr_svc.nr_num = generate_nr()
 
-    3b. Important! Set the nr_id
+    # 3b. Important! Set the nr_id
     nr_svc.nr_id = nr_model.id
 
-    3c. Important! Set the request_data
+    # 3c. Important! Set the request_data
     nr_svc.request_data = request.get_json()
 
-    4. Do your update logic in here
+    # 4. Do your update logic in here
     def on_update(nr, svc):
         # Do stuff here
         nr = svc.map_request_data(nr, False)
@@ -121,7 +121,7 @@ class NameRequestService(AbstractNameRequestMixin):
         # The result of on_update is returned as the result of apply_state_change
         return nr
 
-    5. Run apply_state_change to execute the update
+    # 5. Run apply_state_change to execute the update
     nr_model = nr_svc.apply_state_change(nr_model, new_state, on_update)
     """
     _virtual_wc_service = None
