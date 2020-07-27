@@ -166,7 +166,7 @@ class NameRequestService(AbstractNameRequestMixin):
             if self.request_data.get('submit_count') is None:
                 name_request.submitCount = 1
             else:
-                name_request.submitCount = name_request.submitCount + 1
+                name_request.submitCount = name_request.submitCount + 1 if isinstance(name_request.submitCount, int) else 1
         except Exception as err:
             raise UpdateSubmitCountError(err)
 
