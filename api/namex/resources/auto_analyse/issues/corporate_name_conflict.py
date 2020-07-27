@@ -4,7 +4,6 @@ from string import Template
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
 # Import DTOs
-from tests.python.end_points.auto_analyse.protected_names import QUEUE_CONFLICT_MESSAGE
 from .abstract import AnalysisResponseIssue
 from ..response_objects import NameAnalysisIssue
 from ..response_objects import NameAction, NameActions, Conflict
