@@ -365,6 +365,10 @@ class NameRequestActiveActions(AbstractEnum):
     RESEND = NameRequestActions.RESEND.value
 
 
+class NameRequestReservedActions(AbstractEnum):
+    pass
+
+
 class NameRequestHoldActions(AbstractEnum):
     pass
 

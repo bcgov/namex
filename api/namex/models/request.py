@@ -10,6 +10,7 @@ from sqlalchemy.orm import backref
 from sqlalchemy.dialects import postgresql
 from sqlalchemy import and_, func
 from marshmallow import Schema, fields, post_load, post_dump
+from .nwpta import PartnerNameSystem
 from .user import User, UserSchema
 from .comment import Comment, CommentSchema
 from .applicant import Applicant
