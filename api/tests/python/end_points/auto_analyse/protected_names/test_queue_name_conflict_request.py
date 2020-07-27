@@ -90,4 +90,3 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
             assert_issues_count_is_gt(0, payload_lst)
             assert_correct_conflict(AnalysisIssueCodes.QUEUE_CONFLICT, payload_lst, expected)
             assert_additional_conflict_parameters(AnalysisIssueCodes.QUEUE_CONFLICT, payload_lst)
-            assert_conflict_message(AnalysisIssueCodes.QUEUE_CONFLICT, payload_lst, queue=True)
