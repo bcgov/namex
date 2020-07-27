@@ -1,12 +1,7 @@
-from pytz import timezone
-import os, pysolr
+import os
+
 from datetime import datetime
-
-from flask import request
-from flask_restplus import Namespace, Resource, fields
-from flask import current_app
-
-from namex import nro
+from pytz import timezone
 
 from namex.utils.logging import setup_logging
 
@@ -14,80 +9,18 @@ from namex.constants import NameState
 
 from namex.models import Request, Name, State, Comment, Applicant
 
-from namex.services import MessageServices
-from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
-from namex.services.name_request import convert_to_ascii
-
 from .abstract_name_request import AbstractNameRequestMixin
+from .name_request_state import apply_nr_state_change, get_nr_state_actions
 
-from .exceptions import *
-from .utils import log_error
+from .exceptions import \
+    CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
+    MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError
+
+from .utils import log_error, convert_to_ascii
 
 setup_logging()  # Important to do this first
 
-# Register a local namespace for the NR reserve
-api = Namespace('nameRequests', description='Public facing Name Requests')
-
-applicant_model = api.model('applicant_model', {
-    'partyId': fields.Integer('partyId'),
-    'lastName': fields.String(attribute='lastName'),
-    'firstName': fields.String(attribute='firstName'),
-    'middleName': fields.String('Applicant middle name or initial'),
-    'contact': fields.String('Applicant contact person last and first name'),
-    'clientFirstName': fields.String('Client first name'),
-    'clientLastName': fields.String('Client last name'),
-    'phoneNumber': fields.String('Contact phone number'),
-    'faxNumber': fields.String('Contact fax number'),
-    'emailAddress': fields.String('Contact email'),
-    'addrLine1': fields.String('First address line'),
-    'addrLine2': fields.String('Second address line'),
-    'city': fields.String('City'),
-    'stateProvinceCd': fields.String('Province or state code'),
-    'postalCd': fields.String('Postal code or zip code'),
-    'countryTypeCd': fields.String('Country code')
-})
-
-consent_model = api.model('consent_model', {
-    'consent_word': fields.String('A word that requires consent')
-})
-
-name_model = api.model('name_model', {
-    'id': fields.Integer('id'),
-    'choice': fields.Integer('Name choice'),
-    'name': fields.String('Name'),
-    'name_type_cd': fields.String('For company or assumed name', enum=['CO', 'AS']),
-    'state': fields.String('The state of the Name'),
-    'designation': fields.String('Name designation based on entity type'),
-    'conflict1_num': fields.String('The corp_num of the matching name'),
-    'conflict1': fields.String('The matching corp name'),
-    'consent_words': fields.Nested(consent_model)
-})
-
-nr_request = api.model('name_request', {
-    'id': fields.Integer('id'),
-    'nrNum': fields.Integer('nrNum'),
-    'entity_type': fields.String('The entity type'),
-    'request_action': fields.String('The action requested by the user'),
-    'stateCd': fields.String('The state of the NR'),
-    'english': fields.Boolean('Set when the name is English only'),
-    'nameFlag': fields.Boolean('Set when the name is a person'),
-    'additionalInfo': fields.String('Additional NR Info'),
-    'natureBusinessInfo': fields.String('The nature of business'),
-    'tradeMark': fields.String('Registered Trademark'),
-    'previousRequestId': fields.Integer('Internal Id for Re-Applys'),
-    'priorityCd': fields.String('Set to Yes if it is  priority going to examination'),
-    'submit_count': fields.Integer('Used to enforce the 3 times only rule for Re-Applys'),
-    'xproJurisdiction': fields.String('The province or country code for XPRO requests'),
-    'homeJurisNum': fields.String('For MRAS participants, their home jurisdiction corp_num'),
-    'corpNum': fields.String('For companies already registered in BC, their BC corp_num'),
-    'applicants': fields.Nested(applicant_model),
-    'names': fields.Nested(name_model)
-})
-
 NAME_REQUEST_SOURCE = 'NAMEREQUEST'
-
-SOLR_URL = os.getenv('SOLR_BASE_URL')
-SOLR_API_URL = SOLR_URL + '/solr/'
 
 
 def build_language_comment(english_bol, user_id, nr_id):
@@ -113,7 +46,6 @@ def build_name_comment(user_id, nr_id):
 def build_request_applicant(nr_id, party_id, request_applicant):
     # Applicant, contact and address info
     applicant = Applicant()
-    party_id = party_id
     applicant.nrId = nr_id
     applicant.partyId = party_id
     applicant.lastName = convert_to_ascii(request_applicant['lastName'])
@@ -143,30 +75,64 @@ def build_request_applicant(nr_id, party_id, request_applicant):
     return applicant
 
 
-class BaseNameRequest(Resource, AbstractNameRequestMixin):
-    _restricted_word_service = None
-    _nr_id = None
-    _nr_num = None
-    _next_state_code = None
+class NameRequestService(AbstractNameRequestMixin):
+    """
+    Basic usage:
+
+    # 1. Create or retrieve an NR
+    nr_model = Request()
+
+    # Sample method to generate a new NR number
+    def generate_nr():
+        db.session.query(NRNumber).first()
+        if r is None:
+            # Set starting nr number
+            last_nr = 'NR L000000'
+        else:
+            last_nr = r.nrNum
+        return nr_num
+
+        nr_num = NRNumber.get_next_nr_num(last_nr)
+        r.nrNum = nr_num
+        r.save_to_db()
+
+    # 2. Set the initial state of the NR
+    nr_model.stateCd = State.DRAFT
+
+    # 3. Create an instance of this service
+    nr_svc = NameRequestService()
+
+    # 3a. Important! Set the nr_num property on the service
+    nr_svc.nr_num = generate_nr()
+
+    # 3b. Important! Set the nr_id
+    nr_svc.nr_id = nr_model.id
+
+    # 3c. Important! Set the request_data
+    nr_svc.request_data = request.get_json()
+
+    # 4. Do your update logic in here
+    def on_update(nr, svc):
+        # Do stuff here
+        nr = svc.map_request_data(nr, False)
+        # Save the request
+        nr = svc.save_request(nr)
+        # Return the updated name request
+        # The result of on_update is returned as the result of apply_state_change
+        return nr
+
+    # 5. Run apply_state_change to execute the update
+    nr_model = nr_svc.apply_state_change(nr_model, new_state, on_update)
+    """
+    _virtual_wc_service = None
 
     @property
-    def restricted_word_service(self):
-        try:
-            if not self._restricted_word_service:
-                self._restricted_word_service = VirtualWordConditionService()
-        except Exception as err:
-            log_error('Error initializing VirtualWordCondition Service. Error: {0}', err)
-            raise VirtualWordConditionServiceError()
+    def virtual_wc_service(self):
+        return self._virtual_wc_service
 
-        return self._restricted_word_service
-
-    def _before_create_or_update(self):
-        self._validate_config(current_app)
-
-        self.request_data = request.get_json()
-        if not self.request_data:
-            log_error('Error getting json input.', None)
-            raise InvalidInputError()
+    @virtual_wc_service.setter
+    def virtual_wc_service(self, service):
+        self._virtual_wc_service = service
 
     def create_name_request(self):
         """
@@ -197,10 +163,10 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
     def update_request_submit_count(self, name_request):
         try:
-            if self.request_data['submit_count'] is None:
+            if self.request_data.get('submit_count') is None:
                 name_request.submitCount = 1
             else:
-                name_request.submitCount = + 1
+                name_request.submitCount = name_request.submitCount + 1 if isinstance(name_request.submitCount, int) else 1
         except Exception as err:
             raise UpdateSubmitCountError(err)
 
@@ -532,7 +498,7 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
             try:
                 cnd_instructions = None
                 if consent != '' or len(consent) > 0:
-                    cnd_instructions = self.restricted_word_service.get_word_condition_instructions(consent)
+                    cnd_instructions = self.virtual_wc_service.get_word_condition_instructions(consent)
             except Exception as err:
                 log_error('Error on get consent word. Consent Word[0]'.format(consent), err)
                 raise MapRequestNamesError('Error mapping consent words.')
@@ -552,73 +518,24 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
     def apply_state_change(self, name_request, next_state, on_success=None):
         """
         This is where we handle entity state changes.
-        We ONLY change entity state from within this procedure to avoid
-        accidental or undesired state mutation.
+        This just wraps .state.apply_nr_state_change located in this module.
         :param name_request:
         :param next_state:
         :param on_success:
         :return:
         """
-        def to_draft(resource, nr, on_success_cb=None):
-            if nr.stateCd in [State.DRAFT]:
-                resource.nr_state_code = State.DRAFT
-                nr.stateCd = State.DRAFT
+        def on_success_cb(nr, resource):
+            new_state = next_state
 
-                if on_success_cb:
-                    nr = on_success_cb(nr, resource)
-                return nr
+            # TODO: Try / except here?
+            if on_success:
+                nr = on_success(nr, resource)
 
-        def to_cond_reserved(resource, nr, on_success_cb):
-            if nr.stateCd in [State.DRAFT, State.COND_RESERVE]:
-                resource.nr_state_code = State.COND_RESERVE
-                nr.stateCd = State.COND_RESERVE
-                if on_success_cb:
-                    nr = on_success_cb(nr, resource)
-                return nr
-
-        def to_reserved(resource, nr, on_success_cb):
-            if nr.stateCd in [State.DRAFT, State.RESERVED]:
-                resource.nr_state_code = State.RESERVED
-                nr.stateCd = State.RESERVED
-                if on_success_cb:
-                    nr = on_success_cb(nr, resource)
-                return nr
-
-        def to_conditional(resource, nr, on_success_cb):
-            if nr.stateCd != State.COND_RESERVE:
-                raise Exception('Invalid state transition')
-
-            # Check for payment
-            if nr.payment_token is None:
-                raise Exception('Transition error, payment token is not defined')
-
-            resource.next_state_code = State.CONDITIONAL
-            nr.stateCd = State.CONDITIONAL
-            if on_success_cb:
-                nr = on_success_cb(nr, resource)
+            # Set the actions corresponding to the new Name Request state
+            self.current_state_actions = get_nr_state_actions(new_state)
             return nr
 
-        def to_approved(resource, nr, on_success_cb):
-            if nr.stateCd != State.RESERVED:
-                raise Exception('Invalid state transition')
-
-            # Check for payment
-            if nr.payment_token is None:
-                raise Exception('Transition error, payment token is not defined')
-
-            resource.next_state_code = State.APPROVED
-            nr.stateCd = State.APPROVED
-            if on_success_cb:
-                nr = on_success_cb(nr, resource)
-            return nr
-
-        return {
-            State.DRAFT: to_draft,
-            State.RESERVED: to_reserved,
-            State.COND_RESERVE: to_cond_reserved,
-            State.CONDITIONAL: to_conditional,
-            State.APPROVED: to_approved
-        }.get(next_state)(self, name_request, on_success)
+        return apply_nr_state_change(self, name_request, next_state, on_success_cb)
 
     # CRUD methods
     def save_request(self, name_request, on_success=None):
@@ -631,56 +548,3 @@ class BaseNameRequest(Resource, AbstractNameRequestMixin):
 
         except Exception as err:
             raise SaveNameRequestError(err)
-
-    def save_request_to_nro(self, name_request, on_success=None):
-        # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
-        if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            warnings = nro.add_nr(name_request)
-            if warnings:
-                MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
-                raise NROUpdateError()
-            else:
-                # Execute the callback handler
-                if on_success:
-                    return on_success(name_request, self)
-        else:
-            raise Exception('Invalid state exception')
-
-    def create_solr_nr_doc(self, solr_core, name_request):
-        try:
-            # Create a new solr doc
-            solr_name = name_request.names[0].name
-            solr_docs = []
-            nr_doc = {
-                'id': name_request.nrNum,
-                'name': solr_name,
-                'source': 'NR',
-                'start_date': name_request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
-            }
-
-            solr_docs.append(nr_doc)
-            self.add_solr_doc(solr_core, solr_docs)
-
-        except Exception as err:
-            raise SolrUpdateError(err)
-
-    @classmethod
-    def add_solr_doc(cls, solr_core, solr_docs):
-        try:
-            solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
-            result = solr.add(solr_docs, commit=True)
-        except Exception as err:
-            raise SolrUpdateError(err)
-
-        return result
-
-    @classmethod
-    def delete_solr_doc(cls, solr_core, doc_id):
-        try:
-            solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
-            result = solr.delete(id=doc_id, commit=True)
-
-        except Exception as err:
-            raise SolrUpdateError(err)
-
-        return result

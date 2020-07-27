@@ -3,29 +3,25 @@ from pytz import timezone
 
 from namex.constants import request_type_mapping
 
-from namex.models import db, NRNumber, User
+from namex.models import db
+from namex.models.nr_number import NRNumber
+from namex.models.user import User
 
-from .utils import handle_exception, log_error
+from namex.services.name_request.utils import handle_exception
 
 from namex.utils.logging import setup_logging
 
-from .exceptions import *
+from namex.services.name_request.exceptions import GetUserIdError
 
 setup_logging()  # Important to do this first
 
 
 class AbstractNameRequestMixin(object):
-    # Initialization methods
-    @classmethod
-    def _validate_config(cls, current_app):
-        app_config = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
-        if not app_config:
-            log_error('ENV is not set', None)
-            raise Exception('Internal server error')
-
-        test_env = 'prod'
-        if test_env in app_config:
-            return NotImplementedError()
+    _request_data = None
+    _nr_id = None
+    _nr_num = None
+    _next_state_code = None
+    _state_actions = None
 
     @property
     def user_id(self):
@@ -44,6 +40,7 @@ class AbstractNameRequestMixin(object):
             raise GetUserIdError(err)
 
         return user
+
     @property
     def request_data(self):
         return self._request_data
@@ -67,6 +64,14 @@ class AbstractNameRequestMixin(object):
     @property
     def request_names(self):
         return self.request_data.get('names', None)
+
+    @property
+    def current_state_actions(self):
+        return self._state_actions
+
+    @current_state_actions.setter
+    def current_state_actions(self, data):
+        self._state_actions = data
 
     @property
     def nr_num(self):

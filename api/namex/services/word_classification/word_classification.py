@@ -1,8 +1,11 @@
 from namex.models import WordClassification
 from datetime import datetime
-from .token_classifier import TokenClassifier
-from namex.services.name_request import get_or_create_user_by_jwt
+
 from namex.models import User
+# from namex.services.name_request.utils import get_or_create_user_by_jwt
+
+from .token_classifier import TokenClassifier
+
 
 class WordClassificationService:
     def __init__(self):
@@ -50,7 +53,7 @@ class WordClassificationService:
             word_classification['classification']
         ) or None
 
-        #user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+        # user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
         user = User.find_by_username(word_classification['examiner'])
 
         if not entity:

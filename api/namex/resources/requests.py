@@ -7,9 +7,7 @@ from flask_restplus import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
-setup_logging() ## important to do this first
 
-from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func, text
 from sqlalchemy.inspection import inspect
@@ -25,20 +23,17 @@ from namex.models import DecisionReason
 
 from namex.services import ServicesError, MessageServices, EventRecorder
 
-from namex.services.name_request import check_ownership, get_or_create_user_by_jwt, valid_state_transition, convert_to_ascii
+from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition, convert_to_ascii
 from namex.utils.util import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
-from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 import datetime
-from datetime import datetime as dt
-import json
-import urllib
-import sys
+
+setup_logging()  # Important to do this first
 
 # Register a local namespace for the requests
-api = Namespace('nameRequests', description='Name Request System - Core API for reviewing a Name Request')
+api = Namespace('namexRequests', description='Namex - Requests API')
 
 # Marshmallow schemas
 request_schema = RequestsSchema(many=False)
@@ -394,7 +389,7 @@ class Request(Resource):
                 if not nrd:
                     return jsonify({"message": "Request:{} not found".format(nr)}), 404
 
-                if not services.name_request.valid_state_transition(user, nrd, state):
+                if not valid_state_transition(user, nrd, state):
                     return jsonify(message='you are not authorized to make these changes'), 401
 
                 # if the user has an existing (different) INPROGRESS NR, revert to previous state (default to HOLD)
@@ -527,7 +522,7 @@ class Request(Resource):
             current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return jsonify({"message": "NR had an internal error"}), 404
 
-        if not services.name_request.valid_state_transition(user, nrd, state):
+        if not valid_state_transition(user, nrd, state):
             return jsonify(message='you are not authorized to make these changes'), 401
 
         name_choice_exists = {1: False, 2: False, 3: False}

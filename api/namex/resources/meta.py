@@ -2,7 +2,7 @@ from flask import jsonify
 from flask_restplus import Resource, Namespace
 from namex.utils.run_version import get_run_version
 
-api = Namespace('nameRequestMeta', description='Name Request System - Metadata')
+api = Namespace('namexRequestMeta', description='Namex - Metadata')
 
 
 @api.route("/info")

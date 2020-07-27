@@ -1,5 +1,5 @@
 class NameRequestException(Exception):
-    def __init__(self, wrapped_err, message="Name request error."):
+    def __init__(self, wrapped_err=None, message="Name request error."):
         self.err = wrapped_err
         self.message = message
         super().__init__(self.message)

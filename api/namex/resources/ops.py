@@ -3,7 +3,7 @@ from flask_restplus import Resource, Namespace
 from sqlalchemy import text, exc
 from namex.models import db
 
-api = Namespace('nameRequestOPS', description='Name Request System - OPS checks')
+api = Namespace('namexRequestOPS', description='Namex - OPS checks')
 
 sql = text('select 1')
 

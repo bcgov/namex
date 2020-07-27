@@ -1,36 +1,19 @@
 import pytest
-from datetime import date
+import datetime
 
 from namex.constants import EntityTypes
-from namex.models import User
 
-API_BASE_URI = '/api/v1/'
-ENDPOINT_PATH = API_BASE_URI + 'name-analysis'
+CORP_CONFLICT_MESSAGE = 'Too similar to an existing name.'
+QUEUE_CONFLICT_MESSAGE = 'Too similar to an existing name in the queue.'
 
-token_header = {
-    "alg": "RS256",
-    "typ": "JWT",
-    "kid": "flask-jwt-oidc-test-client"
-}
 
-claims = {
-    "iss": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc",
-    "sub": "43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc",
-    "aud": "NameX-Dev",
-    "exp": 31531718745,
-    "iat": 1531718745,
-    "jti": "flask-jwt-oidc-test-support",
-    "typ": "Bearer",
-    "username": "test-user",
-    "realm_access": {
-        "roles": [
-            "{}".format(User.EDITOR),
-            "{}".format(User.APPROVER),
-            "viewer",
-            "user"
-        ]
-    }
-}
+@pytest.mark.skip
+def assert_issues_count_is(count, issues):
+    if issues.__len__() > count:
+        print('\n' + 'Issue types:' + '\n')
+        for issue in issues:
+            print('- ' + issue.issueType.value + '\n')
+    assert issues.__len__() == count
 
 
 @pytest.mark.skip
@@ -39,14 +22,6 @@ def assert_issues_count_is_gt(count, issues):
     for issue in issues:
         print('- ' + issue.get('issue_type') + '\n')
     assert issues.__len__() > count
-
-
-@pytest.mark.skip
-def assert_issues_count_is_zero(issues):
-    print('\n' + 'Issue types:' + '\n')
-    for issue in issues:
-        print('- ' + issue.get('issue_type') + '\n')
-    assert issues.__len__() == 0
 
 
 @pytest.mark.skip
@@ -117,14 +92,28 @@ def assert_additional_conflict_parameters(issue_type, issues):
     assert is_correct is True
 
 
+def assert_conflict_message(issue_type, issues, queue=False):
+    is_correct = False
+    for issue in issues:
+        if queue:
+            if issue.get('issue_type') == issue_type.value and (value['line1'] == QUEUE_CONFLICT_MESSAGE for value in
+                                                                issue.get('conflicts')):
+                is_correct = True
+        else:
+            if issue.get('issue_type') == issue_type.value and (value['line1'] == CORP_CONFLICT_MESSAGE for value in
+                                                                issue.get('conflicts')):
+                is_correct = True
+    assert is_correct is True
+
+
 def save_words_list_classification(words_list):
     from namex.models import WordClassification as WordClassificationDAO
     for record in words_list:
         wc = WordClassificationDAO()
         wc.classification = record['classification']
         wc.word = record['word']
-        wc.start_dt = date.today()
-        wc.approved_dt = date.today()
+        wc.start_dt = datetime.date.today()
+        wc.approved_dt = datetime.date.today()
         wc.save_to_db()
 
 
@@ -138,7 +127,7 @@ def save_words_list_virtual_word_condition(words_list):
         vwc.save_to_db()
 
 
-def save_words_list_name(words_list):
+def save_words_list_name(words_list, queue=False):
     from namex.models import Request as RequestDAO, State, Name as NameDAO
     num = 0
     req = 1460775
@@ -150,7 +139,11 @@ def save_words_list_name(words_list):
 
         nr = RequestDAO()
         nr.nrNum = nr_num
-        nr.stateCd = State.APPROVED
+        if queue:
+            nr.stateCd = State.DRAFT
+            nr.expirationDate = datetime.date.today() + datetime.timedelta(days=1)
+        else:
+            nr.stateCd = State.APPROVED
         nr.requestId = req
         nr.requestTypeCd = EntityTypes.CORPORATION.value
         nr._source = 'NAMEREQUEST'

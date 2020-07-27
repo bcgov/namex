@@ -4,8 +4,8 @@ import jsonpickle
 from urllib.parse import quote_plus
 
 from ..common import save_words_list_classification, assert_issues_count_is_zero
-from ..common import ENDPOINT_PATH
-from ..common import token_header, claims
+from ..configuration import ENDPOINT_PATH
+from ...common import token_header, claims
 
 
 @pytest.mark.xfail(raises=ValueError)

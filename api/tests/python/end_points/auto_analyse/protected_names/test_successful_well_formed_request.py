@@ -3,8 +3,8 @@ import jsonpickle
 
 from urllib.parse import quote_plus
 
-from ...common import save_words_list_classification
-from ..common import ENDPOINT_PATH
+from ..common import save_words_list_classification
+from ..configuration import ENDPOINT_PATH
 from ...common import token_header, claims
 
 

@@ -5,9 +5,9 @@ from urllib.parse import quote_plus
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ...common import assert_issues_count_is_gt, assert_has_word_upper, assert_has_designations_upper, \
+from ..common import assert_issues_count_is_gt, assert_has_word_upper, assert_has_designations_upper, \
     save_words_list_classification, assert_has_issue_type, assert_has_no_issue_type
-from ..common import ENDPOINT_PATH
+from ..configuration import ENDPOINT_PATH
 from ...common import token_header, claims
 
 

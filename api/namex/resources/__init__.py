@@ -7,7 +7,7 @@ from .meta import api as meta_api
 from .exact_match import api as exact_match_api
 from .events import api as events_api
 
-from .name_requests import api as name_request_api
+from .name_requests.api_namespace import api as name_request_api
 from .word_classification import api as word_classification_api
 
 from .auto_analyse.paths import bc_name_analysis_api, xpro_name_analysis_api

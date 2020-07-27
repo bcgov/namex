@@ -1,5 +1,5 @@
 import re
-from namex.resources.name_requests.utils import normalize_nr_num, nr_regex
+from namex.services.name_request.utils import normalize_nr_num, nr_regex
 
 
 def test_normalize_nr_num_pattern():
@@ -52,7 +52,7 @@ def test_normalize_nr_num_func():
 
     test_nr_num = 'NR005'
     result_str = normalize_nr_num(test_nr_num)
-    assert result_str is False
+    assert result_str is None
 
     test_nr_num = '005005'
     result_str = normalize_nr_num(test_nr_num)
@@ -60,4 +60,4 @@ def test_normalize_nr_num_func():
 
     test_nr_num = '005'
     result_str = normalize_nr_num(test_nr_num)
-    assert result_str is False
+    assert result_str is None
