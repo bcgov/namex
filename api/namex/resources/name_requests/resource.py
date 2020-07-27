@@ -105,7 +105,7 @@ class NameRequestResource(Resource):
         :param nr: The name request model
         :param svc A NameRequestService instance
         """
-        self.post_nr(nr, svc)
+        return self.post_nr(nr, svc)
 
     def handle_nr_update(self, nr, svc):
         """
@@ -115,7 +115,7 @@ class NameRequestResource(Resource):
         :param svc A NameRequestService instance
         :return:
         """
-        self.put_nr(nr, svc)
+        return self.put_nr(nr, svc)
 
     def handle_nr_patch(self, nr, svc):
         """
@@ -127,7 +127,7 @@ class NameRequestResource(Resource):
         """
         request_data = self.request_data  # Valid request data
 
-        self.patch_nr(nr, request_data, svc)
+        return self.patch_nr(nr, request_data, svc)
 
     def handle_nr_approval(self, nr, svc):
         """
@@ -137,7 +137,7 @@ class NameRequestResource(Resource):
         :param svc:
         :return:
         """
-        self.on_nr_approved(nr, svc)
+        return self.on_nr_approved(nr, svc)
 
     """
     The actual methods that map the request data to our domain models and persist the data.
@@ -193,26 +193,26 @@ class NameRequestResource(Resource):
         :return:
         """
 
-        cleared = request_data.get('cleared', [])  # Clear first
-        changed = request_data.get('changed', [])  # Then process changes
+        # cleared = request_data.get('cleared', [])  # Clear first
+        # changed = request_data.get('changed', [])  # Then process changes
 
         # TODO: This needs more work (in progress)
-        if cleared:
-            nr = svc.map_request_data(nr, False)
+        # if cleared:
+        nr = svc.map_request_data(nr, False)
 
-        is_changed = len(changed) > 0
-        has_applicants = changed.get('applicants', None)
-        has_names = changed.get('names', None)
+        # is_changed = len(changed) > 0
+        # has_applicants = changed.get('applicants', None)
+        # has_names = changed.get('names', None)
 
-        if is_changed:
-            # Map data from request_data to the name request
-            nr = svc.map_request_data(nr, False)
-        if has_applicants:
-            # Map applicants from request_data to the name request
-            nr = svc.map_request_applicants(nr)
-        if has_names:
-            # Map any submitted names from request_data to the name request
-            nr = svc.map_request_names(nr)
+        # if is_changed:
+        # Map data from request_data to the name request
+        nr = svc.map_request_data(nr, False)
+        # if has_applicants:
+        # Map applicants from request_data to the name request
+        nr = svc.map_request_applicants(nr)
+        # if has_names:
+        # Map any submitted names from request_data to the name request
+        nr = svc.map_request_names(nr)
         # Save
         nr = svc.save_request(nr)
         # Return the updated name request
@@ -249,7 +249,7 @@ class NameRequestResource(Resource):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
             # TODO: Re-enable NRO update, might be a good idea to set an env var for this...
-            warnings = self.nro_service.add_nr(name_request)
+            warnings = None  # self.nro_service.add_nr(name_request)
             if warnings:
                 MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
                 raise NROUpdateError()

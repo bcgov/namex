@@ -30,10 +30,10 @@ class NameRequest(NameRequestResource):
 
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
-            response_data['actions'] = get_nr_state_actions(get_nr_state_actions(nr_model.stateCd))
+            response_data['actions'] = get_nr_state_actions(nr_model.stateCd)
             return jsonify(response_data), 200
         except Exception as err:
-            return handle_exception(err, 'Error retrieving the NR from the db.', 500)
+            return handle_exception(err, 'Error retrieving the NR.', 500)
 
     # REST Method Handlers
     @api.expect(nr_request)
@@ -70,7 +70,7 @@ class NameRequest(NameRequestResource):
             def validate_put_request(data):
                 is_valid = False
                 msg = ''
-                if data.payment_token or (data.payment_token is None and data.stateCd in valid_update_states):
+                if data.get('payment_token') or (data.get('payment_token') is None and data.get('stateCd') in valid_update_states):
                     is_valid = True
 
                 return is_valid, msg
@@ -151,7 +151,7 @@ class NameRequest(NameRequestResource):
 
                 # Unlike the inherited initialize(), we don't want to set the NameRequestService's request_data just yet
                 # This is a partial update operation and we will need to selectively map the request data over
-                # -> self.nr_service.request_data = self.request_data
+                self.nr_service.request_data = self.request_data
 
             initialize(self)
 
@@ -163,18 +163,20 @@ class NameRequest(NameRequestResource):
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
-            valid_states = [State.CANCELLED, State.INPROGRESS, State.HOLD, State.APPROVED, State.REJECTED]
+            valid_states = State.VALID_STATES
 
             # This could be moved out, but it's fine here for now
             def validate_patch_request(data):
+                # Use the NR model state as the default, as the state change may not be included in the PATCH request
+                request_state = data.get('stateCd', nr_model.stateCd)
                 is_valid = False
                 msg = ''
                 # This handles updates if the NR state is 'patchable'
-                if data.stateCd in valid_states:
+                if request_state in valid_states:
                     # Get the SQL alchemy columns and associations
                     is_valid = True
                 else:
-                    msg = 'Invalid state change requested - the NR state cannot be changed to [' + data.stateCd + ']'
+                    msg = 'Invalid state change requested - the NR state cannot be changed to [' + data.get('stateCd', '') + ']'
 
                 return is_valid, msg
 
@@ -184,8 +186,8 @@ class NameRequest(NameRequestResource):
             if not is_valid_patch:
                 raise InvalidInputError(message=validation_msg)
 
-            if nr_model.payment_token is not None:
-                raise NameRequestException(message='Invalid request state for PATCH - payment token should not be present!')
+            # if nr_model.payment_token is not None:
+            #    raise NameRequestException(message='Invalid request state for PATCH - payment token should not be present!')
 
             # This handles updates if the NR state is 'patchable'
             nr_model = self.update_nr_state(nr_model, nr_model.stateCd)  # TODO: Pass state code in request
@@ -225,7 +227,7 @@ class NameRequest(NameRequestResource):
 
         # Use apply_state_change to change state, as it enforces the State change pattern
         # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-        if new_state in [State.CANCELLED, State.INPROGRESS, State.HOLD, State.APPROVED, State.REJECTED]:
+        if new_state in State.VALID_STATES:
             nr_model = nr_svc.apply_state_change(nr_model, new_state, self.handle_nr_patch)
 
         return nr_model

@@ -163,10 +163,10 @@ class NameRequestService(AbstractNameRequestMixin):
 
     def update_request_submit_count(self, name_request):
         try:
-            if self.request_data['submit_count'] is None:
+            if self.request_data.get('submit_count') is None:
                 name_request.submitCount = 1
             else:
-                name_request.submitCount = + 1
+                name_request.submitCount = name_request.submitCount + 1
         except Exception as err:
             raise UpdateSubmitCountError(err)
 

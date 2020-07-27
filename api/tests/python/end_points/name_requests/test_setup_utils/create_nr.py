@@ -1,4 +1,5 @@
 from namex.models import State, Request as RequestDAO, Name as NameDAO
+from tests.python.unit.test_setup_utils.build_nr import build_nr
 
 
 def create_nr(nr_state):
@@ -17,75 +18,35 @@ def create_nr(nr_state):
 
 
 def create_draft():
-    nr = RequestDAO()
-    nr.nrNum = 'NR 0000002'
-    nr.stateCd = State.DRAFT
-    nr.requestId = 1460775
-    nr._source = 'NRO'
-    name1 = NameDAO()
-    name1.choice = 1
-    name1.name = 'TEST NAME ONE'
-    nr.names = [name1]
+    nr = build_nr(State.DRAFT)
     nr.save_to_db()
 
     return nr
 
 
 def create_cond_reserved():
-    nr = RequestDAO()
-    nr.nrNum = 'NR 0000002'
-    nr.stateCd = State.COND_RESERVE
-    nr.requestId = 1460775
-    nr._source = 'NRO'
-    name1 = NameDAO()
-    name1.choice = 1
-    name1.name = 'TEST NAME ONE'
-    nr.names = [name1]
+    nr = build_nr(State.COND_RESERVE)
     nr.save_to_db()
 
     return nr
 
 
 def create_reserved():
-    nr = RequestDAO()
-    nr.nrNum = 'NR 0000002'
-    nr.stateCd = State.RESERVED
-    nr.requestId = 1460775
-    nr._source = 'NRO'
-    name1 = NameDAO()
-    name1.choice = 1
-    name1.name = 'TEST NAME ONE'
-    nr.names = [name1]
+    nr = build_nr(State.RESERVED)
     nr.save_to_db()
 
     return nr
 
 
 def create_conditional():
-    nr = RequestDAO()
-    nr.nrNum = 'NR 0000002'
-    nr.stateCd = State.CONDITIONAL
-    nr.requestId = 1460775
-    nr._source = 'NRO'
-    name1 = NameDAO()
-    name1.choice = 1
-    name1.name = 'TEST NAME ONE'
-    nr.names = [name1]
+    nr = build_nr(State.CONDITIONAL)
     nr.save_to_db()
 
     return nr
 
 
 def create_approved():
-    nr = RequestDAO()
-    nr.nrNum = 'NR 0000002'
-    nr.stateCd = State.APPROVED
-    nr.requestId = 1460775
-    nr._source = 'NRO'
-    name1 = NameDAO()
-    name1.choice = 1
-    name1.name = 'TEST NAME ONE'
-    nr.names = [name1]
+    nr = build_nr(State.APPROVED)
     nr.save_to_db()
 
     return nr
