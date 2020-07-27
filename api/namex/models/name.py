@@ -105,7 +105,6 @@ class NameSchema(ma.ModelSchema):
     class Meta:
         model = Name
         fields = (
-            'id',
             'name',
             'state',
             'choice',
