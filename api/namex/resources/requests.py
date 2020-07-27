@@ -38,7 +38,7 @@ import urllib
 import sys
 
 # Register a local namespace for the requests
-api = Namespace('namexRequests', description='Name Request System - Requests API')
+api = Namespace('namexRequests', description='Namex - Requests API')
 
 # Marshmallow schemas
 request_schema = RequestsSchema(many=False)

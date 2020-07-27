@@ -248,8 +248,8 @@ class NameRequestResource(Resource):
     def save_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            # TODO: Re-enable NRO update, might be a good idea to set an env var for this...
-            warnings = None  # self.nro_service.add_nr(name_request)
+            # TODO: It might be a good idea to set an env var for this...
+            warnings = self.nro_service.add_nr(name_request)
             if warnings:
                 MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
                 raise NROUpdateError()
@@ -318,13 +318,10 @@ class NameRequestResource(Resource):
 
         # Update SOLR
         if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
-            # TODO: Solr might be down...
-            # self.create_solr_nr_doc(SOLR_CORE, nr_model)
+            self.create_solr_nr_doc(SOLR_CORE, nr_model)
             if temp_nr_num:
                 # This performs a safe delete, we check to see if the temp ID exists before deleting
-                # TODO: Solr might be down...
-                # self.delete_solr_doc(SOLR_CORE, temp_nr_num)
-                pass
+                self.delete_solr_doc(SOLR_CORE, temp_nr_num)
 
     @staticmethod
     def log_error(msg, err):
