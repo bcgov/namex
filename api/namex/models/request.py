@@ -352,11 +352,14 @@ class Request(db.Model):
                 EntityTypes.PARISH.value,
                 EntityTypes.BENEFIT_COMPANY.value
             ]),
-
-            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
-                            NameState.COND_RESERVE.value]),
-
         ]
+
+        corporate_state = [
+            Name.state.in_(
+                [NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
+                 NameState.COND_RESERVE.value])
+        ]
+
         not_consumed_filters = [
             cls.expirationDate > func.current_Date(),
             Name.corpNum.is_(None),
@@ -375,6 +378,7 @@ class Request(db.Model):
                 filters=[basic_filters, not_consumed_filters]
             ))
         else:
+            basic_filters.extend(corporate_state)
             criteria.append(RequestConditionCriteria(
                 fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('submittedDate'),
                         Name.corpNum,
@@ -437,7 +441,8 @@ class Request(db.Model):
                 )
             else:
                 queries.append(
-                    cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters[0])).filter(and_(*criteria.filters[1]))
+                    cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters[0])).filter(
+                        and_(*criteria.filters[1]))
                 )
         if queue:
             query_all = queries[0]
@@ -459,7 +464,8 @@ class Request(db.Model):
         query = query.limit(limit)
 
         # Dump the query
-        query_str = '\n' + str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
+        query_str = '\n' + str(
+            query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
         current_app.logger.debug(query_str)
 
         return query.all()
