@@ -7,6 +7,7 @@ from flask import current_app
 from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import and_, or_, func
 from marshmallow import Schema, fields, post_load, post_dump

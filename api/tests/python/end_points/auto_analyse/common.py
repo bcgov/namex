@@ -3,6 +3,9 @@ import datetime
 
 from namex.constants import EntityTypes
 
+CORP_CONFLICT_MESSAGE = 'Too similar to an existing name.'
+QUEUE_CONFLICT_MESSAGE = 'Too similar to an existing name in the queue.'
+
 
 @pytest.mark.skip
 def assert_issues_count_is(count, issues):
