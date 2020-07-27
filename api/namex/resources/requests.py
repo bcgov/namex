@@ -522,7 +522,7 @@ class Request(Resource):
             current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return jsonify({"message": "NR had an internal error"}), 404
 
-        if not services.name_request.valid_state_transition(user, nrd, state):
+        if not valid_state_transition(user, nrd, state):
             return jsonify(message='you are not authorized to make these changes'), 401
 
         name_choice_exists = {1: False, 2: False, 3: False}
