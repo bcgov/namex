@@ -106,7 +106,7 @@ class NameRequests(NameRequestResource):
         if nr_num and len(results) == 1:
             response_data = results[0].json()
             # Add the list of valid Name Request actions for the given state to the response
-            response_data['actions'] = get_nr_state_actions(get_nr_state_actions(results[0].stateCd))
+            response_data['actions'] = get_nr_state_actions(results[0].stateCd)
             return jsonify(response_data), 200
         elif len(results) > 0:
             # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
