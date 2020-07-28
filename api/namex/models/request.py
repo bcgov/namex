@@ -412,6 +412,10 @@ class Request(db.Model):
         special_characters_element = Request.set_special_characters(descriptive_element)
         for e in criteria:
             if not distinctive:
+                # Clean descriptive for next iteration
+                if not queue and len(e.filters) > 5 or queue and len(e.filters) > 3:
+                    e.filters.pop()
+
                 substitutions = ' ?| '.join(map(str, special_characters_element)) + ' ?'
                 e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions))])
             else:
