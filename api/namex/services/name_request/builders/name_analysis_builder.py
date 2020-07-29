@@ -210,12 +210,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         for dist in dist_substitution_list:
             criteria = Request.get_general_query(change_filter, queue)
-            # Inject distinctive section into query
-            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, stop_words,
-                                                                 check_name_is_well_formed)
+            criteria = Request.get_distinctive_query(dist, criteria, stop_words, check_name_is_well_formed)
             for desc in desc_synonym_list:
-                # Inject descriptive section into query, execute and add matches to list
-                matches = Request.get_query_distinctive_descriptive(desc, criteria, False, None, False, queue)
+                criteria = Request.get_descriptive_query(desc, criteria, queue)
+                matches = Request.find_by_criteria_array(criteria, queue)
                 list_conflicts_details, forced = self.get_most_similar_names(
                     dict_highest_counter,
                     matches, w_dist,

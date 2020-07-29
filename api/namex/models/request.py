@@ -357,7 +357,7 @@ class Request(db.Model):
 
         corp_request_state_filter = [
             cls.stateCd.in_(
-            [State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
+                [State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
         ]
 
         name_state_filter = [
@@ -407,31 +407,30 @@ class Request(db.Model):
         return flattened
 
     @classmethod
-    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, stop_words=None,
-                                          check_name_is_well_formed=False, queue=False):
-        special_characters_element = Request.set_special_characters(descriptive_element)
+    def get_distinctive_query(cls, dist, criteria, stop_words, check_name_is_well_formed):
+        special_characters_dist = Request.set_special_characters(dist)
         for e in criteria:
-            if not distinctive:
-                # Clean descriptive for next iteration
-                if not queue and len(e.filters) > 5 or queue and len(e.filters) > 3:
-                    e.filters.pop()
-
-                substitutions = ' ?| '.join(map(str, special_characters_element)) + ' ?'
-                e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions))])
+            substitutions = '|'.join(map(str, special_characters_dist))
+            if not check_name_is_well_formed:
+                e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
+                    r'^(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
             else:
-                substitutions = '|'.join(map(str, special_characters_element))
-                if not check_name_is_well_formed:
-                    e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
-                        r'^(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
-                else:
-                    e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
-                        r'^\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
+                e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
+                    r'^\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
 
-        if distinctive:
-            return criteria
-        results = Request.find_by_criteria_array(criteria, queue)
+        return criteria
 
-        return results
+    @classmethod
+    def get_descriptive_query(cls, desc, criteria, queue):
+        special_characters_descriptive = Request.set_special_characters(desc)
+        for e in criteria:
+            if not queue and len(e.filters) > 5 or queue and len(e.filters) > 3:
+                e.filters.pop()
+
+            substitutions = ' ?| '.join(map(str, special_characters_descriptive)) + ' ?'
+            e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions))])
+
+        return criteria
 
     @classmethod
     def find_by_criteria_array(cls, criteria_arr=None, queue=False):
