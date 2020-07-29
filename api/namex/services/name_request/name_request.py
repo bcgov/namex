@@ -14,7 +14,7 @@ from .name_request_state import apply_nr_state_change, get_nr_state_actions
 
 from .exceptions import \
     CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
-    MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError
+    MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError, ExtendExpiryDateError
 
 from .utils import log_error, convert_to_ascii
 
@@ -169,6 +169,24 @@ class NameRequestService(AbstractNameRequestMixin):
                 name_request.submitCount = name_request.submitCount + 1 if isinstance(name_request.submitCount, int) else 1
         except Exception as err:
             raise UpdateSubmitCountError(err)
+
+        return name_request
+
+    def extend_expiry_date(self, name_request, start_date=None):
+        start_datetime = start_date if start_date else datetime.utcnow()
+        """
+        Extends the expiry date by 56 days from today's date
+        :param name_request:
+        :return:
+        """
+        try:
+            name_request.expirationDate = self.create_expiry_date(
+                start=start_datetime,
+                expires_in_days=56,
+                tz=timezone('UTC')
+            )
+        except Exception as err:
+            raise ExtendExpiryDateError(err)
 
         return name_request
 

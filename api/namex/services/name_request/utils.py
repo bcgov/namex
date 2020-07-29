@@ -37,7 +37,7 @@ def query_results_to_dict(results):
     return list(map(lambda result: query_result_to_dict(result), results))
 
 
-nr_regex = r'^(NR\ ?L{0,1}?)?([\d]{6,8})$'
+nr_regex = r'^(NR\ ?L{0,1}|L{0,1})?([\d]{6,8})$'
 
 
 def normalize_nr_num(nr_num_str):
@@ -51,7 +51,7 @@ def normalize_nr_num(nr_num_str):
 
         if nr_type == 'NR':
             return 'NR ' + digits
-        if nr_type == 'NRL':
+        if nr_type in ['NRL', 'L']:
             return 'NR L' + digits
 
     return None

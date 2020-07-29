@@ -1,9 +1,12 @@
 from flask import jsonify, request, current_app
 from flask_restplus import cors
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from namex.utils.logging import setup_logging
 from namex.utils.util import cors_preflight
 
+from namex.constants import NameRequestActions
 from namex.models import Request, State
 
 from namex.services.name_request.utils import handle_exception
@@ -19,8 +22,11 @@ from .utils import parse_nr_num
 setup_logging()  # Important to do this first
 
 
-@cors_preflight('GET, PUT, PATCH')
-@api.route('/<string:nr_num>', strict_slashes=False, methods=['GET', 'PUT', 'PATCH', 'OPTIONS'])
+@cors_preflight('GET, PUT')
+@api.route('/<string:nr_num>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
+@api.doc(params={
+    'nr_num': 'NR Number - This field is required'
+})
 class NameRequest(NameRequestResource):
     @cors.crossdomain(origin='*')
     def get(self, nr_num):
@@ -43,13 +49,7 @@ class NameRequest(NameRequestResource):
         Handles general update operations including update when a payment token is present.
         NOT used for updates that only change the Name Request state. Use 'patch' instead.
 
-        State changes handled:
-        - to DRAFT
-        - to COND_RESERVE
-        - to RESERVED
-        - COND_RESERVE to CONDITIONAL
-        - RESERVED to APPROVED
-
+        State changes handled include state changes to [DRAFT, COND_RESERVE, RESERVED, COND_RESERVE to CONDITIONAL, RESERVED to APPROVED]
         :param nr_num:
         :return:
         """
@@ -103,34 +103,51 @@ class NameRequest(NameRequestResource):
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
 
+    def update_nr(self, nr_model):
+        nr_svc = self.nr_service
+
+        # Use apply_state_change to change state, as it enforces the State change pattern
+        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+        return nr_svc.apply_state_change(nr_model, nr_model.stateCd, self.handle_nr_update)
+
+    def process_payment(self, nr_model):
+        nr_svc = self.nr_service
+
+        # Use apply_state_change to change state, as it enforces the State change pattern
+        # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
+        if nr_model.payment_token and nr_model.stateCd == State.COND_RESERVE:
+            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+            nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, self.handle_nr_approval)
+            # If the state is RESERVED update state to APPROVED, and update the name request as required
+        elif nr_model.payment_token and nr_model.stateCd == State.RESERVED:
+            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+            nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
+
+        return nr_model
+
+
+@cors_preflight('PATCH')
+@api.route('/<string:nr_num>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
+@api.doc(params={
+    'nr_num': 'NR Number - This field is required',
+    'nr_action': 'NR Action - One of [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]'
+})
+class NameRequestFields(NameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def patch(self, nr_num):
+    def patch(self, nr_num, nr_action):
         """
-        Update a specific set of fields. Fields excluded from the payload will not be updated.
-
-        The following data format is expected eg. update State, and clear the field:
-        payload = {
-            changed: [{ field: 'stateCd', value: 'CANCELLED' }],  # Fields to update
-            cleared: [{ field: 'hasBeenReset' }]  # Fields to clear (todo: implement this!)
-        }
-
-
-        This is mostly used for updates that ONLY involve Name Request state changes.
-        NOT used for updates that change Name Request data. Use 'put' instead.
+        Update a specific set of fields and/or a provided action. Fields excluded from the payload will not be updated.
+        The following data format is expected when providing a data payload:
+        { 'stateCd': 'CANCELLED' }  # Fields to update
 
         We use this to:
+        - Edit a subset of NR fields
         - Cancel an NR
-        - Update the Payment
-
-        State changes handled:
-        - to CANCELLED
-        - to INPROGRESS
-        - to HOLD
-        - to APPROVED
-        - to REJECTED
-
+        - Change the state of an NR to [CANCELLED, INPROGRESS, HOLD, APPROVED, REJECTED
+        - Apply the following actions to an NR [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]
         :param nr_num:
+        :param nr_action: One of [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]
         :return:
         """
         try:
@@ -159,6 +176,10 @@ class NameRequest(NameRequestResource):
 
             # Find the existing name request
             nr_num = parse_nr_num(nr_num)
+            nr_action = str(nr_action).upper()  # Convert to upper-case, just so we can support lower case action strings
+            nr_action = NameRequestActions[nr_action].value \
+                if NameRequestActions.has_value(nr_action) \
+                else NameRequestActions.EDIT.value
             nr_model = Request.find_by_nr(nr_num)
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
@@ -189,11 +210,20 @@ class NameRequest(NameRequestResource):
             # if nr_model.payment_token is not None:
             #    raise NameRequestException(message='Invalid request state for PATCH - payment token should not be present!')
 
-            # This handles updates if the NR state is 'patchable'
-            nr_model = self.update_nr_state(nr_model, nr_model.stateCd)  # TODO: Pass state code in request
+            def handle_patch_actions(action, model):
+                return {
+                    NameRequestActions.EDIT: self.handle_patch_edit,
+                    NameRequestActions.UPGRADE: self.handle_patch_upgrade,
+                    NameRequestActions.CANCEL: self.handle_patch_cancel,
+                    NameRequestActions.REFUND: self.handle_patch_refund,
+                    # TODO: This is a frontend only action throw an error!
+                    # NameRequestActions.RECEIPT: self.patch_receipt,
+                    NameRequestActions.REAPPLY: self.patch_reapply,
+                    NameRequestActions.RESEND: self.patch_resend
+                }.get(action)(model)
 
-            # This handles the updates for NRO and Solr, if necessary
-            self.update_network_services(nr_model)
+            # This handles updates if the NR state is 'patchable'
+            nr_model = handle_patch_actions(nr_action, nr_model)
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
@@ -204,14 +234,81 @@ class NameRequest(NameRequestResource):
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
 
-    def update_nr(self, nr_model):
+    def handle_patch_edit(self, nr_model):
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+        # This handles the updates for NRO and Solr, if necessary
+        # TODO: Do we update network services?
+        self.update_network_services(nr_model)
+        return nr_model
+
+    def handle_patch_upgrade(self, nr_model):
+        # TODO: Only works for DRAFT state
+
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+        # TODO: Update Oracle (change_nr?) and payment related stuff
+        # This will generate a new payment Id and then the NR will have two payments.
+        # We have not accounted for multiple payments.
+        # We will need to add a request_payment model (request_id and payment_id)
+        # This handles the updates for NRO and Solr, if necessary
+        self.update_network_services(nr_model)
+        return nr_model
+
+    def handle_patch_cancel(self, nr_model):
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
+
+        # This handles the updates for NRO and Solr, if necessary
+        # TODO: Do we update network services?
+        self.update_network_services(nr_model)
+        return nr_model
+
+    def handle_patch_refund(self, nr_model):
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+        # This handles the updates for NRO and Solr, if necessary
+        # self.update_network_services(nr_model)
+        return nr_model
+
+    def handle_patch_reapply(self, nr_model):
         nr_svc = self.nr_service
 
-        # Use apply_state_change to change state, as it enforces the State change pattern
-        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-        return nr_svc.apply_state_change(nr_model, nr_model.stateCd, self.handle_nr_update)
+        # This handles updates if the NR state is 'patchable'
+        # TODO: Ensure request action is REH or REST <- Where does this come in?
+        # TODO: Ensure submit count is not greater than 3
 
-    def update_nr_state(self, nr_model, new_state):
+        if nr_model.submitCount < 3:
+            # Update submit count
+            nr_model = nr_svc.update_request_submit_count(nr_model)
+            # Extend expiry date by (default) 56 days
+            nr_model = nr_svc.extend_expiry_date(nr_model)
+            # TODO: If request action is REH or REST extend by 1 year (+ 56 default) days
+            # TODO: Where does the request action come from in this scenario?
+            # nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1)))
+
+            nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+            # This handles the updates for NRO and Solr, if necessary
+            # TODO: Do we update network services?
+            self.update_network_services(nr_model)
+
+            # TODO: Raise an error if submitCount is greater than 3
+        return nr_model
+
+    def handle_patch_resend(self, nr_model):
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+        # This handles the updates for NRO and Solr, if necessary
+        # TODO: Do we update network services?
+        self.update_network_services(nr_model)
+        return nr_model
+
+    def update_nr_fields(self, nr_model, new_state):
         """
         State changes handled:
         - to CANCELLED
@@ -229,20 +326,5 @@ class NameRequest(NameRequestResource):
         # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
         if new_state in State.VALID_STATES:
             nr_model = nr_svc.apply_state_change(nr_model, new_state, self.handle_nr_patch)
-
-        return nr_model
-
-    def process_payment(self, nr_model):
-        nr_svc = self.nr_service
-
-        # Use apply_state_change to change state, as it enforces the State change pattern
-        # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
-        if nr_model.payment_token and nr_model.stateCd == State.COND_RESERVE:
-            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-            nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, self.handle_nr_approval)
-            # If the state is RESERVED update state to APPROVED, and update the name request as required
-        elif nr_model.payment_token and nr_model.stateCd == State.RESERVED:
-            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-            nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
 
         return nr_model

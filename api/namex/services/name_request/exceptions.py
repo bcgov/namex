@@ -45,6 +45,11 @@ class UpdateSubmitCountError(NameRequestException):
         super().__init__(wrapped_err, message)
 
 
+class ExtendExpiryDateError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Error extending the expiry date."):
+        super().__init__(wrapped_err, message)
+
+
 class MapRequestNamesError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error setting names."):
         super().__init__(wrapped_err, message)
