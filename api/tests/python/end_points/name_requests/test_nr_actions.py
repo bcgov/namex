@@ -117,6 +117,7 @@ def assert_names_are_mapped_correctly(req_names, res_names):
             # The name existed, make sure the ID has not changed
             assert_field_is_mapped(req_name, res_name, 'id')
 
+        # Make sure the choice is mapped correctly
         assert_field_is_mapped(req_name, res_name, 'choice')
         print('\n......................................\n')
 
@@ -278,8 +279,9 @@ def test_draft_patch_edit(client, jwt, app):
     assert_names_are_mapped_correctly(nr_data.get('names'), patched_nr.get('names'))
 
     # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
-    # Check actions (write a util for this
+    # Check actions (write a util for this)
 
 
 def test_draft_patch_upgrade(client, jwt, app):
@@ -311,15 +313,17 @@ def test_draft_patch_upgrade(client, jwt, app):
     if not patch_response or patch_response.status_code != 200:
         raise Exception('NR PATCH operation failed')
 
-    payload = json.loads(patch_response.data)
-    assert payload is not None
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(payload.get('stateCd') == 'DRAFT')))
-    assert payload.get('stateCd') == State.DRAFT
-    # Check applicant(s)
-    # Check names
-    # Check actions
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == State.DRAFT
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    # Check actions (write a util for this)
 
     # TODO: Priority CD changes here! (Will be set to Y)
     # TODO: Setting priority date, (today's date in UTC)
@@ -355,15 +359,17 @@ def test_draft_patch_cancel(client, jwt, app):
     if not patch_response or patch_response.status_code != 200:
         raise Exception('NR PATCH operation failed')
 
-    payload = json.loads(patch_response.data)
-    assert payload is not None
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
 
     # Check state
-    print('Assert that stateCd == CANCELLED: ' + str(bool(payload.get('stateCd') == 'CANCELLED')))
-    assert payload.get('stateCd') == State.CANCELLED
-    # Check applicant(s)
-    # Check names
-    # Check actions
+    print('Assert that stateCd == CANCELLED: ' + str(bool(patched_nr.get('stateCd') == 'CANCELLED')))
+    assert patched_nr.get('stateCd') == State.CANCELLED
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    # Check actions (write a util for this)
 
 
 def test_draft_patch_refund(client, jwt, app):
@@ -395,15 +401,15 @@ def test_draft_patch_refund(client, jwt, app):
     if not patch_response or patch_response.status_code != 200:
         raise Exception('NR PATCH operation failed')
 
-    payload = json.loads(patch_response.data)
-    assert payload is not None
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(payload.get('stateCd') == 'DRAFT')))
-    assert payload.get('stateCd') == State.DRAFT
-    # Check applicant(s)
-    # Check names
-    # Check actions
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == State.DRAFT
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
 
 def test_draft_patch_reapply(client, jwt, app):
@@ -436,21 +442,20 @@ def test_draft_patch_reapply(client, jwt, app):
     if not patch_response or patch_response.status_code != 200:
         raise Exception('NR PATCH operation failed')
 
-    payload = json.loads(patch_response.data)
-    assert payload is not None
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(payload.get('stateCd') == 'DRAFT')))
-    assert payload.get('stateCd') == State.DRAFT
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == State.DRAFT
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
     # TODO:
     # TODO: Check submit count < 4
     # TODO: Expiry date extended by 1 yr + 56 or 56 days
     # TODO: Make sure not state change and also make sure nrNum is the same
-
-    # Don't need to Check applicant(s)
-    # Don't need to Check names
-    # Don't need to Check actions
 
 
 def test_draft_patch_resend(client, jwt, app):
@@ -483,12 +488,12 @@ def test_draft_patch_resend(client, jwt, app):
     if not patch_response or patch_response.status_code != 200:
         raise Exception('NR PATCH operation failed')
 
-    payload = json.loads(patch_response.data)
-    assert payload is not None
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(payload.get('stateCd') == 'DRAFT')))
-    assert payload.get('stateCd') == State.DRAFT
-    # Check applicant(s)
-    # Check names
-    # Check actions
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == State.DRAFT
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
