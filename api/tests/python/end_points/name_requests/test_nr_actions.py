@@ -84,29 +84,30 @@ def assert_name_has_id(name):
 
 
 @pytest.mark.skip
-def assert_name_id_is_unchanged(name):
+def assert_field_is_mapped(req_obj, res_obj, prop_name):
     """
     Just a util
-    :param name:
+    :param req_obj:
+    :param res_obj:
+    :param prop_name:
     :return:
     """
-    assert name.get('id') is not None
-
-
-@pytest.mark.skip
-def assert_name_choice_is_mapped(name):
-    """
-    Just a util
-    :param name:
-    :return:
-    """
-    assert name.get('choice') is not None
+    req_obj_val = req_obj.get(prop_name)
+    res_obj_val = res_obj.get(prop_name)
+    print('Request Field [' + prop_name + ': ' + str(req_obj_val) + '] equals Response Field [' + prop_name + ': ' + str(res_obj_val) + ']')
+    assert req_obj_val == res_obj_val
+    print('OK')
 
 
 @pytest.mark.skip
 def assert_names_are_mapped_correctly(req_names, res_names):
+    print('\n-------- Test names --------\n')
     for req_name in req_names:
         res_name = pick_name_from_list(res_names, req_name.get('name'))
+
+        print('\nCompare request name: \n' + repr(req_name) + '\n')
+        print('With response name: \n' + repr(res_name) + '\n')
+
         assert_name_has_name(res_name)
 
         if res_name and req_name.get('id', None) is None:
@@ -114,9 +115,12 @@ def assert_names_are_mapped_correctly(req_names, res_names):
             assert_name_has_id(res_name)
         if res_name and req_name.get('id', None) is not None:
             # The name existed, make sure the ID has not changed
-            assert_name_id_is_unchanged(res_name)
+            assert_field_is_mapped(req_name, res_name, 'id')
 
-        assert_name_choice_is_mapped(res_name)
+        assert_field_is_mapped(req_name, res_name, 'choice')
+        print('\n......................................\n')
+
+    print('\n-------- Test names complete --------\n')
 
 
 @pytest.mark.skip
@@ -157,7 +161,7 @@ def create_draft_nr(client, jwt, app):
 
         nr_data['names'] = [{
             "name": "BLUE HERON TOURS LTD.",
-            "choice": "1",
+            "choice": 1,
             "designation": "LTD.",
             "name_type_cd": "CO",
             "consent_words": "",
@@ -214,6 +218,8 @@ def test_draft_patch_edit(client, jwt, app):
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
+    print('Patching DRAFT: \n' + repr(draft_nr))
+
     # Take the response and edit it
     request_uri = API_BASE_URI + draft_nr.get('nrNum') + '/' + NameRequestActions.EDIT.value
     test_params = [{}]
@@ -231,7 +237,7 @@ def test_draft_patch_edit(client, jwt, app):
     added_names = [
         {
             "name": "BLUE HERON ADVENTURE TOURS LTD.",
-            "choice": "2",
+            "choice": 2,
             "designation": "LTD.",
             "name_type_cd": "CO",
             "consent_words": "",
@@ -240,7 +246,7 @@ def test_draft_patch_edit(client, jwt, app):
         },
         {
             "name": "BLUE HERON ISLAND TOURS LTD.",
-            "choice": "3",
+            "choice": 3,
             "designation": "LTD.",
             "name_type_cd": "CO",
             "consent_words": "",
@@ -251,6 +257,7 @@ def test_draft_patch_edit(client, jwt, app):
 
     nr_data['names'].extend(added_names)
 
+    print('With Data: \n' + repr(nr_data) + '\n')
     patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)
 
     if not patch_response or patch_response.status_code != 200:
@@ -258,6 +265,8 @@ def test_draft_patch_edit(client, jwt, app):
 
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
+
+    print('Result: \n' + repr(patched_nr) + '\n')
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
