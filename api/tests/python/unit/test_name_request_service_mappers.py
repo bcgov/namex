@@ -11,7 +11,71 @@ from namex.resources.name_requests import NameRequest
 
 from .test_setup_utils import build_nr
 
+test_names_no_id = [
+    {
+        "name": "BLUE HERON TOURS LTD.",
+        "choice": 1,
+        "designation": "LTD.",
+        "name_type_cd": "CO",
+        "consent_words": "",
+        "conflict1": "BLUE HERON TOURS LTD.",
+        "conflict1_num": "0515211"
+    },
+    {
+        "name": "BLUE HERON ADVENTURE TOURS LTD.",
+        "choice": 2,
+        "designation": "LTD.",
+        "name_type_cd": "CO",
+        "consent_words": "",
+        "conflict1": "BLUE HERON TOURS LTD.",
+        "conflict1_num": "0515211"
+    },
+    {
+        "name": "BLUE HERON ISLAND TOURS LTD.",
+        "choice": 3,
+        "designation": "LTD.",
+        "name_type_cd": "CO",
+        "consent_words": "",
+        "conflict1": "BLUE HERON TOURS LTD.",
+        "conflict1_num": "0515211"
+    }
+]
 
+test_names = [
+    {
+        "id": 1,
+        "name": "BLUE HERON TOURS LTD.",
+        "choice": 1,
+        "designation": "LTD.",
+        "name_type_cd": "CO",
+        "consent_words": "",
+        "conflict1": "BLUE HERON TOURS LTD.",
+        "conflict1_num": "0515211"
+    },
+    {
+        "id": 2,
+        "name": "BLUE HERON ADVENTURE TOURS LTD.",
+        "choice": 2,
+        "designation": "LTD.",
+        "name_type_cd": "CO",
+        "consent_words": "",
+        "conflict1": "BLUE HERON TOURS LTD.",
+        "conflict1_num": "0515211"
+    },
+    {
+        "id": 3,
+        "name": "BLUE HERON ISLAND TOURS LTD.",
+        "choice": 3,
+        "designation": "LTD.",
+        "name_type_cd": "CO",
+        "consent_words": "",
+        "conflict1": "BLUE HERON TOURS LTD.",
+        "conflict1_num": "0515211"
+    }
+]
+
+
+@pytest.mark.skip
 def test_map_request_data(client, jwt, app):
     """
     Setup:
@@ -40,63 +104,211 @@ def test_map_request_data(client, jwt, app):
 
 @pytest.mark.skip
 def test_map_request_applicants(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     # TODO: We need this first
     pass
 
 
-@pytest.mark.skip
 def test_map_request_names(client, jwt, app):
-    # TODO: We need this first
-    pass
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Initialize the service
+    nr_svc = NameRequestService()
+
+    """
+    Test adding two new names 
+    """
+    # We will need a base NR
+    nr = build_nr(State.DRAFT, [test_names[0]])
+
+    # Set data to the service, all we need to test is names so just provide what's necessary
+    nr_svc.request_data = {
+        'names': [
+            # Same as test name 1
+            test_names_no_id[1],
+            test_names_no_id[2]
+        ]
+    }
+
+    # Build the names
+    nr = nr_svc.map_request_names(nr)
+
+    assert nr is not None
+
+    """
+    Test updating three names 
+    """
+    # We will need a base NR
+    nr = build_nr(State.DRAFT, [test_names[0], test_names[1], test_names[2]])
+
+    # Set data to the service, all we need to test is names so just provide what's necessary
+    nr_svc.request_data = {
+        'names': [
+            # Same as test name 1
+            test_names[0],
+            test_names[1],
+            test_names[2]
+        ]
+    }
+
+    # Build the names
+    nr = nr_svc.map_request_names(nr)
+
+    assert nr is not None
 
 
 @pytest.mark.skip
 def test_map_submitted_name(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     # TODO: We need this first
     pass
 
 
 @pytest.mark.skip
 def test_map_submitted_name_attrs(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     # TODO: We need this first
     pass
 
 
 @pytest.mark.skip
 def test_map_draft_attrs(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     pass
 
 
 @pytest.mark.skip
 def test_map_request_attrs(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     pass
 
 
 @pytest.mark.skip
 def test_map_request_header_attrs(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     pass
 
 
 @pytest.mark.skip
 def test_map_request_comments(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     pass
 
 
 @pytest.mark.skip
 def test_map_request_language_comments(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     pass
 
 
 @pytest.mark.skip
 def test_map_request_person_name_comments(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     pass
 
 
 @pytest.mark.skip
 def test_map_submitted_name_conflicts(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     pass
 
 
 @pytest.mark.skip
 def test_clear_submitted_name_conflicts(client, jwt, app):
+    """
+    Setup:
+    Test:
+    Validate:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
     pass
