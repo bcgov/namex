@@ -279,9 +279,9 @@ class NameRequestService(AbstractNameRequestMixin):
         try:
             # TODO: Review additional info stuff from NRO/namex (prev NR for re-applies,no NWPTA?
             if isinstance(request_data.get('natureBusinessInfo'), str):
-                name_request.natureBusinessInfo = request_data.get('natureBusinessInfo')
+                name_request.natureBusinessInfo = convert_to_ascii(request_data.get('natureBusinessInfo'))
             if isinstance(request_data.get('additionalInfo'), str):
-                name_request.additionalInfo = request_data.get('additionalInfo')
+                name_request.additionalInfo = convert_to_ascii(request_data.get('additionalInfo'))
             if isinstance(request_data.get('tradeMark'), str):
                 name_request.tradeMark = request_data.get('tradeMark')
             if isinstance(request_data.get('previousRequestId'), int):
@@ -298,10 +298,10 @@ class NameRequestService(AbstractNameRequestMixin):
                 name_request.xproJurisdiction = request_data.get('xproJurisdiction')
             # For MRAS participants
             if isinstance(request_data.get('homeJurisNum'), str):
-                name_request.homeJurisNum = request_data.get('homeJurisNum')
+                name_request.homeJurisNum = convert_to_ascii(request_data.get('homeJurisNum'))
             # For existing businesses
             if isinstance(request_data.get('corpNum'), str):
-                name_request.corpNum = request_data.get('corpNum')
+                name_request.corpNum = convert_to_ascii(request_data.get('corpNum'))
         except Exception as err:
             raise MapRequestHeaderAttributesError(err)
 
@@ -445,7 +445,7 @@ class NameRequestService(AbstractNameRequestMixin):
             submitted_name.nrId = self.nr_id
             submitted_name.choice = name.get('choice', 1)
             submitted_name.name_type_cd = name.get('name_type_cd', 'CO')
-            submitted_name.name = name.get('name', '')
+            submitted_name.name = convert_to_ascii(name.get('name', ''))
             submitted_name.designation = name.get('designation', '')
 
             if new_state_code == State.DRAFT:

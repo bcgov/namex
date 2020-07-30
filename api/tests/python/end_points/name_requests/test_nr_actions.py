@@ -19,19 +19,19 @@ from namex.constants import NameRequestActions
 
 """
 Add states
-DRAFT	Unexamined name, submitted by a client
-INPROGRESS	An examiner is working on this request
-CANCELLED	The request is cancelled and cannot be changed
-HOLD	A name approval was halted for some reason
-APPROVED	Approved request, this is a final state
-REJECTED	Rejected request, this is a final state
-CONDITIONAL	Approved, but with conditions to be met. This is a final state
-HISTORICAL	HISTORICAL
-COMPLETED	COMPLETED - LEGACY state for completed NRs from NRO
+DRAFT - Unexamined name, submitted by a client
+INPROGRESS - An examiner is working on this request
+CANCELLED - The request is cancelled and cannot be changed
+HOLD - A name approval was halted for some reason
+APPROVED - Approved request, this is a final state
+REJECTED - Rejected request, this is a final state
+CONDITIONAL - Approved, but with conditions to be met. This is a final state
+HISTORICAL - HISTORICAL
+COMPLETED - COMPLETED - LEGACY state for completed NRs from NRO
 EXPIRED	EXPIRED - LEGACY state for expired NRs from NRO
-NRO_UPDATING	NRO_UPDATING - internal state used when updating records from NRO
-COND-RESERVE	Temporary reserved state with consent required
-RESERVED	Temporary reserved state between name available and paid.  Once paid it is set to APPROVED or CONDITIONAL approval.
+NRO_UPDATING - Internal state used when updating records from NRO
+COND-RESERVE Temporary reserved state with consent required
+RESERVED - Temporary reserved state between name available and paid.  Once paid it is set to APPROVED or CONDITIONAL approval.
 """
 
 state_data = [
@@ -50,6 +50,73 @@ state_data = [
     ('COND-RESERVE', 'Temporary reserved state with consent required'),
     ('RESERVED', 'Temporary reserved state between name available and paid.  Once paid it is set to APPROVED or CONDITIONAL approval.')
 ]
+
+
+def pick_name_from_list(names, name):
+    matches = [n for n in names if n.get('name') == name]
+    if len(matches) == 0:
+        return None
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) > 1:
+        raise Exception('More than one match for a name!')
+
+
+@pytest.mark.skip
+def assert_name_has_name(name):
+    """
+    Just a util
+    :param name:
+    :return:
+    """
+    assert name is not None
+    assert name.get('name') is not None
+
+
+@pytest.mark.skip
+def assert_name_has_id(name):
+    """
+    Just a util
+    :param name:
+    :return:
+    """
+    assert name.get('id') is not None
+
+
+@pytest.mark.skip
+def assert_name_id_is_unchanged(name):
+    """
+    Just a util
+    :param name:
+    :return:
+    """
+    assert name.get('id') is not None
+
+
+@pytest.mark.skip
+def assert_name_choice_is_mapped(name):
+    """
+    Just a util
+    :param name:
+    :return:
+    """
+    assert name.get('choice') is not None
+
+
+@pytest.mark.skip
+def assert_names_are_mapped_correctly(req_names, res_names):
+    for req_name in req_names:
+        res_name = pick_name_from_list(res_names, req_name.get('name'))
+        assert_name_has_name(res_name)
+
+        if res_name and req_name.get('id', None) is None:
+            # It's a new name make sure it has an ID set
+            assert_name_has_id(res_name)
+        if res_name and req_name.get('id', None) is not None:
+            # The name existed, make sure the ID has not changed
+            assert_name_id_is_unchanged(res_name)
+
+        assert_name_choice_is_mapped(res_name)
 
 
 @pytest.mark.skip
@@ -156,20 +223,54 @@ def test_draft_patch_edit(client, jwt, app):
     path = build_request_uri(request_uri, query)
     log_request_path(path)
 
-    patch_response = client.patch(path, data=json.dumps({}), headers=headers)
+    # Add another name to the mix
+    nr_data = {
+        'names': draft_nr.get('names')
+    }
+
+    added_names = [
+        {
+            "name": "BLUE HERON ADVENTURE TOURS LTD.",
+            "choice": "2",
+            "designation": "LTD.",
+            "name_type_cd": "CO",
+            "consent_words": "",
+            "conflict1": "BLUE HERON TOURS LTD.",
+            "conflict1_num": "0515211"
+        },
+        {
+            "name": "BLUE HERON ISLAND TOURS LTD.",
+            "choice": "3",
+            "designation": "LTD.",
+            "name_type_cd": "CO",
+            "consent_words": "",
+            "conflict1": "BLUE HERON TOURS LTD.",
+            "conflict1_num": "0515211"
+        }
+    ]
+
+    nr_data['names'].extend(added_names)
+
+    patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)
 
     if not patch_response or patch_response.status_code != 200:
         raise Exception('NR PATCH operation failed')
 
-    payload = json.loads(patch_response.data)
-    assert payload is not None
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(payload.get('stateCd') == 'DRAFT')))
-    assert payload.get('stateCd') == 'DRAFT'
-    # Check applicant(s)
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == 'DRAFT'
+
+    # TODO: Check applicant(s)
+
     # Check names
-    # Check actions
+    assert_names_are_mapped_correctly(nr_data.get('names'), patched_nr.get('names'))
+
+    # Check NR number is the same because these are PATCH and call change_nr
+
+    # Check actions (write a util for this
 
 
 def test_draft_patch_upgrade(client, jwt, app):
@@ -210,6 +311,10 @@ def test_draft_patch_upgrade(client, jwt, app):
     # Check applicant(s)
     # Check names
     # Check actions
+
+    # TODO: Priority CD changes here! (Will be set to Y)
+    # TODO: Setting priority date, (today's date in UTC)
+    # Note: This is not designed to test for payment
 
 
 def test_draft_patch_cancel(client, jwt, app):
@@ -318,6 +423,7 @@ def test_draft_patch_reapply(client, jwt, app):
 
     patch_response = client.patch(path, data=json.dumps({}), headers=headers)
 
+    # TODO: Assert that this fails! We should NOT be able to run this from a DRAFT
     if not patch_response or patch_response.status_code != 200:
         raise Exception('NR PATCH operation failed')
 
@@ -327,9 +433,15 @@ def test_draft_patch_reapply(client, jwt, app):
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(payload.get('stateCd') == 'DRAFT')))
     assert payload.get('stateCd') == State.DRAFT
-    # Check applicant(s)
-    # Check names
-    # Check actions
+
+    # TODO:
+    # TODO: Check submit count < 4
+    # TODO: Expiry date extended by 1 yr + 56 or 56 days
+    # TODO: Make sure not state change and also make sure nrNum is the same
+
+    # Don't need to Check applicant(s)
+    # Don't need to Check names
+    # Don't need to Check actions
 
 
 def test_draft_patch_resend(client, jwt, app):
@@ -358,6 +470,7 @@ def test_draft_patch_resend(client, jwt, app):
 
     patch_response = client.patch(path, data=json.dumps({}), headers=headers)
 
+    # TODO: Ensure this notification is resent
     if not patch_response or patch_response.status_code != 200:
         raise Exception('NR PATCH operation failed')
 
