@@ -1,9 +1,11 @@
 """Request is the main business class that is the real top level object in the system
 """
 import sqlalchemy
+import traceback
 
 from . import db, ma
 from flask import current_app
+from flask_sqlalchemy import get_debug_queries
 from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
@@ -161,6 +163,8 @@ class Request(db.Model):
             'lastUpdate': self.lastUpdate,
             'userId': '' if (self.activeUser is None) else self.activeUser.username,
             'submitter_userid': '' if (self.submitter is None) else self.submitter.username,
+            # TODO: Lucas added stateCd not sure why when we're mapping to json we're sending back 'state' and not 'stateCd'
+            'stateCd': self.stateCd,
             'state': self.stateCd,
             'previousStateCd': self.previousStateCd,
             'nrNum': self.nrNum,
@@ -199,8 +203,14 @@ class Request(db.Model):
         # next_nr = db.engine.execute(seq)
         # self.nr = 'NR{0:0>8}'.format(next_nr)
 
-        db.session.add(self)
-        db.session.commit()
+        try:
+            db.session.add(self)
+
+            db.session.commit()
+        except Exception as err:
+            print(repr(err))
+            traceback.print_exc()
+            raise
 
     def delete_from_db(self):
         # TODO: Add listener onto the SQLALchemy event to block deletes
@@ -459,6 +469,7 @@ class Request(db.Model):
         query = query.limit(limit)
 
         # Dump the query
+        # TODO: Make a util for this!
         query_str = '\n' + str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
         current_app.logger.debug(query_str)
 
@@ -498,6 +509,8 @@ def update_request_action_entity_type(mapper, connection,
     """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
     # needed to break apart  request_type
     request = target
+    # TODO: We should check to make sure nrNum actually exists if it's None, this will bomb out with a cryptic error
+    # TODO: Use the new regex for nr matching if possible
     if re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None:
         # todo: handle assumed name as it is a name type and not currently a request action?
         # map the legacy request_type to the new Entity_type and Request_action

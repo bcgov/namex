@@ -160,11 +160,12 @@ class NameRequestFields(NameRequestResource):
                 resource.validate_config(current_app)
 
                 # Store a copy of request_data to our class instance
+                # TODO: Only require if request json is relevant
                 resource.request_data = request.get_json()
 
-                if not self.request_data:
-                    self.log_error('Error getting json input.', None)
-                    raise InvalidInputError()
+                # if not self.request_data:
+                #     self.log_error('Error getting json input.', None)
+                #     raise InvalidInputError()
 
                 # Unlike the inherited initialize(), we don't want to set the NameRequestService's request_data just yet
                 # This is a partial update operation and we will need to selectively map the request data over
@@ -212,14 +213,14 @@ class NameRequestFields(NameRequestResource):
 
             def handle_patch_actions(action, model):
                 return {
-                    NameRequestActions.EDIT: self.handle_patch_edit,
-                    NameRequestActions.UPGRADE: self.handle_patch_upgrade,
-                    NameRequestActions.CANCEL: self.handle_patch_cancel,
-                    NameRequestActions.REFUND: self.handle_patch_refund,
+                    NameRequestActions.EDIT.value: self.handle_patch_edit,
+                    NameRequestActions.UPGRADE.value: self.handle_patch_upgrade,
+                    NameRequestActions.CANCEL.value: self.handle_patch_cancel,
+                    NameRequestActions.REFUND.value: self.handle_patch_refund,
                     # TODO: This is a frontend only action throw an error!
-                    # NameRequestActions.RECEIPT: self.patch_receipt,
-                    NameRequestActions.REAPPLY: self.patch_reapply,
-                    NameRequestActions.RESEND: self.patch_resend
+                    # NameRequestActions.RECEIPT.value: self.patch_receipt,
+                    NameRequestActions.REAPPLY.value: self.handle_patch_reapply,
+                    NameRequestActions.RESEND.value: self.handle_patch_resend
                 }.get(action)(model)
 
             # This handles updates if the NR state is 'patchable'
@@ -233,6 +234,8 @@ class NameRequestFields(NameRequestResource):
 
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
+        except Exception as err:
+            return handle_exception(err, repr(err), 500)
 
     def handle_patch_edit(self, nr_model):
         # This handles updates if the NR state is 'patchable'

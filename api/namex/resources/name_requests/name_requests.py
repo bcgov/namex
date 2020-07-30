@@ -147,6 +147,6 @@ class NameRequests(NameRequestResource):
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = nr_svc.current_state_actions
-            return jsonify(response_data), 200
+            return jsonify(response_data), 201
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)

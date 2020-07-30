@@ -278,31 +278,30 @@ class NameRequestService(AbstractNameRequestMixin):
 
         try:
             # TODO: Review additional info stuff from NRO/namex (prev NR for re-applies,no NWPTA?
-            name_request.natureBusinessInfo = request_data['natureBusinessInfo']
-            if request_data['natureBusinessInfo']:
-                name_request.natureBusinessInfo = request_data['natureBusinessInfo']
-
-            if request_data['additionalInfo']:
-                name_request.additionalInfo = request_data['additionalInfo']
-            if request_data['tradeMark']:
-                name_request.tradeMark = request_data['tradeMark']
-            if request_data['previousRequestId']:
-                name_request.previousRequestId = request_data['previousRequestId']
-            name_request.priorityCd = request_data['priorityCd']
-            if request_data['priorityCd'] == 'Y':
+            if isinstance(request_data.get('natureBusinessInfo'), str):
+                name_request.natureBusinessInfo = request_data.get('natureBusinessInfo')
+            if isinstance(request_data.get('additionalInfo'), str):
+                name_request.additionalInfo = request_data.get('additionalInfo')
+            if isinstance(request_data.get('tradeMark'), str):
+                name_request.tradeMark = request_data.get('tradeMark')
+            if isinstance(request_data.get('previousRequestId'), int):
+                name_request.previousRequestId = request_data.get('previousRequestId')
+            if isinstance(request_data.get('priorityCd'), str):
+                name_request.priorityCd = request_data.get('priorityCd')
+            if request_data.get('priorityCd') == 'Y':
                 name_request.priorityDate = datetime.utcnow().date()
 
             name_request.submitter_userid = user_id
 
             # XPRO
-            if request_data['xproJurisdiction']:
-                name_request.xproJurisdiction = request_data['xproJurisdiction']
+            if isinstance(request_data.get('xproJurisdiction'), str):
+                name_request.xproJurisdiction = request_data.get('xproJurisdiction')
             # For MRAS participants
-            if request_data['homeJurisNum']:
-                name_request.homeJurisNum = request_data['homeJurisNum']
+            if isinstance(request_data.get('homeJurisNum'), str):
+                name_request.homeJurisNum = request_data.get('homeJurisNum')
             # For existing businesses
-            if request_data['corpNum']:
-                name_request.corpNum = request_data['corpNum']
+            if isinstance(request_data.get('corpNum'), str):
+                name_request.corpNum = request_data.get('corpNum')
         except Exception as err:
             raise MapRequestHeaderAttributesError(err)
 
@@ -331,7 +330,7 @@ class NameRequestService(AbstractNameRequestMixin):
             nr_id = self.nr_id
 
             # If the language comment exists, we don't need to add it again
-            lang_comment = build_language_comment(request_data['english'], user_id, nr_id)
+            lang_comment = build_language_comment(request_data.get('english'), user_id, nr_id)
             matching_comments = list(filter(lambda x: x.comment == lang_comment.comment, list(name_request.comments)))
             if len(matching_comments) == 0:
                 name_request.comments.append(lang_comment)
@@ -351,7 +350,7 @@ class NameRequestService(AbstractNameRequestMixin):
             user_id = self.user_id
             nr_id = self.nr_id
 
-            if request_data['nameFlag'] is True:
+            if request_data.get('nameFlag') is True:
                 # If the person name comment exists, we don't need to add it again
                 name_comment = build_name_comment(user_id, nr_id)
                 matching_comments = list(filter(lambda x: x.comment == name_comment.comment, list(name_request.comments)))
@@ -386,7 +385,7 @@ class NameRequestService(AbstractNameRequestMixin):
         :param name_request:
         :return:
         """
-        if not self.request_names:
+        if not isinstance(self.request_names, list):
             raise MapRequestNamesError()
 
         try:
@@ -419,12 +418,12 @@ class NameRequestService(AbstractNameRequestMixin):
         # Common name attributes
         submitted_name = self.map_submitted_name_attrs(submitted_name, name)
         test_conflict = name.get('conflict1')
-        if len(test_conflict) > 0 :
+        if len(test_conflict) > 0:
             conflict_flag = 'Y'
         else:
-            conflict_flag='N'
+            conflict_flag = 'N'
 
-        if new_state_code in [State.COND_RESERVE] and conflict_flag=='Y':
+        if new_state_code in [State.COND_RESERVE] and conflict_flag == 'Y':
             submitted_name = self.map_submitted_name_conflicts(submitted_name, name)
 
         consent_words_list = name.get('consent_words', None)
@@ -508,7 +507,7 @@ class NameRequestService(AbstractNameRequestMixin):
         """
         Used internally by map_submitted_name.
         :param submitted_name:
-        :param name:
+        :param consent_list:
         :return:
         """
         decision_text = submitted_name.decision_text

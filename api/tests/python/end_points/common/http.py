@@ -1,6 +1,10 @@
 from urllib.parse import quote_plus
 
 
+def get_test_headers():
+    return {'content-type': 'application/json'}
+
+
 def build_test_query(test_params):
     query = ''
 

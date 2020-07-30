@@ -198,7 +198,7 @@ class NameRequestResource(Resource):
 
         # TODO: This needs more work (in progress)
         # if cleared:
-        nr = svc.map_request_data(nr, False)
+        # nr = svc.map_request_data(nr, False)
 
         # is_changed = len(changed) > 0
         # has_applicants = changed.get('applicants', None)
