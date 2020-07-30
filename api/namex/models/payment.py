@@ -3,7 +3,7 @@
 from . import db
 from datetime import datetime
 
-class Payments(db.Model):
+class Payment(db.Model):
     __tablename__ = 'payments'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
