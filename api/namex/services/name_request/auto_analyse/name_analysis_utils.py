@@ -82,29 +82,17 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
     return dist_list_all, desc_list_all
 
 
-def get_all_substitutions(syn_svc, list_dist, list_desc, list_name):
-    all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-        words=list_dist,
-        words_are_distinctive=True
-    ).data
-
-    dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
-
-    all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-        words=list_desc,
-        words_are_distinctive=False
-    ).data
-
-    desc_substitution_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-
-    all_substitution_dict = collections.OrderedDict()
+def get_all_dict_substitutions(dist_substitution_dict, desc_substitution_dict, list_name):
+    all_substitution_dict = {}
     for word in list_name:
-        if word in dist_substitution_dict:
-            all_substitution_dict[word] = dist_substitution_dict[word]
-        elif word in desc_substitution_dict:
-            all_substitution_dict[word] = desc_substitution_dict[word]
+        key_dist = next((key for key, value in dist_substitution_dict.items() if word == key or word in value), None)
+        if key_dist:
+            all_substitution_dict[word] = dist_substitution_dict[key_dist]
+        key_desc = next((key for key, value in desc_substitution_dict.items() if word == key or word in value), None)
+        if key_desc:
+            all_substitution_dict[word] = desc_substitution_dict[key_desc]
 
-    return all_substitution_dict, dist_substitution_dict, desc_substitution_dict
+    return all_substitution_dict
 
 
 def get_distinctive_substitutions(syn_svc, list_dist):
@@ -219,4 +207,3 @@ def get_classification(service, syn_svc, match, wc_svc, token_svc):
                                                           service.get_list_dist(),
                                                           service.get_list_desc())
     print(service.get_dict_name())
-
