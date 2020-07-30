@@ -219,7 +219,7 @@ def test_draft_patch_edit(client, jwt, app):
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
-    print('Patching DRAFT: \n' + repr(draft_nr))
+    print('Patching DRAFT: \n' + json.dumps(draft_nr, sort_keys=True, indent=4, separators=(',', ': ')))
 
     # Take the response and edit it
     request_uri = API_BASE_URI + draft_nr.get('nrNum') + '/' + NameRequestActions.EDIT.value
@@ -258,7 +258,7 @@ def test_draft_patch_edit(client, jwt, app):
 
     nr_data['names'].extend(added_names)
 
-    print('With Data: \n' + repr(nr_data) + '\n')
+    print('PATCH Request #1: \n' + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
     patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)
 
     if not patch_response or patch_response.status_code != 200:
@@ -267,7 +267,7 @@ def test_draft_patch_edit(client, jwt, app):
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
-    print('Result: \n' + repr(patched_nr) + '\n')
+    print('PATCH Response #1: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
@@ -282,6 +282,33 @@ def test_draft_patch_edit(client, jwt, app):
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
     # Check actions (write a util for this)
+
+    """
+    Patch the NR again with the response to make sure everything runs as expected
+    """
+
+    print('PATCH Request #2: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+    patch_response = client.patch(path, data=json.dumps(patched_nr), headers=headers)
+
+    if not patch_response or patch_response.status_code != 200:
+        raise Exception('NR PATCH operation failed')
+
+    re_patched_nr = json.loads(patch_response.data)
+    assert re_patched_nr is not None
+
+    print('PATCH Response #2: \n' + json.dumps(re_patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == DRAFT: ' + str(bool(re_patched_nr.get('stateCd') == 'DRAFT')))
+    assert re_patched_nr.get('stateCd') == 'DRAFT'
+
+    # TODO: Check applicant(s)
+
+    # Check names
+    assert_names_are_mapped_correctly(patched_nr.get('names'), re_patched_nr.get('names'))
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
 
 def test_draft_patch_upgrade(client, jwt, app):
