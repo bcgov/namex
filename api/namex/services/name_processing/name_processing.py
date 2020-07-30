@@ -75,6 +75,10 @@ class NameProcessingService(GetSynonymListsMixin):
         self._name_tokens = val
 
     @property
+    def stop_words(self):
+        return self._stop_words
+
+    @property
     def word_classification_service(self):
         return self._word_classification_service
 
