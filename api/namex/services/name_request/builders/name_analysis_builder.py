@@ -117,9 +117,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        # TODO: Arturo plz check the word against the list, provide it as an input for word_condition_service.get_words_to_avoid()
-        all_words_to_avoid_list = self.word_condition_service.get_words_to_avoid()
-        all_words_to_avoid_list = [word.lower() for word in all_words_to_avoid_list]
+        all_words_to_avoid_list = [word.lower() for word in self.word_condition_service.get_words_to_avoid()]
         all_words_to_avoid_list.sort(key=len, reverse=True)
 
         word_avoid_alternators = '|'.join(map(re.escape, all_words_to_avoid_list))
