@@ -1,6 +1,6 @@
 import re
 import itertools
-from . import porter, STEM_W, OTHER_W, SUBS_W, STEM_COS_W, SUBS_COS_W, EXACT_MATCH, MINIMUM_SIMILARITY, \
+from . import porter, STEM_W, OTHER_W, SUBS_W, EXACT_MATCH, MINIMUM_SIMILARITY, \
     HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY
 import math
 from collections import Counter
