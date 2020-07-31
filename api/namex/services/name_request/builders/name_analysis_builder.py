@@ -1,5 +1,5 @@
 import re
-from . import porter, STEM_W, OTHER_W, SUBS_W, STEM_COS_W, SUBS_COS_W, EXACT_MATCH, MINIMUM_SIMILARITY, \
+from . import porter, STEM_W, OTHER_W, SUBS_W, EXACT_MATCH, MINIMUM_SIMILARITY, \
     HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY
 import math
 from collections import Counter
@@ -8,7 +8,7 @@ WORD = re.compile(r"\w+")
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list, list_distinctive_descriptive, \
+from ..auto_analyse.name_analysis_utils import get_all_substitutions, get_flat_list, \
     get_conflicts_same_classification, get_classification
 
 from namex.models.request import Request
@@ -210,12 +210,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         for dist in dist_substitution_list:
             criteria = Request.get_general_query(change_filter, queue)
-            # Inject distinctive section into query
-            criteria = Request.get_query_distinctive_descriptive(dist, criteria, True, stop_words,
-                                                                 check_name_is_well_formed)
+            criteria = Request.get_distinctive_query(dist, criteria, stop_words, check_name_is_well_formed)
             for desc in desc_synonym_list:
-                # Inject descriptive section into query, execute and add matches to list
-                matches = Request.get_query_distinctive_descriptive(desc, criteria, False, None, False, queue)
+                criteria = Request.get_descriptive_query(desc, criteria, queue)
+                matches = Request.find_by_criteria_array(criteria, queue)
                 list_conflicts_details, forced = self.get_most_similar_names(
                     dict_highest_counter,
                     matches, w_dist,

@@ -275,12 +275,8 @@ class Request(db.Model):
     @classmethod
     def get_general_query(cls, change_filter=False, queue=False):
         criteria = []
-        basic_filters = [
+        basic_filter = [
             cls.id == Name.nrId,
-            cls.stateCd.in_(
-                [State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED] if not queue else [State.DRAFT,
-                                                                                                           State.HOLD,
-                                                                                                           State.INPROGRESS]),
             cls.requestTypeCd.in_([
                                       EntityTypes.PRIVATE_ACT.value,
                                       EntityTypes.CORPORATION.value,
@@ -352,39 +348,51 @@ class Request(db.Model):
                 EntityTypes.PARISH.value,
                 EntityTypes.BENEFIT_COMPANY.value
             ]),
-
-            Name.state.in_([NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
-                            NameState.COND_RESERVE.value]),
-
         ]
-        not_consumed_filters = [
+
+        queue_request_state_filter = [
+            cls.stateCd.in_(
+                [State.DRAFT, State.HOLD, State.INPROGRESS])
+        ]
+
+        corp_request_state_filter = [
+            cls.stateCd.in_(
+                [State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
+        ]
+
+        name_state_filter = [
+            Name.state.in_(
+                [NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
+                 NameState.COND_RESERVE.value])
+        ]
+
+        not_consumed_filter = [
             cls.expirationDate > func.current_Date(),
             Name.corpNum.is_(None),
             Name.consumptionDate.is_(None)
         ]
 
-        consumed_filters = [
+        consumed_filter = [
             Name.corpNum.isnot(None),
-            # Name.consumptionDate.isnot(None)
         ]
 
         if queue:
             criteria.append(RequestConditionCriteria(
                 fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
                         sqlalchemy.null().label('corpNum'), cls.nrNum],
-                filters=[basic_filters, not_consumed_filters]
+                filters=[basic_filter, queue_request_state_filter]
             ))
         else:
             criteria.append(RequestConditionCriteria(
                 fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('submittedDate'),
                         Name.corpNum,
                         sqlalchemy.null().label('nrNum')],
-                filters=[basic_filters, consumed_filters]
+                filters=[basic_filter, corp_request_state_filter, name_state_filter, consumed_filter]
             ))
             criteria.append(RequestConditionCriteria(
                 fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
                         sqlalchemy.null().label('corpNum'), cls.nrNum],
-                filters=[basic_filters, not_consumed_filters]
+                filters=[basic_filter, corp_request_state_filter, name_state_filter, not_consumed_filter]
             ))
 
         return criteria
@@ -399,46 +407,42 @@ class Request(db.Model):
         return flattened
 
     @classmethod
-    def get_query_distinctive_descriptive(cls, descriptive_element, criteria, distinctive=False, stop_words=None,
-                                          check_name_is_well_formed=False, queue=False):
-        special_characters_element = Request.set_special_characters(descriptive_element)
+    def get_distinctive_query(cls, dist, criteria, stop_words, check_name_is_well_formed):
+        special_characters_dist = Request.set_special_characters(dist)
         for e in criteria:
-            if not distinctive:
-                # Reset filter index 5 which contains the descriptive in the previous round.
-                # The filter index 4 contains distinctive value
-                if len(e.filters[0]) > 5:
-                    e.filters[0].pop()
-                substitutions = ' ?| '.join(map(str, special_characters_element)) + ' ?'
-                e.filters[0].append(func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions)))
+            substitutions = '|'.join(map(str, special_characters_dist))
+            if not check_name_is_well_formed:
+                e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
+                    r'^(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
             else:
-                substitutions = '|'.join(map(str, special_characters_element))
-                if not check_name_is_well_formed:
-                    e.filters[0].append(func.lower(Name.name).op('~')(
-                        r'^(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)))
-                else:
-                    e.filters[0].append(
-                        func.lower(Name.name).op('~')(
-                            r'^\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)))
+                e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
+                    r'^\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
 
-        if distinctive:
-            return criteria
-        results = Request.find_by_criteria_array(criteria, queue)
+        return criteria
 
-        return results
+    @classmethod
+    def get_descriptive_query(cls, desc, criteria, queue):
+        special_characters_descriptive = Request.set_special_characters(desc)
+        for e in criteria:
+            if not queue and len(e.filters) > 5 or queue and len(e.filters) > 3:
+                e.filters.pop()
+
+            substitutions = ' ?| '.join(map(str, special_characters_descriptive)) + ' ?'
+            e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions))])
+
+        return criteria
 
     @classmethod
     def find_by_criteria_array(cls, criteria_arr=None, queue=False):
         queries = []
         for criteria in criteria_arr:
             RequestConditionCriteria.is_valid_criteria(criteria)
-            if queue:
-                queries.append(
-                    cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters[0]))
-                )
-            else:
-                queries.append(
-                    cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters[0])).filter(and_(*criteria.filters[1]))
-                )
+            filters_all = []
+            for filter_group in criteria.filters:
+                for element in filter_group:
+                    filters_all.append(element)
+            queries.append(cls.query.with_entities(*criteria.fields).filter(and_(*filters_all)))
+
         if queue:
             query_all = queries[0]
         else:
@@ -459,7 +463,8 @@ class Request(db.Model):
         query = query.limit(limit)
 
         # Dump the query
-        query_str = '\n' + str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
+        query_str = '\n' + str(
+            query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
         current_app.logger.debug(query_str)
 
         return query.all()
