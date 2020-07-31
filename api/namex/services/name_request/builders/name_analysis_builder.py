@@ -148,12 +148,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def search_conflicts(self, list_dist_words, list_desc_words, list_name, name, check_name_is_well_formed=False,
                          queue=False):
         result = ProcedureResult()
-        result.is_valid = False
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
 
-        # Can we write a custom Exception here (raise Exception('Blah blah') so that if list_dist_words is not coming back like:
-        # [['my', 'words']] (list of lists) we throw an error because this procedure expects a list of lists...
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
             if w_dist and w_desc:
                 print(w_dist, ":DIST ", w_desc, ":DESC")
@@ -162,7 +159,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 list_conflicts.extend(list_details)
                 list_conflicts = [i for n, i in enumerate(list_conflicts) if
                                   i not in list_conflicts[n + 1:]]  # Remove duplicates
-
                 if forced:
                     break
 
@@ -171,21 +167,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             0:MAX_MATCHES_LIMIT])
 
         if most_similar_names:
-            response = self.prepare_response(most_similar_names)
+            result = self.prepare_response(most_similar_names, queue, list_name, list_dist_words, list_desc_words)
 
-        if response and not queue:
-            result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
-            self.get_response_search_conflicts_queue(result, list_name, list_dist_words, list_desc_words, response,
-                                                     result_code)
-        elif response and queue:
-            result_code = AnalysisIssueCodes.QUEUE_CONFLICT
-            self.get_response_search_conflicts_queue(result, list_name, list_dist_words, list_desc_words, response,
-                                                     result_code)
-
-        else:
-            result.is_valid = True
-            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
-            result.values = []
         return result
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed, queue):
@@ -448,28 +431,22 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_most_similar_names(self, dict_highest_counter, matches, dist_substitution_dict, desc_synonym_dict,
                                list_name):
-        list_details = []
+        list_details, selected_matches = [],[]
+        dict_matches_counter = {}
         forced = False
         list_dist = list(dist_substitution_dict.keys())
         list_desc = list(desc_synonym_dict.keys())
         if matches:
-            selected_matches, dict_details = [], {}
             syn_svc = self.synonym_service
             service = ProtectedNameAnalysisService()
             np_svc = service.name_processing_service
             wc_svc = service.word_classification_service
             token_svc = service.token_classifier_service
 
-            all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
-
-            list_dist_stem = [porter.stem(name.lower()) for name in list_dist]
-            list_desc_stem = [porter.stem(name.lower()) for name in list_desc]
-
-            dict_matches_counter, dict_matches_words = {}, {}
             print(list_dist, ": DIST ", list_desc, ": DESC")
+
             vector1_dist = self.text_to_vector(list_dist)
             vector1_desc = self.text_to_vector(list_desc)
-            similarity = 0.0
             for match in matches:
                 np_svc.set_name(match.name)
                 if np_svc.name_tokens == list_name:
@@ -478,26 +455,25 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     match_list = np_svc.name_tokens
                     get_classification(service, syn_svc, match_list, wc_svc, token_svc)
 
-                    vector2_dist, entropy_dist = self.get_score_by_classification(service.get_list_dist(), list_dist,
-                                                                                  list_dist_stem,
-                                                                                  dist_substitution_dict)
+                    vector2_dist, entropy_dist = self.get_vector(service.get_list_dist(), list_dist,dist_substitution_dict)
                     similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
-                    vector2_desc, entropy_desc = self.get_score_by_classification(service.get_list_desc(), list_desc,
-                                                                                  list_desc_stem,
-                                                                                  desc_synonym_dict)
+
+                    vector2_desc, entropy_desc = self.get_vector(service.get_list_desc(), list_desc, desc_synonym_dict)
                     similarity_desc = round(
                         self.get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
+
                     similarity = round((similarity_dist + similarity_desc) / 2, 2)
                     print(similarity)
 
                 if similarity >= MINIMUM_SIMILARITY:
                     dict_matches_counter.update({match.name: similarity})
                     selected_matches.append(match)
-                if self.stop_search(similarity, matches):
-                    forced = True
-                    break
+                    if self.stop_search(similarity, matches):
+                        forced = True
+                        break
 
             if dict_matches_counter:
+                all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
                 # Get  N highest score (values) and shortest names (key)
                 dict_highest_counter.update({k: v for k, v in
                                              sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
@@ -506,8 +482,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details, forced
 
-    def prepare_response(self, most_similar_names):
+    def prepare_response(self, most_similar_names, queue, list_name, list_dist_words, list_desc_words):
         conflict_name = {}
+        result = ProcedureResult()
+        result.is_valid = False
+        response = {}
 
         for record in most_similar_names:
             conflict_name = {record['name']: record['tokens']}
@@ -522,7 +501,23 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                         'source': source
                         }
 
-        return response
+        if response and not queue:
+            result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
+            result = self.get_response_search_conflicts_queue(result, list_name, list_dist_words, list_desc_words,
+                                                              response,
+                                                              result_code)
+        elif response and queue:
+            result_code = AnalysisIssueCodes.QUEUE_CONFLICT
+            result = self.get_response_search_conflicts_queue(result, list_name, list_dist_words, list_desc_words,
+                                                              response,
+                                                              result_code)
+
+        else:
+            result.is_valid = True
+            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
+            result.values = []
+
+        return result
 
     def is_match(self, list_conflicts, forced):
         for record in list_conflicts:
@@ -570,10 +565,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     
     '''
 
-    def get_score_by_classification(self, conflict_class_list, original_class_list, original_class_stem,
-                                    class_subs_dict):
-        vector1 = dict()
+    def get_vector(self, conflict_class_list, original_class_list, class_subs_dict):
+        vector = dict()
         entropy = 0.0
+        original_class_stem = [porter.stem(name.lower()) for name in original_class_list]
+
         for idx, word in enumerate(conflict_class_list):
             k = word.lower()
             word_stem = porter.stem(k)
@@ -590,10 +586,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             else:
                 counter = OTHER_W
             if counter == 1:
-                vector1[k] = counter
+                vector[k] = counter
             else:
-                vector1[word] = counter
-        return vector1, entropy
+                vector[word] = counter
+        return vector, entropy
 
     def get_subsitutions_distinctive(self, w_dist):
         syn_svc = self.synonym_service
