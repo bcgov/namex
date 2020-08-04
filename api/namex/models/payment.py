@@ -27,12 +27,21 @@ class Payment(db.Model):
     @property
     def payment_completion_date(self):
         """Property containing the date the payment cleared."""
-        return self._payment_date
+        return self._payment_completion_date
 
     @payment_completion_date.setter
-    def payment_date(self, date):
+    def payment_completion_date(self, date):
         """Property containing the date the payment cleared."""
-        self._payment_date = date
+        self._payment_completion_date = date
+
+    @property
+    def payment_status_code(self):
+        """Property containing the payment token."""
+        return self._payment_status_code
+
+    @payment_status_code.setter
+    def payment_status_code(self, str):
+        self._payment_status_code = str
 
 
     def as_dict(self):
