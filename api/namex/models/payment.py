@@ -48,7 +48,8 @@ class Payment(db.Model):
         return {
             'id': self.id,
             'payment_token' : self.payment_token,
-            'payment_completion_date' : self.payment_completion_date
+            'payment_completion_date' : self.payment_completion_date,
+            'payment_status_code' : self.payment_status_code
         }
 
 
