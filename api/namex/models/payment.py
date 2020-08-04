@@ -9,7 +9,8 @@ class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     _payment_token = db.Column('payment_id', db.String(4096))
-    _payment_date = db.Column('payment_date', db.DateTime(timezone=True), default=datetime.utcnow)
+    _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
+    _payment_status_code = db.Column('payment_status_code', db.String(50))
 
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
 
@@ -24,11 +25,11 @@ class Payment(db.Model):
         self._payment_token = token
 
     @property
-    def payment_date(self):
+    def payment_completion_date(self):
         """Property containing the date the payment cleared."""
         return self._payment_date
 
-    @payment_date.setter
+    @payment_completion_date.setter
     def payment_date(self, date):
         """Property containing the date the payment cleared."""
         self._payment_date = date
@@ -38,7 +39,7 @@ class Payment(db.Model):
         return {
             'id': self.id,
             'payment_token' : self.payment_token,
-            'payment_date' : self.payment_date
+            'payment_completion_date' : self.payment_completion_date
         }
 
 
