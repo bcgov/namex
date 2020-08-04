@@ -10,9 +10,10 @@ from tests.python.end_points.common.logging import log_request_path
 from tests.python.unit.test_setup_utils import build_nr
 from tests.python.end_points.common.http import get_test_headers
 # Import token and claims if you need it
-from tests.python.end_points.common.configuration import claims, token_header
+# from tests.python.end_points.common.configuration import claims, token_header
 
 from .configuration import API_BASE_URI
+from tests.python.common.test_name_request_utils import pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_field_is_mapped
 
 from namex.models import State, User
 from namex.constants import NameRequestActions
@@ -50,53 +51,6 @@ state_data = [
     ('COND-RESERVE', 'Temporary reserved state with consent required'),
     ('RESERVED', 'Temporary reserved state between name available and paid.  Once paid it is set to APPROVED or CONDITIONAL approval.')
 ]
-
-
-def pick_name_from_list(names, name):
-    matches = [n for n in names if n.get('name') == name]
-    if len(matches) == 0:
-        return None
-    if len(matches) == 1:
-        return matches[0]
-    if len(matches) > 1:
-        raise Exception('More than one match for a name!')
-
-
-@pytest.mark.skip
-def assert_name_has_name(name):
-    """
-    Just a util
-    :param name:
-    :return:
-    """
-    assert name is not None
-    assert name.get('name') is not None
-
-
-@pytest.mark.skip
-def assert_name_has_id(name):
-    """
-    Just a util
-    :param name:
-    :return:
-    """
-    assert name.get('id') is not None
-
-
-@pytest.mark.skip
-def assert_field_is_mapped(req_obj, res_obj, prop_name):
-    """
-    Just a util
-    :param req_obj:
-    :param res_obj:
-    :param prop_name:
-    :return:
-    """
-    req_obj_val = req_obj.get(prop_name)
-    res_obj_val = res_obj.get(prop_name)
-    print('Request Field [' + prop_name + ': ' + str(req_obj_val) + '] equals Response Field [' + prop_name + ': ' + str(res_obj_val) + ']')
-    assert req_obj_val == res_obj_val
-    print('OK')
 
 
 @pytest.mark.skip

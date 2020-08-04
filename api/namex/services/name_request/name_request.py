@@ -161,6 +161,16 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return name
 
+    @classmethod
+    def get_name_from_list(cls, names, name_id):
+        matches = [n for n in names if n.id == name_id]
+        if len(matches) == 0:
+            return None
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise Exception('More than one match for a name!')
+
     def update_request_submit_count(self, name_request):
         try:
             if self.request_data.get('submit_count') is None:
@@ -389,16 +399,18 @@ class NameRequestService(AbstractNameRequestMixin):
             raise MapRequestNamesError()
 
         try:
-            for name in self.request_names:
-                name_id = name.get('id')
-                if name_id:
-                    existing_names = []
-                    for idx, existing_name in enumerate(name_request.names):
-                        existing_names.append(self.map_submitted_name(existing_name, name))
-                    name_request.names = existing_names
+            for request_name in self.request_names:
+                request_name_id = request_name.get('id')
+                if request_name_id:
+                    existing_names = name_request.names.all()
+                    match = self.get_name_from_list(existing_names, request_name_id)
+                    if match:
+                        # Update the name
+                        updated_name = self.map_submitted_name(match, request_name)
+                        name_request.names.append(updated_name)
                 else:
                     submitted_name = self.create_name()
-                    submitted_name = self.map_submitted_name(submitted_name, name)
+                    submitted_name = self.map_submitted_name(submitted_name, request_name)
                     name_request.names.append(submitted_name)
 
         except Exception as err:

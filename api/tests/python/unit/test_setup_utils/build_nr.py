@@ -1,4 +1,4 @@
-from namex.models import State, Request as RequestDAO, Name as NameDAO
+from namex.models import db, State, Request as RequestDAO, Name as NameDAO
 
 default_test_names = [
     {
@@ -24,7 +24,11 @@ default_test_names = [
 
 def build_name(test_name):
     name = NameDAO()
-    name.id = test_name.get('id', None)
+    # TODO: Why are these sequences NOT auto increment, why do we have to update the seq manually?
+    # name.id = test_name.get('id', None)
+    seq = db.Sequence('names_id_seq')
+    name_id = db.engine.execute(seq)
+    name.id = test_name.get('id', name_id)
     name.choice = 1
     name.name = test_name.get('name', '')
     name.designation = test_name.get('designation', '')
