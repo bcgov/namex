@@ -374,7 +374,7 @@ class NameRequestResource(Resource):
                 temp_nr_num = existing_nr_num
 
         # Record the event
-        EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
+        EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
 
         # Update SOLR
         self.update_solr_service(nr_model, temp_nr_num)
