@@ -195,7 +195,18 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                                             , status='ERROR'
                                     )
                         namex_db.session.rollback()
+
                         ora_con.commit()
+            else:
+                current_app.logger.error(err.with_traceback(None))
+                success = update_datafix_row(ora_con
+                                             , id=row['id']
+                                             , nr_num=nr_num
+                                             , status='ERROR'
+                                             )
+                namex_db.session.rollback()
+
+                ora_con.commit()
 
         return row_count
 
