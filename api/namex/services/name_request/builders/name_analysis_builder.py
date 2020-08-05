@@ -189,12 +189,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 desc_list_dict_compound = self.get_descriptive_compounds(dist_list_dict_compound, desc_synonym_dict)
 
                 for dist_dict, desc_dict in zip(dist_list_dict_compound, desc_list_dict_compound):
-                    list_details, forced = self.get_conflicts_db(dist_dict, desc_dict,
-                                                                 dict_highest_counter,
-                                                                 change_filter, list_name_compound, check_name_is_well_formed,
-                                                                 queue)
-                    if list_details:
-                        return list_details, forced
+                    list_details_compound, forced = self.get_conflicts_db(dist_dict, desc_dict,
+                                                                          dict_highest_counter,
+                                                                          change_filter, list_name_compound,
+                                                                          check_name_is_well_formed,
+                                                                          queue)
+                    if list_details_compound:
+                        return list_details_compound, forced
 
         return list_details, forced
 
@@ -618,6 +619,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         ).data
 
         desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
+
+        for key, value in desc_synonym_dict.items():
+            if key not in value:
+                desc_synonym_list = desc_synonym_dict.get(key)
+                desc_synonym_list.append(key)
+                desc_synonym_dict[key] = desc_synonym_list
+
         return desc_synonym_dict
 
     def check_name_is_well_formed_response(self, list_original_name, list_name, list_dist, result_code):
@@ -767,4 +775,3 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             list_dict_desc_compound.append(dict_desc_compound)
 
         return list_dict_desc_compound
-
