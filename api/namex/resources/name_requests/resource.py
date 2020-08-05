@@ -365,7 +365,7 @@ class NameRequestResource(Resource):
         temp_nr_num = None
         # Save the request to NRO and back to postgres ONLY if the state is DRAFT, CONDITIONAL, or APPROVED
         # this is after fees are accepted
-        if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
+        if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED, State.CANCELLED]:
             existing_nr_num = nr_model.nrNum
             # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
             nr_model = self.update_request_in_nro(nr_model, self.on_nro_save_success)
