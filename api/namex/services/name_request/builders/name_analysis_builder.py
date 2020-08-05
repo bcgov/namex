@@ -184,16 +184,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             print("Search for conflicts considering compound words.")
             dict_compound_dist, dict_desc, list_name_compound = self.compound_words(dist_substitution_dict,
                                                                                     desc_synonym_dict, list_name)
-            dist_list_dict_compound = self.get_distinctive_compounds(dict_compound_dist)
-            desc_list_dict_compound = self.get_descriptive_compounds(dist_list_dict_compound, desc_synonym_dict)
+            if dict_compound_dist:
+                dist_list_dict_compound = self.get_distinctive_compounds(dict_compound_dist)
+                desc_list_dict_compound = self.get_descriptive_compounds(dist_list_dict_compound, desc_synonym_dict)
 
-            for dist_dict, desc_dict in zip(dist_list_dict_compound, desc_list_dict_compound):
-                list_details, forced = self.get_conflicts_db(dist_dict, desc_dict,
-                                                             dict_highest_counter,
-                                                             change_filter, list_name_compound, check_name_is_well_formed,
-                                                             queue)
-                if list_details:
-                    return list_details, forced
+                for dist_dict, desc_dict in zip(dist_list_dict_compound, desc_list_dict_compound):
+                    list_details, forced = self.get_conflicts_db(dist_dict, desc_dict,
+                                                                 dict_highest_counter,
+                                                                 change_filter, list_name_compound, check_name_is_well_formed,
+                                                                 queue)
+                    if list_details:
+                        return list_details, forced
 
         return list_details, forced
 
@@ -700,7 +701,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 idx += 1
                 a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else dict_desc[list_name[idx]]
 
-            if idx + 1 < len(list_name):
+            if idx + 1 < len(list_name[:-1]):
                 b = dict_dist[list_name[idx + 1]] if list_name[idx + 1] in dict_dist else dict_desc[list_name[idx + 1]]
                 if a in dict_dist.values():
                     compound = []
