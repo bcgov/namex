@@ -118,11 +118,6 @@ def _update_request(oracle_cursor, nr, event_id, change_flags):
 
     if change_flags['is_changed__request']:
 
-        app_config = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
-        if not app_config:
-            current_app.logger.error('ENV is not set for oracle  update')
-            return None, 'Internal server error', 500
-
         # get request_instance record, with all fields
         oracle_cursor.execute("""
         SELECT *

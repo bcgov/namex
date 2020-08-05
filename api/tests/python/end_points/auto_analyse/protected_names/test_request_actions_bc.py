@@ -3,7 +3,8 @@ import jsonpickle
 
 from urllib.parse import quote_plus
 
-from ..common import save_words_list_classification, assert_issues_count_is_zero
+from namex.services.name_request.auto_analyse import AnalysisIssueCodes
+from ..common import save_words_list_classification, assert_has_no_issue_type
 from ..configuration import ENDPOINT_PATH
 from ...common import token_header, claims
 
@@ -48,4 +49,4 @@ def test_designation_existence_request_response(client, jwt, app):
         payload = jsonpickle.decode(response.data)
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
-            assert_issues_count_is_zero(payload.get('issues'))
+            assert_has_no_issue_type(AnalysisIssueCodes, payload.get('issues'))
