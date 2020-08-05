@@ -5,6 +5,7 @@ from flask_restplus import Resource
 
 from namex.utils.logging import setup_logging
 
+from namex.constants import NROChangeFlags
 from namex.models import Event, State
 
 from namex.services import EventRecorder, MessageServices
@@ -245,43 +246,57 @@ class NameRequestResource(Resource):
         # Return the updated name request
         return nr
 
+    def on_nro_update_complete(self, name_request, on_success, warnings, is_new_record=False):
+        if warnings:
+            code = 'add_request_in_NRO' if is_new_record else 'update_request_in_NRO'
+            MessageServices.add_message(MessageServices.ERROR, code, warnings)
+            raise NROUpdateError()
+        else:
+            self.on_nro_update_success(name_request, on_success)
+
+    def on_nro_update_success(self, name_request, on_success):
+        if on_success:
+            return on_success(self, name_request, self.nr_service)
+
     def add_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
             # TODO: It might be a good idea to set an env var for this...
-            # warnings = None  # self.nro_service.add_nr(name_request)
-            warnings = self.nro_service.add_nr(name_request)
-            if warnings:
-                MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
-                raise NROUpdateError()
-            else:
-                # Execute the callback handler
-                if on_success:
-                    return on_success(name_request, self.nr_service)
+            nro_warnings = None  # self.nro_service.add_nr(name_request)
+            self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
         else:
             raise NameRequestException(message='Invalid state exception')
 
     def update_request_in_nro(self, name_request, on_success=None):
-        # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
-        if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
+        # Only update Oracle for DRAFT
+        # NRO / Oracle records are added when CONDITIONAL or APPROVED (see add_request_to_nro)
+        if name_request.stateCd in [State.DRAFT]:
             # TODO: It might be a good idea to set an env var for this...
-            # warnings = None  # self.nro_service.add_nr(name_request)
-            warnings = self.nro_service.change_nr(name_request, [
-                'is_changed__request',
-                'is_changed__applicant',
-                'is_changed__name1',
-                'is_changed__name2',
-                'is_changed__name3',
-                'is_changed__address'
-            ])
+            # nro_warnings = None
+            nro_warnings = self.nro_service.change_nr(name_request, {
+                NROChangeFlags.REQUEST.value: True,
+                NROChangeFlags.PREV_REQ.value: False,
+                NROChangeFlags.APPLICANT.value: True,
+                NROChangeFlags.ADDRESS.value: True,
+                NROChangeFlags.NAME_1.value: True,
+                NROChangeFlags.NAME_2.value: True,
+                NROChangeFlags.NAME_3.value: True,
+                NROChangeFlags.NWPTA_AB.value: False,
+                NROChangeFlags.NWPTA_SK.value: False,
+                NROChangeFlags.CONSENT.value: False,
+                NROChangeFlags.STATE.value: True
+            })
 
-            if warnings:
-                MessageServices.add_message(MessageServices.ERROR, 'update_request_in_NRO', warnings)
-                raise NROUpdateError()
-            else:
-                # Execute the callback handler
-                if on_success:
-                    return on_success(name_request, self.nr_service)
+            self.on_nro_update_complete(name_request, on_success, nro_warnings)
+        # Handle any changes where ONLY state is changed
+        elif name_request.stateCd in [State.CANCELLED]:
+            # TODO: It might be a good idea to set an env var for this...
+            # nro_warnings = None
+            nro_warnings = self.nro_service.change_nr(name_request, {
+                NROChangeFlags.STATE.value: True
+            })
+
+            self.on_nro_update_complete(name_request, on_success, nro_warnings)
         else:
             raise NameRequestException(message='Invalid state exception')
 

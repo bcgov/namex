@@ -1,11 +1,13 @@
 """Request is the main business class that is the real top level object in the system
 """
 import sqlalchemy
-import traceback
+# TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
+# import traceback
 
 from . import db, ma
 from flask import current_app
-from flask_sqlalchemy import get_debug_queries
+# TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
+# from flask_sqlalchemy import get_debug_queries
 from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
@@ -203,14 +205,14 @@ class Request(db.Model):
         # next_nr = db.engine.execute(seq)
         # self.nr = 'NR{0:0>8}'.format(next_nr)
 
-        try:
-            db.session.add(self)
-
-            db.session.commit()
-        except Exception as err:
-            print(repr(err))
-            traceback.print_exc()
-            raise
+        # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
+        # try:
+        db.session.add(self)
+        db.session.commit()
+        # except Exception as err:
+        #    print(repr(err))
+        #    traceback.print_exc()
+        #    raise
 
     def delete_from_db(self):
         # TODO: Add listener onto the SQLALchemy event to block deletes
@@ -474,8 +476,9 @@ class Request(db.Model):
 
         # Dump the query
         # TODO: Make a util for this!
-        query_str = '\n' + str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
-        current_app.logger.debug(query_str)
+        # TODO: Only log if LOCAL_DEV_MODE / DEBUG conf exists
+        # query_str = '\n' + str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
+        # current_app.logger.debug(query_str)
 
         return query.all()
 
@@ -514,10 +517,9 @@ def update_request_action_entity_type(mapper, connection,
     # needed to break apart  request_type
     request = target
     # TODO: We should check to make sure nrNum actually exists if it's None, this will bomb out with a cryptic error
+    #  Finish implementing debug logging first!
     # TODO: Use the new regex for nr matching if possible
     if re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None:
-        # todo: handle assumed name as it is a name type and not currently a request action?
-        # map the legacy request_type to the new Entity_type and Request_action
         new_value = request.requestTypeCd
         output = [item for item in request_type_mapping
                   if item[0] == new_value]
