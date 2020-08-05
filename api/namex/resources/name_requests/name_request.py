@@ -92,9 +92,6 @@ class NameRequest(NameRequestResource):
                 # Then update the name request as required
                 nr_model = self.process_payment(nr_model)
 
-            # This handles the updates for NRO and Solr, if necessary
-            self.update_network_services(nr_model)
-
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
@@ -108,7 +105,11 @@ class NameRequest(NameRequestResource):
 
         # Use apply_state_change to change state, as it enforces the State change pattern
         # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-        return nr_svc.apply_state_change(nr_model, nr_model.stateCd, self.handle_nr_update)
+        nr_model = nr_svc.apply_state_change(nr_model, nr_model.stateCd, self.handle_nr_update)
+
+        # This handles the updates for NRO and Solr, if necessary
+        # self.add_records_to_network_services(nr_model)
+        return nr_model
 
     def process_payment(self, nr_model):
         nr_svc = self.nr_service
@@ -123,6 +124,8 @@ class NameRequest(NameRequestResource):
             # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
             nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
 
+        # This handles the updates for NRO and Solr, if necessary
+        self.add_records_to_network_services(nr_model)
         return nr_model
 
 
@@ -243,7 +246,7 @@ class NameRequestFields(NameRequestResource):
 
         # This handles the updates for NRO and Solr, if necessary
         # TODO: Do we update network services?
-        self.update_network_services(nr_model)
+        self.update_records_in_network_services(nr_model)
         return nr_model
 
     def handle_patch_upgrade(self, nr_model):
@@ -257,7 +260,7 @@ class NameRequestFields(NameRequestResource):
         # We have not accounted for multiple payments.
         # We will need to add a request_payment model (request_id and payment_id)
         # This handles the updates for NRO and Solr, if necessary
-        self.update_network_services(nr_model)
+        self.update_records_in_network_services(nr_model)
         return nr_model
 
     def handle_patch_cancel(self, nr_model):
@@ -266,7 +269,7 @@ class NameRequestFields(NameRequestResource):
 
         # This handles the updates for NRO and Solr, if necessary
         # TODO: Do we update network services?
-        self.update_network_services(nr_model)
+        self.update_records_in_network_services(nr_model)
         return nr_model
 
     def handle_patch_refund(self, nr_model):
@@ -274,7 +277,7 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        # self.update_network_services(nr_model)
+        # self.update_records_in_network_services(nr_model)
         return nr_model
 
     def handle_patch_reapply(self, nr_model):
@@ -297,7 +300,7 @@ class NameRequestFields(NameRequestResource):
 
             # This handles the updates for NRO and Solr, if necessary
             # TODO: Do we update network services?
-            self.update_network_services(nr_model)
+            self.update_records_in_network_services(nr_model)
 
             # TODO: Raise an error if submitCount is greater than 3
         return nr_model
@@ -308,7 +311,7 @@ class NameRequestFields(NameRequestResource):
 
         # This handles the updates for NRO and Solr, if necessary
         # TODO: Do we update network services?
-        self.update_network_services(nr_model)
+        self.update_records_in_network_services(nr_model)
         return nr_model
 
     def update_nr_fields(self, nr_model, new_state):

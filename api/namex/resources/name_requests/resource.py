@@ -245,13 +245,38 @@ class NameRequestResource(Resource):
         # Return the updated name request
         return nr
 
-    def save_request_to_nro(self, name_request, on_success=None):
+    def add_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
             # TODO: It might be a good idea to set an env var for this...
-            warnings = None  # self.nro_service.add_nr(name_request)
+            # warnings = None  # self.nro_service.add_nr(name_request)
+            warnings = self.nro_service.add_nr(name_request)
             if warnings:
                 MessageServices.add_message(MessageServices.ERROR, 'add_request_in_NRO', warnings)
+                raise NROUpdateError()
+            else:
+                # Execute the callback handler
+                if on_success:
+                    return on_success(name_request, self.nr_service)
+        else:
+            raise NameRequestException(message='Invalid state exception')
+
+    def update_request_in_nro(self, name_request, on_success=None):
+        # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
+        if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
+            # TODO: It might be a good idea to set an env var for this...
+            # warnings = None  # self.nro_service.add_nr(name_request)
+            warnings = self.nro_service.change_nr(name_request, [
+                'is_changed__request',
+                'is_changed__applicant',
+                'is_changed__name1',
+                'is_changed__name2',
+                'is_changed__name3',
+                'is_changed__address'
+            ])
+
+            if warnings:
+                MessageServices.add_message(MessageServices.ERROR, 'update_request_in_NRO', warnings)
                 raise NROUpdateError()
             else:
                 # Execute the callback handler
@@ -299,7 +324,7 @@ class NameRequestResource(Resource):
 
         return result
 
-    def update_network_services(self, nr_model):
+    def add_records_to_network_services(self, nr_model):
         nr_svc = self.nr_service
 
         temp_nr_num = None
@@ -308,7 +333,7 @@ class NameRequestResource(Resource):
         if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
             existing_nr_num = nr_model.nrNum
             # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
-            nr_model = self.save_request_to_nro(nr_model, self.on_nro_save_success)
+            nr_model = self.add_request_to_nro(nr_model, self.on_nro_save_success)
             # Set the temp NR number if its different
             if nr_model.nrNum != existing_nr_num:
                 temp_nr_num = existing_nr_num
@@ -317,6 +342,29 @@ class NameRequestResource(Resource):
         EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
 
         # Update SOLR
+        self.update_solr_service(nr_model, temp_nr_num)
+
+    def update_records_in_network_services(self, nr_model):
+        nr_svc = self.nr_service
+
+        temp_nr_num = None
+        # Save the request to NRO and back to postgres ONLY if the state is DRAFT, CONDITIONAL, or APPROVED
+        # this is after fees are accepted
+        if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
+            existing_nr_num = nr_model.nrNum
+            # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
+            nr_model = self.update_request_in_nro(nr_model, self.on_nro_save_success)
+            # Set the temp NR number if its different
+            if nr_model.nrNum != existing_nr_num:
+                temp_nr_num = existing_nr_num
+
+        # Record the event
+        EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
+
+        # Update SOLR
+        self.update_solr_service(nr_model, temp_nr_num)
+
+    def update_solr_service(self, nr_model, temp_nr_num):
         if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
             self.create_solr_nr_doc(SOLR_CORE, nr_model)
             if temp_nr_num:
