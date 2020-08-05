@@ -284,7 +284,7 @@ class NameRequestResource(Resource):
                 NROChangeFlags.NWPTA_AB.value: False,
                 NROChangeFlags.NWPTA_SK.value: False,
                 NROChangeFlags.CONSENT.value: False,
-                NROChangeFlags.STATE.value: True
+                NROChangeFlags.STATE.value: False
             })
 
             self.on_nro_update_complete(name_request, on_success, nro_warnings)
