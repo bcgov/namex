@@ -80,7 +80,9 @@ class TestConfig(Config):
     DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
     DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
+    # Allows for NRO add / update bypass if necessary (for local development)
     LOCAL_DEV_MODE = os.getenv('LOCAL_DEV_MODE', False)
+    # Set this in your .env to debug SQL Alchemy queries (for local development)
     SQLALCHEMY_ECHO = 'debug' if os.getenv('DEBUG_SQL_QUERIES', False) else False
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
         user=DB_USER,
