@@ -182,8 +182,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if not forced:
             print("Search for conflicts considering compound words.")
-            dict_compound_dist, dict_desc, list_name_compound = self.get_compound_words(dist_substitution_dict,
-                                                                                        desc_synonym_dict, list_name)
+            dict_compound_dist = self.get_compound_words(dist_substitution_dict, desc_synonym_dict, list_name)
             if dict_compound_dist:
                 dist_list_dict_compound = self.get_distinctive_compounds(dict_compound_dist)
                 desc_list_dict_compound = self.get_descriptive_compounds(dist_list_dict_compound, desc_synonym_dict)
@@ -191,7 +190,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 for dist_dict, desc_dict in zip(dist_list_dict_compound, desc_list_dict_compound):
                     list_details_compound, forced = self.get_conflicts_db(dist_dict, desc_dict,
                                                                           dict_highest_counter,
-                                                                          change_filter, list_name_compound,
+                                                                          change_filter,
+                                                                          list(dict_compound_dist.keys()),
                                                                           check_name_is_well_formed,
                                                                           queue)
                     if list_details_compound:
@@ -697,13 +697,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return result
 
     '''
+    Input:
+    dict_dist: {'victoria': ['victoria'], 
+                 'south': ['south']}
+    dict_desc: {'land': ['emigr', 'emigra', 'imigr', ..., 'structur'], 
+                'developers': ['abod', 'acr', 'build', 'builder', ...,'structur', 'developers']}  
+    list_name: ['victoria', 'south', 'land', 'developers']
     
+    Output:
+    dict_compound_dist: {'victoriasouth': ['victoriasouth'], 
+                         'southland': ['southemigr', 'southemigra', 'southimigr', ..., 'southstructur']}        
     '''
 
     def get_compound_words(self, dict_dist, dict_descriptive, list_name):
         dict_compound_dist = {}
         dict_desc = dict(dict_descriptive)
-        list_name_compound = []
         for idx, elem in enumerate(list_name[:-1]):
             a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else None
             next_idx = idx + 1
@@ -715,12 +723,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     compound.append(''.join(item))
                     dict_compound_dist[list_name[idx] + list_name[next_idx]] = compound
 
-                list_name_compound.append(list_name[idx] + list_name[next_idx])
-
                 if list_name[next_idx] in dict_desc:
                     del dict_desc[list_name[next_idx]]
 
-        return dict_compound_dist, dict_desc, list_name_compound
+        return dict_compound_dist
 
     def get_dictionary(self, dct, lst):
         for elem in lst:
