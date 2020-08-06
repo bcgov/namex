@@ -262,7 +262,9 @@ class NameRequestResource(Resource):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
             # TODO: It might be a good idea to set an env var for this...
-            nro_warnings = None  # self.nro_service.add_nr(name_request)
+            # nro_warnings = None  # self.nro_service.add_nr(name_request)
+            nro_warnings = self.nro_service.add_nr(name_request)
+            self.nro_service.add_nr(name_request)
             self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
         else:
             raise NameRequestException(message='Invalid state exception')
