@@ -252,7 +252,7 @@ class NameRequestResource(Resource):
             MessageServices.add_message(MessageServices.ERROR, code, warnings)
             raise NROUpdateError()
         else:
-            self.on_nro_update_success(name_request, on_success)
+            return self.on_nro_update_success(name_request, on_success)
 
     def on_nro_update_success(self, name_request, on_success):
         if on_success:
@@ -262,8 +262,9 @@ class NameRequestResource(Resource):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
             # TODO: It might be a good idea to set an env var for this...
+            # nro_warnings = None
             nro_warnings = self.nro_service.add_nr(name_request)
-            self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
+            return self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
         else:
             raise NameRequestException(message='Invalid state exception')
 
@@ -287,7 +288,7 @@ class NameRequestResource(Resource):
                 NROChangeFlags.STATE.value: False
             })
 
-            self.on_nro_update_complete(name_request, on_success, nro_warnings)
+            return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         # Handle any changes where ONLY state is changed
         elif name_request.stateCd in [State.CANCELLED]:
             # TODO: It might be a good idea to set an env var for this...
@@ -295,7 +296,7 @@ class NameRequestResource(Resource):
                 NROChangeFlags.STATE.value: True
             })
 
-            self.on_nro_update_complete(name_request, on_success, nro_warnings)
+            return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         else:
             raise NameRequestException(message='Invalid state exception')
 
