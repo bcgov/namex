@@ -256,7 +256,7 @@ class NameRequestResource(Resource):
 
     def on_nro_update_success(self, name_request, on_success):
         if on_success:
-            return on_success(self, name_request, self.nr_service)
+            return on_success(name_request, self.nr_service)
 
     def add_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
