@@ -622,9 +622,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         for key, value in desc_synonym_dict.items():
             if key not in value:
-                desc_synonym_list = desc_synonym_dict.get(key)
-                desc_synonym_list.append(key)
-                desc_synonym_dict[key] = desc_synonym_list
+                value.append(key)
 
         return desc_synonym_dict
 
@@ -709,7 +707,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 idx += 1
                 a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else dict_desc[list_name[idx]]
 
-            if idx + 1 < len(list_name[:-1]):
+            if idx + 1 < len(list_name):
                 b = dict_dist[list_name[idx + 1]] if list_name[idx + 1] in dict_dist else dict_desc[list_name[idx + 1]]
                 if a in dict_dist.values():
                     compound = []
