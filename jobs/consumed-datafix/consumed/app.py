@@ -41,12 +41,13 @@ def job_result_set(ora_con, max_rows):
 
     ora_cursor = ora_con.cursor()
 
+    #(df.fd = 'FD' and df.status is null) -DONE
     result_set = ora_cursor.execute("""
     SELECT * 
     FROM (SELECT  df.ID, df.NR_NUM, df.corp_num, df.STATUS, corp.name
     FROM namex_datafix df
     INNER JOIN namex.solr_dataimport_conflicts_vw@colin_readonly corp on corp.id = df.corp_num
-    WHERE(df.fd = 'FD' and df.status is null) or (df.status='ERROR') order  by  df.id)
+    WHERE(df.status is null or (df.status='ERROR'))  order  by  df.id)
     WHERE ROWNUM <= :max_rows
     """
                                     , max_rows=max_rows
@@ -64,9 +65,10 @@ def get_name_count(ora_con1, corp_num, corp_name):
                    FROM  name_instance ni
                    LEFT OUTER JOIN name n ON  n.name_id = ni.name_id
                    LEFT OUTER JOIN request r ON r.request_id = n.request_id
+                   LEFT OUTER JOIN request_state rs on rs.request_id = r.request_id
                    LEFT OUTER JOIN name_state ns ON  ns.name_id = ni.name_id
                    WHERE ni.corp_num = :corp_num AND ni.end_event_id IS  NULL and ni.name = :corp_name
-                   AND ns.end_event_id IS NULL and ns.name_state_type_cd in ('A', 'C')
+                   AND ns.end_event_id IS NULL and ns.name_state_type_cd in ('A', 'C') and rs.end_event_id IS NULL and rs.state_type_cd='COMPLETED'
                    """
                                     , corp_num=corp_num
                                     , corp_name=corp_name
@@ -83,9 +85,10 @@ def get_name_instance_rows(ora_con2, corp_num, corp_name):
                FROM  name_instance ni
                LEFT OUTER JOIN name n ON  n.name_id = ni.name_id
                LEFT OUTER JOIN request r ON r.request_id = n.request_id
+               LEFT OUTER JOIN request_state rs on rs.request_id = r.request_id
                LEFT OUTER JOIN name_state ns ON  ns.name_id = ni.name_id
                WHERE ni.corp_num = :corp_num AND ni.end_event_id IS  NULL and ni.name = :corp_name
-               AND ns.end_event_id IS NULL and ns.name_state_type_cd in ('A', 'C')
+               AND ns.end_event_id IS NULL and ns.name_state_type_cd in ('A', 'C') and rs.end_event_id IS NULL and rs.state_type_cd='COMPLETED'
                """
                                     , corp_num=corp_num
                                     , corp_name=corp_name
@@ -157,6 +160,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                                              )
             else:
 
+                skipped = 0
                 #check for name_instance corp rows
                 ora_con2 = nro_connection
                 name_results, col_ni = get_name_instance_rows(ora_con2, corp_num, corp_name)
@@ -164,12 +168,15 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
 
 
                 for ni in name_results:
+
+                    skipped = skipped + 1
                     ni_row = ora_row_to_dict(col_ni, ni)
                     if ni_row['nr_num'] !=  nr_num:
                         nr_num = ni_row['nr_num']
 
                     nr = Request.find_by_nr(nr_num)
-                    if nr.stateCd == 'HISTORICAL':
+
+                    if(nr is None and skipped < test[0] ):
                         continue
 
                     current_app.logger.debug('processing: {}, NameX state: {}'
@@ -188,7 +195,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                         EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, {}, save_to_session=True)
                         current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
 
-                        datafix_status = None if (not nr) else nr.stateCd
+                        datafix_status = None if (not nr) else nr.stateCd[0:9]
 
                         success = update_datafix_row(ora_con
                                             , id=row['id']
