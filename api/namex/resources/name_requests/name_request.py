@@ -114,6 +114,7 @@ class NameRequest(NameRequestResource):
     def process_payment(self, nr_model):
         nr_svc = self.nr_service
 
+        # TODO: If no payment token throw an error here! It's important!
         # Use apply_state_change to change state, as it enforces the State change pattern
         # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
         if nr_model.payment_token and nr_model.stateCd == State.COND_RESERVE:
