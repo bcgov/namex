@@ -29,16 +29,16 @@ class Config(object):
 
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_PASSWORD','')
-    DB_NAME = os.getenv('DATABASE_NAME','')
-    DB_HOST = os.getenv('DATABASE_HOST','')
-    DB_PORT = os.getenv('DATABASE_PORT','5432')
+    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
+    DB_NAME = os.getenv('DATABASE_NAME', '')
+    DB_HOST = os.getenv('DATABASE_HOST', '')
+    DB_PORT = os.getenv('DATABASE_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-         user=DB_USER,
-         password=DB_PASSWORD,
-         host=DB_HOST,
-         port=int(DB_PORT),
-         name=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=int(DB_PORT),
+        name=DB_NAME
     )
     ## ORACLE - LEGACY NRO NAMESDB
     NRO_USER = os.getenv('NRO_USER', '')
@@ -56,11 +56,11 @@ class Config(object):
     JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
     JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
     JWT_OIDC_CACHING_ENABLED = os.getenv('JWT_OIDC_CACHING_ENABLED')
+
     try:
         JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT'))
     except:
         JWT_OIDC_JWKS_CACHE_TIMEOUT = 300
-
 
     TESTING = False,
     DEBUG = False
@@ -76,16 +76,20 @@ class TestConfig(Config):
     TESTING = True
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD','')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME','')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST','')
-    DB_PORT = os.getenv('DATABASE_TEST_PORT','5432')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
+    DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
+    # Allows for NRO add / update bypass if necessary (for local development)
+    LOCAL_DEV_MODE = os.getenv('LOCAL_DEV_MODE', False)
+    # Set this in your .env to debug SQL Alchemy queries (for local development)
+    SQLALCHEMY_ECHO = 'debug' if os.getenv('DEBUG_SQL_QUERIES', False) else False
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-         user=DB_USER,
-         password=DB_PASSWORD,
-         host=DB_HOST,
-         port=int(DB_PORT),
-         name=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=int(DB_PORT),
+        name=DB_NAME,
     )
 
     # JWT OIDC settings
@@ -114,7 +118,6 @@ class TestConfig(Config):
                 "kty": "RSA",
                 "alg": "RS256",
                 "use": "sig",
-                "kty": "RSA",
                 "n": "AN-fWcpCyE5KPzHDjigLaSUVZI0uYrcGcc40InVtl-rQRDmAh-C2W8H4_Hxhr5VLc6crsJ2LiJTV_E72S03pzpOOaaYV6-TzAjCou2GYJIXev7f6Hh512PuG5wyxda_TlBSsI-gvphRTPsKCnPutrbiukCYrnPuWxX5_cES9eStR",
                 "e": "AQAB",
                 "d": "C0G3QGI6OQ6tvbCNYGCqq043YI_8MiBl7C5dqbGZmx1ewdJBhMNJPStuckhskURaDwk4-8VBW9SlvcfSJJrnZhgFMjOYSSsBtPGBIMIdM5eSKbenCCjO8Tg0BUh_xa3CHST1W4RQ5rFXadZ9AeNtaGcWj2acmXNO3DVETXAX3x0",

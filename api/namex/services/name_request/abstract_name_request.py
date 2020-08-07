@@ -7,11 +7,9 @@ from namex.models import db
 from namex.models.nr_number import NRNumber
 from namex.models.user import User
 
-from namex.services.name_request.utils import handle_exception
-
 from namex.utils.logging import setup_logging
 
-from namex.services.name_request.exceptions import GetUserIdError
+from namex.services.name_request.exceptions import GetUserIdError, GenerateNRKeysError
 
 setup_logging()  # Important to do this first
 
@@ -27,6 +25,8 @@ class AbstractNameRequestMixin(object):
     def user_id(self):
         try:
             user = User.find_by_username('name_request_service_account')
+            if not user:
+                raise GetUserIdError()
         except Exception as err:
             raise GetUserIdError(err)
 
@@ -63,7 +63,7 @@ class AbstractNameRequestMixin(object):
 
     @property
     def request_names(self):
-        return self.request_data.get('names', None)
+        return self.request_data.get('names', [])
 
     @property
     def current_state_actions(self):
@@ -130,6 +130,7 @@ class AbstractNameRequestMixin(object):
         if r is None:
             # Set starting nr number
             last_nr = 'NR L000000'
+            r = NRNumber()
         else:
             last_nr = r.nrNum
             # TODO: Add a check wheN the number has reached 999999
@@ -156,6 +157,6 @@ class AbstractNameRequestMixin(object):
             self.nr_num = self.generate_nr()
             self.nr_id = self.get_request_sequence()
         except Exception as err:
-            return handle_exception(err, 'Error getting nr number.', 500)
+            raise GenerateNRKeysError(err)
 
         return self.nr_num, self.nr_id

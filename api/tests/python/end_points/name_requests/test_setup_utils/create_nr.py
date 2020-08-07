@@ -1,4 +1,4 @@
-from namex.models import State, Request as RequestDAO, Name as NameDAO
+from namex.models import State
 from tests.python.unit.test_setup_utils.build_nr import build_nr
 
 
@@ -19,6 +19,7 @@ def create_nr(nr_state):
 
 def create_draft():
     nr = build_nr(State.DRAFT)
+    nr.nrNum = 'NR 0000002'
     nr.save_to_db()
 
     return nr
@@ -26,6 +27,7 @@ def create_draft():
 
 def create_cond_reserved():
     nr = build_nr(State.COND_RESERVE)
+    nr.nrNum = 'NR 0000002'
     nr.save_to_db()
 
     return nr
@@ -33,6 +35,7 @@ def create_cond_reserved():
 
 def create_reserved():
     nr = build_nr(State.RESERVED)
+    nr.nrNum = 'NR 0000002'
     nr.save_to_db()
 
     return nr
@@ -40,6 +43,7 @@ def create_reserved():
 
 def create_conditional():
     nr = build_nr(State.CONDITIONAL)
+    nr.nrNum = 'NR 0000002'
     nr.save_to_db()
 
     return nr
@@ -47,6 +51,7 @@ def create_conditional():
 
 def create_approved():
     nr = build_nr(State.APPROVED)
+    nr.nrNum = 'NR 0000002'
     nr.save_to_db()
 
     return nr

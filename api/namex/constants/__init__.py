@@ -414,3 +414,17 @@ class NameRequestExpiredRejectedActions(AbstractEnum):
     EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
     RECEIPT = NameRequestActions.RECEIPT.value
     RESEND = NameRequestActions.RESEND.value
+
+
+class NROChangeFlags(AbstractEnum):
+    REQUEST = 'is_changed__request'
+    PREV_REQ = 'is_changed__previous_request'
+    APPLICANT = 'is_changed__applicant'
+    NAME_1 = 'is_changed__name1'
+    NAME_2 = 'is_changed__name2'
+    NAME_3 = 'is_changed__name3'
+    ADDRESS = 'is_changed__address'
+    NWPTA_AB = 'is_changed__nwpta_ab'
+    NWPTA_SK = 'is_changed__nwpta_sk'
+    CONSENT = 'is_changed__consent'
+    STATE = 'is_changed__request_state'

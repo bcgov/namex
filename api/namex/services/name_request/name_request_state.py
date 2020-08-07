@@ -33,8 +33,8 @@ def get_nr_state_actions(next_state):
 
 
 def to_draft(resource, nr, on_success_cb=None):
-    if nr.stateCd in [State.DRAFT]:
-        resource.nr_state_code = State.DRAFT
+    if nr.stateCd in [State.DRAFT, State.INPROGRESS]:
+        resource.next_state_code = State.DRAFT
         nr.stateCd = State.DRAFT
 
         if on_success_cb:
@@ -44,7 +44,7 @@ def to_draft(resource, nr, on_success_cb=None):
 
 def to_cond_reserved(resource, nr, on_success_cb):
     if nr.stateCd in [State.DRAFT, State.COND_RESERVE]:
-        resource.nr_state_code = State.COND_RESERVE
+        resource.next_state_code = State.COND_RESERVE
         nr.stateCd = State.COND_RESERVE
         if on_success_cb:
             nr = on_success_cb(nr, resource)
@@ -53,7 +53,7 @@ def to_cond_reserved(resource, nr, on_success_cb):
 
 def to_reserved(resource, nr, on_success_cb):
     if nr.stateCd in [State.DRAFT, State.RESERVED]:
-        resource.nr_state_code = State.RESERVED
+        resource.next_state_code = State.RESERVED
         nr.stateCd = State.RESERVED
         if on_success_cb:
             nr = on_success_cb(nr, resource)
@@ -61,7 +61,7 @@ def to_reserved(resource, nr, on_success_cb):
 
 
 def to_conditional(resource, nr, on_success_cb):
-    if nr.stateCd != State.COND_RESERVE:
+    if nr.stateCd in [State.DRAFT, State.COND_RESERVE, State.CONDITIONAL, State.INPROGRESS]:
         raise NameRequestException(message='Invalid state transition')
 
     # Check for payment
@@ -76,7 +76,7 @@ def to_conditional(resource, nr, on_success_cb):
 
 
 def to_approved(resource, nr, on_success_cb):
-    if nr.stateCd != State.RESERVED:
+    if nr.stateCd in [State.RESERVED, State.APPROVED, State.INPROGRESS]:
         raise NameRequestException(message='Invalid state transition')
 
     # Check for payment
@@ -88,6 +88,15 @@ def to_approved(resource, nr, on_success_cb):
     if on_success_cb:
         nr = on_success_cb(nr, resource)
     return nr
+
+
+def to_cancelled(resource, nr, on_success_cb):
+    if nr.stateCd in State.CANCELLABLE_STATES:
+        resource.next_state_code = State.CANCELLED
+        nr.stateCd = State.CANCELLED
+        if on_success_cb:
+            nr = on_success_cb(nr, resource)
+        return nr
 
 
 def apply_nr_state_change(self, name_request, next_state, on_success=None):
@@ -107,5 +116,6 @@ def apply_nr_state_change(self, name_request, next_state, on_success=None):
         State.RESERVED: to_reserved,
         State.COND_RESERVE: to_cond_reserved,
         State.CONDITIONAL: to_conditional,
-        State.APPROVED: to_approved
+        State.APPROVED: to_approved,
+        State.CANCELLED: to_cancelled
     }.get(next_state)(self, name_request, on_success)

@@ -5,6 +5,11 @@ class NameRequestException(Exception):
         super().__init__(self.message)
 
 
+class GenerateNRKeysError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Error generating NR keys."):
+        super().__init__(wrapped_err, message)
+
+
 class InvalidInputError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error getting json input."):
         super().__init__(wrapped_err, message)
@@ -42,6 +47,11 @@ class MapPersonCommentError(NameRequestException):
 
 class UpdateSubmitCountError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error setting submit count."):
+        super().__init__(wrapped_err, message)
+
+
+class ExtendExpiryDateError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Error extending the expiry date."):
         super().__init__(wrapped_err, message)
 
 
