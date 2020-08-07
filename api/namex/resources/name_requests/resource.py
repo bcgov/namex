@@ -282,9 +282,9 @@ class NameRequestResource(Resource):
                 NROChangeFlags.NAME_1.value: True,
                 NROChangeFlags.NAME_2.value: True,
                 NROChangeFlags.NAME_3.value: True,
-                NROChangeFlags.NWPTA_AB.value: False,
-                NROChangeFlags.NWPTA_SK.value: False,
-                NROChangeFlags.CONSENT.value: False,
+                # NROChangeFlags.NWPTA_AB.value: False,
+                # NROChangeFlags.NWPTA_SK.value: False,
+                # NROChangeFlags.CONSENT.value: False,
                 NROChangeFlags.STATE.value: False
             })
 

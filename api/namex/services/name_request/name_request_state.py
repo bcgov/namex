@@ -33,7 +33,7 @@ def get_nr_state_actions(next_state):
 
 
 def to_draft(resource, nr, on_success_cb=None):
-    if nr.stateCd in [State.DRAFT]:
+    if nr.stateCd in [State.DRAFT, State.INPROGRESS]:
         resource.next_state_code = State.DRAFT
         nr.stateCd = State.DRAFT
 
@@ -61,7 +61,7 @@ def to_reserved(resource, nr, on_success_cb):
 
 
 def to_conditional(resource, nr, on_success_cb):
-    if nr.stateCd != State.COND_RESERVE:
+    if nr.stateCd in [State.DRAFT, State.COND_RESERVE, State.CONDITIONAL, State.INPROGRESS]:
         raise NameRequestException(message='Invalid state transition')
 
     # Check for payment
@@ -76,7 +76,7 @@ def to_conditional(resource, nr, on_success_cb):
 
 
 def to_approved(resource, nr, on_success_cb):
-    if nr.stateCd != State.RESERVED:
+    if nr.stateCd in [State.RESERVED, State.APPROVED, State.INPROGRESS]:
         raise NameRequestException(message='Invalid state transition')
 
     # Check for payment
