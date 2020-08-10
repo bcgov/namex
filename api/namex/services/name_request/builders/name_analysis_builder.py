@@ -182,8 +182,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if not forced:
             print("Search for conflicts considering compound words.")
-            dict_compound_dist, dict_desc, list_name_compound = self.compound_words(dist_substitution_dict,
-                                                                                    desc_synonym_dict, list_name)
+            dict_compound_dist, dict_desc, list_name_compound = self.get_compound_words(dist_substitution_dict,
+                                                                                        desc_synonym_dict, list_name)
             if dict_compound_dist:
                 dist_list_dict_compound = self.get_distinctive_compounds(dict_compound_dist)
                 desc_list_dict_compound = self.get_descriptive_compounds(dist_list_dict_compound, desc_synonym_dict)
@@ -696,27 +696,29 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         }
         return result
 
-    def compound_words(self, dict_dist, dict_descriptive, list_name):
+    '''
+    
+    '''
+
+    def get_compound_words(self, dict_dist, dict_descriptive, list_name):
         dict_compound_dist = {}
         dict_desc = dict(dict_descriptive)
         list_name_compound = []
         for idx, elem in enumerate(list_name[:-1]):
-            try:
-                a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else dict_desc[list_name[idx]]
-            except KeyError:
-                idx += 1
-                a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else dict_desc[list_name[idx]]
+            a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else None
+            next_idx = idx + 1
+            if a and next_idx < len(list_name):
+                b = dict_dist[list_name[next_idx]] if list_name[next_idx] in dict_dist else dict_desc[list_name[next_idx]]
+                compound = []
 
-            if idx + 1 < len(list_name):
-                b = dict_dist[list_name[idx + 1]] if list_name[idx + 1] in dict_dist else dict_desc[list_name[idx + 1]]
-                if a in dict_dist.values():
-                    compound = []
-                    for item in itertools.product(a, b):
-                        compound.append(''.join(item))
-                        dict_compound_dist[list_name[idx] + list_name[idx + 1]] = compound
-                    list_name_compound.append(list_name[idx] + list_name[idx + 1])
-                    if list_name[idx + 1] in dict_desc:
-                        del dict_desc[list_name[idx + 1]]
+                for item in itertools.product(a, b):
+                    compound.append(''.join(item))
+                    dict_compound_dist[list_name[idx] + list_name[next_idx]] = compound
+
+                list_name_compound.append(list_name[idx] + list_name[next_idx])
+
+                if list_name[next_idx] in dict_desc:
+                    del dict_desc[list_name[next_idx]]
 
         return dict_compound_dist, dict_desc, list_name_compound
 
