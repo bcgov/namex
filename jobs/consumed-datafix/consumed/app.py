@@ -42,12 +42,13 @@ def job_result_set(ora_con, max_rows):
     ora_cursor = ora_con.cursor()
 
     #(df.fd = 'FD' and df.status is null) -DONE
+    #(df.status='ERROR') - removed becaus ethese are obsolete entity types (LIB,CEM,TRM,RLY)
     result_set = ora_cursor.execute("""
     SELECT * 
     FROM (SELECT  df.ID, df.NR_NUM, df.corp_num, df.STATUS, corp.name
     FROM namex_datafix df
     INNER JOIN namex.solr_dataimport_conflicts_vw@colin_readonly corp on corp.id = df.corp_num
-    WHERE(df.status is null or (df.status='ERROR'))  order  by  df.id)
+    WHERE(df.status is null )  order  by  df.id)
     WHERE ROWNUM <= :max_rows
     """
                                     , max_rows=max_rows
