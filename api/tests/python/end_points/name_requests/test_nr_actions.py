@@ -338,6 +338,7 @@ def test_draft_patch_cancel(client, jwt, app):
     patch_response = client.patch(path, data=json.dumps({}), headers=headers)
 
     if not patch_response or patch_response.status_code != 200:
+        print(repr(patch_response))
         raise Exception('NR PATCH operation failed')
 
     patched_nr = json.loads(patch_response.data)
