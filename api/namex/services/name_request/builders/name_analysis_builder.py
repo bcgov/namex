@@ -697,16 +697,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return result
 
     '''
-    Input:
-    dict_dist: {'victoria': ['victoria'], 
-                 'south': ['south']}
-    dict_desc: {'land': ['emigr', 'emigra', 'imigr', ..., 'structur'], 
-                'developers': ['abod', 'acr', 'build', 'builder', ...,'structur', 'developers']}  
-    list_name: ['victoria', 'south', 'land', 'developers']
-    
-    Output:
-    dict_compound_dist: {'victoriasouth': ['victoriasouth'], 
-                         'southland': ['southemigr', 'southemigra', 'southimigr', ..., 'southstructur']}        
+    dict_dist: Dictionary of distinctive tokens with its corresponding substitutions (if they exist) included in a list.
+    dict_desc: Dictionary of descriptive tokens with its corresponding substitutions (if they exist) included in a list.
+    list_name: List of words which form a clean name
+    @return dict_compound_dist: dictionary of compound distinctive items (made of two words) with its corresponding 
+    substitutions (if they exist) included as list
     '''
 
     def get_compound_words(self, dict_dist, dict_descriptive, list_name):
@@ -734,16 +729,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return dct
 
     '''
-    Input:
-    list_name_compound: ['victoriasouth', 'southland']
-    dist_dict: {'victoria': ['victoria'], 'south': ['south']}
-    dict_compound_dist: {'victoriasouth': ['victoriasouth'], 
-                         'southland': ['southemigr', 'southemigra', 'southimigr', 'southimigra', ... , 'southstructur']}
-    
-    Output:
-    list_dict_dist_compound: [
-                               {'victoriasouth': ['victoriasouth']}, 
-                               {'southland': ['southemigr', 'southemigra', ..., 'southstructur']}]
+    dict_compound_dist: Dictionary of all valid compound words
+    @return list_dict_dist_compound: Dictionary is added to the list list_dict_dist_compound for further analysis.
     '''
 
     def get_distinctive_compounds(self, dict_compound_dist):
@@ -754,25 +741,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return list_dict_dist_compound
 
     '''
-    Input:
-    dist_list_compound: [{'victoriasouth': ['victoriasouth']}, 
-                         {'southland': ['southemigr', 'southemigra', 'southimigr', ... , 'southstructur']}
-                        ]
-    desc_dict={'land': ['emigr', 'emigra', 'imigr', ..., 'structur'], 
-               'developers': ['abod', 'acr', 'build', 'builder', ... , 'structur']}
-    
-    Output:
-    list_dict_desc_compound: [{'land': ['emigr', 'emigra', 'imigr', ..., 'structur'], 
-                               'developers': ['abod', 'acr', 'build', 'builder', ... , 'structur']}, 
-                              {'developers': ['abod', 'acr', 'build', 'builder', ... , 'structur']}]
-    
-    
+    list_dict_compound: List of dictionary including all compound words and its substitutions as list.
+    desc_dict: Dictionary of descriptive elements with its substitutions.
+    @return list_dict_desc_compound: List of dictionary of descriptive items with its corresponding substitutions 
+    (if they exist) included as list
     '''
 
-    def get_descriptive_compounds(self, dist_list_compound, desc_dict):
+    def get_descriptive_compounds(self, list_dict_compound, desc_dict):
         list_dict_desc_compound = []
         desc_list = list(desc_dict.keys())
-        for compound_names in dist_list_compound:
+        for compound_names in list_dict_compound:
             dict_desc_compound = {}
             for desc in desc_list:
                 key_desc = "".join([desc for name in compound_names if desc not in name])
