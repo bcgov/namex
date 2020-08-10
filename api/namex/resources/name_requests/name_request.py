@@ -86,7 +86,8 @@ class NameRequest(NameRequestResource):
             if nr_model.stateCd in valid_update_states and nr_model.payment_token is None:
                 nr_model = self.update_nr(nr_model)
             elif nr_model.payment_token:
-                # This handles updates if the NR state is COND_RESERVE or RESERVED and a payment token is present
+                # TODO: This would be better off in the PATCH...
+                # This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED and a payment token is present
                 # If the state is COND_RESERVE update state to CONDITIONAL
                 # If the state is RESERVED update state to APPROVED
                 # Then update the name request as required
@@ -116,13 +117,16 @@ class NameRequest(NameRequestResource):
 
         # TODO: If no payment token throw an error here! It's important!
         # Use apply_state_change to change state, as it enforces the State change pattern
-        # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
-        if nr_model.payment_token and nr_model.stateCd == State.COND_RESERVE:
-            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+        if nr_model.stateCd == State.DRAFT:
+            # If the state is DRAFT, leave it as a DRAFT
+            nr_model = nr_svc.apply_state_change(nr_model, State.DRAFT, self.handle_nr_approval)
+        if nr_model.stateCd == State.COND_RESERVE:
+            # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
             nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, self.handle_nr_approval)
+
+        elif nr_model.stateCd == State.RESERVED:
             # If the state is RESERVED update state to APPROVED, and update the name request as required
-        elif nr_model.payment_token and nr_model.stateCd == State.RESERVED:
-            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
             nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
 
         # This handles the updates for NRO and Solr, if necessary
