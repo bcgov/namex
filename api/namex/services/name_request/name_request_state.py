@@ -5,7 +5,10 @@ from namex.constants import \
 
 from namex.models import State
 
-from .exceptions import NameRequestException
+from .exceptions import NameRequestException, InvalidStateError
+
+state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{next_state}]'
+invalid_state_transition_msg = 'Invalid state transition [{current_state}] -> [{next_state}], valid states are [{valid_states}]'
 
 
 def get_nr_state_actions(next_state):
@@ -33,40 +36,66 @@ def get_nr_state_actions(next_state):
 
 
 def to_draft(resource, nr, on_success_cb=None):
-    if nr.stateCd in [State.DRAFT, State.INPROGRESS]:
-        resource.next_state_code = State.DRAFT
-        nr.stateCd = State.DRAFT
+    valid_states = [State.DRAFT, State.INPROGRESS]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.DRAFT,
+            valid_states=', '.join(valid_states)
+        ))
 
-        if on_success_cb:
-            nr = on_success_cb(nr, resource)
-        return nr
+    resource.next_state_code = State.DRAFT
+    nr.stateCd = State.DRAFT
+
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
 
 
 def to_cond_reserved(resource, nr, on_success_cb):
-    if nr.stateCd in [State.DRAFT, State.COND_RESERVE]:
-        resource.next_state_code = State.COND_RESERVE
-        nr.stateCd = State.COND_RESERVE
-        if on_success_cb:
-            nr = on_success_cb(nr, resource)
-        return nr
+    valid_states = [State.DRAFT, State.COND_RESERVE]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.COND_RESERVE,
+            valid_states=', '.join(valid_states)
+        ))
+
+    resource.next_state_code = State.COND_RESERVE
+    nr.stateCd = State.COND_RESERVE
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
 
 
 def to_reserved(resource, nr, on_success_cb):
-    if nr.stateCd in [State.DRAFT, State.RESERVED]:
-        resource.next_state_code = State.RESERVED
-        nr.stateCd = State.RESERVED
-        if on_success_cb:
-            nr = on_success_cb(nr, resource)
-        return nr
+    valid_states = [State.DRAFT, State.RESERVED]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.RESERVED,
+            valid_states=', '.join(valid_states)
+        ))
+
+    resource.next_state_code = State.RESERVED
+    nr.stateCd = State.RESERVED
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
 
 
 def to_conditional(resource, nr, on_success_cb):
-    if nr.stateCd in [State.DRAFT, State.COND_RESERVE, State.CONDITIONAL, State.INPROGRESS]:
-        raise NameRequestException(message='Invalid state transition')
+    valid_states = [State.DRAFT, State.COND_RESERVE, State.CONDITIONAL, State.INPROGRESS]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.CONDITIONAL,
+            valid_states=', '.join(valid_states)
+        ))
 
     # Check for payment
     if nr.payment_token is None:
-        raise NameRequestException(message='Transition error, payment token is not defined')
+        raise NameRequestException(message=state_transition_error_msg.format(current_state=nr.stateCd, next_state=State.CONDITIONAL) + ', payment token is not defined')
 
     resource.next_state_code = State.CONDITIONAL
     nr.stateCd = State.CONDITIONAL
@@ -76,12 +105,17 @@ def to_conditional(resource, nr, on_success_cb):
 
 
 def to_approved(resource, nr, on_success_cb):
-    if nr.stateCd in [State.RESERVED, State.APPROVED, State.INPROGRESS]:
-        raise NameRequestException(message='Invalid state transition')
+    valid_states = [State.RESERVED, State.APPROVED, State.INPROGRESS]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.APPROVED,
+            valid_states=', '.join(valid_states)
+        ))
 
     # Check for payment
     if nr.payment_token is None:
-        raise NameRequestException(message='Transition error, payment token is not defined')
+        raise NameRequestException(message=state_transition_error_msg.format(current_state=nr.stateCd, next_state=State.APPROVED) + ', payment token is not defined')
 
     resource.next_state_code = State.APPROVED
     nr.stateCd = State.APPROVED
@@ -91,12 +125,19 @@ def to_approved(resource, nr, on_success_cb):
 
 
 def to_cancelled(resource, nr, on_success_cb):
-    if nr.stateCd in State.CANCELLABLE_STATES:
-        resource.next_state_code = State.CANCELLED
-        nr.stateCd = State.CANCELLED
-        if on_success_cb:
-            nr = on_success_cb(nr, resource)
-        return nr
+    valid_states = State.CANCELLABLE_STATES
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.CANCELLED,
+            valid_states=', '.join(valid_states)
+        ))
+
+    resource.next_state_code = State.CANCELLED
+    nr.stateCd = State.CANCELLED
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
 
 
 def apply_nr_state_change(self, name_request, next_state, on_success=None):

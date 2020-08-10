@@ -15,6 +15,11 @@ class InvalidInputError(NameRequestException):
         super().__init__(wrapped_err, message)
 
 
+class InvalidStateError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Invalid state error."):
+        super().__init__(wrapped_err, message)
+
+
 class CreateNameRequestError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error initializing name_request object."):
         super().__init__(wrapped_err, message)

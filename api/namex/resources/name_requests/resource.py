@@ -261,18 +261,18 @@ class NameRequestResource(Resource):
     def add_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            # TODO: It might be a good idea to set an env var for this...
+            # TODO: It might be a good idea to set an env var for this... as NRO can't run in local tests
             # nro_warnings = None
             nro_warnings = self.nro_service.add_nr(name_request)
             return self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
         else:
-            raise NameRequestException(message='Invalid state exception')
+            raise NameRequestException(message='Invalid state exception [' + name_request.stateCd + '], cannot add Name Request to NRO when Request state is NOT in DRAFT, CONDITIONAL or APPROVED')
 
     def update_request_in_nro(self, name_request, on_success=None):
         # Only update Oracle for DRAFT
         # NRO / Oracle records are added when CONDITIONAL or APPROVED (see add_request_to_nro)
         if name_request.stateCd in [State.DRAFT]:
-            # TODO: It might be a good idea to set an env var for this...
+            # TODO: It might be a good idea to set an env var for this... as NRO can't run in local tests
             # nro_warnings = None
             nro_warnings = self.nro_service.change_nr(name_request, {
                 NROChangeFlags.REQUEST.value: True,
@@ -291,14 +291,14 @@ class NameRequestResource(Resource):
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         # Handle any changes where ONLY state is changed
         elif name_request.stateCd in [State.CANCELLED]:
-            # TODO: It might be a good idea to set an env var for this...
+            # TODO: It might be a good idea to set an env var for this... as NRO can't run in local tests
             nro_warnings = self.nro_service.change_nr(name_request, {
                 NROChangeFlags.STATE.value: True
             })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         else:
-            raise NameRequestException(message='Invalid state exception')
+            raise NameRequestException(message='Invalid state exception [' + name_request.stateCd + '], cannot update Name Request in NRO when Request state is NOT in DRAFT or CANCELLED')
 
     def create_solr_nr_doc(self, solr_core, name_request):
         try:
