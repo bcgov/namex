@@ -15,6 +15,7 @@
 from flask import current_app
 from .utils import generate_compressed_name, nro_examiner_name
 from namex.models import State
+from namex.constants import NROChangeFlags
 
 
 def update_nr(nr, ora_cursor, change_flags):
@@ -387,7 +388,7 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
                                   )
 
 def  _update_consent(oracle_cursor, nr,eid, change_flags):
-    if change_flags['is_changed_consent']:
+    if change_flags.get(NROChangeFlags.CONSENT.value):
         # set the end event for the existing record
         oracle_cursor.execute("""
                UPDATE consent
