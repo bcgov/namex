@@ -44,6 +44,57 @@ def assert_field_is_mapped(req_obj, res_obj, prop_name):
     """
     req_obj_val = req_obj.get(prop_name)
     res_obj_val = res_obj.get(prop_name)
-    print('Request Field [' + prop_name + ': ' + str(req_obj_val) + '] equals Response Field [' + prop_name + ': ' + str(res_obj_val) + ']')
-    assert req_obj_val == res_obj_val
+    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] equals Request Field [' + prop_name + ': ' + str(req_obj_val) + ']')
+    assert res_obj_val == req_obj_val
     print('OK')
+    print('...')
+
+
+@pytest.mark.skip
+def assert_field_is_gt(req_obj, res_obj, prop_name):
+    """
+    Just a util
+    :param req_obj:
+    :param res_obj:
+    :param prop_name:
+    :return:
+    """
+    req_obj_val = req_obj.get(prop_name)
+    res_obj_val = res_obj.get(prop_name)
+    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] is greater than Request Field [' + prop_name + ': ' + str(req_obj_val) + ']')
+    assert res_obj_val > req_obj_val
+    print('OK')
+    print('...')
+
+
+@pytest.mark.skip
+def assert_field_is_lt(req_obj, res_obj, prop_name):
+    """
+    Just a util
+    :param req_obj:
+    :param res_obj:
+    :param prop_name:
+    :return:
+    """
+    req_obj_val = req_obj.get(prop_name)
+    res_obj_val = res_obj.get(prop_name)
+    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] is less than Request Field [' + prop_name + ': ' + str(req_obj_val) + ']')
+    assert res_obj_val < req_obj_val
+    print('OK')
+    print('...')
+
+
+@pytest.mark.skip
+def assert_field_has_value(res_obj, prop_name, prop_val):
+    """
+    Just a util
+    :param res_obj:
+    :param prop_name:
+    :param prop_val:
+    :return:
+    """
+    res_obj_val = res_obj.get(prop_name)
+    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] is equal to "' + str(prop_val) + '"')
+    assert res_obj_val == prop_val
+    print('OK')
+    print('...')

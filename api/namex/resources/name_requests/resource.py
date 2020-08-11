@@ -296,10 +296,13 @@ class NameRequestResource(Resource):
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         # Handle any changes where ONLY state is changed
         elif name_request.stateCd in [State.CANCELLED]:
-            # TODO: It might be a good idea to set an env var for this... as NRO can't run in local tests
-            nro_warnings = self.nro_service.change_nr(name_request, {
-                NROChangeFlags.STATE.value: True
-            })
+            if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
+                # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
+                nro_warnings = None
+            else:
+                nro_warnings = self.nro_service.change_nr(name_request, {
+                    NROChangeFlags.STATE.value: True
+                })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         else:
