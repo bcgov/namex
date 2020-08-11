@@ -250,7 +250,6 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        # TODO: Do we update network services?
         self.update_records_in_network_services(nr_model)
         return nr_model
 
@@ -273,7 +272,6 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
 
         # This handles the updates for NRO and Solr, if necessary
-        # TODO: Do we update network services?
         self.update_records_in_network_services(nr_model)
         return nr_model
 

@@ -167,8 +167,8 @@ class BcNameAnalysis(Resource):
             service.set_entity_type(entity_type)  # Required step! TODO: Enforce this!
             service.set_name(name)  # Required step! TODO: Enforce this!
 
-        except Exception as error:
-            print('Error initializing NameAnalysisService: ' + repr(error))
+        except Exception as err:
+            print('Error initializing BcNameAnalysis service: ' + repr(err.with_traceback(None)))
             raise
 
         # Perform the name analysis - execute analysis using the supplied builder
