@@ -222,7 +222,12 @@ def test_draft_patch_edit_data(client, jwt, app):
         'names': draft_nr.get('names'),
         'applicants': draft_nr.get('applicants'),
         'entity_type_cd': 'FR',
-        'corpNum': 'TEST123'
+        'corpNum': 'TESTCORP123',
+        # 'homeJurisNum': 'TESTHOME123',
+        'additionalInfo': 'Testing additional info',
+        'natureBusinessInfo': 'Testing nature of business info',
+        'priorityCd': 'Y',
+        'requestTypeCd': 'CR'
     }
 
     added_names = [
@@ -265,24 +270,25 @@ def test_draft_patch_edit_data(client, jwt, app):
     # Check names
     assert_names_are_mapped_correctly(nr_data.get('names'), patched_nr.get('names'))
 
-    # Check NR number is the same because these are PATCH and call change_nr
-    output_fields = {
-        'additionalInfo': '',
+    # Check data
+    expected_field_values = {
+        'additionalInfo': 'Testing additional info',
         'consentFlag': None,
         'consent_dt': None,
-        'corpNum': 'TEST123',
+        'corpNum': 'TESTCORP123',
+        # 'homeJurisNum': 'TESTHOME123',
         'entity_type_cd': 'FR',
         'expirationDate': None,
         'furnished': 'N',
         'hasBeenReset': False,
         # 'lastUpdate': None,
-        'natureBusinessInfo': 'Test',
+        'natureBusinessInfo': 'Testing nature of business info',
         # 'nrNum': '',
         # 'nwpta': '',
         # 'previousNr': '',
         # 'previousRequestId': '',
         # 'previousStateCd': '',
-        'priorityCd': 'N',
+        'priorityCd': 'Y',
         # 'priorityDate': None,
         'requestTypeCd': 'CR',
         'request_action_cd': 'NEW',
@@ -296,8 +302,7 @@ def test_draft_patch_edit_data(client, jwt, app):
         'xproJurisdiction': ''
     }
 
-    for key, value in output_fields.items():
-        # assert_field_is_mapped(draft_nr, patched_nr, key)
+    for key, value in expected_field_values.items():
         assert_field_has_value(patched_nr, key, value)
 
 

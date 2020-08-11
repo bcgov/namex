@@ -174,7 +174,8 @@ class NameRequestResource(Resource):
         :param svc A NameRequestService instance
         :return:
         """
-        nr = svc.map_request_data(nr, False)
+        map_draft_attrs = nr.stateCd == State.DRAFT
+        nr = svc.map_request_data(nr, map_draft_attrs)
         # Map applicants from request_data to the name request
         nr = svc.map_request_applicants(nr)
         # Map any submitted names from request_data to the name request
@@ -193,21 +194,9 @@ class NameRequestResource(Resource):
         :param svc A NameRequestService instance
         :return:
         """
-
-        # cleared = request_data.get('cleared', [])  # Clear first
-        # changed = request_data.get('changed', [])  # Then process changes
-
-        # TODO: This needs more work (in progress)
-        # if cleared:
-        # nr = svc.map_request_data(nr, False)
-
-        # is_changed = len(changed) > 0
-        # has_applicants = changed.get('applicants', None)
-        # has_names = changed.get('names', None)
-
-        # if is_changed:
         # Map data from request_data to the name request
-        nr = svc.map_request_data(nr, False)
+        map_draft_attrs = nr.stateCd == State.DRAFT
+        nr = svc.map_request_data(nr, map_draft_attrs)
         # if has_applicants:
         # Map applicants from request_data to the name request
         nr = svc.map_request_applicants(nr)

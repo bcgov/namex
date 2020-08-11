@@ -217,8 +217,9 @@ class NameRequestService(AbstractNameRequestMixin):
         # If this is a draft, set name request header attributes
         if map_draft_attrs:
             name_request = self.map_draft_attrs(name_request)
-            name_request = self.map_request_header_attrs(name_request)
-            name_request = self.map_request_comments(name_request)
+
+        name_request = self.map_request_header_attrs(name_request)
+        name_request = self.map_request_comments(name_request)
 
         try:
             if new_state_code == State.COND_RESERVE:
@@ -250,10 +251,12 @@ class NameRequestService(AbstractNameRequestMixin):
 
             # Set this to name_request_service_account
             name_request.userId = user_id
-            name_request.entity_type_cd = request_entity
-            name_request.request_action_cd = request_action
             name_request.submittedDate = datetime.utcnow()
-            name_request.requestTypeCd = self.set_request_type(request_entity, request_action)
+            name_request.entity_type_cd = request_entity
+
+            if request_action:
+                name_request.request_action_cd = request_action
+                name_request.requestTypeCd = self.set_request_type(name_request.entity_type_cd, request_action)
         except Exception as err:
             raise MapRequestDataError(err)
 
