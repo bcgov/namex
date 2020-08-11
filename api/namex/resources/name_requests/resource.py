@@ -261,9 +261,12 @@ class NameRequestResource(Resource):
     def add_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
         if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            # TODO: It might be a good idea to set an env var for this... as NRO can't run in local tests
-            # nro_warnings = None
-            nro_warnings = self.nro_service.add_nr(name_request)
+            if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
+                # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
+                nro_warnings = None
+            else:
+                nro_warnings = self.nro_service.add_nr(name_request)
+
             return self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
         else:
             raise NameRequestException(message='Invalid state exception [' + name_request.stateCd + '], cannot add Name Request to NRO when Request state is NOT in DRAFT, CONDITIONAL or APPROVED')
@@ -272,21 +275,23 @@ class NameRequestResource(Resource):
         # Only update Oracle for DRAFT
         # NRO / Oracle records are added when CONDITIONAL or APPROVED (see add_request_to_nro)
         if name_request.stateCd in [State.DRAFT]:
-            # TODO: It might be a good idea to set an env var for this... as NRO can't run in local tests
-            # nro_warnings = None
-            nro_warnings = self.nro_service.change_nr(name_request, {
-                NROChangeFlags.REQUEST.value: True,
-                NROChangeFlags.PREV_REQ.value: False,
-                NROChangeFlags.APPLICANT.value: True,
-                NROChangeFlags.ADDRESS.value: True,
-                NROChangeFlags.NAME_1.value: True,
-                NROChangeFlags.NAME_2.value: True,
-                NROChangeFlags.NAME_3.value: True,
-                # NROChangeFlags.NWPTA_AB.value: False,
-                # NROChangeFlags.NWPTA_SK.value: False,
-                # NROChangeFlags.CONSENT.value: False,
-                NROChangeFlags.STATE.value: False
-            })
+            if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
+                # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
+                nro_warnings = None
+            else:
+                nro_warnings = self.nro_service.change_nr(name_request, {
+                    NROChangeFlags.REQUEST.value: True,
+                    NROChangeFlags.PREV_REQ.value: False,
+                    NROChangeFlags.APPLICANT.value: True,
+                    NROChangeFlags.ADDRESS.value: True,
+                    NROChangeFlags.NAME_1.value: True,
+                    NROChangeFlags.NAME_2.value: True,
+                    NROChangeFlags.NAME_3.value: True,
+                    # NROChangeFlags.NWPTA_AB.value: False,
+                    # NROChangeFlags.NWPTA_SK.value: False,
+                    # NROChangeFlags.CONSENT.value: False,
+                    NROChangeFlags.STATE.value: False
+                })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         # Handle any changes where ONLY state is changed
@@ -380,6 +385,10 @@ class NameRequestResource(Resource):
         self.update_solr_service(nr_model, temp_nr_num)
 
     def update_solr_service(self, nr_model, temp_nr_num):
+        if current_app.config.get('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0) == 1:
+            # Ignore update to SOLR if SOLR updates [DISABLE_NAMEREQUEST_SOLR_UPDATES] are explicitly disabled in your .env
+            return
+
         if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
             self.create_solr_nr_doc(SOLR_CORE, nr_model)
             if temp_nr_num:

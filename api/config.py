@@ -65,10 +65,18 @@ class Config(object):
     TESTING = False,
     DEBUG = False
 
+    # You can disable NRO updates for Name Requests by setting the variable in your .env / OpenShift configuration
+    DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
+    DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
+
 
 class DevConfig(Config):
     TESTING = False,
     DEBUG = True
+
+    # We can't run NRO locally unless you're provisioned, you can disable NRO updates for Name Requests by setting the variable in your .env
+    DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
+    DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
 
 class TestConfig(Config):
@@ -89,8 +97,12 @@ class TestConfig(Config):
         password=DB_PASSWORD,
         host=DB_HOST,
         port=int(DB_PORT),
-        name=DB_NAME,
+        name=DB_NAME
     )
+
+    # We can't run NRO locally for running our tests
+    DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 1))
+    DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
     # JWT OIDC settings
     ## JWT_OIDC_TEST_MODE will set jwt_manager to use
