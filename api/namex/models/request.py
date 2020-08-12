@@ -25,7 +25,7 @@ import re
 
 from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
-    request_type_mapping
+    request_type_mapping, RequestPriority
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -408,6 +408,18 @@ class Request(db.Model):
             ))
 
         return criteria
+
+    @classmethod
+    def get_queue_requests(cls, is_priority):
+        request_state = db.session.query(func.count(Request.id)).filter(
+            Request.stateCd.in_([State.HOLD, State.DRAFT, State.INPROGRESS]))
+
+        queue_requests = request_state.filter(Request.priorityCd == RequestPriority.Y.value) if is_priority else \
+            request_state.filter(Request.priorityCd != RequestPriority.Y.value)
+
+        response = queue_requests.all()
+
+        return response
 
     @classmethod
     def get_query_exact_match(cls, criteria, prep_name):

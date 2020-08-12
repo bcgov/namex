@@ -1,13 +1,19 @@
 """Events keep an audit trail of all changes submitted to the datastore
 
 """
+from sqlalchemy import and_, func
+
 from . import db
 from namex.exceptions import BusinessException
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
 from .request import Request
 from sqlalchemy.orm import backref
+from sqlalchemy import cast, Date
 from sqlalchemy.dialects.postgresql import JSONB
+from datetime import datetime, timedelta
+
+from ..constants import EventAction, EventUserId, EventState, RequestState, RequestPriority
 
 
 class Event(db.Model):
@@ -39,7 +45,8 @@ class Event(db.Model):
     VALID_ACTIONS = [GET, PUT, PATCH, POST, DELETE]
 
     def json(self):
-        return {"id": self.id, "eventDate": self.eventDate, "action": self.action, "stateCd": self.stateCd, "jsonData": self.eventJson,
+        return {"id": self.id, "eventDate": self.eventDate, "action": self.action, "stateCd": self.stateCd,
+                "jsonData": self.eventJson,
                 "requestId": self.nrId, "userId": self.userId}
 
     def save_to_db(self):
@@ -51,3 +58,28 @@ class Event(db.Model):
 
     def delete_from_db(self):
         raise BusinessException()
+
+    @classmethod
+    def get_approved_names_counter(cls):
+        auto_approved_names_counter = db.session.query(
+            func.count(Event.id)).filter(Event.action == EventAction.PUT.value,
+                                         Event.userId == EventUserId.SERVICE_ACCOUNT.value,
+                                         Event.stateCd == EventState.APPROVED.value,
+                                         func.date_trunc('day', Event.eventDate) == func.date_trunc('day', func.now())
+                                         ).all()
+        return auto_approved_names_counter
+
+    @classmethod
+    def get_avg_examination_time_secs(cls):
+        avg_examination_time = db.session.query(
+            func.percentile_cont(0.5).within_group((func.extract('epoch', Event.eventDate) -
+                                                    func.extract('epoch', Request.submittedDate)))). \
+            join(Request, and_(Event.nrId == Request.id)). \
+            filter(Event.action == EventAction.PATCH.value,
+                   Event.stateCd.in_(
+                       [EventState.APPROVED.value, EventState.REJECTED.value,
+                        EventState.CONDITIONAL.value, EventState.CANCELLED.value]),
+                   Event.eventDate.cast(Date) == (func.now() - timedelta(days=1)).cast(Date)
+                   ).all()
+
+        return avg_examination_time
