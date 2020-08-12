@@ -7,6 +7,7 @@ from namex.models import State, User
 from namex.services import ServicesError
 
 
+# TODO: Strip these utils out, they are being moved up a level to namex.utils
 def log_error(msg, err):
     return msg.format(err)
 
@@ -37,6 +38,8 @@ def query_results_to_dict(results):
     return list(map(lambda result: query_result_to_dict(result), results))
 
 
+# TODO: End of utils to strip out, see comment above
+
 nr_regex = r'^(NR\ ?L{0,1}|L{0,1})?([\d]{6,8})$'
 
 
@@ -45,7 +48,8 @@ def normalize_nr_num(nr_num_str):
     # If there's a match and the match has a second capturing group (valid NR digits) then proceed
     if len(matches) == 1 and matches[0][1]:
         # Get the first capturing group if it exists, convert to upper case, and remove any spaces
-        nr_type = str(matches[0][0]).upper().replace(' ', '') if matches[0][0] else 'NR'  # Default to NR if not supplied
+        nr_type = str(matches[0][0]).upper().replace(' ', '') if matches[0][
+            0] else 'NR'  # Default to NR if not supplied
         # Grab the NR digits from the second capturing group
         digits = matches[0][1]
 
@@ -69,7 +73,8 @@ def get_or_create_user_by_jwt(jwt_oidc_token):
         user = User.find_by_jwtToken(jwt_oidc_token)
         current_app.logger.debug('finding user: {}'.format(jwt_oidc_token))
         if not user:
-            current_app.logger.debug('didnt find user, attempting to create new user from the JWT info:{}'.format(jwt_oidc_token))
+            current_app.logger.debug(
+                'didnt find user, attempting to create new user from the JWT info:{}'.format(jwt_oidc_token))
             user = User.create_from_jwtToken(jwt_oidc_token)
 
         return user
@@ -107,7 +112,7 @@ def valid_state_transition(user, nr, new_state):
 
         # TODO what are the business rules about editing a finalized name
         # if nr.furnished == Request.REQUEST_FURNISHED:
-            # return jsonify({"message": "Request has already been furnished and cannot be altered"}), 409
+        # return jsonify({"message": "Request has already been furnished and cannot be altered"}), 409
 
         # A completed Request can only be moved to editable (INPROGRESS)
         # OR remain in its current state (editing a closed request)
