@@ -387,11 +387,13 @@ class NameRequestService(AbstractNameRequestMixin):
                 applicant = build_request_applicant(nr_id, self.get_applicant_sequence(), request_applicant)
                 applicants.append(applicant)
 
+            name_request.applicants = applicants
+
         elif isinstance(request_applicants, dict):
             applicant = build_request_applicant(nr_id, self.get_applicant_sequence(), request_applicants)
             applicants.append(applicant)
 
-        name_request.applicants = applicants
+            name_request.applicants = applicants
 
         return name_request
 
