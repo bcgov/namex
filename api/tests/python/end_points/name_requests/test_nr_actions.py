@@ -14,7 +14,7 @@ from tests.python.end_points.common.http import get_test_headers
 
 from .configuration import API_BASE_URI
 from tests.python.common.test_name_request_utils import \
-    pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_field_is_mapped, assert_field_has_value, assert_field_is_lt_value
+    pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_field_is_mapped, assert_field_equals_value, assert_field_is_lt_value
 
 from namex.models import State, User
 from namex.constants import NameRequestActions
@@ -189,7 +189,8 @@ def patch_nr(client, action, nr_num, nr_data):
         patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)
 
         if not patch_response or patch_response.status_code != 200:
-            raise Exception('NR PATCH operation failed')
+            # raise Exception('NR PATCH operation failed')
+            pass
 
         return patch_response
     except Exception as err:
@@ -302,7 +303,7 @@ def test_draft_patch_edit_data(client, jwt, app):
     }
 
     for key, value in expected_field_values.items():
-        assert_field_has_value(patched_nr, key, value)
+        assert_field_equals_value(patched_nr, key, value)
 
 
 def test_draft_patch_edit_and_repatch(client, jwt, app):
@@ -421,6 +422,8 @@ def test_draft_patch_upgrade(client, jwt, app):
     # Take the response and edit it
     nr_data = {}
     patch_response = patch_nr(client, NameRequestActions.UPGRADE.value, draft_nr.get('nrNum'), nr_data)
+
+    assert patch_response.status_code == 200
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -435,9 +438,9 @@ def test_draft_patch_upgrade(client, jwt, app):
 
     # Check actions (write a util for this)
 
-    # assert_field_has_value(patched_nr, 'payment_token', '')
-    assert_field_has_value(patched_nr, 'priorityCd', 'Y')
-    # assert_field_has_value(patched_nr, 'priorityDate', '')
+    # assert_field_equals_value(patched_nr, 'payment_token', '')
+    assert_field_equals_value(patched_nr, 'priorityCd', 'Y')
+    # assert_field_equals_value(patched_nr, 'priorityDate', '')
 
 
 def test_draft_patch_cancel(client, jwt, app):
@@ -525,13 +528,22 @@ def test_draft_patch_reapply(client, jwt, app):
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
-    # Take the response and edit it
-    nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
-    patched_nr = json.loads(patch_response.data)
-    assert patched_nr is not None
+    def do_reapply():
+        # Take the response and edit it
+        nr_data = {}
+        patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
 
-    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+        updated_nr = None
+        if patch_response.status_code == 200:
+            updated_nr = json.loads(patch_response.data)
+            assert updated_nr is not None
+
+            print('PATCH Response: \n' + json.dumps(updated_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+        return updated_nr, patch_response.status_code
+
+    # Re-apply
+    patched_nr, status_code = do_reapply()
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
@@ -540,8 +552,18 @@ def test_draft_patch_reapply(client, jwt, app):
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
-    assert_field_is_lt_value(patched_nr, 'submitCount', 4)
-    # assert_field_has_value(patched_nr, 'expirationDate', '')
+    assert_field_equals_value(patched_nr, 'submitCount', 2)
+    # assert_field_equals_value(patched_nr, 'expirationDate', '')
+
+    # Re-apply
+    patched_nr, status_code = do_reapply()
+
+    assert_field_equals_value(patched_nr, 'submitCount', 3)
+
+    # Re-apply
+    patched_nr, status_code = do_reapply()
+    # The submitCount should never be greater than 3, this should now fail with a 500
+    assert status_code == 500
 
 
 def test_draft_patch_reapply_historical(client, jwt, app):
@@ -580,7 +602,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
     assert_field_is_lt_value(patched_nr, 'submitCount', 4)
-    # assert_field_has_value(patched_nr, 'expirationDate', '')
+    # assert_field_equals_value(patched_nr, 'expirationDate', '')
 
     # Take the response and edit it
     nr_data = {
@@ -601,7 +623,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
     assert_field_is_lt_value(patched_nr, 'submitCount', 4)
-    # assert_field_has_value(patched_nr, 'expirationDate', '')
+    # assert_field_equals_value(patched_nr, 'expirationDate', '')
 
 
 def test_draft_patch_resend(client, jwt, app):

@@ -85,7 +85,7 @@ def assert_field_is_lt(req_obj, res_obj, prop_name):
 
 
 @pytest.mark.skip
-def assert_field_has_value(res_obj, prop_name, prop_val):
+def assert_field_equals_value(res_obj, prop_name, prop_val):
     """
     Just a util
     :param res_obj:
