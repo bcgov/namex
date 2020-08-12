@@ -14,7 +14,7 @@ from .name_request_state import apply_nr_state_change, get_nr_state_actions
 
 from .exceptions import \
     CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
-    MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError, ExtendExpiryDateError
+    MapRequestApplicantError, MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError, ExtendExpiryDateError
 
 from .utils import log_error, convert_to_ascii
 
@@ -41,38 +41,6 @@ def build_name_comment(user_id, nr_id):
     name_comment.nrId = nr_id
     name_comment.comment = 'The submitted name or names is a person name, coined phrase or trademark'
     return name_comment
-
-
-def build_request_applicant(nr_id, party_id, request_applicant):
-    # Applicant, contact and address info
-    applicant = Applicant()
-    applicant.nrId = nr_id
-    applicant.partyId = party_id
-    applicant.lastName = convert_to_ascii(request_applicant['lastName'])
-    applicant.firstName = convert_to_ascii(request_applicant['firstName'])
-    if request_applicant['middleName']:
-        applicant.middleName = convert_to_ascii(request_applicant['middleName'])
-    applicant.contact = convert_to_ascii(request_applicant['contact'])
-    if request_applicant['middleName']:
-        applicant.middleName = convert_to_ascii(request_applicant['middleName'])
-    if request_applicant['clientFirstName']:
-        applicant.clientFirstName = convert_to_ascii(request_applicant['clientFirstName'])
-    if request_applicant['clientLastName']:
-        applicant.clientLastName = convert_to_ascii(request_applicant['clientLastName'])
-    if request_applicant['phoneNumber']:
-        applicant.phoneNumber = convert_to_ascii(request_applicant['phoneNumber'])
-    if request_applicant['faxNumber']:
-        applicant.faxNumber = convert_to_ascii(request_applicant['faxNumber'])
-    applicant.emailAddress = convert_to_ascii(request_applicant['emailAddress'])
-    applicant.addrLine1 = convert_to_ascii(request_applicant['addrLine1'])
-    if request_applicant['addrLine2']:
-        applicant.addrLine2 = convert_to_ascii(request_applicant['addrLine2'])
-    applicant.city = convert_to_ascii(request_applicant['city'])
-    applicant.stateProvinceCd = request_applicant['stateProvinceCd']
-    applicant.postalCd = convert_to_ascii(request_applicant['postalCd'])
-    applicant.countryTypeCd = request_applicant['countryTypeCd']
-
-    return applicant
 
 
 class NameRequestService(AbstractNameRequestMixin):
@@ -161,15 +129,31 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return name
 
+    def create_applicant(self):
+        try:
+            applicant = Applicant()
+            applicant.partyId = self.get_applicant_sequence()
+        except Exception as err:
+            raise MapRequestApplicantError(err, 'Error setting applicant and / or sequence.')
+
+        return applicant
+
     @classmethod
-    def get_name_from_list(cls, names, name_id):
-        matches = [n for n in names if n.id == name_id]
+    def get_item_from_list(cls, items, item_id, item_prop='id'):
+        """
+        TODO: We could make a util for this...
+        :param items:
+        :param item_id:
+        :param item_prop:
+        :return:
+        """
+        matches = [i for i in items if i.__getattribute__(item_prop) == item_id]
         if len(matches) == 0:
             return None
         if len(matches) == 1:
             return matches[0]
         if len(matches) > 1:
-            raise Exception('More than one match for a name!')
+            raise Exception('More than one match found for a given ID!')
 
     @classmethod
     def update_request_submit_count(cls, name_request):
@@ -383,19 +367,76 @@ class NameRequestService(AbstractNameRequestMixin):
         applicants = []
 
         if isinstance(request_applicants, list):
-            for request_applicant in request_data.get('applicants', []):
-                applicant = build_request_applicant(nr_id, self.get_applicant_sequence(), request_applicant)
-                applicants.append(applicant)
+            try:
+                for request_applicant in request_applicants:
+                    request_applicant_id = request_applicant.get('partyId')
 
-            name_request.applicants = applicants
+                    if request_applicant_id:
+                        existing_applicants = name_request.applicants.all()
+                        match = self.get_item_from_list(existing_applicants, request_applicant_id, 'partyId')
+                        if match:
+                            applicant = self.map_request_applicant(match, request_applicant)
+                            applicants.append(applicant)
+                    else:
+                        applicant = self.create_applicant()
+                        applicant.nrId = nr_id
+
+                        applicant = self.map_request_applicant(applicant, request_applicant)
+                        applicants.append(applicant)
+
+                name_request.applicants = applicants
+            except Exception as err:
+                raise MapRequestApplicantError(err)
 
         elif isinstance(request_applicants, dict):
-            applicant = build_request_applicant(nr_id, self.get_applicant_sequence(), request_applicants)
-            applicants.append(applicant)
+            try:
+                request_applicant_id = request_applicants.get('partyId')
 
-            name_request.applicants = applicants
+                if request_applicant_id:
+                    existing_applicants = name_request.applicants.all()
+                    match = self.get_item_from_list(existing_applicants, request_applicant_id, 'partyId')
+                    if match:
+                        applicant = self.map_request_applicant(match, request_applicants)
+                        applicants.append(applicant)
+                else:
+                    applicant = self.create_applicant()
+                    applicant.nrId = nr_id
+
+                    applicant = self.map_request_applicant(applicant, request_applicants)
+                    applicants.append(applicant)
+
+                name_request.applicants = applicants
+            except Exception as err:
+                raise MapRequestApplicantError(err)
 
         return name_request
+
+    def map_request_applicant(self, applicant, request_applicant):
+        applicant.lastName = convert_to_ascii(request_applicant['lastName'])
+        applicant.firstName = convert_to_ascii(request_applicant['firstName'])
+        if request_applicant['middleName']:
+            applicant.middleName = convert_to_ascii(request_applicant['middleName'])
+        applicant.contact = convert_to_ascii(request_applicant['contact'])
+        if request_applicant['middleName']:
+            applicant.middleName = convert_to_ascii(request_applicant['middleName'])
+        if request_applicant['clientFirstName']:
+            applicant.clientFirstName = convert_to_ascii(request_applicant['clientFirstName'])
+        if request_applicant['clientLastName']:
+            applicant.clientLastName = convert_to_ascii(request_applicant['clientLastName'])
+        if request_applicant['phoneNumber']:
+            applicant.phoneNumber = convert_to_ascii(request_applicant['phoneNumber'])
+        if request_applicant['faxNumber']:
+            applicant.faxNumber = convert_to_ascii(request_applicant['faxNumber'])
+        applicant.emailAddress = convert_to_ascii(request_applicant['emailAddress'])
+        applicant.addrLine1 = convert_to_ascii(request_applicant['addrLine1'])
+        if request_applicant['addrLine2']:
+            applicant.addrLine2 = convert_to_ascii(request_applicant['addrLine2'])
+        applicant.city = convert_to_ascii(request_applicant['city'])
+        applicant.stateProvinceCd = request_applicant['stateProvinceCd']
+        applicant.postalCd = convert_to_ascii(request_applicant['postalCd'])
+        applicant.countryTypeCd = request_applicant['countryTypeCd']
+
+        return applicant
 
     def map_request_names(self, name_request):
         """
@@ -411,7 +452,7 @@ class NameRequestService(AbstractNameRequestMixin):
                 request_name_id = request_name.get('id')
                 if request_name_id:
                     existing_names = name_request.names.all()
-                    match = self.get_name_from_list(existing_names, request_name_id)
+                    match = self.get_item_from_list(existing_names, request_name_id)
                     if match:
                         # Update the name
                         updated_name = self.map_submitted_name(match, request_name)

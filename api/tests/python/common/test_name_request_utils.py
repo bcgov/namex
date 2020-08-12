@@ -34,6 +34,16 @@ def assert_name_has_id(name):
 
 
 @pytest.mark.skip
+def assert_applicant_has_id(applicant):
+    """
+    Just a util
+    :param applicant:
+    :return:
+    """
+    assert applicant.get('partyId') is not None
+
+
+@pytest.mark.skip
 def assert_field_is_mapped(req_obj, res_obj, prop_name):
     """
     Just a util

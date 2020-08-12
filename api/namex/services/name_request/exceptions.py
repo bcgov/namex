@@ -65,6 +65,11 @@ class MapRequestNamesError(NameRequestException):
         super().__init__(wrapped_err, message)
 
 
+class MapRequestApplicantError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Error setting applicant."):
+        super().__init__(wrapped_err, message)
+
+
 class SolrUpdateError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error updating solr for reservation."):
         super().__init__(wrapped_err, message)

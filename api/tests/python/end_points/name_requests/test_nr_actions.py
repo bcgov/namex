@@ -14,7 +14,8 @@ from tests.python.end_points.common.http import get_test_headers
 
 from .configuration import API_BASE_URI
 from tests.python.common.test_name_request_utils import \
-    pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_field_is_mapped, assert_field_equals_value, assert_field_is_lt_value
+    pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_applicant_has_id, \
+    assert_field_is_mapped, assert_field_equals_value, assert_field_is_lt_value
 
 from namex.models import State, User
 from namex.constants import NameRequestActions
@@ -109,6 +110,22 @@ def assert_names_are_mapped_correctly(req_names, res_names):
         print('\n......................................\n')
 
     print('\n-------- Test names complete --------\n')
+
+
+@pytest.mark.skip
+def assert_applicant_is_mapped_correctly(req_applicant, res_applicant):
+    print('\n-------- Test applicant --------\n')
+    print('\nCompare request applicant: \n' + repr(req_applicant) + '\n')
+    print('With response applicant: \n' + repr(res_applicant) + '\n')
+
+    if res_applicant and req_applicant.get('partyId', None) is None:
+        # It's a new applicant make sure it has an ID set
+        assert_applicant_has_id(res_applicant)
+    if res_applicant and req_applicant.get('partyId', None) is not None:
+        # The applicant existed, make sure the ID has not changed
+        assert_field_is_mapped(req_applicant, res_applicant, 'partyId')
+
+    print('\n-------- Test applicant complete --------\n')
 
 
 @pytest.mark.skip
@@ -292,6 +309,9 @@ def test_draft_patch_edit_data(client, jwt, app):
     # Check names
     assert_names_are_mapped_correctly(nr_data.get('names'), patched_nr.get('names'))
 
+    # Check applicant
+    assert_applicant_is_mapped_correctly(nr_data.get('applicants'), patched_nr.get('applicants'))
+
     # Check data
     expected_field_values = {
         'additionalInfo': 'Testing additional info',
@@ -440,6 +460,7 @@ def test_draft_patch_upgrade(client, jwt, app):
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
+    assert_field_equals_value(draft_nr, 'priorityCd', 'N')
 
     # Take the response and edit it
     nr_data = {}
