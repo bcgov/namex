@@ -288,7 +288,7 @@ class NameRequestFields(NameRequestResource):
                     'date': date.today(),
                     'filingTypes': [
                         {
-                            'filingDescription': 'NM620: ' + nr_name.name,
+                            'filingDescription': '',  # 'NM620: ' + nr_name.name,
                             'filingTypeCode': 'NM620',  # TODO: Use an enum
                             'priority': (nr_model.priorityCd == 'Y')  # TODO: Use an enum
                         }
