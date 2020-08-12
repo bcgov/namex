@@ -366,8 +366,8 @@ class NameRequestService(AbstractNameRequestMixin):
         request_applicants = request_data.get('applicants')
         applicants = []
 
-        if isinstance(request_applicants, list):
-            try:
+        try:
+            if isinstance(request_applicants, list):
                 for request_applicant in request_applicants:
                     request_applicant_id = request_applicant.get('partyId')
 
@@ -385,11 +385,8 @@ class NameRequestService(AbstractNameRequestMixin):
                         applicants.append(applicant)
 
                 name_request.applicants = applicants
-            except Exception as err:
-                raise MapRequestApplicantError(err)
 
-        elif isinstance(request_applicants, dict):
-            try:
+            elif isinstance(request_applicants, dict):
                 request_applicant_id = request_applicants.get('partyId')
 
                 if request_applicant_id:
@@ -406,8 +403,9 @@ class NameRequestService(AbstractNameRequestMixin):
                     applicants.append(applicant)
 
                 name_request.applicants = applicants
-            except Exception as err:
-                raise MapRequestApplicantError(err)
+
+        except Exception as err:
+            raise MapRequestApplicantError(err)
 
         return name_request
 
