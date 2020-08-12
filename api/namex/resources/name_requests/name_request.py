@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from namex.utils.logging import setup_logging
 from namex.utils.util import cors_preflight
 
-from namex.constants import NameRequestActions
+from namex.constants import NameRequestActions, RequestAction
 from namex.models import Request, State
 
 from namex.services.name_request.utils import handle_exception
@@ -19,7 +19,16 @@ from .api_models import nr_request
 from .resource import NameRequestResource
 from .utils import parse_nr_num
 
+from namex.services.payment import PaymentServiceException
+from namex.services.payment.payments import create_payment
+from openapi_client.models import PaymentRequest
+
 setup_logging()  # Important to do this first
+
+MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
+MSG_SERVER_ERROR = 'Server Error!'
+MSG_NOT_FOUND = 'Resource not found'
+MSG_ERROR_CREATING_RESOURCE = 'Could not create / update resource'
 
 
 @cors_preflight('GET, PUT')
@@ -254,13 +263,46 @@ class NameRequestFields(NameRequestResource):
         return nr_model
 
     def handle_patch_upgrade(self, nr_model):
-        # TODO: Only works for DRAFT state
+        if not nr_model.stateCd == State.DRAFT:
+            raise NameRequestException(message='Upgrade error')
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
-        # TODO: Update Oracle (change_nr?) and payment related stuff
         # This will generate a new payment Id and then the NR will have two payments.
+        payment_request = {}
+
+        # Grab the info we need off the request
+        payment_info = payment_request.get('paymentInfo')
+        filing_info = payment_request.get('filingInfo')
+        business_info = payment_request.get('businessInfo')
+
+        # Create our payment request
+        req = PaymentRequest(
+            payment_info=payment_info,
+            filing_info=filing_info,
+            business_info=business_info
+        )
+
+        try:
+            payment = create_payment(req)
+            if not payment:
+                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
+
+            # Update the name request with the payment id
+            # nr_draft.paymentToken = str(payment.id)
+            nr_model.payment_token = str(payment.id)
+            # nr_model.payment_completion_date = ''
+
+            nr_model.priorityCd = 'Y'
+            # nr_model.priorityDate = ''
+
+            # Save the name request
+            nr_model.save_to_db()
+
+        except Exception as err:
+            raise NameRequestException(err, 'Upgrade error')
+
         # We have not accounted for multiple payments.
         # We will need to add a request_payment model (request_id and payment_id)
         # This handles the updates for NRO and Solr, if necessary
@@ -286,26 +328,26 @@ class NameRequestFields(NameRequestResource):
     def handle_patch_reapply(self, nr_model):
         nr_svc = self.nr_service
 
-        # This handles updates if the NR state is 'patchable'
-        # TODO: Ensure request action is REH or REST <- Where does this come in?
-        # TODO: Ensure submit count is not greater than 3
-
-        if nr_model.submitCount < 3:
+        if nr_model.submitCount < 4:
             # Update submit count
             nr_model = nr_svc.update_request_submit_count(nr_model)
-            # Extend expiry date by (default) 56 days
-            nr_model = nr_svc.extend_expiry_date(nr_model)
-            # TODO: If request action is REH or REST extend by 1 year (+ 56 default) days
-            # TODO: Where does the request action come from in this scenario?
-            # nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1)))
 
+            if nr_svc.request_action in [RequestAction.REH, RequestAction.REST]:
+                # If request action is REH or REST extend by 1 year (+ 56 default) days
+                nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1)))
+            else:
+                # Extend expiry date by (default) 56 days
+                nr_model = nr_svc.extend_expiry_date(nr_model)
+
+            # This handles updates if the NR state is 'patchable'
             nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
             # This handles the updates for NRO and Solr, if necessary
-            # TODO: Do we update network services?
             self.update_records_in_network_services(nr_model)
+        else:
+            # TODO: Make a custom exception for this?
+            raise NameRequestException(message='Submit count maximum of 3 retries has been reached')
 
-            # TODO: Raise an error if submitCount is greater than 3
         return nr_model
 
     def handle_patch_resend(self, nr_model):

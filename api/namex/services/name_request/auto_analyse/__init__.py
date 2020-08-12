@@ -30,6 +30,7 @@ class ProcedureResult:
         self.values = kwargs.get('values', None)
 
 
+# TODO: Why can't we use the RequestAction enum in namex.constants
 class AnalysisRequestActions(str, Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)
     AML = 'AML'  # Amalgamate (NAME PROTECTION, BC ONLY)

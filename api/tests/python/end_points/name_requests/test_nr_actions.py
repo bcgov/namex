@@ -14,7 +14,7 @@ from tests.python.end_points.common.http import get_test_headers
 
 from .configuration import API_BASE_URI
 from tests.python.common.test_name_request_utils import \
-    pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_field_is_mapped, assert_field_has_value
+    pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_field_is_mapped, assert_field_has_value, assert_field_is_lt_value
 
 from namex.models import State, User
 from namex.constants import NameRequestActions
@@ -318,7 +318,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     # Define our data
     input_fields = draft_input_fields
 
-    post_response = create_draft_nr(client, draft_input_fields)
+    post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
@@ -438,9 +438,9 @@ def test_draft_patch_upgrade(client, jwt, app):
 
     # Check actions (write a util for this)
 
-    # TODO: Priority CD changes here! (Will be set to Y)
-    # TODO: Setting priority date, (today's date in UTC)
-    # Note: This is not designed to test for payment
+    # assert_field_has_value(patched_nr, 'payment_token', '')
+    assert_field_has_value(patched_nr, 'priorityCd', 'Y')
+    # assert_field_has_value(patched_nr, 'priorityDate', '')
 
 
 def test_draft_patch_cancel(client, jwt, app):
@@ -546,10 +546,69 @@ def test_draft_patch_reapply(client, jwt, app):
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
-    # TODO:
-    # TODO: Check submit count < 4
-    # TODO: Expiry date extended by 1 yr + 56 or 56 days
-    # TODO: Make sure not state change and also make sure nrNum is the same
+    assert_field_is_lt_value(patched_nr, 'submitCount', 4)
+    # assert_field_has_value(patched_nr, 'expirationDate', '')
+
+
+def test_draft_patch_reapply_historical(client, jwt, app):
+    """
+    Setup:
+    Test:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Define our data
+    input_fields = draft_input_fields
+
+    post_response = create_draft_nr(client, input_fields)
+
+    # Assign the payload to new nr var
+    draft_nr = json.loads(post_response.data)
+    assert draft_nr is not None
+
+    # Take the response and edit it
+    nr_data = {
+        'request_action_cd': 'REH'
+    }
+
+    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == State.DRAFT
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    assert_field_is_lt_value(patched_nr, 'submitCount', 4)
+    # assert_field_has_value(patched_nr, 'expirationDate', '')
+
+    # Take the response and edit it
+    nr_data = {
+        'request_action_cd': 'REST'
+    }
+
+    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == State.DRAFT
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    assert_field_is_lt_value(patched_nr, 'submitCount', 4)
+    # assert_field_has_value(patched_nr, 'expirationDate', '')
 
 
 def test_draft_patch_resend(client, jwt, app):

@@ -98,3 +98,35 @@ def assert_field_has_value(res_obj, prop_name, prop_val):
     assert res_obj_val == prop_val
     print('OK')
     print('...')
+
+
+@pytest.mark.skip
+def assert_field_is_lt_value(res_obj, prop_name, prop_val):
+    """
+    Just a util
+    :param res_obj:
+    :param prop_name:
+    :param prop_val:
+    :return:
+    """
+    res_obj_val = res_obj.get(prop_name)
+    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] is less than "' + str(prop_val) + '"')
+    assert res_obj_val < prop_val
+    print('OK')
+    print('...')
+
+
+@pytest.mark.skip
+def assert_field_is_gt_value(res_obj, prop_name, prop_val):
+    """
+    Just a util
+    :param res_obj:
+    :param prop_name:
+    :param prop_val:
+    :return:
+    """
+    res_obj_val = res_obj.get(prop_name)
+    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] is greater than "' + str(prop_val) + '"')
+    assert res_obj_val > prop_val
+    print('OK')
+    print('...')
