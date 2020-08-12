@@ -285,8 +285,7 @@ class NameRequestFields(NameRequestResource):
                     'methodOfPayment': 'CC',
                 },
                 'filingInfo': {
-                    'corpType': 'NRO',
-                    'date': '',
+                    'date': '2020-08-12',
                     'filingTypes': [
                         {
                             'filingDescription': 'NM620: ' + nr_name.name,
@@ -296,6 +295,7 @@ class NameRequestFields(NameRequestResource):
                     ],
                 },
                 'businessInfo': {
+                    'corpType': 'NRO',
                     'businessIdentifier': nr_model.nrNum,
                     'businessName': nr_name.name,
                     'contactInfo': {
