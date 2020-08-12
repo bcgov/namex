@@ -379,9 +379,16 @@ class NameRequestService(AbstractNameRequestMixin):
         request_data = self.request_data
         nr_id = self.nr_id
 
+        request_applicants = request_data.get('applicants')
         applicants = []
-        for request_applicant in request_data.get('applicants', []):
-            applicant = build_request_applicant(nr_id, self.get_applicant_sequence(), request_applicant)
+
+        if isinstance(request_applicants, list):
+            for request_applicant in request_data.get('applicants', []):
+                applicant = build_request_applicant(nr_id, self.get_applicant_sequence(), request_applicant)
+                applicants.append(applicant)
+
+        elif isinstance(request_applicants, dict):
+            applicant = build_request_applicant(nr_id, self.get_applicant_sequence(), request_applicants)
             applicants.append(applicant)
 
         name_request.applicants = applicants

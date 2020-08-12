@@ -146,14 +146,36 @@ def create_draft_nr(client, nr_data=None):
 
         nr_data = nr.json()
 
+        nr_data['applicants'] = [{
+            'addrLine1': '1796 KINGS RD',
+            'addrLine2': '',
+            'addrLine3': '',
+            'city': 'VICTORIA',
+            'clientFirstName': '',
+            'clientLastName': '',
+            'contact': '',
+            'countryTypeCd': 'CA',
+            # 'declineNotificationInd': None,
+            'emailAddress': 'bob.johnson@example.com',
+            'faxNumber': '',
+            'firstName': 'BOB',
+            'lastName': 'JOHNSON',
+            'middleName': '',
+            # 'partyId': None,
+            'phoneNumber': '2505320083',
+            'postalCd': 'V8R 2P1',
+            'stateProvinceCd': 'BC'
+
+        }]
+
         nr_data['names'] = [{
-            "name": "BLUE HERON TOURS LTD.",
-            "choice": 1,
-            "designation": "LTD.",
-            "name_type_cd": "CO",
-            "consent_words": "",
-            "conflict1": "BLUE HERON TOURS LTD.",
-            "conflict1_num": "0515211"
+            'name': 'BLUE HERON TOURS LTD.',
+            'choice': 1,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
         }]
 
         # Create a new DRAFT NR using the NR we just created
@@ -232,22 +254,22 @@ def test_draft_patch_edit_data(client, jwt, app):
 
     added_names = [
         {
-            "name": "BLUE HERON ADVENTURE TOURS LTD.",
-            "choice": 2,
-            "designation": "LTD.",
-            "name_type_cd": "CO",
-            "consent_words": "",
-            "conflict1": "BLUE HERON TOURS LTD.",
-            "conflict1_num": "0515211"
+            'name': 'BLUE HERON ADVENTURE TOURS LTD.',
+            'choice': 2,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
         },
         {
-            "name": "BLUE HERON ISLAND TOURS LTD.",
-            "choice": 3,
-            "designation": "LTD.",
-            "name_type_cd": "CO",
-            "consent_words": "",
-            "conflict1": "BLUE HERON TOURS LTD.",
-            "conflict1_num": "0515211"
+            'name': 'BLUE HERON ISLAND TOURS LTD.',
+            'choice': 3,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
         }
     ]
 
@@ -332,22 +354,22 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
 
     added_names = [
         {
-            "name": "BLUE HERON ADVENTURE TOURS LTD.",
-            "choice": 2,
-            "designation": "LTD.",
-            "name_type_cd": "CO",
-            "consent_words": "",
-            "conflict1": "BLUE HERON TOURS LTD.",
-            "conflict1_num": "0515211"
+            'name': 'BLUE HERON ADVENTURE TOURS LTD.',
+            'choice': 2,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
         },
         {
-            "name": "BLUE HERON ISLAND TOURS LTD.",
-            "choice": 3,
-            "designation": "LTD.",
-            "name_type_cd": "CO",
-            "consent_words": "",
-            "conflict1": "BLUE HERON TOURS LTD.",
-            "conflict1_num": "0515211"
+            'name': 'BLUE HERON ISLAND TOURS LTD.',
+            'choice': 3,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
         }
     ]
 
