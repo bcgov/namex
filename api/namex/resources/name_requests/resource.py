@@ -285,13 +285,24 @@ class NameRequestResource(Resource):
                 })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
-        elif name_request.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED, State.CANCELLED]:
+        elif name_request.stateCd in [State.CONDITIONAL, State.APPROVED]:
             if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
                 # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
                 nro_warnings = None
             else:
                 nro_warnings = self.nro_service.change_nr(name_request, {
                     NROChangeFlags.REQUEST.value: True,
+                    NROChangeFlags.APPLICANT.value: True,
+                    NROChangeFlags.ADDRESS.value: True
+                })
+
+            return self.on_nro_update_complete(name_request, on_success, nro_warnings)
+        elif name_request.stateCd in [State.CANCELLED]:
+            if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
+                # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
+                nro_warnings = None
+            else:
+                nro_warnings = self.nro_service.change_nr(name_request, {
                     NROChangeFlags.STATE.value: True
                 })
 
