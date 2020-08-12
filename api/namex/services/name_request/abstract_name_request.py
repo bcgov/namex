@@ -55,8 +55,8 @@ class AbstractNameRequestMixin(object):
 
     @property
     def request_action(self):
-        # Sometimes we get request_action, sometimes we get request_action_cd, handle both
-        action = self.request_data.get('request_action', None)
+        # Sometimes we get requestAction, sometimes we get request_action_cd, handle both
+        action = self.request_data.get('requestAction', None)
         action_cd = self.request_data.get('request_action_cd', None)
 
         if action:
@@ -112,7 +112,7 @@ class AbstractNameRequestMixin(object):
         self._next_state_code = val
 
     @classmethod
-    def set_request_type(cls, entity_type, request_action):
+    def get_mapped_request_type(cls, entity_type, request_action):
         output = None
         for item in request_type_mapping:
             if item[1] == entity_type and item[2] == request_action:
@@ -121,7 +121,7 @@ class AbstractNameRequestMixin(object):
 
         if output:
             request_type = list(output)
-            return request_type[0]
+            return request_type
 
     @classmethod
     def get_request_sequence(cls):

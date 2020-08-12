@@ -236,7 +236,12 @@ class NameRequestService(AbstractNameRequestMixin):
 
             if request_action:
                 name_request.request_action_cd = request_action
-                name_request.requestTypeCd = self.set_request_type(name_request.entity_type_cd, request_action)
+
+            if request_action and request_entity:
+                request_type = self.get_mapped_request_type(request_entity, request_action)
+                if request_type:
+                    name_request.requestTypeCd = request_type[0]
+
         except Exception as err:
             raise MapRequestDataError(err)
 
