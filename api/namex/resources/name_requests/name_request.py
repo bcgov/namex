@@ -285,6 +285,7 @@ class NameRequestFields(NameRequestResource):
                     'methodOfPayment': 'CC',
                 },
                 'filingInfo': {
+                    # TODO: Don't forget to update the Date property here!
                     'date': '2020-08-12',
                     'filingTypes': [
                         {
