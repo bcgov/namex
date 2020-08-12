@@ -209,7 +209,6 @@ def test_draft_patch_edit_data(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
-
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -317,7 +316,6 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
-
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -414,7 +412,6 @@ def test_draft_patch_upgrade(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
-
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -454,7 +451,6 @@ def test_draft_patch_cancel(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
-
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -490,7 +486,6 @@ def test_draft_patch_refund(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
-
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -524,7 +519,6 @@ def test_draft_patch_reapply(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
-
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -561,7 +555,6 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
-
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -622,7 +615,6 @@ def test_draft_patch_resend(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
-
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var

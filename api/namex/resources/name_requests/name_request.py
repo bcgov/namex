@@ -263,28 +263,66 @@ class NameRequestFields(NameRequestResource):
         return nr_model
 
     def handle_patch_upgrade(self, nr_model):
+        """
+        Upgrade the Name Request to priority, create the payment and save the record.
+        :param nr_model:
+        :return:
+        """
         if not nr_model.stateCd == State.DRAFT:
-            raise NameRequestException(message='Upgrade error')
+            raise NameRequestException(message='Error upgrading Name Request, request is in an invalid state!')
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
-        # This will generate a new payment Id and then the NR will have two payments.
-        payment_request = {}
+        # TODO: Any other supported types? What role does frontend have in this?
+        #  Also, this will generate a new payment Id and then the NR will have two payments.
+        nr_name = nr_model.names[0]
+        nr_applicant = nr_model.applicants[0]
 
-        # Grab the info we need off the request
-        payment_info = payment_request.get('paymentInfo')
-        filing_info = payment_request.get('filingInfo')
-        business_info = payment_request.get('businessInfo')
-
-        # Create our payment request
-        req = PaymentRequest(
-            payment_info=payment_info,
-            filing_info=filing_info,
-            business_info=business_info
-        )
+        if nr_name and nr_applicant:
+            payment_request = {
+                'paymentInfo': {
+                    'methodOfPayment': 'CC',
+                },
+                'filingInfo': {
+                    'corpType': 'NRO',
+                    'date': '',
+                    'filingTypes': [
+                        {
+                            'filingDescription': 'NM620: ' + nr_name.name,
+                            'filingTypeCode': 'NM620',  # TODO: Use an enum
+                            'priority': (nr_model.priority == 'Y')  # TODO: Use an enum
+                        }
+                    ],
+                },
+                'businessInfo': {
+                    'businessIdentifier': nr_model.nrNum,
+                    'businessName': nr_name.name,
+                    'contactInfo': {
+                        'addressLine1': ', '.join([nr_applicant.addrLine1, nr_applicant.addrLine2]),
+                        'city': nr_applicant.city,
+                        'province': nr_applicant.stateProvinceCd,
+                        'country': nr_applicant.countryTypeCd,
+                        'postalCode': nr_applicant.postalCd
+                    }
+                }
+            }
+        else:
+            raise NameRequestException(message='Error upgrading Name Request, payment request is missing information!')
 
         try:
+            # Grab the info we need off the request
+            payment_info = payment_request.get('paymentInfo')
+            filing_info = payment_request.get('filingInfo')
+            business_info = payment_request.get('businessInfo')
+
+            # Create our payment request
+            req = PaymentRequest(
+                payment_info=payment_info,
+                filing_info=filing_info,
+                business_info=business_info
+            )
+
             payment = create_payment(req)
             if not payment:
                 raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
@@ -301,7 +339,7 @@ class NameRequestFields(NameRequestResource):
             nr_model.save_to_db()
 
         except Exception as err:
-            raise NameRequestException(err, 'Upgrade error')
+            raise NameRequestException(err, message='Error upgrading Name Request!')
 
         # We have not accounted for multiple payments.
         # We will need to add a request_payment model (request_id and payment_id)
@@ -309,30 +347,20 @@ class NameRequestFields(NameRequestResource):
         self.update_records_in_network_services(nr_model)
         return nr_model
 
-    def handle_patch_cancel(self, nr_model):
-        # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
-
-        # This handles the updates for NRO and Solr, if necessary
-        self.update_records_in_network_services(nr_model)
-        return nr_model
-
-    def handle_patch_refund(self, nr_model):
-        # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
-
-        # This handles the updates for NRO and Solr, if necessary
-        # self.update_records_in_network_services(nr_model)
-        return nr_model
-
     def handle_patch_reapply(self, nr_model):
+        """
+        Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
+        extend the expiration by an additional year (plus the default 56 days).
+        :param nr_model:
+        :return:
+        """
         nr_svc = self.nr_service
 
         if nr_model.submitCount < 4:
             # Update submit count
             nr_model = nr_svc.update_request_submit_count(nr_model)
 
-            if nr_svc.request_action in [RequestAction.REH, RequestAction.REST]:
+            if nr_svc.request_action in [RequestAction.REH.value, RequestAction.REST.value]:
                 # If request action is REH or REST extend by 1 year (+ 56 default) days
                 nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1)))
             else:
@@ -346,7 +374,7 @@ class NameRequestFields(NameRequestResource):
             self.update_records_in_network_services(nr_model)
         else:
             # TODO: Make a custom exception for this?
-            raise NameRequestException(message='Submit count maximum of 3 retries has been reached')
+            raise NameRequestException(message='Submit count maximum of 3 retries has been reached!')
 
         return nr_model
 
@@ -355,7 +383,27 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        # TODO: Do we update network services?
+        # self.update_records_in_network_services(nr_model)
+        return nr_model
+
+    def handle_patch_refund(self, nr_model):
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+        # This handles the updates for NRO and Solr, if necessary
+        # self.update_records_in_network_services(nr_model)
+        return nr_model
+
+    def handle_patch_cancel(self, nr_model):
+        """
+        Cancel the Name Request.
+        :param nr_model:
+        :return:
+        """
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
+
+        # This handles the updates for NRO and Solr, if necessary
         self.update_records_in_network_services(nr_model)
         return nr_model
 
