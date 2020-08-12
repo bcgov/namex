@@ -107,6 +107,7 @@ def assert_names_are_mapped_correctly(req_names, res_names):
 
         # Make sure the choice is mapped correctly
         assert_field_is_mapped(req_name, res_name, 'choice')
+        assert_field_is_mapped(req_name, res_name, 'designation')
         print('\n......................................\n')
 
     print('\n-------- Test names complete --------\n')
@@ -292,8 +293,11 @@ def test_draft_patch_edit_data(client, jwt, app):
 
     nr_data['names'].extend(added_names)
 
-    # updated_applicant = {}
+    # Change the designation, we'll check to make sure it's mapped in the response
+    nr_data['names'][0]['designation'] = 'INC.'
 
+    # TODO: More applicant testing
+    # updated_applicant = {}
     # nr_data['applicant'] = updated_applicant
 
     patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('nrNum'), nr_data)

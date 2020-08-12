@@ -365,7 +365,7 @@ class NameRequestFields(NameRequestResource):
                 nr_model = nr_svc.update_request_submit_count(nr_model)
             else:
                 # Extend expiry date by (default) 56 days
-                nr_model = nr_svc.extend_expiry_date(nr_model)
+                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow())
                 nr_model = nr_svc.update_request_submit_count(nr_model)
 
             # This handles updates if the NR state is 'patchable'
