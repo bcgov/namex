@@ -171,12 +171,10 @@ class NameRequestService(AbstractNameRequestMixin):
         if len(matches) > 1:
             raise Exception('More than one match for a name!')
 
-    def update_request_submit_count(self, name_request):
+    @classmethod
+    def update_request_submit_count(cls, name_request):
         try:
-            if self.request_data.get('submit_count') is None:
-                name_request.submitCount = 1
-            else:
-                name_request.submitCount = name_request.submitCount + 1 if isinstance(name_request.submitCount, int) else 1
+            name_request.submitCount = name_request.submitCount + 1 if isinstance(name_request.submitCount, int) else 1
         except Exception as err:
             raise UpdateSubmitCountError(err)
 
@@ -233,8 +231,6 @@ class NameRequestService(AbstractNameRequestMixin):
                 )
         except Exception as err:
             raise MapRequestDataError(err)
-
-        name_request = self.update_request_submit_count(name_request)
 
         return name_request
 

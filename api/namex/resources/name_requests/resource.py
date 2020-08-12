@@ -161,6 +161,8 @@ class NameRequestResource(Resource):
         nr = svc.map_request_applicants(nr)
         # Map any submitted names from the request data to the name request
         nr = svc.map_request_names(nr)
+        # Update the submit count to 1
+        nr = svc.update_request_submit_count(nr)
         # Save
         nr = svc.save_request(nr)
         # Return the updated name request
@@ -263,7 +265,7 @@ class NameRequestResource(Resource):
     def update_request_in_nro(self, name_request, on_success=None):
         # Only update Oracle for DRAFT
         # NRO / Oracle records are added when CONDITIONAL or APPROVED (see add_request_to_nro)
-        if name_request in [State.DRAFT]:
+        if name_request.stateCd in [State.DRAFT]:
             if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
                 # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
                 nro_warnings = None
