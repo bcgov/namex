@@ -263,7 +263,7 @@ class NameRequestResource(Resource):
     def update_request_in_nro(self, name_request, on_success=None):
         # Only update Oracle for DRAFT
         # NRO / Oracle records are added when CONDITIONAL or APPROVED (see add_request_to_nro)
-        if name_request.stateCd in [State.DRAFT]:
+        if name_request in [State.DRAFT]:
             if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
                 # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
                 nro_warnings = None
@@ -283,13 +283,13 @@ class NameRequestResource(Resource):
                 })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
-        # Handle any changes where ONLY state is changed
-        elif name_request.stateCd in [State.CANCELLED]:
+        elif name_request.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED, State.CANCELLED]:
             if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
                 # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
                 nro_warnings = None
             else:
                 nro_warnings = self.nro_service.change_nr(name_request, {
+                    NROChangeFlags.REQUEST.value: True,
                     NROChangeFlags.STATE.value: True
                 })
 
