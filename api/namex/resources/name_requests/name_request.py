@@ -1,6 +1,6 @@
 from flask import jsonify, request, current_app
 from flask_restplus import cors
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from namex.utils.logging import setup_logging
@@ -285,8 +285,7 @@ class NameRequestFields(NameRequestResource):
                     'methodOfPayment': 'CC',
                 },
                 'filingInfo': {
-                    # TODO: Don't forget to update the Date property here!
-                    'date': '2020-08-12',
+                    'date': date.today(),
                     'filingTypes': [
                         {
                             'filingDescription': 'NM620: ' + nr_name.name,
