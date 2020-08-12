@@ -291,7 +291,7 @@ class NameRequestFields(NameRequestResource):
                         {
                             'filingDescription': 'NM620: ' + nr_name.name,
                             'filingTypeCode': 'NM620',  # TODO: Use an enum
-                            'priority': (nr_model.priority == 'Y')  # TODO: Use an enum
+                            'priority': (nr_model.priorityCd == 'Y')  # TODO: Use an enum
                         }
                     ],
                 },
@@ -299,7 +299,9 @@ class NameRequestFields(NameRequestResource):
                     'businessIdentifier': nr_model.nrNum,
                     'businessName': nr_name.name,
                     'contactInfo': {
-                        'addressLine1': ', '.join([nr_applicant.addrLine1, nr_applicant.addrLine2]),
+                        # TODO: Concat this for payments?
+                        # 'addressLine1': ', '.join([nr_applicant.addrLine1, nr_applicant.addrLine2]),
+                        'addressLine1': nr_applicant.addrLine1,
                         'city': nr_applicant.city,
                         'province': nr_applicant.stateProvinceCd,
                         'country': nr_applicant.countryTypeCd,
