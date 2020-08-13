@@ -45,7 +45,7 @@ class NameRequest(NameRequestResource):
 
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
-            response_data['actions'] = get_nr_state_actions(nr_model.stateCd)
+            response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
             return jsonify(response_data), 200
         except Exception as err:
             return handle_exception(err, 'Error retrieving the NR.', 500)

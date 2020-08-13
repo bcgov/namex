@@ -613,7 +613,7 @@ class NameRequestService(AbstractNameRequestMixin):
                 nr = on_success(nr, resource)
 
             # Set the actions corresponding to the new Name Request state
-            self.current_state_actions = get_nr_state_actions(new_state)
+            self.current_state_actions = get_nr_state_actions(new_state, nr)
             return nr
 
         return apply_nr_state_change(self, name_request, next_state, on_success_cb)
