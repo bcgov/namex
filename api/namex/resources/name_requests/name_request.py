@@ -343,6 +343,8 @@ class NameRequestFields(NameRequestResource):
         except Exception as err:
             raise NameRequestException(err, message='Error upgrading Name Request!')
 
+        # Update the actions, as things change once the payment is successful
+        self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
         # We have not accounted for multiple payments.
         # We will need to add a request_payment model (request_id and payment_id)
         # This handles the updates for NRO and Solr, if necessary
