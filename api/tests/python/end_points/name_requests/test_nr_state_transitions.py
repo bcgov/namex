@@ -3,6 +3,7 @@ Integration tests for Name Request state transitions.
 """
 
 import json
+import pytest
 
 from .configuration import API_BASE_URI
 # Import token and claims if you need it
@@ -15,6 +16,7 @@ from .test_setup_utils import create_nr, get_nr_request_uri
 from namex.models import State
 
 
+@pytest.mark.skip
 def test_initial_to_reserved(client, jwt, app):
     """
     Setup:
@@ -45,6 +47,7 @@ def test_initial_to_reserved(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_initial_to_conditionally_reserved(client, jwt, app):
     """
     Setup:
@@ -75,6 +78,7 @@ def test_initial_to_conditionally_reserved(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_initial_to_draft(client, jwt, app):
     """
     Setup:
@@ -105,6 +109,7 @@ def test_initial_to_draft(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_conditionally_reserved_to_conditional(client, jwt, app):
     """
     Setup:
@@ -139,6 +144,7 @@ def test_conditionally_reserved_to_conditional(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_reserved_to_approved(client, jwt, app):
     """
     Setup:
@@ -173,6 +179,7 @@ def test_reserved_to_approved(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_conditional_to_hold(client, jwt, app):
     """
     Setup:
@@ -210,6 +217,7 @@ def test_conditional_to_hold(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_approved_to_hold(client, jwt, app):
     """
     Setup:
@@ -245,6 +253,7 @@ def test_approved_to_hold(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_conditional_to_cancelled(client, jwt, app):
     """
     Setup:
@@ -280,6 +289,7 @@ def test_conditional_to_cancelled(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_approved_to_cancelled(client, jwt, app):
     """
     Setup:
@@ -315,6 +325,7 @@ def test_approved_to_cancelled(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_conditional_to_rejected(client, jwt, app):
     """
     Setup:
@@ -350,6 +361,7 @@ def test_conditional_to_rejected(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_approved_to_rejected(client, jwt, app):
     """
     Setup:

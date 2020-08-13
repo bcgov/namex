@@ -161,6 +161,8 @@ class NameRequestResource(Resource):
         nr = svc.map_request_applicants(nr)
         # Map any submitted names from the request data to the name request
         nr = svc.map_request_names(nr)
+        # Update the submit count to 1
+        nr = svc.update_request_submit_count(nr)
         # Save
         nr = svc.save_request(nr)
         # Return the updated name request
@@ -174,7 +176,8 @@ class NameRequestResource(Resource):
         :param svc A NameRequestService instance
         :return:
         """
-        nr = svc.map_request_data(nr, False)
+        map_draft_attrs = nr.stateCd == State.DRAFT
+        nr = svc.map_request_data(nr, map_draft_attrs)
         # Map applicants from request_data to the name request
         nr = svc.map_request_applicants(nr)
         # Map any submitted names from request_data to the name request
@@ -193,21 +196,9 @@ class NameRequestResource(Resource):
         :param svc A NameRequestService instance
         :return:
         """
-
-        # cleared = request_data.get('cleared', [])  # Clear first
-        # changed = request_data.get('changed', [])  # Then process changes
-
-        # TODO: This needs more work (in progress)
-        # if cleared:
-        # nr = svc.map_request_data(nr, False)
-
-        # is_changed = len(changed) > 0
-        # has_applicants = changed.get('applicants', None)
-        # has_names = changed.get('names', None)
-
-        # if is_changed:
         # Map data from request_data to the name request
-        nr = svc.map_request_data(nr, False)
+        map_draft_attrs = nr.stateCd == State.DRAFT
+        nr = svc.map_request_data(nr, map_draft_attrs)
         # if has_applicants:
         # Map applicants from request_data to the name request
         nr = svc.map_request_applicants(nr)
@@ -294,12 +285,26 @@ class NameRequestResource(Resource):
                 })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
-        # Handle any changes where ONLY state is changed
+        elif name_request.stateCd in [State.CONDITIONAL, State.APPROVED]:
+            if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
+                # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
+                nro_warnings = None
+            else:
+                nro_warnings = self.nro_service.change_nr(name_request, {
+                    NROChangeFlags.REQUEST.value: True,
+                    NROChangeFlags.APPLICANT.value: True,
+                    NROChangeFlags.ADDRESS.value: True
+                })
+
+            return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         elif name_request.stateCd in [State.CANCELLED]:
-            # TODO: It might be a good idea to set an env var for this... as NRO can't run in local tests
-            nro_warnings = self.nro_service.change_nr(name_request, {
-                NROChangeFlags.STATE.value: True
-            })
+            if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
+                # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
+                nro_warnings = None
+            else:
+                nro_warnings = self.nro_service.change_nr(name_request, {
+                    NROChangeFlags.STATE.value: True
+                })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         else:

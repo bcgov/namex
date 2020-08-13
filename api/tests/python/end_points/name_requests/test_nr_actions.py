@@ -13,7 +13,9 @@ from tests.python.end_points.common.http import get_test_headers
 # from tests.python.end_points.common.configuration import claims, token_header
 
 from .configuration import API_BASE_URI
-from tests.python.common.test_name_request_utils import pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_field_is_mapped
+from tests.python.common.test_name_request_utils import \
+    pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_applicant_has_id, \
+    assert_field_is_mapped, assert_field_equals_value, assert_field_is_lt_value
 
 from namex.models import State, User
 from namex.constants import NameRequestActions
@@ -52,6 +54,38 @@ state_data = [
     ('RESERVED', 'Temporary reserved state between name available and paid.  Once paid it is set to APPROVED or CONDITIONAL approval.')
 ]
 
+# Define our data
+# Check NR number is the same because these are PATCH and call change_nr
+draft_input_fields = {
+    'additionalInfo': '',
+    'consentFlag': None,
+    'consent_dt': None,
+    'corpNum': '',
+    'entity_type_cd': 'CR',
+    'expirationDate': None,
+    'furnished': 'N',
+    'hasBeenReset': False,
+    # 'lastUpdate': None,
+    'natureBusinessInfo': 'Test',
+    # 'nrNum': '',
+    # 'nwpta': '',
+    # 'previousNr': '',
+    # 'previousRequestId': '',
+    # 'previousStateCd': '',
+    'priorityCd': 'N',
+    # 'priorityDate': None,
+    'requestTypeCd': 'CR',
+    'request_action_cd': 'NEW',
+    # 'source': 'NAMEREQUEST',
+    'state': 'DRAFT',
+    'stateCd': 'DRAFT',
+    'submitCount': 1,
+    # 'submittedDate': None,
+    'submitter_userid': 'name_request_service_account',
+    'userId': 'name_request_service_account',
+    'xproJurisdiction': ''
+}
+
 
 @pytest.mark.skip
 def assert_names_are_mapped_correctly(req_names, res_names):
@@ -73,9 +107,26 @@ def assert_names_are_mapped_correctly(req_names, res_names):
 
         # Make sure the choice is mapped correctly
         assert_field_is_mapped(req_name, res_name, 'choice')
+        assert_field_is_mapped(req_name, res_name, 'designation')
         print('\n......................................\n')
 
     print('\n-------- Test names complete --------\n')
+
+
+@pytest.mark.skip
+def assert_applicant_is_mapped_correctly(req_applicant, res_applicant):
+    print('\n-------- Test applicant --------\n')
+    print('\nCompare request applicant: \n' + repr(req_applicant) + '\n')
+    print('With response applicant: \n' + repr(res_applicant) + '\n')
+
+    if res_applicant and req_applicant.get('partyId', None) is None:
+        # It's a new applicant make sure it has an ID set
+        assert_applicant_has_id(res_applicant)
+    if res_applicant and req_applicant.get('partyId', None) is not None:
+        # The applicant existed, make sure the ID has not changed
+        assert_field_is_mapped(req_applicant, res_applicant, 'partyId')
+
+    print('\n-------- Test applicant complete --------\n')
 
 
 @pytest.mark.skip
@@ -92,12 +143,11 @@ def add_test_user_to_db():
 
 
 @pytest.mark.skip
-def create_draft_nr(client, jwt, app):
+def create_draft_nr(client, nr_data=None):
     """
     Create a draft NR, using the API, to use as the initial state for each test.
     :param client:
-    :param jwt:
-    :param app:
+    :param nr_data:
     :return:
     """
     try:
@@ -109,36 +159,42 @@ def create_draft_nr(client, jwt, app):
         add_states_to_db(state_data)
         add_test_user_to_db()
 
-        nr = build_nr(State.DRAFT)
-        # nr.requestTypeCd = 'CR'
+        # Optionally supply the field data
+        nr = build_nr(State.DRAFT, nr_data)
 
         nr_data = nr.json()
 
-        nr_data['names'] = [{
-            "name": "BLUE HERON TOURS LTD.",
-            "choice": 1,
-            "designation": "LTD.",
-            "name_type_cd": "CO",
-            "consent_words": "",
-            "conflict1": "BLUE HERON TOURS LTD.",
-            "conflict1_num": "0515211"
+        nr_data['applicants'] = [{
+            'addrLine1': '1796 KINGS RD',
+            'addrLine2': '',
+            'addrLine3': '',
+            'city': 'VICTORIA',
+            'clientFirstName': '',
+            'clientLastName': '',
+            'contact': '',
+            'countryTypeCd': 'CA',
+            # 'declineNotificationInd': None,
+            'emailAddress': 'bob.johnson@example.com',
+            'faxNumber': '',
+            'firstName': 'BOB',
+            'lastName': 'JOHNSON',
+            'middleName': '',
+            # 'partyId': None,
+            'phoneNumber': '2505320083',
+            'postalCd': 'V8R 2P1',
+            'stateProvinceCd': 'BC'
+
         }]
 
-        # New requests need to have these set
-        nr_data['additionalInfo'] = ''
-        nr_data['corpNum'] = ''
-        nr_data['homeJurisNum'] = ''
-        nr_data['natureBusinessInfo'] = 'Test'
-        nr_data['previousRequestId'] = ''
-        nr_data['tradeMark'] = ''
-        nr_data['xproJurisdiction'] = ''
-        nr_data['priorityCd'] = 'N'
-        nr_data['entity_type'] = 'CR'
-        nr_data['request_action'] = 'NEW'
-        nr_data['stateCd'] = 'DRAFT'
-        nr_data['english'] = True
-        nr_data['nameFlag'] = False
-        nr_data['submit_count'] = 0
+        nr_data['names'] = [{
+            'name': 'BLUE HERON TOURS LTD.',
+            'choice': 1,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
+        }]
 
         # Create a new DRAFT NR using the NR we just created
         request_uri = API_BASE_URI
@@ -158,7 +214,145 @@ def create_draft_nr(client, jwt, app):
         print(repr(err))
 
 
-def test_draft_patch_edit(client, jwt, app):
+@pytest.mark.skip
+def patch_nr(client, action, nr_num, nr_data):
+    try:
+        request_uri = API_BASE_URI + nr_num + '/' + action
+        test_params = [{}]
+
+        headers = get_test_headers()
+        query = build_test_query(test_params)
+        path = build_request_uri(request_uri, query)
+        print('Patch (' + action + ') Name Request [' + nr_num + ']: \n' + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': ')))
+        log_request_path(path)
+
+        patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)
+
+        if not patch_response or patch_response.status_code != 200:
+            # raise Exception('NR PATCH operation failed')
+            pass
+
+        return patch_response
+    except Exception as err:
+        print(repr(err))
+        raise
+
+
+def test_draft_patch_edit_data(client, jwt, app):
+    """
+    Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
+    Setup:
+    Test:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
+
+    # Assign the payload to new nr var
+    draft_nr = json.loads(post_response.data)
+    assert draft_nr is not None
+
+    # Take the response and edit it
+    # Add another name to the mix
+    nr_data = {
+        'names': draft_nr.get('names'),
+        'applicants': draft_nr.get('applicants'),
+        'entity_type_cd': 'FR',
+        'corpNum': 'TESTCORP123',
+        # 'homeJurisNum': 'TESTHOME123',
+        'additionalInfo': 'Testing additional info',
+        'natureBusinessInfo': 'Testing nature of business info',
+        'priorityCd': 'Y',
+        'requestTypeCd': 'CR'
+    }
+
+    added_names = [
+        {
+            'name': 'BLUE HERON ADVENTURE TOURS LTD.',
+            'choice': 2,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
+        },
+        {
+            'name': 'BLUE HERON ISLAND TOURS LTD.',
+            'choice': 3,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
+        }
+    ]
+
+    nr_data['names'].extend(added_names)
+
+    # Change the designation, we'll check to make sure it's mapped in the response
+    nr_data['names'][0]['designation'] = 'INC.'
+
+    # TODO: More applicant testing
+    # updated_applicant = {}
+    # nr_data['applicant'] = updated_applicant
+
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('nrNum'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == 'DRAFT'
+
+    # Check names
+    assert_names_are_mapped_correctly(nr_data.get('names'), patched_nr.get('names'))
+
+    # Check applicant
+    assert_applicant_is_mapped_correctly(nr_data.get('applicants'), patched_nr.get('applicants'))
+
+    # Check data
+    expected_field_values = {
+        'additionalInfo': 'Testing additional info',
+        'consentFlag': None,
+        'consent_dt': None,
+        'corpNum': 'TESTCORP123',
+        # 'homeJurisNum': 'TESTHOME123',
+        'entity_type_cd': 'FR',
+        'expirationDate': None,
+        'furnished': 'N',
+        'hasBeenReset': False,
+        # 'lastUpdate': None,
+        'natureBusinessInfo': 'Testing nature of business info',
+        # 'nrNum': '',
+        # 'nwpta': '',
+        # 'previousNr': '',
+        # 'previousRequestId': '',
+        # 'previousStateCd': '',
+        'priorityCd': 'Y',
+        # 'priorityDate': None,
+        'requestTypeCd': 'CR',
+        'request_action_cd': 'NEW',
+        'source': 'NAMEREQUEST',
+        'state': 'DRAFT',
+        'stateCd': 'DRAFT',
+        'submitCount': 1,
+        # 'submittedDate': None,
+        'submitter_userid': 'name_request_service_account',
+        'userId': 'name_request_service_account',
+        'xproJurisdiction': ''
+    }
+
+    for key, value in expected_field_values.items():
+        assert_field_equals_value(patched_nr, key, value)
+
+
+def test_draft_patch_edit_and_repatch(client, jwt, app):
     """
     Setup:
     Test:
@@ -167,57 +361,49 @@ def test_draft_patch_edit(client, jwt, app):
     :param app:
     :return:
     """
-    post_response = create_draft_nr(client, jwt, app)
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
-    print('Patching DRAFT: \n' + json.dumps(draft_nr, sort_keys=True, indent=4, separators=(',', ': ')))
-
     # Take the response and edit it
-    request_uri = API_BASE_URI + draft_nr.get('nrNum') + '/' + NameRequestActions.EDIT.value
-    test_params = [{}]
-
-    headers = get_test_headers()
-    query = build_test_query(test_params)
-    path = build_request_uri(request_uri, query)
-    log_request_path(path)
-
     # Add another name to the mix
     nr_data = {
-        'names': draft_nr.get('names')
+        'names': draft_nr.get('names'),
+        'applicants': draft_nr.get('applicants')
     }
 
     added_names = [
         {
-            "name": "BLUE HERON ADVENTURE TOURS LTD.",
-            "choice": 2,
-            "designation": "LTD.",
-            "name_type_cd": "CO",
-            "consent_words": "",
-            "conflict1": "BLUE HERON TOURS LTD.",
-            "conflict1_num": "0515211"
+            'name': 'BLUE HERON ADVENTURE TOURS LTD.',
+            'choice': 2,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
         },
         {
-            "name": "BLUE HERON ISLAND TOURS LTD.",
-            "choice": 3,
-            "designation": "LTD.",
-            "name_type_cd": "CO",
-            "consent_words": "",
-            "conflict1": "BLUE HERON TOURS LTD.",
-            "conflict1_num": "0515211"
+            'name': 'BLUE HERON ISLAND TOURS LTD.',
+            'choice': 3,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211'
         }
     ]
 
     nr_data['names'].extend(added_names)
 
-    print('PATCH Request #1: \n' + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
-    patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)
+    # updated_applicant = {}
 
-    if not patch_response or patch_response.status_code != 200:
-        raise Exception('NR PATCH operation failed')
+    # nr_data['applicant'] = updated_applicant
 
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('nrNum'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -241,11 +427,8 @@ def test_draft_patch_edit(client, jwt, app):
     Patch the NR again with the response to make sure everything runs as expected
     """
 
-    print('PATCH Request #2: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
-    patch_response = client.patch(path, data=json.dumps(patched_nr), headers=headers)
-
-    if not patch_response or patch_response.status_code != 200:
-        raise Exception('NR PATCH operation failed')
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, patched_nr.get('nrNum'), patched_nr)
+    patched_nr = json.loads(patch_response.data)
 
     re_patched_nr = json.loads(patch_response.data)
     assert re_patched_nr is not None
@@ -274,28 +457,24 @@ def test_draft_patch_upgrade(client, jwt, app):
     :param app:
     :return:
     """
-    post_response = create_draft_nr(client, jwt, app)
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
+    assert_field_equals_value(draft_nr, 'priorityCd', 'N')
 
     # Take the response and edit it
-    request_uri = API_BASE_URI + draft_nr.get('nrNum') + '/' + NameRequestActions.UPGRADE.value
-    test_params = [{}]
+    nr_data = {}
+    patch_response = patch_nr(client, NameRequestActions.UPGRADE.value, draft_nr.get('nrNum'), nr_data)
 
-    headers = get_test_headers()
-    query = build_test_query(test_params)
-    path = build_request_uri(request_uri, query)
-    log_request_path(path)
-
-    patch_response = client.patch(path, data=json.dumps({}), headers=headers)
-
-    if not patch_response or patch_response.status_code != 200:
-        raise Exception('NR PATCH operation failed')
-
+    assert patch_response.status_code == 200
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
@@ -306,9 +485,9 @@ def test_draft_patch_upgrade(client, jwt, app):
 
     # Check actions (write a util for this)
 
-    # TODO: Priority CD changes here! (Will be set to Y)
-    # TODO: Setting priority date, (today's date in UTC)
-    # Note: This is not designed to test for payment
+    # assert_field_equals_value(patched_nr, 'payment_token', '')
+    assert_field_equals_value(patched_nr, 'priorityCd', 'Y')
+    # assert_field_equals_value(patched_nr, 'priorityDate', '')
 
 
 def test_draft_patch_cancel(client, jwt, app):
@@ -320,29 +499,21 @@ def test_draft_patch_cancel(client, jwt, app):
     :param app:
     :return:
     """
-    post_response = create_draft_nr(client, jwt, app)
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
     # Take the response and edit it
-    request_uri = API_BASE_URI + draft_nr.get('nrNum') + '/' + NameRequestActions.CANCEL.value
-    test_params = [{}]
-
-    headers = get_test_headers()
-    query = build_test_query(test_params)
-    path = build_request_uri(request_uri, query)
-    log_request_path(path)
-
-    patch_response = client.patch(path, data=json.dumps({}), headers=headers)
-
-    if not patch_response or patch_response.status_code != 200:
-        print(repr(patch_response))
-        raise Exception('NR PATCH operation failed')
-
+    nr_data = {}
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('nrNum'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
     print('Assert that stateCd == CANCELLED: ' + str(bool(patched_nr.get('stateCd') == 'CANCELLED')))
@@ -363,28 +534,21 @@ def test_draft_patch_refund(client, jwt, app):
     :param app:
     :return:
     """
-    post_response = create_draft_nr(client, jwt, app)
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
     # Take the response and edit it
-    request_uri = API_BASE_URI + draft_nr.get('nrNum') + '/' + NameRequestActions.REFUND.value
-    test_params = [{}]
-
-    headers = get_test_headers()
-    query = build_test_query(test_params)
-    path = build_request_uri(request_uri, query)
-    log_request_path(path)
-
-    patch_response = client.patch(path, data=json.dumps({}), headers=headers)
-
-    if not patch_response or patch_response.status_code != 200:
-        raise Exception('NR PATCH operation failed')
-
+    nr_data = {}
+    patch_response = patch_nr(client, NameRequestActions.REFUND.value, draft_nr.get('nrNum'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
@@ -403,29 +567,30 @@ def test_draft_patch_reapply(client, jwt, app):
     :param app:
     :return:
     """
-    post_response = create_draft_nr(client, jwt, app)
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
-    # Take the response and edit it
-    request_uri = API_BASE_URI + draft_nr.get('nrNum') + '/' + NameRequestActions.REAPPLY.value
-    test_params = [{}]
+    def do_reapply():
+        # Take the response and edit it
+        nr_data = {}
+        patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
 
-    headers = get_test_headers()
-    query = build_test_query(test_params)
-    path = build_request_uri(request_uri, query)
-    log_request_path(path)
+        updated_nr = None
+        if patch_response.status_code == 200:
+            updated_nr = json.loads(patch_response.data)
+            assert updated_nr is not None
 
-    patch_response = client.patch(path, data=json.dumps({}), headers=headers)
+            print('PATCH Response: \n' + json.dumps(updated_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
-    # TODO: Assert that this fails! We should NOT be able to run this from a DRAFT
-    if not patch_response or patch_response.status_code != 200:
-        raise Exception('NR PATCH operation failed')
+        return updated_nr, patch_response.status_code
 
-    patched_nr = json.loads(patch_response.data)
-    assert patched_nr is not None
+    # Re-apply
+    patched_nr, status_code = do_reapply()
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
@@ -434,10 +599,78 @@ def test_draft_patch_reapply(client, jwt, app):
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
-    # TODO:
-    # TODO: Check submit count < 4
-    # TODO: Expiry date extended by 1 yr + 56 or 56 days
-    # TODO: Make sure not state change and also make sure nrNum is the same
+    assert_field_equals_value(patched_nr, 'submitCount', 2)
+    # assert_field_equals_value(patched_nr, 'expirationDate', '')
+
+    # Re-apply
+    patched_nr, status_code = do_reapply()
+
+    assert_field_equals_value(patched_nr, 'submitCount', 3)
+
+    # Re-apply
+    patched_nr, status_code = do_reapply()
+    # The submitCount should never be greater than 3, this should now fail with a 500
+    assert status_code == 500
+
+
+def test_draft_patch_reapply_historical(client, jwt, app):
+    """
+    Setup:
+    Test:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
+
+    # Assign the payload to new nr var
+    draft_nr = json.loads(post_response.data)
+    assert draft_nr is not None
+
+    # Take the response and edit it
+    nr_data = {
+        'request_action_cd': 'REH'
+    }
+
+    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == State.DRAFT
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    assert_field_is_lt_value(patched_nr, 'submitCount', 4)
+    # assert_field_equals_value(patched_nr, 'expirationDate', '')
+
+    # Take the response and edit it
+    nr_data = {
+        'request_action_cd': 'REST'
+    }
+
+    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == State.DRAFT
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    assert_field_is_lt_value(patched_nr, 'submitCount', 4)
+    # assert_field_equals_value(patched_nr, 'expirationDate', '')
 
 
 def test_draft_patch_resend(client, jwt, app):
@@ -449,29 +682,21 @@ def test_draft_patch_resend(client, jwt, app):
     :param app:
     :return:
     """
-    post_response = create_draft_nr(client, jwt, app)
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
     # Take the response and edit it
-    request_uri = API_BASE_URI + draft_nr.get('nrNum') + '/' + NameRequestActions.RESEND.value
-    test_params = [{}]
-
-    headers = get_test_headers()
-    query = build_test_query(test_params)
-    path = build_request_uri(request_uri, query)
-    log_request_path(path)
-
-    patch_response = client.patch(path, data=json.dumps({}), headers=headers)
-
-    # TODO: Ensure this notification is resent
-    if not patch_response or patch_response.status_code != 200:
-        raise Exception('NR PATCH operation failed')
-
+    nr_data = {}
+    patch_response = patch_nr(client, NameRequestActions.RESEND.value, draft_nr.get('nrNum'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))

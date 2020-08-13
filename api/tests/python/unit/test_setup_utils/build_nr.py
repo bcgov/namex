@@ -40,10 +40,11 @@ def build_name(test_name):
     return name
 
 
-def build_nr(nr_state, test_names=None):
+def build_nr(nr_state, data=None, test_names=None):
     """
     Creates an NR in a given state.
     :param nr_state:
+    :param data:
     :param test_names:
     :return:
     """
@@ -55,15 +56,24 @@ def build_nr(nr_state, test_names=None):
         State.COND_RESERVE: build_cond_reserved,
         State.CONDITIONAL: build_conditional,
         State.APPROVED: build_approved
-    }.get(nr_state)(test_names)
+    }.get(nr_state)(data, test_names)
 
 
-def build_draft(test_names):
+def build_draft(data=None, test_names=None):
     nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
     nr.stateCd = State.DRAFT
     nr.requestId = 1460775
     nr._source = 'NRO'
 
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        nr.__setattr__(key, value)
+
     nr.names = []
     for test_name in test_names:
         nr.names.append(build_name(test_name))
@@ -71,12 +81,21 @@ def build_draft(test_names):
     return nr
 
 
-def build_cond_reserved(test_names):
+def build_cond_reserved(data=None, test_names=None):
     nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
     nr.stateCd = State.COND_RESERVE
     nr.requestId = 1460775
     nr._source = 'NRO'
 
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        nr.__setattr__(key, value)
+
     nr.names = []
     for test_name in test_names:
         nr.names.append(build_name(test_name))
@@ -84,12 +103,21 @@ def build_cond_reserved(test_names):
     return nr
 
 
-def build_reserved(test_names):
+def build_reserved(data=None, test_names=None):
     nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
     nr.stateCd = State.RESERVED
     nr.requestId = 1460775
     nr._source = 'NRO'
 
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        nr.__setattr__(key, value)
+
     nr.names = []
     for test_name in test_names:
         nr.names.append(build_name(test_name))
@@ -97,12 +125,21 @@ def build_reserved(test_names):
     return nr
 
 
-def build_conditional(test_names):
+def build_conditional(data=None, test_names=None):
     nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
     nr.stateCd = State.CONDITIONAL
     nr.requestId = 1460775
     nr._source = 'NRO'
 
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        nr.__setattr__(key, value)
+
     nr.names = []
     for test_name in test_names:
         nr.names.append(build_name(test_name))
@@ -110,11 +147,20 @@ def build_conditional(test_names):
     return nr
 
 
-def build_approved(test_names):
+def build_approved(data=None, test_names=None):
     nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
     nr.stateCd = State.APPROVED
     nr.requestId = 1460775
     nr._source = 'NRO'
+
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        nr.__setattr__(key, value)
 
     nr.names = []
     for test_name in test_names:
