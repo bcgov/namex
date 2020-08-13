@@ -45,6 +45,6 @@ class WaitTimeStatsService:
         waiting_time_regular_queue = get_waiting_time(examination_time_secs, regular_queue_requests)
         response_values.append(waiting_time_regular_queue)
 
-        response = query_result_to_dict(response_values, response_keys)
+        response = query_result_to_dict(response_keys, response_values)
 
         return response
