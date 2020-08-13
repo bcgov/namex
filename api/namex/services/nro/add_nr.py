@@ -31,7 +31,7 @@ import cx_Oracle
 
 
 
-def new_nr(nr, ora_cursor):
+def new_nr(nr, ora_cursor,con):
     """Add the Name Request in NRO
     :raises Exception: what ever error we get, let our caller handle, this is here in case we want to wrap it - future
     """
@@ -57,26 +57,32 @@ def new_nr(nr, ora_cursor):
 
     nr.requestId = request_id
     _create_nro_transaction(ora_cursor, nr, eid, transaction_type='NRREQ')
+    con.commit()
     current_app.logger.debug('Created the transaction for new_nr() for NR:{}'.format(nr_num))
 
     _create_request_instance(ora_cursor, nr, eid,priority)
+    con.commit()
     applicantInfo = nr.applicants.one_or_none()
     if not applicantInfo:
         current_app.logger.error("Error on getting applicant info.")
         return jsonify({"Message": "No applicant info"}), 404
 
     _create_request_party(ora_cursor, applicantInfo, eid, request_id) #includes address
+    con.commit()
     current_app.logger.debug('Created Request Party and Address in new_nr() for NR:{}'.format(nr_num))
 
     _create_request_state(ora_cursor, 'D', eid, request_id)
+    con.commit()
 
     _create_names(ora_cursor, nr, eid) #name, name_instace and name state
+    con.commit()
     current_app.logger.debug('Created Names in new_nr() for NR:{}'.format(nr_num))
 
     # for completed NRs waiting for the updater set the state to H so no one can change it.
     if nr.stateCd in [State.APPROVED, State.CONDITIONAL]:
         eid = _get_event_id(ora_cursor)
         set_request_on_hold(ora_cursor, request_id, eid)
+        con.commit()
         current_app.logger.debug('Set State to ONHOLD for Updater to Run in new_nr() for NR:{}'.format(nr_num))
 
     current_app.logger.debug('got to the end of new_nr() for NR:{}'.format(nr_num))

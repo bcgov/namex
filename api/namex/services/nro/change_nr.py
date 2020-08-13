@@ -18,7 +18,7 @@ from namex.models import State
 from namex.constants import NROChangeFlags
 
 
-def update_nr(nr, ora_cursor, change_flags):
+def update_nr(nr, ora_cursor, change_flags,con):
     """Update the Name Request in NRO
     :raises Exception: what ever error we get, let our caller handle, this is here in case we want to wrap it - future
     """
@@ -27,9 +27,15 @@ def update_nr(nr, ora_cursor, change_flags):
     current_app.logger.debug('got to update_nr() for NR:{}'.format(nr.nrNum))
     current_app.logger.debug('event ID for NR Details edit:{}'.format(eid))
     _create_nro_transaction(ora_cursor, nr, eid, transaction_type='CORRT')
+    con.commit()
+
     _update_nro_request_state(ora_cursor, nr, eid, change_flags)
+    con.commit()
+
     _update_request(ora_cursor, nr, eid, change_flags)
+    con.commit()
     _update_nro_names(ora_cursor, nr, eid, change_flags)
+    con.commit()
     _update_nro_address(ora_cursor, nr, eid, change_flags)
     _update_nro_partner_name_system(ora_cursor, nr, eid, change_flags)
     _update_consent(ora_cursor, nr, eid, change_flags)

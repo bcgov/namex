@@ -317,7 +317,7 @@ class NROServices(object):
             con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
 
             cursor = con.cursor()
-            update_nr(nr, cursor, change_flags)
+            update_nr(nr, cursor, change_flags,con)
 
             con.commit()
 
@@ -348,7 +348,7 @@ class NROServices(object):
             con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
 
             cursor = con.cursor()
-            new_nr(nr, cursor)
+            new_nr(nr, cursor,con)
 
             con.commit()
 
