@@ -411,7 +411,7 @@ class Request(db.Model):
 
     @classmethod
     def get_queue_requests(cls, is_priority):
-        request_state = db.session.query(func.count(Request.id)).filter(
+        request_state = db.session.query(func.count(Request.id).label('queueRequestCounter')).filter(
             Request.stateCd.in_([State.HOLD, State.DRAFT, State.INPROGRESS]))
 
         queue_requests = request_state.filter(Request.priorityCd == RequestPriority.Y.value) if is_priority else \
@@ -419,7 +419,7 @@ class Request(db.Model):
 
         response = queue_requests.all()
 
-        return response
+        return response.pop()
 
     @classmethod
     def get_query_exact_match(cls, criteria, prep_name):

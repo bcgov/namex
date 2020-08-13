@@ -62,18 +62,21 @@ class Event(db.Model):
     @classmethod
     def get_approved_names_counter(cls):
         auto_approved_names_counter = db.session.query(
-            func.count(Event.id)).filter(Event.action == EventAction.PUT.value,
-                                         Event.userId == EventUserId.SERVICE_ACCOUNT.value,
-                                         Event.stateCd == EventState.APPROVED.value,
-                                         func.date_trunc('day', Event.eventDate) == func.date_trunc('day', func.now())
-                                         ).all()
-        return auto_approved_names_counter
+            func.count(Event.id).label('approvedNamesCounter')).filter(Event.action == EventAction.PUT.value,
+                                                                       Event.userId == EventUserId.SERVICE_ACCOUNT.value,
+                                                                       Event.stateCd == EventState.APPROVED.value,
+                                                                       func.date_trunc('day',
+                                                                                       Event.eventDate) == func.date_trunc(
+                                                                           'day', func.now())
+                                                                       ).all()
+        return auto_approved_names_counter.pop()
 
     @classmethod
-    def get_avg_examination_time_secs(cls):
+    def get_examination_time_secs(cls):
         avg_examination_time = db.session.query(
             func.percentile_cont(0.5).within_group((func.extract('epoch', Event.eventDate) -
-                                                    func.extract('epoch', Request.submittedDate)))). \
+                                                    func.extract('epoch', Request.submittedDate))).label(
+                'examinationTime')). \
             join(Request, and_(Event.nrId == Request.id)). \
             filter(Event.action == EventAction.PATCH.value,
                    Event.stateCd.in_(
@@ -82,4 +85,4 @@ class Event(db.Model):
                    Event.eventDate.cast(Date) == (func.now() - timedelta(days=1)).cast(Date)
                    ).all()
 
-        return avg_examination_time
+        return avg_examination_time.pop()
