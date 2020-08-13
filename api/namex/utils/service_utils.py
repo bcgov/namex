@@ -67,7 +67,7 @@ def get_entity_type_description(entity_type_str):
 
 
 def get_waiting_time(examination_time, queue_requests):
-    quwaiting_time = 0 if not all(examination_time[0]) or not all(queue_requests[0]) else round(
+    waiting_time = 0 if not all(examination_time[0]) or not all(queue_requests[0]) else round(
         (examination_time[0][0] * queue_requests[0][0]) / 86400)
 
     return waiting_time
