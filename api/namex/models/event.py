@@ -73,7 +73,7 @@ class Event(db.Model):
 
     @classmethod
     def get_examination_time_secs(cls):
-        avg_examination_time = db.session.query(
+        median_examination_time = db.session.query(
             func.percentile_cont(0.5).within_group((func.extract('epoch', Event.eventDate) -
                                                     func.extract('epoch', Request.submittedDate))).label(
                 'examinationTime')). \
@@ -85,4 +85,4 @@ class Event(db.Model):
                    Event.eventDate.cast(Date) == (func.now() - timedelta(days=1)).cast(Date)
                    ).all()
 
-        return avg_examination_time.pop()
+        return median_examination_time.pop()
