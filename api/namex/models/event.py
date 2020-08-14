@@ -7,7 +7,6 @@ from . import db
 from namex.exceptions import BusinessException
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
-from .request import Request
 from sqlalchemy.orm import backref
 from sqlalchemy import cast, Date
 from sqlalchemy.dialects.postgresql import JSONB
@@ -29,7 +28,6 @@ class Event(db.Model):
     stateCd = db.Column('state_cd', db.String(20), db.ForeignKey('states.cd'))
     state = db.relationship('State', backref=backref('state_events', uselist=False), foreign_keys=[stateCd])
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
-    request = db.relationship('Request', backref=backref('request_events', uselist=False), foreign_keys=[nrId])
     userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('User', backref=backref('user_events', uselist=False), foreign_keys=[userId])
 
@@ -70,19 +68,3 @@ class Event(db.Model):
                                                                            'day', func.now())
                                                                        ).all()
         return auto_approved_names_counter.pop()
-
-    @classmethod
-    def get_examination_time_secs(cls):
-        median_examination_time = db.session.query(
-            func.percentile_cont(0.5).within_group((func.extract('epoch', Event.eventDate) -
-                                                    func.extract('epoch', Request.submittedDate))).label(
-                'examinationTime')). \
-            join(Request, and_(Event.nrId == Request.id)). \
-            filter(Event.action == EventAction.PATCH.value,
-                   Event.stateCd.in_(
-                       [EventState.APPROVED.value, EventState.REJECTED.value,
-                        EventState.CONDITIONAL.value, EventState.CANCELLED.value]),
-                   Event.eventDate.cast(Date) == (func.now() - timedelta(days=1)).cast(Date)
-                   ).all()
-
-        return median_examination_time.pop()

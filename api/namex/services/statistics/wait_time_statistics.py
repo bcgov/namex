@@ -23,7 +23,7 @@ class WaitTimeStatsService:
 
     @classmethod
     def get_examination_time_secs(cls):
-        examination_time_secs = Event.get_examination_time_secs().examinationTime
+        examination_time_secs = Request.get_examination_time_secs().examinationTime
 
         return examination_time_secs
 
