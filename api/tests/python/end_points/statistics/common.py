@@ -1,7 +1,6 @@
-import pytest
 import datetime
 
-from namex.constants import EntityTypes, EventAction, EventUserId
+from namex.constants import EventAction, EventUserId
 
 API_BASE_URI = '/api/v1/statistics/'
 ENDPOINT_PATH = API_BASE_URI + ''
@@ -17,7 +16,7 @@ def save_names_queue(queue_number_records, priority=False):
     while queue_number_records > num:
         nr_num_label = 'NR '
         num_records += 1
-        num+=1
+        num += 1
         nr_num = nr_num_label + str(num_records)
 
         nr = RequestDAO()
@@ -37,12 +36,11 @@ def save_auto_approved_names(approved_number_records):
     usr = UserDAO(username, '', '', '', '')
     usr.id = 86
 
-
     usr.save_to_db()
     while approved_number_records > num:
         nr_num_label = 'NR 00'
         num_records += 1
-        num+=1
+        num += 1
         nr_num = nr_num_label + str(num_records)
 
         nr = RequestDAO()
@@ -66,7 +64,7 @@ def save_approved_names_by_examiner(approved_number_records):
 
     while approved_number_records > num:
         num_records += 1
-        num +=1
+        num += 1
         nr_num_label = 'NR 00'
         nr_num = nr_num_label + str(num_records)
 
