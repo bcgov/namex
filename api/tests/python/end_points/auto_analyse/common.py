@@ -149,7 +149,6 @@ def save_words_list_name(words_list, queue=False):
         nr._source = 'NAMEREQUEST'
 
         name = NameDAO()
-        name.nr_id = nr.id
         name.choice = 1
         name.name = record
         name.state = State.APPROVED

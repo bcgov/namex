@@ -3,7 +3,6 @@ These are common utilities shared across Namex projects. Any utilities that are 
 either reside here, or be imported and exported from here.
 """
 
-
 # TODO: Implement a true shared lib for stuff like this!
 #  Most, if not all of these methods are shared with the namex api project!
 from namex.constants import \
@@ -18,6 +17,8 @@ from namex.constants import \
 A temporary fallback for getting an EntityType code using its string value.
 This method will be removed in a future iteration. Please use get_entity_type_code.
 '''
+
+
 def get_entity_type_code_DEPRECATED(entity_type_str):
     entity_type_code = None
     if BCProtectedNameEntityTypes.has_value(entity_type_str):
@@ -58,6 +59,14 @@ def get_entity_type_code_description(entity_type_code):
 A wrapper for get_entity_type_code_description that provides the ability to get an
 EntityType code description using its text / string value, as opposed to the code itself.
 '''
+
+
 def get_entity_type_description(entity_type_str):
     entity_type_code = get_entity_type_code(entity_type_str)
     return get_entity_type_code_description(entity_type_code) if entity_type_code else ''
+
+
+def get_waiting_time(examination_time_secs, queue_requests):
+    waiting_time = 0.0 if (examination_time_secs is None or queue_requests is None) else round(examination_time_secs * queue_requests / 86400)
+
+    return waiting_time

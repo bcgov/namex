@@ -12,20 +12,21 @@ from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.dialects import postgresql
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, Date
 from marshmallow import Schema, fields, post_load, post_dump
 from .nwpta import PartnerNameSystem
 from .user import User, UserSchema
 from .comment import Comment, CommentSchema
 from .applicant import Applicant
 from .name import Name, NameSchema
+from .event import Event
 from .state import State, StateSchema
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
-    request_type_mapping
+    request_type_mapping, RequestPriority, EventAction, EventState, EventUserId
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -80,6 +81,8 @@ class Request(db.Model):
     submitter = db.relationship('User', backref=backref('submitter', uselist=False), foreign_keys=[submitter_userid])
     # Relationships - Names
     names = db.relationship('Name', lazy='dynamic')
+    # Relationships - Events
+    events = db.relationship('Event', lazy='dynamic')
     # Relationships - Applicants
     applicants = db.relationship('Applicant', lazy='dynamic')
     # Relationships - Examiner Comments
@@ -408,6 +411,35 @@ class Request(db.Model):
             ))
 
         return criteria
+
+    @classmethod
+    def get_queue_requests(cls, is_priority):
+        request_state = db.session.query(func.count(Request.id).label('queueRequestCounter')).filter(
+            Request.stateCd.in_([State.HOLD, State.DRAFT, State.INPROGRESS]))
+
+        queue_requests = request_state.filter(Request.priorityCd == RequestPriority.Y.value) if is_priority else \
+            request_state.filter(Request.priorityCd != RequestPriority.Y.value)
+
+        response = queue_requests.all()
+
+        return response.pop()
+
+    @classmethod
+    def get_examination_time_secs(cls):
+        median_examination_time = db.session.query(
+            func.percentile_cont(0.5).within_group((func.extract('epoch', Event.eventDate) -
+                                                    func.extract('epoch', Request.submittedDate))).label(
+                'examinationTime')). \
+            join(Request, and_(Event.nrId == Request.id)). \
+            filter(Event.action == EventAction.PATCH.value,
+                   Event.stateCd.in_(
+                       [EventState.APPROVED.value, EventState.REJECTED.value,
+                        EventState.CONDITIONAL.value, EventState.CANCELLED.value]),
+                   Event.userId != EventUserId.SERVICE_ACCOUNT.value,
+                   Event.eventDate.cast(Date) >= (func.now() - timedelta(days=1)).cast(Date)
+                   ).all()
+
+        return median_examination_time.pop()
 
     @classmethod
     def get_query_exact_match(cls, criteria, prep_name):
