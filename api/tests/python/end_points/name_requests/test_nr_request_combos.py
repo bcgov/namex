@@ -108,7 +108,7 @@ def test_change_request_action_entity_reqtype(client, test_map):
         test_fields_were_updated(client, initial_data, update_data, expected_result)
 
 
-def test_change_request_combos(client):
+def test_change_request_actions(client):
     """
     Setup:
     Test:
@@ -175,6 +175,42 @@ def test_change_request_combos(client):
             # request_action_cd, entity_type_cd, requestTypeCd
             'combo': ('NRO-REST', 'CR', 'CR'),
             'result': ('NRO-REST', 'CR', 'CR')
+        }
+    ]
+
+    test_change_request_action_entity_reqtype(client, test_cases)
+
+
+def test_change_request_entity(client):
+    """
+    Setup:
+    Test:
+    :param client:
+    """
+    test_cases = [
+        # Test actions
+        {
+            # request_action_cd, entity_type_cd, requestTypeCd
+            'combo': ('NEW', 'CR', 'CR'),
+            'result': ('NEW', 'CR', 'CR')
+        }
+    ]
+
+    test_change_request_action_entity_reqtype(client, test_cases)
+
+
+def test_change_request_type(client):
+    """
+    Setup:
+    Test:
+    :param client:
+    """
+    test_cases = [
+        # Test actions
+        {
+            # request_action_cd, entity_type_cd, requestTypeCd
+            'combo': ('NEW', 'CR', 'CR'),
+            'result': ('NEW', 'CR', 'CR')
         }
     ]
 
