@@ -26,7 +26,7 @@ import re
 
 from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
-    request_type_mapping, RequestPriority, EventAction, EventState
+    request_type_mapping, RequestPriority, EventAction, EventState, EventUserId
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -435,6 +435,7 @@ class Request(db.Model):
                    Event.stateCd.in_(
                        [EventState.APPROVED.value, EventState.REJECTED.value,
                         EventState.CONDITIONAL.value, EventState.CANCELLED.value]),
+                   Event.userId != EventUserId.SERVICE_ACCOUNT.value,
                    Event.eventDate.cast(Date) >= (func.now() - timedelta(days=1)).cast(Date)
                    ).all()
 
