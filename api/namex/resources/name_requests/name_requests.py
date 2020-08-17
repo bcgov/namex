@@ -6,7 +6,7 @@ from flask_restplus import cors
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
-from namex.utils.common import handle_exception, get_query_param_str
+from namex.utils.api_resource import handle_exception, get_query_param_str
 
 from namex.models import Request, Event, State, Applicant
 from namex.criteria.request import RequestQueryCriteria

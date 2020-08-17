@@ -4,7 +4,8 @@ from datetime import datetime
 from pytz import timezone
 
 from namex.utils.logging import setup_logging
-from namex.utils.common import log_error, convert_to_ascii
+from namex.utils.api_resource import log_error
+from namex.utils.common import convert_to_ascii
 
 from namex.constants import NameState
 

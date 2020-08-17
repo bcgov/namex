@@ -8,7 +8,7 @@ from flask_restplus import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
 
 from namex.utils.auth import cors_preflight
-from namex.utils.common import get_query_param_str
+from namex.utils.api_resource import get_query_param_str
 from namex.utils.logging import setup_logging
 
 from .bc_name_analysis_response import BcAnalysisResponse as AnalysisResponse

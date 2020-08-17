@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
-from namex.utils.common import handle_exception
+from namex.utils.api_resource import handle_exception
 
 from namex.constants import NameRequestActions, RequestAction
 from namex.models import Request, State
