@@ -3,7 +3,7 @@ def data_for_add_distinctive_word_request_test():
         'name': 'FOOD GROWERS INC.',
         'location': 'BC',
         'entity_type_cd': 'CC',
-        'request_type': 'NEW'
+        'request_action_cd': 'NEW'
     }
 
 
@@ -12,7 +12,7 @@ def data_for_add_descriptive_word_request_test():
         'name': 'MOUNTAIN VIEW INC.',
         'location': 'BC',
         'entity_type_cd': 'CC',
-        'request_type': 'NEW'
+        'request_action_cd': 'NEW'
     }
 
 
@@ -21,7 +21,7 @@ def data_for_too_many_words_request_test():
         'name': 'MOUNTAIN VIEW FOOD GROWERS INTERNATIONAL INC.',
         'location': 'BC',
         'entity_type_cd': 'CC',
-        'request_type': 'NEW'
+        'request_action_cd': 'NEW'
     }
 
 
@@ -30,7 +30,7 @@ def data_for_contains_words_to_avoid_request_test():
         'name': 'MOUNTAIN VIEW VSC INC.',  # VSC = VANCOUVER STOCK EXCHANGE
         'location': 'BC',
         'entity_type_cd': 'CC',
-        'request_type': 'NEW'
+        'request_action_cd': 'NEW'
     }
 
 
@@ -39,7 +39,7 @@ def data_for_designation_mismatch_request_test():
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',
         'location': 'BC',
         'entity_type_cd': 'CC',
-        'request_type': 'NEW'
+        'request_action_cd': 'NEW'
     }
 
 
@@ -48,7 +48,7 @@ def data_for_name_requires_consent_request_test():
         'name': 'MOUNTAIN VIEW FOOD ENGINEERING COOP',
         'location': 'BC',
         'entity_type_cd': 'CC',
-        'request_type': 'NEW'
+        'request_action_cd': 'NEW'
     }
 
 
@@ -57,7 +57,7 @@ def data_for_contains_unclassifiable_word_request_test():
         'name': 'MOUNTAIN VIEW FOOD BLOGGINS INC.',
         'location': 'BC',
         'entity_type_cd': 'CC',
-        'request_type': 'NEW'
+        'request_action_cd': 'NEW'
     }
 
 
@@ -70,5 +70,5 @@ def data_for_corporate_name_conflict_request_test():
         'name': 'MOUNTAIN VIEW FOOD GROWERS INC.',
         'location': 'BC',
         'entity_type_cd': 'CC',
-        'request_type': 'NEW'
+        'request_action_cd': 'NEW'
     }
