@@ -107,8 +107,8 @@ class XproNameAnalysis(Resource):
     @api.doc(params={
         'name': 'A company / organization name string',
         'location': 'A location code [ CA (only) ]',
-        'entity_type': 'An entity type code [ XCR, RLC ]',
-        'request_action': 'A request action code [ NEW ]'
+        'entity_type_cd': 'An entity type code [ XCR, RLC ]',
+        'request_action_cd': 'A request action code [ NEW ]'
     })
     def get():
         name = get_query_param_str('name')

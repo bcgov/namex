@@ -372,8 +372,8 @@ actual_patch = {
             "conflict1_num": ""
         }
     ],
-    "requestAction": "NEW",
-    "entity_type": "CR",
+    "request_action_cd": "NEW",
+    "entity_type_cd": "CR",
     "natureBusinessInfo": "Test"
 }
 

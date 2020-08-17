@@ -38,8 +38,8 @@ def test_name_use_special_words_more_than_one_request_response(client, jwt, app)
         {
             'name': 'ARMSTRONG BIG BROS PLUMBING LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

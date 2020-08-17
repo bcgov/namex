@@ -27,32 +27,32 @@ def test_designation_mismatch_more_than_one_word_request_response(client, jwt, a
         {
             'name': 'ARMSTRONG PLUMBING LIMITED LIABILITY COMPANY',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG PLUMBING SOCIETE A RESPONSABILITE LIMITEE',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG  PLUMBING LIMITED LIABILITY PARTNERSHIP',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG PLUMBING COMMUNITY CONTRIBUTION COMPANY',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG PLUMBING UNLIMITED LIABILITY COMPANY',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

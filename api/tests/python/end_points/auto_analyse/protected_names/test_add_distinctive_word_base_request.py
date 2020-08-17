@@ -55,62 +55,62 @@ def test_add_distinctive_word_base_request_response(client, jwt, app):
     test_params = [
         {'name': 'CARPENTRY INC.',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          },
         {'name': 'HEATING LIMITED',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          },
         {'name': 'ADJUSTERS LTD.',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          },
         # When checking synonyms dist=['victoria'], desc=['properties']. Because if there are descriptive items before distinctive, these become distinctive as well:
         # dist=['victoria','properties']. There are no conflicts, then a descriptive is missing, not a distinctive. This test case is moved to test_add_descriptive_word_both_classification_request.py
         # {'name': 'PROPERTIES OF VICTORIA LTD.',
         #  'location': 'BC',
-        #  'entity_type': 'CR',
-        #  'request_action': 'NEW'
+        #  'entity_type_cd': 'CR',
+        #  'request_action_cd': 'NEW'
         #  },
         {'name': 'COFFEE SHOP INC',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          },
         {'name': 'AUTO BODY GARAGE LTD.',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          },
         # When checking synonyms dist=['service'], desc=['sewing']. Because if there are descriptive items before distinctive, these become distinctive as well:
         # dist=['sewing','service']. There are no conflicts, then a descriptive is missing, not a distinctive. This test case is moved to test_add_descriptive_word_both_classification_request.py
         # {'name': 'SEWING SERVICE LTD.',
         #  'location': 'BC',
-        #  'entity_type': 'CR',
-        #  'request_action': 'NEW'
+        #  'entity_type_cd': 'CR',
+        #  'request_action_cd': 'NEW'
         #  },
         {'name': 'KITCHEN FOOD LTD.',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          },
         {'name': 'CAR WASH CENTRAL LTD.',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          },
         {'name': 'AUTO BODY PACIFIC LTD.',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          },
         {'name': 'CAPITAL IDEAS LTD.',
          'location': 'BC',
-         'entity_type': 'CR',
-         'request_action': 'NEW'
+         'entity_type_cd': 'CR',
+         'request_action_cd': 'NEW'
          }
 
     ]

@@ -39,8 +39,8 @@ name_model = api.model('name_model', {
 nr_request = api.model('name_request', {
     'id': fields.Integer('id'),
     'nrNum': fields.Integer('nrNum'),
-    'entity_type': fields.String('The entity type'),
-    'request_action': fields.String('The action requested by the user'),
+    'entity_type_cd': fields.String('The entity type'),
+    'request_action_cd': fields.String('The action requested by the user'),
     'stateCd': fields.String('The state of the NR'),
     'english': fields.Boolean('Set when the name is English only'),
     'nameFlag': fields.Boolean('Set when the name is a person'),

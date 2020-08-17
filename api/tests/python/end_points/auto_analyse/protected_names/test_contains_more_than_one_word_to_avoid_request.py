@@ -33,8 +33,8 @@ def test_contains_more_than_one_word_to_avoid_request_response(client, jwt, app)
         {
             'name': 'CANADIAN NATIONAL INTERPOL INVESTIGATORS INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

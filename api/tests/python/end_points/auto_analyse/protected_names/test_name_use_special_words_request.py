@@ -42,14 +42,14 @@ def test_name_use_special_words_request_response(client, jwt, app):
         {
             'name': '468040 BC LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'COAST ANGULARS TREASURY INCORPORATED',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

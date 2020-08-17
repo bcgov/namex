@@ -27,8 +27,8 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
         {
             'name': 'UNCLASSIFIED FINANCIAL SOLUTIONS INCORPORATED',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

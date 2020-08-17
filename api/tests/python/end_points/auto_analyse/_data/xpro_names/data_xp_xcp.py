@@ -4,7 +4,7 @@ def data_for_contains_unclassifiable_word_request_test():
     return {
         'name': 'MOUNTAIN VIEW FOOD BLOGGINS COOP',
         'location': 'CA',
-        'entity_type': 'XCP',
+        'entity_type_cd': 'XCP',
         'request_type': 'NEW'
     }
 
@@ -13,7 +13,7 @@ def data_for_contains_words_to_avoid_request_test():
     return {
         'name': 'MOUNTAIN VIEW VSC COOP',
         'location': 'CA',
-        'entity_type': 'XCP',
+        'entity_type_cd': 'XCP',
         'request_type': 'NEW'
     }
 
@@ -22,7 +22,7 @@ def data_for_name_requires_consent_request_test():
     return {
         'name': 'MOUNTAIN VIEW FOOD ENGINEERING COOP',
         'location': 'CA',
-        'entity_type': 'XCP',
+        'entity_type_cd': 'XCP',
         'request_type': 'NEW'
     }
 
@@ -31,6 +31,6 @@ def data_for_corporate_name_conflict_request_test():
     return {
         'name': 'MOUNTAIN VIEW FOOD GROWERS COOP',
         'location': 'CA',
-        'entity_type': 'XCP',
+        'entity_type_cd': 'XCP',
         'request_type': 'NEW'
     }

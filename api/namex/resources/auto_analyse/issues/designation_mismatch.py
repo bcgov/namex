@@ -78,7 +78,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                         'list_name': self._join_list_words(list_name),
                         'correct_designations': self._join_list_words(correct_designations_lc),
                         'incorrect_designations': self._join_list_words(incorrect_designations_lc),
-                        'entity_type': self.entity_type  # TODO: Map this CODE!
+                        'entity_type_cd': self.entity_type  # TODO: Map this CODE!
                     }))
 
         return issue

@@ -25,8 +25,8 @@ def test_designation_existence_request_response(client, jwt, app):
         {
             'name': 'ARMSTRONG PLUMBING',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

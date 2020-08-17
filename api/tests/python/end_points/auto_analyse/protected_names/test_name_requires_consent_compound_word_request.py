@@ -46,15 +46,15 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
         {
             'name': 'CANADIAN SUMMERS GAMES LIMITED',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         # All words are identified as distinctive because none of them are in synonym table
         {
             'name': 'BLAKE ENGINEERING LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 
