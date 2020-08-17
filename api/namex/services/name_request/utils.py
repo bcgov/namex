@@ -1,40 +1,9 @@
 import re
-from flask import request, jsonify, current_app
-from urllib.parse import unquote_plus
+from flask import current_app
 
 from namex import jwt
 from namex.models import State, User
 from namex.services import ServicesError
-
-
-def log_error(msg, err):
-    return msg.format(err)
-
-
-def handle_exception(err, msg, err_code):
-    log_error(msg + ' Error:{0}', err)
-    return jsonify(message=msg), err_code
-
-
-def get_query_param_str(param):
-    param_value = request.args.get(param)
-    return unquote_plus(param_value).strip() if param_value and isinstance(param_value, str) else None
-
-
-def query_result_to_dict(result):
-    """
-    SQLAlchemy returns tuples, they need to be converted to dict so we can jsonify
-    :return:
-    """
-    return dict(zip(result.keys(), result))
-
-
-def query_results_to_dict(results):
-    """
-    SQLAlchemy returns tuples, they need to be converted to dict so we can jsonify
-    :return:
-    """
-    return list(map(lambda result: query_result_to_dict(result), results))
 
 
 nr_regex = r'^(NR\ ?L{0,1}|L{0,1})?([\d]{6,8})$'
@@ -120,8 +89,3 @@ def valid_state_transition(user, nr, new_state):
     return True
 
 
-def convert_to_ascii(value):
-    try:
-        return value.encode("ascii", "ignore").decode('ascii')
-    except Exception as err:
-        return value

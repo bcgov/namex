@@ -6,7 +6,7 @@ import openapi_client
 
 from . import PAYMENT_SVC_URL, PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET, PaymentServiceException
 from .utils import set_api_client_auth_header, set_api_client_request_host
-from namex.utils.util import get_client_credentials, MSG_CLIENT_CREDENTIALS_REQ_FAILED
+from namex.utils.auth import get_client_credentials, MSG_CLIENT_CREDENTIALS_REQ_FAILED
 
 from .request_objects.abstract import Serializable
 

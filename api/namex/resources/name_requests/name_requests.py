@@ -5,13 +5,13 @@ from flask import request, jsonify, current_app
 from flask_restplus import cors
 
 from namex.utils.logging import setup_logging
-from namex.utils.util import cors_preflight
+from namex.utils.auth import cors_preflight
+from namex.utils.common import handle_exception, get_query_param_str
 
 from namex.models import Request, Event, State, Applicant
 from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
-from namex.services.name_request.utils import handle_exception, get_query_param_str
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError

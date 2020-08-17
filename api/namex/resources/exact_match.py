@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from flask_restplus import Resource, Namespace, cors
-from namex.utils.util import cors_preflight
+from namex.utils.auth import cors_preflight
 import json
 from namex import jwt
 import urllib

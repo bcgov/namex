@@ -4,12 +4,12 @@ from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from namex.utils.logging import setup_logging
-from namex.utils.util import cors_preflight
+from namex.utils.auth import cors_preflight
+from namex.utils.common import handle_exception
 
 from namex.constants import NameRequestActions, RequestAction
 from namex.models import Request, State
 
-from namex.services.name_request.utils import handle_exception
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError

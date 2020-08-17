@@ -4,6 +4,7 @@ from datetime import datetime
 from pytz import timezone
 
 from namex.utils.logging import setup_logging
+from namex.utils.common import log_error, convert_to_ascii
 
 from namex.constants import NameState
 
@@ -15,8 +16,6 @@ from .name_request_state import apply_nr_state_change, get_nr_state_actions
 from .exceptions import \
     CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
     MapRequestApplicantError, MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError, ExtendExpiryDateError
-
-from .utils import log_error, convert_to_ascii
 
 setup_logging()  # Important to do this first
 

@@ -5,7 +5,7 @@ from namex import jwt
 
 import enum
 
-from namex.utils.util import cors_preflight
+from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS
 
 api = Namespace('namexDocuments', description='Namex - OPS checks')
