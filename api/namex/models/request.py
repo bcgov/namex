@@ -435,7 +435,7 @@ class Request(db.Model):
                    Event.stateCd.in_(
                        [EventState.APPROVED.value, EventState.REJECTED.value,
                         EventState.CONDITIONAL.value, EventState.CANCELLED.value]),
-                   Event.eventDate.cast(Date) == (func.now() - timedelta(days=1)).cast(Date)
+                   Event.eventDate.cast(Date) >= (func.now() - timedelta(days=1)).cast(Date)
                    ).all()
 
         return median_examination_time.pop()
