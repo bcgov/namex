@@ -4,7 +4,6 @@ from datetime import datetime
 from flask import current_app
 
 from namex.utils.logging import setup_logging
-from namex.models import User
 
 from config import Config
 from corps.app import create_app, db, nro, job
@@ -36,7 +35,7 @@ if __name__ == "__main__":
     processed = 0
 
     # run the job
-    processed = job(app, db, nro.connection, user, max_rows)
+    processed = job(app, db, nro.connection,max_rows)
 
     # clean up
     app.do_teardown_appcontext()

@@ -54,36 +54,56 @@ def job_result_set(ora_con, max_rows):
 
     return result_set, col_names
 
+def find_corp_count_in_namex(id, corp_name):
+    sql = "select count(*) as name_count" \
+          "from names n " \
+          "where n.corp_num = '{id}' and n.name = '{corp_name}' and n.state in ('APPROVED','CONDITION') ".format(id=id, corp_name=corp_name)
+
+    print(sql)
+    name_results =  db.session.execute(sql)
+    for n in name_results:
+        name_count  = n['name_count']
+
+
+
+    return name_count
+
 
 def find_corp_in_namex(id,corp_name):
     sql = "select n.id, n.nr_id, n.name, n.corp_num, n.consumption_date, n.state " \
           "from names n " \
-          "where n.corp_num = :id and n.name = :corp_name and n.state in ('APPROVED','CONDITION') "
+          "where n.corp_num = '{id}' and n.name = '{corp_name}' and n.state in ('APPROVED','CONDITION') ".format(id=id, corp_name=corp_name)
 
-
+    print(sql)
     name_results = db.session.execute(sql)
     return name_results
 
-def update_consumption_date(name_id):
+def update_consumption_date(name_id,start_date):
 
-    sql = "update names" \
-          "set consumption_date = :start_date" \
-          "where id = : name_id"
-    results = db.session.execute(sql)
+    #need to deal with utc consumption_date check extractor
+
+    update_sql = "update names" \
+          "set consumption_date =  {start_date}" \
+          "where id =  {name_id}".format(name_id=name_id, start_date=start_date)
+
+    print(update_sql)
+    results = db.session.execute(update_sql)
     return results
 
 
 def insert_corps_list(id,nr_id, name_id):
-    sql = "insert into corps_list" \
+    insert_sql = "insert into corps_list" \
           "(corp_num, nr_id, name_id )"\
-          "values(:id, nr_id, name_id)"
+          "values('{id}', {nr_id}, {name_id})".format(id=id, nr_id=nr_id, name_id=name_id)
 
-    results = db.session.execute(sql)
+    print(insert_sql)
+
+    results = db.session.execute(insert_sql)
     return results
 
 
 
-def job(app, namex_db, nro_connection, user, max_rows=100):
+def job(app, namex_db, nro_connection, max_rows=100):
 
     row_count = 0
     datafix_status = None
@@ -96,18 +116,25 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
 
             row_count += 1
             row = ora_row_to_dict(col_names, r)
-            #stuff from the datafix table (from namesp, CPRD)
+
             corp_num = row['id']
             corp_name = row['name']
             start_date = row['start_date']
 
-            name_results = find_corp_in_namex(id, corp_name)
-            for name in name_results:
+            name_count = find_corp_count_in_namex(corp_num, corp_name)
+            if name_count == 0:
+                insert_corps_list(corp_num)
+            else:
 
-                if name.consumption_date != start_date:
-                    update_consumption_date(name.id)
+                name_results = find_corp_in_namex(corp_num, corp_name)
+                for name in name_results:
 
-                insert_corps_list(corp_num, name.nr_id,name.id )
+                    if name.consumption_date != start_date:
+                        update_consumption_date(name.id)
+
+                        #only the ones that needed to be fixed.
+                        insert_corps_list(corp_num, name.nr_id,name.id )
+
 
         return row_count
 
