@@ -6,7 +6,7 @@ from namex.services import EventRecorder
 from namex.services.nro import NROServices
 from namex.services.nro.utils import ora_row_to_dict
 from namex.models import Request, Event, State
-from corp-check.utils.logging import setup_logging
+from corps.utils.logging import setup_logging
 
 
 

@@ -7,7 +7,7 @@ from namex.utils.logging import setup_logging
 from namex.models import User
 
 from config import Config
-from corp-check.app import create_app, db, nro, job
+from corps.app import create_app, db, nro, job
 
 
 setup_logging() # important to do this first
@@ -24,7 +24,7 @@ def get_ops_params():
 
 if __name__ == "__main__":
     start_time = datetime.utcnow()
-    print('corp-check sync: starting job: {}'.format(start_time))
+    print('corps sync: starting job: {}'.format(start_time))
 
     # setup Flask, push a context, initialize db & nro connections
     app = create_app(Config)
