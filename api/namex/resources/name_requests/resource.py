@@ -218,9 +218,16 @@ class NameRequestResource(Resource):
         :param svc:
         :return:
         """
-        # Update the names, we can ignore everything else as this is only
-        # invoked when we're completing a payment.
+        # Map data from request_data to the name request
+        map_draft_attrs = nr.stateCd == State.DRAFT
+        nr = svc.map_request_data(nr, map_draft_attrs)
+        # if has_applicants:
+        # Map applicants from request_data to the name request
+        nr = svc.map_request_applicants(nr)
+        # if has_names:
+        # Map any submitted names from request_data to the name request
         nr = svc.map_request_names(nr)
+        # Save
         nr = svc.save_request(nr)
         # Return the updated name request
         return nr
