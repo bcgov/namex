@@ -228,6 +228,7 @@ class NameRequestService(AbstractNameRequestMixin):
             user_id = self.user_id
             request_entity = self.request_entity
             request_action = self.request_action
+            request_type = name_request.requestTypeCd
 
             # Set this to name_request_service_account
             name_request.userId = user_id
@@ -237,7 +238,7 @@ class NameRequestService(AbstractNameRequestMixin):
             if request_action:
                 name_request.request_action_cd = request_action
 
-            if request_action and request_entity:
+            if request_type is None:
                 request_type = self.get_mapped_request_type(request_entity, request_action)
                 if request_type:
                     name_request.requestTypeCd = request_type[0]
@@ -260,6 +261,12 @@ class NameRequestService(AbstractNameRequestMixin):
             name_request.id = nr_id
             name_request.nrNum = nr_num
             name_request._source = NAME_REQUEST_SOURCE
+            request_data = self.request_data
+            request_type_cd = request_data.get('request_type_cd')
+
+            if request_type_cd:
+                name_request.requestTypeCd = request_type_cd
+
         except Exception as err:
             raise MapRequestAttributesError(err)
 
