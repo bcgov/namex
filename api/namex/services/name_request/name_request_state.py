@@ -53,10 +53,12 @@ def display_receipt_action(nr_model=None):
 
 
 def display_reapply_action(nr_model=None):
-    if nr_model and nr_model.expirationDate:
+    if nr_model and nr_model.expirationDate and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
         todays_date = datetime.utcnow()
-        min_display_date = nr_model.expirationDate - timedelta(days=5)
-        difference_in_days = abs((todays_date - min_display_date).days)
+        if nr_model.expirationDate:
+            min_display_date = nr_model.expirationDate - timedelta(days=5)
+            difference_in_days = abs((todays_date - min_display_date).days)
+
 
         return difference_in_days <= 5
 
