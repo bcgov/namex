@@ -71,8 +71,6 @@ class ApplicantSchema(ma.ModelSchema):
     class Meta:
         model = Applicant
         fields = (
-            # TODO: Make sure we don't need this!
-            # 'partyId',
             'lastName',
             'firstName',
             'middleName',
