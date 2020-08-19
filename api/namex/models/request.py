@@ -523,46 +523,6 @@ class Request(db.Model):
         return list_special_characters
 
 
-# set the source from NRO, Societies Online, Name Request
-@event.listens_for(Request, 'before_update')
-def set_source(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the source of the NR."""
-    request = target
-    soc_list = []
-    soc_list = ['SO', 'ASO', 'CSO', 'RSO', 'CTSO', 'XSO', 'XCSO', 'XRSO', 'XASO', 'XCASO', 'CSSO']
-    so_source = ValidSources.SO.value
-    nro_source = ValidSources.NRO.value
-
-    # comes from NRO/Societies Online
-    if request._source is None:
-        if request.requestTypeCd not in soc_list:
-            request._source = nro_source  # pylint: disable=protected-access
-        if request.requestTypeCd in soc_list:
-            request._source = so_source  # pylint: disable=protected-access
-
-
-@event.listens_for(Request, 'before_insert')
-@event.listens_for(Request, 'before_update')
-def update_request_action_entity_type(mapper, connection,
-                                      target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
-    """Set the request_action when it is null because the NR is coming from NRO or NAMEX or Societies Online"""
-    # needed to break apart  request_type
-    try:
-        request = target
-        # TODO: We should check to make sure nrNum actually exists if it's None, this will bomb out with a cryptic error
-        #  Finish implementing debug logging first!
-        # TODO: Use the new regex for nr matching if possible
-        if re.match(r"NR [0-9]+", request.nrNum) and request.requestTypeCd != None:
-            new_value = request.requestTypeCd
-            output = [item for item in request_type_mapping
-                      if item[0] == new_value]
-
-            request._entity_type_cd = output[0][1]
-            request._request_action_cd = output[0][2]
-    except Exception as err:
-        raise err
-
-
 class RequestsSchema(ma.ModelSchema):
     class Meta:
         model = Request
