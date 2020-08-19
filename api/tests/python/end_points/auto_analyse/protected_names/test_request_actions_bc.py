@@ -24,20 +24,20 @@ def test_designation_existence_request_response(client, jwt, app):
         {
             'name': 'ARMSTRONG PLUMBING LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'CHG'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'CHG'
         },
         {
             'name': 'ARMSTRONG PLUMBING LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'DBA'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'DBA'
         },
         {
             'name': 'ARMSTRONG PLUMBING LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

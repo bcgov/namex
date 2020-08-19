@@ -27,62 +27,62 @@ def test_end_designation_more_than_once_request_response(client, jwt, app):
         {
             'name': 'ARMSTRONG LTD. PLUMBING INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'LTD. ARMSTRONG CORPORATION PLUMBING INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG LTD. CORPORATION PLUMBING INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG LTD. CORPORATION INC. PLUMBING',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'LTD. COOP ARMSTRONG L.L.C. CORPORATION PLUMBING CCC INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG LTD. COOP L.L.C. CORPORATION LLP INC. PLUMBING  ',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG LTD. COOP L.L.C. CORPORATION LLP PLUMBING INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG PLUMBING LTD. INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG PLUMBING LTD. INC. CORPORATION',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'ARMSTRONG LIMITED LIABILITY COMPANY PLUMBING COOP LIMITED INC. CORPORATION',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

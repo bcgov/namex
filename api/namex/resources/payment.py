@@ -3,7 +3,7 @@ from flask_restplus import Namespace, Resource, cors, fields, marshal_with, mars
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
-from namex.utils.util import cors_preflight
+from namex.utils.auth import cors_preflight
 
 from urllib.parse import unquote_plus
 

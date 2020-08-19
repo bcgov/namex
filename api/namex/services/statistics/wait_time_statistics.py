@@ -1,7 +1,7 @@
 from namex.models import Request
 from namex.models import Event
 from namex.services.statistics import response_keys
-from namex.utils.service_utils import get_waiting_time
+from namex.utils.statistics import get_waiting_time
 from namex.utils.sql_alchemy import query_result_to_dict
 
 

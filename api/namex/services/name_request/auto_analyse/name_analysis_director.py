@@ -1,4 +1,3 @@
-from namex.utils.common import parse_dict_of_lists
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin

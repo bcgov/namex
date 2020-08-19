@@ -293,7 +293,10 @@ class NameRequestResource(Resource):
                 nro_warnings = self.nro_service.change_nr(name_request, {
                     NROChangeFlags.REQUEST.value: True,
                     NROChangeFlags.APPLICANT.value: True,
-                    NROChangeFlags.ADDRESS.value: True
+                    NROChangeFlags.ADDRESS.value: True,
+                    NROChangeFlags.NAME_1.value: False,
+                    NROChangeFlags.NAME_2.value: False,
+                    NROChangeFlags.NAME_3.value: False,
                 })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)

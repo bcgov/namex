@@ -4,6 +4,8 @@ from datetime import datetime
 from pytz import timezone
 
 from namex.utils.logging import setup_logging
+from namex.utils.api_resource import log_error
+from namex.utils.common import convert_to_ascii
 
 from namex.constants import NameState
 
@@ -15,8 +17,6 @@ from .name_request_state import apply_nr_state_change, get_nr_state_actions
 from .exceptions import \
     CreateNameRequestError, SaveNameRequestError, MapRequestDataError, MapRequestHeaderAttributesError, MapRequestAttributesError, \
     MapRequestApplicantError, MapRequestNamesError, MapPersonCommentError, MapLanguageCommentError, UpdateSubmitCountError, ExtendExpiryDateError
-
-from .utils import log_error, convert_to_ascii
 
 setup_logging()  # Important to do this first
 
@@ -228,6 +228,7 @@ class NameRequestService(AbstractNameRequestMixin):
             user_id = self.user_id
             request_entity = self.request_entity
             request_action = self.request_action
+            request_type = name_request.requestTypeCd
 
             # Set this to name_request_service_account
             name_request.userId = user_id
@@ -237,7 +238,7 @@ class NameRequestService(AbstractNameRequestMixin):
             if request_action:
                 name_request.request_action_cd = request_action
 
-            if request_action and request_entity:
+            if request_type is None:
                 request_type = self.get_mapped_request_type(request_entity, request_action)
                 if request_type:
                     name_request.requestTypeCd = request_type[0]
@@ -260,6 +261,12 @@ class NameRequestService(AbstractNameRequestMixin):
             name_request.id = nr_id
             name_request.nrNum = nr_num
             name_request._source = NAME_REQUEST_SOURCE
+            request_data = self.request_data
+            request_type_cd = request_data.get('request_type_cd')
+
+            if request_type_cd:
+                name_request.requestTypeCd = request_type_cd
+
         except Exception as err:
             raise MapRequestAttributesError(err)
 
@@ -613,7 +620,7 @@ class NameRequestService(AbstractNameRequestMixin):
                 nr = on_success(nr, resource)
 
             # Set the actions corresponding to the new Name Request state
-            self.current_state_actions = get_nr_state_actions(new_state)
+            self.current_state_actions = get_nr_state_actions(new_state, nr)
             return nr
 
         return apply_nr_state_change(self, name_request, next_state, on_success_cb)

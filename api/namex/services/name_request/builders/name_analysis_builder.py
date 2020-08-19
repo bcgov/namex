@@ -5,7 +5,6 @@ from . import porter, STEM_W, OTHER_W, SUBS_W, EXACT_MATCH, MINIMUM_SIMILARITY, 
 import math
 from collections import Counter
 
-WORD = re.compile(r"\w+")
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
@@ -17,6 +16,8 @@ from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
 from namex.services.name_request.auto_analyse import DataFrameFields
+
+WORD = re.compile(r"\w+")
 
 '''
 Sample builder

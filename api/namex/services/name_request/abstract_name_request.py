@@ -55,24 +55,14 @@ class AbstractNameRequestMixin(object):
 
     @property
     def request_action(self):
-        # Sometimes we get requestAction, sometimes we get request_action_cd, handle both
-        action = self.request_data.get('requestAction', None)
         action_cd = self.request_data.get('request_action_cd', None)
-
-        if action:
-            return action
-        elif action_cd:
+        if action_cd:
             return action_cd
 
     @property
     def request_entity(self):
-        # Sometimes we get entity_type, sometimes we get entity_type_cd, handle both
-        entity_type = self.request_data.get('entity_type', None)
         entity_type_cd = self.request_data.get('entity_type_cd', None)
-
-        if entity_type:
-            return entity_type
-        elif entity_type_cd:
+        if entity_type_cd:
             return entity_type_cd
 
     @property

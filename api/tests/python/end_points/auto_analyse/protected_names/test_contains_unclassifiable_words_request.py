@@ -25,14 +25,14 @@ def test_contains_unclassifiable_words_request_response(client, jwt, app):
         {
             'name': 'FLERKIN BLUBBLUB CONSULTING INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'FLERKIN BLUBBLUB BAKERY INC.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

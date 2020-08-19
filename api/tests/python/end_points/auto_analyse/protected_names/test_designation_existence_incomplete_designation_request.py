@@ -25,8 +25,8 @@ def test_designation_existence_incomplete_designation_request_response(client, j
         {
             'name': 'ARMSTRONG PLUMBING SOCIETE A RESPONSABILITE',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

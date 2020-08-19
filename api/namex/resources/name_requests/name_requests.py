@@ -5,13 +5,13 @@ from flask import request, jsonify, current_app
 from flask_restplus import cors
 
 from namex.utils.logging import setup_logging
-from namex.utils.util import cors_preflight
+from namex.utils.auth import cors_preflight
+from namex.utils.api_resource import handle_exception, get_query_param_str
 
 from namex.models import Request, Event, State, Applicant
 from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
-from namex.services.name_request.utils import handle_exception, get_query_param_str
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError
@@ -106,7 +106,7 @@ class NameRequests(NameRequestResource):
         if nr_num and len(results) == 1:
             response_data = results[0].json()
             # Add the list of valid Name Request actions for the given state to the response
-            response_data['actions'] = get_nr_state_actions(results[0].stateCd)
+            response_data['actions'] = get_nr_state_actions(results[0].stateCd, results[0])
             return jsonify(response_data), 200
         elif len(results) > 0:
             # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list

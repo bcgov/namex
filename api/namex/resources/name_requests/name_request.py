@@ -4,12 +4,12 @@ from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from namex.utils.logging import setup_logging
-from namex.utils.util import cors_preflight
+from namex.utils.auth import cors_preflight
+from namex.utils.api_resource import handle_exception
 
 from namex.constants import NameRequestActions, RequestAction
 from namex.models import Request, State
 
-from namex.services.name_request.utils import handle_exception
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError
@@ -45,7 +45,7 @@ class NameRequest(NameRequestResource):
 
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
-            response_data['actions'] = get_nr_state_actions(nr_model.stateCd)
+            response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
             return jsonify(response_data), 200
         except Exception as err:
             return handle_exception(err, 'Error retrieving the NR.', 500)
@@ -343,6 +343,8 @@ class NameRequestFields(NameRequestResource):
         except Exception as err:
             raise NameRequestException(err, message='Error upgrading Name Request!')
 
+        # Update the actions, as things change once the payment is successful
+        self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
         # We have not accounted for multiple payments.
         # We will need to add a request_payment model (request_id and payment_id)
         # This handles the updates for NRO and Solr, if necessary

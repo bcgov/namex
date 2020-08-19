@@ -2,7 +2,7 @@ from string import Template
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from namex.utils.service_utils import get_entity_type_description
+from namex.utils.entity_type import get_entity_type_description
 
 # Import DTOs
 from .abstract import AnalysisResponseIssue
@@ -78,7 +78,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                         'list_name': self._join_list_words(list_name),
                         'correct_designations': self._join_list_words(correct_designations_lc),
                         'incorrect_designations': self._join_list_words(incorrect_designations_lc),
-                        'entity_type': self.entity_type  # TODO: Map this CODE!
+                        'entity_type_cd': self.entity_type  # TODO: Map this CODE!
                     }))
 
         return issue

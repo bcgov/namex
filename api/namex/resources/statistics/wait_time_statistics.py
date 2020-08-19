@@ -1,6 +1,8 @@
 from flask import jsonify
 
-from namex.services.name_request.utils import handle_exception
+from namex.utils.auth import cors_preflight
+from namex.utils.api_resource import handle_exception
+
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 from namex.services.exceptions import ApiServiceException
 from namex.utils.logging import setup_logging
@@ -9,7 +11,6 @@ from flask_jwt_oidc import AuthError
 
 from http import HTTPStatus
 
-from namex.utils.util import cors_preflight
 
 setup_logging()  # important to do this first
 

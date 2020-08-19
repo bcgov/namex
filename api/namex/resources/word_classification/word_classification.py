@@ -4,7 +4,7 @@ from flask_jwt_oidc import AuthError
 
 from http import HTTPStatus
 
-from namex.utils.util import cors_preflight
+from namex.utils.auth import cors_preflight
 from namex.utils.logging import setup_logging
 
 from namex.services.word_classification.word_classification import WordClassificationService

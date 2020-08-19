@@ -32,8 +32,8 @@ def test_too_many_words_request_response(client, jwt, app):
         {
             'name': 'MOUNTAIN VIEW FOOD GROWERS & CAFE LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

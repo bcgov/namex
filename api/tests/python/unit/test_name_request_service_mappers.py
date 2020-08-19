@@ -138,7 +138,7 @@ def test_add_request_names(client, jwt, app):
     Test adding two new names 
     """
     # We will need a base NR
-    nr = build_nr(State.DRAFT, [test_names_no_id[0]])
+    nr = build_nr(State.DRAFT, {}, [test_names_no_id[0]])
     # We can't save the NR without an NR Num
     nr.nrNum = 'NR L000001'
     # Save to DB so PK sequences are updated
@@ -193,7 +193,7 @@ def test_update_request_names(client, jwt, app):
     Test updating three names 
     """
     # We will need a base NR
-    nr = build_nr(State.DRAFT, [test_names_no_id[0], test_names_no_id[1]])
+    nr = build_nr(State.DRAFT, {}, [test_names_no_id[0], test_names_no_id[1]])
     # We can't save the NR without an NR Num
     nr.nrNum = 'NR L000001'
     # Save to DB so PK sequences are updated

@@ -3,15 +3,15 @@
 TODO: Fill in a larger description once the API is defined for V1
 """
 
-from flask import request, make_response, jsonify
+from flask import make_response, jsonify
 from flask_restplus import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
 
-from urllib.parse import unquote_plus
+from namex.utils.auth import cors_preflight
+from namex.utils.api_resource import get_query_param_str
+from namex.utils.logging import setup_logging
 
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
-from namex.utils.util import cors_preflight
-from namex.utils.logging import setup_logging
 
 from .xpro_name_analysis_response import XproAnalysisResponse as AnalysisResponse
 from namex.services.name_request.auto_analyse import AnalysisRequestActions
@@ -73,7 +73,7 @@ def validate_name_request(location, entity_type, request_action):
 @cors_preflight("GET")
 @api.route('/', strict_slashes=False, methods=['GET', 'OPTIONS'])
 class XproNameAnalysis(Resource):
-    '''
+    """
     We use different service sub-types depending on:
 
     - the location and the entity type:
@@ -99,7 +99,7 @@ class XproNameAnalysis(Resource):
       - Always to examination
       REN = Restore by starting a new business
       - Always to examination
-    '''
+    """
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
@@ -107,14 +107,14 @@ class XproNameAnalysis(Resource):
     @api.doc(params={
         'name': 'A company / organization name string',
         'location': 'A location code [ CA (only) ]',
-        'entity_type': 'An entity type code [ XCR, RLC ]',
-        'request_action': 'A request action code [ NEW ]'
+        'entity_type_cd': 'An entity type code [ XCR, RLC ]',
+        'request_action_cd': 'A request action code [ NEW ]'
     })
     def get():
-        name = unquote_plus(request.args.get('name').strip()) if request.args.get('name') else None
-        location = unquote_plus(request.args.get('location').strip()) if request.args.get('location') else None
-        entity_type = unquote_plus(request.args.get('entity_type').strip()) if request.args.get('entity_type') else None
-        request_action = unquote_plus(request.args.get('request_action').strip()) if request.args.get('request_action') else None
+        name = get_query_param_str('name')
+        location = get_query_param_str('location')
+        entity_type = get_query_param_str('entity_type_cd')
+        request_action = get_query_param_str('request_action_cd')
 
         service = None
 

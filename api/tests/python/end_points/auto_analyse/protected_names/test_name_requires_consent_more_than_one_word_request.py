@@ -43,14 +43,14 @@ def test_name_requires_consent_more_than_one_word_request_response(client, jwt, 
         {
             'name': 'BLAKE 4H ENGINEERING LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         },
         {
             'name': 'EQTEC HONEYWELL ENGINEERING LTD.',
             'location': 'BC',
-            'entity_type': 'CR',
-            'request_action': 'NEW'
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
         }
     ]
 

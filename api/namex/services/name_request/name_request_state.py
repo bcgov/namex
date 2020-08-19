@@ -1,4 +1,7 @@
+from datetime import datetime, timedelta
+
 from namex.constants import \
+    NameRequestActions, \
     NameRequestDraftActions, NameRequestReservedActions, NameRequestActiveActions, NameRequestCancelledActions, \
     NameRequestHoldActions, NameRequestInProgressActions, NameRequestExpiredActions, NameRequestConsumedActions, \
     NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions
@@ -11,27 +14,93 @@ state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{ne
 invalid_state_transition_msg = 'Invalid state transition [{current_state}] -> [{next_state}], valid states are [{valid_states}]'
 
 
-def get_nr_state_actions(next_state):
+def display_edit_action(nr_model=None):
+    if nr_model and nr_model.stateCd == State.CANCELLED:
+        return False
+
+    return True
+
+
+def display_upgrade_action(nr_model=None):
+    if nr_model and nr_model.priorityCd == 'Y':
+        return False
+
+    return True
+
+
+def display_cancel_action(nr_model=None):
+    if nr_model and nr_model.stateCd == State.CANCELLED:
+        return False
+
+    if nr_model and nr_model.stateCd in State.CANCELLABLE_STATES:
+        return True
+
+    return False
+
+
+def display_refund_action(nr_model=None):
+    if nr_model and nr_model.payment_token is not None:
+        return True
+
+    return False
+
+
+def display_receipt_action(nr_model=None):
+    if nr_model and nr_model.payment_token is not None:
+        return True
+
+    return False
+
+
+def display_reapply_action(nr_model=None):
+    if nr_model and nr_model.expirationDate and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
+
+        todays_date =  datetime.utcnow().date()
+        expiry_date = nr_model.expirationDate.date()
+        if todays_date < expiry_date:
+            delta = expiry_date - todays_date
+            if delta.days <= 5:
+                return True
+    return False
+
+
+def display_resend_action(nr_model=None):
+    return True
+
+
+action_handlers = {
+    NameRequestActions.EDIT.value: display_edit_action,
+    NameRequestActions.UPGRADE.value: display_upgrade_action,
+    NameRequestActions.CANCEL.value: display_cancel_action,
+    NameRequestActions.REFUND.value: display_refund_action,
+    NameRequestActions.RECEIPT.value: display_receipt_action,
+    NameRequestActions.REAPPLY.value: display_reapply_action,
+    NameRequestActions.RESEND.value: display_resend_action
+}
+
+
+def get_nr_state_actions(next_state, nr_model=None):
     """
     Get the corresponding actions for a particular Name Request state
     :param next_state:
+    :param nr_model:
     :return:
     """
+    def build_actions(state_actions_list, nr):
+        return [sa for sa in state_actions_list if action_handlers[sa](nr)]
 
     return {
-        State.DRAFT: NameRequestDraftActions.list(),
-        State.RESERVED: NameRequestReservedActions.list(),
-        State.COND_RESERVE: NameRequestReservedActions.list(),
+        State.DRAFT: build_actions(NameRequestDraftActions.list(), nr_model),
+        State.RESERVED: build_actions(NameRequestReservedActions.list(), nr_model),
+        State.COND_RESERVE: build_actions(NameRequestReservedActions.list(), nr_model),
         # Not expired
-        State.CONDITIONAL: NameRequestActiveActions.list(),
-        State.APPROVED: NameRequestActiveActions.list(),
-        # TODO: What if CONDITIONAL or APPROVED is expired, we need to be able to handle that here!
-        State.INPROGRESS: NameRequestInProgressActions.list(),
-        State.HOLD: NameRequestHoldActions.list(),
-        State.HISTORICAL: NameRequestHistoricalActions.list(),
-        State.CANCELLED: NameRequestCancelledActions.list(),
-        State.REJECTED: NameRequestActiveRejectedActions.list()
-        # TODO: What if REJECTED is expired, we need to be able to handle that here!
+        State.CONDITIONAL: build_actions(NameRequestActiveActions.list(), nr_model),
+        State.APPROVED: build_actions(NameRequestActiveActions.list(), nr_model),
+        State.INPROGRESS: build_actions(NameRequestInProgressActions.list(), nr_model),
+        State.HOLD: build_actions(NameRequestHoldActions.list(), nr_model),
+        State.HISTORICAL: build_actions(NameRequestHistoricalActions.list(), nr_model),
+        State.CANCELLED: build_actions(NameRequestCancelledActions.list(), nr_model),
+        State.REJECTED: build_actions(NameRequestActiveRejectedActions.list(), nr_model)
     }.get(next_state)
 
 
