@@ -257,6 +257,7 @@ class LegacyEntityTypes:
 request_type_mapping = [
     ('CR', EntityTypes.CORPORATION.value, RequestAction.NEW_AML.value),
     ('CR', EntityTypes.CORPORATION.value, RequestAction.NEW.value),
+    ('CR', EntityTypes.CORPORATION.value, RequestAction.AML.value),
     ('CCR', EntityTypes.CORPORATION.value, RequestAction.CHG.value),
     ('CT', EntityTypes.CORPORATION.value, RequestAction.MVE.value),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REST.value),
@@ -269,7 +270,10 @@ request_type_mapping = [
     ('RLC', EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value, RequestAction.REST.value),
     ('AL', EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value, RequestAction.AS.value),
     ('FR', EntityTypes.SOLE_PROPRIETORSHIP.value, RequestAction.NEW.value),
+    ('FR', EntityTypes.DOING_BUSINESS_AS.value, RequestAction.NEW.value),
+    ('FR', EntityTypes.GENERAL_PARTNERSHIP.value, RequestAction.NEW.value),
     ('CFR', EntityTypes.SOLE_PROPRIETORSHIP.value, RequestAction.CHG.value),
+    ('CFR', EntityTypes.GENERAL_PARTNERSHIP.value, RequestAction.CHG.value),
     ('LL', EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value, RequestAction.NEW.value),
     ('CLL', EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value, RequestAction.CHG.value),
     ('XLL', EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value, RequestAction.NEW.value),
@@ -290,6 +294,7 @@ request_type_mapping = [
     ('XASO', EntityTypes.XPRO_SOCIETY.value, RequestAction.AS.value),
     ('XCASO', EntityTypes.XPRO_SOCIETY.value, RequestAction.ACHG.value),
     ('CP', EntityTypes.COOPERATIVE.value, RequestAction.NEW_AML.value),
+    ('CP', EntityTypes.COOPERATIVE.value, RequestAction.AML.value),
     ('CCP', EntityTypes.COOPERATIVE.value, RequestAction.CHG.value),
     ('CTC', EntityTypes.COOPERATIVE.value, RequestAction.MVE.value),
     ('RCP', EntityTypes.COOPERATIVE.value, RequestAction.REST.value),
@@ -297,11 +302,13 @@ request_type_mapping = [
     ('XCCP', EntityTypes.XPRO_COOPERATIVE.value, RequestAction.CHG.value),
     ('XRCP', EntityTypes.XPRO_COOPERATIVE.value, RequestAction.REST.value),
     ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.NEW_AML.value),
+    ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.AML.value),
     ('CCV', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CNV.value),
     ('CCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CHG.value),
     ('CCCT', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.MVE.value),
     ('RCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.REST.value),
     ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.NEW.value),
+    ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.AML.value),
     ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CNV.value),
     ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value),
     ('ULCT', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.MVE.value),
@@ -321,7 +328,7 @@ request_type_mapping = [
     ('BECT', EntityTypes.BENEFIT_COMPANY.value, RequestAction.MVE.value),
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REST.value),
     ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value),
-    ('BECR', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value)
+    ('BECR', EntityTypes.CORPORATION.value, RequestAction.CNV.value)
 ]
 
 
