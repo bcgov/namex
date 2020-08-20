@@ -7,7 +7,7 @@ from flask import jsonify
 from flask_restplus import Namespace, Resource, cors
 
 from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import get_query_param_str, handle_exception
+from namex.utils.api_resource import handle_exception
 from namex.utils.logging import setup_logging
 
 setup_logging()  # Important to do this first
