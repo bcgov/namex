@@ -593,9 +593,9 @@ class NameRequestService(AbstractNameRequestMixin):
 
             try:
                 if decision_text is None:
-                    decision_text = cnd_instructions + '\n'
+                    decision_text = cnd_instructions + '\n' + '\n'
                 else:
-                    decision_text += consent + '- ' + cnd_instructions + '\n'
+                    decision_text += consent + '- ' + cnd_instructions + '\n' + '\n'
 
                 submitted_name.decision_text = decision_text
             except Exception as err:
