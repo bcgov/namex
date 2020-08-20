@@ -80,6 +80,8 @@ class NameRequestResource(Resource):
 
         # Set the request data to the service
         self.nr_service.request_data = self.request_data
+        # Inject the virtual word condition service instance
+        self.nr_service.virtual_wc_service = self.virtual_wc_service
 
     @classmethod
     def validate_config(cls, app):
