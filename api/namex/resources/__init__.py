@@ -14,6 +14,7 @@ from .auto_analyse.paths import bc_name_analysis_api, xpro_name_analysis_api
 
 from .payment import payment_api
 from .mras import mras_profile_api
+from .colin import colin_api
 from .statistics.wait_time_statistics import api as wait_time_stats_api
 
 
@@ -47,4 +48,5 @@ api.add_namespace(bc_name_analysis_api, path='/name-analysis')
 api.add_namespace(xpro_name_analysis_api, path='/xpro-name-analysis')
 api.add_namespace(payment_api, path='/payments')
 api.add_namespace(mras_profile_api, path='/mras-profile')
+api.add_namespace(colin_api, path='/colin')
 api.add_namespace(wait_time_stats_api, path='/statistics')
