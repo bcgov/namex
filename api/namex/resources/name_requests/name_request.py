@@ -361,7 +361,7 @@ class NameRequestFields(NameRequestResource):
         nr_svc = self.nr_service
 
         if nr_model.submitCount < 3:
-            if nr_svc.request_action in [RequestAction.REH.value, RequestAction.REN.value]:
+            if nr_model.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
                 # If request action is REH or REST extend by 1 year (+ 56 default) days
                 nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1)))
                 nr_model = nr_svc.update_request_submit_count(nr_model)
