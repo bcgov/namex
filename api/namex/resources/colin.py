@@ -45,7 +45,7 @@ class ColinApi(Resource):
         try:
             authenticated, token = get_client_credentials(AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, COLIN_SVC_CLIENT_SECRET)
             if not authenticated:
-                raise ColinServiceException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+                raise ColinServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
 
             # Get the profile
             print('\nCalling COLIN API using [corp_num: {corp_num}]'.format(corp_num=corp_num))
