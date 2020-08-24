@@ -51,16 +51,16 @@ def get_active_corp_info(ora_con,corp_num):
 def pg_job_results(max_rows):
     sql = "select * " \
           "from missing_corps " \
-          "where skip='N' "
+          "where skip is null "
 
     print(sql)
     results = db.session.execute(sql)
     return results
 
-def find_corp_name_count_in_namex(id, corp_name):
+def find_corp_name_count_in_namex(corp_name):
     sql = "select count(*) as name_count " \
-          "from names n " \
-          "where n.name = '{corp_name}' and n.state in ('APPROVED','CONDITION') and n.corp_num is null".format(corp_name=corp_name)
+          "from names n, requests r  " \
+          "where n.nr_id = r.id and r.state_cd in ('APPROVED','CONDITIONAL') and n.name = '{corp_name}' and n.state in ('APPROVED','CONDITION') and n.corp_num is null and n.nr_id > 0 ".format(corp_name=corp_name)
 
     print(sql)
     name_results =  db.session.execute(sql)
@@ -70,10 +70,10 @@ def find_corp_name_count_in_namex(id, corp_name):
     return name_count
 
 
-def find_corp_name_in_namex(id,corp_name):
+def find_corp_name_in_namex(corp_name):
     sql = "select n.id, n.nr_id, n.name, n.corp_num, n.consumption_date, n.state " \
-          "from names n " \
-          "where n.name = '{corp_name}' and n.state in ('APPROVED','CONDITION') and n.corp_num is null".format(corp_name=corp_name)
+          "from names n, requests r  " \
+          "where n.nr_id = r.id and r.state_cd in ('APPROVED','CONDITIONAL') and n.name = '{corp_name}' and n.state in ('APPROVED','CONDITION') and n.corp_num is null and n.nr_id > 0 ".format(corp_name=corp_name)
 
     print(sql)
     name_results = db.session.execute(sql)
@@ -82,8 +82,8 @@ def find_corp_name_in_namex(id,corp_name):
 def update_consumption_info(name_id,corp_num,start_date):
 
     update_sql = "update names " \
-          "set consumption_date =  '{start_date}' " \
-          " corp_num = '{corp_num}'" \
+          "set consumption_date =  '{start_date}',  " \
+          "corp_num = '{corp_num}'  " \
           "where id =  {name_id}".format(name_id=name_id, corp_num=corp_num,start_date=start_date)
 
     print(update_sql)
@@ -91,10 +91,10 @@ def update_consumption_info(name_id,corp_num,start_date):
     return results
 
 
-def update_missing_corps_list(corp_num):
-    update_sql = "update missing_corps" \
-          "set skip='D'"\
-          "where corp_num = '{corp_num}')".format(corp_num=corp_num)
+def update_missing_corps_list(corp_num,skip_value):
+    update_sql = "update missing_corps " \
+          "set skip='{skip_value}' "\
+          "where corp_num = '{corp_num}'".format(corp_num=corp_num,skip_value = skip_value)
 
     print(update_sql)
 
@@ -103,8 +103,8 @@ def update_missing_corps_list(corp_num):
 
 
 def insert_active_corps_list(corp_num, corp_name, nr_id, name_id):
-    insert_sql = "insert into active_corps" \
-          "(corp_num, corp_name, nr_id, name_id )"\
+    insert_sql = "insert into active_corps " \
+          "(corp_num, corp_name, nr_id, name_id) "\
           "values('{corp_num}', '{corp_name}', {nr_id}, {name_id})".format(corp_num=corp_num, corp_name=corp_name, nr_id=nr_id, name_id=name_id)
 
     print(insert_sql)
@@ -127,28 +127,35 @@ def job(app, db, nro_connection, max_rows=100):
             if row_count > max_rows:
                 return row_count
 
-            row = ora_row_to_dict(col_names, r)
-
             corp_num = r.corp_num
-            corp_name =r.corp_name
+            corp_name =r.corp_name.strip()
 
             corp_name=corp_name.replace('\'', "''")
 
             active_corp, col_names = get_active_corp_info(ora_con,corp_num)
-            row = ora_row_to_dict(col_names, r)
-            start_date = row['start_date']
+            for a in active_corp:
+                row = ora_row_to_dict(col_names, a)
+                start_date = row['start_date']
 
 
             name_count = find_corp_name_count_in_namex(corp_name)
             if name_count == 0:
-                #update skip='D'
-                update_missing_corps_list(corp_num)
+                #update skip='D' for Datafix
+                skip_value='D'
+                update_missing_corps_list(corp_num,skip_value)
             else:
 
                 name_results = find_corp_name_in_namex(corp_name)
                 for name in name_results:
                     update_consumption_info(name.id,corp_num,start_date)
                     insert_active_corps_list(corp_num, corp_name, name.nr_id,name.id )
+                    if name_count == 1:
+                       skip_value = 'A' #added to active_corp_list
+                    else:
+                       skip_value = 'M' #multiple names because of bad datq in the colin nr filing table worng corp_num and name
+
+                    update_missing_corps_list(corp_num, skip_value)
+
 
             db.session.commit()
         return row_count
