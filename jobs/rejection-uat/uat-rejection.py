@@ -84,6 +84,7 @@ if __name__ == "__main__":
         sql = "select r.id, r.nr_num, r.state_cd, n.choice, n.name, n.decision_text, n.conflict1_num, n.conflict1, n.conflict1_num " \
               "from requests r, names n " \
               "where r.id = n.nr_id and n.state = " + '\'' + State.REJECTED + '\'' + " and " \
+              "r.state_cd in(" + '\'' + State.APPROVED + '\',' + '\'' + State.CONDITIONAL + '\',' + '\'' + State.REJECTED + '\') and '\
               "r.request_type_cd = " + '\'' + EntityTypes.CORPORATION.value + '\'' + " and " \
               "r.nr_num not in (select nr_num from uat_results) " \
               "order by r.submitted_date " \
