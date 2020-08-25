@@ -85,7 +85,7 @@ if __name__ == "__main__":
               "from requests r, names n " \
               "where r.id = n.nr_id and n.state = " + '\'' + State.REJECTED + '\'' + " and " \
               "r.request_type_cd = " + '\'' + EntityTypes.CORPORATION.value + '\'' + " and " \
-              "n.name = 'DLB CRANES LTD.' " \
+              "r.nr_num not in (select nr_num from uat_results) " \
               "order by r.submitted_date " \
               "limit " + MAX_ROW_LIMIT
 
