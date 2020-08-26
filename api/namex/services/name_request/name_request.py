@@ -226,23 +226,9 @@ class NameRequestService(AbstractNameRequestMixin):
         """
         try:
             user_id = self.user_id
-            request_entity = self.request_entity
-            request_action = self.request_action
-            request_type = name_request.requestTypeCd
-
             # Set this to name_request_service_account
             name_request.userId = user_id
             name_request.submittedDate = datetime.utcnow()
-            name_request.entity_type_cd = request_entity
-
-            if request_action:
-                name_request.request_action_cd = request_action
-
-            if request_type is None:
-                request_type = self.get_mapped_request_type(request_entity, request_action)
-                if request_type:
-                    name_request.requestTypeCd = request_type[0]
-
         except Exception as err:
             raise MapRequestDataError(err)
 
@@ -255,18 +241,39 @@ class NameRequestService(AbstractNameRequestMixin):
         :return:
         """
         try:
+            # Use class property values for the ID, NR Number and Source!
+            # Do not map those values from the request if supplied, as they
+            # should not be changed outside of the context of this application!
             nr_id = self.nr_id
             nr_num = self.nr_num
-
             name_request.id = nr_id
             name_request.nrNum = nr_num
             name_request._source = NAME_REQUEST_SOURCE
-            request_data = self.request_data
-            request_type_cd = request_data.get('request_type_cd')
 
-            if request_type_cd:
-                name_request.requestTypeCd = request_type_cd
+            # Default to whatever entity, action, or type already exists when mapping
+            request_entity = self.request_entity if self.request_entity else name_request.entity_type_cd
+            request_action = self.request_action if self.request_action else name_request.request_action_cd
+            request_type = self.request_type if self.request_type or self.request_type is None else name_request.requestTypeCd
 
+            # Set action and entity
+            if request_entity:
+                name_request.entity_type_cd = request_entity
+
+            if request_action:
+                name_request.request_action_cd = request_action
+
+            # TODO: Throw exceptions for invalid combos?
+            if not request_type and request_entity and request_action:
+                # If request_type is None (eg. no 'requestTypeCd' was provided in the payload)
+                # but a request_entity (entity_type_cd) and a request_action (request_action_cd)
+                # are supplied, use get_mapped_request_type to map the requestTypeCd in the model
+                # using the action and entity type
+                request_type = self.get_mapped_request_type(request_entity, request_action)
+                name_request.requestTypeCd = request_type[0]
+            elif request_type is not None:
+                # If request_type is NOT None, (eg. 'requestTypeCd' was provided in the payload)
+                # then use the provided value
+                name_request.requestTypeCd = request_type
         except Exception as err:
             raise MapRequestAttributesError(err)
 
