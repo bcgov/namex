@@ -132,6 +132,8 @@ def test_draft_patch_edit_data(client, jwt, app):
         'corpNum': 'TESTCORP123',
         # 'homeJurisNum': 'TESTHOME123',
         'entity_type_cd': 'FR',
+        'requestTypeCd': 'CR',
+        'request_action_cd': 'NEW',
         'expirationDate': None,
         'furnished': 'N',
         'hasBeenReset': False,
@@ -144,8 +146,6 @@ def test_draft_patch_edit_data(client, jwt, app):
         # 'previousStateCd': '',
         'priorityCd': 'Y',
         # 'priorityDate': None,
-        'requestTypeCd': 'CR',
-        'request_action_cd': 'NEW',
         'source': 'NAMEREQUEST',
         'state': 'DRAFT',
         'stateCd': 'DRAFT',
@@ -154,6 +154,59 @@ def test_draft_patch_edit_data(client, jwt, app):
         'submitter_userid': 'name_request_service_account',
         'userId': 'name_request_service_account',
         'xproJurisdiction': ''
+    }
+
+    for key, value in expected_field_values.items():
+        assert_field_equals_value(patched_nr, key, value)
+
+
+def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app):
+    """
+    This is not designed to test all combinations, for those tests see test_nr_request_combos.
+    Setup:
+    Test:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Define our data, which is initially set to:
+    # draft_input_fields = {
+    #     'request_action_cd': 'NEW'
+    #     'entity_type_cd': 'CR'
+    #     'requestTypeCd': 'CR'
+    #     ...
+    # }
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
+
+    # Assign the payload to new nr var
+    draft_nr = json.loads(post_response.data)
+    assert draft_nr is not None
+
+    # Take the response and edit it
+    # Change the request action
+    nr_data = {
+        'request_action_cd': 'CHG',
+        'entity_type_cd': 'RLC',  # Limited Liability Co.
+        'requestTypeCd': 'CLC'  # From request_type_mapping in namex.constants
+    }
+
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('nrNum'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
+    assert patched_nr.get('stateCd') == 'DRAFT'
+
+    # Check data
+    expected_field_values = {
+        'request_action_cd': 'CHG',
+        'entity_type_cd': 'RLC',
+        'requestTypeCd': 'CLC'
     }
 
     for key, value in expected_field_values.items():

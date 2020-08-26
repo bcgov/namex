@@ -1,5 +1,6 @@
 """
 Integration tests for Name Request state transitions.
+TODO: These tests are incomplete, but are are important to have. Do not remove!
 """
 import pytest
 import json
