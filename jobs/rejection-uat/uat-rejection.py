@@ -1,5 +1,7 @@
 import sys, os, re
 from datetime import datetime
+
+import psycopg2
 from flask import Flask, g, current_app
 from namex import db
 from namex.constants import BCProtectedNameEntityTypes, EntityTypes
@@ -33,8 +35,9 @@ def unicode_to_string(json_str):
     return re.sub(r'\\u([0-9A-F]{4})', lambda m: chr(int(m.group(1), 16)), json_str)
 
 
-def name_profile_data(request_id, nr_num, state, choice, name, decision_text, conflict1_num, conflict1):
-    name_profile = {'id': request_id,
+def name_profile_data(nr_num, state, choice, name, decision_text, conflict1_num, conflict1):
+    seq_id = db.session.execute("select nextval('uat_results_seq') as id").fetchone()
+    name_profile = {'id': seq_id[0],
                     'nr_num': nr_num,
                     'nr_state': state,
                     'choice': choice,
@@ -112,7 +115,7 @@ if __name__ == "__main__":
                 analysis_response = AnalysisResponse(service, analysis)
                 payload = analysis_response.build_response()
 
-                profile_data = name_profile_data(request_id, nr_num, state_cd, choice, name, decision_text,
+                profile_data = name_profile_data(nr_num, state_cd, choice, name, decision_text,
                                                  conflict1_num, conflict1)
                 response_data = name_response_data(payload)
 
