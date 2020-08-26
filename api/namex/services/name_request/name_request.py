@@ -253,7 +253,7 @@ class NameRequestService(AbstractNameRequestMixin):
             # Default to whatever entity, action, or type already exists when mapping
             request_entity = self.request_entity if self.request_entity else name_request.entity_type_cd
             request_action = self.request_action if self.request_action else name_request.request_action_cd
-            request_type = self.request_type if self.request_type else name_request.requestTypeCd
+            request_type = self.request_type if self.request_type or self.request_type is None else name_request.requestTypeCd
 
             # Set action and entity
             if request_entity:
