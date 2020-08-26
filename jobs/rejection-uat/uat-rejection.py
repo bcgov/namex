@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, re
 from datetime import datetime
 from flask import Flask, g, current_app
 from namex import db
@@ -27,6 +27,10 @@ def create_app(config=Config):
     current_app.logger.debug('created the Flask App and pushed the App Context')
 
     return app
+
+
+def unicode_to_string(json_str):
+    return re.sub(r'\\u([0-9A-F]{4})', lambda m: chr(int(m.group(1), 16)), json_str)
 
 
 def name_profile_data(request_id, nr_num, state, choice, name, decision_text, conflict1_num, conflict1):
@@ -69,6 +73,8 @@ def name_response_data(payload):
 
     name_response['result_decision_text'] = decision_text
     name_response['result_response'] = payload.to_json()
+
+    name_response['result_response'] = unicode_to_string(name_response['result_response']).replace("\'", "''")
 
     return name_response
 
@@ -117,7 +123,9 @@ if __name__ == "__main__":
             cols_str = ','.join(cols)
             record_to_insert = tuple([data_dict[k] for k in cols])
 
-            db.session.execute('insert into uat_results VALUES {};'.format(record_to_insert))
+            sql_insert = 'insert into uat_results VALUES {};'.format(record_to_insert).replace("\\", "")
+
+            db.session.execute(sql_insert)
             db.session.commit()
             row_count += 1
 
