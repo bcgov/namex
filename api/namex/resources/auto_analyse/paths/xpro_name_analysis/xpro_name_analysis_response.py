@@ -1,3 +1,4 @@
+from namex.constants import EntityTypes
 from ... import QueueNameConflictIssue
 from ...analysis_response import AnalysisResponse
 
@@ -25,6 +26,7 @@ from ...analysis_options import \
     remove_setup, \
     remove_or_replace_setup, \
     assumed_name_setup, \
+    alternative_assumed_name_setup, \
     resolve_conflict_setup, \
     send_to_examiner_setup, \
     obtain_consent_setup, \
@@ -203,7 +205,10 @@ class XproAnalysisResponse(AnalysisResponse):
         :param issue_idx:
         :return:
         """
-        option1 = assumed_name_setup()
+        option1 = assumed_name_setup() if self.entity_type in (
+            EntityTypes.XPRO_CORPORATION.value, EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+            EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
+            else alternative_assumed_name_setup()
         # Tweak the header
         option1.header = "Helpful Hint"
 
@@ -227,7 +232,10 @@ class XproAnalysisResponse(AnalysisResponse):
         return issue
 
     def build_queue_conflict_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = assumed_name_setup()
+        option1 = assumed_name_setup() if self.entity_type in (
+            EntityTypes.XPRO_CORPORATION.value, EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+            EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
+            else alternative_assumed_name_setup()
         # Tweak the header
         option1.header = "Helpful Hint"
 
