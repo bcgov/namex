@@ -341,11 +341,12 @@ class NameRequestService(AbstractNameRequestMixin):
             user_id = self.user_id
             nr_id = self.nr_id
 
-            # If the language comment exists, we don't need to add it again
-            lang_comment = build_language_comment(request_data.get('english'), user_id, nr_id)
-            matching_comments = list(filter(lambda x: x.comment == lang_comment.comment, list(name_request.comments)))
-            if len(matching_comments) == 0:
-                name_request.comments.append(lang_comment)
+            # If the language comment exists, we don't need to add it again, after nitail PIST it gets set to None so must dealt with
+            if request_data.get('english') is not None:
+                lang_comment = build_language_comment(request_data.get('english'), user_id, nr_id)
+                matching_comments = list(filter(lambda x: x.comment == lang_comment.comment, list(name_request.comments)))
+                if len(matching_comments) == 0:
+                    name_request.comments.append(lang_comment)
         except Exception as err:
             raise MapLanguageCommentError(err)
 
@@ -362,12 +363,13 @@ class NameRequestService(AbstractNameRequestMixin):
             user_id = self.user_id
             nr_id = self.nr_id
 
-            if request_data.get('nameFlag') is True:
-                # If the person name comment exists, we don't need to add it again
-                name_comment = build_name_comment(user_id, nr_id)
-                matching_comments = list(filter(lambda x: x.comment == name_comment.comment, list(name_request.comments)))
-                if len(matching_comments) == 0:
-                    name_request.comments.append(name_comment)
+            if request_data.get('nameFlag') is not None:
+                if request_data.get('nameFlag') is True:
+                    # If the person name comment exists, we don't need to add it again
+                    name_comment = build_name_comment(user_id, nr_id)
+                    matching_comments = list(filter(lambda x: x.comment == name_comment.comment, list(name_request.comments)))
+                    if len(matching_comments) == 0:
+                        name_request.comments.append(name_comment)
         except Exception as err:
             raise MapPersonCommentError(err)
 
