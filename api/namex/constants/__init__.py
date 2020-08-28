@@ -176,6 +176,8 @@ class XproUnprotectedNameEntityTypes(AbstractEnum):
     XPRO_COOPERATIVE = EntityTypes.XPRO_COOPERATIVE.value
 
 
+
+
 # Request types (legacy) used in search conflicts
 class LegacyBCORPEntityTypes(AbstractEnum):
     CCR = 'CCR'
