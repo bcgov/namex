@@ -50,13 +50,10 @@ def validate_name_request(location, entity_type, request_action):
     valid_request_actions = [
         AnalysisRequestActions.NEW.value,
         AnalysisRequestActions.CHG.value,
-        AnalysisRequestActions.CNV.value,
-        AnalysisRequestActions.DBA.value,
-        AnalysisRequestActions.MVE.value,
-        AnalysisRequestActions.REH.value,
-        AnalysisRequestActions.REST.value,
-        AnalysisRequestActions.REN.value
-    ]
+        AnalysisRequestActions.ASSUMED.value,
+        AnalysisRequestActions.REN.value,
+        AnalysisRequestActions.REH.value
+      ]
 
     if not valid_location:
         raise ValueError('Invalid location provided')
@@ -87,18 +84,8 @@ class XproNameAnalysis(Resource):
 
     - the request actions, which are not location dependent:
       NEW = Start a new business (NAME PROTECTION)
-      AML = Amalgamate (NAME PROTECTION, BC ONLY)
-      DBA = Get a new trade name (NO NAME PROTECTION)
       CHG = Change your name
-      - It's coming stub it out
-      MVE = Move your business
-      - Always to examination
-      CNV = Convert to another structure
-      - Always to examination
-      REH = Restore from historical business
-      - Always to examination
-      REN = Restore by starting a new business
-      - Always to examination
+      ASSUMED = Assumed Name only for certain entity types. handled on the fornt-end
     """
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -123,23 +110,14 @@ class XproNameAnalysis(Resource):
 
         valid_location = location in [ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value]
         valid_entity_type = entity_type in XproUnprotectedNameEntityTypes.list()
-        is_mve_action = request_action == AnalysisRequestActions.MVE.value
-        is_other_action = request_action in [
-            AnalysisRequestActions.NEW.value,
-            AnalysisRequestActions.CHG.value,
-            AnalysisRequestActions.CNV.value,
-            AnalysisRequestActions.DBA.value,
-            AnalysisRequestActions.REH.value,
-            AnalysisRequestActions.REST.value,
-            AnalysisRequestActions.REN.value
-        ]
 
         try:
-            if valid_location and valid_entity_type and is_mve_action:
-                # Use ProtectedNameAnalysisService
-                service = ProtectedNameAnalysisService()
-                builder = NameAnalysisBuilder(service)
-            elif valid_location and valid_entity_type and is_other_action:
+            if valid_location and valid_entity_type and request_action in (AnalysisRequestActions.NEW.value,
+                                                                           AnalysisRequestActions.CHG.value,
+                                                                           AnalysisRequestActions.ASSUMED.value,
+                                                                           AnalysisRequestActions.REN.value,
+                                                                           AnalysisRequestActions.REH.value):
+
                 # Use UnprotectedNameAnalysisService
                 service = XproNameAnalysisService()
                 builder = NameAnalysisBuilder(service)

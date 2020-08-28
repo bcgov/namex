@@ -58,7 +58,7 @@ def validate_name_request(location, entity_type, request_action):
         valid_request_actions = [
             AnalysisRequestActions.NEW.value,
             AnalysisRequestActions.CHG.value,
-            AnalysisRequestActions.DBA.value
+            AnalysisRequestActions.MVE.value
         ]
     elif entity_type in BCUnprotectedNameEntityTypes.list():
         is_unprotected = True
@@ -103,7 +103,6 @@ class BcNameAnalysis(Resource):
     - the request actions, which are not location dependent:
       NEW = Start a new business (NAME PROTECTION)
       AML = Amalgamate (NAME PROTECTION, BC ONLY)
-      DBA = Get a new trade name (NO NAME PROTECTION)
       CHG = Change your name
       - It's coming stub it out
       MVE = Move your business
@@ -139,7 +138,7 @@ class BcNameAnalysis(Resource):
         valid_location = location == ValidLocations.CA_BC.value
         valid_protected_entity_type = entity_type in BCProtectedNameEntityTypes.list()
         valid_unprotected_entity_type = entity_type in BCUnprotectedNameEntityTypes.list()
-        is_protected_action = request_action in [AnalysisRequestActions.NEW.value, AnalysisRequestActions.CHG.value, AnalysisRequestActions.DBA.value]
+        is_protected_action = request_action in [AnalysisRequestActions.NEW.value, AnalysisRequestActions.CHG.value, AnalysisRequestActions.MVE.value]
         is_unprotected_action = request_action in [AnalysisRequestActions.NEW.value]
 
         try:
