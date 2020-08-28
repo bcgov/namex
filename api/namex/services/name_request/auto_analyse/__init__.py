@@ -34,13 +34,13 @@ class ProcedureResult:
 class AnalysisRequestActions(str, Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)
     AML = 'AML'  # Amalgamate (NAME PROTECTION, BC ONLY)
-    DBA = 'DBA'  # Get a new trade name (NO NAME PROTECTION)
+    ASSUMED = 'ASSUMED'  #Assumed Name for certain XPROs only.
+
     CHG = 'CHG'  # Change your name (it's coming stub it out)
     MVE = 'MVE'  # Move your business
     CNV = 'CNV'  # Convert to another structure
     REH = 'REH'  # Restore from historical business
     REN = 'REN'  # Restore by starting a new business
-    REST = 'REST'  # NOT 100% sure what this is
 
     @classmethod
     def list(cls):
