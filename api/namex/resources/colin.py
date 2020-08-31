@@ -15,9 +15,9 @@ MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
 
-AUTH_SVC_URL = os.getenv('AUTH_SVC_URL', '')
-AUTH_SVC_CLIENT_ID = os.getenv('AUTH_SVC_CLIENT_ID', '')
-COLIN_SVC_CLIENT_SECRET = os.getenv('COLIN_SVC_CLIENT_SECRET', '')
+SBC_SVC_AUTH_URL = os.getenv('SBC_SVC_AUTH_URL', '')
+SBC_SVC_AUTH_CLIENT_ID = os.getenv('SBC_SVC_AUTH_CLIENT_ID', '')
+SBC_SVC_CLIENT_SECRET = os.getenv('SBC_SVC_CLIENT_SECRET', '')
 COLIN_SVC_URL = os.getenv('COLIN_SVC_URL', '') + '/corporations/{corp_num}'
 
 
@@ -43,7 +43,7 @@ class ColinApi(Resource):
     @cors.crossdomain(origin='*')
     def post(self, corp_num):
         try:
-            authenticated, token = get_client_credentials(AUTH_SVC_URL, AUTH_SVC_CLIENT_ID, COLIN_SVC_CLIENT_SECRET)
+            authenticated, token = get_client_credentials(SBC_SVC_AUTH_URL, SBC_SVC_AUTH_CLIENT_ID, SBC_SVC_CLIENT_SECRET)
             if not authenticated:
                 raise ColinServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
 
@@ -53,6 +53,7 @@ class ColinApi(Resource):
             headers = {
                 # 'x-api-key': COLIN_SVC_API_KEY,
                 # 'Accept': 'application/xml'
+                'Authorization': 'Bearer ' + token
             }
 
             print(colin_url)
