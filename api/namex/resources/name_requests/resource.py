@@ -399,7 +399,9 @@ class NameRequestResource(Resource):
             # Ignore update to SOLR if SOLR updates [DISABLE_NAMEREQUEST_SOLR_UPDATES] are explicitly disabled in your .env
             return
 
-        if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
+        #only update solr for corp entity types
+        if(nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED] and  \
+                    nr_model.entity_type_cd in ['CR','UL','BC','CP', 'PA','XCR','XUL', 'XCP','CC','FI', 'XCR', 'XUL','XCP']):
             self.create_solr_nr_doc(SOLR_CORE, nr_model)
             if temp_nr_num:
                 # This performs a safe delete, we check to see if the temp ID exists before deleting
