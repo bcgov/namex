@@ -51,12 +51,13 @@ def name_profile_data(nr_num, state, choice, name, decision_text, conflict1_num,
     return name_profile
 
 
-def name_response_data(payload):
+def name_response_data(payload, duration):
     name_response = {'result_state': 'NULL',
                      'result_decision_text': 'NULL',
                      'result_conflict_num1': 'NULL',
                      'result_conflict1': 'NULL',
-                     'result_response': 'NULL'
+                     'result_response': 'NULL',
+                     'result_duration_secs': 'NULL'
                      }
 
     decision_text = ''
@@ -78,6 +79,7 @@ def name_response_data(payload):
     name_response['result_response'] = payload.to_json()
 
     name_response['result_response'] = unicode_to_string(name_response['result_response']).replace("\'", "''")
+    name_response['result_duration_secs'] = duration.seconds
 
     return name_response
 
@@ -102,6 +104,7 @@ if __name__ == "__main__":
         requests = db.session.execute(sql)
         for request_id, nr_num, state_cd, choice, name, decision_text, conflict1_num, conflict1, conflict_num1 in requests:
             if entry_params['entity_type'] in BCProtectedNameEntityTypes.list():
+                start_time_name = datetime.utcnow()
                 service = ProtectedNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
 
@@ -114,10 +117,11 @@ if __name__ == "__main__":
                 # Build the appropriate response for the analysis result
                 analysis_response = AnalysisResponse(service, analysis)
                 payload = analysis_response.build_response()
+                end_time_name = datetime.utcnow()
 
                 profile_data = name_profile_data(nr_num, state_cd, choice, name, decision_text,
                                                  conflict1_num, conflict1)
-                response_data = name_response_data(payload)
+                response_data = name_response_data(payload, duration=end_time_name - start_time_name)
 
                 data_dict = profile_data.copy()
                 data_dict.update(response_data)
