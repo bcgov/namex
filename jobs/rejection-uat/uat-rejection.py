@@ -43,9 +43,9 @@ def name_profile_data(nr_num, state, choice, name, decision_text, conflict1_num,
                     'choice': choice,
                     'name': name,
                     'name_state': State.REJECTED,
-                    'decision_text': decision_text,
-                    'conflict_num1': conflict1_num,
-                    'conflict1': conflict1
+                    'decision_text': decision_text if decision_text else 'NULL',
+                    'conflict_num1': conflict1_num if conflict1_num else 'NULL',
+                    'conflict1': conflict1 if conflict1 else 'NULL'
                     }
 
     return name_profile
