@@ -19,6 +19,7 @@ from .user import User, UserSchema
 from .comment import Comment, CommentSchema
 from .applicant import Applicant
 from .name import Name, NameSchema
+from .payment import Payment
 from .event import Event
 from .state import State, StateSchema
 from datetime import datetime, timedelta
@@ -89,6 +90,9 @@ class Request(db.Model):
     comments = db.relationship('Comment', lazy='dynamic', order_by="Comment.timestamp")
     # Relationships - Examiner Comments
     partnerNS = db.relationship('PartnerNameSystem', lazy='dynamic')
+
+    # Relationships - Payments
+    payments = db.relationship('Payment', lazy='dynamic')
 
     # Name Request Additional Fields
     _request_action_cd = db.Column('request_action_cd', db.String(10))
