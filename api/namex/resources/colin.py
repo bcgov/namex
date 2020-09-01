@@ -1,5 +1,5 @@
 import os
-
+import json
 import requests
 
 from flask import current_app, jsonify
@@ -63,12 +63,10 @@ class ColinApi(Resource):
                 headers=headers
             )
 
-            # Return the auth response if an error occurs
-            if not response.status_code == 200:
-                pass
-
-            # Just return true or false, the profile either exists or it doesn't
-            return jsonify(response.ok), 200
+            content = json.loads(response.text)
+            if response.status_code != 200:
+                return jsonify(content.get('message')), response.status_code
+            return jsonify(content), response.status_code
         except ColinServiceException as err:
             return handle_exception(err, err.message, err.error_code)
         except Exception as err:
