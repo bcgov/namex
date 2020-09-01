@@ -97,6 +97,9 @@ def name_response_data(payload, duration):
                                     AnalysisIssueCodes.WORDS_TO_AVOID, AnalysisIssueCodes.TOO_MANY_WORDS):
             name_response['result_state'] = State.REJECTED
 
+    if not payload.issues:
+        name_response['result_state'] = State.APPROVED
+
     name_response['result_decision_text'] = decision_text
     name_response['result_response'] = payload.to_json()
     name_response['result_duration_secs'] = duration.seconds
