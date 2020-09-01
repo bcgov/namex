@@ -6,7 +6,7 @@ import openapi_client
 # from openapi_client.models import Receipt
 # from openapi_client.rest import ApiException
 
-from . import PAYMENT_SVC_URL, PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET, PaymentServiceException
+from . import PAYMENT_SVC_URL, PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET, PaymentServiceException
 from .utils import set_api_client_auth_header, set_api_client_request_host
 from namex.utils.auth import get_client_credentials, MSG_CLIENT_CREDENTIALS_REQ_FAILED
 
@@ -23,7 +23,7 @@ def get_receipt(payment_identifier, model):
     # Create an instance of the API class
     api_instance = openapi_client.ReceiptsApi()
 
-    authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, AUTH_SVC_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
+    authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
         raise PaymentServiceException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
