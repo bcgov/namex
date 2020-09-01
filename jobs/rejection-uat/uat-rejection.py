@@ -1,7 +1,6 @@
 import sys, os, re
 from datetime import datetime
 
-import psycopg2
 from flask import Flask, g, current_app
 from namex import db
 from namex.constants import BCProtectedNameEntityTypes, EntityTypes
@@ -13,12 +12,41 @@ from namex.resources.auto_analyse.paths.bc_name_analysis.bc_name_analysis_respon
     BcAnalysisResponse as AnalysisResponse
 from namex.utils.logging import setup_logging
 from config import Config
+from sqlalchemy import Column
 
 setup_logging()  ## important to do this first
 
 entry_params = {
     'entity_type': 'CR',
 }
+
+
+class UatResults(db.Model):
+    __tablename__ = 'uat_results'
+
+    id = Column(db.Integer, primary_key=True, autoincrement=True)
+
+    nr_num = Column(db.VARCHAR(10))
+    nr_state = Column(db.VARCHAR(20))
+    choice = Column(db.Integer)
+    name = Column(db.VARCHAR(1024))
+    name_state = db.Column(db.VARCHAR(20))
+    decision_text = db.Column(db.VARCHAR(1024))
+    conflict_num1 = db.Column(db.VARCHAR(20))
+    conflict1 = db.Column(db.VARCHAR(1024))
+    result_state = Column(db.VARCHAR(20))
+    result_decision_text = db.Column(db.VARCHAR(2048))
+    result_conflict_num1 = Column(db.VARCHAR(20))
+    result_conflict1 = db.Column(db.VARCHAR(1024))
+    result_response = db.Column(db.JSON)
+    result_duration_secs = Column(db.Integer)
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def save_to_session(self):
+        db.session.add(self)
 
 
 def create_app(config=Config):
@@ -31,10 +59,6 @@ def create_app(config=Config):
     return app
 
 
-def unicode_to_string(json_str):
-    return re.sub(r'\\u([0-9A-F]{4})', lambda m: chr(int(m.group(1), 16)), json_str)
-
-
 def name_profile_data(nr_num, state, choice, name, decision_text, conflict1_num, conflict1):
     seq_id = db.session.execute("select nextval('uat_results_seq') as id").fetchone()
     name_profile = {'id': seq_id[0],
@@ -43,21 +67,21 @@ def name_profile_data(nr_num, state, choice, name, decision_text, conflict1_num,
                     'choice': choice,
                     'name': name,
                     'name_state': State.REJECTED,
-                    'decision_text': decision_text if decision_text else 'NULL',
-                    'conflict_num1': conflict1_num if conflict1_num else 'NULL',
-                    'conflict1': conflict1 if conflict1 else 'NULL'
+                    'decision_text': decision_text,
+                    'conflict_num1': conflict1_num,
+                    'conflict1': conflict1
                     }
 
     return name_profile
 
 
 def name_response_data(payload, duration):
-    name_response = {'result_state': 'NULL',
-                     'result_decision_text': 'NULL',
-                     'result_conflict_num1': 'NULL',
-                     'result_conflict1': 'NULL',
-                     'result_response': 'NULL',
-                     'result_duration_secs': 'NULL'
+    name_response = {'result_state': None,
+                     'result_decision_text': None,
+                     'result_conflict_num1': None,
+                     'result_conflict1': None,
+                     'result_response': None,
+                     'result_duration_secs': None
                      }
 
     decision_text = ''
@@ -72,13 +96,9 @@ def name_response_data(payload, duration):
         elif element.issue_type in (AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
                                     AnalysisIssueCodes.WORDS_TO_AVOID, AnalysisIssueCodes.TOO_MANY_WORDS):
             name_response['result_state'] = State.REJECTED
-        else:
-            name_response['result_state'] = 'NULL'
 
     name_response['result_decision_text'] = decision_text
     name_response['result_response'] = payload.to_json()
-
-    name_response['result_response'] = unicode_to_string(name_response['result_response']).replace("\'", "''")
     name_response['result_duration_secs'] = duration.seconds
 
     return name_response
@@ -126,15 +146,26 @@ if __name__ == "__main__":
                 data_dict = profile_data.copy()
                 data_dict.update(response_data)
 
-            cols = data_dict.keys()
-            cols_str = ','.join(cols)
-            record_to_insert = tuple([data_dict[k] for k in cols])
+                uat = UatResults()
+                uat.id = data_dict['id']
+                uat.nr_num = data_dict['nr_num']
+                uat.nr_state = data_dict['nr_state']
+                uat.choice = data_dict['choice']
+                uat.name = data_dict['name']
+                uat.name_state = data_dict['name_state']
+                uat.decision_text = data_dict['decision_text']
+                uat.conflict_num1 = data_dict['conflict_num1']
+                uat.conflict1 = data_dict['conflict1']
+                uat.result_state = data_dict['result_state']
+                uat.result_decision_text = data_dict['result_decision_text']
+                uat.result_conflict_num1 = data_dict['result_conflict_num1']
+                uat.result_conflict1 = data_dict['result_conflict1']
+                uat.result_response = data_dict['result_response']
+                uat.result_duration_secs = data_dict['result_duration_secs']
 
-            sql_insert = 'insert into uat_results VALUES {};'.format(record_to_insert).replace("\\", "")
-
-            db.session.execute(sql_insert)
-            db.session.commit()
-            row_count += 1
+                db.session.add(uat)
+                db.session.commit()
+                row_count += 1
 
     except Exception as err:
         db.session.rollback()
