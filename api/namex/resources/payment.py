@@ -1,3 +1,5 @@
+import json
+
 from flask import request, make_response, send_file, jsonify
 from flask_restplus import Namespace, Resource, cors, fields, marshal_with, marshal
 from flask_jwt_oidc import AuthError
@@ -7,7 +9,9 @@ from namex.utils.auth import cors_preflight
 
 from urllib.parse import unquote_plus
 
-from namex.models import Request
+from namex.constants import PaymentState, PaymentStatusCode
+
+from namex.models import Request as RequestDAO, Payment as PaymentDAO
 
 from namex.services.payment import PaymentServiceException
 
@@ -153,10 +157,10 @@ class Payments(Resource):
     })
     def post(nr_num):
         # TODO: Validate NR string format
-        # if not Request.validNRFormat(nr_num):
+        # if not RequestDAO.validNRFormat(nr_num):
         #    return None, None, jsonify(message='NR number is not in a valid format \'NR 9999999\''), 400
 
-        nr_draft = Request.find_by_nr(nr_num)
+        nr_draft = RequestDAO.find_by_nr(nr_num)
         if not nr_draft:
             # Should this be a 400 or 404... hmmm
             return None, None, jsonify(message='{nr_num} not found'.format(nr_num=nr_num)), 400
@@ -164,6 +168,8 @@ class Payments(Resource):
         json_input = request.get_json()
         if not json_input:
             return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+        elif isinstance(json_input, str):
+            json_input = json.loads(json_input)
 
         # Grab the info we need off the request
         payment_info = json_input.get('paymentInfo')
@@ -178,22 +184,25 @@ class Payments(Resource):
         )
 
         try:
-            payment = create_payment(req)
-            if not payment:
+            payment_response = create_payment(req)
+            if not payment_response:
                 raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
 
-            # Update the name request with the payment id
-            # nr_draft.paymentToken = str(payment.id)
-            nr_draft.payment_token = str(payment.id)
-            # Save the name request
-            nr_draft.save_to_db()
+            if payment_response and payment_response.status_code == PaymentStatusCode.CREATED.value:
+                # Save the payment info to Postgres
+                payment = PaymentDAO()
+                payment.nrId = nr_draft.id
+                payment.payment_token = payment_response.id
+                payment.payment_completion_date = payment_response.created_on
+                payment.payment_status_code = PaymentState.CREATED.value
+                payment.save_to_db()
+
+                data = jsonify(payment_response.to_dict())
+                response = make_response(data, 200)
+                return response
 
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), err.status if err.status else err
-
-        data = jsonify(payment.to_dict())
-        response = make_response(data, 200)
-        return response
 
 
 @cors_preflight('GET, PUT')

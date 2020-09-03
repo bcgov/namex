@@ -1,3 +1,4 @@
+import pytest
 import json
 
 from .common import API_BASE_URI
@@ -6,30 +7,31 @@ from .common import API_BASE_URI
 from ..common.http import build_test_query, build_request_uri
 from ..common.logging import log_request_path
 
+from tests.python.end_points.name_requests.test_setup_utils.test_helpers import create_draft_nr
+
 create_payment_request = {
-    "payment_info": {
-        "method_of_payment": "CC"
+    'paymentInfo': {
+        'methodOfPayment': 'CC'
     },
-    "business_info": {
-        "business_identifier": "CP1234567",
-        "corp_type": "CP",
-        "business_name": "ABC Corp",
-        "contact_info": {
-            "city": "Victoria",
-            "postal_code": "V8P2P2",
-            "province": "BC",
-            "address_line1": "100 Douglas Street",
-            "country": "CA"
+    'businessInfo': {
+        'corpType': 'NRO',
+        'businessIdentifier': 'NR L000001',
+        'businessName': 'ABC PLUMBING LTD.',
+        'contactInfo': {
+            'addressLine1': '1796 KINGS RD',
+            'city': 'VICTORIA',
+            'province': 'BC',
+            'country': 'CA',
+            'postalCode': 'V8R 2P1'
         }
     },
-    "filing_info": {
-        "filing_types": [
+    'filingInfo': {
+        'date': '2020-09-02',
+        'filingTypes': [
             {
-                "filing_type_code": "OTADD",
-                "filing_description": "TEST"
-            },
-            {
-                "filing_type_code": "OTANN"
+                'filingTypeCode': 'NM620',
+                'priority': False,
+                'filingDescription': ''
             }
         ]
     }
@@ -42,6 +44,48 @@ calculate_fees_request = {
     "date": "",
     "priority": ""
 }
+
+# Define our data
+# Check NR number is the same because these are PATCH and call change_nr
+draft_input_fields = {
+    'additionalInfo': '',
+    'consentFlag': None,
+    'consent_dt': None,
+    'corpNum': '',
+    'entity_type_cd': 'CR',
+    'expirationDate': None,
+    'furnished': 'N',
+    'hasBeenReset': False,
+    # 'lastUpdate': None,
+    'natureBusinessInfo': 'Test',
+    # 'nrNum': '',
+    # 'nwpta': '',
+    # 'previousNr': '',
+    # 'previousRequestId': '',
+    # 'previousStateCd': '',
+    'priorityCd': 'N',
+    # 'priorityDate': None,
+    'requestTypeCd': 'CR',
+    'request_action_cd': 'NEW',
+    # 'source': 'NAMEREQUEST',
+    'state': 'DRAFT',
+    'stateCd': 'DRAFT',
+    'submitCount': 1,
+    # 'submittedDate': None,
+    'submitter_userid': 'name_request_service_account',
+    'userId': 'name_request_service_account',
+    'xproJurisdiction': ''
+}
+
+
+@pytest.mark.skip
+def setup_draft_nr(client):
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
+
+    # Assign the payload to new nr var
+    return json.loads(post_response.data)
 
 
 def test_get_payment(client, jwt, app):
@@ -61,11 +105,15 @@ def test_get_payment(client, jwt, app):
 
 
 def test_create_payment(client, jwt, app):
-    request_uri = API_BASE_URI
+    draft_nr = setup_draft_nr(client)
+
+    nr_num = draft_nr.get('nrNum')
+    request_uri = API_BASE_URI + nr_num
 
     path = request_uri
     body = json.dumps(create_payment_request)
     log_request_path(path)
+
 
     response = client.post(path, json=body)
     payload = json.loads(response.data)
@@ -77,6 +125,11 @@ def test_create_payment(client, jwt, app):
 
 
 def test_update_payment(client, jwt, app):
+    draft_nr = setup_draft_nr(client)
+
+    nr_num = draft_nr.get('nrNum')
+    request_uri = API_BASE_URI + nr_num
+
     payment_id = 'abcd153'
     request_uri = API_BASE_URI + payment_id
 

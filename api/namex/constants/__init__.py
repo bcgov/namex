@@ -473,10 +473,37 @@ class EventState(AbstractEnum):
     CANCELLED = 'CANCELLED'
 
 
+# TODO: Why are these the only states, also, although this is imported in the project nothing really uses it...
 class RequestState(AbstractEnum):
     DRAFT = 'DRAFT'
     HOLD = 'HOLD'
     INPROGRESS = 'INPROGRESS'
+
+
+# TODO: Confirm these statuses!
+class PaymentStatusCode(AbstractEnum):
+    """
+    Payment status code mappings for SBC Pay
+    """
+    CREATED = 'CREATED'
+    PENDING = 'PENDING'
+    # PROCESSING = 'PROCESSING'
+    # COMPLETE = 'COMPLETE'
+    # FAILED = 'FAILED'
+    # CANCELLED = 'CANCELLED'
+
+
+# TODO: Confirm these statuses!
+class PaymentState(AbstractEnum):
+    """
+    Internal PaymentState codes for Payment model
+    """
+    PENDING = 'PENDING'
+    CREATED = 'CREATED'
+    # PROCESSING = 'PROCESSING'
+    # COMPLETE = 'COMPLETE'
+    # FAILED = 'FAILED'
+    # CANCELLED = 'CANCELLED'
 
 
 class EventAction(AbstractEnum):

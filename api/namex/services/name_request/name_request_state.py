@@ -39,15 +39,17 @@ def display_cancel_action(nr_model=None):
 
 
 def display_refund_action(nr_model=None):
-    if nr_model and nr_model.payment_token is not None:
-        return True
+    # TODO: Fix this!
+    # if nr_model and nr_model.payment_token is not None:
+    #    return True
 
     return False
 
 
 def display_receipt_action(nr_model=None):
-    if nr_model and nr_model.payment_token is not None:
-        return True
+    # TODO: Fix this!
+    # if nr_model and nr_model.payment_token is not None:
+    #    return True
 
     return False
 
@@ -55,7 +57,7 @@ def display_receipt_action(nr_model=None):
 def display_reapply_action(nr_model=None):
     if nr_model and nr_model.expirationDate and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
 
-        todays_date =  datetime.utcnow().date()
+        todays_date = datetime.utcnow().date()
         expiry_date = nr_model.expirationDate.date()
         if todays_date < expiry_date:
             delta = expiry_date - todays_date
@@ -163,8 +165,9 @@ def to_conditional(resource, nr, on_success_cb):
         ))
 
     # Check for payment
-    if nr.payment_token is None:
-        raise NameRequestException(message=state_transition_error_msg.format(current_state=nr.stateCd, next_state=State.CONDITIONAL) + ', payment token is not defined')
+    # TODO: Fix this!
+    # if nr.payment_token is None:
+    #     raise NameRequestException(message=state_transition_error_msg.format(current_state=nr.stateCd, next_state=State.CONDITIONAL) + ', payment token is not defined')
 
     resource.next_state_code = State.CONDITIONAL
     nr.stateCd = State.CONDITIONAL
@@ -183,8 +186,9 @@ def to_approved(resource, nr, on_success_cb):
         ))
 
     # Check for payment
-    if nr.payment_token is None:
-        raise NameRequestException(message=state_transition_error_msg.format(current_state=nr.stateCd, next_state=State.APPROVED) + ', payment token is not defined')
+    # TODO: Fix this!
+    # if nr.payment_token is None:
+    #     raise NameRequestException(message=state_transition_error_msg.format(current_state=nr.stateCd, next_state=State.APPROVED) + ', payment token is not defined')
 
     resource.next_state_code = State.APPROVED
     nr.stateCd = State.APPROVED

@@ -72,11 +72,12 @@ class NameRequestResource(Resource):
         self.validate_config(current_app)
 
         # Store a copy of the request data to our class instance
-        self.request_data = request.get_json()
+        request_json = request.get_json()
+        self.request_data = request_json if request_json else {}
 
-        if not self.request_data:
-            self.log_error('Error getting json input.', None)
-            raise InvalidInputError()
+        # if not self.request_data:
+        #    self.log_error('Error getting json input.', None)
+        #    raise InvalidInputError()
 
         # Set the request data to the service
         self.nr_service.request_data = self.request_data

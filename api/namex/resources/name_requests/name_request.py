@@ -31,6 +31,22 @@ MSG_NOT_FOUND = 'Resource not found'
 MSG_ERROR_CREATING_RESOURCE = 'Could not create / update resource'
 
 
+# This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
+# If no payment token just do a regular update...
+# TODO: Finish this, this may also be a useful utility on the model...
+def has_active_payment(nr):
+    if len(nr.payments.all()) > 0:
+        return True
+    return None
+
+
+# TODO: Finish this, this may also be a useful utility on the model...
+def get_active_payment(nr):
+    if len(nr.payments.all()) > 0:
+        return nr.payments[0]
+    return None
+
+
 @cors_preflight('GET, PUT')
 @api.route('/<string:nr_num>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
 @api.doc(params={
@@ -55,6 +71,7 @@ class NameRequest(NameRequestResource):
     @cors.crossdomain(origin='*')
     def put(self, nr_num):
         """
+        TODO: Test PUT with payment
         Handles general update operations including update when a payment token is present.
         NOT used for updates that only change the Name Request state. Use 'patch' instead.
 
@@ -79,7 +96,7 @@ class NameRequest(NameRequestResource):
             def validate_put_request(data):
                 is_valid = False
                 msg = ''
-                if data.get('payment_token') or (data.get('payment_token') is None and data.get('stateCd') in valid_update_states):
+                if data.get('stateCd') in valid_update_states:
                     is_valid = True
 
                 return is_valid, msg
@@ -90,17 +107,8 @@ class NameRequest(NameRequestResource):
             if not is_valid_put:
                 raise InvalidInputError(message=validation_msg)
 
-            # This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
-            # If no payment token just do a regular update...
-            if nr_model.stateCd in valid_update_states and nr_model.payment_token is None:
+            if nr_model.stateCd in valid_update_states:
                 nr_model = self.update_nr(nr_model)
-            elif nr_model.payment_token:
-                # TODO: This would be better off in the PATCH...
-                # This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED and a payment token is present
-                # If the state is COND_RESERVE update state to CONDITIONAL
-                # If the state is RESERVED update state to APPROVED
-                # Then update the name request as required
-                nr_model = self.process_payment(nr_model)
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
@@ -121,8 +129,77 @@ class NameRequest(NameRequestResource):
         # self.add_records_to_network_services(nr_model)
         return nr_model
 
+
+@cors_preflight('PUT')
+@api.route('/<string:nr_num>/complete-payment', strict_slashes=False, methods=['PUT', 'OPTIONS'])
+@api.doc(params={
+    'nr_num': 'NR Number - This field is required'
+})
+class NameRequestPayment(NameRequestResource):
+    # REST Method Handlers
+    @api.expect(nr_request)
+    @cors.crossdomain(origin='*')
+    def put(self, nr_num):
+        """
+        TODO: Test PUT with payment
+        Handles general update operations including update when a payment token is present.
+        NOT used for updates that only change the Name Request state. Use 'patch' instead.
+
+        State changes handled include state changes to [DRAFT, COND_RESERVE, RESERVED, COND_RESERVE to CONDITIONAL, RESERVED to APPROVED]
+        :param nr_num:
+        :return:
+        """
+        try:
+            # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
+            self.initialize()
+            nr_svc = self.nr_service
+
+            # Find the existing name request
+            nr_num = parse_nr_num(nr_num)
+            nr_model = Request.find_by_nr(nr_num)
+            nr_svc.nr_num = nr_model.nrNum
+            nr_svc.nr_id = nr_model.id
+
+            valid_update_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED]
+
+            # This could be moved out, but it's fine here for now
+            def validate_put_request(data, nr):
+                is_valid = True
+                msg = ''
+                if nr.stateCd in valid_update_states:
+                    is_valid = True
+
+                return is_valid, msg
+
+            is_valid_put, validation_msg = validate_put_request(self.request_data, nr_model)
+            validation_msg = validation_msg if not len(validation_msg) > 0 else 'Invalid request for PUT'
+
+            if not is_valid_put:
+                raise InvalidInputError(message=validation_msg)
+
+            process_payment = has_active_payment(nr_model)
+            if nr_model.stateCd in valid_update_states and not process_payment:
+                pass
+            elif process_payment:
+                # This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
+                # If the state is COND_RESERVE update state to CONDITIONAL
+                # If the state is RESERVED update state to APPROVED
+                # Then update the name request as required
+                nr_model = self.process_payment(nr_model)
+
+            current_app.logger.debug(nr_model.json())
+            response_data = nr_model.json()
+            # Add the list of valid Name Request actions for the given state to the response
+            response_data['actions'] = nr_svc.current_state_actions
+            return jsonify(response_data), 200
+        except NameRequestException as err:
+            return handle_exception(err, err.message, 500)
+
     def process_payment(self, nr_model):
         nr_svc = self.nr_service
+
+        # Update the state of the payment
+        payment = get_active_payment(nr_model)
 
         # TODO: If no payment token throw an error here! It's important!
         # Use apply_state_change to change state, as it enforces the State change pattern
@@ -133,7 +210,6 @@ class NameRequest(NameRequestResource):
         if nr_model.stateCd == State.COND_RESERVE:
             # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
             nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, self.handle_nr_approval)
-
         elif nr_model.stateCd == State.RESERVED:
             # If the state is RESERVED update state to APPROVED, and update the name request as required
             nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
