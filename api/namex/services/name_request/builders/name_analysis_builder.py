@@ -609,6 +609,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         ).data
 
         dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
+
+        for key, value in dist_substitution_dict.items():
+            if key not in value:
+                value.append(key)
+
         return dist_substitution_dict
 
     def get_substitutions_descriptive(self, w_desc):
@@ -705,24 +710,46 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     substitutions (if they exist) included as list
     '''
 
-    def get_compound_words(self, dict_dist, dict_descriptive, list_name):
-        dict_compound_dist = {}
+    # def get_compound_words(self, dict_dist, dict_descriptive, list_name):
+    #     dict_compound_dist = {}
+    #     dict_desc = dict(dict_descriptive)
+    #     for idx, elem in enumerate(list_name[:-1]):
+    #         a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else None
+    #         next_idx = idx + 1
+    #         if a and next_idx < len(list_name[:-1]):
+    #             b = dict_dist[list_name[next_idx]] if list_name[next_idx] in dict_dist else dict_desc[list_name[next_idx]]
+    #             compound = []
+    #
+    #             for item in itertools.product(a, b):
+    #                 compound.append(''.join(item))
+    #                 dict_compound_dist[list_name[idx] + list_name[next_idx]] = compound
+    #
+    #             if list_name[next_idx] in dict_desc:
+    #                 del dict_desc[list_name[next_idx]]
+    #
+    #     return dict_compound_dist
+
+    def get_all_compound_descriptive(self, dict_dist, dict_descriptive, list_name):
+        dict_compound_desc = {}
         dict_desc = dict(dict_descriptive)
-        for idx, elem in enumerate(list_name[:-1]):
-            a = dict_dist[list_name[idx]] if list_name[idx] in dict_dist else None
+        for idx, elem in enumerate(list_name[1:], 1):
+            a = dict_dist[list_name[idx]] if list_name[idx] in list(dict_dist.values())[-1] else dict_desc[
+                list_name[idx]] if list_name[idx] in dict_descriptive else None
+
             next_idx = idx + 1
             if a and next_idx < len(list_name):
-                b = dict_dist[list_name[next_idx]] if list_name[next_idx] in dict_dist else dict_desc[list_name[next_idx]]
+                b = dict_desc[list_name[next_idx]] if list_name[next_idx] in dict_descriptive else None
                 compound = []
 
-                for item in itertools.product(a, b):
-                    compound.append(''.join(item))
-                    dict_compound_dist[list_name[idx] + list_name[next_idx]] = compound
+                if a and b:
+                    for item in itertools.product(a, b):
+                        compound.append(''.join(item))
+                        dict_compound_desc[list_name[idx] + list_name[next_idx]] = compound
 
-                if list_name[next_idx] in dict_desc:
-                    del dict_desc[list_name[next_idx]]
+                    if list_name[idx] in dict_dist:
+                        del dict_dist[list_name[idx]]
 
-        return dict_compound_dist
+        return dict_compound_desc
 
     def get_dictionary(self, dct, lst):
         for elem in lst:
@@ -760,3 +787,18 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             list_dict_desc_compound.append(dict_desc_compound)
 
         return list_dict_desc_compound
+
+    def get_valid_compound_descriptive(self, desc_compound_dist):
+        syn_svc = self.synonym_service
+        found = False
+        for key, val in desc_compound_dist.items():
+            for word in val:
+                substitution = syn_svc.get_word_synonyms(word=word).data
+                if substitution:
+                    desc_compound_dist[key] = substitution
+                    found = True
+                    break
+            if not found:
+                del desc_compound_dist[key]
+
+        return desc_compound_dist
