@@ -192,7 +192,7 @@ class Payments(Resource):
                 # Save the payment info to Postgres
                 payment = PaymentDAO()
                 payment.nrId = nr_draft.id
-                payment.payment_token = payment_response.id
+                payment.payment_token = str(payment_response.id)
                 payment.payment_completion_date = payment_response.created_on
                 payment.payment_status_code = PaymentState.CREATED.value
                 payment.save_to_db()

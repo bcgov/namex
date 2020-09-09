@@ -27,6 +27,23 @@ def normalize_nr_num(nr_num_str):
     return None
 
 
+# This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
+# If no payment token just do a regular update...
+# TODO: Finish this, this may also be a useful utility on the model...
+def has_active_payment(nr):
+    if len(nr.payments.all()) > 0:
+        return True
+    return None
+
+
+# TODO: Finish this, this may also be a useful utility on the model...
+def get_active_payment(nr):
+    if len(nr.payments.all()) > 0:
+        return nr.payments[0]
+    return None
+
+
+# TODO: Move these out into auth utils in the main utils module
 def check_ownership(nrd, user):
     if nrd.stateCd == State.INPROGRESS and nrd.userId == user.id:
         return True
@@ -89,5 +106,7 @@ def valid_state_transition(user, nr, new_state):
         if nr.userId != user.id or nr.stateCd != State.INPROGRESS:
             return False
     return True
+
+
 
 

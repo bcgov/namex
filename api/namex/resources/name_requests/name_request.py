@@ -19,6 +19,7 @@ from .api_models import nr_request
 from .resource import NameRequestResource
 from .utils import parse_nr_num
 
+from namex.services.name_request.utils import has_active_payment, get_active_payment
 from namex.services.payment import PaymentServiceException
 from namex.services.payment.payments import create_payment
 from openapi_client.models import PaymentRequest
@@ -29,22 +30,6 @@ MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
 MSG_ERROR_CREATING_RESOURCE = 'Could not create / update resource'
-
-
-# This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
-# If no payment token just do a regular update...
-# TODO: Finish this, this may also be a useful utility on the model...
-def has_active_payment(nr):
-    if len(nr.payments.all()) > 0:
-        return True
-    return None
-
-
-# TODO: Finish this, this may also be a useful utility on the model...
-def get_active_payment(nr):
-    if len(nr.payments.all()) > 0:
-        return nr.payments[0]
-    return None
 
 
 @cors_preflight('GET, PUT')
@@ -196,7 +181,7 @@ class NameRequestPayment(NameRequestResource):
             return handle_exception(err, err.message, 500)
 
     def process_payment(self, nr_model):
-        nr_svc = self.nr_service
+        nr_svc = self.nr_serv
 
         # Update the state of the payment
         payment = get_active_payment(nr_model)

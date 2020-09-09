@@ -8,6 +8,7 @@ from namex.constants import \
 
 from namex.models import State
 
+from .utils import has_active_payment
 from .exceptions import NameRequestException, InvalidStateError
 
 state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{next_state}]'
@@ -39,24 +40,21 @@ def display_cancel_action(nr_model=None):
 
 
 def display_refund_action(nr_model=None):
-    # TODO: Fix this!
-    # if nr_model and nr_model.payment_token is not None:
-    #    return True
+    if nr_model and has_active_payment(nr_model):
+        return True
 
     return False
 
 
 def display_receipt_action(nr_model=None):
-    # TODO: Fix this!
-    # if nr_model and nr_model.payment_token is not None:
-    #    return True
+    if nr_model and has_active_payment(nr_model):
+        return True
 
     return False
 
 
 def display_reapply_action(nr_model=None):
     if nr_model and nr_model.expirationDate and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
-
         todays_date = datetime.utcnow().date()
         expiry_date = nr_model.expirationDate.date()
         if todays_date < expiry_date:
