@@ -209,7 +209,8 @@ def get_nr_header(session, nr_num):
         'expiration_date,'
         'additional_info,'
         'nature_business_info,'
-        'xpro_jurisdiction'
+        'xpro_jurisdiction,'
+        'home_juris_num'
         ' from request_vw'
         ' where nr_num = :nr'
     )
