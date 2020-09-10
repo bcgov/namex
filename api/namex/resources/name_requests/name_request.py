@@ -7,8 +7,8 @@ from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
-from namex.constants import NameRequestActions, RequestAction
-from namex.models import Request, State
+from namex.constants import NameRequestActions, RequestAction, PaymentState, PaymentStatusCode
+from namex.models import Request, State, Payment
 
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.exceptions import \
@@ -20,11 +20,12 @@ from .resource import NameRequestResource
 from .utils import parse_nr_num
 
 from namex.services.name_request.utils import has_active_payment, get_active_payment
-from namex.services.payment import PaymentServiceException
+from namex.services.payment.exceptions import SBCPaymentException
 from namex.services.payment.payments import create_payment
 from openapi_client.models import PaymentRequest
 
 setup_logging()  # Important to do this first
+MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
@@ -181,7 +182,7 @@ class NameRequestPayment(NameRequestResource):
             return handle_exception(err, err.message, 500)
 
     def process_payment(self, nr_model):
-        nr_svc = self.nr_serv
+        nr_svc = self.nr_service
 
         # Update the state of the payment
         payment = get_active_payment(nr_model)
@@ -386,14 +387,18 @@ class NameRequestFields(NameRequestResource):
                 business_info=business_info
             )
 
-            payment = create_payment(req)
-            if not payment:
-                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
+            payment_response = create_payment(req)
+            if not payment_response:
+                raise SBCPaymentException(MSG_ERROR_CREATING_RESOURCE)
 
-            # Update the name request with the payment id
-            # nr_draft.paymentToken = str(payment.id)
-            nr_model.payment_token = str(payment.id)
-            # nr_model.payment_completion_date = ''
+            if payment_response and payment_response.status_code == PaymentStatusCode.CREATED.value:
+                # Save the payment info to Postgres
+                payment = Payment()
+                payment.nrId = nr_model.id
+                payment.payment_token = str(payment_response.id)
+                payment.payment_completion_date = payment_response.created_on
+                payment.payment_status_code = PaymentState.CREATED.value
+                payment.save_to_db()
 
             nr_model.priorityCd = 'Y'
             nr_model.priorityDate = datetime.utcnow()
@@ -490,4 +495,104 @@ class NameRequestFields(NameRequestResource):
         if new_state in State.VALID_STATES:
             nr_model = nr_svc.apply_state_change(nr_model, new_state, self.handle_nr_patch)
 
+        return nr_model
+
+
+@cors_preflight('PATCH')
+@api.route('/<string:nr_num>/rollback>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
+@api.doc(params={
+    'nr_num': 'NR Number - This field is required',
+})
+class NameRequestRollback(NameRequestResource):
+    @api.expect(nr_request)
+    @cors.crossdomain(origin='*')
+    def patch(self, nr_num):
+        """
+        Roll back a Name Request to a usable state in case of a frontend error.
+        :param nr_num:
+        :return:
+        """
+        try:
+            # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
+            def initialize(resource):
+                """
+                Override the default initialization (instead of self.initialize())
+                :return:
+                """
+                resource.validate_config(current_app)
+
+                # Store a copy of request_data to our class instance
+                # TODO: Only require if request json is relevant
+                resource.request_data = request.get_json()
+
+                # if not self.request_data:
+                #     self.log_error('Error getting json input.', None)
+                #     raise InvalidInputError()
+
+                # Unlike the inherited initialize(), we don't want to set the NameRequestService's request_data just yet
+                # This is a partial update operation and we will need to selectively map the request data over
+                self.nr_service.request_data = self.request_data
+
+            initialize(self)
+
+            nr_svc = self.nr_service
+
+            # Find the existing name request
+            nr_num = parse_nr_num(nr_num)
+            nr_model = Request.find_by_nr(nr_num)
+            nr_svc.nr_num = nr_model.nrNum
+            nr_svc.nr_id = nr_model.id
+
+            valid_states = State.VALID_STATES
+
+            # This could be moved out, but it's fine here for now
+            def validate_patch_request(data):
+                # Use the NR model state as the default, as the state change may not be included in the PATCH request
+                request_state = data.get('stateCd', nr_model.stateCd)
+                is_valid = False
+                msg = ''
+                # This handles updates if the NR state is 'patchable'
+                if request_state in valid_states:
+                    # Get the SQL alchemy columns and associations
+                    is_valid = True
+                else:
+                    msg = 'Invalid state change requested - the NR state cannot be changed to [' + data.get('stateCd', '') + ']'
+
+                return is_valid, msg
+
+            is_valid_patch, validation_msg = validate_patch_request(self.request_data)
+            validation_msg = validation_msg if not len(validation_msg) > 0 else 'Invalid request for PATCH'
+
+            if not is_valid_patch:
+                raise InvalidInputError(message=validation_msg)
+
+            # if nr_model.payment_token is not None:
+            #    raise NameRequestException(message='Invalid request state for PATCH - payment token should not be present!')
+
+            # This handles updates if the NR state is 'patchable'
+            nr_model = self.handle_patch_rollback(nr_model)
+
+            current_app.logger.debug(nr_model.json())
+            response_data = nr_model.json()
+            # Add the list of valid Name Request actions for the given state to the response
+            response_data['actions'] = nr_svc.current_state_actions
+            return jsonify(response_data), 200
+
+        except NameRequestException as err:
+            return handle_exception(err, err.message, 500)
+        except Exception as err:
+            return handle_exception(err, repr(err), 500)
+
+    def handle_patch_rollback(self, nr_model):
+        """
+        TODO: Handle rollback to a specific state?
+        Cancel the Name Request.
+        :param nr_model:
+        :return:
+        """
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
+
+        # This handles the updates for NRO and Solr, if necessary
+        self.update_records_in_network_services(nr_model)
         return nr_model

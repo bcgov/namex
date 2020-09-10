@@ -13,7 +13,7 @@ from namex.constants import PaymentState, PaymentStatusCode
 
 from namex.models import Request as RequestDAO, Payment as PaymentDAO
 
-from namex.services.payment import PaymentServiceException
+from namex.services.payment.exceptions import SBCPaymentException
 
 from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
 
@@ -171,22 +171,22 @@ class Payments(Resource):
         elif isinstance(json_input, str):
             json_input = json.loads(json_input)
 
-        # Grab the info we need off the request
-        payment_info = json_input.get('paymentInfo')
-        filing_info = json_input.get('filingInfo')
-        business_info = json_input.get('businessInfo')
-
-        # Create our payment request
-        req = PaymentRequest(
-            payment_info=payment_info,
-            filing_info=filing_info,
-            business_info=business_info
-        )
-
         try:
+            # Grab the info we need off the request
+            payment_info = json_input.get('paymentInfo')
+            filing_info = json_input.get('filingInfo')
+            business_info = json_input.get('businessInfo')
+
+            # Create our payment request
+            req = PaymentRequest(
+                payment_info=payment_info,
+                filing_info=filing_info,
+                business_info=business_info
+            )
+
             payment_response = create_payment(req)
             if not payment_response:
-                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
+                raise SBCPaymentException(MSG_ERROR_CREATING_RESOURCE)
 
             if payment_response and payment_response.status_code == PaymentStatusCode.CREATED.value:
                 # Save the payment info to Postgres
@@ -259,7 +259,7 @@ class Payment(Resource):
         try:
             payment = update_payment(payment_identifier, req)
             if not payment:
-                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
+                raise SBCPaymentException(MSG_ERROR_CREATING_RESOURCE)
 
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
@@ -306,7 +306,7 @@ class PaymentFees(Resource):
         try:
             fees = calculate_fees(req)
             if not fees:
-                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
+                raise SBCPaymentException(MSG_ERROR_CREATING_RESOURCE)
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
 
