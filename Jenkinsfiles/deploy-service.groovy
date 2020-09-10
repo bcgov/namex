@@ -60,7 +60,7 @@ node {
         script {
             openshift.withCluster() {
                 openshift.withProject("${NAMESPACE}-${TAG_NAME}") {
-                    old_version = openshift.selector('dc', "${COMPONENT_NAME}-${TAG_NAME}").object().status.latestVersion
+                    old_version = openshift.selector('dc', "${COMPONENT_NAME}").object().status.latestVersion
                 }
             }
             openshift.withCluster() {
@@ -85,18 +85,18 @@ node {
         script {
             openshift.withCluster() {
                 openshift.withProject("${NAMESPACE}-${TAG_NAME}") {
-                    def new_version = openshift.selector('dc', "${COMPONENT_NAME}-${TAG_NAME}").object().status.latestVersion
+                    def new_version = openshift.selector('dc', "${COMPONENT_NAME}").object().status.latestVersion
                     if (new_version == old_version) {
                         echo "New deployment was not triggered."
                         currentBuild.result = "FAILURE"
                         return
                     }
-                    def pod_selector = openshift.selector('pod', [ app:"${COMPONENT_NAME}-${TAG_NAME}" ])
+                    def pod_selector = openshift.selector('pod', [ app:"${COMPONENT_NAME}" ])
                     pod_selector.untilEach {
                         pod = it.objects()[0]
                         deployment = pod.metadata.labels.deployment
                         echo deployment
-                        if (deployment ==  "${COMPONENT_NAME}-${TAG_NAME}-${new_version}" && pod.status.phase == 'Running' && pod.status.containerStatuses[0].ready) {
+                        if (deployment ==  "${COMPONENT_NAME}-${new_version}" && pod.status.phase == 'Running' && pod.status.containerStatuses[0].ready) {
                             return true
                         } else {
                             echo "Pod for new deployment not ready"
