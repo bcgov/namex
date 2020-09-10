@@ -114,7 +114,6 @@ def test_create_payment(client, jwt, app):
     body = json.dumps(create_payment_request)
     log_request_path(path)
 
-
     response = client.post(path, json=body)
     payload = json.loads(response.data)
 

@@ -499,7 +499,7 @@ class NameRequestFields(NameRequestResource):
 
 
 @cors_preflight('PATCH')
-@api.route('/<string:nr_num>/rollback>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
+@api.route('/<string:nr_num>/rollback', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @api.doc(params={
     'nr_num': 'NR Number - This field is required',
 })
