@@ -11,12 +11,13 @@ CREATE OR REPLACE FORCE VIEW namex.request_vw (request_id,
                                                expiration_date,
                                                additional_info,
                                                nature_business_info,
-                                               xpro_jurisdiction
+                                               xpro_jurisdiction,
+											   home_juris_num
                                               )
 AS
     SELECT r.request_id, r.nr_num, r.previous_request_id, r.submit_count, ri.priority_cd,
            ri.request_type_cd, ri.expiration_date, ri.additional_info, ri.nature_business_info,
-           ri.xpro_jurisdiction
+           ri.xpro_jurisdiction, ri.home_juris_num
       FROM request r LEFT OUTER JOIN request_instance ri ON ri.request_id = r.request_id
       WHERE ri.end_event_id IS NULL
            ;
