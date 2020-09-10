@@ -36,6 +36,7 @@ def add_nr_header(nr, nr_header, nr_submitter, user):
     nr.additionalInfo = nr_header['additional_info']
     nr.natureBusinessInfo = nr_header['nature_business_info']
     nr.xproJurisdiction = nr_header['xpro_jurisdiction']
+    nr.homeJurisNum = nr_header['home_juris_num']
     # TODO This should NOT be None, but due to some legacy issues, it's set to None
     nr.submittedDate = None if not nr_submitter else nr_submitter['submitted_date']
     nr.submitter_userid = None if not submitter else submitter.id
