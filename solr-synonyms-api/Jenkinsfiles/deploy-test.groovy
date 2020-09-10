@@ -19,12 +19,12 @@
 //   -> hudson.model.DirectoryBrowserSupport.CSP : removes restrictions on CSS file load, thus html pages of test reports are displayed pretty
 //   See: https://docs.openshift.com/container-platform/3.9/using_images/other_images/jenkins.html for a complete list of JENKINS env vars
 // define constants
-def NAMESPACE = 'gl2uos'
-def COMPONENT_NAME = 'legal-api'
+def NAMESPACE = 'servicebc-ne'
+def COMPONENT_NAME = 'solr-synonyms-api'
 def TAG_NAME = 'test'
 def SOURCE_TAG = 'dev'
 def DEPLOY_PIPELINE = 'deploy-service'
-def DEPLOY_PIPELINE_LOC = 'gl2uos-tools'
+def DEPLOY_PIPELINE_LOC = 'servicebc-ne-tools'
 
 
 // define job properties - keep 10 builds only
