@@ -389,7 +389,7 @@ class NameRequestFields(NameRequestResource):
 
             payment_response = create_payment(req)
             if not payment_response:
-                raise SBCPaymentException(MSG_ERROR_CREATING_RESOURCE)
+                raise SBCPaymentException(message=MSG_ERROR_CREATING_RESOURCE)
 
             if payment_response and payment_response.status_code == PaymentStatusCode.CREATED.value:
                 # Save the payment info to Postgres
