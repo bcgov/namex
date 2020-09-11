@@ -27,7 +27,7 @@ def get_receipt(payment_identifier, model):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -40,5 +40,6 @@ def get_receipt(payment_identifier, model):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling ReceiptsApi->get_receipt: %s\n" % e)
+    except Exception as err:
+        print("Exception when calling ReceiptsApi->get_receipt: %s\n" % err)
+        raise SBCPaymentException(err)

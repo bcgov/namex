@@ -32,7 +32,7 @@ def get_invoice(payment_identifier, invoice_id):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -55,7 +55,7 @@ def get_invoices(payment_identifier):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI

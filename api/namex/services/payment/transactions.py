@@ -46,7 +46,7 @@ def create_transaction(req):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -62,8 +62,9 @@ def create_transaction(req):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling TransactionsApi->create_transaction: %s\n" % e)
+    except Exception as err:
+        print("Exception when calling TransactionsApi->create_transaction: %s\n" % err)
+        raise SBCPaymentException(err)
 
 
 def get_transaction(req):
@@ -72,7 +73,7 @@ def get_transaction(req):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -89,8 +90,9 @@ def get_transaction(req):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling TransactionsApi->get_transaction: %s\n" % e)
+    except Exception as err:
+        print("Exception when calling TransactionsApi->get_transaction: %s\n" % err)
+        raise SBCPaymentException(err)
 
 
 def get_transactions(req):
@@ -99,7 +101,7 @@ def get_transactions(req):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -114,8 +116,9 @@ def get_transactions(req):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling TransactionsApi->get_transactions: %s\n" % e)
+    except Exception as err:
+        print("Exception when calling TransactionsApi->get_transactions: %s\n" % err)
+        raise SBCPaymentException(err)
 
 
 def update_transaction(req):
@@ -124,7 +127,7 @@ def update_transaction(req):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -141,5 +144,6 @@ def update_transaction(req):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling TransactionsApi->update_transaction: %s\n" % e)
+    except Exception as err:
+        print("Exception when calling TransactionsApi->update_transaction: %s\n" % err)
+        raise SBCPaymentException(err)

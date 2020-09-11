@@ -109,7 +109,7 @@ def get_payment(payment_identifier):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -122,9 +122,9 @@ def get_payment(payment_identifier):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling PaymentsApi->get_payment: %s\n" % e)
-        raise
+    except Exception as err:
+        print("Exception when calling PaymentsApi->get_payment: %s\n" % err)
+        raise SBCPaymentException(err)
 
 
 def create_payment(model):
@@ -133,7 +133,7 @@ def create_payment(model):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -146,9 +146,9 @@ def create_payment(model):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling PaymentsApi->create_payment: %s\n" % e)
-        raise
+    except Exception as err:
+        print("Exception when calling PaymentsApi->create_payment: %s\n" % err)
+        raise SBCPaymentException(err)
 
 
 def update_payment(payment_identifier, model):
@@ -157,7 +157,7 @@ def update_payment(payment_identifier, model):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise SBCPaymentException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -170,6 +170,6 @@ def update_payment(payment_identifier, model):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling PaymentsApi->update_payment: %s\n" % e)
-        raise
+    except Exception as err:
+        print("Exception when calling PaymentsApi->update_payment: %s\n" % err)
+        raise SBCPaymentException(err)
