@@ -8,8 +8,6 @@ from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import clean_url_path_param, handle_exception
 
-from urllib.parse import unquote_plus
-
 from namex.constants import PaymentState, PaymentStatusCode
 
 from namex.models import Request as RequestDAO, Payment as PaymentDAO
