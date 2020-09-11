@@ -190,6 +190,10 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_tokens
 
     # API for extending implementations
+    def set_name_tokens(self, name_tokens):
+        self.name_processing_service.name_tokens = name_tokens
+
+    # API for extending implementations
     # TODO: Just for backward compat. et rid of this when we are done refactoring!
     def get_name(self):
         return self.name_tokens
