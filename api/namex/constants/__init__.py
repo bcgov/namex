@@ -480,17 +480,18 @@ class RequestState(AbstractEnum):
     INPROGRESS = 'INPROGRESS'
 
 
-# TODO: Confirm these statuses!
 class PaymentStatusCode(AbstractEnum):
     """
     Payment status code mappings for SBC Pay
     """
+    DRAFT = 'DRAFT'
+    INPROGRESS = 'IN_PROGRESS'
     CREATED = 'CREATED'
-    PENDING = 'PENDING'
-    # PROCESSING = 'PROCESSING'
-    # COMPLETE = 'COMPLETE'
-    # FAILED = 'FAILED'
-    # CANCELLED = 'CANCELLED'
+    COMPLETED = 'COMPLETED'
+    PARTIAL = 'PARTIAL'
+    FAILED = 'PARTIAL'
+    REFUNDED = 'REFUNDED'
+    CANCELLED = 'CANCELLED'
 
 
 # TODO: Confirm these statuses!
@@ -498,12 +499,14 @@ class PaymentState(AbstractEnum):
     """
     Internal PaymentState codes for Payment model
     """
-    PENDING = 'PENDING'
-    CREATED = 'CREATED'
-    # PROCESSING = 'PROCESSING'
-    # COMPLETE = 'COMPLETE'
-    # FAILED = 'FAILED'
-    # CANCELLED = 'CANCELLED'
+    CREATED = 'CREATED'  # A payment has been created
+    PENDING = 'PENDING'  # A newly created Payment
+    INPROGRESS = 'IN_PROGRESS'
+    COMPLETED = 'COMPLETED'
+    PARTIAL = 'PARTIAL'
+    FAILED = 'PARTIAL'
+    REFUNDED = 'REFUNDED'
+    CANCELLED = 'CANCELLED'
 
 
 class EventAction(AbstractEnum):
