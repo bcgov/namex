@@ -148,16 +148,14 @@ def check_numbers_beginning(syn_svc, tokens):
 
 def check_synonyms(syn_svc, list_dist_words, list_desc_words):
     both_list = list(set(list_dist_words) & set(list_desc_words))
-    dist_substitution_dict, desc_synonym_dict = {}, {}
     for word in both_list:
         substitution = syn_svc.get_word_synonyms(word=word).data
         if substitution:
             list_dist_words.remove(word)
-            desc_synonym_dict[word] = substitution
         else:
             list_desc_words.remove(word)
 
-    return list_dist_words, list_desc_words, desc_synonym_dict
+    return list_dist_words, list_desc_words
 
 
 def change_descriptive(list_dist_words, list_desc_words, list_name):
@@ -173,9 +171,16 @@ def change_descriptive(list_dist_words, list_desc_words, list_name):
     return list_dist_words, list_desc_words
 
 
-def get_classification_summary(list_name, list_dist_words, list_desc_words):
-    return {word: DataFrameFields.DISTINCTIVE.value if word in list_dist_words else DataFrameFields.DESCRIPTIVE.value if any(word in desc_word for desc_word in list_desc_words) else DataFrameFields.UNCLASSIFIED.value for word in
-            list_name}
+def get_classification_summary(service):
+    classification_summary = {
+        word.replace(" ",
+                     ""): DataFrameFields.DISTINCTIVE.value if word in service.get_list_dist() else DataFrameFields.DESCRIPTIVE.value if any(
+            word in desc_word for desc_word in service.get_list_desc()) else DataFrameFields.UNCLASSIFIED.value for word
+        in
+        service.name_tokens}
+    service.set_name_tokens([x.replace(' ', '') for x in service.name_tokens])
+
+    return classification_summary
 
 
 def get_conflicts_same_classification(builder, name_tokens, processed_name, list_dist, list_desc):
@@ -187,6 +192,9 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, list
 
 
 def get_classification(service, syn_svc, match, wc_svc, token_svc):
+    desc_compound_dict = get_compound_descriptives(service, syn_svc)
+    match = update_list(list(desc_compound_dict.keys()), match)
+
     service.token_classifier = wc_svc.classify_tokens(match)
     service._list_dist_words, service._list_desc_words, service._list_none_words = service.word_classification_tokens
 
@@ -196,72 +204,36 @@ def get_classification(service, syn_svc, match, wc_svc, token_svc):
                 service.get_list_dist(),
                 service.get_list_desc(),
                 service.get_list_none(),
-                service.name_tokens
+                match
             )
-
-    service._list_dist_words, service._list_desc_words, desc_synonym_dict = check_synonyms(syn_svc,
-                                                                                           service.get_list_dist(),
-                                                                                           service.get_list_desc())
-
-    # if check_name_is_well_formed:
-    #     dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
-    #     desc_synonym_dict = self.get_dictionary(desc_synonym_dict, w_desc)
-    # else:
-    #     dist_substitution_dict = self.get_subsitutions_distinctive(w_dist)
-    #     desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
-
-    desc_compound_dict = get_all_compound_descriptive(service.get_list_dist(), desc_synonym_dict,
-                                                      service.name_tokens)
-
-    desc_dict_compound = get_valid_compound_descriptive(syn_svc, desc_compound_dict)
-
-    list_name = service.get_list_dist()[-1:] + service.get_list_desc()
-
-    if desc_dict_compound:
-        for idx, word in enumerate(list_name):
-            key = search_word(desc_dict_compound, list_name[idx])
-            if key and idx == 0:
-                del service._list_dist_words[idx - 1]
-                del service._list_desc_words[idx]
-                service._list_desc_words.insert(idx, key)
-            elif key and idx + 1 < len(list_name) and search_word(
-                    desc_dict_compound,
-                    list_name[idx + 1]):
-                del service._list_desc_words[idx - 1: idx + 1]
-                service._list_desc_words.insert(idx - 1, key)
-
-    print(service._list_dist_words)
-    print(service._list_desc_words)
+    service._list_dist_words, service._list_desc_words = check_synonyms(syn_svc, service.get_list_dist(),
+                                                                        service.get_list_desc())
+    service.set_name_tokens(update_list(service.get_list_dist() + service.get_list_desc(), service.name_tokens))
 
     service._list_dist_words, service._list_desc_words = change_descriptive(service.get_list_dist(),
                                                                             service.get_list_desc(),
                                                                             service.name_tokens)
 
-    service._dict_name_words = get_classification_summary(service.name_tokens,
-                                                          service.get_list_dist(),
-                                                          service.get_list_desc())
+    service._dict_name_words = get_classification_summary(service)
 
     print(service.get_dict_name())
 
 
-def get_all_compound_descriptive(list_dist, dict_descriptive, list_name):
-    dict_compound_desc = {}
-    dict_desc = dict(dict_descriptive)
-    for idx, elem in enumerate(list_name[1:], 1):
-        a = [list_dist[-1]] if list_name[idx] in list_dist[-1] else [list_name[idx]] if list_name[
-                                                                                            idx] in dict_descriptive else None
+def get_all_compound_words(list_name, reverse=False):
+    dict_compound = dict()
+    list_name_l = list(list_name)
+    current = list_name_l[0]
+    while list_name_l.__len__() > 1:
+        for idx, w in enumerate(list_name_l[1:]):
+            current = ' '.join([current, w])
+        dict_compound[current] = [current]
+        if not reverse:
+            list_name_l.pop()
+        else:
+            list_name_l.pop(0)
+        current = list_name_l[0]
 
-        next_idx = idx + 1
-        if a and next_idx < len(list_name):
-            b = [list_name[next_idx]] if list_name[next_idx] in dict_descriptive else None
-            compound = []
-
-            if a and b:
-                for item in itertools.product(a, b):
-                    compound.append(''.join(item))
-                    dict_compound_desc[list_name[idx] + ' ' + list_name[next_idx]] = compound
-
-    return dict_compound_desc
+    return dict_compound
 
 
 def get_valid_compound_descriptive(syn_svc, desc_compound_dist):
@@ -282,8 +254,29 @@ def get_valid_compound_descriptive(syn_svc, desc_compound_dist):
 
 
 def search_word(d, searchFor):
-    for k in d:
-        for v in d[k]:
-            if searchFor in v:
-                return k
+    for key, values in d.items():
+        if key is not None:
+            for value in values:
+                if searchFor in key or searchFor in value:
+                    return key
     return None
+
+
+def update_list(list_desc_compound, original_list):
+    list_compound = list_desc_compound + original_list
+    str_original = " ".join(original_list)
+
+    compound_alternators = '|'.join(map(re.escape, list_compound))
+    regex = re.compile(r'(?<!\w)({0})(?!\w)'.format(compound_alternators))
+    compound_name = regex.findall(str_original)
+
+    return compound_name
+
+
+def get_compound_descriptives(service, syn_svc):
+    desc_compound_dict = get_all_compound_words(service.name_tokens, reverse=False)
+    desc_compound_dict.update(get_all_compound_words(service.name_tokens, reverse=True))
+
+    desc_compound_dict_validated = get_valid_compound_descriptive(syn_svc, desc_compound_dict)
+
+    return desc_compound_dict_validated
