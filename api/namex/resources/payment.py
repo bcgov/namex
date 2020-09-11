@@ -6,7 +6,7 @@ from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import handle_exception
+from namex.utils.api_resource import clean_url_path_param, handle_exception
 
 from urllib.parse import unquote_plus
 
@@ -223,7 +223,7 @@ class Payment(Resource):
     # @marshal_with(payment_response_schema)
     def get(payment_identifier):
         try:
-            payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+            payment_identifier = clean_url_path_param(payment_identifier)
 
             payment = get_payment(payment_identifier)
 
@@ -245,7 +245,7 @@ class Payment(Resource):
     # @marshal_with()
     def put(payment_identifier):
         try:
-            payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+            payment_identifier = clean_url_path_param(payment_identifier)
 
             json_input = request.get_json()
             if not json_input:
@@ -349,7 +349,7 @@ class PaymentInvoices(Resource):
     })
     def get(payment_identifier):
         try:
-            payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+            payment_identifier = clean_url_path_param(payment_identifier)
 
             invoices = get_invoices(payment_identifier)
 
@@ -386,7 +386,7 @@ class PaymentInvoice(Resource):
     })
     def get(payment_identifier, invoice_id):
         try:
-            payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+            payment_identifier = clean_url_path_param(payment_identifier)
             invoice_id = invoice_id if invoice_id else None
 
             invoice = get_invoice(payment_identifier, invoice_id)
@@ -424,7 +424,7 @@ class PaymentReceipt(Resource):
     # def post(payment_identifier, invoice_id):
     def post(payment_identifier):
         try:
-            payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+            payment_identifier = clean_url_path_param(payment_identifier)
 
             json_input = request.get_json()
             if not json_input:
@@ -476,7 +476,7 @@ class PaymentTransactions(Resource):
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
     def get(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        payment_identifier = clean_url_path_param(payment_identifier)
 
         req = GetTransactionsRequest(
             payment_identifier=payment_identifier
@@ -505,7 +505,7 @@ class PaymentTransaction(Resource):
         'transaction_identifier': ''
     })
     def get(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        payment_identifier = clean_url_path_param(payment_identifier)
         receipt_number = unquote_plus(request.args.get('receipt_number').strip()) if request.args.get('receipt_number') else None
         transaction_identifier = unquote_plus(request.args.get('transaction_identifier').strip()) if request.args.get('transaction_identifier') else None
 
@@ -534,7 +534,7 @@ class PaymentTransaction(Resource):
         'redirect_uri': ''
     })
     def post(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        payment_identifier = clean_url_path_param(payment_identifier)
         redirect_uri = unquote_plus(request.args.get('redirect_uri').strip()) if request.args.get('redirect_uri') else None
 
         req = CreateTransactionRequest(
@@ -559,7 +559,7 @@ class PaymentTransaction(Resource):
         'transaction_identifier': ''
     })
     def put(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        payment_identifier = clean_url_path_param(payment_identifier)
 
         json_input = request.get_json()
         if not json_input:
