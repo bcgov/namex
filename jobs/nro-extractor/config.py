@@ -12,6 +12,8 @@ class BaseConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
+    SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', 'http://localhost:8983')
+
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
