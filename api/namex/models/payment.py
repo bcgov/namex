@@ -3,6 +3,7 @@
 from . import db
 from datetime import datetime
 
+
 class Payment(db.Model):
     __tablename__ = 'payments'
 
@@ -14,7 +15,7 @@ class Payment(db.Model):
 
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
 
-    #properties
+    # properties
     @property
     def payment_token(self):
         """Property containing the payment token."""
@@ -43,7 +44,6 @@ class Payment(db.Model):
     def payment_status_code(self, str):
         self._payment_status_code = str
 
-
     def as_dict(self):
         return {
             'id': self.id,
@@ -51,7 +51,6 @@ class Payment(db.Model):
             'payment_completion_date' : self.payment_completion_date,
             'payment_status_code' : self.payment_status_code
         }
-
 
     def save_to_db(self):
         db.session.add(self)

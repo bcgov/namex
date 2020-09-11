@@ -21,7 +21,7 @@ from .utils import parse_nr_num
 
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 from namex.services.payment.exceptions import SBCPaymentException
-from namex.services.payment.payments import create_payment
+from namex.services.payment.payments import create_payment, get_payment
 from openapi_client.models import PaymentRequest
 
 setup_logging()  # Important to do this first
@@ -186,22 +186,29 @@ class NameRequestPayment(NameRequestResource):
 
         # Update the state of the payment
         payment = get_active_payment(nr_model)
+        sbc_payment_response = get_payment(payment.payment_token)
 
-        # TODO: If no payment token throw an error here! It's important!
-        # Use apply_state_change to change state, as it enforces the State change pattern
-        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-        if nr_model.stateCd == State.DRAFT:
-            # If the state is DRAFT, leave it as a DRAFT
-            nr_model = nr_svc.apply_state_change(nr_model, State.DRAFT, self.handle_nr_approval)
-        if nr_model.stateCd == State.COND_RESERVE:
-            # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
-            nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, self.handle_nr_approval)
-        elif nr_model.stateCd == State.RESERVED:
-            # If the state is RESERVED update state to APPROVED, and update the name request as required
-            nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
+        # TODO: Throw errors if this fails!
+        if sbc_payment_response.status_code == PaymentStatusCode.COMPLETED.value:
+            payment.payment_status_code = PaymentState.COMPLETED.value
+            payment.payment_completion_date = sbc_payment_response.created_on
+            payment.save_to_db()
 
-        # This handles the updates for NRO and Solr, if necessary
-        self.add_records_to_network_services(nr_model)
+            # Use apply_state_change to change state, as it enforces the State change pattern
+            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+            if nr_model.stateCd == State.DRAFT:
+                # If the state is DRAFT, leave it as a DRAFT
+                nr_model = nr_svc.apply_state_change(nr_model, State.DRAFT, self.handle_nr_approval)
+            if nr_model.stateCd == State.COND_RESERVE:
+                # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
+                nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, self.handle_nr_approval)
+            elif nr_model.stateCd == State.RESERVED:
+                # If the state is RESERVED update state to APPROVED, and update the name request as required
+                nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
+
+            # This handles the updates for NRO and Solr, if necessary
+            self.add_records_to_network_services(nr_model)
+
         return nr_model
 
 

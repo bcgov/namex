@@ -20,7 +20,7 @@ class SBCPaymentException(PaymentException):
     """
     Used for general / unknown Service BC Payment API exceptions when calling the Service BC Payment API.
     """
-    def __init__(self, wrapped_err=None, message="Payment Service exception."):
+    def __init__(self, wrapped_err=None, message="Unhandled SBC Pay API exception."):
         super().__init__(wrapped_err, message)
 
 
