@@ -14,7 +14,7 @@ from namex.constants import PaymentState, PaymentStatusCode
 
 from namex.models import Request as RequestDAO, Payment as PaymentDAO
 
-from namex.services.payment.exceptions import SBCPaymentError, PaymentServiceError
+from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
 from namex.services.payment.invoices import get_invoices, get_invoice
 from namex.services.payment.payments import get_payment, create_payment, update_payment, CreatePaymentRequest, UpdatePaymentRequest
@@ -202,6 +202,8 @@ class Payments(Resource):
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
         except SBCPaymentError as err:
             return handle_exception(err, err.message, 500)
         except Exception as err:
@@ -271,6 +273,8 @@ class Payment(Resource):
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
         except SBCPaymentError as err:
             return handle_exception(err, err.message, 500)
         except Exception as err:
@@ -322,6 +326,8 @@ class PaymentFees(Resource):
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
         except SBCPaymentError as err:
             return handle_exception(err, err.message, 500)
         except Exception as err:
@@ -355,6 +361,8 @@ class PaymentInvoices(Resource):
             return response
 
         except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
             return handle_exception(err, err.message, 500)
         except SBCPaymentError as err:
             return handle_exception(err, err.message, 500)
@@ -391,6 +399,8 @@ class PaymentInvoice(Resource):
             return response
 
         except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
             return handle_exception(err, err.message, 500)
         except SBCPaymentError as err:
             return handle_exception(err, err.message, 500)
@@ -444,6 +454,8 @@ class PaymentReceipt(Resource):
             return send_file(receipt, mimetype='application/pdf', as_attachment=True)
 
         except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
             return handle_exception(err, err.message, 500)
         except SBCPaymentError as err:
             return handle_exception(err, err.message, 500)
