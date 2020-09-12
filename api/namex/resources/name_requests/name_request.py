@@ -136,13 +136,25 @@ class NameRequestPayment(NameRequestResource):
         :return:
         """
         try:
-            # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
-            self.initialize()
-            nr_svc = self.nr_service
-
             # Find the existing name request
             nr_num = parse_nr_num(nr_num)
             nr_model = Request.find_by_nr(nr_num)
+
+            # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
+            # Override the default self.initialize method
+            def initialize(_self):
+                # The request payload will be empty when making this call,
+                # but we still want to process names, so we need to add
+                # them to the request, otherwise they won't be processed!
+                _self.request_data = {
+                    'names': [n.as_dict() for n in nr_model.names.all()]
+                }
+                # Set the request data to the service
+                _self.nr_service.request_data = self.request_data
+
+            initialize(self)
+            nr_svc = self.nr_service
+
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
@@ -238,26 +250,7 @@ class NameRequestFields(NameRequestResource):
         """
         try:
             # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
-            def initialize(resource):
-                """
-                Override the default initialization (instead of self.initialize())
-                :return:
-                """
-                resource.validate_config(current_app)
-
-                # Store a copy of request_data to our class instance
-                # TODO: Only require if request json is relevant
-                resource.request_data = request.get_json()
-
-                # if not self.request_data:
-                #     self.log_error('Error getting json input.', None)
-                #     raise InvalidInputError()
-
-                # Unlike the inherited initialize(), we don't want to set the NameRequestService's request_data just yet
-                # This is a partial update operation and we will need to selectively map the request data over
-                self.nr_service.request_data = self.request_data
-
-            initialize(self)
+            self.initialize()
 
             nr_svc = self.nr_service
 
@@ -521,26 +514,7 @@ class NameRequestRollback(NameRequestResource):
         """
         try:
             # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
-            def initialize(resource):
-                """
-                Override the default initialization (instead of self.initialize())
-                :return:
-                """
-                resource.validate_config(current_app)
-
-                # Store a copy of request_data to our class instance
-                # TODO: Only require if request json is relevant
-                resource.request_data = request.get_json()
-
-                # if not self.request_data:
-                #     self.log_error('Error getting json input.', None)
-                #     raise InvalidInputError()
-
-                # Unlike the inherited initialize(), we don't want to set the NameRequestService's request_data just yet
-                # This is a partial update operation and we will need to selectively map the request data over
-                self.nr_service.request_data = self.request_data
-
-            initialize(self)
+            self.initialize()
 
             nr_svc = self.nr_service
 

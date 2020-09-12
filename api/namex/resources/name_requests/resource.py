@@ -216,13 +216,13 @@ class NameRequestResource(Resource):
     @staticmethod
     def on_nr_approved(nr, svc):
         """
-        This method is for updating certain parts of the name request eg. its STATE when a payment token is present in the request.
+        This method is for updating certain parts of the name request eg. its STATE when an active payment exists on the NR.
         :param nr:
         :param svc:
         :return:
         """
         # Update the names, we can ignore everything else as this is only
-        # invoked when we're completing a payment.
+        # invoked when we're completing a payment
         nr = svc.map_request_names(nr)
         nr = svc.save_request(nr)
         # Return the updated name request
@@ -400,9 +400,11 @@ class NameRequestResource(Resource):
             # Ignore update to SOLR if SOLR updates [DISABLE_NAMEREQUEST_SOLR_UPDATES] are explicitly disabled in your .env
             return
 
-        #only update solr for corp entity types
-        if(nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED] and  \
-                    nr_model.entity_type_cd in ['CR','UL','BC','CP', 'PA','XCR','XUL', 'XCP','CC','FI', 'XCR', 'XUL','XCP']):
+        # Only update solr for corp entity types
+        # TODO: Use the actual codes from the constants file...
+        if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED] and \
+                nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
+
             self.create_solr_nr_doc(SOLR_CORE, nr_model)
             if temp_nr_num:
                 # This performs a safe delete, we check to see if the temp ID exists before deleting
