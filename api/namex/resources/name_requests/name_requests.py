@@ -140,8 +140,9 @@ class NameRequests(NameRequestResource):
             EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_svc.request_data)
 
             # Update Solr - note that we don't save DRAFT name requests to Solr for corp entities only
-            if(nr_model.stateCd in [State.COND_RESERVE, State.RESERVED] and  \
-                    nr_model.entity_type_cd in ['CR','UL','BC','CP', 'PA','XCR','XUL', 'XCP','CC','FI', 'XCR', 'XUL','XCP']):
+            if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED] and \
+                    nr_model.entity_type_cd in \
+                    ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
                 self.create_solr_nr_doc(SOLR_CORE, nr_model)
 
             current_app.logger.debug(nr_model.json())

@@ -6,9 +6,11 @@ import openapi_client
 # from openapi_client.models import Payment
 # from openapi_client.rest import ApiException
 
-from . import PAYMENT_SVC_URL, PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET, PaymentServiceException
-from .utils import set_api_client_auth_header, set_api_client_request_host
 from namex.utils.auth import get_client_credentials, MSG_CLIENT_CREDENTIALS_REQ_FAILED
+
+from . import PAYMENT_SVC_URL, PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET
+from .utils import set_api_client_auth_header, set_api_client_request_host
+from .exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 
 from .request_objects.abstract import Serializable
 
@@ -107,7 +109,7 @@ def get_payment(payment_identifier):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise PaymentServiceException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -120,9 +122,9 @@ def get_payment(payment_identifier):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling PaymentsApi->get_payment: %s\n" % e)
-        raise
+    except Exception as err:
+        print("Exception when calling PaymentsApi->get_payment: %s\n" % err)
+        raise SBCPaymentException(err)
 
 
 def create_payment(model):
@@ -131,7 +133,7 @@ def create_payment(model):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise PaymentServiceException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -144,9 +146,9 @@ def create_payment(model):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling PaymentsApi->create_payment: %s\n" % e)
-        raise
+    except Exception as err:
+        print("Exception when calling PaymentsApi->create_payment: %s\n" % err)
+        raise SBCPaymentException(err)
 
 
 def update_payment(payment_identifier, model):
@@ -155,7 +157,7 @@ def update_payment(payment_identifier, model):
 
     authenticated, token = get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
     if not authenticated:
-        raise PaymentServiceException(MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+        raise SBCPaymentException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
     set_api_client_auth_header(api_instance, token)
 
     # Set API host URI
@@ -168,6 +170,6 @@ def update_payment(payment_identifier, model):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling PaymentsApi->update_payment: %s\n" % e)
-        raise
+    except Exception as err:
+        print("Exception when calling PaymentsApi->update_payment: %s\n" % err)
+        raise SBCPaymentException(err)

@@ -5,6 +5,11 @@ class NameRequestException(Exception):
         super().__init__(self.message)
 
 
+class NameRequestPaymentError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="SBC Pay API error."):
+        super().__init__(wrapped_err, message)
+
+
 class GenerateNRKeysError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error generating NR keys."):
         super().__init__(wrapped_err, message)

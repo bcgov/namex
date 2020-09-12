@@ -18,3 +18,7 @@ def handle_exception(err, msg, err_code):
 def get_query_param_str(param):
     param_value = request.args.get(param)
     return unquote_plus(param_value).strip() if param_value and isinstance(param_value, str) else None
+
+
+def clean_url_path_param(param):
+    return unquote_plus(param.strip()) if param and isinstance(param, str) else None

@@ -1,27 +1,28 @@
+import json
+
 from flask import request, make_response, send_file, jsonify
 from flask_restplus import Namespace, Resource, cors, fields, marshal_with, marshal
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
+from namex.utils.api_resource import clean_url_path_param, handle_exception
 
-from urllib.parse import unquote_plus
+from namex.constants import PaymentState, PaymentStatusCode
 
-from namex.models import Request
+from namex.models import Request as RequestDAO, Payment as PaymentDAO
 
-from namex.services.payment import PaymentServiceException
-
+from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
-
 from namex.services.payment.invoices import get_invoices, get_invoice
-
 from namex.services.payment.payments import get_payment, create_payment, update_payment, CreatePaymentRequest, UpdatePaymentRequest
-
 from namex.services.payment.receipts import get_receipt
 
+"""
 from namex.services.payment.transactions import \
     get_transactions, get_transaction, create_transaction, update_transaction, \
     GetTransactionsRequest, GetTransactionRequest, CreateTransactionRequest, UpdateTransactionRequest
+"""
 
 from openapi_client.models import PaymentRequest, PaymentReceiptInput
 
@@ -152,48 +153,59 @@ class Payments(Resource):
         'nr_num': 'Name Request number'
     })
     def post(nr_num):
-        # TODO: Validate NR string format
-        # if not Request.validNRFormat(nr_num):
-        #    return None, None, jsonify(message='NR number is not in a valid format \'NR 9999999\''), 400
-
-        nr_draft = Request.find_by_nr(nr_num)
-        if not nr_draft:
-            # Should this be a 400 or 404... hmmm
-            return None, None, jsonify(message='{nr_num} not found'.format(nr_num=nr_num)), 400
-
-        json_input = request.get_json()
-        if not json_input:
-            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
-
-        # Grab the info we need off the request
-        payment_info = json_input.get('paymentInfo')
-        filing_info = json_input.get('filingInfo')
-        business_info = json_input.get('businessInfo')
-
-        # Create our payment request
-        req = PaymentRequest(
-            payment_info=payment_info,
-            filing_info=filing_info,
-            business_info=business_info
-        )
-
         try:
-            payment = create_payment(req)
-            if not payment:
-                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
+            # TODO: Validate NR string format
+            # if not RequestDAO.validNRFormat(nr_num):
+            #    return None, None, jsonify(message='NR number is not in a valid format \'NR 9999999\''), 400
 
-            # Update the name request with the payment id
-            # nr_draft.paymentToken = str(payment.id)
-            nr_draft.payment_token = str(payment.id)
-            # Save the name request
-            nr_draft.save_to_db()
+            nr_draft = RequestDAO.find_by_nr(nr_num)
+            if not nr_draft:
+                # Should this be a 400 or 404... hmmm
+                return None, None, jsonify(message='{nr_num} not found'.format(nr_num=nr_num)), 400
 
+            json_input = request.get_json()
+            if not json_input:
+                return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+            elif isinstance(json_input, str):
+                json_input = json.loads(json_input)
+
+            # Grab the info we need off the request
+            payment_info = json_input.get('paymentInfo')
+            filing_info = json_input.get('filingInfo')
+            business_info = json_input.get('businessInfo')
+
+            # Create our payment request
+            req = PaymentRequest(
+                payment_info=payment_info,
+                filing_info=filing_info,
+                business_info=business_info
+            )
+
+            payment_response = create_payment(req)
+            if not payment_response:
+                raise PaymentServiceError(message=MSG_ERROR_CREATING_RESOURCE)
+
+            if payment_response and payment_response.status_code == PaymentStatusCode.CREATED.value:
+                # Save the payment info to Postgres
+                payment = PaymentDAO()
+                payment.nrId = nr_draft.id
+                payment.payment_token = str(payment_response.id)
+                payment.payment_completion_date = payment_response.created_on
+                payment.payment_status_code = PaymentState.CREATED.value
+                payment.save_to_db()
+
+                data = jsonify(payment_response.to_dict())
+                response = make_response(data, 200)
+                return response
+
+        except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentError as err:
+            return handle_exception(err, err.message, 500)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), err.status if err.status else err
-
-        data = jsonify(payment.to_dict())
-        response = make_response(data, 200)
-        return response
+            return handle_exception(err, err, 500)
 
 
 @cors_preflight('GET, PUT')
@@ -208,19 +220,20 @@ class Payment(Resource):
     @payment_api.response(200, 'Success', '')
     # @marshal_with(payment_response_schema)
     def get(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-
         try:
+            payment_identifier = clean_url_path_param(payment_identifier)
+
             payment = get_payment(payment_identifier)
+
+            if not payment:
+                return jsonify(message=MSG_NOT_FOUND), 404
+
+            data = jsonify(payment.to_dict())
+            response = make_response(data, 200)
+            return response
+
         except Exception as err:
             return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
-
-        if not payment:
-            return jsonify(message=MSG_NOT_FOUND), 404
-
-        data = jsonify(payment.to_dict())
-        response = make_response(data, 200)
-        return response
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -229,35 +242,41 @@ class Payment(Resource):
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
     def put(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-
-        json_input = request.get_json()
-        if not json_input:
-            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
-
-        # Grab the info we need off the request
-        payment_info = json_input.get('paymentInfo')
-        filing_info = json_input.get('filingInfo')
-        business_info = json_input.get('businessInfo')
-
-        # Update our payment request
-        req = PaymentRequest(
-            payment_info=payment_info,
-            filing_info=filing_info,
-            business_info=business_info
-        )
-
         try:
-            payment = update_payment(payment_identifier, req)
-            if not payment:
-                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
+            payment_identifier = clean_url_path_param(payment_identifier)
 
+            json_input = request.get_json()
+            if not json_input:
+                return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+
+            # Grab the info we need off the request
+            payment_info = json_input.get('paymentInfo')
+            filing_info = json_input.get('filingInfo')
+            business_info = json_input.get('businessInfo')
+
+            # Update our payment request
+            req = PaymentRequest(
+                payment_info=payment_info,
+                filing_info=filing_info,
+                business_info=business_info
+            )
+
+            payment_response = update_payment(payment_identifier, req)
+            if not payment_response:
+                raise PaymentServiceError(message=MSG_ERROR_CREATING_RESOURCE)
+
+            data = jsonify(payment_response.to_dict())
+            response = make_response(data, 200)
+            return response
+
+        except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentError as err:
+            return handle_exception(err, err.message, 500)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
-
-        data = jsonify(payment.to_dict())
-        response = make_response(data, 200)
-        return response
+            return handle_exception(err, err, 500)
 
 
 @cors_preflight('POST')
@@ -274,36 +293,43 @@ class PaymentFees(Resource):
     @payment_api.doc(params={
     })
     def post():
-        json_input = request.get_json()
-        if not json_input:
-            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
-
-        corp_type = json_input.get('corp_type')
-        filing_type_code = json_input.get('filing_type_code')
-        jurisdiction = json_input.get('jurisdiction', None)
-        date = json_input.get('date', None)
-        priority = json_input.get('priority', None)
-
-        # Params are snake_case for this POST
-        # Response data is also snake_case
-        req = CalculateFeesRequest(
-            corp_type=corp_type,
-            filing_type_code=filing_type_code,
-            jurisdiction=jurisdiction,
-            date=date,
-            priority=priority
-        )
-
         try:
+            json_input = request.get_json()
+            if not json_input:
+                return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+            
+            corp_type = json_input.get('corp_type')
+            filing_type_code = json_input.get('filing_type_code')
+            jurisdiction = json_input.get('jurisdiction', None)
+            date = json_input.get('date', None)
+            priority = json_input.get('priority', None)
+
+            # Params are snake_case for this POST
+            # Response data is also snake_case
+            req = CalculateFeesRequest(
+                corp_type=corp_type,
+                filing_type_code=filing_type_code,
+                jurisdiction=jurisdiction,
+                date=date,
+                priority=priority
+            )
+
             fees = calculate_fees(req)
             if not fees:
-                raise PaymentServiceException(MSG_ERROR_CREATING_RESOURCE)
-        except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
+                raise SBCPaymentError(message=MSG_ERROR_CREATING_RESOURCE)
 
-        data = jsonify(fees.to_dict())
-        response = make_response(data, 200)
-        return response
+            data = jsonify(fees.to_dict())
+            response = make_response(data, 200)
+            return response
+
+        except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentError as err:
+            return handle_exception(err, err.message, 500)
+        except Exception as err:
+            return handle_exception(err, err, 500)
 
 
 @cors_preflight('GET')
@@ -320,19 +346,26 @@ class PaymentInvoices(Resource):
     @payment_api.doc(params={
     })
     def get(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-
         try:
+            payment_identifier = clean_url_path_param(payment_identifier)
+
             invoices = get_invoices(payment_identifier)
+
+            if not invoices:
+                return jsonify(message=MSG_NOT_FOUND), 404
+
+            data = jsonify(invoices.to_dict())
+            response = make_response(data, 200)
+            return response
+
+        except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentError as err:
+            return handle_exception(err, err.message, 500)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
-
-        if not invoices:
-            return jsonify(message=MSG_NOT_FOUND), 404
-
-        data = jsonify(invoices.to_dict())
-        response = make_response(data, 200)
-        return response
+            return handle_exception(err, err, 500)
 
 
 @cors_preflight('GET')
@@ -350,20 +383,27 @@ class PaymentInvoice(Resource):
         'invoice_id': '[required]'
     })
     def get(payment_identifier, invoice_id):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-        invoice_id = invoice_id if invoice_id else None
-
         try:
+            payment_identifier = clean_url_path_param(payment_identifier)
+            invoice_id = invoice_id if invoice_id else None
+
             invoice = get_invoice(payment_identifier, invoice_id)
+
+            if not invoice:
+                return jsonify(message=MSG_NOT_FOUND), 404
+
+            data = jsonify(invoice.to_dict())
+            response = make_response(data, 200)
+            return response
+
+        except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentError as err:
+            return handle_exception(err, err.message, 500)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
-
-        if not invoice:
-            return jsonify(message=MSG_NOT_FOUND), 404
-
-        data = jsonify(invoice.to_dict())
-        response = make_response(data, 200)
-        return response
+            return handle_exception(err, err, 500)
 
 
 @cors_preflight('GET')
@@ -381,39 +421,47 @@ class PaymentReceipt(Resource):
     # @marshal_with()
     # def post(payment_identifier, invoice_id):
     def post(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
-
-        json_input = request.get_json()
-        if not json_input:
-            return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
-
-        corp_name = json_input.get('corpName', None)
-        business_number = json_input.get('businessNumber', None)
-        recognition_date_time = json_input.get('recognitionDateTime', None)
-        filing_identifier = json_input.get('filingIdentifier', None)
-        filing_date_time = json_input.get('filingDateTime', None)
-        file_name = json_input.get('fileName', None)
-
-        req = PaymentReceiptInput(
-            corp_name=corp_name,
-            business_number=business_number,
-            recognition_date_time=recognition_date_time,
-            filing_identifier=filing_identifier,
-            filing_date_time=filing_date_time,
-            file_name=file_name
-        )
-
         try:
+            payment_identifier = clean_url_path_param(payment_identifier)
+
+            json_input = request.get_json()
+            if not json_input:
+                return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+
+            corp_name = json_input.get('corpName', None)
+            business_number = json_input.get('businessNumber', None)
+            recognition_date_time = json_input.get('recognitionDateTime', None)
+            filing_identifier = json_input.get('filingIdentifier', None)
+            filing_date_time = json_input.get('filingDateTime', None)
+            file_name = json_input.get('fileName', None)
+
+            req = PaymentReceiptInput(
+                corp_name=corp_name,
+                business_number=business_number,
+                recognition_date_time=recognition_date_time,
+                filing_identifier=filing_identifier,
+                filing_date_time=filing_date_time,
+                file_name=file_name
+            )
+
             receipt = get_receipt(payment_identifier, req)
+
+            if not receipt:
+                return jsonify(message=MSG_NOT_FOUND), 404
+
+            return send_file(receipt, mimetype='application/pdf', as_attachment=True)
+
+        except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentError as err:
+            return handle_exception(err, err.message, 500)
         except Exception as err:
-            return jsonify(message=MSG_SERVER_ERROR + ' ' + str(err)), 500
-
-        if not receipt:
-            return jsonify(message=MSG_NOT_FOUND), 404
-
-        return send_file(receipt, mimetype='application/pdf', as_attachment=True)
+            return handle_exception(err, err, 500)
 
 
+"""
 @cors_preflight('GET')
 @payment_api.route('/<string:payment_identifier>/transactions', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
@@ -426,7 +474,7 @@ class PaymentTransactions(Resource):
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
     def get(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        payment_identifier = clean_url_path_param(payment_identifier)
 
         req = GetTransactionsRequest(
             payment_identifier=payment_identifier
@@ -455,7 +503,7 @@ class PaymentTransaction(Resource):
         'transaction_identifier': ''
     })
     def get(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        payment_identifier = clean_url_path_param(payment_identifier)
         receipt_number = unquote_plus(request.args.get('receipt_number').strip()) if request.args.get('receipt_number') else None
         transaction_identifier = unquote_plus(request.args.get('transaction_identifier').strip()) if request.args.get('transaction_identifier') else None
 
@@ -484,7 +532,7 @@ class PaymentTransaction(Resource):
         'redirect_uri': ''
     })
     def post(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        payment_identifier = clean_url_path_param(payment_identifier)
         redirect_uri = unquote_plus(request.args.get('redirect_uri').strip()) if request.args.get('redirect_uri') else None
 
         req = CreateTransactionRequest(
@@ -509,7 +557,7 @@ class PaymentTransaction(Resource):
         'transaction_identifier': ''
     })
     def put(payment_identifier):
-        payment_identifier = unquote_plus(payment_identifier.strip()) if payment_identifier else None
+        payment_identifier = clean_url_path_param(payment_identifier)
 
         json_input = request.get_json()
         if not json_input:
@@ -529,6 +577,7 @@ class PaymentTransaction(Resource):
         data = jsonify(transaction.to_dict())
         response = make_response(data, 200)
         return response
+"""
 
 
 @cors_preflight('DELETE')
