@@ -19,6 +19,7 @@ from .api_models import nr_request
 from .resource import NameRequestResource
 from .utils import parse_nr_num
 
+from namex.resources.payment.utils import build_payment_request
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 from namex.services.payment.exceptions import SBCPaymentException
 from namex.services.payment.payments import create_payment, get_payment
@@ -342,35 +343,7 @@ class NameRequestFields(NameRequestResource):
         nr_applicant = nr_model.applicants[0]
 
         if nr_name and nr_applicant:
-            payment_request = {
-                'paymentInfo': {
-                    'methodOfPayment': 'CC',
-                },
-                'filingInfo': {
-                    'date': date.today(),
-                    'filingTypes': [
-                        {
-                            'filingDescription': '',  # 'NM620: ' + nr_name.name,
-                            'filingTypeCode': 'NM620',  # TODO: Use an enum
-                            'priority': (nr_model.priorityCd == 'Y')  # TODO: Use an enum
-                        }
-                    ],
-                },
-                'businessInfo': {
-                    'corpType': 'NRO',
-                    'businessIdentifier': nr_model.nrNum,
-                    'businessName': nr_name.name,
-                    'contactInfo': {
-                        # TODO: Concat this for payments?
-                        # 'addressLine1': ', '.join([nr_applicant.addrLine1, nr_applicant.addrLine2]),
-                        'addressLine1': nr_applicant.addrLine1,
-                        'city': nr_applicant.city,
-                        'province': nr_applicant.stateProvinceCd,
-                        'country': nr_applicant.countryTypeCd,
-                        'postalCode': nr_applicant.postalCd
-                    }
-                }
-            }
+            payment_request = build_payment_request(nr_model)
         else:
             raise NameRequestException(message='Error upgrading Name Request, payment request is missing information!')
 

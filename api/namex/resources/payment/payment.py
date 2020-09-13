@@ -16,6 +16,7 @@ from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentErr
 from namex.services.payment.payments import get_payment, create_payment, update_payment, CreatePaymentRequest, UpdatePaymentRequest
 
 from .api_namespace import api as payment_api
+from .utils import build_payment_request, merge_payment_request
 
 from openapi_client.models import PaymentRequest
 
@@ -139,21 +140,26 @@ class Payments(Resource):
             # if not RequestDAO.validNRFormat(nr_num):
             #    return None, None, jsonify(message='NR number is not in a valid format \'NR 9999999\''), 400
 
-            nr_draft = RequestDAO.find_by_nr(nr_num)
-            if not nr_draft:
+            nr_model = RequestDAO.find_by_nr(nr_num)
+            if not nr_model:
                 # Should this be a 400 or 404... hmmm
                 return None, None, jsonify(message='{nr_num} not found'.format(nr_num=nr_num)), 400
 
             json_input = request.get_json()
+            payment_request = {}
             if not json_input:
-                return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+                # return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+                # Grab the data from the NR, if it exists
+                payment_request = build_payment_request(nr_model)
+            elif isinstance(json_input, dict):
+                payment_request = merge_payment_request(nr_model, json_input)
             elif isinstance(json_input, str):
-                json_input = json.loads(json_input)
+                payment_request = merge_payment_request(nr_model, json.loads(json_input))
 
             # Grab the info we need off the request
-            payment_info = json_input.get('paymentInfo')
-            filing_info = json_input.get('filingInfo')
-            business_info = json_input.get('businessInfo')
+            payment_info = payment_request.get('paymentInfo')
+            filing_info = payment_request.get('filingInfo')
+            business_info = payment_request.get('businessInfo')
 
             # Create our payment request
             req = PaymentRequest(
@@ -169,7 +175,7 @@ class Payments(Resource):
             if payment_response and payment_response.status_code == PaymentStatusCode.CREATED.value:
                 # Save the payment info to Postgres
                 payment = PaymentDAO()
-                payment.nrId = nr_draft.id
+                payment.nrId = nr_model.id
                 payment.payment_token = str(payment_response.id)
                 payment.payment_completion_date = payment_response.created_on
                 payment.payment_status_code = PaymentState.CREATED.value
@@ -189,7 +195,7 @@ class Payments(Resource):
                 """
 
                 data = jsonify(payment_response.to_dict())
-                response = make_response(data, 200)
+                response = make_response(data, 201)
                 return response
 
         except PaymentServiceError as err:
