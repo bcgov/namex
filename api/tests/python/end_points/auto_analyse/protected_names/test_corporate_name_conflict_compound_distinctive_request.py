@@ -14,7 +14,7 @@ from ...common import token_header, claims
 @pytest.mark.parametrize("name, expected",
                          [
                              ("SOUTH LAND BERRY FARMS LTD.", "SOUTHLAND BERRY FARMS LTD."),
-                             ("SOUTH LAND FREIGHTWAYS", "SOUTHLAND FREIGHTWAYS LTD."),
+                             ("SOUTH LAND FREIGHTWAYS LTD.", "SOUTHLAND FREIGHTWAYS LTD."),
                              ("SOUTH LAND FREIGHT WAYS LTD.", "SOUTHLAND FREIGHTWAYS LTD."),
                          ]
                          )

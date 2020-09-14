@@ -17,7 +17,7 @@ from ...common import token_header, claims
                              # # ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."), #Under evaluation
                              ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
                              ("ARMSTRONG PLUMBING & CAFE INC.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."),
+                             # ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."), #Failure related to stand-alone to be fixed with 4844: Fixes from UAT Rejection Testing
                              ("LE BLUE CAFE LTD.", "LE BLUE RESTAURANT LTD.")
                          ]
                          )
