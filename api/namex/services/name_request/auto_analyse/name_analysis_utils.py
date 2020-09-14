@@ -217,9 +217,9 @@ def get_classification(service, syn_svc, match, wc_svc, token_svc):
 
     service.set_name_tokens(update_list(service.get_list_dist() + service.get_list_desc(), service.name_tokens))
 
-    service._list_dist_words, service._list_desc_words = change_descriptive(service.get_list_dist(),
-                                                                            service.get_list_desc(),
-                                                                            service.name_tokens)
+    # service._list_dist_words, service._list_desc_words = change_descriptive(service.get_list_dist(),
+    #                                                                         service.get_list_desc(),
+    #                                                                         service.name_tokens)
 
     service._dict_name_words = get_classification_summary(service)
 
