@@ -714,7 +714,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     '''
 
     def get_compound_distinctives(self, dict_dist):
-        dist_compound_dict = dict()
         list_dict = list(dict_dist.keys())
 
         list_dist_compound= list()
