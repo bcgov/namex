@@ -229,26 +229,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         # Classify the tokens that were created by NameProcessingService
         self.token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
-    def configure_analysis(self):
-        syn_svc = self.synonym_service
-        self._list_dist_words, self._list_desc_words, self._list_none_words = self.word_classification_tokens
-
-        if self.get_list_none() and self.get_list_none().__len__() > 0:
-            self._list_dist_words, self._list_desc_words = \
-                TokenClassifier.handle_unclassified_words(
-                    self.get_list_dist(),
-                    self.get_list_desc(),
-                    self.get_list_none(),
-                    self.name_tokens
-                )
-
-        self._list_dist_words, self._list_desc_words = check_synonyms(syn_svc, self._list_dist_words,
-                                                                      self._list_desc_words)
-
-        self._list_dist_words, self._list_desc_words = change_descriptive(self._list_dist_words, self._list_desc_words, self.name_tokens)
-
-        self._dict_name_words = get_classification_summary(self.name_tokens, self._list_dist_words,
-                                                           self._list_desc_words)
 
     '''
     This is the main execution call that wraps name analysis checks. 
@@ -268,7 +248,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             analysis = []
 
             # Configure the analysis for the supplied builder
-            #self.configure_analysis()
             get_classification(self, syn_svc, self.name_tokens, wc_svc, token_svc)
 
             check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
