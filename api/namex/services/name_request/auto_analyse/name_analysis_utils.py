@@ -217,10 +217,6 @@ def get_classification(service, syn_svc, match, wc_svc, token_svc):
 
     service.set_name_tokens(update_list(service.get_list_dist() + service.get_list_desc(), service.name_tokens))
 
-    # service._list_dist_words, service._list_desc_words = change_descriptive(service.get_list_dist(),
-    #                                                                         service.get_list_desc(),
-    #                                                                         service.name_tokens)
-
     service._dict_name_words = get_classification_summary(service)
 
     print(service.get_dict_name())
@@ -240,11 +236,11 @@ def get_valid_compound_descriptive(syn_svc, list_compound):
     return desc_dist
 
 
-def search_word(d, searchFor):
+def search_word(d, search_item):
     for key, values in d.items():
         if key is not None:
             for value in values:
-                if searchFor in key or searchFor in value:
+                if search_item in key or search_item in value:
                     return key
     return None
 
