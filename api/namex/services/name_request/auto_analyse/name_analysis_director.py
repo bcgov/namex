@@ -5,7 +5,7 @@ from .mixins.get_word_classification_lists import GetWordClassificationListsMixi
 from . import AnalysisIssueCodes
 
 from ..auto_analyse.name_analysis_utils import check_synonyms, get_classification_summary, change_descriptive, \
-    get_classification
+    get_classification, update_none_list
 
 from namex.services.name_processing.name_processing \
     import NameProcessingService

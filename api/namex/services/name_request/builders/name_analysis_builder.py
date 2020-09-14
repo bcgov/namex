@@ -9,7 +9,7 @@ from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBu
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import get_flat_list, get_conflicts_same_classification, \
-    get_classification, get_all_dict_substitutions, get_all_compound_words
+    get_classification, get_all_dict_substitutions, remove_spaces_list, subsequences
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -470,7 +470,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                                                  dist_substitution_dict)
                     similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
-                    vector2_desc, entropy_desc = self.get_vector(service.get_list_desc(), list_desc, desc_synonym_dict)
+                    vector2_desc, entropy_desc = self.get_vector(remove_spaces_list(service.get_list_desc()), list_desc, desc_synonym_dict)
                     similarity_desc = round(
                         self.get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
 
@@ -716,10 +716,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_compound_distinctives(self, dict_dist):
         dist_compound_dict = dict()
         list_dict = list(dict_dist.keys())
-        dist_compound_dict.update(get_all_compound_words((list_dict, False)))
-        dist_compound_dict.update(get_all_compound_words((list_dict, True)))
 
-        dist_compound_dict = self.add_substitutions(list(dist_compound_dict.keys()), dict_dist)
+        list_dist_compound= list()
+        for i in range(2, len(list_dict)):
+            list_dist_compound.extend(subsequences(list_dict, i))
+
+        dist_compound_dict = self.add_substitutions(list_dist_compound, dict_dist)
 
         return {x.replace(' ', ''): v
                 for x, v in dist_compound_dict.items()}

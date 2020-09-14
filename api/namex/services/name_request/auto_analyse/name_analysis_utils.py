@@ -158,6 +158,10 @@ def check_synonyms(syn_svc, list_dist_words, list_desc_words):
     return list_dist_words, list_desc_words
 
 
+def update_none_list(list_none_words, list_desc):
+    return [x for x in list_none_words if x not in list_desc]
+
+
 def change_descriptive(list_dist_words, list_desc_words, list_name):
     for idx, word in enumerate(list_name[1:], start=1):
         pos = idx - 1
@@ -178,7 +182,7 @@ def get_classification_summary(service):
             word in desc_word for desc_word in service.get_list_desc()) else DataFrameFields.UNCLASSIFIED.value for word
         in
         service.name_tokens}
-    service.set_name_tokens([x.replace(' ', '') for x in service.name_tokens])
+    service.set_name_tokens(remove_spaces_list(service.name_tokens))
 
     return classification_summary
 
@@ -208,6 +212,9 @@ def get_classification(service, syn_svc, match, wc_svc, token_svc):
             )
     service._list_dist_words, service._list_desc_words = check_synonyms(syn_svc, service.get_list_dist(),
                                                                         service.get_list_desc())
+
+    service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())
+
     service.set_name_tokens(update_list(service.get_list_dist() + service.get_list_desc(), service.name_tokens))
 
     service._list_dist_words, service._list_desc_words = change_descriptive(service.get_list_dist(),
@@ -219,36 +226,16 @@ def get_classification(service, syn_svc, match, wc_svc, token_svc):
     print(service.get_dict_name())
 
 
-def get_all_compound_words(list_name, reverse=False):
-    dict_compound = dict()
-    list_name_l = list(list_name)
-    current = list_name_l[0]
-    while list_name_l.__len__() > 1:
-        for idx, w in enumerate(list_name_l[1:]):
-            current = ' '.join([current, w])
-        dict_compound[current] = [current]
-        if not reverse:
-            list_name_l.pop()
-        else:
-            list_name_l.pop(0)
-        current = list_name_l[0]
-
-    return dict_compound
+def subsequences(iterable, length):
+    return [" ".join(iterable[i: i + length]) for i in range(len(iterable) - length + 1)]
 
 
-def get_valid_compound_descriptive(syn_svc, desc_compound_dist):
-    found = False
-    desc_dist = dict(desc_compound_dist)
-    for key, val in desc_compound_dist.items():
-        for word in val:
-            substitution = syn_svc.get_word_synonyms(word=word).data
-            if substitution:
-                desc_dist[key] = substitution
-                found = True
-                break
-            found = False
-        if not found:
-            del desc_dist[key]
+def get_valid_compound_descriptive(syn_svc, list_compound):
+    desc_dist = dict()
+    for compound in list_compound:
+        substitution = syn_svc.get_word_synonyms(word=compound.replace(" ", "")).data
+        if substitution:
+            desc_dist[compound] = substitution
 
     return desc_dist
 
@@ -274,9 +261,14 @@ def update_list(list_desc_compound, original_list):
 
 
 def get_compound_descriptives(service, syn_svc):
-    desc_compound_dict = get_all_compound_words(service.name_tokens, reverse=False)
-    desc_compound_dict.update(get_all_compound_words(service.name_tokens, reverse=True))
+    list_compound = []
+    for i in range(2, len(service.name_tokens)):
+        list_compound.extend(subsequences(service.name_tokens, i))
 
-    desc_compound_dict_validated = get_valid_compound_descriptive(syn_svc, desc_compound_dict)
+    desc_compound_dict_validated = get_valid_compound_descriptive(syn_svc, list_compound)
 
     return desc_compound_dict_validated
+
+
+def remove_spaces_list(lst):
+    return [x.replace(' ', '') for x in lst]
