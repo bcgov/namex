@@ -21,7 +21,7 @@ def parse_dict_of_lists(results):
     # running again after pulling out the synonyms service into a self-contained app
     output = {}
     for item in results:
-        output[item.key] = item.list
+        output[item.key] = sorted(list(set(item.list)), key=len, reverse=True)
     return output
 
 
