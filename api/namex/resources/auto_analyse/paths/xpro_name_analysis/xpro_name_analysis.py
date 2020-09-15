@@ -49,6 +49,7 @@ def validate_name_request(location, entity_type, request_action):
     valid_location = location in [ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value]
     valid_request_actions = [
         AnalysisRequestActions.NEW.value,
+        AnalysisRequestActions.AML.value,
         AnalysisRequestActions.CHG.value,
         AnalysisRequestActions.ASSUMED.value,
         AnalysisRequestActions.REN.value,
@@ -113,6 +114,7 @@ class XproNameAnalysis(Resource):
 
         try:
             if valid_location and valid_entity_type and request_action in (AnalysisRequestActions.NEW.value,
+                                                                           AnalysisRequestActions.AML.value,
                                                                            AnalysisRequestActions.CHG.value,
                                                                            AnalysisRequestActions.ASSUMED.value,
                                                                            AnalysisRequestActions.REN.value,
