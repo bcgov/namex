@@ -45,7 +45,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         word = word.lower() if isinstance(word, str) else None
 
         if word:
-            filters.append(func.lower(model.stems_text).op('~')(r'\y{}\y'.format(porter.stem(word))))
+            filters.append(func.lower(model.stems_text).op('~')(r'\y{}\y'.format(porter.stem(word).replace(" ", ""))))
 
         field = model.category if category else model.stems_text
 
@@ -207,7 +207,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = self.regex_punctuation(text)
         text = self.regex_together_one_letter(text)
         text = self.regex_strip_out_numbers_middle_end(text, ordinal_suffixes, numbers)
-        #text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_regex)
+        # text = self.regex_numbers_standalone(text, ordinal_suffixes, numbers, stand_alone_regex)
         text = self.regex_remove_extra_spaces(text)
 
         return text
