@@ -113,6 +113,7 @@ class XproNameAnalysis(Resource):
 
         try:
             if valid_location and valid_entity_type and request_action in (AnalysisRequestActions.NEW.value,
+                                                                           AnalysisRequestActions.AML.value,
                                                                            AnalysisRequestActions.CHG.value,
                                                                            AnalysisRequestActions.ASSUMED.value,
                                                                            AnalysisRequestActions.REN.value,
