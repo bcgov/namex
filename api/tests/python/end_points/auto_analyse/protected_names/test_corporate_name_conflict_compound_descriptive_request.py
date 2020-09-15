@@ -17,6 +17,8 @@ from ...common import token_header, claims
                              ("WESTWOOD FABRICARE DRYCLEANER LTD.", "WESTWOOD FABRICARE LAUNDRY LTD."),
                              ("WESTWOOD FABRICARE DRY CLEANING LTD.", "WESTWOOD FABRICARE LAUNDRY LTD."),
                              ("WESTWOOD FABRICARE DRYCLEAN LTD.", "WESTWOOD FABRICARE LAUNDRY LTD."),
+                             ("GARY DRY CLEANING LTD.", "GARY'S LAUNDRY INC."),
+                             ("GARY DRYCLEANING LTD.", "GARY'S LAUNDRY INC."),
                              ('VANCOUVER ISLAND AUTOSPA LTD.','VANCOUVER ISLAND CAR WASH LTD.'),
                              ('VANCOUVER ISLAND AUTO SPA LTD.','VANCOUVER ISLAND CAR WASH LTD.'),
                              ('WESTWOOD PRE-SCHOOL DEVELOPMENT LTD.', 'WESTWOOD EARLY CHILDHOOD DEVELOPMENT LTD.'),
@@ -29,6 +31,7 @@ from ...common import token_header, claims
 def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, name, expected):
     words_list_classification = [{'word': 'WESTWOOD', 'classification': 'DIST'},
                                  {'word': 'WESTWOOD', 'classification': 'DESC'},
+                                 {'word': 'GARY', 'classification': 'DIST'},
                                  {'word': 'FABRICARE', 'classification': 'DESC'},
                                  {'word': 'DRY', 'classification': 'DIST'},
                                  {'word': 'DRY', 'classification': 'DESC'},
@@ -77,7 +80,8 @@ def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, 
     conflict_list_db = ['WESTWOOD FABRICARE LAUNDRY LTD.', 'WESTWOOD FABRICS & WAREHOUSE LTD.',
                         'VANCOUVER ISLAND CAR WASH LTD.', 'VANCOUVER ISLAND CAR SERVICES LTD.',
                         'WESTWOOD EARLY CHILDHOOD DEVELOPMENT LTD.', 'WESTWOOD KIDS DEVELOPMENT LTD.',
-                        'WESTWOOD LIQUIFIED NATURAL GAS LTD.','WESTWOOD NATURAL GAS PRODUCTS LTD.']
+                        'WESTWOOD LIQUIFIED NATURAL GAS LTD.', 'WESTWOOD NATURAL GAS PRODUCTS LTD.',
+                        "GARY'S LAUNDRY INC.", "GARY'S CLEAN SOLUTION INC."]
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
