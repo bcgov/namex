@@ -266,6 +266,7 @@ request_type_mapping = [
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REH.value),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REN.value),
     ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.NEW.value),
+    ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.AML.value),
     ('XCCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.CHG.value),
     ('XRCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.REST.value),
     ('XRCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.REH.value),
