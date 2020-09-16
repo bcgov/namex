@@ -86,14 +86,14 @@ class NameRequestResource(Resource):
 
     @classmethod
     def validate_config(cls, app):
-        app_config = app.config.get('SOLR_SYNONYMS_API_URL', None)
+        app_config = app.config.get('DB_HOST', None)
         if not app_config:
             cls.log_error('ENV is not set', None)
             raise NameRequestException(message='Internal server error')
 
         test_env = 'prod'
         if test_env in app_config:
-            return NotImplementedError()
+            raise NameRequestException(message='Not Implemented')
 
     """
     These Event callback 'actions' are fired off when Name Request state change is triggered.
