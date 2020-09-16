@@ -397,7 +397,6 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
                                   )
 
 def  _update_consent(oracle_cursor, nr,eid, change_flags):
-    #test = change_flags.get(NROChangeFlags.CONSENT.value)
     if change_flags['is_changed_consent']:
         # set the end event for the existing record
         oracle_cursor.execute("""
