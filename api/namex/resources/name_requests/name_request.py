@@ -5,9 +5,9 @@ from dateutil.relativedelta import relativedelta
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import handle_exception
+from namex.utils.api_resource import clean_url_path_param, handle_exception
 
-from namex.constants import NameRequestActions, RequestAction, PaymentState, PaymentStatusCode
+from namex.constants import NameRequestActions, NameRequestRollbackActions, RequestAction, PaymentState, PaymentStatusCode
 from namex.models import Request, State, Payment
 
 from namex.services.name_request.name_request_state import get_nr_state_actions
@@ -19,6 +19,7 @@ from .api_models import nr_request
 from .resource import NameRequestResource
 from .utils import parse_nr_num
 
+from namex.resources.payment.utils import build_payment_request
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 from namex.services.payment.exceptions import SBCPaymentException
 from namex.services.payment.payments import create_payment, get_payment
@@ -34,16 +35,15 @@ MSG_ERROR_CREATING_RESOURCE = 'Could not create / update resource'
 
 
 @cors_preflight('GET, PUT')
-@api.route('/<string:nr_num>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
+@api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
 @api.doc(params={
-    'nr_num': 'NR Number - This field is required'
+    'nr_id': 'NR ID - This field is required'
 })
 class NameRequest(NameRequestResource):
     @cors.crossdomain(origin='*')
-    def get(self, nr_num):
+    def get(self, nr_id):
         try:
-            nr_num = parse_nr_num(nr_num)
-            nr_model = Request.find_by_nr(nr_num)
+            nr_model = Request.query.get(nr_id)
 
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
@@ -55,24 +55,24 @@ class NameRequest(NameRequestResource):
     # REST Method Handlers
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def put(self, nr_num):
+    def put(self, nr_id):
         """
         TODO: Test PUT with payment
         Handles general update operations including update when a payment token is present.
         NOT used for updates that only change the Name Request state. Use 'patch' instead.
 
         State changes handled include state changes to [DRAFT, COND_RESERVE, RESERVED, COND_RESERVE to CONDITIONAL, RESERVED to APPROVED]
-        :param nr_num:
+        :param nr_id:
         :return:
         """
         try:
+            # Find the existing name request
+            nr_model = Request.query.get(nr_id)
+
             # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
             self.initialize()
             nr_svc = self.nr_service
 
-            # Find the existing name request
-            nr_num = parse_nr_num(nr_num)
-            nr_model = Request.find_by_nr(nr_num)
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
@@ -117,28 +117,27 @@ class NameRequest(NameRequestResource):
 
 
 @cors_preflight('PUT')
-@api.route('/<string:nr_num>/complete-payment', strict_slashes=False, methods=['PUT', 'OPTIONS'])
+@api.route('/<int:nr_id>/complete-payment', strict_slashes=False, methods=['PUT', 'OPTIONS'])
 @api.doc(params={
-    'nr_num': 'NR Number - This field is required'
+    'nr_id': 'NR Number - This field is required'
 })
 class NameRequestPayment(NameRequestResource):
     # REST Method Handlers
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def put(self, nr_num):
+    def put(self, nr_id):
         """
         TODO: Test PUT with payment
         Handles general update operations including update when a payment token is present.
         NOT used for updates that only change the Name Request state. Use 'patch' instead.
 
         State changes handled include state changes to [DRAFT, COND_RESERVE, RESERVED, COND_RESERVE to CONDITIONAL, RESERVED to APPROVED]
-        :param nr_num:
+        :param nr_id:
         :return:
         """
         try:
             # Find the existing name request
-            nr_num = parse_nr_num(nr_num)
-            nr_model = Request.find_by_nr(nr_num)
+            nr_model = Request.query.get(nr_id)
 
             # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
             # Override the default self.initialize method
@@ -225,15 +224,15 @@ class NameRequestPayment(NameRequestResource):
 
 
 @cors_preflight('PATCH')
-@api.route('/<string:nr_num>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
+@api.route('/<int:nr_id>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @api.doc(params={
-    'nr_num': 'NR Number - This field is required',
+    'nr_id': 'NR ID - This field is required',
     'nr_action': 'NR Action - One of [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]'
 })
 class NameRequestFields(NameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def patch(self, nr_num, nr_action):
+    def patch(self, nr_id, nr_action):
         """
         Update a specific set of fields and/or a provided action. Fields excluded from the payload will not be updated.
         The following data format is expected when providing a data payload:
@@ -244,23 +243,23 @@ class NameRequestFields(NameRequestResource):
         - Cancel an NR
         - Change the state of an NR to [CANCELLED, INPROGRESS, HOLD, APPROVED, REJECTED
         - Apply the following actions to an NR [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]
-        :param nr_num:
+        :param nr_id:
         :param nr_action: One of [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]
         :return:
         """
         try:
+            # Find the existing name request
+            nr_model = Request.query.get(nr_id)
+
             # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
             self.initialize()
-
             nr_svc = self.nr_service
 
-            # Find the existing name request
-            nr_num = parse_nr_num(nr_num)
             nr_action = str(nr_action).upper()  # Convert to upper-case, just so we can support lower case action strings
             nr_action = NameRequestActions[nr_action].value \
                 if NameRequestActions.has_value(nr_action) \
                 else NameRequestActions.EDIT.value
-            nr_model = Request.find_by_nr(nr_num)
+
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
@@ -342,35 +341,7 @@ class NameRequestFields(NameRequestResource):
         nr_applicant = nr_model.applicants[0]
 
         if nr_name and nr_applicant:
-            payment_request = {
-                'paymentInfo': {
-                    'methodOfPayment': 'CC',
-                },
-                'filingInfo': {
-                    'date': date.today(),
-                    'filingTypes': [
-                        {
-                            'filingDescription': '',  # 'NM620: ' + nr_name.name,
-                            'filingTypeCode': 'NM620',  # TODO: Use an enum
-                            'priority': (nr_model.priorityCd == 'Y')  # TODO: Use an enum
-                        }
-                    ],
-                },
-                'businessInfo': {
-                    'corpType': 'NRO',
-                    'businessIdentifier': nr_model.nrNum,
-                    'businessName': nr_name.name,
-                    'contactInfo': {
-                        # TODO: Concat this for payments?
-                        # 'addressLine1': ', '.join([nr_applicant.addrLine1, nr_applicant.addrLine2]),
-                        'addressLine1': nr_applicant.addrLine1,
-                        'city': nr_applicant.city,
-                        'province': nr_applicant.stateProvinceCd,
-                        'country': nr_applicant.countryTypeCd,
-                        'postalCode': nr_applicant.postalCd
-                    }
-                }
-            }
+            payment_request = build_payment_request(nr_model)
         else:
             raise NameRequestException(message='Error upgrading Name Request, payment request is missing information!')
 
@@ -499,45 +470,42 @@ class NameRequestFields(NameRequestResource):
 
 
 @cors_preflight('PATCH')
-@api.route('/<string:nr_num>/rollback', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
+@api.route('/<int:nr_id>/rollback/<string:action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @api.doc(params={
-    'nr_num': 'NR Number - This field is required',
+    'nr_id': 'NR Number - This field is required',
 })
 class NameRequestRollback(NameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def patch(self, nr_num):
+    def patch(self, nr_id, action):
         """
         Roll back a Name Request to a usable state in case of a frontend error.
-        :param nr_num:
+        :param nr_id:
+        :param action:
         :return:
         """
         try:
+            # Find the existing name request
+            nr_model = Request.query.get(nr_id)
+
             # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
             self.initialize()
-
             nr_svc = self.nr_service
 
-            # Find the existing name request
-            nr_num = parse_nr_num(nr_num)
-            nr_model = Request.find_by_nr(nr_num)
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
-            valid_states = State.VALID_STATES
-
             # This could be moved out, but it's fine here for now
             def validate_patch_request(data):
+                # TODO: Validate the data payload
                 # Use the NR model state as the default, as the state change may not be included in the PATCH request
-                request_state = data.get('stateCd', nr_model.stateCd)
                 is_valid = False
                 msg = ''
                 # This handles updates if the NR state is 'patchable'
-                if request_state in valid_states:
-                    # Get the SQL alchemy columns and associations
+                if NameRequestRollbackActions.has_value(action):
                     is_valid = True
                 else:
-                    msg = 'Invalid state change requested - the NR state cannot be changed to [' + data.get('stateCd', '') + ']'
+                    msg = 'Invalid rollback action'
 
                 return is_valid, msg
 
@@ -547,11 +515,8 @@ class NameRequestRollback(NameRequestResource):
             if not is_valid_patch:
                 raise InvalidInputError(message=validation_msg)
 
-            # if nr_model.payment_token is not None:
-            #    raise NameRequestException(message='Invalid request state for PATCH - payment token should not be present!')
-
             # This handles updates if the NR state is 'patchable'
-            nr_model = self.handle_patch_rollback(nr_model)
+            nr_model = self.handle_patch_rollback(nr_model, action)
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
@@ -564,11 +529,11 @@ class NameRequestRollback(NameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_patch_rollback(self, nr_model):
+    def handle_patch_rollback(self, nr_model, action):
         """
-        TODO: Handle rollback to a specific state?
-        Cancel the Name Request.
+        Roll back the Name Request.
         :param nr_model:
+        :param action:
         :return:
         """
         # This handles updates if the NR state is 'patchable'
@@ -576,4 +541,21 @@ class NameRequestRollback(NameRequestResource):
 
         # This handles the updates for NRO and Solr, if necessary
         self.update_records_in_network_services(nr_model)
+        return nr_model
+
+    def update_nr_fields(self, nr_model, new_state):
+        """
+        State changes handled:
+        - to CANCELLED
+        :param nr_model:
+        :param new_state:
+        :return:
+        """
+        nr_svc = self.nr_service
+
+        # Use apply_state_change to change state, as it enforces the State change pattern
+        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+        if new_state in State.VALID_STATES:
+            nr_model = nr_svc.apply_state_change(nr_model, new_state, self.handle_nr_patch)
+
         return nr_model

@@ -8,11 +8,11 @@ from .exact_match import api as exact_match_api
 from .events import api as events_api
 
 from .name_requests.api_namespace import api as name_request_api
+from .payment.api_namespace import api as payment_api
 from .word_classification import api as word_classification_api
 
 from .auto_analyse.paths import bc_name_analysis_api, xpro_name_analysis_api
 
-from .payment import payment_api
 from .mras import mras_profile_api
 from .colin import colin_api
 from .statistics.wait_time_statistics import api as wait_time_stats_api

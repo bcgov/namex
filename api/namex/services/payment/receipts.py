@@ -1,7 +1,9 @@
 from __future__ import print_function
 from pprint import pprint
 
+import json
 import openapi_client
+from openapi_client import ApiException
 # Other stuff you can import...
 # from openapi_client.models import Receipt
 # from openapi_client.rest import ApiException
@@ -39,6 +41,18 @@ def get_receipt(payment_identifier, model):
 
         pprint(api_response)
         return api_response
+
+    except ApiException as err:
+        print("Exception when calling ReceiptsApi->get_receipt: %s\n" % err)
+        err_response = json.loads(err.body)
+        title = err_response.get('detail')
+        details = ', '.join(err_response.get('invalidParams', []))
+        message = ''
+        if title and not details:
+            message = '{title}'.format(title=title)
+        elif title and details:
+            message = '{title} - {details}'.format(title=title, details=details)
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling ReceiptsApi->get_receipt: %s\n" % err)
