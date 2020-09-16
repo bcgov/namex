@@ -22,34 +22,26 @@ def update_nr(nr, ora_cursor, change_flags,con):
     """Update the Name Request in NRO
     :raises Exception: what ever error we get, let our caller handle, this is here in case we want to wrap it - future
     """
-    #namesd is broken and cannot commit a full set so intermediate comit have been added
-    app_config = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
-    test_env = 'dev'
 
     eid = _get_event_id(ora_cursor)
     current_app.logger.debug('got to update_nr() for NR:{}'.format(nr.nrNum))
     current_app.logger.debug('event ID for NR Details edit:{}'.format(eid))
     _create_nro_transaction(ora_cursor, nr, eid, transaction_type='CORRT')
-    if test_env in app_config:
-        con.commit()
+    con.commit()
 
     _update_nro_request_state(ora_cursor, nr, eid, change_flags)
-    if test_env in app_config:
-        con.commit()
+    con.commit()
 
     _update_request(ora_cursor, nr, eid, change_flags)
-    if test_env in app_config:
-        con.commit()
+    con.commit()
 
     _update_nro_names(ora_cursor, nr, eid, change_flags)
-    if test_env in app_config:
-        con.commit()
+    con.commit()
 
     _update_nro_address(ora_cursor, nr, eid, change_flags)
     _update_nro_partner_name_system(ora_cursor, nr, eid, change_flags)
     _update_consent(ora_cursor, nr, eid, change_flags)
-    if test_env in app_config:
-        con.commit()
+    con.commit()
 
     current_app.logger.debug('got to the end of update_nr()')
 
@@ -405,7 +397,8 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
                                   )
 
 def  _update_consent(oracle_cursor, nr,eid, change_flags):
-    if change_flags.get(NROChangeFlags.CONSENT.value):
+    #test = change_flags.get(NROChangeFlags.CONSENT.value)
+    if change_flags['is_changed_consent']:
         # set the end event for the existing record
         oracle_cursor.execute("""
                UPDATE consent
