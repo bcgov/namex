@@ -34,11 +34,14 @@ def update_nr(nr, ora_cursor, change_flags,con):
 
     _update_request(ora_cursor, nr, eid, change_flags)
     con.commit()
+
     _update_nro_names(ora_cursor, nr, eid, change_flags)
     con.commit()
+
     _update_nro_address(ora_cursor, nr, eid, change_flags)
     _update_nro_partner_name_system(ora_cursor, nr, eid, change_flags)
     _update_consent(ora_cursor, nr, eid, change_flags)
+    con.commit()
 
     current_app.logger.debug('got to the end of update_nr()')
 
@@ -394,7 +397,7 @@ def _update_nro_partner_name_system(oracle_cursor, nr, event_id, change_flags):
                                   )
 
 def  _update_consent(oracle_cursor, nr,eid, change_flags):
-    if change_flags.get(NROChangeFlags.CONSENT.value):
+    if change_flags['is_changed_consent']:
         # set the end event for the existing record
         oracle_cursor.execute("""
                UPDATE consent
