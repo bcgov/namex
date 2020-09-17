@@ -4,8 +4,8 @@
 # Component: pipeline
 # Action: build
 # Template File: templates/pipeline.json
-# Hint: oc process -n servicebc-ne-dev -f templates/pipeline.json --param-file=pipeline.param | oc create -n servicebc-ne-dev -f -
-# Hint: oc process -n servicebc-ne-dev -f templates/pipeline.json --param-file=pipeline.param | oc replace -n servicebc-ne-dev -f -
+# Hint: oc process -n servicebc-ne-tools -f templates/pipeline.json --param-file=pipeline.param | oc create -n servicebc-ne-tools -f -
+# Hint: oc process -n servicebc-ne-tools -f templates/pipeline.json --param-file=pipeline.param | oc replace -n servicebc-ne-tools -f -
 #=========================================================
 NAME="nr-garbage-collector"
 PIPELINE_PURPOSE="build-dev"
