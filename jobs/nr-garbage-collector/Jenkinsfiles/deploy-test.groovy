@@ -23,9 +23,20 @@ def NAMESPACE = 'servicebc-ne'
 def COMPONENT_NAME = 'nr-garbage-collector'
 def TAG_NAME = 'test'
 def SOURCE_TAG = 'dev'
-def DEPLOY_PIPELINE = 'deploy-service'
-def DEPLOY_PIPELINE_LOC = 'servicebc-ne-tools'
 
+// define groovy functions
+import groovy.json.JsonOutput
+
+// Get an image's hash tag
+String getImageTagHash(String imageName, String tag = "") {
+
+  if(!tag?.trim()) {
+    tag = "latest"
+  }
+
+  def istag = openshift.raw("get istag ${imageName}:${tag} -o template --template='{{.image.dockerImageReference}}'")
+  return istag.out.tokenize('@')[1].trim()
+}
 
 // define job properties - keep 10 builds only
 properties([
@@ -34,18 +45,23 @@ properties([
     ]
 ])
 
-stage("deploy ${COMPONENT_NAME}-${TAG_NAME}") {
-    script {
-        openshift.withCluster() {
-            openshift.withProject("${DEPLOY_PIPELINE_LOC}") {
-                def deploy_pipeline = openshift.selector('bc', "${DEPLOY_PIPELINE}")
-                deploy_pipeline.startBuild(
-                    '--wait=true', 
-                    "-e=NAMESPACE=${NAMESPACE}",
-                    "-e=COMPONENT_NAME=${COMPONENT_NAME}",
-                    "-e=TAG_NAME=${TAG_NAME}",
-                    "-e=SOURCE_TAG=${SOURCE_TAG}"
-                ).logs('-f')
+stage("Tag ${COMPONENT_NAME}-${TAG_NAME}") {
+        script {
+            openshift.withCluster() {
+                openshift.withProject() {
+
+                    echo "Updating ${COMPONENT_NAME}-previous tag..."
+                    def IMAGE_HASH = getImageTagHash("${COMPONENT_NAME}", "${TAG_NAME}")
+                    echo "IMAGE_HASH: ${IMAGE_HASH}"
+                    openshift.tag("${COMPONENT_NAME}@${IMAGE_HASH}", "${COMPONENT_NAME}:${TAG_NAME}-previous")
+
+                    echo "Tagging ${COMPONENT_NAME} to ${TAG_NAME} ..."
+                    // Don't tag with BUILD_ID so the pruner can do it's job; it won't delete tagged images.
+                    // Tag the images for deployment based on the image's hash
+                    IMAGE_HASH = getImageTagHash("${COMPONENT_NAME}", "${SOURCE_TAG}")
+                    echo "IMAGE_HASH: ${IMAGE_HASH}"
+                    openshift.tag("${COMPONENT_NAME}@${IMAGE_HASH}", "${COMPONENT_NAME}:${TAG_NAME}")
+                }
             }
         }
     }
