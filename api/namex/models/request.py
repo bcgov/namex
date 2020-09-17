@@ -31,6 +31,7 @@ from namex.constants import ValidSources, NameState, \
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
+from ..services.statistics import UnitTime
 
 
 class Request(db.Model):
@@ -408,22 +409,11 @@ class Request(db.Model):
         return criteria
 
     @classmethod
-    def get_queue_requests(cls, is_priority):
-        request_state = db.session.query(func.count(Request.id).label('queueRequestCounter')).filter(
-            Request.stateCd.in_([State.HOLD, State.DRAFT, State.INPROGRESS]))
-
-        queue_requests = request_state.filter(Request.priorityCd == RequestPriority.Y.value) if is_priority else \
-            request_state.filter(Request.priorityCd != RequestPriority.Y.value)
-
-        response = queue_requests.all()
-
-        return response.pop()
-
-    @classmethod
-    def get_examination_time_secs(cls):
-        median_examination_time = db.session.query(
+    def get_waiting_time(cls, unit):
+        unit_time = 86400 if unit == UnitTime.DAY.value else 60 * 60 if unit == UnitTime.HR.value else 60
+        median_waiting_time = db.session.query(
             func.percentile_cont(0.5).within_group((func.extract('epoch', Event.eventDate) -
-                                                    func.extract('epoch', Request.submittedDate))).label(
+                                                    func.extract('epoch', Request.submittedDate)) / unit_time).label(
                 'examinationTime')). \
             join(Request, and_(Event.nrId == Request.id)). \
             filter(Event.action == EventAction.PATCH.value,
@@ -432,9 +422,23 @@ class Request(db.Model):
                         EventState.CONDITIONAL.value, EventState.CANCELLED.value]),
                    Event.userId != EventUserId.SERVICE_ACCOUNT.value,
                    Event.eventDate.cast(Date) >= (func.now() - timedelta(days=1)).cast(Date)
-                   ).all()
+                   )
 
-        return median_examination_time.pop()
+        return median_waiting_time
+
+    @classmethod
+    def get_waiting_time_priority_queue(cls, unit):
+        median_waiting_time = cls.get_waiting_time(unit)
+        priority_waiting_time = median_waiting_time.filter(Request.priorityCd == RequestPriority.Y.value).all()
+
+        return priority_waiting_time.pop()
+
+    @classmethod
+    def get_waiting_time_regular_queue(cls, unit):
+        median_waiting_time = cls.get_waiting_time(unit)
+        regular_waiting_time = median_waiting_time.filter(Request.priorityCd != RequestPriority.Y.value).all()
+
+        return regular_waiting_time.pop()
 
     @classmethod
     def get_query_exact_match(cls, criteria, prep_name):

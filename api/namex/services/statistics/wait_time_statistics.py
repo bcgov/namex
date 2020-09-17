@@ -1,7 +1,8 @@
+import math
+
 from namex.models import Request
 from namex.models import Event
-from namex.services.statistics import response_keys
-from namex.utils.statistics import get_waiting_time
+from namex.services.statistics import response_keys, UnitTime
 from namex.utils.sql_alchemy import query_result_to_dict
 
 
@@ -16,34 +17,22 @@ class WaitTimeStatsService:
         return approved_names_counter
 
     @classmethod
-    def get_queue_requests(cls, is_priority):
-        queue_requests = Request.get_queue_requests(is_priority).queueRequestCounter
+    def get_waiting_time_priority_queue(cls, unit):
+        waiting_time = Request.get_waiting_time_priority_queue(unit)
 
-        return queue_requests
+        return math.ceil(waiting_time.examinationTime)
 
     @classmethod
-    def get_examination_time_secs(cls):
-        examination_time_secs = Request.get_examination_time_secs().examinationTime
+    def get_waiting_time_regular_queue(cls, unit):
+        waiting_time = Request.get_waiting_time_regular_queue(unit)
 
-        return examination_time_secs
+        return math.ceil(waiting_time.examinationTime)
 
     @classmethod
     def get_statistics(cls):
-        response_values = []
-
-        approved_names = cls.get_approved_names_counter()
-        response_values.append(approved_names)
-
-        priority_queue_requests = cls.get_queue_requests(is_priority=True)
-        regular_queue_requests = cls.get_queue_requests(is_priority=False)
-
-        examination_time_secs = cls.get_examination_time_secs()
-
-        waiting_time_priority_queue = get_waiting_time(examination_time_secs, priority_queue_requests)
-        response_values.append(waiting_time_priority_queue)
-
-        waiting_time_regular_queue = get_waiting_time(examination_time_secs, regular_queue_requests)
-        response_values.append(waiting_time_regular_queue)
+        response_values = [cls.get_approved_names_counter(),
+                           cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
+                           cls.get_waiting_time_regular_queue(unit=UnitTime.DAY.value)]
 
         response = query_result_to_dict(response_keys, response_values)
 
