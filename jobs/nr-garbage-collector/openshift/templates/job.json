@@ -32,7 +32,7 @@
                                         "valueFrom": {
                                             "configMapKeyRef": {
                                                 "key": "DATABASE_USERNAME",
-                                                "name": "{$NAME}-${ENV}-config"
+                                                "name": "${NAME}-${ENV}-config"
                                             }
                                         }
                                     },
@@ -41,7 +41,7 @@
                                         "valueFrom": {
                                             "configMapKeyRef": {
                                                 "key": "DATABASE_PASSWORD",
-                                                "name": "{$NAME}-${ENV}-config"
+                                                "name": "${NAME}-${ENV}-config"
                                             }
                                         }
                                     },
@@ -50,7 +50,7 @@
                                         "valueFrom": {
                                             "configMapKeyRef": {
                                                 "key": "DATABASE_NAME",
-                                                "name": "{$NAME}-${ENV}-config"
+                                                "name": "${NAME}-${ENV}-config"
                                             }
                                         }
                                     },
@@ -59,7 +59,7 @@
                                         "valueFrom": {
                                             "configMapKeyRef": {
                                                 "key": "DATABASE_HOST",
-                                                "name": "{$NAME}-${ENV}-config"
+                                                "name": "${NAME}-${ENV}-config"
                                             }
                                         }
                                     },
@@ -68,7 +68,7 @@
                                         "valueFrom": {
                                             "configMapKeyRef": {
                                                 "key": "DATABASE_PORT",
-                                                "name": "{$NAME}-${ENV}-config"
+                                                "name": "${NAME}-${ENV}-config"
                                             }
                                         }
                                     },
@@ -77,7 +77,7 @@
                                         "valueFrom": {
                                             "configMapKeyRef": {
                                                 "key": "SOLR_BASE_URL",
-                                                "name": "{$NAME}-${ENV}-config"
+                                                "name": "${NAME}-${ENV}-config"
                                             }
                                         }
                                     },
@@ -86,7 +86,7 @@
                                         "valueFrom": {
                                             "configMapKeyRef": {
                                                 "key": "STATE_THRESHOLD",
-                                                "name": "{$NAME}-${ENV}-config"
+                                                "name": "${NAME}-${ENV}-config"
                                             }
                                         }
                                     },
@@ -95,7 +95,7 @@
                                         "valueFrom": {
                                             "configMapKeyRef": {
                                                 "key": "MAX_ROWS_LIMIT",
-                                                "name": "{$NAME}-${ENV}-config"
+                                                "name": "${NAME}-${ENV}-config"
                                             }
                                         }
                                     }
