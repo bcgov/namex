@@ -1,7 +1,9 @@
 from __future__ import print_function
 from pprint import pprint
 
+import json
 import openapi_client
+from openapi_client import ApiException
 # Other stuff you can import...
 # from openapi_client.models import Payment
 # from openapi_client.rest import ApiException
@@ -122,6 +124,11 @@ def get_payment(payment_identifier):
         pprint(api_response)
         return api_response
 
+    except ApiException as err:
+        print("Exception when calling PaymentsApi->get_payment: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
+
     except Exception as err:
         print("Exception when calling PaymentsApi->get_payment: %s\n" % err)
         raise SBCPaymentException(err)
@@ -146,6 +153,11 @@ def create_payment(model):
         pprint(api_response)
         return api_response
 
+    except ApiException as err:
+        print("Exception when calling PaymentsApi->create_payment: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
+
     except Exception as err:
         print("Exception when calling PaymentsApi->create_payment: %s\n" % err)
         raise SBCPaymentException(err)
@@ -169,6 +181,11 @@ def update_payment(payment_identifier, model):
 
         pprint(api_response)
         return api_response
+
+    except ApiException as err:
+        print("Exception when calling PaymentsApi->update_payment: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
 
     except Exception as err:
         print("Exception when calling PaymentsApi->update_payment: %s\n" % err)

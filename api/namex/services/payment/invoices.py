@@ -1,7 +1,9 @@
 from __future__ import print_function
 from pprint import pprint
 
+import json
 import openapi_client
+from openapi_client import ApiException
 # Other stuff you can import...
 # from openapi_client.models import Invoice
 # from openapi_client.rest import ApiException
@@ -45,8 +47,14 @@ def get_invoice(payment_identifier, invoice_id):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling InvoicesApi->get_invoice: %s\n" % e)
+    except ApiException as err:
+        print("Exception when calling InvoicesApi->get_invoice: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
+
+    except Exception as err:
+        print("Exception when calling InvoicesApi->get_invoice: %s\n" % err)
+        raise SBCPaymentException(err)
 
 
 def get_invoices(payment_identifier):
@@ -68,5 +76,11 @@ def get_invoices(payment_identifier):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling InvoicesApi->get_invoices: %s\n" % e)
+    except ApiException as err:
+        print("Exception when calling InvoicesApi->get_invoices: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
+
+    except Exception as err:
+        print("Exception when calling InvoicesApi->get_invoices: %s\n" % err)
+        raise SBCPaymentException(err)

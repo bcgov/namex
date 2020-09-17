@@ -47,9 +47,10 @@ class Payment(db.Model):
     def as_dict(self):
         return {
             'id': self.id,
-            'payment_token' : self.payment_token,
-            'payment_completion_date' : self.payment_completion_date,
-            'payment_status_code' : self.payment_status_code
+            'nr_id': self.nrId,
+            'payment_token': self.payment_token,
+            'payment_completion_date': self.payment_completion_date,
+            'payment_status_code': self.payment_status_code
         }
 
     def save_to_db(self):

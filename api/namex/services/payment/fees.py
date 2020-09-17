@@ -1,7 +1,9 @@
 from __future__ import print_function
 from pprint import pprint
 
+import json
 import openapi_client
+from openapi_client import ApiException
 # Other stuff you can import...
 # from openapi_client.models import Fees
 # from openapi_client.rest import ApiException
@@ -49,5 +51,11 @@ def calculate_fees(req):
         pprint(api_response)
         return api_response
 
-    except Exception as e:
-        print("Exception when calling FeesApi->calculate_fees: %s\n" % e)
+    except ApiException as err:
+        print("Exception when calling FeesApi->calculate_fees: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
+
+    except Exception as err:
+        print("Exception when calling FeesApi->calculate_fees: %s\n" % err)
+        raise SBCPaymentException(err)

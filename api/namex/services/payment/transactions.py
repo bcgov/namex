@@ -1,7 +1,9 @@
 from __future__ import print_function
 from pprint import pprint
 
+import json
 import openapi_client
+from openapi_client import ApiException
 # Other stuff you can import...
 # from openapi_client.models import Transaction
 # from openapi_client.rest import ApiException
@@ -62,6 +64,11 @@ def create_transaction(req):
         pprint(api_response)
         return api_response
 
+    except ApiException as err:
+        print("Exception when calling TransactionsApi->create_transaction: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
+
     except Exception as err:
         print("Exception when calling TransactionsApi->create_transaction: %s\n" % err)
         raise SBCPaymentException(err)
@@ -90,6 +97,11 @@ def get_transaction(req):
         pprint(api_response)
         return api_response
 
+    except ApiException as err:
+        print("Exception when calling TransactionsApi->get_transaction: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
+
     except Exception as err:
         print("Exception when calling TransactionsApi->get_transaction: %s\n" % err)
         raise SBCPaymentException(err)
@@ -115,6 +127,11 @@ def get_transactions(req):
 
         pprint(api_response)
         return api_response
+
+    except ApiException as err:
+        print("Exception when calling TransactionsApi->get_transactions: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
 
     except Exception as err:
         print("Exception when calling TransactionsApi->get_transactions: %s\n" % err)
@@ -143,6 +160,11 @@ def update_transaction(req):
 
         pprint(api_response)
         return api_response
+
+    except ApiException as err:
+        print("Exception when calling TransactionsApi->update_transaction: %s\n" % err)
+        err_response = json.loads(err.body)
+        raise SBCPaymentException(err, message=err_response.detail)
 
     except Exception as err:
         print("Exception when calling TransactionsApi->update_transaction: %s\n" % err)

@@ -2,9 +2,10 @@ class PaymentException(Exception):
     """
     Base class for Payment exceptions.
     """
-    def __init__(self, wrapped_err=None, message="Payment exception."):
+    def __init__(self, wrapped_err=None, message="Payment exception.", status_code=None):
         self.err = wrapped_err
         self.message = message
+        self.status_code = wrapped_err.status if wrapped_err else 500
         super().__init__(self.message)
 
 

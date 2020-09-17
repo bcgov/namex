@@ -453,6 +453,12 @@ class NameRequestExpiredRejectedActions(AbstractEnum):
     RESEND = NameRequestActions.RESEND.value
 
 
+class NameRequestRollbackActions(AbstractEnum):
+    CANCEL = 'cancel'
+    RESTORE_STATE = 'restore'  # TODO: Not implemented yet
+    ROLLBACK_PAYMENT = 'rollback-payment'  # TODO: Not implemented yet
+
+
 class NROChangeFlags(AbstractEnum):
     REQUEST = 'is_changed__request'
     PREV_REQ = 'is_changed__previous_request'
