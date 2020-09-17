@@ -40,8 +40,8 @@ class Config(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    STALE_THRESHOLD = os.getenv('STALE_THRESHOLD', '1800')
-    MAX_ROWS_LIMIT = os.getenv('STALE_THRESHOLD', '100')
+    STALE_THRESHOLD = os.getenv('STALE_THRESHOLD', 1800)
+    MAX_ROWS_LIMIT = os.getenv('MAX_ROWS_LIMIT', 100)
     SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False

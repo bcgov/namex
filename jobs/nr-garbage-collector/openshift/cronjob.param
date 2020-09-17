@@ -10,4 +10,4 @@
 NAME="nr-garbage-collector"
 NAMESPACE="servicebc-ne"
 ENV="dev"
-SCHEDULE="0 0 * * *"
+SCHEDULE="*/5 * * * *"

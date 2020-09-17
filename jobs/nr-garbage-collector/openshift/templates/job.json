@@ -28,92 +28,74 @@
                                 ],
                                 "env": [
                                     {
-                                        "name": "COLIN_URL",
+                                        "name": "DATABASE_USERNAME",
                                         "valueFrom": {
                                             "configMapKeyRef": {
-                                                "key": "ROUTE",
-                                                "name": "colin-api-${ENV}-config"
+                                                "key": "DATABASE_USERNAME",
+                                                "name": "{$NAME}-${ENV}-config"
                                             }
                                         }
                                     },
                                     {
-                                        "name": "SENTRY_DSN",
+                                        "name": "DATABASE_PASSWORD",
                                         "valueFrom": {
                                             "configMapKeyRef": {
-                                                "key": "SENTRY_DSN",
-                                                "name": "updater-jobs-${ENV}-config"
+                                                "key": "DATABASE_PASSWORD",
+                                                "name": "{$NAME}-${ENV}-config"
                                             }
                                         }
                                     },
                                     {
-                                        "name": "LEGAL_URL",
+                                        "name": "DATABASE_NAME",
                                         "valueFrom": {
                                             "configMapKeyRef": {
-                                                "key": "ROUTE",
-                                                "name": "legal-api-${ENV}-config"
+                                                "key": "DATABASE_NAME",
+                                                "name": "{$NAME}-${ENV}-config"
                                             }
                                         }
                                     },
                                     {
-                                        "name": "ACCOUNT_SVC_AUTH_URL",
+                                        "name": "DATABASE_HOST",
                                         "valueFrom": {
                                             "configMapKeyRef": {
-                                                "key": "ACCOUNT_SVC_AUTH_URL",
-                                                "name": "updater-jobs-${ENV}-config"
+                                                "key": "DATABASE_HOST",
+                                                "name": "{$NAME}-${ENV}-config"
                                             }
                                         }
                                     },
                                     {
-                                        "name": "ACCOUNT_SVC_CLIENT_ID",
+                                        "name": "DATABASE_PORT",
                                         "valueFrom": {
                                             "configMapKeyRef": {
-                                                "key": "ACCOUNT_SVC_CLIENT_ID",
-                                                "name": "updater-jobs-${ENV}-config"
+                                                "key": "DATABASE_PORT",
+                                                "name": "{$NAME}-${ENV}-config"
                                             }
                                         }
                                     },
                                     {
-                                        "name": "ACCOUNT_SVC_CLIENT_SECRET",
+                                        "name": "SOLR_BASE_URL",
                                         "valueFrom": {
                                             "configMapKeyRef": {
-                                                "key": "ACCOUNT_SVC_CLIENT_SECRET",
-                                                "name": "updater-jobs-${ENV}-config"
+                                                "key": "SOLR_BASE_URL",
+                                                "name": "{$NAME}-${ENV}-config"
                                             }
                                         }
                                     },
                                     {
-                                        "name": "NATS_SERVERS",
+                                        "name": "STATE_THRESHOLD",
                                         "valueFrom": {
                                             "configMapKeyRef": {
-                                                "key": "NATS_SERVERS",
-                                                "name": "updater-jobs-${ENV}-config"
+                                                "key": "STATE_THRESHOLD",
+                                                "name": "{$NAME}-${ENV}-config"
                                             }
                                         }
                                     },
                                     {
-                                        "name": "NATS_CLUSTER_ID",
+                                        "name": "MAX_ROWS_LIMIT",
                                         "valueFrom": {
                                             "configMapKeyRef": {
-                                                "key": "NATS_CLUSTER_ID",
-                                                "name": "updater-jobs-${ENV}-config"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "name": "NATS_CLIENT_NAME",
-                                        "valueFrom": {
-                                            "configMapKeyRef": {
-                                                "key": "NATS_CLIENT_NAME",
-                                                "name": "updater-jobs-${ENV}-config"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "name": "NATS_EMAILER_SUBJECT",
-                                        "valueFrom": {
-                                            "configMapKeyRef": {
-                                                "key": "NATS_EMAILER_SUBJECT",
-                                                "name": "updater-jobs-${ENV}-config"
+                                                "key": "MAX_ROWS_LIMIT",
+                                                "name": "{$NAME}-${ENV}-config"
                                             }
                                         }
                                     }
