@@ -47,12 +47,13 @@ def test_add_descriptive_word_both_classifications_request_response(client, jwt,
             'entity_type_cd': 'CR',
             'request_action_cd': 'NEW'
         },
-        {
-            'name': 'PROPERTIES OF VICTORIA LTD.',
-            'location': 'BC',
-            'entity_type_cd': 'CR',
-            'request_action_cd': 'NEW'
-        },
+        # Name not allowed
+        # {
+        #     'name': 'PROPERTIES OF VICTORIA LTD.',
+        #     'location': 'BC',
+        #     'entity_type_cd': 'CR',
+        #     'request_action_cd': 'NEW'
+        # },
         {
             'name': 'SEWING SERVICE LTD.',
             'location': 'BC',
