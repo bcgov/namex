@@ -38,20 +38,20 @@ stage("Tag ${COMPONENT_NAME}-${TAG_NAME}") {
             input message: "Deploy to PROD?", id: "1234"
         }
         openshift.withCluster() {
-                openshift.withProject() {
+            openshift.withProject() {
 
-                    echo "Updating ${COMPONENT_NAME}-previous tag..."
-                    def IMAGE_HASH = getImageTagHash("${COMPONENT_NAME}", "${TAG_NAME}")
-                    echo "IMAGE_HASH: ${IMAGE_HASH}"
-                    openshift.tag("${COMPONENT_NAME}@${IMAGE_HASH}", "${COMPONENT_NAME}:${TAG_NAME}-previous")
+                echo "Updating ${COMPONENT_NAME}-previous tag..."
+                def IMAGE_HASH = getImageTagHash("${COMPONENT_NAME}", "${TAG_NAME}")
+                echo "IMAGE_HASH: ${IMAGE_HASH}"
+                openshift.tag("${COMPONENT_NAME}@${IMAGE_HASH}", "${COMPONENT_NAME}:${TAG_NAME}-previous")
 
-                    echo "Tagging ${COMPONENT_NAME} to ${TAG_NAME} ..."
-                    // Don't tag with BUILD_ID so the pruner can do it's job; it won't delete tagged images.
-                    // Tag the images for deployment based on the image's hash
-                    IMAGE_HASH = getImageTagHash("${COMPONENT_NAME}", "${SOURCE_TAG}")
-                    echo "IMAGE_HASH: ${IMAGE_HASH}"
-                    openshift.tag("${COMPONENT_NAME}@${IMAGE_HASH}", "${COMPONENT_NAME}:${TAG_NAME}")
-                }
+                echo "Tagging ${COMPONENT_NAME} to ${TAG_NAME} ..."
+                // Don't tag with BUILD_ID so the pruner can do it's job; it won't delete tagged images.
+                // Tag the images for deployment based on the image's hash
+                IMAGE_HASH = getImageTagHash("${COMPONENT_NAME}", "${SOURCE_TAG}")
+                echo "IMAGE_HASH: ${IMAGE_HASH}"
+                openshift.tag("${COMPONENT_NAME}@${IMAGE_HASH}", "${COMPONENT_NAME}:${TAG_NAME}")
             }
+        }
     }
 }
