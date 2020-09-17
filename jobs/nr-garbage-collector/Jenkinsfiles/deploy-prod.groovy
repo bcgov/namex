@@ -24,6 +24,19 @@ def COMPONENT_NAME = 'nr-garbage-collector'
 def TAG_NAME = 'prod'
 def SOURCE_TAG = 'test'
 
+// define groovy functions
+import groovy.json.JsonOutput
+
+// Get an image's hash tag
+String getImageTagHash(String imageName, String tag = "") {
+
+  if(!tag?.trim()) {
+    tag = "latest"
+  }
+
+  def istag = openshift.raw("get istag ${imageName}:${tag} -o template --template='{{.image.dockerImageReference}}'")
+  return istag.out.tokenize('@')[1].trim()
+}
 
 // define job properties - keep 10 builds only
 properties([
