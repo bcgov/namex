@@ -47,7 +47,7 @@ def run_nr_garbage_collection():
 
             original_state = r.stateCd
             r.stateCd = State.CANCELLED
-            if r.names and r.names[0]:
+            if r.names.all():
                 try:
                     current_app.logger.debug(f'deleting {r.nrNum} from possible.conflicts...')
                     deletion = NameRequestResource.delete_solr_doc('possible.conflicts', r.nrNum)
