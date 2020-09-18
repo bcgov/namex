@@ -635,7 +635,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                    stand_alone_words):
         if self.is_standalone_name(lst_desc_name1, stand_alone_words) and self.is_standalone_name(lst_desc_name2,
                                                                                                   stand_alone_words):
-            if lst_dist_name1.__len__() > lst_dist_name2.__len__() or lst_desc_name1.__len__() > lst_desc_name2.__len__():
+            if lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__():
                 return True
 
         return False
