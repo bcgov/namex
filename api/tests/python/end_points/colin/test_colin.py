@@ -8,7 +8,7 @@ from ..common.logging import log_request_path
 def test_colin_request(client, jwt, app):
     """
     """
-    corp_num = '4291018'  # Test corp num / profile ID from MRAS docs
+    corp_num = '0644263'  # Test corp num / profile ID from MRAS docs
 
     request_uri = API_BASE_URI + '{corp_num}'.format(corp_num=corp_num)
     test_params = [{}]

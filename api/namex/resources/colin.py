@@ -22,11 +22,30 @@ COLIN_SVC_URL = os.getenv('COLIN_SVC_URL', '') + '/corporations/{corp_num}'
 
 
 class ColinServiceException(Exception):
-    def __init__(self, colin_error=None, message=None):
-        # TODO: Finish this stuff
-        self.error_code = int(colin_error['error_code'])
-        self.colin_error_code = int(colin_error['internal_error_code'])
-        self.message = message if message else str(self.colin_error_code) + ': ' + colin_error['internal_error_message']
+    def __init__(self, wrapped_err=None, message="COLIN API exception.", status_code=500):
+        self.err = wrapped_err
+        self.colin_error_code = None
+        self.status_code = status_code
+
+        if wrapped_err and hasattr(wrapped_err, 'status'):
+            # Map HTTP status if the wrapped error has an HTTP status code
+            self.status_code = wrapped_err.status if wrapped_err.status else status_code
+
+        if wrapped_err and hasattr(wrapped_err, 'error_code'):
+            # Map COLIN error code if the wrapped error has a COLIN error code
+            self.error_code = int(wrapped_err.error_code)
+
+        if wrapped_err and hasattr(wrapped_err, 'internal_error_code'):
+            # Map COLIN error code if the wrapped error has a COLIN error code
+            self.colin_error_code = int(wrapped_err.internal_error_code)
+
+        if self.colin_error_code is not None:
+            self.message = message if message else str(self.colin_error_code) + ': ' + wrapped_err['internal_error_message']
+        elif wrapped_err:
+            self.message = '{msg}\r\n\r\n{desc}'.format(msg=message, desc=str(wrapped_err))
+        else:
+            self.message = message
+
         super().__init__(self.message)
 
 
@@ -68,6 +87,6 @@ class ColinApi(Resource):
                 return jsonify(content.get('message')), response.status_code
             return jsonify(content), response.status_code
         except ColinServiceException as err:
-            return handle_exception(err, err.message, err.error_code)
+            return handle_exception(err, err.message, err.status_code)
         except Exception as err:
             return handle_exception(err, 'Internal Server Error', 500)

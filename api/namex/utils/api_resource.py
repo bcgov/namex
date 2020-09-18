@@ -11,7 +11,7 @@ def log_error(msg, err):
 
 
 def handle_exception(err, msg, err_code):
-    log_error(msg + ' Error:{0}', err)
+    print('Error: ' + repr(err))
     return jsonify(message=msg), err_code
 
 

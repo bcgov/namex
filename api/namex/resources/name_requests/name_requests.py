@@ -152,3 +152,5 @@ class NameRequests(NameRequestResource):
             return jsonify(response_data), 201
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
+        except Exception as err:
+            return handle_exception(err, repr(err), 500)

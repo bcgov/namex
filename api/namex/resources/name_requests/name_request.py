@@ -103,6 +103,8 @@ class NameRequest(NameRequestResource):
             return jsonify(response_data), 200
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
+        except Exception as err:
+            return handle_exception(err, repr(err), 500)
 
     def update_nr(self, nr_model):
         nr_svc = self.nr_service
@@ -191,6 +193,8 @@ class NameRequestPayment(NameRequestResource):
             return jsonify(response_data), 200
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
+        except Exception as err:
+            return handle_exception(err, repr(err), 500)
 
     def process_payment(self, nr_model):
         nr_svc = self.nr_service
