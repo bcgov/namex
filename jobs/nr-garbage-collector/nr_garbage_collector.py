@@ -47,26 +47,26 @@ def run_nr_garbage_collection():
 
             original_state = r.stateCd
             r.stateCd = State.CANCELLED
-
-            try:
-                current_app.logger.debug(f'deleting {r.nrNum} from possible.conflicts...')
-                deletion = NameRequestResource.delete_solr_doc('possible.conflicts', r.nrNum)
-                if deletion:
-                    cancelled_nrs.append(
-                        {
-                            'id': r.nrNum,
-                            'name': r.names[0].name,
-                            'source': 'NR',
-                            'start_date': r.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
-                        }
-                    )
-                    current_app.logger.debug(f'successfully deleted {r.nrNum} from possible.conflics.')
-                else:
-                    raise Exception(f'Failed to delete {r.nrNum} from solr possible.conflicts core')
-            except Exception as err:
-                current_app.logger.error(err)
-                current_app.logger.debug(f'setting {r.nrNum} back to original state...')
-                r.stateCd = original_state
+            if r.names:
+                try:
+                    current_app.logger.debug(f'deleting {r.nrNum} from possible.conflicts...')
+                    deletion = NameRequestResource.delete_solr_doc('possible.conflicts', r.nrNum)
+                    if deletion:
+                        cancelled_nrs.append(
+                            {
+                                'id': r.nrNum,
+                                'name': r.names[0].name,
+                                'source': 'NR',
+                                'start_date': r.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
+                            }
+                        )
+                        current_app.logger.debug(f'successfully deleted {r.nrNum} from possible.conflics.')
+                    else:
+                        raise Exception(f'Failed to delete {r.nrNum} from solr possible.conflicts core')
+                except Exception as err:
+                    current_app.logger.error(err)
+                    current_app.logger.debug(f'setting {r.nrNum} back to original state...')
+                    r.stateCd = original_state
 
             db.session.add(r)
 
