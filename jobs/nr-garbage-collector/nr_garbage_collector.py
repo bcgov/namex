@@ -47,7 +47,6 @@ def run_nr_garbage_collection():
 
             original_state = r.stateCd
             r.stateCd = State.CANCELLED
-            db.session.add(r)
 
             try:
                 current_app.logger.debug(f'deleting {r.nrNum} from possible.conflicts...')
@@ -68,7 +67,8 @@ def run_nr_garbage_collection():
                 current_app.logger.error(err)
                 current_app.logger.debug(f'setting {r.nrNum} back to original state...')
                 r.stateCd = original_state
-                db.session.add(r)
+
+            db.session.add(r)
 
         db.session.commit()
         current_app.logger.debug(f'Successfully cancelled {row_count} NRs.')

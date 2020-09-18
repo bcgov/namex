@@ -107,7 +107,7 @@
                                                 }
                                             }
                                         ],
-                                        "image": "docker-registry.default.svc:5000/gl2uos-tools/${NAME}:${ENV}",
+                                        "image": "docker-registry.default.svc:5000/servicebc-ne-tools/${NAME}:${ENV}",
                                         "imagePullPolicy": "Always",
                                         "name": "${NAME}",
                                         "resources": {},
@@ -144,7 +144,7 @@
             "displayName": "Namespace",
             "description": "Namespace of the cronjob.",
             "required": true,
-            "value": "gl2uos"
+            "value": "servicebc-ne"
         },
         {
             "name": "ENV",
