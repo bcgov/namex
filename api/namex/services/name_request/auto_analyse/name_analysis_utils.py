@@ -150,7 +150,7 @@ def check_synonyms(syn_svc, stand_alone_words, list_dist_words, list_desc_words)
     both_list = list(set(list_dist_words) & set(list_desc_words))
     for word in both_list:
         substitution = syn_svc.get_word_synonyms(word=word).data
-        if substitution or porter.stem(word.lower()) in stand_alone_words:
+        if substitution or word.lower() in stand_alone_words:
             list_dist_words.remove(word)
         else:
             list_desc_words.remove(word)
