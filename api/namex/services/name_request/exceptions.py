@@ -1,7 +1,12 @@
 class NameRequestException(Exception):
-    def __init__(self, wrapped_err=None, message="Name request error."):
+    def __init__(self, wrapped_err=None, message="Name request error.", status_code=500):
         self.err = wrapped_err
-        self.message = message
+        if wrapped_err:
+            self.message = '{msg}\r\n\r\n{desc}'.format(msg=message, desc=str(wrapped_err))
+        else:
+            self.message = message
+        # Map HTTP status if the wrapped error has an HTTP status code
+        self.status_code = wrapped_err.status if wrapped_err and hasattr(wrapped_err, 'status') else status_code
         super().__init__(self.message)
 
 
