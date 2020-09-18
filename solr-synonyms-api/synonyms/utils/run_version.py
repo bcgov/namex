@@ -1,5 +1,7 @@
+"""Version information."""
 import os
-from synonyms import __version__
+
+from synonyms.VERSION import __version__
 
 
 def _build_openshift_run_version_id():
@@ -10,5 +12,5 @@ def _build_openshift_run_version_id():
 
 
 def get_run_version():
+    """Return version of service."""
     return __version__ if (_build_openshift_run_version_id() is None) else _build_openshift_run_version_id()
-

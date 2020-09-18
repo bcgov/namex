@@ -1,8 +1,9 @@
 # setup logging - important to set it up first
-from config import Config
-from os import path
 import logging.config
 import sys
+from os import path
+
+from config import Config
 
 
 def setup_logging(conf='logging.conf'):
