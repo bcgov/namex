@@ -146,11 +146,11 @@ def check_numbers_beginning(syn_svc, tokens):
     return tokens
 
 
-def check_synonyms(syn_svc, list_dist_words, list_desc_words):
+def check_synonyms(syn_svc, stand_alone_words, list_dist_words, list_desc_words):
     both_list = list(set(list_dist_words) & set(list_desc_words))
     for word in both_list:
         substitution = syn_svc.get_word_synonyms(word=word).data
-        if substitution:
+        if substitution or porter.stem(word.lower()) in stand_alone_words:
             list_dist_words.remove(word)
         else:
             list_desc_words.remove(word)
@@ -195,7 +195,7 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, list
     return check_conflicts
 
 
-def get_classification(service, syn_svc, match, wc_svc, token_svc):
+def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token_svc):
     desc_compound_dict = get_compound_descriptives(service, syn_svc)
     match = update_list(list(desc_compound_dict.keys()), match)
 
@@ -210,7 +210,9 @@ def get_classification(service, syn_svc, match, wc_svc, token_svc):
                 service.get_list_none(),
                 match
             )
-    service._list_dist_words, service._list_desc_words = check_synonyms(syn_svc, service.get_list_dist(),
+    service._list_dist_words, service._list_desc_words = check_synonyms(syn_svc,
+                                                                        stand_alone_words,
+                                                                        service.get_list_dist(),
                                                                         service.get_list_desc())
 
     service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())

@@ -466,7 +466,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     similarity = EXACT_MATCH
                 else:
                     match_list = np_svc.name_tokens
-                    get_classification(service, syn_svc, match_list, wc_svc, token_svc)
+                    get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc)
 
                     vector2_dist, entropy_dist = self.get_vector(service.get_list_dist(), list_dist,
                                                                  dist_substitution_dict)
