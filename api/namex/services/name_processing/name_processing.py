@@ -187,7 +187,7 @@ class NameProcessingService(GetSynonymListsMixin):
 
         tokens = tokens.split()
 
-        tokens = check_numbers_beginning(syn_svc, tokens)
+        #tokens = check_numbers_beginning(syn_svc, tokens)
 
         return [x.lower() for x in tokens if x]
 
