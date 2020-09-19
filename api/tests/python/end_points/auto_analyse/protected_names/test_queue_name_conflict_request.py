@@ -16,7 +16,7 @@ from ...common import token_header, claims
                              ("ARMSTRONG PLUMBING LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              # Stand alone names with additional distinctive or descriptive have to be approved.
                              # Test case no longer valid
-                             ("NO. 001 CATHEDRAL MINING LTD.", "NO. 003 CATHEDRAL MINING LTD."),
+                             # ("NO. 001 CATHEDRAL MINING LTD.", "NO. 003 CATHEDRAL MINING LTD."),
                              ("ARMSTRONG PLUMBING & CAFE INC.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              # Stand alone names with additional distinctive or descriptive have to be approved.
                              # Test case no longer valid
