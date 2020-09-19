@@ -50,12 +50,12 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
             'request_action_cd': 'NEW'
         },
         # All words are identified as distinctive because none of them are in synonym table
-        {
-            'name': 'BLAKE ENGINEERING LTD.',
-            'location': 'BC',
-            'entity_type_cd': 'CR',
-            'request_action_cd': 'NEW'
-        }
+        # {
+        #     'name': 'BLAKE ENGINEERING LTD.',
+        #     'location': 'BC',
+        #     'entity_type_cd': 'CR',
+        #     'request_action_cd': 'NEW'
+        # }
     ]
 
     for entry in test_params:
