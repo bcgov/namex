@@ -47,8 +47,11 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         if word:
             filters.append(func.lower(model.stems_text).op('~')(r'\y{}\y'.format(porter.stem(word).replace(" ", ""))))
 
-        field = [model.category] if category else [model.synonyms_text] if stand_alone else [model.stems_text,
-                                                                                             model.synonyms_text]
+        field = []
+        if category:
+            field = [model.category]
+        else:
+            field = [model.synonyms_text] if stand_alone else [model.stems_text, model.synonyms_text]
 
         criteria = SynonymQueryCriteria(
             word=word,
