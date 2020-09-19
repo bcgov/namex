@@ -187,8 +187,6 @@ class NameProcessingService(GetSynonymListsMixin):
 
         tokens = tokens.split()
 
-        #tokens = check_numbers_beginning(syn_svc, tokens)
-
         return [x.lower() for x in tokens if x]
 
     def exception_virtual_word_condition(self, text, vwc_svc):

@@ -634,9 +634,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def stand_alone_name_different(self, lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2,
                                    stand_alone_words):
         if self.is_standalone_name(lst_desc_name1, stand_alone_words) and self.is_standalone_name(lst_desc_name2,
-                                                                                                  stand_alone_words):
-            if lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__():
-                return True
+                                                                                                  stand_alone_words) and (
+                lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__()):
+            return True
 
         return False
 
