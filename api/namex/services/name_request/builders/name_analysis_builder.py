@@ -480,7 +480,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     similarity = round((similarity_dist + similarity_desc) / 2, 2)
                     print(similarity)
 
-                if similarity >= MINIMUM_SIMILARITY and not self.stand_alone_name_different(list_dist,
+                if similarity >= MINIMUM_SIMILARITY and not self.stand_alone_additional_dist_desc(list_dist,
                                                                                             service.get_list_dist(),
                                                                                             list_desc,
                                                                                             service.get_list_desc(),
@@ -631,7 +631,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             return True
         return False
 
-    def stand_alone_name_different(self, lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2,
+    def stand_alone_additional_dist_desc(self, lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2,
                                    stand_alone_words):
         if self.is_standalone_name(lst_desc_name1, stand_alone_words) and self.is_standalone_name(lst_desc_name2,
                                                                                                   stand_alone_words) and (
