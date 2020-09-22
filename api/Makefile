@@ -2,7 +2,7 @@
 
 .PHONY: flake8
 
-project_name := synonyms
+project_name := namex
 
 SHELL:=/bin/bash
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -17,7 +17,7 @@ setup: setup-venv
 
 venv/bin/activate: requirements/prod.txt requirements/dev.txt
 	rm -rf venv/
-	test -f venv/bin/activate || python3 -m venv  $(current_abs_dir)/venv
+	test -f venv/bin/activate || python3.6 -m venv  $(current_abs_dir)/venv
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;\
 	pip install -Ur requirements/dev.txt ;
@@ -25,7 +25,7 @@ venv/bin/activate: requirements/prod.txt requirements/dev.txt
 
 setup-venv: requirements/dev.txt
 	rm -rf venv/
-	test -f venv/bin/activate || python3 -m venv  $(current_abs_dir)/venv
+	test -f venv/bin/activate || python3.6 -m venv  $(current_abs_dir)/venv
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;
 	pip install -Ur requirements/dev.txt;

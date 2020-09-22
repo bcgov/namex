@@ -1,18 +1,22 @@
+"""Config for initializing the namex-api."""
 import os
-from dotenv import load_dotenv, find_dotenv
 
-#this will load all the envars from a .env file located in the project root (api)
+from dotenv import find_dotenv, load_dotenv
+
+# this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
 CONFIGURATION = {
-    "development": "config.DevConfig",
-    "testing": "config.TestConfig",
-    "production": "config.Config",
-    "default": "config.Config"
+    'development': 'config.DevConfig',
+    'testing': 'config.TestConfig',
+    'production': 'config.Config',
+    'default': 'config.Config'
 }
 
 
 class Config(object):
+    """Base config (also production config)."""
+
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
     SECRET_KEY = 'a secret'
@@ -25,8 +29,9 @@ class Config(object):
     SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
     NRO_EXTRACTOR_URI = os.getenv('NRO_EXTRACTOR_URI', None)
     AUTO_ANALYZE_URL = os.getenv('AUTO_ANALYZE_URL', None)
+    SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
-    ALEMBIC_INI='migrations/alembic.ini'
+    ALEMBIC_INI = 'migrations/alembic.ini'
 
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_USERNAME', '')
@@ -41,7 +46,7 @@ class Config(object):
         port=int(DB_PORT),
         name=DB_NAME
     )
-    ## ORACLE - LEGACY NRO NAMESDB
+    # ORACLE - LEGACY NRO NAMESDB
     NRO_USER = os.getenv('NRO_USER', '')
     NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
     NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
@@ -58,10 +63,7 @@ class Config(object):
     JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
     JWT_OIDC_CACHING_ENABLED = os.getenv('JWT_OIDC_CACHING_ENABLED')
 
-    try:
-        JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT'))
-    except:
-        JWT_OIDC_JWKS_CACHE_TIMEOUT = 300
+    JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT', '300'))
 
     TESTING = False,
     DEBUG = False
@@ -72,6 +74,8 @@ class Config(object):
 
 
 class DevConfig(Config):
+    """Dev config used for development."""
+
     TESTING = False,
     DEBUG = True
 
@@ -81,6 +85,8 @@ class DevConfig(Config):
 
 
 class TestConfig(Config):
+    """Test config used for pytests."""
+
     DEBUG = True
     TESTING = True
     # POSTGRESQL
@@ -106,39 +112,39 @@ class TestConfig(Config):
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
     # JWT OIDC settings
-    ## JWT_OIDC_TEST_MODE will set jwt_manager to use
+    # JWT_OIDC_TEST_MODE will set jwt_manager to use
     JWT_OIDC_TEST_MODE = True
     JWT_OIDC_TEST_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
     JWT_OIDC_TEST_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
     JWT_OIDC_TEST_ISSUER = 'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc'
     JWT_OIDC_TEST_KEYS = {
-        "keys": [
+        'keys': [
             {
-                "kid": "flask-jwt-oidc-test-client",
-                "kty": "RSA",
-                "alg": "RS256",
-                "use": "sig",
-                "n": "AN-fWcpCyE5KPzHDjigLaSUVZI0uYrcGcc40InVtl-rQRDmAh-C2W8H4_Hxhr5VLc6crsJ2LiJTV_E72S03pzpOOaaYV6-TzAjCou2GYJIXev7f6Hh512PuG5wyxda_TlBSsI-gvphRTPsKCnPutrbiukCYrnPuWxX5_cES9eStR",
-                "e": "AQAB"
+                'kid': 'flask-jwt-oidc-test-client',
+                'kty': 'RSA',
+                'alg': 'RS256',
+                'use': 'sig',
+                'n': 'AN-fWcpCyE5KPzHDjigLaSUVZI0uYrcGcc40InVtl-rQRDmAh-C2W8H4_Hxhr5VLc6crsJ2LiJTV_E72S03pzpOOaaYV6-TzAjCou2GYJIXev7f6Hh512PuG5wyxda_TlBSsI-gvphRTPsKCnPutrbiukCYrnPuWxX5_cES9eStR',
+                'e': 'AQAB'
             }
         ]
     }
 
     JWT_OIDC_TEST_PRIVATE_KEY_JWKS = {
-        "keys": [
+        'keys': [
             {
-                "kid": "flask-jwt-oidc-test-client",
-                "kty": "RSA",
-                "alg": "RS256",
-                "use": "sig",
-                "n": "AN-fWcpCyE5KPzHDjigLaSUVZI0uYrcGcc40InVtl-rQRDmAh-C2W8H4_Hxhr5VLc6crsJ2LiJTV_E72S03pzpOOaaYV6-TzAjCou2GYJIXev7f6Hh512PuG5wyxda_TlBSsI-gvphRTPsKCnPutrbiukCYrnPuWxX5_cES9eStR",
-                "e": "AQAB",
-                "d": "C0G3QGI6OQ6tvbCNYGCqq043YI_8MiBl7C5dqbGZmx1ewdJBhMNJPStuckhskURaDwk4-8VBW9SlvcfSJJrnZhgFMjOYSSsBtPGBIMIdM5eSKbenCCjO8Tg0BUh_xa3CHST1W4RQ5rFXadZ9AeNtaGcWj2acmXNO3DVETXAX3x0",
-                "p": "APXcusFMQNHjh6KVD_hOUIw87lvK13WkDEeeuqAydai9Ig9JKEAAfV94W6Aftka7tGgE7ulg1vo3eJoLWJ1zvKM",
-                "q": "AOjX3OnPJnk0ZFUQBwhduCweRi37I6DAdLTnhDvcPTrrNWuKPg9uGwHjzFCJgKd8KBaDQ0X1rZTZLTqi3peT43s",
-                "dp": "AN9kBoA5o6_Rl9zeqdsIdWFmv4DB5lEqlEnC7HlAP-3oo3jWFO9KQqArQL1V8w2D4aCd0uJULiC9pCP7aTHvBhc",
-                "dq": "ANtbSY6njfpPploQsF9sU26U0s7MsuLljM1E8uml8bVJE1mNsiu9MgpUvg39jEu9BtM2tDD7Y51AAIEmIQex1nM",
-                "qi": "XLE5O360x-MhsdFXx8Vwz4304-MJg-oGSJXCK_ZWYOB_FGXFRTfebxCsSYi0YwJo-oNu96bvZCuMplzRI1liZw"
+                'kid': 'flask-jwt-oidc-test-client',
+                'kty': 'RSA',
+                'alg': 'RS256',
+                'use': 'sig',
+                'n': 'AN-fWcpCyE5KPzHDjigLaSUVZI0uYrcGcc40InVtl-rQRDmAh-C2W8H4_Hxhr5VLc6crsJ2LiJTV_E72S03pzpOOaaYV6-TzAjCou2GYJIXev7f6Hh512PuG5wyxda_TlBSsI-gvphRTPsKCnPutrbiukCYrnPuWxX5_cES9eStR',
+                'e': 'AQAB',
+                'd': 'C0G3QGI6OQ6tvbCNYGCqq043YI_8MiBl7C5dqbGZmx1ewdJBhMNJPStuckhskURaDwk4-8VBW9SlvcfSJJrnZhgFMjOYSSsBtPGBIMIdM5eSKbenCCjO8Tg0BUh_xa3CHST1W4RQ5rFXadZ9AeNtaGcWj2acmXNO3DVETXAX3x0',
+                'p': 'APXcusFMQNHjh6KVD_hOUIw87lvK13WkDEeeuqAydai9Ig9JKEAAfV94W6Aftka7tGgE7ulg1vo3eJoLWJ1zvKM',
+                'q': 'AOjX3OnPJnk0ZFUQBwhduCweRi37I6DAdLTnhDvcPTrrNWuKPg9uGwHjzFCJgKd8KBaDQ0X1rZTZLTqi3peT43s',
+                'dp': 'AN9kBoA5o6_Rl9zeqdsIdWFmv4DB5lEqlEnC7HlAP-3oo3jWFO9KQqArQL1V8w2D4aCd0uJULiC9pCP7aTHvBhc',
+                'dq': 'ANtbSY6njfpPploQsF9sU26U0s7MsuLljM1E8uml8bVJE1mNsiu9MgpUvg39jEu9BtM2tDD7Y51AAIEmIQex1nM',
+                'qi': 'XLE5O360x-MhsdFXx8Vwz4304-MJg-oGSJXCK_ZWYOB_FGXFRTfebxCsSYi0YwJo-oNu96bvZCuMplzRI1liZw'
             }
         ]
     }
@@ -159,4 +165,3 @@ class TestConfig(Config):
     NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     4H8UZcVFN95vEKxJiLRjAmj6g273pu9kK4ymXNEjWWJn
     -----END RSA PRIVATE KEY-----"""
-
