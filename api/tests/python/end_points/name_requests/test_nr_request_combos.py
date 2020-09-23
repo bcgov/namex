@@ -108,7 +108,7 @@ def test_change_request_action_entity_reqtype(client, test_map):
 
         test_fields_were_updated(client, initial_data, update_data, expected_result)
 
-
+@pytest.mark.skip
 def test_change_request_actions(client):
     """
     Setup:
