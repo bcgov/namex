@@ -54,12 +54,13 @@ def test_add_descriptive_word_both_classifications_request_response(client, jwt,
         #     'entity_type_cd': 'CR',
         #     'request_action_cd': 'NEW'
         # },
-        {
-            'name': 'SEWING SERVICE LTD.',
-            'location': 'BC',
-            'entity_type_cd': 'CR',
-            'request_action_cd': 'NEW'
-        },
+        # Not valid name SEWING is descriptive and SERVICE distinctive, the order is reversed.
+        # {
+        #     'name': 'SEWING SERVICE LTD.',
+        #     'location': 'BC',
+        #     'entity_type_cd': 'CR',
+        #     'request_action_cd': 'NEW'
+        # },
     ]
 
     for entry in test_params:
