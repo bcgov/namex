@@ -362,6 +362,126 @@ def test_draft_patch_cancel(client, jwt, app):
     """
     # Define our data
     input_fields = draft_input_fields
+
+    post_response = create_draft_nr(client, input_fields)
+
+    # Assign the payload to new nr var
+    draft_nr = json.loads(post_response.data)
+    assert draft_nr is not None
+
+    # Take the response and edit it
+    nr_data = {}
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == CANCELLED: ' + str(bool(patched_nr.get('stateCd') == 'CANCELLED')))
+    assert patched_nr.get('stateCd') == State.CANCELLED
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    # Check actions (write a util for this)
+
+
+def test_draft_patch_cancel_with_invalid_states(client, jwt, app):
+    """
+    Setup:
+    Test:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Define our data
+    input_fields = draft_input_fields
+    post_response = create_draft_nr(client, input_fields)
+
+    # Assign the payload to new nr var
+    draft_nr = json.loads(post_response.data)
+    assert draft_nr is not None
+
+    # Take the response and edit it
+    nr_data = {}
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == CANCELLED: ' + str(bool(patched_nr.get('stateCd') == 'CANCELLED')))
+    assert patched_nr.get('stateCd') == State.CANCELLED
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    # Check actions (write a util for this)
+
+
+def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
+    """
+    Setup:
+    Test:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Define our data
+    input_fields = draft_input_fields
+    custom_names = [{
+        'name': 'BLUE HERON TOURS LTD.',
+        'choice': 1,
+        'designation': 'LTD.',
+        'name_type_cd': 'CO',
+        'consent_words': '',
+        'conflict1': 'BLUE HERON TOURS LTD.',
+        'conflict1_num': '0515211',
+        # Custom name has a corp num to make it 'consumed'
+        'corpNum': '12345'
+    }]
+
+    input_fields['names'] = custom_names
+
+    post_response = create_draft_nr(client, input_fields)
+
+    # Assign the payload to new nr var
+    draft_nr = json.loads(post_response.data)
+    assert draft_nr is not None
+
+    # Take the response and edit it
+    nr_data = {}
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+
+    # Check state
+    print('Assert that stateCd == CANCELLED: ' + str(bool(patched_nr.get('stateCd') == 'CANCELLED')))
+    assert patched_nr.get('stateCd') == State.CANCELLED
+
+    # Check NR number is the same because these are PATCH and call change_nr
+    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+    # Check actions (write a util for this)
+
+
+def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
+    """
+    Setup:
+    Test:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Define our data
+    input_fields = draft_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var

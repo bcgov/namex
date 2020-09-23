@@ -126,7 +126,19 @@ def create_draft_nr(client, nr_data=None):
         add_test_user_to_db()
 
         # Optionally supply the field data
-        nr = build_nr(State.DRAFT, nr_data)
+        custom_names = nr_data.get('names', None)
+        if not custom_names:
+            custom_names = [{
+                'name': 'BLUE HERON TOURS LTD.',
+                'choice': 1,
+                'designation': 'LTD.',
+                'name_type_cd': 'CO',
+                'consent_words': '',
+                'conflict1': 'BLUE HERON TOURS LTD.',
+                'conflict1_num': '0515211'
+            }]
+
+        nr = build_nr(State.DRAFT, nr_data, custom_names, False)
 
         nr_data = nr.json()
 
@@ -150,16 +162,6 @@ def create_draft_nr(client, nr_data=None):
             'postalCd': 'V8R 2P1',
             'stateProvinceCd': 'BC'
 
-        }]
-
-        nr_data['names'] = [{
-            'name': 'BLUE HERON TOURS LTD.',
-            'choice': 1,
-            'designation': 'LTD.',
-            'name_type_cd': 'CO',
-            'consent_words': '',
-            'conflict1': 'BLUE HERON TOURS LTD.',
-            'conflict1_num': '0515211'
         }]
 
         # Create a new DRAFT NR using the NR we just created
