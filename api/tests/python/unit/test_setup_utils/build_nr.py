@@ -57,7 +57,8 @@ def build_nr(nr_state, data=None, test_names=None, generate_id_seq=None):
         State.RESERVED: build_reserved,
         State.COND_RESERVE: build_cond_reserved,
         State.CONDITIONAL: build_conditional,
-        State.APPROVED: build_approved
+        State.APPROVED: build_approved,
+        State.CANCELLED: build_cancelled
     }.get(nr_state)(data, test_names, generate_id_seq)
 
 
@@ -101,7 +102,9 @@ def build_cond_reserved(data=None, test_names=None, generate_id_seq=None):
 
     # Map the data, if provided
     for key, value in data.items():
-        nr.__setattr__(key, value)
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
 
     nr.names = []
     for test_name in test_names:
@@ -159,6 +162,34 @@ def build_approved(data=None, test_names=None, generate_id_seq=None):
 
     # Set defaults, if these exist in the provided data they will be overwritten
     nr.stateCd = State.APPROVED
+    nr.requestId = 1460775
+    nr._source = 'NRO'
+
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        nr.__setattr__(key, value)
+
+    nr.names = []
+    for test_name in test_names:
+        nr.names.append(build_name(test_name, generate_id_seq))
+
+    return nr
+
+
+def build_cancelled(data=None, test_names=None, generate_id_seq=None):
+    """
+    :param data:
+    :param test_names:
+    :param generate_id_seq:
+    :return:
+    """
+    nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    nr.stateCd = State.CANCELLED
     nr.requestId = 1460775
     nr._source = 'NRO'
 

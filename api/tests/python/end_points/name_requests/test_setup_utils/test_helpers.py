@@ -109,11 +109,22 @@ def add_test_user_to_db():
 
 
 @pytest.mark.skip
+def create_cancelled_nr(client, nr_data=None):
+    return create_test_nr(client, nr_data, State.CANCELLED)
+
+
+@pytest.mark.skip
 def create_draft_nr(client, nr_data=None):
+    return create_test_nr(client, nr_data, State.DRAFT)
+
+
+@pytest.mark.skip
+def create_test_nr(client, nr_data=None, nr_state=State.DRAFT):
     """
     Create a draft NR, using the API, to use as the initial state for each test.
     :param client:
     :param nr_data:
+    :param nr_state:
     :return:
     """
     try:
@@ -138,7 +149,7 @@ def create_draft_nr(client, nr_data=None):
                 'conflict1_num': '0515211'
             }]
 
-        nr = build_nr(State.DRAFT, nr_data, custom_names, False)
+        nr = build_nr(nr_state, nr_data, custom_names, False)
 
         nr_data = nr.json()
 
@@ -180,7 +191,6 @@ def create_draft_nr(client, nr_data=None):
         return post_response
     except Exception as err:
         print(repr(err))
-
 
 @pytest.mark.skip
 def patch_nr(client, action, nr_id, nr_data):

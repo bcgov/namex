@@ -8,7 +8,7 @@ from tests.python.common.test_name_request_utils import \
 
 from .test_setup_utils.test_helpers import \
     assert_names_are_mapped_correctly, assert_applicant_is_mapped_correctly, \
-    create_draft_nr, patch_nr
+    create_draft_nr, create_cancelled_nr, patch_nr
 
 from namex.models import State
 from namex.constants import NameRequestActions
@@ -447,13 +447,14 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
 
     input_fields['names'] = custom_names
 
-    post_response = create_draft_nr(client, input_fields)
+    post_response = create_cancelled_nr(client, input_fields)
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
     # Take the response and edit it
+    # Expect this to fail as we
     nr_data = {}
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
