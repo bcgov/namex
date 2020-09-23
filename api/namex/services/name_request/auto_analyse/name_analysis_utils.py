@@ -182,15 +182,13 @@ def change_descriptive(list_dist_words, list_desc_words, list_name):
     return list_dist_words, list_desc_words
 
 
-def get_classification_summary(service):
+def get_classification_summary(list_dist, list_desc, list_name):
     classification_summary = {
         word.replace(" ",
-                     ""): DataFrameFields.DISTINCTIVE.value if word in service.get_list_dist() else DataFrameFields.DESCRIPTIVE.value if any(
-            word in desc_word for desc_word in service.get_list_desc()) else DataFrameFields.UNCLASSIFIED.value for word
+                     ""): DataFrameFields.DISTINCTIVE.value if word in list_dist else DataFrameFields.DESCRIPTIVE.value if any(
+            word in desc_word for desc_word in list_desc) else DataFrameFields.UNCLASSIFIED.value for word
         in
-        service.name_tokens_search_conflict}
-    service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
-
+        list_name}
     return classification_summary
 
 
@@ -224,6 +222,12 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
 
     service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())
 
+    dict_name_words_original = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
+                                                          service.name_tokens)
+    service.set_name_tokens(remove_spaces_list(service.name_tokens))
+    print("Original Classification:")
+    print(dict_name_words_original)
+
     service.set_name_tokens_search_conflict(service.name_tokens)
     service._list_dist_words = remove_misplaced_distinctive(service.get_list_dist(), service.get_list_desc(),
                                                             service.name_tokens)
@@ -235,8 +239,11 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     service.set_name_tokens_search_conflict(update_elements_list(service.get_list_dist() + service.get_list_desc(),
                                                                  service.name_tokens))
 
-    service._dict_name_words = get_classification_summary(service)
+    service._dict_name_words = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
+                                                          service.name_tokens_search_conflict)
+    service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 
+    print("Classification for search conflict:")
     print(service.get_dict_name())
 
 
@@ -285,7 +292,7 @@ def update_elements_list(list_desc_dist, list_name):
 
 def get_compound_descriptives(service, syn_svc):
     list_compound = []
-    for i in range(2, len(service.name_tokens)):
+    for i in range(2, len(service.name_tokens)+1):
         list_compound.extend(subsequences(service.name_tokens, i))
 
     desc_compound_dict_validated = get_valid_compound_descriptive(syn_svc, list_compound)
