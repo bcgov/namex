@@ -8,14 +8,14 @@ from tests.python.common.test_name_request_utils import \
 
 from .test_setup_utils.test_helpers import \
     assert_names_are_mapped_correctly, assert_applicant_is_mapped_correctly, \
-    create_draft_nr, create_cancelled_nr, patch_nr
+    create_draft_nr, create_approved_nr, create_cancelled_nr, patch_nr
 
 from namex.models import State
 from namex.constants import NameRequestActions
 
 # Define our data
 # Check NR number is the same because these are PATCH and call change_nr
-draft_input_fields = {
+test_input_fields = {
     'additionalInfo': '',
     'consentFlag': None,
     'consent_dt': None,
@@ -36,8 +36,8 @@ draft_input_fields = {
     'requestTypeCd': 'CR',
     'request_action_cd': 'NEW',
     # 'source': 'NAMEREQUEST',
-    'state': 'DRAFT',
-    'stateCd': 'DRAFT',
+    # 'state': 'DRAFT',
+    # 'stateCd': 'DRAFT',
     'submitCount': 1,
     # 'submittedDate': None,
     'submitter_userid': 'name_request_service_account',
@@ -57,7 +57,7 @@ def test_draft_patch_edit_data(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -171,13 +171,13 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app):
     :return:
     """
     # Define our data, which is initially set to:
-    # draft_input_fields = {
+    # test_input_fields = {
     #     'request_action_cd': 'NEW'
     #     'entity_type_cd': 'CR'
     #     'requestTypeCd': 'CR'
     #     ...
     # }
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -223,7 +223,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -319,7 +319,7 @@ def test_draft_patch_upgrade(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -361,7 +361,7 @@ def test_draft_patch_cancel(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
 
     post_response = create_draft_nr(client, input_fields)
 
@@ -397,42 +397,7 @@ def test_draft_patch_cancel_with_invalid_states(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
-    post_response = create_draft_nr(client, input_fields)
-
-    # Assign the payload to new nr var
-    draft_nr = json.loads(post_response.data)
-    assert draft_nr is not None
-
-    # Take the response and edit it
-    nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
-    patched_nr = json.loads(patch_response.data)
-    assert patched_nr is not None
-
-    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
-
-    # Check state
-    print('Assert that stateCd == CANCELLED: ' + str(bool(patched_nr.get('stateCd') == 'CANCELLED')))
-    assert patched_nr.get('stateCd') == State.CANCELLED
-
-    # Check NR number is the same because these are PATCH and call change_nr
-    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
-
-    # Check actions (write a util for this)
-
-
-def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
-    """
-    Setup:
-    Test:
-    :param client:
-    :param jwt:
-    :param app:
-    :return:
-    """
-    # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     custom_names = [{
         'name': 'BLUE HERON TOURS LTD.',
         'choice': 1,
@@ -447,29 +412,67 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
 
     input_fields['names'] = custom_names
 
-    post_response = create_cancelled_nr(client, input_fields)
-
-    # Assign the payload to new nr var
-    draft_nr = json.loads(post_response.data)
+    draft_nr = create_approved_nr(client, input_fields)
     assert draft_nr is not None
 
     # Take the response and edit it
     # Expect this to fail as we
     nr_data = {}
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
+
+    # Ensure the request failed
+    print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
+
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
+    # There should be an error message in the response
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+    assert isinstance(patched_nr.get('message'), str)
 
-    # Check state
-    print('Assert that stateCd == CANCELLED: ' + str(bool(patched_nr.get('stateCd') == 'CANCELLED')))
-    assert patched_nr.get('stateCd') == State.CANCELLED
 
-    # Check NR number is the same because these are PATCH and call change_nr
-    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
+    """
+    Setup:
+    Test:
+    :param client:
+    :param jwt:
+    :param app:
+    :return:
+    """
+    # Define our data
+    input_fields = test_input_fields
+    custom_names = [{
+        'name': 'BLUE HERON TOURS LTD.',
+        'choice': 1,
+        'designation': 'LTD.',
+        'name_type_cd': 'CO',
+        'consent_words': '',
+        'conflict1': 'BLUE HERON TOURS LTD.',
+        'conflict1_num': '0515211',
+        # Custom name has a corp num to make it 'consumed'
+        'corpNum': '12345'
+    }]
 
-    # Check actions (write a util for this)
+    input_fields['names'] = custom_names
+
+    draft_nr = create_approved_nr(client, input_fields)
+    assert draft_nr is not None
+
+    # Take the response and edit it
+    # Expect this to fail as we
+    nr_data = {}
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
+
+    # Ensure the request failed
+    print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
+
+    patched_nr = json.loads(patch_response.data)
+    assert patched_nr is not None
+
+    # There should be an error message in the response
+    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
+    assert isinstance(patched_nr.get('message'), str)
 
 
 def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
@@ -482,29 +485,38 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
-    post_response = create_draft_nr(client, input_fields)
+    input_fields = test_input_fields
+    custom_names = [{
+        'name': 'BLUE HERON TOURS LTD.',
+        'choice': 1,
+        'designation': 'LTD.',
+        'name_type_cd': 'CO',
+        'consent_words': '',
+        'conflict1': 'BLUE HERON TOURS LTD.',
+        'conflict1_num': '0515211',
+        # Custom name has a corp num to make it 'consumed'
+        'corpNum': '12345'
+    }]
 
-    # Assign the payload to new nr var
-    draft_nr = json.loads(post_response.data)
+    input_fields['names'] = custom_names
+
+    draft_nr = create_approved_nr(client, input_fields)
     assert draft_nr is not None
 
     # Take the response and edit it
+    # Expect this to fail as we
     nr_data = {}
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
+
+    # Ensure the request failed
+    print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
+
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
+    # There should be an error message in the response
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
-
-    # Check state
-    print('Assert that stateCd == CANCELLED: ' + str(bool(patched_nr.get('stateCd') == 'CANCELLED')))
-    assert patched_nr.get('stateCd') == State.CANCELLED
-
-    # Check NR number is the same because these are PATCH and call change_nr
-    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
-
-    # Check actions (write a util for this)
+    assert isinstance(patched_nr.get('message'), str)
 
 
 def test_draft_patch_refund(client, jwt, app):
@@ -517,7 +529,7 @@ def test_draft_patch_refund(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -550,7 +562,7 @@ def test_draft_patch_reapply(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -605,7 +617,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -665,7 +677,7 @@ def test_draft_patch_resend(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = draft_input_fields
+    input_fields = test_input_fields
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var

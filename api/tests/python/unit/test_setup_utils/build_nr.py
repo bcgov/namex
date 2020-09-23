@@ -126,7 +126,9 @@ def build_reserved(data=None, test_names=None, generate_id_seq=None):
 
     # Map the data, if provided
     for key, value in data.items():
-        nr.__setattr__(key, value)
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
 
     nr.names = []
     for test_name in test_names:
@@ -148,7 +150,9 @@ def build_conditional(data=None, test_names=None, generate_id_seq=None):
 
     # Map the data, if provided
     for key, value in data.items():
-        nr.__setattr__(key, value)
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
 
     nr.names = []
     for test_name in test_names:
@@ -170,7 +174,9 @@ def build_approved(data=None, test_names=None, generate_id_seq=None):
 
     # Map the data, if provided
     for key, value in data.items():
-        nr.__setattr__(key, value)
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
 
     nr.names = []
     for test_name in test_names:
@@ -198,7 +204,9 @@ def build_cancelled(data=None, test_names=None, generate_id_seq=None):
 
     # Map the data, if provided
     for key, value in data.items():
-        nr.__setattr__(key, value)
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
 
     nr.names = []
     for test_name in test_names:

@@ -221,7 +221,9 @@ def to_approved(resource, nr, on_success_cb):
 
 
 def to_cancelled(resource, nr, on_success_cb):
-    valid_states = [State.APPROVED, State.CONDITIONAL]
+    # Allow cancelled to cancelled state transition here, if this is not to be allowed, catch it when validating the request
+    # valid_states = [State.APPROVED, State.CONDITIONAL]
+    valid_states = State.CANCELLABLE_STATES
     if nr.stateCd not in valid_states:
         raise InvalidStateError(message=invalid_state_transition_msg.format(
             current_state=nr.stateCd,

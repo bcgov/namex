@@ -1,5 +1,3 @@
-import os
-
 from datetime import datetime
 from pytz import timezone
 
@@ -527,7 +525,6 @@ class NameRequestService(AbstractNameRequestMixin):
             submitted_name.name_type_cd = name.get('name_type_cd', 'CO')
             submitted_name.name = convert_to_ascii(name.get('name', ''))
             submitted_name.designation = name.get('designation', '')
-            # TODO: Verify this behavior I don't see ANYWHERE where this is currently being mapped
             # For existing businesses
             if isinstance(name.get('corpNum'), str):
                 # To clear the corpNum use an empty string in the data payload

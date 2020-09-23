@@ -107,6 +107,13 @@ def add_test_user_to_db():
     user = User(username='name_request_service_account', firstname='Test', lastname='User', sub='idir/name_request_service_account', iss='keycloak')
     user.save_to_db()
 
+    return user
+
+
+@pytest.mark.skip
+def create_approved_nr(client, nr_data=None):
+    return create_test_nr(client, nr_data, State.APPROVED)
+
 
 @pytest.mark.skip
 def create_cancelled_nr(client, nr_data=None):
@@ -114,12 +121,65 @@ def create_cancelled_nr(client, nr_data=None):
 
 
 @pytest.mark.skip
-def create_draft_nr(client, nr_data=None):
+def create_draft_nr(client, nr_data=None, use_api=True):
+    """
+    You can optionally set the use_api param to False to create an NR using model persistence as opposed to the API
+    :param client:
+    :param nr_data:
+    :param use_api:
+    :return:
+    """
+    if use_api:
+        return post_test_nr(client, nr_data, State.DRAFT)
+
     return create_test_nr(client, nr_data, State.DRAFT)
 
 
 @pytest.mark.skip
 def create_test_nr(client, nr_data=None, nr_state=State.DRAFT):
+    """
+    Create a draft NR and persist (NOT using the API) to use as the initial state for each test.
+    :param client:
+    :param nr_data:
+    :param nr_state:
+    :return:
+    """
+    try:
+        # Set up our test data
+        add_states_to_db(state_data)
+        user = add_test_user_to_db()
+
+        # Optionally supply the field data
+        custom_names = nr_data.get('names', None)
+        if not custom_names:
+            custom_names = [{
+                'name': 'BLUE HERON TOURS LTD.',
+                'choice': 1,
+                'designation': 'LTD.',
+                'name_type_cd': 'CO',
+                'consent_words': '',
+                'conflict1': 'BLUE HERON TOURS LTD.',
+                'conflict1_num': '0515211'
+            }]
+
+        nr = build_nr(nr_state, nr_data, custom_names, False)
+
+        # Set any missing fields
+        # TODO: We may want to add this stuff to build_nr
+        nr.userId = user.id
+        nr.activeUser = user
+        nr.submitter = user
+        nr.submitter_userid = user.id
+
+        nr.save_to_db()
+
+        return nr.json()
+    except Exception as err:
+        print(repr(err))
+
+
+@pytest.mark.skip
+def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
     """
     Create a draft NR, using the API, to use as the initial state for each test.
     :param client:
@@ -191,6 +251,7 @@ def create_test_nr(client, nr_data=None, nr_state=State.DRAFT):
         return post_response
     except Exception as err:
         print(repr(err))
+
 
 @pytest.mark.skip
 def patch_nr(client, action, nr_id, nr_data):
