@@ -108,7 +108,7 @@ def test_draft_patch_edit_data(client, jwt, app):
     # updated_applicant = {}
     # nr_data['applicant'] = updated_applicant
 
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -192,7 +192,7 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app):
         'requestTypeCd': 'CLC'  # From request_type_mapping in namex.constants
     }
 
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -264,7 +264,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
 
     # nr_data['applicant'] = updated_applicant
 
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -288,7 +288,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     Patch the NR again with the response to make sure everything runs as expected
     """
 
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, patched_nr.get('nrNum'), patched_nr)
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, patched_nr.get('id'), patched_nr)
     patched_nr = json.loads(patch_response.data)
 
     re_patched_nr = json.loads(patch_response.data)
@@ -329,7 +329,7 @@ def test_draft_patch_upgrade(client, jwt, app):
 
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.UPGRADE.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.UPGRADE.value, draft_nr.get('id'), nr_data)
 
     assert patch_response.status_code == 200
     patched_nr = json.loads(patch_response.data)
@@ -370,7 +370,7 @@ def test_draft_patch_cancel(client, jwt, app):
 
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -405,7 +405,7 @@ def test_draft_patch_refund(client, jwt, app):
 
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.REFUND.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.REFUND.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -439,7 +439,7 @@ def test_draft_patch_reapply(client, jwt, app):
     def do_reapply():
         # Take the response and edit it
         nr_data = {}
-        patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
+        patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data)
 
         updated_nr = None
         if patch_response.status_code == 200:
@@ -496,7 +496,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
         'request_action_cd': 'REH'
     }
 
-    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -517,7 +517,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
         'request_action_cd': 'REST'
     }
 
-    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -553,7 +553,7 @@ def test_draft_patch_resend(client, jwt, app):
 
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.RESEND.value, draft_nr.get('nrNum'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.RESEND.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 

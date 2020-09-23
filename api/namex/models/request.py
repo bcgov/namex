@@ -112,6 +112,19 @@ class Request(db.Model):
 
     # properties
     @property
+    def has_consumed_name(self):
+        names = self.names.all()
+
+        def is_not_consumed(name):
+            no_corp_num = name.corpNum is None
+            no_consumption_date = name.consumptionDate is None
+
+            return no_corp_num and no_consumption_date
+
+        results = [is_not_consumed(n) is False for n in names]
+        return True in results
+
+    @property
     def latest_payment(self):
         payments = self.payments.all()
         return payments[0]
@@ -120,6 +133,12 @@ class Request(db.Model):
     def latest_payment_completion_date(self):
         payments = self.payments.all()
         return payments[0]
+
+    @property
+    def is_expired(self):
+        todays_date = datetime.utcnow().date()
+        expiry_date = self.expirationDate.date()
+        return todays_date < expiry_date
 
     @property
     def source(self):

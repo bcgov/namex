@@ -9,7 +9,7 @@ from namex.constants import \
 from namex.models import State
 
 from .utils import has_active_payment
-from .exceptions import NameRequestException, InvalidStateError
+from .exceptions import NameRequestException, InvalidStateError, NameRequestIsConsumedError, NameRequestIsExpiredError
 
 state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{next_state}]'
 invalid_state_transition_msg = 'Invalid state transition [{current_state}] -> [{next_state}], valid states are [{valid_states}]'
@@ -30,13 +30,13 @@ def display_upgrade_action(nr_model=None):
 
 
 def display_cancel_action(nr_model=None):
-    if nr_model and nr_model.stateCd == State.CANCELLED:
+    if (nr_model and nr_model.stateCd == State.CANCELLED) or (nr_model.stateCd not in State.CANCELLABLE_STATES):
         return False
 
-    if nr_model and nr_model.stateCd in State.CANCELLABLE_STATES:
-        return True
+    if nr_model and (nr_model.is_expired or nr_model.has_consumed_name):
+        return False
 
-    return False
+    return True
 
 
 def display_refund_action(nr_model=None):
@@ -55,9 +55,10 @@ def display_receipt_action(nr_model=None):
 
 def display_reapply_action(nr_model=None):
     if nr_model and nr_model.expirationDate and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
-        todays_date = datetime.utcnow().date()
-        expiry_date = nr_model.expirationDate.date()
-        if todays_date < expiry_date:
+        if nr_model.is_expired:
+            todays_date = datetime.utcnow().date()
+            expiry_date = nr_model.expirationDate.date()
+
             delta = expiry_date - todays_date
             if delta.days <= 5:
                 return True
@@ -196,13 +197,19 @@ def to_approved(resource, nr, on_success_cb):
 
 
 def to_cancelled(resource, nr, on_success_cb):
-    valid_states = State.CANCELLABLE_STATES
+    valid_states = [State.APPROVED, State.CONDITIONAL]
     if nr.stateCd not in valid_states:
         raise InvalidStateError(message=invalid_state_transition_msg.format(
             current_state=nr.stateCd,
             next_state=State.CANCELLED,
             valid_states=', '.join(valid_states)
         ))
+
+    if nr.is_expired is True:
+        raise NameRequestIsExpiredError()
+
+    if nr.has_consumed_name is True:
+        raise NameRequestIsConsumedError()
 
     resource.next_state_code = State.CANCELLED
     nr.stateCd = State.CANCELLED

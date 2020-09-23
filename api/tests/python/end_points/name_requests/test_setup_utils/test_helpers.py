@@ -181,15 +181,15 @@ def create_draft_nr(client, nr_data=None):
 
 
 @pytest.mark.skip
-def patch_nr(client, action, nr_num, nr_data):
+def patch_nr(client, action, nr_id, nr_data):
     try:
-        request_uri = API_BASE_URI + nr_num + '/' + action
+        request_uri = API_BASE_URI + str(nr_id) + '/' + action
         test_params = [{}]
 
         headers = get_test_headers()
         query = build_test_query(test_params)
         path = build_request_uri(request_uri, query)
-        print('Patch (' + action + ') Name Request [' + nr_num + ']: \n' + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': ')))
+        print('Patch (' + action + ') Name Request [' + str(nr_id) + ']: \n' + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': ')))
         log_request_path(path)
 
         patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)
