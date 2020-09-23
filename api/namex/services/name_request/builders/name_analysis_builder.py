@@ -766,7 +766,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_compound_distinctive_hybrid(self, dist_substitution_dict, dict_descriptive, list_name):
         dict_compound_dist, dict_desc = {}, {}
 
-        if dict_descriptive.__len__() > 1 and dist_substitution_dict.__len__() >1:
+        if dict_descriptive.__len__() > 1 and dist_substitution_dict.__len__() > 0:
             dict_desc = dict(dict_descriptive)
             for key_dist, value in sorted(list(dist_substitution_dict.items()), key=lambda x: x[0].lower(),
                                           reverse=True):
