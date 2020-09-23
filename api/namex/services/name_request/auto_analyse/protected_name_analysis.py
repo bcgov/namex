@@ -48,7 +48,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
             check_conflicts = builder.search_conflicts(
                 [self.get_list_dist()],
                 [self.get_list_desc()],
-                self.name_tokens,
+                self.name_tokens_search_conflict,
                 self.processed_name
             )
 
@@ -58,7 +58,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         check_conflicts_queue = builder.search_conflicts(
             [self.get_list_dist()],
             [self.get_list_desc()],
-            self.name_tokens,
+            self.name_tokens_search_conflict,
             self.processed_name,
             False,
             True
