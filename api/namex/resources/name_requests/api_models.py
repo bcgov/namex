@@ -33,7 +33,8 @@ name_model = api.model('name_model', {
     'designation': fields.String('Name designation based on entity type'),
     'conflict1_num': fields.String('The corp_num of the matching name'),
     'conflict1': fields.String('The matching corp name'),
-    'consent_words': fields.Nested(consent_model)
+    'consent_words': fields.Nested(consent_model),
+    'corpNum': fields.String('Corp Num')
 })
 
 nr_request = api.model('name_request', {

@@ -36,6 +36,7 @@ def build_name(test_name, generate_id_seq=True):
     name.consent_words = test_name.get('consent_words', '')
     name.conflict1 = test_name.get('conflict1', '')
     name.conflict1_num = test_name.get('conflict1_num', '')
+    name.corpNum = test_name.get('corpNum', None)
 
     return name
 
