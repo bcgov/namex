@@ -75,6 +75,14 @@ class NameProcessingService(GetSynonymListsMixin):
         self._name_tokens = val
 
     @property
+    def name_tokens_search_conflict(self):
+        return self._name_tokens_search_conflict
+
+    @name_tokens_search_conflict.setter
+    def name_tokens_search_conflict(self, val):
+        self._name_tokens_search_conflict = val
+
+    @property
     def stop_words(self):
         return self._stop_words
 
@@ -112,6 +120,7 @@ class NameProcessingService(GetSynonymListsMixin):
         self.name_original_tokens = None
         self.processed_name = None
         self.name_tokens = None
+        self.name_tokens_search_conflict = None
         self.distinctive_word_tokens = None
         self.descriptive_word_tokens = None
         self.unclassified_word_tokens = None

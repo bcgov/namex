@@ -93,6 +93,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_processing_service.name_tokens if np_svc else ''
 
     @property
+    def name_tokens_search_conflict(self):
+        np_svc = self.name_processing_service
+        return self.name_processing_service.name_tokens_search_conflict if np_svc else ''
+
+    @property
     def name_original_tokens(self):
         np_svc = self.name_processing_service
         return self.name_processing_service.name_original_tokens if np_svc else ''
@@ -192,6 +197,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     # API for extending implementations
     def set_name_tokens(self, name_tokens):
         self.name_processing_service.name_tokens = name_tokens
+
+    # API for extending implementations
+    def get_name_tokens_search_conflict(self):
+        return self.name_tokens_search_conflict
+
+    # API for extending implementations
+    def set_name_tokens_search_conflict(self, name_tokens_search_conflict):
+        self.name_processing_service.name_tokens_search_conflict = name_tokens_search_conflict
 
     # API for extending implementations
     # TODO: Just for backward compat. et rid of this when we are done refactoring!
