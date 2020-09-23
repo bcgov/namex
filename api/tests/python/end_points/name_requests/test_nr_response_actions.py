@@ -175,6 +175,7 @@ def test_approved_and_expired_response_actions(client, jwt, app):
         NameRequestActions.EDIT.value,
         # TODO: Show receipt action ONLY if there is an existing payment!
         # NameRequestActions.RECEIPT.value,
+        NameRequestActions.REAPPLY.value,
         NameRequestActions.RESEND.value
     ])
 
@@ -235,7 +236,7 @@ def test_conditional_and_expired_response_actions(client, jwt, app):
     # Define our data
     input_fields = build_test_input_fields()
 
-    # Set the expirationDate to a previous day
+    # Set the expirationDate to a previous day, set to less than 5 so we get the REAPPLY option
     input_fields['expirationDate'] = datetime.date.today() - datetime.timedelta(days=2)
 
     # Assign the payload to new nr var
@@ -261,6 +262,7 @@ def test_conditional_and_expired_response_actions(client, jwt, app):
         NameRequestActions.EDIT.value,
         # TODO: Show receipt action ONLY if there is an existing payment!
         # NameRequestActions.RECEIPT.value,
+        NameRequestActions.REAPPLY.value,
         NameRequestActions.RESEND.value
     ])
 
