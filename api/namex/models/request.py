@@ -139,7 +139,7 @@ class Request(db.Model):
         todays_date = datetime.utcnow().date()
         expiry_date = self.expirationDate.date() if self.expirationDate else None
         if expiry_date:
-            return todays_date < expiry_date
+            return todays_date > expiry_date
         return False
 
     @property

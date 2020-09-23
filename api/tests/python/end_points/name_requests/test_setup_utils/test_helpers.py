@@ -112,18 +112,18 @@ def add_test_user_to_db():
 
 @pytest.mark.skip
 def create_approved_nr(client, nr_data=None):
-    return create_test_nr(client, nr_data, State.APPROVED)
+    return create_test_nr(nr_data, State.APPROVED)
 
 
 @pytest.mark.skip
 def create_cancelled_nr(client, nr_data=None):
-    return create_test_nr(client, nr_data, State.CANCELLED)
+    return create_test_nr(nr_data, State.CANCELLED)
 
 
 @pytest.mark.skip
 def create_draft_nr(client, nr_data=None, use_api=True):
     """
-    You can optionally set the use_api param to False to create an NR using model persistence as opposed to the API
+    You can optionally set the use_api param to False to create an NR using model persistence as opposed to the API!
     :param client:
     :param nr_data:
     :param use_api:
@@ -132,14 +132,13 @@ def create_draft_nr(client, nr_data=None, use_api=True):
     if use_api:
         return post_test_nr(client, nr_data, State.DRAFT)
 
-    return create_test_nr(client, nr_data, State.DRAFT)
+    return create_test_nr(nr_data, State.DRAFT)
 
 
 @pytest.mark.skip
-def create_test_nr(client, nr_data=None, nr_state=State.DRAFT):
+def create_test_nr(nr_data=None, nr_state=State.DRAFT):
     """
     Create a draft NR and persist (NOT using the API) to use as the initial state for each test.
-    :param client:
     :param nr_data:
     :param nr_state:
     :return:
@@ -272,6 +271,30 @@ def patch_nr(client, action, nr_id, nr_data):
             pass
 
         return patch_response
+    except Exception as err:
+        print(repr(err))
+        raise
+
+
+@pytest.mark.skip
+def get_nr(client, nr_id):
+    try:
+        request_uri = API_BASE_URI + str(nr_id)
+        test_params = [{}]
+
+        headers = get_test_headers()
+        query = build_test_query(test_params)
+        path = build_request_uri(request_uri, query)
+        print('Get Name Request [' + str(nr_id) + ']')
+        log_request_path(path)
+
+        get_response = client.get(path, headers=headers)
+
+        if not get_response or get_response.status_code != 200:
+            # raise Exception('NR PATCH operation failed')
+            pass
+
+        return get_response
     except Exception as err:
         print(repr(err))
         raise

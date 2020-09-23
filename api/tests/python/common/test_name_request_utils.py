@@ -140,3 +140,19 @@ def assert_field_is_gt_value(res_obj, prop_name, prop_val):
     assert res_obj_val > prop_val
     print('OK')
     print('...')
+
+
+@pytest.mark.skip
+def assert_list_contains(test_list, values):
+    """
+    Just a util
+    :param test_list:
+    :param values:
+    :return:
+    """
+    assert isinstance(test_list, list)
+
+    for val in values:
+        assert val in test_list
+    print('OK')
+    print('...')
