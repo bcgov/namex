@@ -10,8 +10,23 @@ class NameRequestException(Exception):
         super().__init__(self.message)
 
 
+class NameRequestActionError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Error building request actions."):
+        super().__init__(wrapped_err, message)
+
+
 class NameRequestPaymentError(NameRequestException):
     def __init__(self, wrapped_err=None, message="SBC Pay API error."):
+        super().__init__(wrapped_err, message)
+
+
+class NameRequestIsExpiredError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="The request is expired."):
+        super().__init__(wrapped_err, message)
+
+
+class NameRequestIsConsumedError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="The request has already been consumed."):
         super().__init__(wrapped_err, message)
 
 

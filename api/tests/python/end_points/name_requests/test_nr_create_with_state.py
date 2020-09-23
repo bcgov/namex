@@ -1,7 +1,8 @@
 """
 Integration tests for creating Name Requests in various states.
+This is analagous to the Name Request POST using different initial states.
 """
-
+import pytest
 import json
 
 from .configuration import API_BASE_URI
@@ -11,6 +12,7 @@ from ..common.http import build_test_query, build_request_uri
 from ..common.logging import log_request_path
 
 
+@pytest.mark.skip
 def test_create_draft_nr(client, jwt, app):
     """
     Create a basic draft NR
@@ -34,6 +36,7 @@ def test_create_draft_nr(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_create_conditional_nr(client, jwt, app):
     """
     Create a basic conditional NR
@@ -57,6 +60,7 @@ def test_create_conditional_nr(client, jwt, app):
     assert payload is not None
 
 
+@pytest.mark.skip
 def test_create_reserved_nr(client, jwt, app):
     """
     Create a basic reserved NR

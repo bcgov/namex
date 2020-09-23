@@ -107,13 +107,83 @@ def add_test_user_to_db():
     user = User(username='name_request_service_account', firstname='Test', lastname='User', sub='idir/name_request_service_account', iss='keycloak')
     user.save_to_db()
 
+    return user
+
 
 @pytest.mark.skip
-def create_draft_nr(client, nr_data=None):
+def create_approved_nr(client, nr_data=None):
+    return create_test_nr(nr_data, State.APPROVED)
+
+
+@pytest.mark.skip
+def create_cancelled_nr(client, nr_data=None):
+    return create_test_nr(nr_data, State.CANCELLED)
+
+
+@pytest.mark.skip
+def create_draft_nr(client, nr_data=None, use_api=True):
+    """
+    You can optionally set the use_api param to False to create an NR using model persistence as opposed to the API!
+    :param client:
+    :param nr_data:
+    :param use_api:
+    :return:
+    """
+    if use_api:
+        return post_test_nr(client, nr_data, State.DRAFT)
+
+    return create_test_nr(nr_data, State.DRAFT)
+
+
+@pytest.mark.skip
+def create_test_nr(nr_data=None, nr_state=State.DRAFT):
+    """
+    Create a draft NR and persist (NOT using the API) to use as the initial state for each test.
+    :param nr_data:
+    :param nr_state:
+    :return:
+    """
+    try:
+        # Set up our test data
+        add_states_to_db(state_data)
+        user = add_test_user_to_db()
+
+        # Optionally supply the field data
+        custom_names = nr_data.get('names', None)
+        if not custom_names:
+            custom_names = [{
+                'name': 'BLUE HERON TOURS LTD.',
+                'choice': 1,
+                'designation': 'LTD.',
+                'name_type_cd': 'CO',
+                'consent_words': '',
+                'conflict1': 'BLUE HERON TOURS LTD.',
+                'conflict1_num': '0515211'
+            }]
+
+        nr = build_nr(nr_state, nr_data, custom_names, False)
+
+        # Set any missing fields
+        # TODO: We may want to add this stuff to build_nr
+        nr.userId = user.id
+        nr.activeUser = user
+        nr.submitter = user
+        nr.submitter_userid = user.id
+
+        nr.save_to_db()
+
+        return nr.json()
+    except Exception as err:
+        print(repr(err))
+
+
+@pytest.mark.skip
+def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
     """
     Create a draft NR, using the API, to use as the initial state for each test.
     :param client:
     :param nr_data:
+    :param nr_state:
     :return:
     """
     try:
@@ -126,7 +196,19 @@ def create_draft_nr(client, nr_data=None):
         add_test_user_to_db()
 
         # Optionally supply the field data
-        nr = build_nr(State.DRAFT, nr_data)
+        custom_names = nr_data.get('names', None)
+        if not custom_names:
+            custom_names = [{
+                'name': 'BLUE HERON TOURS LTD.',
+                'choice': 1,
+                'designation': 'LTD.',
+                'name_type_cd': 'CO',
+                'consent_words': '',
+                'conflict1': 'BLUE HERON TOURS LTD.',
+                'conflict1_num': '0515211'
+            }]
+
+        nr = build_nr(nr_state, nr_data, custom_names, False)
 
         nr_data = nr.json()
 
@@ -152,16 +234,6 @@ def create_draft_nr(client, nr_data=None):
 
         }]
 
-        nr_data['names'] = [{
-            'name': 'BLUE HERON TOURS LTD.',
-            'choice': 1,
-            'designation': 'LTD.',
-            'name_type_cd': 'CO',
-            'consent_words': '',
-            'conflict1': 'BLUE HERON TOURS LTD.',
-            'conflict1_num': '0515211'
-        }]
-
         # Create a new DRAFT NR using the NR we just created
         request_uri = API_BASE_URI
         test_params = [{}]
@@ -181,15 +253,15 @@ def create_draft_nr(client, nr_data=None):
 
 
 @pytest.mark.skip
-def patch_nr(client, action, nr_num, nr_data):
+def patch_nr(client, action, nr_id, nr_data):
     try:
-        request_uri = API_BASE_URI + nr_num + '/' + action
+        request_uri = API_BASE_URI + str(nr_id) + '/' + action
         test_params = [{}]
 
         headers = get_test_headers()
         query = build_test_query(test_params)
         path = build_request_uri(request_uri, query)
-        print('Patch (' + action + ') Name Request [' + nr_num + ']: \n' + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': ')))
+        print('Patch (' + action + ') Name Request [' + str(nr_id) + ']: \n' + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': ')))
         log_request_path(path)
 
         patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)
@@ -199,6 +271,30 @@ def patch_nr(client, action, nr_num, nr_data):
             pass
 
         return patch_response
+    except Exception as err:
+        print(repr(err))
+        raise
+
+
+@pytest.mark.skip
+def get_nr(client, nr_id):
+    try:
+        request_uri = API_BASE_URI + str(nr_id)
+        test_params = [{}]
+
+        headers = get_test_headers()
+        query = build_test_query(test_params)
+        path = build_request_uri(request_uri, query)
+        print('Get Name Request [' + str(nr_id) + ']')
+        log_request_path(path)
+
+        get_response = client.get(path, headers=headers)
+
+        if not get_response or get_response.status_code != 200:
+            # raise Exception('NR PATCH operation failed')
+            pass
+
+        return get_response
     except Exception as err:
         print(repr(err))
         raise
