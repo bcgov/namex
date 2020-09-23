@@ -15,37 +15,39 @@ from .test_setup_utils.test_helpers import \
 from namex.models import State
 from namex.constants import NameRequestActions
 
+
 # Define our data
 # Check NR number is the same because these are PATCH and call change_nr
-test_input_fields = {
-    'additionalInfo': '',
-    'consentFlag': None,
-    'consent_dt': None,
-    'corpNum': '',
-    'entity_type_cd': 'CR',
-    'expirationDate': None,
-    'furnished': 'N',
-    'hasBeenReset': False,
-    # 'lastUpdate': None,
-    'natureBusinessInfo': 'Test',
-    # 'nrNum': '',
-    # 'nwpta': '',
-    # 'previousNr': '',
-    # 'previousRequestId': '',
-    # 'previousStateCd': '',
-    'priorityCd': 'N',
-    # 'priorityDate': None,
-    'requestTypeCd': 'CR',
-    'request_action_cd': 'NEW',
-    # 'source': 'NAMEREQUEST',
-    # 'state': 'DRAFT',
-    # 'stateCd': 'DRAFT',
-    'submitCount': 1,
-    # 'submittedDate': None,
-    'submitter_userid': 'name_request_service_account',
-    'userId': 'name_request_service_account',
-    'xproJurisdiction': ''
-}
+def build_test_input_fields():
+    return {
+        'additionalInfo': '',
+        'consentFlag': None,
+        'consent_dt': None,
+        'corpNum': '',
+        'entity_type_cd': 'CR',
+        'expirationDate': None,
+        'furnished': 'N',
+        'hasBeenReset': False,
+        # 'lastUpdate': None,
+        'natureBusinessInfo': 'Test',
+        # 'nrNum': '',
+        # 'nwpta': '',
+        # 'previousNr': '',
+        # 'previousRequestId': '',
+        # 'previousStateCd': '',
+        'priorityCd': 'N',
+        # 'priorityDate': None,
+        'requestTypeCd': 'CR',
+        'request_action_cd': 'NEW',
+        # 'source': 'NAMEREQUEST',
+        # 'state': 'DRAFT',
+        # 'stateCd': 'DRAFT',
+        'submitCount': 1,
+        # 'submittedDate': None,
+        'submitter_userid': 'name_request_service_account',
+        'userId': 'name_request_service_account',
+        'xproJurisdiction': ''
+    }
 
 
 def test_draft_patch_edit_data(client, jwt, app):
@@ -59,7 +61,7 @@ def test_draft_patch_edit_data(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -179,7 +181,7 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app):
     #     'requestTypeCd': 'CR'
     #     ...
     # }
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -225,7 +227,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -321,7 +323,7 @@ def test_draft_patch_upgrade(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -363,7 +365,7 @@ def test_draft_patch_cancel(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
 
     post_response = create_draft_nr(client, input_fields)
 
@@ -401,7 +403,7 @@ def test_draft_patch_cancel_with_invalid_states(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     custom_names = [{
         'name': 'BLUE HERON TOURS LTD.',
         'choice': 1,
@@ -445,7 +447,7 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     custom_names = [{
         'name': 'BLUE HERON TOURS LTD.',
         'choice': 1,
@@ -489,7 +491,7 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
 
     # Set the expirationDate to a previous day
     input_fields['expirationDate'] = datetime.date.today() - datetime.timedelta(days=2)
@@ -535,7 +537,7 @@ def test_draft_patch_refund(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -568,7 +570,7 @@ def test_draft_patch_reapply(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -623,7 +625,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var
@@ -683,7 +685,7 @@ def test_draft_patch_resend(client, jwt, app):
     :return:
     """
     # Define our data
-    input_fields = test_input_fields
+    input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
     # Assign the payload to new nr var

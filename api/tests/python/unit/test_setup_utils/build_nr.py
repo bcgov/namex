@@ -58,7 +58,11 @@ def build_nr(nr_state, data=None, test_names=None, generate_id_seq=None):
         State.COND_RESERVE: build_cond_reserved,
         State.CONDITIONAL: build_conditional,
         State.APPROVED: build_approved,
-        State.CANCELLED: build_cancelled
+        State.CANCELLED: build_cancelled,
+        State.HOLD: build_hold,
+        State.INPROGRESS: build_in_progress,
+        State.HISTORICAL: build_historical,
+        State.REJECTED: build_rejected,
     }.get(nr_state)(data, test_names, generate_id_seq)
 
 
@@ -196,6 +200,126 @@ def build_cancelled(data=None, test_names=None, generate_id_seq=None):
 
     # Set defaults, if these exist in the provided data they will be overwritten
     nr.stateCd = State.CANCELLED
+    nr.requestId = 1460775
+    nr._source = 'NRO'
+
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
+
+    nr.names = []
+    for test_name in test_names:
+        nr.names.append(build_name(test_name, generate_id_seq))
+
+    return nr
+
+
+def build_hold(data=None, test_names=None, generate_id_seq=None):
+    """
+    :param data:
+    :param test_names:
+    :param generate_id_seq:
+    :return:
+    """
+    nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    nr.stateCd = State.HOLD
+    nr.requestId = 1460775
+    nr._source = 'NRO'
+
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
+
+    nr.names = []
+    for test_name in test_names:
+        nr.names.append(build_name(test_name, generate_id_seq))
+
+    return nr
+
+
+def build_in_progress(data=None, test_names=None, generate_id_seq=None):
+    """
+    :param data:
+    :param test_names:
+    :param generate_id_seq:
+    :return:
+    """
+    nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    nr.stateCd = State.INPROGRESS
+    nr.requestId = 1460775
+    nr._source = 'NRO'
+
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
+
+    nr.names = []
+    for test_name in test_names:
+        nr.names.append(build_name(test_name, generate_id_seq))
+
+    return nr
+
+
+def build_historical(data=None, test_names=None, generate_id_seq=None):
+    """
+    :param data:
+    :param test_names:
+    :param generate_id_seq:
+    :return:
+    """
+    nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    nr.stateCd = State.HISTORICAL
+    nr.requestId = 1460775
+    nr._source = 'NRO'
+
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
+
+    nr.names = []
+    for test_name in test_names:
+        nr.names.append(build_name(test_name, generate_id_seq))
+
+    return nr
+
+
+def build_rejected(data=None, test_names=None, generate_id_seq=None):
+    """
+    :param data:
+    :param test_names:
+    :param generate_id_seq:
+    :return:
+    """
+    nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    nr.stateCd = State.REJECTED
     nr.requestId = 1460775
     nr._source = 'NRO'
 

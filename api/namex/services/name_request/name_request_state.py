@@ -27,6 +27,7 @@ def display_edit_action(nr_model=None):
 
 def display_upgrade_action(nr_model=None):
     try:
+        # Has the request already been upgraded?
         if nr_model and nr_model.priorityCd == 'Y':
             return False
 
