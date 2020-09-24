@@ -37,9 +37,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        first_classification = next(iter(name_dict.values()))
-        first_word = next(iter(name_dict))
-        name_dict.pop(first_word)
+        first_classification = None
+        if name_dict:
+            first_classification = next(iter(name_dict.values()))
+            first_word = next(iter(name_dict))
+            name_dict.pop(first_word)
 
         if first_classification == DataFrameFields.DISTINCTIVE.value:
             valid = self.check_descriptive(name_dict)

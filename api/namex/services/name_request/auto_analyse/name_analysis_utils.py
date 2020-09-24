@@ -202,9 +202,9 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, list
 
 def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token_svc):
     desc_compound_dict = get_compound_descriptives(service, syn_svc)
-    match = update_compound_tokens(list(desc_compound_dict.keys()), match)
+    service.set_name_tokens(update_compound_tokens(list(desc_compound_dict.keys()), match))
 
-    service.token_classifier = wc_svc.classify_tokens(match)
+    service.token_classifier = wc_svc.classify_tokens(service.name_tokens)
     service._list_dist_words, service._list_desc_words, service._list_none_words = service.word_classification_tokens
 
     if service.get_list_none() and service.get_list_none().__len__() > 0:
@@ -213,16 +213,17 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
                 service.get_list_dist(),
                 service.get_list_desc(),
                 service.get_list_none(),
-                match
+                service.name_tokens
             )
-    service._list_dist_words, service._list_desc_words = check_synonyms(syn_svc,
-                                                                        stand_alone_words,
-                                                                        service.get_list_dist(),
-                                                                        service.get_list_desc())
+    service._list_dist_words, service._list_desc_words, dict_desc = check_synonyms(syn_svc,
+                                                                                   stand_alone_words,
+                                                                                   service.get_list_dist(),
+                                                                                   service.get_list_desc())
 
     service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())
 
-    service.set_name_tokens(update_compound_tokens(service.get_list_dist() + service.get_list_desc(), service.name_tokens))
+    service.set_name_tokens(
+        update_compound_tokens(service.get_list_dist() + service.get_list_desc(), service.name_tokens))
 
     dict_name_words_original = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
                                                           service.name_tokens)
@@ -282,25 +283,17 @@ def update_compound_tokens(list_desc_compound, original_list):
 
 
 def update_token_list(list_dist_desc, list_name):
-    list_name_updated= []
+    list_name_updated = []
     for item in list_name:
         if item in list_dist_desc:
             list_name_updated.append(item)
 
     return list_name_updated
 
-def update_elements_list(list_desc_dist, list_name):
-    list_name_search_conflict = []
-    for word in list_name:
-        if word in list_desc_dist:
-            list_name_search_conflict.append(word)
-
-    return list_name_search_conflict
-
 
 def get_compound_descriptives(service, syn_svc):
     list_compound = []
-    for i in range(2, len(service.name_tokens)+1):
+    for i in range(2, len(service.name_tokens) + 1):
         list_compound.extend(subsequences(service.name_tokens, i))
 
     desc_compound_dict_validated = get_valid_compound_descriptive(syn_svc, list_compound)
