@@ -469,7 +469,7 @@ class NROChangeFlags(AbstractEnum):
     ADDRESS = 'is_changed__address'
     NWPTA_AB = 'is_changed__nwpta_ab'
     NWPTA_SK = 'is_changed__nwpta_sk'
-    CONSENT = 'is_changed__consent'
+    CONSENT = 'is_changed_consent'
     STATE = 'is_changed__request_state'
 
 
