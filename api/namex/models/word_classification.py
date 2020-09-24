@@ -44,8 +44,8 @@ class WordClassification(db.Model):
 
     @classmethod
     def find_word_classification(cls, word):
-        results = db.session.query(cls.word, cls.classification) \
-            .filter(func.lower(cls.word).op('~')(r"(\y{0}(''[a-zA-Z])?\y)".format(word.lower()))) \
+        results = db.session.query(cls.word, cls.classification).distinct(cls.word, cls.classification) \
+            .filter(func.lower(cls.word).op('~')(r"(^{0}(''[a-zA-Z])?\y)".format(word.lower()))) \
             .filter(cls.end_dt.is_(None)) \
             .filter(cls.start_dt <= date.today()) \
             .filter(cls.approved_dt <= date.today()).all()

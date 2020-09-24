@@ -37,9 +37,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        first_classification = next(iter(name_dict.values()))
-        first_word = next(iter(name_dict))
-        name_dict.pop(first_word)
+        first_classification = None
+        if name_dict:
+            first_classification = next(iter(name_dict.values()))
+            first_word = next(iter(name_dict))
+            name_dict.pop(first_word)
 
         if first_classification == DataFrameFields.DISTINCTIVE.value:
             valid = self.check_descriptive(name_dict)
@@ -766,7 +768,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_compound_distinctive_hybrid(self, dist_substitution_dict, dict_descriptive, list_name):
         dict_compound_dist, dict_desc = {}, {}
 
-        if dict_descriptive.__len__() > 1:
+        if dict_descriptive.__len__() > 1 and dist_substitution_dict.__len__() > 0:
             dict_desc = dict(dict_descriptive)
             for key_dist, value in sorted(list(dist_substitution_dict.items()), key=lambda x: x[0].lower(),
                                           reverse=True):
