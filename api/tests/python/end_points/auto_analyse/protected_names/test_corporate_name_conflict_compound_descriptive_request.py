@@ -28,7 +28,7 @@ from ...common import token_header, claims
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
-def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, name, expected):
+def test_corporate_name_conflict_compound_descriptive_response(client, jwt, app, name, expected):
     words_list_classification = [{'word': 'WESTWOOD', 'classification': 'DIST'},
                                  {'word': 'WESTWOOD', 'classification': 'DESC'},
                                  {'word': 'GARY', 'classification': 'DIST'},
