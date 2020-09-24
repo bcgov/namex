@@ -754,8 +754,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_compound_distinctives(self, dict_dist):
         list_dict = list(dict_dist.keys())
 
-        list_dist_compound = list()
-        for i in range(2, len(list_dict) + 1):
+        list_dist_compound= list()
+        for i in range(2, len(list_dict)+1):
             list_dist_compound.extend(subsequences(list_dict, i))
 
         dist_compound_dict = self.add_substitutions(list_dist_compound, dict_dist)
