@@ -9,59 +9,79 @@ from namex.constants import \
 from namex.models import State
 
 from .utils import has_active_payment
-from .exceptions import NameRequestException, InvalidStateError
+from .exceptions import NameRequestException, InvalidStateError, NameRequestIsConsumedError, NameRequestIsExpiredError, NameRequestActionError
 
 state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{next_state}]'
 invalid_state_transition_msg = 'Invalid state transition [{current_state}] -> [{next_state}], valid states are [{valid_states}]'
 
 
 def display_edit_action(nr_model=None):
-    if nr_model and nr_model.stateCd == State.CANCELLED:
-        return False
+    try:
+        if nr_model and nr_model.stateCd == State.CANCELLED:
+            return False
 
-    return True
+        return True
+    except Exception as err:
+        raise NameRequestActionError(err)
 
 
 def display_upgrade_action(nr_model=None):
-    if nr_model and nr_model.priorityCd == 'Y':
-        return False
+    try:
+        # Has the request already been upgraded?
+        if nr_model and nr_model.priorityCd == 'Y':
+            return False
 
-    return True
+        return True
+    except Exception as err:
+        raise NameRequestActionError(err)
 
 
 def display_cancel_action(nr_model=None):
-    if nr_model and nr_model.stateCd == State.CANCELLED:
-        return False
+    try:
+        if (nr_model and nr_model.stateCd == State.CANCELLED) or (nr_model.stateCd not in State.CANCELLABLE_STATES):
+            return False
 
-    if nr_model and nr_model.stateCd in State.CANCELLABLE_STATES:
+        if nr_model and (nr_model.is_expired or nr_model.has_consumed_name):
+            return False
+
         return True
-
-    return False
+    except Exception as err:
+        raise NameRequestActionError(err)
 
 
 def display_refund_action(nr_model=None):
-    if nr_model and has_active_payment(nr_model):
-        return True
+    try:
+        if nr_model and has_active_payment(nr_model):
+            return True
 
-    return False
+        return False
+    except Exception as err:
+        raise NameRequestActionError(err)
 
 
 def display_receipt_action(nr_model=None):
-    if nr_model and has_active_payment(nr_model):
-        return True
+    try:
+        if nr_model and has_active_payment(nr_model):
+            return True
 
-    return False
+        return False
+    except Exception as err:
+        raise NameRequestActionError(err)
 
 
 def display_reapply_action(nr_model=None):
-    if nr_model and nr_model.expirationDate and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
-        todays_date = datetime.utcnow().date()
-        expiry_date = nr_model.expirationDate.date()
-        if todays_date < expiry_date:
-            delta = expiry_date - todays_date
-            if delta.days <= 5:
-                return True
-    return False
+    try:
+        if nr_model and nr_model.expirationDate and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
+            if nr_model.is_expired:
+                todays_date = datetime.utcnow().date()
+                expiry_date = nr_model.expirationDate.date()
+
+                delta = expiry_date - todays_date
+                if delta.days <= 5:
+                    return True
+        return False
+    except Exception as err:
+        raise NameRequestActionError(err)
 
 
 def display_resend_action(nr_model=None):
@@ -87,21 +107,27 @@ def get_nr_state_actions(next_state, nr_model=None):
     :return:
     """
     def build_actions(state_actions_list, nr):
-        return [sa for sa in state_actions_list if action_handlers[sa](nr)]
+        try:
+            return [sa for sa in state_actions_list if action_handlers[sa](nr)]
+        except Exception as action_handler_err:
+            raise NameRequestActionError(action_handler_err)
 
-    return {
-        State.DRAFT: build_actions(NameRequestDraftActions.list(), nr_model),
-        State.RESERVED: build_actions(NameRequestReservedActions.list(), nr_model),
-        State.COND_RESERVE: build_actions(NameRequestReservedActions.list(), nr_model),
-        # Not expired
-        State.CONDITIONAL: build_actions(NameRequestActiveActions.list(), nr_model),
-        State.APPROVED: build_actions(NameRequestActiveActions.list(), nr_model),
-        State.INPROGRESS: build_actions(NameRequestInProgressActions.list(), nr_model),
-        State.HOLD: build_actions(NameRequestHoldActions.list(), nr_model),
-        State.HISTORICAL: build_actions(NameRequestHistoricalActions.list(), nr_model),
-        State.CANCELLED: build_actions(NameRequestCancelledActions.list(), nr_model),
-        State.REJECTED: build_actions(NameRequestActiveRejectedActions.list(), nr_model)
-    }.get(next_state)
+    try:
+        return {
+            State.DRAFT: build_actions(NameRequestDraftActions.list(), nr_model),
+            State.RESERVED: build_actions(NameRequestReservedActions.list(), nr_model),
+            State.COND_RESERVE: build_actions(NameRequestReservedActions.list(), nr_model),
+            # Not expired
+            State.CONDITIONAL: build_actions(NameRequestActiveActions.list(), nr_model),
+            State.APPROVED: build_actions(NameRequestActiveActions.list(), nr_model),
+            State.INPROGRESS: build_actions(NameRequestInProgressActions.list(), nr_model),
+            State.HOLD: build_actions(NameRequestHoldActions.list(), nr_model),
+            State.HISTORICAL: build_actions(NameRequestHistoricalActions.list(), nr_model),
+            State.CANCELLED: build_actions(NameRequestCancelledActions.list(), nr_model),
+            State.REJECTED: build_actions(NameRequestActiveRejectedActions.list(), nr_model)
+        }.get(next_state)
+    except Exception as err:
+        raise NameRequestActionError(err)
 
 
 def to_draft(resource, nr, on_success_cb=None):
@@ -196,6 +222,8 @@ def to_approved(resource, nr, on_success_cb):
 
 
 def to_cancelled(resource, nr, on_success_cb):
+    # Allow cancelled to cancelled state transition here, if this is not to be allowed, catch it when validating the request
+    # valid_states = [State.APPROVED, State.CONDITIONAL]
     valid_states = State.CANCELLABLE_STATES
     if nr.stateCd not in valid_states:
         raise InvalidStateError(message=invalid_state_transition_msg.format(
@@ -203,6 +231,12 @@ def to_cancelled(resource, nr, on_success_cb):
             next_state=State.CANCELLED,
             valid_states=', '.join(valid_states)
         ))
+
+    if nr.is_expired is True:
+        raise NameRequestIsExpiredError()
+
+    if nr.has_consumed_name is True:
+        raise NameRequestIsConsumedError()
 
     resource.next_state_code = State.CANCELLED
     nr.stateCd = State.CANCELLED

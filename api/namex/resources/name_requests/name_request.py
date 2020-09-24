@@ -267,7 +267,18 @@ class NameRequestFields(NameRequestResource):
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
-            valid_states = State.VALID_STATES
+            # Only allow editing if the request is in certain valid states
+            request_editable_states = [
+                State.DRAFT,
+                State.RESERVED,
+                State.COND_RESERVE
+            ]
+
+            contact_editable_states = [
+                State.APPROVED,
+                State.REJECTED,
+                State.CONDITIONAL
+            ]
 
             # This could be moved out, but it's fine here for now
             def validate_patch_request(data):
@@ -275,12 +286,18 @@ class NameRequestFields(NameRequestResource):
                 request_state = data.get('stateCd', nr_model.stateCd)
                 is_valid = False
                 msg = ''
-                # This handles updates if the NR state is 'patchable'
-                if request_state in valid_states:
-                    # Get the SQL alchemy columns and associations
+
+                # Handles updates if the NR state is 'patchable'
+                if request_state in request_editable_states:
                     is_valid = True
+                elif request_state in contact_editable_states:
+                    # Check expiry
+                    if not nr_model.is_expired:
+                        is_valid = True
+                    else:
+                        msg = 'Name Request PATCH is invalid - the Name Request is expired'
                 else:
-                    msg = 'Invalid state change requested - the NR state cannot be changed to [' + data.get('stateCd', '') + ']'
+                    msg = 'Invalid state change requested - the Name Request state cannot be changed to [' + data.get('stateCd', '') + ']'
 
                 return is_valid, msg
 
