@@ -320,7 +320,7 @@ def remove_descriptive_same_category(dict_desc):
     for base_key in base_keys:
         c = 0
         for key, values in dict_desc.items():
-            if base_key in values:
+            if base_key in values or porter.stem(base_key) in values:
                 c += 1
             if c > 1:
                 desc_list.remove(base_key)
