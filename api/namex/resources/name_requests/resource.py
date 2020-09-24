@@ -283,8 +283,9 @@ class NameRequestResource(Resource):
                     NROChangeFlags.NAME_3.value: True,
                     # NROChangeFlags.NWPTA_AB.value: False,
                     # NROChangeFlags.NWPTA_SK.value: False,
-                    # NROChangeFlags.CONSENT.value: False,
+                    NROChangeFlags.CONSENT.value: False,
                     NROChangeFlags.STATE.value: False
+
                 })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
@@ -300,6 +301,7 @@ class NameRequestResource(Resource):
                     NROChangeFlags.NAME_1.value: False,
                     NROChangeFlags.NAME_2.value: False,
                     NROChangeFlags.NAME_3.value: False,
+                    NROChangeFlags.CONSENT.value: False
                 })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
@@ -309,7 +311,8 @@ class NameRequestResource(Resource):
                 nro_warnings = None
             else:
                 nro_warnings = self.nro_service.change_nr(name_request, {
-                    NROChangeFlags.STATE.value: True
+                    NROChangeFlags.STATE.value: True,
+                    NROChangeFlags.CONSENT.value: False
                 })
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
