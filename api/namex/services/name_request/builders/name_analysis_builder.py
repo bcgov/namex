@@ -791,6 +791,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def check_compound_dist(self, vector_dist_dict, original_class_list,class_subs_dict):
         vector_dist = {}
+        entropy_dist = 0.0
         list_dist = list(vector_dist_dict.keys())
         for i in range(2, len(list_dist) + 1):
             compound = [x.replace(' ','') for x in subsequences(list_dist, i)]
