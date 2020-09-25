@@ -412,19 +412,20 @@ class Request(db.Model):
 
         if queue:
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
+                fields=[sqlalchemy.func.regexp_replace(Name.name, '(.)\1{1,}', '\1', 'g').label('name'), sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
                         sqlalchemy.null().label('corpNum'), cls.nrNum],
                 filters=[basic_filter, queue_request_state_filter]
             ))
         else:
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('submittedDate'),
+                fields=[sqlalchemy.func.regexp_replace(Name.name, '(.)\1{1,}', '\1', 'g').label('name'), Name.consumptionDate,
+                        sqlalchemy.null().label('submittedDate'),
                         Name.corpNum,
                         sqlalchemy.null().label('nrNum')],
                 filters=[basic_filter, corp_request_state_filter, name_state_filter, consumed_filter]
             ))
             criteria.append(RequestConditionCriteria(
-                fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
+                fields=[sqlalchemy.func.regexp_replace(Name.name, '(.)\1{1,}', '\1', 'g').label('name'), sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
                         sqlalchemy.null().label('corpNum'), cls.nrNum],
                 filters=[basic_filter, corp_request_state_filter, name_state_filter, not_consumed_filter]
             ))
