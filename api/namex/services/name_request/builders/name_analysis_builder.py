@@ -9,7 +9,7 @@ from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBu
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import get_flat_list, get_conflicts_same_classification, \
-    get_classification, get_all_dict_substitutions, remove_spaces_list, subsequences
+    get_classification, get_all_dict_substitutions, remove_spaces_list, subsequences, remove_double_letters
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -754,8 +754,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_compound_distinctives(self, dict_dist):
         list_dict = list(dict_dist.keys())
 
-        list_dist_compound= list()
-        for i in range(2, len(list_dict)+1):
+        list_dist_compound = list()
+        for i in range(2, len(list_dict) + 1):
             list_dist_compound.extend(subsequences(list_dict, i))
 
         dist_compound_dict = self.add_substitutions(list_dist_compound, dict_dist)
