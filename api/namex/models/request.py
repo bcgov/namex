@@ -208,6 +208,8 @@ class Request(db.Model):
             'previousNr': previousNr,
             'submitCount': self.submitCount,
             'corpNum': self.corpNum,
+            'tradeMark': self.tradeMark,
+            'homeJurisNum': self.homeJurisNum,
             'names': [name.as_dict() for name in self.names.all()],
             'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
             'comments': [comment.as_dict() for comment in self.comments.all()],
