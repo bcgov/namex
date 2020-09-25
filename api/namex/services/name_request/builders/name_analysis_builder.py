@@ -177,14 +177,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if check_name_is_well_formed:
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
-            dist_substitution_dict[dist].append(remove_double_letters(w_dist))
+            dist_substitution_dict[dist].append(remove_double_letters(dist))
             desc_synonym_dict = self.get_dictionary(desc_synonym_dict, w_desc)
-            desc_synonym_dict[desc].append(remove_double_letters(w_desc))
+            desc_synonym_dict[desc].append(remove_double_letters(desc))
         else:
             dist_substitution_dict = self.get_subsitutions_distinctive(w_dist)
-            dist_substitution_dict[dist].append(remove_double_letters(w_dist))
+            dist_substitution_dict[dist].append(remove_double_letters(dist))
             desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
-            desc_synonym_dict[desc].append(remove_double_letters(w_desc))
+            desc_synonym_dict[desc].append(remove_double_letters(desc))
 
         list_conflict_details = list()
 
