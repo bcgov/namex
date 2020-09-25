@@ -310,10 +310,7 @@ class NameRequestResource(Resource):
                 # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
                 nro_warnings = None
             else:
-                nro_warnings = self.nro_service.change_nr(name_request, {
-                    NROChangeFlags.STATE.value: True,
-                    NROChangeFlags.CONSENT.value: False
-                })
+                nro_warnings = self.nro_service.cancel_nr(name_request, 'name_request_service_account')
 
             return self.on_nro_update_complete(name_request, on_success, nro_warnings)
         else:

@@ -126,7 +126,7 @@ def  _create_request_instance(oracle_cursor, nr, eid,priority):
                           xpro_jurisdiction=nr.xproJurisdiction,
                           additional_info=nr.additionalInfo,
                           nature_business_info=nr.natureBusinessInfo,
-                          home_juris_num=nr. homeJurisNum
+                          home_juris_num=nr.homeJurisNum
                           )
         current_app.logger.debug('request instance record created')
     except Exception as error:
