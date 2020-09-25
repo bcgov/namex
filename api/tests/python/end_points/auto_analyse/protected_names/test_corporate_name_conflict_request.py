@@ -17,7 +17,10 @@ from ...common import token_header, claims
                              # # ("ABC CONSULTING LTD.", "ABC INTERNATIONAL CONSULTING LTD."), #Under evaluation
                              ("NO. 001 CATHEDRAL MINING LTD.", "CATHEDRAL MINING LTD."),
                              ("ARMSTRONG PLUMBING & CAFE INC.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             # ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."), #Failure related to stand-alone to be fixed with 4844: Fixes from UAT Rejection Testing
+                             # Stand-alone names are approved as long as they have an additional distinctive or descriptive.
+                             # The only way to be rejected is to have an exact match. We need to implement an exact match for
+                             # Stand-alone names to avoid comparing with many names, just exact matches should be returned.
+                             # ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."),
                              ("LE BLUE CAFE LTD.", "LE BLUE RESTAURANT LTD.")
                          ]
                          )
