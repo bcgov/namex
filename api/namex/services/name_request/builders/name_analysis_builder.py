@@ -9,7 +9,8 @@ from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBu
 
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import get_flat_list, get_conflicts_same_classification, \
-    get_classification, get_all_dict_substitutions, remove_spaces_list, subsequences, remove_double_letters
+    get_classification, get_all_dict_substitutions, remove_spaces_list, subsequences, remove_double_letters, \
+    list_to_string
 
 from namex.models.request import Request
 from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -171,13 +172,19 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed, queue):
         dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = {}, {}, {}, {}
+        dist = list_to_string(w_dist)
+        desc = list_to_string(w_desc)
 
         if check_name_is_well_formed:
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
+            dist_substitution_dict[dist].append(remove_double_letters(w_dist))
             desc_synonym_dict = self.get_dictionary(desc_synonym_dict, w_desc)
+            desc_synonym_dict[desc].append(remove_double_letters(w_desc))
         else:
             dist_substitution_dict = self.get_subsitutions_distinctive(w_dist)
+            dist_substitution_dict[dist].append(remove_double_letters(w_dist))
             desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
+            desc_synonym_dict[desc].append(remove_double_letters(w_desc))
 
         list_conflict_details = list()
 

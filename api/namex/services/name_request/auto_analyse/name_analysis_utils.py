@@ -311,6 +311,10 @@ def remove_double_letters(name):
     return re.sub(r'([a-zA-Z])\1+', r'\1', name)
 
 
+def list_to_string(lst):
+    return ' '.join(map(str, lst))
+
+
 def remove_misplaced_distinctive(list_dist, list_desc, list_name):
     if list_desc.__len__() > 0 and list_dist.__len__() > 0:
         for word in list_name[list_name.index(list_desc[0]) + 1:]:
