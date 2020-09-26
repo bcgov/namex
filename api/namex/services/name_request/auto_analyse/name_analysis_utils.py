@@ -153,16 +153,18 @@ def check_synonyms(syn_svc, stand_alone_words, list_dist_words, list_desc_words)
 
     dict_desc = dict()
 
-    for word in list_desc:
+    for word in list_desc_words:
         substitution = syn_svc.get_word_synonyms(word=word).data
         if substitution or word.lower() in stand_alone_words:
             dict_desc[word] = substitution
             if word in intersection:
                 list_dist_words.remove(word)
+        elif word in intersection:
+            list_desc.remove(word)
         else:
-            list_desc_words.remove(word)
+            dict_desc[word] = word
 
-    return list_dist_words, list_desc_words, dict_desc
+    return list_dist_words, list_desc, dict_desc
 
 
 def update_none_list(list_none_words, list_desc):
@@ -272,7 +274,7 @@ def search_word(d, search_item):
 
 
 def update_compound_tokens(list_desc_compound, original_list):
-    list_compound = list_desc_compound + original_list
+    list_compound = sorted(list_desc_compound + original_list, key=len, reverse=True)
     str_original = " ".join(original_list)
 
     compound_alternators = '|'.join(map(re.escape, list_compound))

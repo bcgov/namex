@@ -16,7 +16,9 @@ from ...common import token_header, claims
                              ("J-J BULK TRANSPORT INC.", "J & J BULK TRANSPORT LTD."),
                              ("MAPLE BAY PRESCHOOL LTD.", "MAPLE BAY PRE-SCHOOL LTD."),
                              ("THUNDERROAD INVESTMENTS LTD.", "THUNDERROAD.ORG INVESTMENTS INC."),
-                             ('J & J HARDWOOD FLOORS AND FLOWERS LTD.', "J.J.'S HARDWOOD FLOORS AND DECORATING LTD."),
+                             # No longer valid: FLOWERS AND DECORATING are in different categories,
+                             # then the name is approved
+                             # ('J & J HARDWOOD FLOORS AND FLOWERS LTD.', "J.J.'S HARDWOOD FLOORS AND DECORATING LTD."),
                              ('TRADEPRO PHOENIX ENTERPRISES LTD.', 'TRADEPRO/PHOENIX ENTERPRISES INC.'),
                              ("TEANOOK JOHNSON HOLDINGS INC.", "TEANOOK / JOHNSON HOLDINGS INC."),
                              ('BIG MIKE FUN FARM INC.', "BIG MIKE'S FUN FARM INC."),

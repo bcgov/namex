@@ -472,6 +472,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
                     vector2_dist, entropy_dist = self.get_vector(service.get_list_dist(), list_dist,
                                                                  dist_substitution_dict)
+
+                    if all(value == OTHER_W for value in vector2_dist.values()):
+                        vector2_dist, entropy_dist, _ = self.check_compound_dist(list_dist=list(vector2_dist.keys()),
+                                                                                 list_desc=None,
+                                                                                 original_class_list=list_dist,
+                                                                                 class_subs_dict=dist_substitution_dict)
+
+                    if not vector2_dist:
+                        match_list_desc = list(service.get_list_desc())
+                        match_list_dist_desc = service.get_list_dist() + match_list_desc[0:-1]
+                        vector2_dist, entropy_dist, service._list_desc_words = self.check_compound_dist(list_dist= match_list_dist_desc,
+                                                                                                        list_desc=service.get_list_desc(),
+                                                                                                        original_class_list=list_dist,
+                                                                                                        class_subs_dict=dist_substitution_dict)
+
                     similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
                     vector2_desc, entropy_desc = self.get_vector(remove_spaces_list(service.get_list_desc()), list_desc,
@@ -740,7 +755,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         list_dict = list(dict_dist.keys())
 
         list_dist_compound = list()
-        for i in range(2, len(list_dict)):
+        for i in range(2, len(list_dict) + 1):
             list_dist_compound.extend(subsequences(list_dict, i))
 
         dist_compound_dict = self.add_substitutions(list_dist_compound, dict_dist)
@@ -784,3 +799,22 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                         del dict_desc[list_name[idx + 1]]
 
         return dict_compound_dist, dict_desc
+
+    def check_compound_dist(self, list_dist, list_desc, original_class_list, class_subs_dict):
+        vector_dist = {}
+        entropy_dist = 0.0
+        for i in range(2, len(list_dist) + 1):
+            compound_space_list = [x for x in subsequences(list_dist, i)]
+            compound = [x.replace(' ', '') for x in compound_space_list]
+            vector_dist, entropy_dist = self.get_vector(compound, original_class_list, class_subs_dict)
+
+        # Update descriptive list
+        if list_desc and entropy_dist > 0.0:
+            token_list = []
+            for word in compound_space_list:
+                token_list.extend(word.split())
+            intersection = [x for x in list_desc if x in token_list]
+            for word in intersection:
+                list_desc.remove(word)
+
+        return vector_dist, entropy_dist, list_desc
