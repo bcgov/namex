@@ -116,10 +116,15 @@ class BcAnalysisResponse(AnalysisResponse):
     def build_add_distinctive_word_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_distinctive_setup()
         # Tweak the header
-        option1.header = "Helpful Tip"
+        option1.header = "Option 1"
+
+        option2 = send_to_examiner_setup()
+        # Tweak the header
+        option2.header = "Option 2"
 
         issue = response_issues(procedure_result.result_code)(self, [
-            option1
+            option1,
+            option2
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
@@ -130,10 +135,15 @@ class BcAnalysisResponse(AnalysisResponse):
     def build_add_descriptive_word_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_descriptive_setup()
         # Tweak the header
-        option1.header = "Helpful Tip"
+        option1.header = "Option 1"
+
+        option2 = send_to_examiner_setup()
+        # Tweak the header
+        option2.header = "Option 2"
 
         issue = response_issues(procedure_result.result_code)(self, [
-            option1
+            option1,
+            option2
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
