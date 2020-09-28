@@ -434,8 +434,6 @@ class NameRequestService(AbstractNameRequestMixin):
         if request_applicant['middleName']:
             applicant.middleName = convert_to_ascii(request_applicant['middleName'])
         applicant.contact = convert_to_ascii(request_applicant['contact'])
-        if request_applicant['middleName']:
-            applicant.middleName = convert_to_ascii(request_applicant['middleName'])
         if request_applicant['clientFirstName']:
             applicant.clientFirstName = convert_to_ascii(request_applicant['clientFirstName'])
         if request_applicant['clientLastName']:
@@ -448,6 +446,8 @@ class NameRequestService(AbstractNameRequestMixin):
         applicant.addrLine1 = convert_to_ascii(request_applicant['addrLine1'])
         if request_applicant['addrLine2']:
             applicant.addrLine2 = convert_to_ascii(request_applicant['addrLine2'])
+        if request_applicant['addrLine3']:
+            applicant.addrLine3 = convert_to_ascii(request_applicant['addrLine3'])
         applicant.city = convert_to_ascii(request_applicant['city'])
         applicant.stateProvinceCd = request_applicant['stateProvinceCd']
         applicant.postalCd = convert_to_ascii(request_applicant['postalCd'])
