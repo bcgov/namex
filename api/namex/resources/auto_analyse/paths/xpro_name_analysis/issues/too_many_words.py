@@ -14,7 +14,7 @@ class XproTooManyWordsIssue(TooManyWordsIssue):
             designations=None,
             show_reserve_button=False,
             # Set the show_examination_button to TRUE for all Xpro issues
-            show_examination_button=False,
+            show_examination_button=True,
             conflicts=None,
             setup=None,
             name_actions=None
