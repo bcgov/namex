@@ -1,12 +1,15 @@
-from flask import request, send_file, jsonify
+from flask import request, make_response, send_file, jsonify
 from flask_restplus import Resource, cors, fields, marshal_with, marshal
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import clean_url_path_param, handle_exception
+from namex.utils.api_resource import clean_url_path_param, get_query_param_str, handle_exception
+
+from namex.models import Request as RequestDAO, Payment as PaymentDAO
 
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
+from namex.services.payment.payments import get_payment
 from namex.services.payment.receipts import get_receipt
 
 from .api_namespace import api as payment_api
@@ -33,11 +36,9 @@ def handle_auth_error(ex):
 
 
 @cors_preflight('GET')
-# @payment_api.route('/<string:payment_identifier>/receipt/<int:invoice_id>', strict_slashes=False, methods=['POST', 'OPTIONS'])
-@payment_api.route('/<string:payment_identifier>/receipt', strict_slashes=False, methods=['POST', 'OPTIONS'])
+@payment_api.route('/<int:payment_id>/receipt', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
-    'payment_identifier': '',
-    # 'invoice_id': '[required]'
+    'payment_id': ''
 })
 class PaymentReceipt(Resource):
     @staticmethod
@@ -45,37 +46,35 @@ class PaymentReceipt(Resource):
     # @jwt.requires_auth
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
-    # def post(payment_identifier, invoice_id):
-    def post(payment_identifier):
+    def get(payment_id):
         try:
-            payment_identifier = clean_url_path_param(payment_identifier)
+            payment = PaymentDAO.query.get(payment_id)
+            # Find the existing name request
+            nr_model = RequestDAO.query.get(payment.nrId)
 
-            json_input = request.get_json()
-            if not json_input:
-                return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+            if not nr_model:
+                # Should this be a 400 or 404... hmmm
+                return None, None, jsonify(message='{nr_id} not found'.format(nr_id=payment.nrId)), 400
 
-            corp_name = json_input.get('corpName', None)
-            business_number = json_input.get('businessNumber', None)
-            recognition_date_time = json_input.get('recognitionDateTime', None)
-            filing_identifier = json_input.get('filingIdentifier', None)
-            filing_date_time = json_input.get('filingDateTime', None)
-            file_name = json_input.get('fileName', None)
+            payment_response = get_payment(payment.payment_token)
+            # TODO: Make sure we pick the right one... use the first choice
+            corp_name = nr_model.names.all()[0].name
 
             req = PaymentReceiptInput(
                 corp_name=corp_name,
-                business_number=business_number,
-                recognition_date_time=recognition_date_time,
-                filing_identifier=filing_identifier,
-                filing_date_time=filing_date_time,
-                file_name=file_name
+                business_number=None,
+                recognition_date_time=None,
+                filing_identifier=None,
+                filing_date_time=payment_response.created_on,
+                file_name=None
             )
 
-            receipt = get_receipt(payment_identifier, req)
+            receipt_response = get_receipt(payment.payment_token, req)
 
-            if not receipt:
-                return jsonify(message=MSG_NOT_FOUND), 404
+            if not receipt_response:
+                return jsonify(message=MSG_NOT_FOUND), 404  # TODO: What if we have a record?
 
-            return send_file(receipt, mimetype='application/pdf', as_attachment=True)
+            return send_file(receipt_response, mimetype='application/pdf', as_attachment=True)
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
