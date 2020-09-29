@@ -168,6 +168,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             sorted(list_conflicts, key=lambda item: (-item['score'], item['name']))[
             0:MAX_MATCHES_LIMIT])
 
+        self._list_processed_names = list()
+
         return self.prepare_response(most_similar_names, queue, list_name, list_dist_words, list_desc_words)
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed, queue):
@@ -179,12 +181,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
             dist_substitution_dict[dist].append(remove_double_letters(dist))
             desc_synonym_dict = self.get_dictionary(desc_synonym_dict, w_desc)
-            desc_synonym_dict[desc].append(remove_double_letters(desc))
         else:
             dist_substitution_dict = self.get_subsitutions_distinctive(w_dist)
             dist_substitution_dict[dist].append(remove_double_letters(dist))
             desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
-            desc_synonym_dict[desc].append(remove_double_letters(desc))
 
         list_conflict_details = list()
 
@@ -469,51 +469,54 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             num = 1
             for match in matches:
                 print(num, '/', total)
-                np_svc.set_name(match.name)
-                num += 1
-                if np_svc.name_tokens == list_name:
-                    similarity = EXACT_MATCH
-                else:
-                    match_list = np_svc.name_tokens
-                    get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc)
+                if match.name not in self.get_processed_names():
+                    np_svc.set_name(match.name)
+                    self._list_processed_names.append(match.name)
+                    num += 1
+                    if np_svc.name_tokens == list_name:
+                        similarity = EXACT_MATCH
+                    else:
+                        match_list = np_svc.name_tokens
+                        get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc)
 
-                    vector2_dist, entropy_dist = self.get_vector(service.get_list_dist(), list_dist,
-                                                                 dist_substitution_dict)
+                        vector2_dist, entropy_dist = self.get_vector(service.get_list_dist(), list_dist,
+                                                                     dist_substitution_dict)
 
-                    if all(value == OTHER_W for value in vector2_dist.values()):
-                        vector2_dist, entropy_dist, _ = self.check_compound_dist(list_dist=list(vector2_dist.keys()),
-                                                                                 list_desc=None,
-                                                                                 original_class_list=list_dist,
-                                                                                 class_subs_dict=dist_substitution_dict)
+                        if all(value == OTHER_W for value in vector2_dist.values()):
+                            vector2_dist, entropy_dist, _ = self.check_compound_dist(list_dist=list(vector2_dist.keys()),
+                                                                                     list_desc=None,
+                                                                                     original_class_list=list_dist,
+                                                                                     class_subs_dict=dist_substitution_dict)
 
-                    if not vector2_dist:
-                        match_list_desc = list(service.get_list_desc())
-                        match_list_dist_desc = service.get_list_dist() + match_list_desc[0:-1]
-                        vector2_dist, entropy_dist, service._list_desc_words = self.check_compound_dist(list_dist= match_list_dist_desc,
-                                                                                                        list_desc=service.get_list_desc(),
-                                                                                                        original_class_list=list_dist,
-                                                                                                        class_subs_dict=dist_substitution_dict)
+                        if not vector2_dist:
+                            match_list_desc = list(service.get_list_desc())
+                            match_list_dist_desc = service.get_list_dist() + match_list_desc[0:-1]
+                            vector2_dist, entropy_dist, service._list_desc_words = self.check_compound_dist(
+                                list_dist=match_list_dist_desc,
+                                list_desc=service.get_list_desc(),
+                                original_class_list=list_dist,
+                                class_subs_dict=dist_substitution_dict)
 
-                    similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
+                        similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
-                    vector2_desc, entropy_desc = self.get_vector(remove_spaces_list(service.get_list_desc()), list_desc,
-                                                                 desc_synonym_dict)
-                    similarity_desc = round(
-                        self.get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
+                        vector2_desc, entropy_desc = self.get_vector(remove_spaces_list(service.get_list_desc()), list_desc,
+                                                                     desc_synonym_dict)
+                        similarity_desc = round(
+                            self.get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
 
-                    similarity = round((similarity_dist + similarity_desc) / 2, 2)
-                    print(similarity)
+                        similarity = round((similarity_dist + similarity_desc) / 2, 2)
+                        print(similarity)
 
-                if similarity >= MINIMUM_SIMILARITY and not self.stand_alone_additional_dist_desc(list_dist,
-                                                                                                  service.get_list_dist(),
-                                                                                                  list_desc,
-                                                                                                  service.get_list_desc(),
-                                                                                                  stand_alone_words):
-                    dict_matches_counter.update({match.name: similarity})
-                    selected_matches.append(match)
-                    if self.stop_search(similarity, matches):
-                        forced = True
-                        break
+                    if similarity >= MINIMUM_SIMILARITY and not self.stand_alone_additional_dist_desc(list_dist,
+                                                                                                      service.get_list_dist(),
+                                                                                                      list_desc,
+                                                                                                      service.get_list_desc(),
+                                                                                                      stand_alone_words):
+                        dict_matches_counter.update({match.name: similarity})
+                        selected_matches.append(match)
+                        if self.stop_search(similarity, matches):
+                            forced = True
+                            break
 
             if dict_matches_counter:
                 all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)

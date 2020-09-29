@@ -337,3 +337,11 @@ def remove_descriptive_same_category(dict_desc):
                 break
 
     return desc_list
+
+
+def remove_doble_letters(list_dist):
+    list_dist_final=[]
+    for item in list_dist:
+        list_dist_final.append(remove_double_letters(item))
+
+    return list_dist_final
