@@ -412,20 +412,19 @@ class Request(db.Model):
 
         if queue:
             criteria.append(RequestConditionCriteria(
-                fields=[sqlalchemy.func.regexp_replace(Name.name, '(.)\1{1,}', '\1', 'g').label('name'), sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
+                fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
                         sqlalchemy.null().label('corpNum'), cls.nrNum],
                 filters=[basic_filter, queue_request_state_filter]
             ))
         else:
             criteria.append(RequestConditionCriteria(
-                fields=[sqlalchemy.func.regexp_replace(Name.name, '(.)\1{1,}', '\1', 'g').label('name'), Name.consumptionDate,
-                        sqlalchemy.null().label('submittedDate'),
+                fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('submittedDate'),
                         Name.corpNum,
                         sqlalchemy.null().label('nrNum')],
                 filters=[basic_filter, corp_request_state_filter, name_state_filter, consumed_filter]
             ))
             criteria.append(RequestConditionCriteria(
-                fields=[sqlalchemy.func.regexp_replace(Name.name, '(.)\1{1,}', '\1', 'g').label('name'), sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
+                fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
                         sqlalchemy.null().label('corpNum'), cls.nrNum],
                 filters=[basic_filter, corp_request_state_filter, name_state_filter, not_consumed_filter]
             ))
@@ -475,7 +474,7 @@ class Request(db.Model):
 
     @classmethod
     def get_distinctive_query(cls, dist, criteria, stop_words, check_name_is_well_formed):
-        special_characters_dist = Request.set_special_characters(dist)
+        special_characters_dist = Request.set_special_characters_distinctive(dist)
         for e in criteria:
             substitutions = '|'.join(map(str, special_characters_dist))
             if not check_name_is_well_formed:
@@ -489,7 +488,7 @@ class Request(db.Model):
 
     @classmethod
     def get_descriptive_query(cls, desc, criteria, queue):
-        special_characters_descriptive = Request.set_special_characters(desc)
+        special_characters_descriptive = Request.set_special_characters_descriptive(desc)
         for e in criteria:
             if not queue and len(e.filters) > 5 or queue and len(e.filters) > 3:
                 e.filters.pop()
@@ -538,10 +537,19 @@ class Request(db.Model):
         return query.all()
 
     @classmethod
-    def set_special_characters(cls, list_d):
+    def set_special_characters_distinctive(cls, list_d):
         list_special_characters = []
         for element in list_d:
-            list_special_characters.append('\\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
+            list_special_characters.append(
+                r'\W*'.join(element[i:i + 1] + element[i:i + 1] + '?' for i in range(0, len(element), 1)))
+
+        return list_special_characters
+
+    @classmethod
+    def set_special_characters_descriptive(cls, list_d):
+        list_special_characters = []
+        for element in list_d:
+            list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
 
         return list_special_characters
 
