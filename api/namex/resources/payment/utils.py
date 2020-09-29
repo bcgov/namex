@@ -14,9 +14,10 @@ def build_payment_request(nr_model):
         raise Exception('Cannot build payment request, please supply an NR with a name and an applicant defined!')
 
     payment_request = {
-        'paymentInfo': {
-            'methodOfPayment': 'CC',
-        },
+        # Comment this out to use direct pay
+        # 'paymentInfo': {
+        #     'methodOfPayment': 'CC',
+        # },
         'filingInfo': {
             'date': date.today(),
             'filingTypes': [
@@ -60,7 +61,8 @@ def merge_payment_request(nr_model, config=None):
     if not config and (not nr_name or not nr_applicant):
         raise Exception('Cannot build payment request, please supply an NR with a name and an applicant defined!')
 
-    method_of_payment = 'CC'
+    # Comment out to use direct pay
+    # method_of_payment = 'CC'
 
     filing_date = date.today()
     filing_description = ''
@@ -80,8 +82,9 @@ def merge_payment_request(nr_model, config=None):
     # If contact info is supplied use the ENTIRE contactInfo
     if isinstance(config, dict):
         payment_info_config = config.get('paymentInfo')
-        if payment_info_config:
-            method_of_payment = payment_info_config.get('methodOfPayment', method_of_payment)
+        # Comment out to use direct pay
+        # if payment_info_config:
+        #     method_of_payment = payment_info_config.get('methodOfPayment', method_of_payment)
 
         filing_info_config = config.get('filingInfo')
         if filing_info_config:
@@ -111,14 +114,15 @@ def merge_payment_request(nr_model, config=None):
                 postal_code = contact_info.get('postalCode', postal_code)
 
     payment_request = {
-        'paymentInfo': {
-            'methodOfPayment': method_of_payment,
-        },
+        # 'paymentInfo': {
+        #     'methodOfPayment': method_of_payment,
+        # },
         'filingInfo': {
             'date': filing_date,
             'filingTypes': [
                 {
-                    'filingDescription': filing_description,
+                    # Exclude filing description
+                    # 'filingDescription': filing_description,
                     'filingTypeCode': filing_type_code,
                     'priority': priority_request
                 }

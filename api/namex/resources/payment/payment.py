@@ -213,6 +213,49 @@ class Extra(Resource):
         pass
 
 
+@cors_preflight('GET')
+@payment_api.route('/<int:nr_id>/payments', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.doc(params={
+    'nr_id': 'NR Number - This field is required'
+})
+class NameRequestPayment(Resource):
+    @cors.crossdomain(origin='*')
+    def get(self, nr_id):
+        try:
+            nr_model = RequestDAO.query.get(nr_id)
+            nr_payments = nr_model.payments.all()
+
+            response_data = []
+            # Wrap our payment
+            for payment in nr_payments:
+                payment_response = get_payment(payment.payment_token)
+
+                if not payment_response:
+                    return None
+                    # TODO: Maybe throw an error here?
+
+                # Wrap the response, providing info from both the SBC Pay response and the payment we created
+                response_data.append({
+                    'id': payment.id,
+                    'nrId': payment.nrId,
+                    'token': payment.payment_token,
+                    'statusCode': payment.payment_status_code,
+                    'completionDate': payment.payment_completion_date,
+                    'payment': payment.as_dict(),
+                    'sbcPayment': payment_response.to_dict()
+                })
+
+            return jsonify(response_data), 200
+        except PaymentServiceError as err:
+            return handle_exception(err, err.message, 500)
+        except SBCPaymentException as err:
+            return handle_exception(err, err.message, err.status_code)
+        except SBCPaymentError as err:
+            return handle_exception(err, err.message, 500)
+        except Exception as err:
+            return handle_exception(err, err, 500)
+
+
 @cors_preflight('GET, POST')
 @payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['POST', 'OPTIONS'])
 @payment_api.doc(params={
