@@ -196,7 +196,9 @@ class NameRequestPayments(AbstractNameRequestResource):
 
             # Save back to NRO to get the updated NR Number
             update_solr = True
-            nr_model = self.update_records_in_network_services(nr_model, update_solr)
+            nr_model = self.add_records_to_network_services(nr_model, update_solr)
+
+            #update the proper NR
 
             json_input = request.get_json()
             payment_request = {}
@@ -468,7 +470,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
 
             # This handles the updates for NRO and Solr, if necessary
-            self.update_records_in_network_services(nr_model)
+            #self.update_records_in_network_services(nr_model)
 
             # Record the event
             # EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment_id), nr_model, nr_svc.request_data)
