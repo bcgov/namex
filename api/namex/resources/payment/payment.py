@@ -195,7 +195,7 @@ class NameRequestPayments(AbstractNameRequestResource):
                 return None, None, jsonify(message='{nr_id} not found'.format(nr_id=nr_id)), 400
 
             # Save back to NRO to get the updated NR Number
-            update_solr = False
+            update_solr = True
             nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
             json_input = request.get_json()
