@@ -238,16 +238,19 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     service._list_dist_words = remove_misplaced_distinctive(service.get_list_dist(), service.get_list_desc(),
                                                             service.name_tokens_search_conflict)
 
-    service._list_dist_words_search_conflicts, updated_name_tokens = remove_double_letters_list_dist_words(service.get_list_dist(),
-                                                                                          service.name_tokens_search_conflict)
+    service._list_dist_words_search_conflicts, updated_name_tokens = remove_double_letters_list_dist_words(
+        service.get_list_dist(),
+        service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(updated_name_tokens)
 
     service._list_desc_words = remove_descriptive_same_category(dict_desc)
 
-    service.set_name_tokens_search_conflict(update_token_list(service.get_list_dist_search_conflicts() + service.get_list_desc(),
-                                                              service.name_tokens_search_conflict))
+    service.set_name_tokens_search_conflict(
+        update_token_list(service.get_list_dist_search_conflicts() + service.get_list_desc(),
+                          service.name_tokens_search_conflict))
 
-    service._dict_name_words = get_classification_summary(service.get_list_dist_search_conflicts(), service.get_list_desc(),
+    service._dict_name_words = get_classification_summary(service.get_list_dist_search_conflicts(),
+                                                          service.get_list_desc(),
                                                           service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 
@@ -349,6 +352,9 @@ def remove_double_letters_list_dist_words(list_dist, name_tokens):
     for item in list_dist:
         not_double_letters_item = remove_double_letters(item)
         list_dist_final.append(not_double_letters_item)
-        name_tokens = list(map(lambda x: str.replace(x, item, not_double_letters_item), name_tokens))
+        name_tokens = list(map(
+            lambda x, value=item, singular_letter_value=not_double_letters_item: str.replace(x, value,
+                                                                                             singular_letter_value),
+            name_tokens))
 
     return list_dist_final, name_tokens

@@ -824,12 +824,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def skip_name_matches_processed(self, matches):
         unique_matches = []
         for match in matches:
-            if not self._list_processed_names:
+            if match.name not in self._list_processed_names:
                 self._list_processed_names.append(match.name)
                 unique_matches.append(match)
-            else:
-                if match.name not in self._list_processed_names:
-                    self._list_processed_names.append(match.name)
-                    unique_matches.append(match)
 
         return unique_matches
