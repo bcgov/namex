@@ -459,7 +459,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         sbc_payment_response = get_payment(payment.payment_token)
 
         # TODO: Throw errors if this fails!
-        if sbc_payment_response.status_code == PaymentStatusCode.COMPLETED.value:
+        if sbc_payment_response.status_code in [PaymentStatusCode.COMPLETED.value]:
             payment.payment_status_code = PaymentState.COMPLETED.value
             payment.payment_completion_date = sbc_payment_response.created_on
             payment.save_to_db()
@@ -485,9 +485,19 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             # Save the name request
             nr_model.save_to_db()
 
+        # This (optionally) handles the updates for NRO and Solr, if necessary
+        # update_solr = False
+        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
+
+        # Update the actions, as things change once the payment is successful
+        self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
+
+        # Record the event
+        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [upgrade]', nr_model, nr_svc.request_data)
+
         return nr_model
 
-    def complete_upgrade_payment(self, nr_model, payment_id=None):
+    def complete_upgrade_payment(self, nr_model, payment_id):
         """
         Invoked when upgrading an existing Name Request reservation to PRIORITY status.
         :param nr_model:
@@ -499,29 +509,39 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         if not nr_model.stateCd == State.DRAFT:
             raise PaymentServiceError(message='Error upgrading Name Request, request is in an invalid state!')
 
-        # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+        # Update the state of the payment
+        payment = get_active_payment(nr_model, payment_id)
+        sbc_payment_response = get_payment(payment.payment_token)
 
-        nr_model.priorityCd = 'Y'
-        nr_model.priorityDate = datetime.utcnow()
+        # TODO: Throw errors if this fails!
+        if sbc_payment_response.status_code in [PaymentStatusCode.COMPLETED.value]:
+            payment.payment_status_code = PaymentState.COMPLETED.value
+            payment.payment_completion_date = sbc_payment_response.created_on
+            payment.save_to_db()
 
-        # Save the name request
-        nr_model.save_to_db()
+            nr_model.priorityCd = 'Y'
+            nr_model.priorityDate = datetime.utcnow()
+
+            # Save the name request
+            nr_model.save_to_db()
+
+        # This (optionally) handles the updates for NRO and Solr, if necessary
+        # update_solr = False
+        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
-        # We have not accounted for multiple payments.
-        # We will need to add a request_payment model (request_id and payment_id)
-        # This handles the updates for NRO and Solr, if necessary
-        update_solr = False
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+
+        # This (optionally) handles the updates for NRO and Solr, if necessary
+        # update_solr = False
+        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Record the event
         # EventRecorder.record(nr_svc.user, Event.PATCH + ' [upgrade]', nr_model, nr_svc.request_data)
 
         return nr_model
 
-    def complete_reapply_payment(self, nr_model, payment_id=None):
+    def complete_reapply_payment(self, nr_model, payment_id):
         """
         Invoked when re-applying for an existing Name Request reservation.
         Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
@@ -544,9 +564,9 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             # This handles updates if the NR state is 'patchable'
             # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
-            # This handles the updates for NRO and Solr, if necessary
-            update_solr = False
-            nr_model = self.update_records_in_network_services(nr_model, update_solr)
+            # This (optionally) handles the updates for NRO and Solr, if necessary
+            # update_solr = False
+            # nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
             # Record the event
             # EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-apply]', nr_model, nr_svc.request_data)
@@ -556,15 +576,15 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         return nr_model
 
-    def complete_refund(self, nr_model, payment_id=None):
+    def complete_refund(self, nr_model, payment_id):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
         # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
-        # This handles the updates for NRO and Solr, if necessary
-        update_solr = False
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        # This (optionally) handles the updates for NRO and Solr, if necessary
+        # update_solr = False
+        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Record the event
         # EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
