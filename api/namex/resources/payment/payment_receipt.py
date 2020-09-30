@@ -1,10 +1,10 @@
-from flask import request, make_response, send_file, jsonify
-from flask_restplus import Resource, cors, fields, marshal_with, marshal
+from flask import send_file, jsonify
+from flask_restplus import Resource, cors
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import clean_url_path_param, get_query_param_str, handle_exception
+from namex.utils.api_resource import handle_exception
 
 from namex.models import Request as RequestDAO, Payment as PaymentDAO
 
@@ -24,7 +24,7 @@ MSG_NOT_FOUND = 'Resource not found'
 MSG_ERROR_CREATING_RESOURCE = 'Could not create / update resource'
 
 
-def validate_request(request):
+def validate_request():
     return True
 
 

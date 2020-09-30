@@ -1,5 +1,5 @@
 from flask import make_response, jsonify
-from flask_restplus import Resource, cors, fields, marshal_with, marshal
+from flask_restplus import Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
@@ -42,11 +42,11 @@ def handle_auth_error(ex):
 
 
 @cors_preflight('GET')
-@payment_api.route('/<string:payment_identifier>/invoices', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/sbc-pay/<string:payment_identifier>/invoices', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
-class PaymentInvoices(Resource):
+class SBCPaymentInvoices(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
@@ -78,11 +78,11 @@ class PaymentInvoices(Resource):
 
 
 @cors_preflight('GET')
-@payment_api.route('/<string:payment_identifier>/invoice/<int:invoice_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/sbc-pay/<string:payment_identifier>/invoice/<int:invoice_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
-class PaymentInvoice(Resource):
+class SBCPaymentInvoice(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth

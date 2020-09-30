@@ -1,5 +1,6 @@
-from .payment import Payment, Extra, NameRequestPayments, NameRequestPayment
+from .payment import NameRequestPayments, NameRequestPayment, NameRequestCompletePayment
 from .payment_fees import PaymentFees
-from .payment_invoice import PaymentInvoices, PaymentInvoice
 from .payment_receipt import PaymentReceipt
-from .payment_transaction import PaymentTransactions, PaymentTransaction
+from .sbc_payment import SBCPayment, SBCPaymentExtra
+from .sbc_payment_invoice import SBCPaymentInvoices, SBCPaymentInvoice
+from .sbc_payment_transaction import SBCPaymentTransactions, SBCPaymentTransaction

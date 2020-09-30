@@ -2,6 +2,7 @@ import re
 from flask import current_app
 
 from namex import jwt
+from namex.constants import PaymentState
 from namex.models import State, User
 from namex.services import ServicesError
 
@@ -27,19 +28,27 @@ def normalize_nr_num(nr_num_str):
     return None
 
 
-# This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
-# If no payment token just do a regular update...
-# TODO: Finish this, this may also be a useful utility on the model...
-def has_active_payment(nr):
-    if len(nr.payments.all()) > 0:
-        return True
-    return None
+def has_active_payment(nr, payment_id=None):
+    payments = nr.payments.all()
+    if payments and payment_id:
+        return len(list(filter(lambda p: p.id == payment_id, payments))) > 0
+    elif payments:
+        return len(list(filter(lambda p: p.payment_status_code == PaymentState.CREATED.value, payments))) > 0
 
 
-# TODO: Finish this, this may also be a useful utility on the model...
-def get_active_payment(nr):
-    if len(nr.payments.all()) > 0:
-        return nr.payments[0]
+def has_complete_payment(nr, payment_id=None):
+    payments = nr.payments.all()
+    if payments and payment_id:
+        return len(list(filter(lambda p: p.id == payment_id, payments))) > 0
+    elif payments:
+        return len(list(filter(lambda p: p.payment_status_code == PaymentState.COMPLETED.value, payments))) > 0
+
+
+def get_active_payment(nr, payment_id):
+    payments = nr.payments.all()
+    if payments:
+        payments = list(filter(lambda p: p.id == payment_id, nr.payments.all()))
+        return payments[0] if len(payments) > 0 else None
     return None
 
 

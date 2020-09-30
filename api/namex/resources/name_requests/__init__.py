@@ -1,2 +1,2 @@
-from .name_request import NameRequest
-from .name_requests import NameRequests
+from .name_request import NameRequestResource
+from .name_requests import NameRequestsResource
