@@ -20,7 +20,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     functionality to communicate with NRO services and Solr.
     """
     _nr_service = None
-    _virtual_wc_service = None
     _request_data = None
 
     @property
@@ -32,16 +31,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
             raise NameRequestException(err, message='Error initializing NameRequestService')
 
         return self._nr_service
-
-    @property
-    def virtual_wc_service(self):
-        try:
-            if not self._virtual_wc_service:
-                self._virtual_wc_service = VirtualWordConditionService()
-        except Exception as err:
-            raise VirtualWordConditionServiceError()
-
-        return self._virtual_wc_service
 
     @property
     def request_data(self):
