@@ -78,8 +78,9 @@ def new_nr(nr, ora_cursor,con):
     con.commit()
     current_app.logger.debug('Created Names in new_nr() for NR:{}'.format(nr_num))
 
-    # for completed NRs waiting for the updater set the state to H so no one can change it.
-    if nr.stateCd in [State.APPROVED, State.CONDITIONAL]:
+    # for completed NRs waiting for the updater set the state to H so no one can change it in NRO
+    # for Name request Rserved and conditionally Reersved NRs.
+    if nr.stateCd in [State.RESERVED, State.COND_RESERVE]:
         eid = _get_event_id(ora_cursor)
         set_request_on_hold(ora_cursor, request_id, eid)
         con.commit()

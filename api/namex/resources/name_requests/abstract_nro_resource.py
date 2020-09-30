@@ -46,16 +46,12 @@ class AbstractNROResource(Resource):
     # TODO: Update this! Add in mocks...
     def add_request_to_nro(self, name_request, on_success=None):
         # Only update Oracle for APPROVED, CONDITIONAL, DRAFT
-        if name_request.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED]:
-            if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
-                # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
-                nro_warnings = None
-            else:
-                nro_warnings = self.nro_service.add_nr(name_request)
-
-            return self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
+        if current_app.config.get('DISABLE_NAMEREQUEST_NRO_UPDATES', 0) == 1:
+         # Ignore update to NRO if NRO updates [DISABLE_NAMEREQUEST_NRO_UPDATES] are explicitly disabled in your .env
+         nro_warnings = None
         else:
-            raise NameRequestException(message='Invalid state exception [' + name_request.stateCd + '], cannot add Name Request to NRO when Request state is NOT in DRAFT, CONDITIONAL or APPROVED')
+         nro_warnings = self.nro_service.add_nr(name_request)
+         return self.on_nro_update_complete(name_request, on_success, nro_warnings, True)
 
     # TODO: Update this! Add in mocks...
     def update_request_in_nro(self, name_request, on_success=None):

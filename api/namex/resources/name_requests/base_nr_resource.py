@@ -2,11 +2,10 @@ from flask import request, current_app
 
 from namex.utils.logging import setup_logging
 
-from namex.models import Request, State
+from namex.models import State
 
 from namex.services.name_request import NameRequestService
-from namex.services.name_request.exceptions import NameRequestException, VirtualWordConditionServiceError
-from namex.services.virtual_word_condition import VirtualWordConditionService
+from namex.services.name_request.exceptions import NameRequestException
 
 from .abstract_nr_resource import AbstractNameRequestResource
 
