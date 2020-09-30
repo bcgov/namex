@@ -387,6 +387,7 @@ class NameRequestActions(AbstractEnum):
     # Needed for name request reservation before completing the NR
     REAPPLY = 'REAPPLY'
     RESEND = 'RESEND'  # Re-send notification
+    COMPLETE = 'COMPLETE'
 
 
 class NameRequestDraftActions(AbstractEnum):

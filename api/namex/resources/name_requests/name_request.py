@@ -1,13 +1,11 @@
 from flask import current_app, jsonify
 from flask_restplus import cors
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
-from namex.constants import NameRequestActions, NameRequestRollbackActions, RequestAction
+from namex.constants import NameRequestActions, NameRequestRollbackActions
 from namex.models import Request, State, Event
 
 from namex.services import EventRecorder
@@ -118,7 +116,7 @@ class NameRequestResource(BaseNameRequestResource):
 @api.route('/<int:nr_id>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @api.doc(params={
     'nr_id': 'NR ID - This field is required',
-    'nr_action': 'NR Action - One of [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]'
+    'nr_action': 'NR Action - One of [EDIT, CANCEL, RESEND]'
 })
 class NameRequestFields(NameRequestResource):
     @api.expect(nr_request)
@@ -235,74 +233,6 @@ class NameRequestFields(NameRequestResource):
 
         return nr_model
 
-    def handle_patch_upgrade(self, nr_model):
-        """
-        Upgrade the Name Request to priority, create the payment and save the record.
-        :param nr_model:
-        :param payment_id:
-        :return:
-        """
-        nr_svc = self.nr_service
-
-        if not nr_model.stateCd == State.DRAFT:
-            raise NameRequestException(message='Error upgrading Name Request, request is in an invalid state!')
-
-        # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
-
-        nr_model.priorityCd = 'Y'
-        nr_model.priorityDate = datetime.utcnow()
-
-        # Save the name request
-        nr_model.save_to_db()
-
-        # Update the actions, as things change once the payment is successful
-        self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
-        # We have not accounted for multiple payments.
-        # We will need to add a request_payment model (request_id and payment_id)
-        # This handles the updates for NRO and Solr, if necessary
-        update_solr = True
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
-
-        # Record the event
-        EventRecorder.record(nr_svc.user, Event.PATCH + ' [upgrade]', nr_model, nr_svc.request_data)
-
-        return nr_model
-
-    def handle_patch_reapply(self, nr_model):
-        """
-        Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
-        extend the expiration by an additional year (plus the default 56 days).
-        :param nr_model:
-        :return:
-        """
-        nr_svc = self.nr_service
-
-        if nr_model.submitCount < 3:
-            if nr_model.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
-                # If request action is REH or REST extend by 1 year (+ 56 default) days
-                nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1,days=56)))
-                nr_model = nr_svc.update_request_submit_count(nr_model)
-            else:
-                # Extend expiry date by (default) 56 days
-                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow())
-                nr_model = nr_svc.update_request_submit_count(nr_model)
-
-            # This handles updates if the NR state is 'patchable'
-            nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
-
-            # This handles the updates for NRO and Solr, if necessary
-            update_solr = True
-            nr_model = self.update_records_in_network_services(nr_model, update_solr)
-
-            # Record the event
-            EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-apply]', nr_model, nr_svc.request_data)
-        else:
-            # TODO: Make a custom exception for this?
-            raise NameRequestException(message='Submit count maximum of 3 retries has been reached!')
-
-        return nr_model
-
     def handle_patch_resend(self, nr_model):
         nr_svc = self.nr_service
 
@@ -315,21 +245,6 @@ class NameRequestFields(NameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-send]', nr_model, nr_svc.request_data)
-
-        return nr_model
-
-    def handle_patch_refund(self, nr_model):
-        nr_svc = self.nr_service
-
-        # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
-
-        # This handles the updates for NRO and Solr, if necessary
-        update_solr = True
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
-
-        # Record the event
-        EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
 
         return nr_model
 
@@ -351,6 +266,33 @@ class NameRequestFields(NameRequestResource):
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [cancel]', nr_model, nr_svc.request_data)
 
+        return nr_model
+
+    def handle_patch_upgrade(self, nr_model):
+        """
+        MOVED TO PAYMENT
+        Upgrade the Name Request to priority, create the payment and save the record.
+        :param nr_model:
+        :return:
+        """
+        return nr_model
+
+    def handle_patch_reapply(self, nr_model):
+        """
+        MOVED TO PAYMENT
+        Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
+        extend the expiration by an additional year (plus the default 56 days).
+        :param nr_model:
+        :return:
+        """
+        return nr_model
+
+    def handle_patch_refund(self, nr_model):
+        """
+        MOVED TO PAYMENT
+        :param nr_model:
+        :return:
+        """
         return nr_model
 
     def update_nr_fields(self, nr_model, new_state):

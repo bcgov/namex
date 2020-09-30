@@ -1,4 +1,4 @@
-from .payment import NameRequestPayments, NameRequestPayment, NameRequestCompletePayment
+from .payment import NameRequestPayments, NameRequestPayment, NameRequestPaymentAction
 from .payment_fees import PaymentFees
 from .payment_receipt import PaymentReceipt
 from .sbc_payment import SBCPayment, SBCPaymentExtra

@@ -1,19 +1,23 @@
 import json
 
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 from flask import current_app, request, make_response, jsonify
-from flask_restplus import Resource, cors, fields
+from flask_restplus import cors, fields
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import clean_url_path_param, handle_exception
 
-from namex.constants import PaymentState, PaymentStatusCode
+from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
 from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event
 
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 
 from namex.services import EventRecorder
+from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.payments import get_payment, create_payment, update_payment
 from namex.services.name_request.utils import has_active_payment, get_active_payment
@@ -244,7 +248,7 @@ class NameRequestPayments(AbstractNameRequestResource):
 
                 # Record the event
                 nr_svc = self.nr_service
-                EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment.id), nr_model, data)
+                # EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment.id), nr_model, data)
 
                 response = make_response(data, 201)
                 return response
@@ -361,17 +365,19 @@ class NameRequestPayment(AbstractNameRequestResource):
 
 
 @cors_preflight('PATCH')
-@payment_api.route('/<int:nr_id>/complete/<int:payment_id>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
+@payment_api.route('/<int:nr_id>/payment/<int:payment_id>/<string:payment_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @payment_api.doc(params={
-    'nr_id': 'NR Number - This field is required'
+    'nr_id': 'NR Number - This field is required',
+    'payment_action': 'Payment NR Action - One of [COMPLETE, UPGRADE, REAPPLY, REFUND]'
 })
-class NameRequestCompletePayment(AbstractNameRequestResource):
+class NameRequestPaymentAction(AbstractNameRequestResource):
     # REST Method Handlers
     @cors.crossdomain(origin='*')
-    def patch(self, nr_id, payment_id):
+    def patch(self, nr_id, payment_id, payment_action):
         """
         :param nr_id:
         :param payment_id:
+        :param payment_action:
         :return:
         """
         try:
@@ -403,11 +409,8 @@ class NameRequestCompletePayment(AbstractNameRequestResource):
             if nr_model.stateCd in valid_update_states and not process_payment:
                 pass
             elif process_payment:
-                # This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
-                # If the state is COND_RESERVE update state to CONDITIONAL
-                # If the state is RESERVED update state to APPROVED
-                # Then update the name request as required
-                nr_model = self.process_payment(nr_model, payment_id)
+                # This handles updates if the NR state is 'patchable'
+                nr_model = self.handle_payment_actions(payment_action, nr_model, payment_id)
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
@@ -419,7 +422,21 @@ class NameRequestCompletePayment(AbstractNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def process_payment(self, nr_model, payment_id):
+    def handle_payment_actions(self, action, model, payment_id):
+        return {
+            NameRequestActions.COMPLETE.value: self.complete_reservation_payment,
+            NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
+            NameRequestActions.REAPPLY.value: self.complete_reapply_payment,
+            NameRequestActions.REFUND.value: self.complete_refund
+        }.get(action)(model, payment_id)
+
+    def complete_reservation_payment(self, nr_model, payment_id):
+        """
+        Invoked when completing an in-progress Name Request reservation.
+        :param nr_model:
+        :param payment_id:
+        :return:
+        """
         nr_svc = self.nr_service
 
         # Update the state of the payment
@@ -434,6 +451,12 @@ class NameRequestCompletePayment(AbstractNameRequestResource):
 
             # Use apply_state_change to change state, as it enforces the State change pattern
             # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+
+            # This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
+            # If the state is COND_RESERVE update state to CONDITIONAL
+            # If the state is RESERVED update state to APPROVED
+            # Then update the name request as required
+
             if nr_model.stateCd == State.DRAFT:
                 # If the state is DRAFT, leave it as a DRAFT
                 nr_model = nr_svc.apply_state_change(nr_model, State.DRAFT, self.handle_nr_approval)
@@ -448,6 +471,90 @@ class NameRequestCompletePayment(AbstractNameRequestResource):
             self.update_records_in_network_services(nr_model)
 
             # Record the event
-            EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment_id), nr_model, nr_svc.request_data)
+            # EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment_id), nr_model, nr_svc.request_data)
+
+        return nr_model
+
+    def complete_upgrade_payment(self, nr_model, payment_id=None):
+        """
+        Invoked when upgrading an existing Name Request reservation to PRIORITY status.
+        :param nr_model:
+        :param payment_id:
+        :return:
+        """
+        nr_svc = self.nr_service
+
+        if not nr_model.stateCd == State.DRAFT:
+            raise PaymentServiceError(message='Error upgrading Name Request, request is in an invalid state!')
+
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+        nr_model.priorityCd = 'Y'
+        nr_model.priorityDate = datetime.utcnow()
+
+        # Save the name request
+        nr_model.save_to_db()
+
+        # Update the actions, as things change once the payment is successful
+        self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
+        # We have not accounted for multiple payments.
+        # We will need to add a request_payment model (request_id and payment_id)
+        # This handles the updates for NRO and Solr, if necessary
+        update_solr = True
+        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+
+        # Record the event
+        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [upgrade]', nr_model, nr_svc.request_data)
+
+        return nr_model
+
+    def complete_reapply_payment(self, nr_model, payment_id=None):
+        """
+        Invoked when re-applying for an existing Name Request reservation.
+        Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
+        extend the expiration by an additional year (plus the default 56 days).
+        :param nr_model:
+        :return:
+        """
+        nr_svc = self.nr_service
+
+        if nr_model.submitCount < 3:
+            if nr_model.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
+                # If request action is REH or REST extend by 1 year (+ 56 default) days
+                nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1, days=56)))
+                nr_model = nr_svc.update_request_submit_count(nr_model)
+            else:
+                # Extend expiry date by (default) 56 days
+                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow())
+                nr_model = nr_svc.update_request_submit_count(nr_model)
+
+            # This handles updates if the NR state is 'patchable'
+            # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+            # This handles the updates for NRO and Solr, if necessary
+            update_solr = True
+            nr_model = self.update_records_in_network_services(nr_model, update_solr)
+
+            # Record the event
+            # EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-apply]', nr_model, nr_svc.request_data)
+        else:
+            # TODO: Make a custom exception for this?
+            raise PaymentServiceError(message='Submit count maximum of 3 retries has been reached!')
+
+        return nr_model
+
+    def complete_refund(self, nr_model, payment_id=None):
+        nr_svc = self.nr_service
+
+        # This handles updates if the NR state is 'patchable'
+        # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+
+        # This handles the updates for NRO and Solr, if necessary
+        update_solr = True
+        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+
+        # Record the event
+        # EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
 
         return nr_model
