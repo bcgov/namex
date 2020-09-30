@@ -472,7 +472,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     match_list = np_svc.name_tokens
                     get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc)
 
-                    vector2_dist, entropy_dist = self.get_vector(service.get_list_dist(), list_dist,
+                    vector2_dist, entropy_dist = self.get_vector(service.get_list_dist_search_conflicts(), list_dist,
                                                                  dist_substitution_dict)
 
                     if all(value == OTHER_W for value in vector2_dist.values()):
