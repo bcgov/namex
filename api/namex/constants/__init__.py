@@ -521,6 +521,14 @@ class PaymentState(AbstractEnum):
     CANCELLED = 'CANCELLED'
 
 
+class PaymentAction(AbstractEnum):
+    """
+    Payment actions
+    """
+    COMPLETE_RESERVATION = 'COMPLETE_RESERVATION'
+    COMPLETE_UPGRADE = 'COMPLETE_UPGRADE'
+
+
 class EventAction(AbstractEnum):
     PUT = 'put'
     PATCH = 'patch'

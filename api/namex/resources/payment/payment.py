@@ -9,10 +9,11 @@ from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import clean_url_path_param, handle_exception
 
 from namex.constants import PaymentState, PaymentStatusCode
-
-from namex.models import Request as RequestDAO, Payment as PaymentDAO, State
+from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event
 
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
+
+from namex.services import EventRecorder
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.payments import get_payment, create_payment, update_payment
 from namex.services.name_request.utils import has_active_payment, get_active_payment
@@ -241,6 +242,10 @@ class NameRequestPayments(AbstractNameRequestResource):
                     'sbcPayment': payment_response.to_dict()
                 })
 
+                # Record the event
+                nr_svc = self.nr_service
+                EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment.id), nr_model, data)
+
                 response = make_response(data, 201)
                 return response
 
@@ -441,5 +446,8 @@ class NameRequestCompletePayment(AbstractNameRequestResource):
 
             # This handles the updates for NRO and Solr, if necessary
             self.update_records_in_network_services(nr_model)
+
+            # Record the event
+            EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment_id), nr_model, nr_svc.request_data)
 
         return nr_model
