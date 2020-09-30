@@ -16,10 +16,10 @@ from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError
 
-from .configuration import SOLR_CORE
+from namex.resources.configuration import SOLR_CORE
 from .api_namespace import api
 from .api_models import nr_request
-from .resource import NameRequestResource
+from .base_nr_resource import BaseNameRequestResource
 from .utils import parse_nr_num
 
 setup_logging()  # Important to do this first
@@ -27,7 +27,7 @@ setup_logging()  # Important to do this first
 
 @cors_preflight('GET, POST')
 @api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
-class NameRequests(NameRequestResource):
+class NameRequestsResource(BaseNameRequestResource):
     @cors.crossdomain(origin='*')
     @api.doc(params={
         'nrNum': 'NR Number - This field is required',

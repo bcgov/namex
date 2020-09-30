@@ -1,12 +1,12 @@
 from flask import request, make_response, jsonify
-from flask_restplus import Resource, cors, fields, marshal_with, marshal
+from flask_restplus import Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
 from urllib.parse import unquote_plus
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import clean_url_path_param, handle_exception
+from namex.utils.api_resource import clean_url_path_param
 
 from namex.services.payment.transactions import \
     get_transactions, get_transaction, create_transaction, update_transaction, \
@@ -107,11 +107,11 @@ def handle_auth_error(ex):
 
 
 @cors_preflight('GET')
-@payment_api.route('/<string:payment_identifier>/transactions', strict_slashes=False, methods=['GET', 'OPTIONS'])
+@payment_api.route('/sbc-pay/<string:payment_identifier>/transactions', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
     'payment_identifier': ''
 })
-class PaymentTransactions(Resource):
+class SBCPaymentTransactions(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
@@ -135,8 +135,8 @@ class PaymentTransactions(Resource):
 
 
 @cors_preflight('GET, POST, PUT')
-@payment_api.route('/<string:payment_identifier>/transaction', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'OPTIONS'])
-class PaymentTransaction(Resource):
+@payment_api.route('/sbc-pay/<string:payment_identifier>/transaction', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'OPTIONS'])
+class SBCPaymentTransaction(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth

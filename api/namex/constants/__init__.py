@@ -387,6 +387,7 @@ class NameRequestActions(AbstractEnum):
     # Needed for name request reservation before completing the NR
     REAPPLY = 'REAPPLY'
     RESEND = 'RESEND'  # Re-send notification
+    COMPLETE = 'COMPLETE'
 
 
 class NameRequestDraftActions(AbstractEnum):
@@ -519,6 +520,14 @@ class PaymentState(AbstractEnum):
     FAILED = 'PARTIAL'
     REFUNDED = 'REFUNDED'
     CANCELLED = 'CANCELLED'
+
+
+class PaymentAction(AbstractEnum):
+    """
+    Payment actions
+    """
+    COMPLETE_RESERVATION = 'COMPLETE_RESERVATION'
+    COMPLETE_UPGRADE = 'COMPLETE_UPGRADE'
 
 
 class EventAction(AbstractEnum):

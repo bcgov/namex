@@ -1,10 +1,10 @@
 from flask import request, make_response, jsonify
-from flask_restplus import Resource, cors, fields, marshal_with, marshal
+from flask_restplus import Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import clean_url_path_param, handle_exception
+from namex.utils.api_resource import handle_exception
 
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
@@ -92,21 +92,3 @@ class PaymentFees(Resource):
             return handle_exception(err, err.message, 500)
         except Exception as err:
             return handle_exception(err, err, 500)
-
-
-@cors_preflight('DELETE')
-@payment_api.route('/extra', strict_slashes=False, methods=['DELETE', 'OPTIONS'])
-class Extra(Resource):
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    # @payment_api.expect()
-    @payment_api.response(200, 'Success', '')
-    # @marshal_with()
-    @payment_api.doc(params={
-        '': ''
-    })
-    def delete():
-        pass
-
-
