@@ -501,7 +501,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         # We have not accounted for multiple payments.
         # We will need to add a request_payment model (request_id and payment_id)
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = True
+        update_solr = False
         nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Record the event
@@ -533,7 +533,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
             # This handles the updates for NRO and Solr, if necessary
-            update_solr = True
+            update_solr = False
             nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
             # Record the event
@@ -551,7 +551,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = True
+        update_solr = False
         nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Record the event
