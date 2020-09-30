@@ -146,23 +146,23 @@ def check_numbers_beginning(syn_svc, tokens):
     return tokens
 
 
-def check_synonyms(syn_svc, stand_alone_words, list_dist_words, list_desc_words):
+def check_synonyms(syn_svc, stand_alone_words, list_dist_words, list_desc_words, list_name):
     list_desc_words_set = frozenset(list_desc_words)
-    list_desc = list(list_desc_words)
+    list_desc = []
     intersection = [x for x in list_dist_words if x in list_desc_words_set]
-
     dict_desc = dict()
 
-    for word in list_desc_words:
-        substitution = syn_svc.get_word_synonyms(word=word).data
-        if substitution or word.lower() in stand_alone_words:
-            dict_desc[word] = substitution
-            if word in intersection:
-                list_dist_words.remove(word)
-        elif word in intersection:
-            list_desc.remove(word)
-        else:
-            dict_desc[word] = word
+    for word in list_name:
+        if word in list_desc_words:
+            substitution = syn_svc.get_word_synonyms(word=word).data
+            if substitution or word.lower() in stand_alone_words:
+                dict_desc[word] = substitution
+                list_desc.append(word)
+                if word in intersection:
+                    list_dist_words.remove(word)
+            elif word not in intersection:
+                dict_desc[word] = word
+                list_desc.append(word)
 
     return list_dist_words, list_desc, dict_desc
 
@@ -220,7 +220,8 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     service._list_dist_words, service._list_desc_words, dict_desc = check_synonyms(syn_svc,
                                                                                    stand_alone_words,
                                                                                    service.get_list_dist(),
-                                                                                   service.get_list_desc())
+                                                                                   service.get_list_desc(),
+                                                                                   service.name_tokens)
 
     service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())
 
@@ -237,12 +238,19 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     service._list_dist_words = remove_misplaced_distinctive(service.get_list_dist(), service.get_list_desc(),
                                                             service.name_tokens_search_conflict)
 
+    service._list_dist_words_search_conflicts, updated_name_tokens = remove_double_letters_list_dist_words(
+        service.get_list_dist(),
+        service.name_tokens_search_conflict)
+    service.set_name_tokens_search_conflict(updated_name_tokens)
+
     service._list_desc_words = remove_descriptive_same_category(dict_desc)
 
-    service.set_name_tokens_search_conflict(update_token_list(service.get_list_dist() + service.get_list_desc(),
-                                                              service.name_tokens_search_conflict))
+    service.set_name_tokens_search_conflict(
+        update_token_list(service.get_list_dist_search_conflicts() + service.get_list_desc(),
+                          service.name_tokens_search_conflict))
 
-    service._dict_name_words = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
+    service._dict_name_words = get_classification_summary(service.get_list_dist_search_conflicts(),
+                                                          service.get_list_desc(),
                                                           service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 
@@ -307,6 +315,14 @@ def remove_spaces_list(lst):
     return [x.replace(' ', '') for x in lst]
 
 
+def remove_double_letters(name):
+    return re.sub(r'([a-zA-Z])\1+', r'\1', name)
+
+
+def list_to_string(lst):
+    return ' '.join(map(str, lst))
+
+
 def remove_misplaced_distinctive(list_dist, list_desc, list_name):
     if list_desc.__len__() > 0 and list_dist.__len__() > 0:
         for word in list_name[list_name.index(list_desc[0]) + 1:]:
@@ -329,3 +345,16 @@ def remove_descriptive_same_category(dict_desc):
                 break
 
     return desc_list
+
+
+def remove_double_letters_list_dist_words(list_dist, name_tokens):
+    list_dist_final = []
+    for item in list_dist:
+        not_double_letters_item = remove_double_letters(item)
+        list_dist_final.append(not_double_letters_item)
+        name_tokens = list(map(
+            lambda x, value=item, singular_letter_value=not_double_letters_item: str.replace(x, value,
+                                                                                             singular_letter_value),
+            name_tokens))
+
+    return list_dist_final, name_tokens

@@ -46,7 +46,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         # Return any combination of these checks
         if not self.skip_search_conflicts:
             check_conflicts = builder.search_conflicts(
-                [self.get_list_dist()],
+                [self.get_list_dist_search_conflicts()],
                 [self.get_list_desc()],
                 self.name_tokens_search_conflict,
                 self.processed_name
@@ -56,7 +56,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                 results.append(check_conflicts)
 
         check_conflicts_queue = builder.search_conflicts(
-            [self.get_list_dist()],
+            [self.get_list_dist_search_conflicts()],
             [self.get_list_desc()],
             self.name_tokens_search_conflict,
             self.processed_name,

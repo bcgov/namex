@@ -148,7 +148,7 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
         # Return any combination of these checks
         check_conflicts = builder.search_conflicts(
-            [self.get_list_dist()],
+            [self.get_list_dist_search_conflicts()],
             [self.get_list_desc()],
             self.name_tokens_search_conflict,
             self.processed_name
@@ -158,7 +158,7 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
             results.append(check_conflicts)
 
         check_conflicts_queue = builder.search_conflicts(
-            [self.get_list_dist()],
+            [self.get_list_dist_search_conflicts()],
             [self.get_list_desc()],
             self.name_tokens_search_conflict,
             self.processed_name,
