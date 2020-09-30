@@ -467,11 +467,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 # If the state is RESERVED update state to APPROVED, and update the name request as required
                 nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
 
-            # This handles the updates for NRO and Solr, if necessary
-            #self.update_records_in_network_services(nr_model)
-
-            # Record the event
-            # EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment_id), nr_model, nr_svc.request_data)
+            # Save the name request
+            nr_model.save_to_db()
 
         return nr_model
 
