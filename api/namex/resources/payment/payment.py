@@ -198,8 +198,6 @@ class NameRequestPayments(AbstractNameRequestResource):
             update_solr = True
             nr_model = self.add_records_to_network_services(nr_model, update_solr)
 
-            #update the proper NR
-
             json_input = request.get_json()
             payment_request = {}
             if not json_input:
