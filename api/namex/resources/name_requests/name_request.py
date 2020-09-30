@@ -102,7 +102,6 @@ class NameRequestResource(BaseNameRequestResource):
         # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
         nr_model = nr_svc.apply_state_change(nr_model, nr_model.stateCd, self.handle_nr_update)
 
-
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
 

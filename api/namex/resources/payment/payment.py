@@ -383,6 +383,21 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         try:
             # Find the existing name request
             nr_model = RequestDAO.query.get(nr_id)
+
+            # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
+            # Override the default self.initialize method
+            def initialize(_self):
+                # The request payload will be empty when making this call,
+                # but we still want to process names, so we need to add
+                # them to the request, otherwise they won't be processed!
+                _self.request_data = {
+                    'names': [n.as_dict() for n in nr_model.names.all()]
+                }
+                # Set the request data to the service
+                _self.nr_service.request_data = self.request_data
+
+            initialize(self)
+
             nr_svc = self.nr_service
 
             nr_svc.nr_num = nr_model.nrNum

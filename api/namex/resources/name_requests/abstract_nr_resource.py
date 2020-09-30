@@ -46,16 +46,6 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         return nr_model
 
     @staticmethod
-    def on_nro_save_success(nr, svc):
-        """
-        Just save. Nothing else to do here.
-        :param nr:
-        :param svc:
-        :return:
-        """
-        return nr
-
-    @staticmethod
     def on_nr_approved(nr, svc):
         """
         This method is for updating certain parts of the name request eg. its STATE when an active payment exists on the NR.
@@ -63,6 +53,23 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         :param svc:
         :return:
         """
+        # Update the names, we can ignore everything else as this is only
+        # invoked when we're completing a payment
+        nr = svc.map_request_names(nr)
+        nr = svc.save_request(nr)
+        # Return the updated name request
+        return nr
+
+    @staticmethod
+    def on_nro_save_success(nr, svc):
+        """
+        Just save. Nothing else to do here.
+        :param nr:
+        :param svc:
+        :return:
+        """
+        nr = svc.save_request(nr)
+        # Return the updated name request
         return nr
 
     def handle_nr_approval(self, nr, svc):
