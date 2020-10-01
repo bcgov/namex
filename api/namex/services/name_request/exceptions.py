@@ -50,6 +50,11 @@ class CreateNameRequestError(NameRequestException):
         super().__init__(wrapped_err, message)
 
 
+class MapRequestTypeError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="Error mapping the request type."):
+        super().__init__(wrapped_err, message)
+
+
 class MapRequestDataError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error setting reserve state."):
         super().__init__(wrapped_err, message)
