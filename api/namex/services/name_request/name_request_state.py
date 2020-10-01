@@ -220,8 +220,8 @@ def to_rejected(resource, nr, on_success_cb):
             valid_states=', '.join(valid_states)
         ))
 
-    resource.next_state_code = State.APPROVED
-    nr.stateCd = State.APPROVED
+    resource.next_state_code = State.REJECTED
+    nr.stateCd = State.REJECTED
     if on_success_cb:
         nr = on_success_cb(nr, resource)
     return nr
