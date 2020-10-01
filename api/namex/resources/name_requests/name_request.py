@@ -16,6 +16,7 @@ from namex.services.name_request.exceptions import \
 from .api_namespace import api
 from .api_models import nr_request
 from .base_nr_resource import BaseNameRequestResource
+from .constants import request_editable_states, contact_editable_states
 
 
 setup_logging()  # Important to do this first
@@ -147,19 +148,6 @@ class NameRequestFields(NameRequestResource):
 
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
-
-            # Only allow editing if the request is in certain valid states
-            request_editable_states = [
-                State.DRAFT,
-                State.RESERVED,
-                State.COND_RESERVE
-            ]
-
-            contact_editable_states = [
-                State.APPROVED,
-                State.REJECTED,
-                State.CONDITIONAL
-            ]
 
             # This could be moved out, but it's fine here for now
             def validate_patch_request(data):

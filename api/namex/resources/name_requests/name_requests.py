@@ -139,14 +139,6 @@ class NameRequestsResource(BaseNameRequestResource):
             # Record the event
             EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_svc.request_data)
 
-            # Update Solr when in TEST mode
-            # TODO: We may have to add more states to this depending on what we're testing
-            test_config_enabled = current_app.config.get('TESTING', False)
-            if test_config_enabled and nr_model.stateCd in [State.CANCELLED] and \
-                    nr_model.entity_type_cd in \
-                    ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
-                self.create_solr_nr_doc(SOLR_CORE, nr_model)
-
             # Update Solr - note that we don't save DRAFT name requests to Solr for corp entities only
             if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED] and \
                     nr_model.entity_type_cd in \

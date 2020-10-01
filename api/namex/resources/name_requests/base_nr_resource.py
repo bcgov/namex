@@ -8,6 +8,7 @@ from namex.services.name_request import NameRequestService
 from namex.services.name_request.exceptions import NameRequestException
 
 from .abstract_nr_resource import AbstractNameRequestResource
+from .constants import request_editable_states, contact_editable_states
 
 setup_logging()  # Important to do this first
 
@@ -168,15 +169,18 @@ class BaseNameRequestResource(AbstractNameRequestResource):
         :param svc A NameRequestService instance
         :return:
         """
-        # Map data from request_data to the name request
-        map_draft_attrs = nr.stateCd == State.DRAFT
-        nr = svc.map_request_data(nr, map_draft_attrs)
-        # if has_applicants:
-        # Map applicants from request_data to the name request
-        nr = svc.map_request_applicants(nr)
-        # if has_names:
-        # Map any submitted names from request_data to the name request
-        nr = svc.map_request_names(nr)
+        if nr.stateCd in request_editable_states:
+            # Map data from request_data to the name request
+            map_draft_attrs = nr.stateCd == State.DRAFT
+            nr = svc.map_request_data(nr, map_draft_attrs)
+
+            # Map any submitted names from request_data to the name request
+            nr = svc.map_request_names(nr)
+
+        if nr.stateCd in contact_editable_states:
+            # Map applicants from request_data to the name request
+            nr = svc.map_request_applicants(nr)
+
         # Save
         nr = svc.save_request(nr)
         # Return the updated name request
