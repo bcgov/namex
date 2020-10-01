@@ -209,9 +209,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 # Save back to NRO to get the updated NR Number
                 update_solr = True
                 nr_model = self.add_records_to_network_services(nr_model, update_solr)
-            elif payment_action in [NameRequestActions.UPGRADE.value, NameRequestActions.REAPPLY]:
-                update_solr = False
-                nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
             json_input = request.get_json()
             payment_request = {}
@@ -500,10 +497,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             # Save the name request
             nr_model.save_to_db()
 
-        # This (optionally) handles the updates for NRO and Solr, if necessary
-        # update_solr = False
-        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
-
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
 
@@ -541,8 +534,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             nr_model.save_to_db()
 
         # This (optionally) handles the updates for NRO and Solr, if necessary
-        # update_solr = False
-        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        update_solr = False
+        nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
