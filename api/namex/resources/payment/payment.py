@@ -212,14 +212,13 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             # We only handle payments if the NR is in the following states
             valid_payment_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]
             valid_nr_state = nr_model.stateCd in valid_payment_states
+            if not valid_nr_state:
+                return None, None, jsonify(message='Invalid NR state'.format(action=payment_action)), 400
 
             if valid_payment_action and valid_nr_state:
-                update_solr = False
                 if payment_action in [NameRequestActions.COMPLETE.value]:
                     # Save back to NRO to get the updated NR Number
                     update_solr = True
-
-
                     nr_model = self.add_records_to_network_services(nr_model, update_solr)
 
             json_input = request.get_json()
