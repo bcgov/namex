@@ -549,7 +549,7 @@ class Request(db.Model):
     def set_special_characters_descriptive(cls, list_d):
         list_special_characters = []
         for element in list_d:
-            list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)) + r'\W*')
+            list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
 
         return list_special_characters
 
