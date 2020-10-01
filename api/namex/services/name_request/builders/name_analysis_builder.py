@@ -239,28 +239,27 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details, forced
 
-    def search_exact_match(self, preprocess_name, list_name):
+    def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False):
         result = ProcedureResult()
         result.is_valid = False
 
-        criteria = Request.get_general_query()
-        exact_match = Request.get_query_exact_match(criteria, preprocess_name)
-
-        if exact_match:
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
-            result.values = {
-                'list_name': list_name,
-                'list_dist': None,
-                'list_desc': None,
-                'list_conflicts': exact_match
-            }
+        if queue:
+            print("Search for exact match in INPROGRESS, HOLD, DRAFT")
         else:
-            result.is_valid = True
-            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
-            result.values = []
+            print("Search for exact match in APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
 
-        return result
+        criteria = Request.get_general_query(change_filter=False, queue=queue)
+        criteria = Request.get_query_exact_match(criteria, list_name)
+        matches = Request.find_by_criteria_array(criteria, queue=queue)
+
+        dict_highest_counter = {}
+        list_details = []
+        for match in matches:
+            dict_highest_counter[match.name] = 1.0
+            list_details = self.get_details_higher_score(dict_highest_counter, match, {})
+            print("Exact match: {}".format(match.name))
+
+        return self.prepare_response(list_details, False, list_name, list_dist_words, list_desc_words)
 
     '''
     Override the abstract / base class method
@@ -500,11 +499,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     similarity = round((similarity_dist + similarity_desc) / 2, 2)
                     print(similarity)
 
-                if similarity >= MINIMUM_SIMILARITY and not self.stand_alone_additional_dist_desc(list_dist,
-                                                                                                  service.get_list_dist(),
-                                                                                                  list_desc,
-                                                                                                  service.get_list_desc(),
-                                                                                                  stand_alone_words):
+                if similarity >= MINIMUM_SIMILARITY:
                     dict_matches_counter.update({match.name: similarity})
                     selected_matches.append(match)
                     if self.stop_search(similarity, matches):
@@ -564,19 +559,18 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 return True
         return False
 
-    def get_details_higher_score(self, dict_highest_counter, selected_matches, all_subs_dict):
+    def get_details_higher_score(self, dict_highest_counter, selected_match, all_subs_dict):
         list_details = []
         for key, value in dict_highest_counter.items():
-            for record in selected_matches:
-                if record.name == key:
-                    dict_details = {'score': value,
-                                    'name': key,
-                                    'tokens': all_subs_dict,
-                                    'consumption_date': record.consumptionDate,
-                                    'submitted_date': record.submittedDate,
-                                    'corp_num': record.corpNum,
-                                    'nr_num': record.nrNum}
-                    list_details.append(dict_details)
+            if selected_match.name == key:
+                dict_details = {'score': value,
+                                'name': key,
+                                'tokens': all_subs_dict,
+                                'consumption_date': selected_match.consumptionDate,
+                                'submitted_date': selected_match.submittedDate,
+                                'corp_num': selected_match.corpNum,
+                                'nr_num': selected_match.nrNum}
+                list_details.append(dict_details)
 
         return list_details
 
@@ -649,15 +643,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def is_standalone_name(self, list_name, stand_alone_words):
         if any(stand_alone in list_name for stand_alone in stand_alone_words):
             return True
-        return False
-
-    def stand_alone_additional_dist_desc(self, lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2,
-                                         stand_alone_words):
-        if self.is_standalone_name(lst_desc_name1, stand_alone_words) and self.is_standalone_name(lst_desc_name2,
-                                                                                                  stand_alone_words) and (
-                lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__()):
-            return True
-
         return False
 
     def get_substitutions_descriptive(self, w_desc):

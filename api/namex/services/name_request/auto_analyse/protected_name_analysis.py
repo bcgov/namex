@@ -42,9 +42,13 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         builder = self.builder
 
         results = []
-
+        nproc_svc = self.name_processing_service
+        is_stand_alone = builder.is_standalone_name(self.name_tokens, nproc_svc.get_stand_alone_words())
         # Return any combination of these checks
         if not self.skip_search_conflicts:
+            check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens)
+
+        if not check_conflicts and not is_stand_alone:
             check_conflicts = builder.search_conflicts(
                 [self.get_list_dist_search_conflicts()],
                 [self.get_list_desc()],
@@ -52,20 +56,25 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                 self.processed_name
             )
 
-            if not check_conflicts.is_valid:
-                results.append(check_conflicts)
+        if not check_conflicts.is_valid:
+            results.append(check_conflicts)
 
-        check_conflicts_queue = builder.search_conflicts(
-            [self.get_list_dist_search_conflicts()],
-            [self.get_list_desc()],
-            self.name_tokens_search_conflict,
-            self.processed_name,
-            False,
-            True
-        )
+        if not self.skip_search_conflicts:
+            check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+                                                               self.name_tokens, True)
+
+        if not check_conflicts_queue and not is_stand_alone:
+            check_conflicts_queue = builder.search_conflicts(
+                [self.get_list_dist_search_conflicts()],
+                [self.get_list_desc()],
+                self.name_tokens_search_conflict,
+                self.processed_name,
+                False,
+                True
+            )
 
         if not check_conflicts_queue.is_valid:
-             results.append(check_conflicts_queue)
+            results.append(check_conflicts_queue)
 
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
