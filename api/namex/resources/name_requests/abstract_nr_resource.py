@@ -10,17 +10,24 @@ setup_logging()  # Important to do this first
 
 class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
     def add_records_to_network_services(self, nr_model, update_solr=False):
+        temp_nr_num = None
         if nr_model.stateCd in [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
+            existing_nr_num = nr_model.nrNum
             # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the on_nro_save_success handler
             print('Adding request to NRO')
             nr_model = self.add_request_to_nro(nr_model, self.on_nro_save_success)
             print('NR is using the temporary NR Number {num}'.format(num=nr_model.nrNum))
 
+            # Set the temp NR number if its different
+            if nr_model.nrNum != existing_nr_num:
+                temp_nr_num = existing_nr_num
+                print('Replacing temporary NR Number {temp} -> {new}'.format(temp=temp_nr_num, new=nr_model.nrNum))
+
             print(repr(nr_model))
 
         # Update SOLR
         if update_solr:
-            self.update_solr_service(nr_model)
+            self.update_solr_service(nr_model, temp_nr_num)
 
         return nr_model
 
