@@ -160,11 +160,7 @@ class NameRequestFields(NameRequestResource):
                 if request_state in request_editable_states:
                     is_valid = True
                 elif request_state in contact_editable_states:
-                    # Check expiry
-                    if not nr_model.is_expired:
-                        is_valid = True
-                    else:
-                        msg = 'Name Request PATCH is invalid - the Name Request is expired'
+                    is_valid = True
                 else:
                     msg = 'Invalid state change requested - the Name Request state cannot be changed to [' + data.get('stateCd', '') + ']'
 
