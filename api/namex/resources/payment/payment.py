@@ -205,10 +205,21 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             if not payment_action:
                 return None, None, jsonify(message='Invalid payment action, {action} not found'.format(action=payment_action)), 400
 
-            if payment_action in [NameRequestActions.COMPLETE.value]:
-                # Save back to NRO to get the updated NR Number
-                update_solr = True
-                nr_model = self.add_records_to_network_services(nr_model, update_solr)
+            valid_payment_action = payment_action in [NameRequestActions.COMPLETE.value]
+            if not valid_payment_action:
+                return None, None, jsonify(message='Invalid payment action'.format(action=payment_action)), 400
+
+            # We only handle payments if the NR is in the following states
+            valid_payment_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]
+            valid_nr_state = nr_model.stateCd in valid_payment_states
+            if not valid_nr_state:
+                return None, None, jsonify(message='Invalid NR state'.format(action=payment_action)), 400
+
+            if valid_payment_action and valid_nr_state:
+                if payment_action in [NameRequestActions.COMPLETE.value]:
+                    # Save back to NRO to get the updated NR Number
+                    update_solr = True
+                    nr_model = self.add_records_to_network_services(nr_model, update_solr)
 
             json_input = request.get_json()
             payment_request = {}
@@ -551,32 +562,45 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
         extend the expiration by an additional year (plus the default 56 days).
         :param nr_model:
+        :param payment_id:
         :return:
         """
         nr_svc = self.nr_service
 
-        if nr_model.submitCount < 3:
-            if nr_model.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
-                # If request action is REH or REST extend by 1 year (+ 56 default) days
-                nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1, days=56)))
-                nr_model = nr_svc.update_request_submit_count(nr_model)
+        # Update the state of the payment
+        payment = get_active_payment(nr_model, payment_id)
+        sbc_payment_response = get_payment(payment.payment_token)
+
+        # TODO: Throw errors if this fails!
+        if sbc_payment_response.status_code in [PaymentStatusCode.COMPLETED.value]:
+            payment.payment_status_code = PaymentState.COMPLETED.value
+            payment.payment_completion_date = sbc_payment_response.created_on
+            payment.save_to_db()
+
+            if nr_model.submitCount < 3:
+                if nr_model.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
+                    # If request action is REH or REST extend by 1 year (+ 56 default) days
+                    nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1, days=56)))
+                    nr_model = nr_svc.update_request_submit_count(nr_model)
+                else:
+                    # Extend expiry date by (default) 56 days
+                    nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow())
+                    nr_model = nr_svc.update_request_submit_count(nr_model)
+
+                nr_model.save_to_db()
             else:
-                # Extend expiry date by (default) 56 days
-                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow())
-                nr_model = nr_svc.update_request_submit_count(nr_model)
+                # TODO: Make a custom exception for this?
+                raise PaymentServiceError(message='Submit count maximum of 3 retries has been reached!')
 
-            # This handles updates if the NR state is 'patchable'
-            # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+        # This (optionally) handles the updates for NRO and Solr, if necessary
+        update_solr = False
+        nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
-            # This (optionally) handles the updates for NRO and Solr, if necessary
-            # update_solr = False
-            # nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        # Update the actions, as things change once the payment is successful
+        self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
 
-            # Record the event
-            # EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-apply]', nr_model, nr_svc.request_data)
-        else:
-            # TODO: Make a custom exception for this?
-            raise PaymentServiceError(message='Submit count maximum of 3 retries has been reached!')
+        # Record the event
+        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-apply]', nr_model, nr_svc.request_data)
 
         return nr_model
 
