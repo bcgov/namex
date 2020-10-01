@@ -258,6 +258,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dict_highest_counter[match.name] = 1.0
             list_details = self.get_details_higher_score(dict_highest_counter, [match], {})
             print("Exact match: {}".format(match.name))
+            break
 
         return self.prepare_response(list_details, queue, list_name, list_dist_words, list_desc_words)
 

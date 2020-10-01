@@ -465,7 +465,7 @@ class Request(db.Model):
 
     @classmethod
     def get_query_exact_match(cls, criteria, list_name, designations):
-        name = cls.create_designation_name(list_name, designations)
+        name = cls.include_designation_in_name(list_name, designations)
         for e in criteria:
             e.filters.insert(len(e.filters),
                              [func.lower(Name.name).op('~')(r'{0}'.format(name))])
@@ -554,7 +554,7 @@ class Request(db.Model):
         return list_special_characters
 
     @classmethod
-    def create_end_designation_name(cls, special_characters_name, designations):
+    def include_end_designation_in_name(cls, special_characters_name, designations):
         name = r'\W*'.join(map(str, special_characters_name))
 
         designation_list = designations.get(DesignationPositionCodes.END.value)
@@ -566,23 +566,11 @@ class Request(db.Model):
         return full_name
 
     @classmethod
-    def create_any_designation_name(cls, special_characters_name, designations):
-        designation_list = designations.get(DesignationPositionCodes.ANY.value)
-        designation_list.sort(key=len, reverse=True)
-        designation_alternators = '|'.join(map(re.escape, designation_list))
-
-        name = r'\s*({0})?\s*'.format(designation_alternators).join(map(str, special_characters_name))
-
-        full_name = r'^({0})?\s*'.format(designation_alternators) + name + r'\s*({0})?$'.format(designation_alternators)
-        return full_name
-
-    @classmethod
-    def create_designation_name(cls, list_name, designations):
+    def include_designation_in_name(cls, list_name, designations):
         special_characters_name = Request.set_special_characters_descriptive(list_name)
+        name = ''
         if DesignationPositionCodes.END.value in designations.keys():
-            name = cls.create_end_designation_name(special_characters_name, designations)
-        else:
-            name = cls.create_any_designation_name(special_characters_name, designations)
+            name = cls.include_end_designation_in_name(special_characters_name, designations)
 
         return name
 
