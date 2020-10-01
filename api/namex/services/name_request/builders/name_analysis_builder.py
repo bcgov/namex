@@ -239,7 +239,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details, forced
 
-    def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False):
+    def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False, designations=None):
         result = ProcedureResult()
         result.is_valid = False
 
@@ -249,17 +249,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             print("Search for exact match in APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
 
         criteria = Request.get_general_query(change_filter=False, queue=queue)
-        criteria = Request.get_query_exact_match(criteria, list_name)
+        criteria = Request.get_query_exact_match(criteria, list_name, designations)
         matches = Request.find_by_criteria_array(criteria, queue=queue)
 
         dict_highest_counter = {}
         list_details = []
         for match in matches:
             dict_highest_counter[match.name] = 1.0
-            list_details = self.get_details_higher_score(dict_highest_counter, match, {})
+            list_details = self.get_details_higher_score(dict_highest_counter, [match], {})
             print("Exact match: {}".format(match.name))
 
-        return self.prepare_response(list_details, False, list_name, list_dist_words, list_desc_words)
+        return self.prepare_response(list_details, queue, list_name, list_dist_words, list_desc_words)
 
     '''
     Override the abstract / base class method
@@ -559,18 +559,19 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 return True
         return False
 
-    def get_details_higher_score(self, dict_highest_counter, selected_match, all_subs_dict):
+    def get_details_higher_score(self, dict_highest_counter, selected_matches, all_subs_dict):
         list_details = []
         for key, value in dict_highest_counter.items():
-            if selected_match.name == key:
-                dict_details = {'score': value,
-                                'name': key,
-                                'tokens': all_subs_dict,
-                                'consumption_date': selected_match.consumptionDate,
-                                'submitted_date': selected_match.submittedDate,
-                                'corp_num': selected_match.corpNum,
-                                'nr_num': selected_match.nrNum}
-                list_details.append(dict_details)
+            for record in selected_matches:
+                if record.name == key:
+                    dict_details = {'score': value,
+                                    'name': key,
+                                    'tokens': all_subs_dict,
+                                    'consumption_date': record.consumptionDate,
+                                    'submitted_date': record.submittedDate,
+                                    'corp_num': record.corpNum,
+                                    'nr_num': record.nrNum}
+                    list_details.append(dict_details)
 
         return list_details
 

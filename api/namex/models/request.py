@@ -27,7 +27,7 @@ import re
 
 from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
-    request_type_mapping, RequestPriority, EventAction, EventState, EventUserId
+    request_type_mapping, RequestPriority, EventAction, EventState, EventUserId, DesignationPositionCodes
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -464,11 +464,11 @@ class Request(db.Model):
         return regular_waiting_time.pop()
 
     @classmethod
-    def get_query_exact_match(cls, criteria, list_name):
-        special_characters_name = Request.set_special_characters(list_name)
-        name = r'\W*'.join(map(str, special_characters_name))
+    def get_query_exact_match(cls, criteria, list_name, designations):
+        name = cls.create_designation_name(list_name, designations)
         for e in criteria:
-            e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r'^{0}'.format(name))])
+            e.filters.insert(len(e.filters),
+                             [func.lower(Name.name).op('~')(r'{0}'.format(name))])
 
         return criteria
 
@@ -549,9 +549,42 @@ class Request(db.Model):
     def set_special_characters_descriptive(cls, list_d):
         list_special_characters = []
         for element in list_d:
-            list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
+            list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)) + r'\W*')
 
         return list_special_characters
+
+    @classmethod
+    def create_end_designation_name(cls, special_characters_name, designations):
+        name = r'\W*'.join(map(str, special_characters_name))
+
+        designation_list = designations.get(DesignationPositionCodes.END.value)
+        designation_list.sort(key=len, reverse=True)
+        designation_alternators = '|'.join(map(re.escape, designation_list))
+
+        full_name = r'^{0}\s+({1})$'.format(name, designation_alternators)
+
+        return full_name
+
+    @classmethod
+    def create_any_designation_name(cls, special_characters_name, designations):
+        designation_list = designations.get(DesignationPositionCodes.ANY.value)
+        designation_list.sort(key=len, reverse=True)
+        designation_alternators = '|'.join(map(re.escape, designation_list))
+
+        name = r'\s*({0})?\s*'.format(designation_alternators).join(map(str, special_characters_name))
+
+        full_name = r'^({0})?\s*'.format(designation_alternators) + name + r'\s*({0})?$'.format(designation_alternators)
+        return full_name
+
+    @classmethod
+    def create_designation_name(cls, list_name, designations):
+        special_characters_name = Request.set_special_characters_descriptive(list_name)
+        if DesignationPositionCodes.END.value in designations.keys():
+            name = cls.create_end_designation_name(special_characters_name, designations)
+        else:
+            name = cls.create_any_designation_name(special_characters_name, designations)
+
+        return name
 
 
 class RequestsSchema(ma.ModelSchema):

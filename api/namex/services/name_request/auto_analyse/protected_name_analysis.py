@@ -1,5 +1,6 @@
 from datetime import (datetime)
 
+from namex.constants import DesignationPositionCodes
 from .name_analysis_director import NameAnalysisDirector
 
 from .mixins.set_designation_lists import SetDesignationsListsMixin
@@ -44,26 +45,33 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         results = []
         nproc_svc = self.name_processing_service
         is_stand_alone = builder.is_standalone_name(self.name_tokens, nproc_svc.get_stand_alone_words())
+
+        # Set designations and run our check
+        self._set_designations()
+
+        designations = self.get_designations_search_conflict()
+
         # Return any combination of these checks
         if not self.skip_search_conflicts:
-            check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens)
 
-        if not check_conflicts and not is_stand_alone:
-            check_conflicts = builder.search_conflicts(
-                [self.get_list_dist_search_conflicts()],
-                [self.get_list_desc()],
-                self.name_tokens_search_conflict,
-                self.processed_name
-            )
+            check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
+                                                         False, designations)
 
-        if not check_conflicts.is_valid:
-            results.append(check_conflicts)
+            if check_conflicts.is_valid and not is_stand_alone:
+                check_conflicts = builder.search_conflicts(
+                    [self.get_list_dist_search_conflicts()],
+                    [self.get_list_desc()],
+                    self.name_tokens_search_conflict,
+                    self.processed_name
+                )
 
-        if not self.skip_search_conflicts:
-            check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-                                                               self.name_tokens, True)
+            if not check_conflicts.is_valid:
+                results.append(check_conflicts)
 
-        if not check_conflicts_queue and not is_stand_alone:
+        check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+                                                           self.name_tokens, True, designations)
+
+        if check_conflicts_queue.is_valid and not is_stand_alone:
             check_conflicts_queue = builder.search_conflicts(
                 [self.get_list_dist_search_conflicts()],
                 [self.get_list_desc()],
@@ -85,8 +93,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
 
-        # Set designations and run our check
-        self._set_designations()
+        # # Set designations and run our check
+        # self._set_designations()
 
         check_designation_existence = builder.check_designation_existence(
             self.get_original_name_tokenized(),
@@ -135,3 +143,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
             results.append(check_special_words)
 
         return results
+
+    def get_designations_search_conflict(self):
+        designations = {
+            DesignationPositionCodes.END.value: self.get_designation_end_list_correct()} if self.get_designation_end_list_correct() else {
+            DesignationPositionCodes.ANY.value: self.get_designation_any_list()}
+
+        return designations
