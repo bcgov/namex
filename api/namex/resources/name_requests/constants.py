@@ -8,6 +8,7 @@ request_editable_states = [
 ]
 
 contact_editable_states = [
+    State.DRAFT,
     State.APPROVED,
     State.REJECTED,
     State.CONDITIONAL
