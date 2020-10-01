@@ -464,13 +464,13 @@ class Request(db.Model):
         return regular_waiting_time.pop()
 
     @classmethod
-    def get_query_exact_match(cls, criteria, prep_name):
-        criteria.filters.append(func.lower(Name.name) == func.lower(prep_name))
+    def get_query_exact_match(cls, criteria, list_name):
+        special_characters_name = Request.set_special_characters(list_name)
+        name = r'\W*'.join(map(str, special_characters_name))
+        for e in criteria:
+            e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r'^{0}'.format(name))])
 
-        results = Request.find_by_criteria_array(criteria)
-        flattened = [item.strip() for sublist in results for item in sublist]
-
-        return flattened
+        return criteria
 
     @classmethod
     def get_distinctive_query(cls, dist, criteria, stop_words, check_name_is_well_formed):
