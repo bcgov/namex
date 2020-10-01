@@ -127,11 +127,11 @@ def handle_auth_error(ex):
     return response
 
 
-@cors_preflight('GET, POST')
-@payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
+@cors_preflight('GET')
+@payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
 })
-class NameRequestPayments(AbstractNameRequestResource):
+class FindNameRequestPayments(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
     def get(self, nr_id):
         try:
@@ -168,15 +168,22 @@ class NameRequestPayments(AbstractNameRequestResource):
         except Exception as err:
             return handle_exception(err, err, 500)
 
+
+@cors_preflight('POST')
+@payment_api.route('/<int:nr_id>/<string:payment_action>', strict_slashes=False, methods=['POST', 'OPTIONS'])
+@payment_api.doc(params={
+})
+class CreateNameRequestPayment(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
     @payment_api.doc(params={
-        'nr_id': 'Name Request number'
+        'nr_id': 'Name Request number',
+        'payment_action': 'Payment NR Action - One of [COMPLETE, UPGRADE, REAPPLY]'
     })
-    def post(self, nr_id):
+    def post(self, nr_id, payment_action=NameRequestActions.COMPLETE.value):
         """
         At this point, the Name Request will still be using a TEMPORARY NR number.
         Confirming the payment on the frontend triggers this endpoint. Here, we:
@@ -184,6 +191,7 @@ class NameRequestPayments(AbstractNameRequestResource):
         - Create the payment via SBC Pay.
         - If payment creation is successful, create a corresponding payment record in our system.
         :param nr_id:
+        :param payment_action:
         :return:
         """
         try:
@@ -192,11 +200,18 @@ class NameRequestPayments(AbstractNameRequestResource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return None, None, jsonify(message='{nr_id} not found'.format(nr_id=nr_id)), 400
+                return None, None, jsonify(message='Name Request {nr_id} not found'.format(nr_id=nr_id)), 400
 
-            # Save back to NRO to get the updated NR Number
-            update_solr = True
-            nr_model = self.add_records_to_network_services(nr_model, update_solr)
+            if not payment_action:
+                return None, None, jsonify(message='Invalid payment action, {action} not found'.format(action=payment_action)), 400
+
+            if payment_action in [NameRequestActions.COMPLETE.value]:
+                # Save back to NRO to get the updated NR Number
+                update_solr = True
+                nr_model = self.add_records_to_network_services(nr_model, update_solr)
+            elif payment_action in [NameRequestActions.UPGRADE.value, NameRequestActions.REAPPLY]:
+                update_solr = False
+                nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
             json_input = request.get_json()
             payment_request = {}
@@ -531,10 +546,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
-
-        # This (optionally) handles the updates for NRO and Solr, if necessary
-        # update_solr = False
-        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Record the event
         # EventRecorder.record(nr_svc.user, Event.PATCH + ' [upgrade]', nr_model, nr_svc.request_data)
