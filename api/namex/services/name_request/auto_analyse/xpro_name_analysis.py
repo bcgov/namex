@@ -4,7 +4,7 @@ from .name_analysis_director import NameAnalysisDirector
 
 from .mixins.set_designation_lists import SetDesignationsListsMixin
 
-from . import AnalysisIssueCodes
+from . import AnalysisIssueCodes, request_types
 from .name_analysis_utils import get_classification
 
 '''
@@ -145,14 +145,20 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
         builder = self.builder
 
         results = []
+        self._get_designations(request_types)
+        np_svc = self._name_processing_service
+        is_stand_alone = builder.is_standalone_name(self.name_tokens, nproc_svc.get_stand_alone_words())
+        stop_words_list = np_svc.get_stop_words()
 
         # Return any combination of these checks
-        check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens)
+        check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
+                                                     False, self.get_designation_end_list(),
+                                                     self.get_designation_any_list(), stop_words_list)
 
-        if not check_conflicts:
+        if check_conflicts.is_valid and not is_stand_alone:
             check_conflicts = builder.search_conflicts(
                 [self.get_list_dist_search_conflicts()],
-                [self.get_list_desc()],
+                [self.get_list_desc_search_conflicts()],
                 self.name_tokens_search_conflict,
                 self.processed_name
             )
@@ -160,13 +166,14 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
         if not check_conflicts.is_valid:
             results.append(check_conflicts)
 
-        check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-                                                           self.name_tokens, True)
+        check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
+                                                           True, self.get_designation_end_list(),
+                                                           self.get_designation_any_list(), stop_words_list)
 
         if not check_conflicts_queue:
             check_conflicts_queue = builder.search_conflicts(
                 [self.get_list_dist_search_conflicts()],
-                [self.get_list_desc()],
+                [self.get_list_desc_search_conflicts()],
                 self.name_tokens_search_conflict,
                 self.processed_name,
                 False,
