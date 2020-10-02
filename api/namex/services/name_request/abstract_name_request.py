@@ -1,15 +1,14 @@
 from datetime import datetime, timedelta
 from pytz import timezone
 
-from namex.constants import request_type_mapping
-
 from namex.models import db
 from namex.models.nr_number import NRNumber
 from namex.models.user import User
 
 from namex.utils.logging import setup_logging
 
-from namex.services.name_request.exceptions import GetUserIdError, GenerateNRKeysError
+from namex.services.name_request.utils import get_mapped_request_type, get_mapped_entity_and_action_code
+from namex.services.name_request.exceptions import GetUserIdError, GenerateNRKeysError, MapRequestTypeError
 
 setup_logging()  # Important to do this first
 
@@ -109,15 +108,11 @@ class AbstractNameRequestMixin(object):
 
     @classmethod
     def get_mapped_request_type(cls, entity_type, request_action):
-        output = None
-        for item in request_type_mapping:
-            if item[1] == entity_type and item[2] == request_action:
-                output = item
-                break
+        return get_mapped_request_type(entity_type, request_action)
 
-        if output:
-            request_type = list(output)
-            return request_type
+    @classmethod
+    def get_mapped_entity_and_action_code(cls, request_type):
+        return get_mapped_entity_and_action_code(request_type)
 
     @classmethod
     def get_request_sequence(cls):

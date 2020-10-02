@@ -2,9 +2,11 @@ import re
 from flask import current_app
 
 from namex import jwt
-from namex.constants import PaymentState
+from namex.constants import PaymentState, request_type_mapping, reverse_request_type_mapping
 from namex.models import State, User
 from namex.services import ServicesError
+
+from .exceptions import MapRequestTypeError
 
 
 nr_regex = r'^(NR\ ?L{0,1}|L{0,1})?([\d]{6,8})$'
@@ -50,6 +52,34 @@ def get_active_payment(nr, payment_id):
         payments = list(filter(lambda p: p.id == payment_id, nr.payments.all()))
         return payments[0] if len(payments) > 0 else None
     return None
+
+
+def get_mapped_request_type(entity_type, request_action):
+    output = None
+    for item in request_type_mapping:
+        if item[1] == entity_type and item[2] == request_action:
+            output = item
+            break
+
+    if output:
+        request_mapping = list(output)
+        return request_mapping
+
+
+def get_mapped_entity_and_action_code(request_type):
+    output = None
+
+    for item in reverse_request_type_mapping:
+        if item[0] == request_type:
+            output = item
+            break
+
+    if output:
+        entity_type = output[1]
+        request_action = output[2]
+        return entity_type, request_action
+    else:
+        raise MapRequestTypeError(message='Error mapping the requestTypeCd to an entity type and action - no default was found in the request type mappings!')
 
 
 # TODO: Move these out into auth utils in the main utils module
