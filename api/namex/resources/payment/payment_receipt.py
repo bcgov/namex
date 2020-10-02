@@ -54,7 +54,7 @@ class PaymentReceipt(Resource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return None, None, jsonify(message='{nr_id} not found'.format(nr_id=payment.nrId)), 400
+                return jsonify(message='{nr_id} not found'.format(nr_id=payment.nrId)), 400
 
             payment_response = get_payment(payment.payment_token)
             # TODO: Make sure we pick the right one... use the first choice

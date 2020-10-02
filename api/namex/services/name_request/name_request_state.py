@@ -188,11 +188,6 @@ def to_conditional(resource, nr, on_success_cb):
             valid_states=', '.join(valid_states)
         ))
 
-    # Check for payment
-    # TODO: Fix this!
-    # if nr.payment_token is None:
-    #     raise NameRequestException(message=state_transition_error_msg.format(current_state=nr.stateCd, next_state=State.CONDITIONAL) + ', payment token is not defined')
-
     resource.next_state_code = State.CONDITIONAL
     nr.stateCd = State.CONDITIONAL
     if on_success_cb:
@@ -209,13 +204,24 @@ def to_approved(resource, nr, on_success_cb):
             valid_states=', '.join(valid_states)
         ))
 
-    # Check for payment
-    # TODO: Fix this!
-    # if nr.payment_token is None:
-    #     raise NameRequestException(message=state_transition_error_msg.format(current_state=nr.stateCd, next_state=State.APPROVED) + ', payment token is not defined')
-
     resource.next_state_code = State.APPROVED
     nr.stateCd = State.APPROVED
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
+
+
+def to_rejected(resource, nr, on_success_cb):
+    valid_states = [State.REJECTED]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.REJECTED,
+            valid_states=', '.join(valid_states)
+        ))
+
+    resource.next_state_code = State.REJECTED
+    nr.stateCd = State.REJECTED
     if on_success_cb:
         nr = on_success_cb(nr, resource)
     return nr
@@ -256,12 +262,12 @@ def apply_nr_state_change(self, name_request, next_state, on_success=None):
     :param on_success:
     :return:
     """
-
     return {
         State.DRAFT: to_draft,
-        State.RESERVED: to_reserved,
         State.COND_RESERVE: to_cond_reserved,
+        State.RESERVED: to_reserved,
         State.CONDITIONAL: to_conditional,
         State.APPROVED: to_approved,
+        State.REJECTED: to_rejected,
         State.CANCELLED: to_cancelled
     }.get(next_state)(self, name_request, on_success)
