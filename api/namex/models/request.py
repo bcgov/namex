@@ -12,7 +12,7 @@ from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.dialects import postgresql
-from sqlalchemy import and_, func, Date
+from sqlalchemy import and_, or_, func, Date
 from marshmallow import Schema, fields, post_load, post_dump
 from .nwpta import PartnerNameSystem
 from .user import User, UserSchema
@@ -464,11 +464,40 @@ class Request(db.Model):
         return regular_waiting_time.pop()
 
     @classmethod
-    def get_query_exact_match(cls, criteria, list_name, designations):
-        name = cls.include_designation_in_name(list_name, designations)
+    def get_query_exact_match(cls, criteria, list_name, list_dist, list_desc, end_designation_list,
+                              any_designation_list, stop_words):
+        name = []
+        for word in list_name:
+            if word in list_dist:
+                name.extend(Request.set_special_characters_distinctive([word]))
+            elif word in list_desc:
+                name.extend(Request.set_special_characters_descriptive([word]))
+            else:
+                print("Unclassified word?")
+
+        criteria = cls.get_designations_in_name(criteria, name, any_designation_list, end_designation_list, stop_words)
+
+        return criteria
+
+    @classmethod
+    def get_designations_in_name(cls, criteria, special_characters_name, any_designation_list, end_designation_list,
+                                 stop_words_list):
+        name_with_designation = cls.include_designations_in_name(special_characters_name, any_designation_list,
+                                                                 end_designation_list,
+                                                                 stop_words_list)
         for e in criteria:
             e.filters.insert(len(e.filters),
-                             [func.lower(Name.name).op('~')(r'{0}'.format(name))])
+                             [func.lower(Name.name).op('~')(r'{0}'.format(name_with_designation))])
+
+        return criteria
+
+    @classmethod
+    def get_any_designation_in_name(cls, criteria, special_characters_name, any_list_designation, stop_words_list):
+        name_any_designation = cls.include_any_designation_in_name(special_characters_name, any_list_designation,
+                                                                   stop_words_list)
+        for e in criteria:
+            e.filters.insert(len(e.filters),
+                             [func.lower(Name.name).op('~')(r'{0}'.format(name_any_designation))])
 
         return criteria
 
@@ -553,26 +582,29 @@ class Request(db.Model):
 
         return list_special_characters
 
+    # @classmethod
+    # def include_end_designation_in_name(cls, special_characters_name, end_designation_list, stop_words_list):
+    #     stop_words_alternators = '|'.join(map(re.escape, stop_words_list))
+    #     end_designation_alternators = '|'.join(map(re.escape, end_designation_list))
+    #
+    #     name = r'\W*({0})?\W*'.format(stop_words_alternators) + r'\W*({0})?\W*'.format(stop_words_alternators).join(map(str, special_characters_name)) + r'\W*({0})?\W*'.format(stop_words_alternators)
+    #     full_name = r'^\d*{0}\s+({1})$'.format(name, end_designation_alternators)
+    #
+    #     return full_name
+
     @classmethod
-    def include_end_designation_in_name(cls, special_characters_name, designations):
-        name = r'\W*'.join(map(str, special_characters_name))
+    def include_designations_in_name(cls, special_characters_name, any_designation_list, end_designation_list,
+                                     stop_words_list):
+        any_designation_alternators = '|'.join(map(re.escape, any_designation_list))
+        end_designation_alternators = '|'.join(map(re.escape, end_designation_list))
+        stop_words_alternators = '|'.join(map(re.escape, stop_words_list))
 
-        designation_list = designations.get(DesignationPositionCodes.END.value)
-        designation_list.sort(key=len, reverse=True)
-        designation_alternators = '|'.join(map(re.escape, designation_list))
+        name = r'\W*({0})?\W*({1})?\W*'.format(any_designation_alternators, stop_words_alternators).join(
+            map(str, special_characters_name))
 
-        full_name = r'^{0}\s+({1})$'.format(name, designation_alternators)
-
+        full_name = r'^\d*\W*({0})?\W*({1})?\W*'.format(any_designation_alternators, stop_words_alternators) + name + \
+                    r'\W*({0})?\W*({1})?$'.format(any_designation_alternators, end_designation_alternators)
         return full_name
-
-    @classmethod
-    def include_designation_in_name(cls, list_name, designations):
-        special_characters_name = Request.set_special_characters_descriptive(list_name)
-        name = ''
-        if DesignationPositionCodes.END.value in designations.keys():
-            name = cls.include_end_designation_in_name(special_characters_name, designations)
-
-        return name
 
 
 class RequestsSchema(ma.ModelSchema):

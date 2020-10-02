@@ -239,7 +239,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details, forced
 
-    def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False, designations=None):
+    def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False, end_list_designations=None,
+                           any_list_designations=None, stop_words=None):
         result = ProcedureResult()
         result.is_valid = False
 
@@ -249,7 +250,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             print("Search for exact match in APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
 
         criteria = Request.get_general_query(change_filter=False, queue=queue)
-        criteria = Request.get_query_exact_match(criteria, list_name, designations)
+        criteria = Request.get_query_exact_match(criteria, list_name, list_dist_words, list_desc_words,
+                                                 end_list_designations, any_list_designations, stop_words)
         matches = Request.find_by_criteria_array(criteria, queue=queue)
 
         dict_highest_counter = {}

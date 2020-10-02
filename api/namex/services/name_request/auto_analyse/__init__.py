@@ -1,6 +1,8 @@
 from enum import Enum
 from nltk.stem import PorterStemmer
 
+from namex.constants import EntityTypes, DesignationPositionCodes
+
 porter = PorterStemmer()
 
 # Limit number of words to analyse
@@ -89,3 +91,10 @@ class AnalysisIssueCodes(str, Enum):
             values.append(item.value)
 
         return values
+
+request_types = {EntityTypes.CORPORATION.value: [DesignationPositionCodes.END.value],
+                 EntityTypes.UNLIMITED_LIABILITY_COMPANY.value: [DesignationPositionCodes.END.value],
+                 EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value: [DesignationPositionCodes.ANY.value,
+                                                                    DesignationPositionCodes.END.value],
+                 EntityTypes.COOPERATIVE.value: [DesignationPositionCodes.ANY.value],
+                 EntityTypes.SOCIETY.value: [DesignationPositionCodes.ANY.value]}
