@@ -200,20 +200,25 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return None, None, jsonify(message='Name Request {nr_id} not found'.format(nr_id=nr_id)), 400
+                return None, jsonify(message='Name Request {nr_id} not found'.format(nr_id=nr_id)), 400
 
             if not payment_action:
-                return None, None, jsonify(message='Invalid payment action, {action} not found'.format(action=payment_action)), 400
+                return None, jsonify(message='Invalid payment action, {action} not found'.format(action=payment_action)), 400
 
-            valid_payment_action = payment_action in [NameRequestActions.COMPLETE.value]
+            valid_payment_action = payment_action in [
+                NameRequestActions.COMPLETE.value,
+                NameRequestActions.UPGRADE.value,
+                NameRequestActions.REAPPLY.value
+            ]
+
             if not valid_payment_action:
-                return None, None, jsonify(message='Invalid payment action'.format(action=payment_action)), 400
+                return None, jsonify(message='Invalid payment action'.format(action=payment_action)), 400
 
             # We only handle payments if the NR is in the following states
             valid_payment_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]
             valid_nr_state = nr_model.stateCd in valid_payment_states
             if not valid_nr_state:
-                return None, None, jsonify(message='Invalid NR state'.format(action=payment_action)), 400
+                return None, jsonify(message='Invalid NR state'.format(action=payment_action)), 400
 
             if valid_payment_action and valid_nr_state:
                 if payment_action in [NameRequestActions.COMPLETE.value]:
