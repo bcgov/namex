@@ -57,7 +57,7 @@ class EntityTypes(AbstractEnum):
     COOPERATIVE = 'CP'
     BENEFIT_COMPANY = 'BC'
     COMMUNITY_CONTRIBUTION_COMPANY = 'CC'
-    SOCIETY = 'SO'
+    SOCIETY = 'SOC'
     PRIVATE_ACT = 'PA'
     FINANCIAL_INSTITUTION = 'FI'
     PARISH = 'PAR'
@@ -98,6 +98,7 @@ class BCProtectedNameEntityTypes(AbstractEnum):
     LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value
     COOPERATIVE = EntityTypes.COOPERATIVE.value
     COMMUNITY_CONTRIBUTION_COMPANY = EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value
+    SOCIETY = EntityTypes.SOCIETY.value
 
 
 # TODO: Are these still valid for unprotected?
@@ -115,3 +116,4 @@ class XproUnprotectedNameEntityTypes(AbstractEnum):
     XPRO_LIMITED_LIABILITY_COMPANY = EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value
     XPRO_LIMITED_PARTNERSHIP = EntityTypes.XPRO_LIMITED_PARTNERSHIP.value
     XPRO_LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value
+    XPRO_SOCIETY = EntityTypes.XPRO_SOCIETY.value
