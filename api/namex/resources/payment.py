@@ -156,12 +156,12 @@ class Payments(Resource):
         try:
             # TODO: Validate NR string format
             # if not RequestDAO.validNRFormat(nr_num):
-            #    return None, None, jsonify(message='NR number is not in a valid format \'NR 9999999\''), 400
+            #    return jsonify(message='NR number is not in a valid format \'NR 9999999\''), 400
 
             nr_draft = RequestDAO.find_by_nr(nr_num)
             if not nr_draft:
                 # Should this be a 400 or 404... hmmm
-                return None, None, jsonify(message='{nr_num} not found'.format(nr_num=nr_num)), 400
+                return jsonify(message='{nr_num} not found'.format(nr_num=nr_num)), 400
 
             json_input = request.get_json()
             if not json_input:
