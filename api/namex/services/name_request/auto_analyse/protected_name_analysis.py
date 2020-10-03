@@ -45,19 +45,17 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
 
         results = []
         np_svc = self.name_processing_service
-        is_stand_alone = builder.is_standalone_name(self.name_tokens, np_svc.get_stand_alone_words())
         stop_words_list = np_svc.get_stop_words()
 
         self._get_designations(request_types)
 
         # Return any combination of these checks
         if not self.skip_search_conflicts:
-
             check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
                                                          False, self.get_designation_end_list(), self.get_designation_any_list(),
                                                          stop_words_list)
 
-            if check_conflicts.is_valid and not is_stand_alone:
+            if check_conflicts.is_valid:
                 check_conflicts = builder.search_conflicts(
                     [self.get_list_dist_search_conflicts()],
                     [self.get_list_desc_search_conflicts()],
@@ -72,7 +70,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                                                            self.name_tokens, True, self.get_designation_end_list(),
                                                            self.get_designation_any_list(), stop_words_list)
 
-        if check_conflicts_queue.is_valid and not is_stand_alone:
+        if check_conflicts_queue.is_valid:
             check_conflicts_queue = builder.search_conflicts(
                 [self.get_list_dist_search_conflicts()],
                 [self.get_list_desc_search_conflicts()],

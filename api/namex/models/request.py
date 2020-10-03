@@ -473,7 +473,7 @@ class Request(db.Model):
             elif word in list_desc:
                 name.extend(Request.set_special_characters_descriptive([word]))
             else:
-                print("Unclassified word?")
+                raise Exception('Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
 
         criteria = cls.get_designations_in_name(criteria, name, any_designation_list, end_designation_list, stop_words)
 

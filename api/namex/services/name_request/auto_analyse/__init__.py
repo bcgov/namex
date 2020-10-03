@@ -36,7 +36,7 @@ class ProcedureResult:
 class AnalysisRequestActions(str, Enum):
     NEW = 'NEW'  # Start a new business (NAME PROTECTION)
     AML = 'AML'  # Amalgamate (NAME PROTECTION, BC ONLY)
-    ASSUMED = 'ASSUMED'  #Assumed Name for certain XPROs only.
+    ASSUMED = 'ASSUMED'  # Assumed Name for certain XPROs only.
 
     CHG = 'CHG'  # Change your name (it's coming stub it out)
     MVE = 'MVE'  # Move your business
@@ -91,6 +91,7 @@ class AnalysisIssueCodes(str, Enum):
             values.append(item.value)
 
         return values
+
 
 request_types = {EntityTypes.CORPORATION.value: [DesignationPositionCodes.END.value],
                  EntityTypes.UNLIMITED_LIABILITY_COMPANY.value: [DesignationPositionCodes.END.value],
