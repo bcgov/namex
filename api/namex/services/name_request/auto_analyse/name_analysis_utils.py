@@ -235,7 +235,7 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     print(dict_name_words_original)
 
     service.set_name_tokens_search_conflict(service.name_tokens)
-    service._list_dist_words_search_conflicts = remove_misplaced_distinctive(service.get_list_dist(),
+    service._list_dist_words_search_conflicts = remove_misplaced_distinctive(list(service.get_list_dist()),
                                                                              service.get_list_desc(),
                                                                              service.name_tokens_search_conflict)
 
