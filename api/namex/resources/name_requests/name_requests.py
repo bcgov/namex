@@ -13,6 +13,7 @@ from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
+from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError
 
@@ -104,7 +105,16 @@ class NameRequestsResource(BaseNameRequestResource):
             return handle_exception(err, 'Error retrieving the NR from the db.', 500)
 
         if nr_num and len(results) == 1:
-            response_data = results[0].json()
+            nr_model = results[0]
+
+            if nr_model.requestTypeCd and (not nr_model.entity_type_cd or not nr_model.request_action_cd):
+                # If requestTypeCd is set, but a request_entity (entity_type_cd) and a request_action (request_action_cd)
+                # are not, use get_mapped_entity_and_action_code to map the values from the requestTypeCd
+                entity_type, request_action = get_mapped_entity_and_action_code(nr_model.requestTypeCd)
+                nr_model.entity_type_cd = entity_type
+                nr_model.request_action_cd = request_action
+
+            response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(results[0].stateCd, results[0])
             return jsonify(response_data), 200
