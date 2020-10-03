@@ -213,7 +213,7 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = True
+        update_solr = False
         nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Record the event
@@ -228,7 +228,7 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = True
+        update_solr = False
         nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Record the event
