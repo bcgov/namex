@@ -12,7 +12,7 @@ from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.dialects import postgresql
-from sqlalchemy import and_, or_, func, Date
+from sqlalchemy import and_, func, Date
 from marshmallow import Schema, fields, post_load, post_dump
 from .nwpta import PartnerNameSystem
 from .user import User, UserSchema
@@ -581,16 +581,6 @@ class Request(db.Model):
             list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
 
         return list_special_characters
-
-    # @classmethod
-    # def include_end_designation_in_name(cls, special_characters_name, end_designation_list, stop_words_list):
-    #     stop_words_alternators = '|'.join(map(re.escape, stop_words_list))
-    #     end_designation_alternators = '|'.join(map(re.escape, end_designation_list))
-    #
-    #     name = r'\W*({0})?\W*'.format(stop_words_alternators) + r'\W*({0})?\W*'.format(stop_words_alternators).join(map(str, special_characters_name)) + r'\W*({0})?\W*'.format(stop_words_alternators)
-    #     full_name = r'^\d*{0}\s+({1})$'.format(name, end_designation_alternators)
-    #
-    #     return full_name
 
     @classmethod
     def include_designations_in_name(cls, special_characters_name, any_designation_list, end_designation_list,

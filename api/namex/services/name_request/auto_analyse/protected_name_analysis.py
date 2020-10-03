@@ -92,7 +92,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
 
-        # # Set designations and run our check
+        # Set designations and run our check
         self._set_designations()
 
         check_designation_existence = builder.check_designation_existence(
