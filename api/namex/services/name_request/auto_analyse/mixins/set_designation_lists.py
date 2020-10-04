@@ -135,3 +135,25 @@ class SetDesignationsListsMixin(object):
         designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
                                                                                        designation_end_list=correct_designation_end_list).data
         self._misplaced_designation_end_list = designation_end_misplaced_list
+
+    def _get_designations(self, request_type_list_dict):
+        syn_svc = self.synonym_service
+
+        for key, value in request_type_list_dict.items():
+            if DesignationPositionCodes.END.value in value:
+                self._designation_end_list.extend(syn_svc.get_designations(entity_type_code=key,
+                                                                           position_code=DesignationPositionCodes.END.value,
+                                                                           lang=LanguageCodes.ENG.value).data)
+                self._designation_end_list.extend(syn_svc.get_designations(entity_type_code=key,
+                                                                           position_code=DesignationPositionCodes.END.value,
+                                                                           lang=LanguageCodes.FR.value).data)
+            if DesignationPositionCodes.ANY.value in value:
+                self._designation_any_list.extend(syn_svc.get_designations(entity_type_code=key,
+                                                                           position_code=DesignationPositionCodes.ANY.value,
+                                                                           lang=LanguageCodes.ENG.value).data)
+                self._designation_any_list.extend(syn_svc.get_designations(entity_type_code=key,
+                                                                           position_code=DesignationPositionCodes.ANY.value,
+                                                                           lang=LanguageCodes.FR.value).data)
+
+        self._designation_end_list = sorted(set(self._designation_end_list), key=len, reverse= True)
+        self._designation_any_list = sorted(set(self._designation_any_list), key=len, reverse= True)

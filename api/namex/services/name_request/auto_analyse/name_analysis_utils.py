@@ -235,22 +235,23 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     print(dict_name_words_original)
 
     service.set_name_tokens_search_conflict(service.name_tokens)
-    service._list_dist_words = remove_misplaced_distinctive(service.get_list_dist(), service.get_list_desc(),
-                                                            service.name_tokens_search_conflict)
+    service._list_dist_words_search_conflicts = remove_misplaced_distinctive(list(service.get_list_dist()),
+                                                                             service.get_list_desc(),
+                                                                             service.name_tokens_search_conflict)
 
     service._list_dist_words_search_conflicts, updated_name_tokens = remove_double_letters_list_dist_words(
-        service.get_list_dist(),
+        service.get_list_dist_search_conflicts(),
         service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(updated_name_tokens)
 
-    service._list_desc_words = remove_descriptive_same_category(dict_desc)
+    service._list_desc_words_search_conflicts = remove_descriptive_same_category(dict_desc)
 
     service.set_name_tokens_search_conflict(
-        update_token_list(service.get_list_dist_search_conflicts() + service.get_list_desc(),
+        update_token_list(service.get_list_dist_search_conflicts() + service.get_list_desc_search_conflicts(),
                           service.name_tokens_search_conflict))
 
     service._dict_name_words = get_classification_summary(service.get_list_dist_search_conflicts(),
-                                                          service.get_list_desc(),
+                                                          service.get_list_desc_search_conflicts(),
                                                           service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 

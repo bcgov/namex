@@ -27,7 +27,7 @@ import re
 
 from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
-    request_type_mapping, RequestPriority, EventAction, EventState, EventUserId
+    request_type_mapping, RequestPriority, EventAction, EventState, EventUserId, DesignationPositionCodes
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -464,13 +464,42 @@ class Request(db.Model):
         return regular_waiting_time.pop()
 
     @classmethod
-    def get_query_exact_match(cls, criteria, prep_name):
-        criteria.filters.append(func.lower(Name.name) == func.lower(prep_name))
+    def get_query_exact_match(cls, criteria, list_name, list_dist, list_desc, end_designation_list,
+                              any_designation_list, stop_words):
+        name = []
+        for word in list_name:
+            if word in list_dist:
+                name.extend(Request.set_special_characters_distinctive([word]))
+            elif word in list_desc:
+                name.extend(Request.set_special_characters_descriptive([word]))
+            else:
+                raise Exception('Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
 
-        results = Request.find_by_criteria_array(criteria)
-        flattened = [item.strip() for sublist in results for item in sublist]
+        criteria = cls.get_designations_in_name(criteria, name, any_designation_list, end_designation_list, stop_words)
 
-        return flattened
+        return criteria
+
+    @classmethod
+    def get_designations_in_name(cls, criteria, special_characters_name, any_designation_list, end_designation_list,
+                                 stop_words_list):
+        name_with_designation = cls.include_designations_in_name(special_characters_name, any_designation_list,
+                                                                 end_designation_list,
+                                                                 stop_words_list)
+        for e in criteria:
+            e.filters.insert(len(e.filters),
+                             [func.lower(Name.name).op('~')(r'{0}'.format(name_with_designation))])
+
+        return criteria
+
+    @classmethod
+    def get_any_designation_in_name(cls, criteria, special_characters_name, any_list_designation, stop_words_list):
+        name_any_designation = cls.include_any_designation_in_name(special_characters_name, any_list_designation,
+                                                                   stop_words_list)
+        for e in criteria:
+            e.filters.insert(len(e.filters),
+                             [func.lower(Name.name).op('~')(r'{0}'.format(name_any_designation))])
+
+        return criteria
 
     @classmethod
     def get_distinctive_query(cls, dist, criteria, stop_words, check_name_is_well_formed):
@@ -552,6 +581,20 @@ class Request(db.Model):
             list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
 
         return list_special_characters
+
+    @classmethod
+    def include_designations_in_name(cls, special_characters_name, any_designation_list, end_designation_list,
+                                     stop_words_list):
+        any_designation_alternators = '|'.join(map(re.escape, any_designation_list))
+        end_designation_alternators = '|'.join(map(re.escape, end_designation_list))
+        stop_words_alternators = '|'.join(map(re.escape, stop_words_list))
+
+        name = r'\W*({0})?\W*({1})?\W*'.format(any_designation_alternators, stop_words_alternators).join(
+            map(str, special_characters_name))
+
+        full_name = r'^\d*\W*({0})?\W*({1})?\W*'.format(any_designation_alternators, stop_words_alternators) + name + \
+                    r'\W*({0})?\W*({1})?$'.format(any_designation_alternators, end_designation_alternators)
+        return full_name
 
 
 class RequestsSchema(ma.ModelSchema):

@@ -1,5 +1,7 @@
 from datetime import (datetime)
 
+from namex.constants import DesignationPositionCodes
+from . import request_types
 from .name_analysis_director import NameAnalysisDirector
 
 from .mixins.set_designation_lists import SetDesignationsListsMixin
@@ -42,30 +44,44 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         builder = self.builder
 
         results = []
+        np_svc = self.name_processing_service
+        stop_words_list = np_svc.get_stop_words()
+
+        self._get_designations(request_types)
 
         # Return any combination of these checks
         if not self.skip_search_conflicts:
-            check_conflicts = builder.search_conflicts(
-                [self.get_list_dist_search_conflicts()],
-                [self.get_list_desc()],
-                self.name_tokens_search_conflict,
-                self.processed_name
-            )
+            check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
+                                                         False, self.get_designation_end_list(), self.get_designation_any_list(),
+                                                         stop_words_list)
+
+            if check_conflicts.is_valid:
+                check_conflicts = builder.search_conflicts(
+                    [self.get_list_dist_search_conflicts()],
+                    [self.get_list_desc_search_conflicts()],
+                    self.name_tokens_search_conflict,
+                    self.processed_name
+                )
 
             if not check_conflicts.is_valid:
                 results.append(check_conflicts)
 
-        check_conflicts_queue = builder.search_conflicts(
-            [self.get_list_dist_search_conflicts()],
-            [self.get_list_desc()],
-            self.name_tokens_search_conflict,
-            self.processed_name,
-            False,
-            True
-        )
+        check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+                                                           self.name_tokens, True, self.get_designation_end_list(),
+                                                           self.get_designation_any_list(), stop_words_list)
+
+        if check_conflicts_queue.is_valid:
+            check_conflicts_queue = builder.search_conflicts(
+                [self.get_list_dist_search_conflicts()],
+                [self.get_list_desc_search_conflicts()],
+                self.name_tokens_search_conflict,
+                self.processed_name,
+                False,
+                True
+            )
 
         if not check_conflicts_queue.is_valid:
-             results.append(check_conflicts_queue)
+            results.append(check_conflicts_queue)
 
         # TODO: Use the list_name array, don't use a string in the method!
         # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
@@ -126,3 +142,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
             results.append(check_special_words)
 
         return results
+
+    def get_designations_search_conflict(self):
+        designations = {
+            DesignationPositionCodes.END.value: self.get_designation_end_list_correct()} if self.get_designation_end_list_correct() else {
+            DesignationPositionCodes.ANY.value: self.get_designation_any_list()}
+
+        return designations

@@ -40,7 +40,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     Designations, distinctives and descriptives return stems_text
     '''
 
-    def find_word_synonyms(self, word, filters, stand_alone=False, category=False):
+    def find_word_synonyms(self, word, filters, stand_alone=False, category=False, entity_type=None):
         model = self.get_model()
         word = word.lower() if isinstance(word, str) else None
 
@@ -51,7 +51,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         if category:
             field = [model.category]
         else:
-            field = [model.synonyms_text] if stand_alone else [model.stems_text, model.synonyms_text]
+            field = [model.synonyms_text] if stand_alone else [model.stems_text] if entity_type else [model.stems_text,
+                                                                                                      model.synonyms_text]
 
         criteria = SynonymQueryCriteria(
             word=word,
@@ -96,7 +97,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         results = self.find_word_synonyms(word, filters)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
-        return flattened
+
+        stop_words_list = sorted(set(flattened), key=len, reverse=True)
+
+        return stop_words_list
 
     def get_prefixes(self):
         model = self.get_model()
@@ -118,7 +122,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         results = self.find_word_synonyms(None, filters, stand_alone=True)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
-        return flattened
+
+        stand_alone_list = sorted(set(flattened), key=len, reverse=True)
+
+        return stand_alone_list
 
     def get_number_words(self):
         model = self.get_model()
@@ -152,7 +159,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
 
-        results = self.find_word_synonyms(None, filters)
+        results = self.find_word_synonyms(None, filters, entity_type=entity_type_code)
         flattened = list(set(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results)))))))
         flattened.sort(key=len, reverse=True)
         return flattened

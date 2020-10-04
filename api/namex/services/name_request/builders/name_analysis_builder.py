@@ -239,28 +239,30 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details, forced
 
-    def search_exact_match(self, preprocess_name, list_name):
+    def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False, end_list_designations=None,
+                           any_list_designations=None, stop_words=None):
         result = ProcedureResult()
         result.is_valid = False
 
-        criteria = Request.get_general_query()
-        exact_match = Request.get_query_exact_match(criteria, preprocess_name)
-
-        if exact_match:
-            result.is_valid = False
-            result.result_code = AnalysisIssueCodes.CORPORATE_CONFLICT
-            result.values = {
-                'list_name': list_name,
-                'list_dist': None,
-                'list_desc': None,
-                'list_conflicts': exact_match
-            }
+        if queue:
+            print("Search for exact match in INPROGRESS, HOLD, DRAFT")
         else:
-            result.is_valid = True
-            result.result_code = AnalysisIssueCodes.CHECK_IS_VALID
-            result.values = []
+            print("Search for exact match in APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
 
-        return result
+        criteria = Request.get_general_query(change_filter=False, queue=queue)
+        criteria = Request.get_query_exact_match(criteria, list_name, list_dist_words, list_desc_words,
+                                                 end_list_designations, any_list_designations, stop_words)
+        matches = Request.find_by_criteria_array(criteria, queue=queue)
+
+        dict_highest_counter = {}
+        list_details = []
+        for match in matches:
+            dict_highest_counter[match.name] = 1.0
+            list_details = self.get_details_higher_score(dict_highest_counter, [match], {})
+            print("Exact match: {}".format(match.name))
+            break
+
+        return self.prepare_response(list_details, queue, list_name, list_dist_words, list_desc_words)
 
     '''
     Override the abstract / base class method
@@ -500,11 +502,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     similarity = round((similarity_dist + similarity_desc) / 2, 2)
                     print(similarity)
 
-                if similarity >= MINIMUM_SIMILARITY and not self.stand_alone_additional_dist_desc(list_dist,
-                                                                                                  service.get_list_dist(),
-                                                                                                  list_desc,
-                                                                                                  service.get_list_desc(),
-                                                                                                  stand_alone_words):
+                if similarity == EXACT_MATCH or (
+                        similarity >= MINIMUM_SIMILARITY and not self.stand_alone_additional_dist_desc(list_dist,
+                                                                                                       service.get_list_dist(),
+                                                                                                       list_desc,
+                                                                                                       service.get_list_desc(),
+                                                                                                       stand_alone_words)):
                     dict_matches_counter.update({match.name: similarity})
                     selected_matches.append(match)
                     if self.stop_search(similarity, matches):
