@@ -60,7 +60,18 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                 analysis.append(check_words_to_avoid)
                 return analysis
 
-            # Normally we'd do the check_name_is_well_formed analysis here... skip it for extra-provincial names
+            # We conduct the same check for well formed names but report just search conflicts for extra-provincial names
+            check_conflict_in_name_is_well_formed = builder.check_name_is_well_formed(
+                self._dict_name_words,
+                self._list_dist_words,
+                self._list_desc_words,
+                self.name_tokens,
+                self.processed_name,
+                self.name_original_tokens
+            )
+            if check_conflict_in_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                analysis.append(check_conflict_in_name_is_well_formed)
+                return analysis
 
             check_word_limit = builder.check_word_limit(self.name_tokens)
             if not check_word_limit.is_valid:
@@ -151,26 +162,27 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
         self._get_designations(request_types)
 
         # Return any combination of these checks
-        check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
-                                                     False, self.get_designation_end_list(),
-                                                     self.get_designation_any_list(), stop_words_list)
+        if not self.skip_search_conflicts:
+            check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
+                                                         False, self.get_designation_end_list(),
+                                                         self.get_designation_any_list(), stop_words_list)
 
-        if check_conflicts.is_valid:
-            check_conflicts = builder.search_conflicts(
-                [self.get_list_dist_search_conflicts()],
-                [self.get_list_desc_search_conflicts()],
-                self.name_tokens_search_conflict,
-                self.processed_name
-            )
+            if check_conflicts.is_valid:
+                check_conflicts = builder.search_conflicts(
+                    [self.get_list_dist_search_conflicts()],
+                    [self.get_list_desc_search_conflicts()],
+                    self.name_tokens_search_conflict,
+                    self.processed_name
+                )
 
-        if not check_conflicts.is_valid:
-            results.append(check_conflicts)
+            if not check_conflicts.is_valid:
+                results.append(check_conflicts)
 
         check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
                                                            True, self.get_designation_end_list(),
                                                            self.get_designation_any_list(), stop_words_list)
 
-        if not check_conflicts_queue:
+        if check_conflicts_queue.is_valid:
             check_conflicts_queue = builder.search_conflicts(
                 [self.get_list_dist_search_conflicts()],
                 [self.get_list_desc_search_conflicts()],
