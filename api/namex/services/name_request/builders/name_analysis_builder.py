@@ -833,9 +833,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_additional_dist_desc(self, list_dist_user_name, list_dist_conflict, dict_desc_user_name, service):
         for (k, v), (k2, v2) in zip(service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()):
             same_synonym_category = porter.stem(k2) in v
-            if k != k2 and same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__():
-                return True
-            elif not same_synonym_category:
+            if (k != k2 and same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
+                    not same_synonym_category:
                 return True
 
         return False
