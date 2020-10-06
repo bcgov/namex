@@ -150,7 +150,7 @@ class NameProcessingService(GetSynonymListsMixin):
         all_designations = self._designated_all_words
         all_designations.sort(key=len, reverse=True)
         designation_alternators = '|'.join(map(re.escape, all_designations))
-        regex = re.compile(r'(?<!\w)({}|[a-z-A-Z]+)(?!\w)'.format(designation_alternators))
+        regex = re.compile(r'(?<!\w)({}|[a-z-A-Z0-9]+)(?!\w)'.format(designation_alternators))
         self.name_as_submitted_tokenized = regex.findall(name.lower())
 
     def _clean_name_words(self, name, stop_words=[], designation_all=[], prefix_list=[], number_list=[]):
