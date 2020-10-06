@@ -494,7 +494,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
                     similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
-                    vector2_desc, entropy_desc = self.get_vector(remove_spaces_list(service.get_list_desc()), list_desc,
+                    vector2_desc, entropy_desc = self.get_vector(remove_spaces_list(service.get_list_desc_search_conflicts()), list_desc,
                                                                  desc_synonym_dict)
                     similarity_desc = round(
                         self.get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
