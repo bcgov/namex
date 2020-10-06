@@ -87,7 +87,7 @@ class EntityTypes(AbstractEnum):
     COOPERATIVE = 'CP'
     BENEFIT_COMPANY = 'BC'
     COMMUNITY_CONTRIBUTION_COMPANY = 'CC'
-    SOCIETY = 'SOC'
+    SOCIETY = 'SO'
     PRIVATE_ACT = 'PA'
     FINANCIAL_INSTITUTION = 'FI'
     PARISH = 'PAR'
