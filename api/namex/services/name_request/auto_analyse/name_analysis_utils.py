@@ -333,19 +333,8 @@ def remove_misplaced_distinctive(list_dist, list_desc, list_name):
 
 
 def remove_descriptive_same_category(dict_desc):
-    list_d = list(dict_desc.keys())
-    desc_list = list(list_d)
-    base_keys = list_d[1:]
-    for base_key in base_keys:
-        c = 0
-        for key, values in dict_desc.items():
-            if base_key in values or porter.stem(base_key) in values:
-                c += 1
-            if c > 1:
-                desc_list.remove(base_key)
-                break
-
-    return desc_list
+    return list({key: val for i, (key, val) in enumerate(dict_desc.items())
+                if porter.stem(key) not in itertools.chain(*list(dict_desc.values())[:i])}.keys())
 
 
 def remove_double_letters_list_dist_words(list_dist, name_tokens):
