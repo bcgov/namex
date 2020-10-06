@@ -244,7 +244,8 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
         service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(updated_name_tokens)
 
-    service._list_desc_words_search_conflicts = remove_descriptive_same_category(dict_desc)
+    service._list_desc_words_search_conflicts, service._dict_desc_words_search_conflicts = remove_descriptive_same_category(
+        dict_desc)
 
     service.set_name_tokens_search_conflict(
         update_token_list(service.get_list_dist_search_conflicts() + service.get_list_desc_search_conflicts(),
@@ -333,8 +334,10 @@ def remove_misplaced_distinctive(list_dist, list_desc, list_name):
 
 
 def remove_descriptive_same_category(dict_desc):
-    return list({key: val for i, (key, val) in enumerate(dict_desc.items())
-                if porter.stem(key) not in itertools.chain(*list(dict_desc.values())[:i])}.keys())
+    dict_desc_unique_category = {key: val for i, (key, val) in enumerate(dict_desc.items())
+                                 if porter.stem(key) not in itertools.chain(*list(dict_desc.values())[:i])}
+
+    return list(dict_desc_unique_category.keys()), dict_desc_unique_category
 
 
 def remove_double_letters_list_dist_words(list_dist, name_tokens):
