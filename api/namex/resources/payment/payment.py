@@ -19,6 +19,7 @@ from namex.resources.name_requests.abstract_nr_resource import AbstractNameReque
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
+from namex.services.payment.invoices import get_invoices
 from namex.services.payment.payments import get_payment, create_payment, update_payment
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 
@@ -142,10 +143,14 @@ class FindNameRequestPayments(AbstractNameRequestResource):
             # Wrap our payment
             for payment in nr_payments:
                 payment_response = get_payment(payment.payment_token)
+                # TODO: Replace this when we're ready!
+                invoices_response = []  # get_invoices(payment.payment_token)
 
                 if not payment_response:
                     return None
-                    # TODO: Maybe throw an error here?
+                # Don't blow up just because we can't get the invoices
+                if not invoices_response or isinstance(invoices_response, list) is False:
+                    invoices_response = []
 
                 # Wrap the response, providing info from both the SBC Pay response and the payment we created
                 response_data.append({
@@ -154,6 +159,7 @@ class FindNameRequestPayments(AbstractNameRequestResource):
                     'token': payment.payment_token,
                     'statusCode': payment.payment_status_code,
                     'completionDate': payment.payment_completion_date,
+                    'invoices': invoices_response,
                     'payment': payment.as_dict(),
                     'sbcPayment': payment_response.to_dict()
                 })

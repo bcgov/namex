@@ -127,7 +127,12 @@ def get_payment(payment_identifier):
     except ApiException as err:
         print("Exception when calling PaymentsApi->get_payment: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling PaymentsApi->get_payment: %s\n" % err)
@@ -156,7 +161,12 @@ def create_payment(model):
     except ApiException as err:
         print("Exception when calling PaymentsApi->create_payment: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling PaymentsApi->create_payment: %s\n" % err)
@@ -185,7 +195,12 @@ def update_payment(payment_identifier, model):
     except ApiException as err:
         print("Exception when calling PaymentsApi->update_payment: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling PaymentsApi->update_payment: %s\n" % err)

@@ -50,7 +50,12 @@ def get_invoice(payment_identifier, invoice_id):
     except ApiException as err:
         print("Exception when calling InvoicesApi->get_invoice: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling InvoicesApi->get_invoice: %s\n" % err)
@@ -79,7 +84,12 @@ def get_invoices(payment_identifier):
     except ApiException as err:
         print("Exception when calling InvoicesApi->get_invoices: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling InvoicesApi->get_invoices: %s\n" % err)
