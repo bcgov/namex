@@ -214,7 +214,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         text = self.regex_numbers_lot(text)
         text = self.regex_repeated_strings(text)
         text = self.regex_separated_ordinals(text, ordinal_suffixes)
-        text = self.regex_keep_together_abv(text, exceptions_ws)
+        # text = self.regex_keep_together_abv(text, exceptions_ws)
         text = self.regex_punctuation(text)
         text = self.regex_together_one_letter(text)
         text = self.regex_strip_out_numbers_middle_end(text, ordinal_suffixes, numbers)
