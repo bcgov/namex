@@ -177,7 +177,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
             desc_synonym_dict = self.get_dictionary(desc_synonym_dict, w_desc)
         else:
-            dist_substitution_dict = self.get_subsitutions_distinctive(w_dist)
+            dist_substitution_dict = self.get_substitutions_distinctive(w_dist)
             desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
 
         list_conflict_details = list()
@@ -503,17 +503,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                     print(similarity)
 
                 if similarity == EXACT_MATCH or (
-                        similarity >= MINIMUM_SIMILARITY and not self.stand_alone_additional_dist_desc(list_dist,
-                                                                                                       service.get_list_dist(),
-                                                                                                       list_desc,
-                                                                                                       service.get_list_desc(),
-                                                                                                       stand_alone_words)):
+                        similarity >= MINIMUM_SIMILARITY and not self.is_not_real_conflict(list_name,
+                                                                                           stand_alone_words,
+                                                                                           list_dist,
+                                                                                           desc_synonym_dict,
+                                                                                           service)):
                     dict_matches_counter.update({match.name: similarity})
                     selected_matches.append(match)
                     if self.stop_search(similarity, matches):
                         forced = True
                         break
-
             if dict_matches_counter:
                 all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
                 # Get  N highest score (values) and shortest names (key)
@@ -609,7 +608,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_vector(self, conflict_class_list, original_class_list, class_subs_dict):
         vector = dict()
-        entropy = 0.0
+        entropy = list()
         original_class_stem = [porter.stem(name.lower()) for name in original_class_list]
 
         for idx, word in enumerate(conflict_class_list):
@@ -617,23 +616,24 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             word_stem = porter.stem(k)
             counter = 1
             if word.lower() in original_class_list:
-                entropy = 1
+                entropy.append(1)
             elif word_stem in original_class_stem:
                 idx = original_class_stem.index(word_stem)
                 k = original_class_list[idx]
-                entropy = STEM_W
+                entropy.append(STEM_W)
             elif word_stem in get_flat_list(class_subs_dict.values()):
                 k = ''.join([key for (key, value) in class_subs_dict.items() if word_stem in value])
-                entropy = SUBS_W
+                entropy.append(SUBS_W)
             else:
                 counter = OTHER_W
+                entropy.append(0.0)
             if counter == 1:
                 vector[k] = counter
             else:
                 vector[word] = counter
-        return vector, entropy
+        return vector, sum(entropy) / len(entropy)
 
-    def get_subsitutions_distinctive(self, w_dist):
+    def get_substitutions_distinctive(self, w_dist):
         syn_svc = self.synonym_service
 
         all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
@@ -654,11 +654,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             return True
         return False
 
-    def stand_alone_additional_dist_desc(self, lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2,
-                                         stand_alone_words):
-        if self.is_standalone_name(lst_desc_name1, stand_alone_words) and self.is_standalone_name(lst_desc_name2,
-                                                                                                  stand_alone_words) and (
-                lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__()):
+    def stand_alone_additional_dist_desc(self, lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2):
+        if lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__():
             return True
 
         return False
@@ -832,3 +829,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 unique_matches.append(match)
 
         return unique_matches
+
+    def check_additional_dist_desc(self, list_dist_user_name, list_dist_conflict, dict_desc_user_name, service):
+        for (k, v), (k2, v2) in zip(service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()):
+            same_synonym_category = porter.stem(k2) in v
+            if (k != k2 and same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
+                    not same_synonym_category:
+                return True
+
+        return False
+
+    def is_not_real_conflict(self, list_name, stand_alone_words, list_dist, dict_desc, service):
+        list_desc = list(dict_desc.keys())
+        if self.is_standalone_name(list_name, stand_alone_words):
+            return self.stand_alone_additional_dist_desc(list_dist, service.get_list_dist(), list_desc,
+                                                         service.get_list_desc())
+        else:
+            return self.check_additional_dist_desc(list_dist, service.get_list_dist(), dict_desc,
+                                                   service)
