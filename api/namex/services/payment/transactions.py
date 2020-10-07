@@ -67,7 +67,12 @@ def create_transaction(req):
     except ApiException as err:
         print("Exception when calling TransactionsApi->create_transaction: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling TransactionsApi->create_transaction: %s\n" % err)
@@ -100,7 +105,12 @@ def get_transaction(req):
     except ApiException as err:
         print("Exception when calling TransactionsApi->get_transaction: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling TransactionsApi->get_transaction: %s\n" % err)
@@ -131,7 +141,12 @@ def get_transactions(req):
     except ApiException as err:
         print("Exception when calling TransactionsApi->get_transactions: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling TransactionsApi->get_transactions: %s\n" % err)
@@ -164,7 +179,12 @@ def update_transaction(req):
     except ApiException as err:
         print("Exception when calling TransactionsApi->update_transaction: %s\n" % err)
         err_response = json.loads(err.body)
-        raise SBCPaymentException(err, message=err_response.detail)
+        message = ''
+        if err_response.get('detail'):
+            message = err_response.get('detail')
+        elif err_response.get('message'):
+            message = err_response.get('message')
+        raise SBCPaymentException(err, message=message)
 
     except Exception as err:
         print("Exception when calling TransactionsApi->update_transaction: %s\n" % err)
