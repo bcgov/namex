@@ -19,4 +19,3 @@ USER 1001
 ENV PYTHONPATH=/opt/app-root
 
 EXPOSE 8080
-RUN /run.sh
