@@ -16,8 +16,7 @@ COPY . .
 USER 1001
 
 # Set Python path
-ENV PYTHONPATH=/opt/app-root/src
+ENV PYTHONPATH=/opt/app-root
 
 EXPOSE 8080
-
-CMD [ "python", "/opt/app-root/auto_analyser_uat.py" ]
+RUN /run.sh
