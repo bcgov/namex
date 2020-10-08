@@ -10,7 +10,7 @@
             "kind": "Job",
             "metadata": {
                 "creationTimestamp": null,
-                "name": "${NAME}",
+                "name": "${NAME}-${UAT_TYPE}",
                 "selfLink": "/apis/batch/v1/namespaces/${NAMESPACE}-${ENV}/jobs/${NAME}"
             },
             "spec": {
@@ -174,7 +174,7 @@
                                 ],
                                 "image": "docker-registry.default.svc:5000/${NAMESPACE}-tools/${NAME}:${ENV}",
                                 "imagePullPolicy": "Always",
-                                "name": "${NAME}",
+                                "name": "${NAME}-${UAT_TYPE}",
                                 "resources": {},
                                 "terminationMessagePath": "/${ENV}/termination-log",
                                 "terminationMessagePolicy": "File"

@@ -10,4 +10,4 @@
 NAME="auto-analyser-uat"
 NAMESPACE="servicebc-ne"
 ENV="dev"
-UAT_TYPE="rejection"
+UAT_TYPE="update"

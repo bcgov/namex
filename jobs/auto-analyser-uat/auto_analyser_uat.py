@@ -55,12 +55,12 @@ def get_prev_job_names(job_id: int) -> List:
 
 def clean_names_list(name_list: List) -> List:
     """Return list with names that wont fail in namex db query."""
+    cleaned_list = []
     for name in name_list:
         if "'" in name:
-            name_list.remove(name)
-            name = name.replace("'", "''")
-            name_list.append(name)
-    return name_list
+            cleaned_name = name.replace("'", "''")
+            cleaned_list.append(cleaned_name)
+    return cleaned_list
 
 
 def get_names_from_namex(uat_job: UatJobResult, app: Flask, excl_names: List, priority_names: List, nrs: List) -> List:
