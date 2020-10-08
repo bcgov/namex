@@ -10,7 +10,7 @@
             "kind": "CronJob",
             "metadata": {
                 "creationTimestamp": null,
-                "name": "${NAME}",
+                "name": "${NAME}-${UAT_TYPE}",
                 "selfLink": "/apis/batch/v1beta1/namespaces/${NAMESPACE}-${ENV}/cronjobs/${NAME}"
             },
             "spec": {
@@ -181,7 +181,7 @@
                                         ],
                                         "image": "docker-registry.default.svc:5000/${NAMESPACE}-tools/${NAME}:${ENV}",
                                         "imagePullPolicy": "Always",
-                                        "name": "${NAME}",
+                                        "name": "${NAME}-${UAT_TYPE}",
                                         "resources": {},
                                         "terminationMessagePath": "/{ENV}/termination-log",
                                         "terminationMessagePolicy": "File"
