@@ -60,6 +60,8 @@ def clean_names_list(name_list: List) -> List:
         if "'" in name:
             cleaned_name = name.replace("'", "''")
             cleaned_list.append(cleaned_name)
+        else:
+            cleaned_list.append(name)
     return cleaned_list
 
 
@@ -198,9 +200,9 @@ def uat_accuracy_update(app: Flask, excluded_names: List, prioritized_names: Lis
             if not uat_job.get_unfinished_names():
                 uat_job.uat_finished = True
                 uat_job.save()
-        count += 1
-        if count == app.config['MAX_ROWS']:
-            break
+            count += 1
+            if count == app.config['MAX_ROWS']:
+                break
     return count
 
 
