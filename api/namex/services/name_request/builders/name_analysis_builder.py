@@ -833,10 +833,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_additional_dist_desc(self, list_dist_user_name, list_dist_conflict, dict_desc_user_name, service):
         for (k, v), (k2, v2) in zip(service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()):
             same_synonym_category = porter.stem(k2) in v
-            if (k != k2 and same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
+            if (k != k2 and k2 not in service.get_list_desc() and same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
                     not same_synonym_category:
+                print("Name '{}' is not considered a real conflict.".format(service.get_processed_name()))
                 return True
-
         return False
 
     def is_not_real_conflict(self, list_name, stand_alone_words, list_dist, dict_desc, service):
