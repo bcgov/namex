@@ -106,7 +106,6 @@ def get_names_from_namex(uat_job: UatJobResult, app: Flask, excl_names: List, pr
         """
     )
     sql = sql.replace('[', '(').replace(']', ')').replace('"', "'")
-    print(sql)
     new_names = db.get_engine(app, 'namex').execute(sql)
     return new_names.fetchall()
 
@@ -164,7 +163,6 @@ def uat_accuracy_update(app: Flask, excluded_names: List, prioritized_names: Lis
     name_objs = RequestName.get_unverified()
     if not name_objs:
         return 0
-    print(name_objs)
     names = []
     nrs = []
     for name in name_objs:
@@ -175,10 +173,8 @@ def uat_accuracy_update(app: Flask, excluded_names: List, prioritized_names: Lis
         else:
             names.append(str(name.name))
             nrs.append(name.nr_num)
-    print(names)
     namex_names = get_names_from_namex(None, app, excluded_names, names, nrs)
     # check if any of these have been examined in namex
-    print(namex_names)
     if not namex_names:
         return 0
     count = 0
@@ -214,7 +210,6 @@ def run_auto_analyse_uat(uat_job: UatJobResult, app: Flask) -> int:
 
     count = 0
     for name in names_list:
-        print(name)
         try:
             app.logger.debug(f'testing {name.name}...')
             result = send_to_auto_analyzer(name, app)
@@ -269,7 +264,7 @@ if __name__ == '__main__':
                 get_prev_job_names(int(app.config['PREV_JOB_ID'])) if app.config['PREV_JOB_ID'] else None
 
         if uat_type == 'uat_accuracy_update':
-            count = uat_accuracy_update(app, excluded_names, )
+            count = uat_accuracy_update(app, excluded_names, prioritized_names)
         else:
             if uat_type not in [x.value for x in UatJobResult.UatTypes.__members__.values()]:
                 raise Exception(f'invalid UAT_TYPE: {uat_type}. Please change it in the config.')
@@ -278,7 +273,6 @@ if __name__ == '__main__':
 
             app.logger.debug('fetching new names...')
             new_names = get_names_from_namex(uat_job, app, excluded_names, prioritized_names, None)
-            print(new_names)
             app.logger.debug('loading new names...')
             if new_names:
                 load_names_into_uat(new_names)
