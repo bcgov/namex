@@ -10,4 +10,5 @@
 NAME="auto-analyser-uat"
 NAMESPACE="servicebc-ne"
 ENV="dev"
-SCHEDULE="0 0 * * *"
+SCHEDULE="0 * * * *"
+UAT_TYPE="rejection"

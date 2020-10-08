@@ -138,7 +138,7 @@
                                                 "valueFrom": {
                                                     "configMapKeyRef": {
                                                         "key": "UAT_TYPE",
-                                                        "name": "${NAME}-${ENV}-config"
+                                                        "name": "${NAME}-${ENV}-${UAT_TYPE}-config"
                                                     }
                                                 }
                                             },
@@ -147,7 +147,7 @@
                                                 "valueFrom": {
                                                     "configMapKeyRef": {
                                                         "key": "EXCLUDED_NAMES",
-                                                        "name": "${NAME}-${ENV}-config"
+                                                        "name": "${NAME}-${ENV}-${UAT_TYPE}-config"
                                                     }
                                                 }
                                             },
@@ -156,7 +156,7 @@
                                                 "valueFrom": {
                                                     "configMapKeyRef": {
                                                         "key": "CSV_FILE",
-                                                        "name": "${NAME}-${ENV}-config"
+                                                        "name": "${NAME}-${ENV}-${UAT_TYPE}-config"
                                                     }
                                                 }
                                             },
@@ -165,21 +165,21 @@
                                                 "valueFrom": {
                                                     "configMapKeyRef": {
                                                         "key": "PREV_JOB_ID",
-                                                        "name": "${NAME}-${ENV}-config"
+                                                        "name": "${NAME}-${ENV}-${UAT_TYPE}-config"
                                                     }
                                                 }
                                             },
                                             {
-                                                "name": "MAX_ROWS_LIMIT",
+                                                "name": "MAX_ROWS",
                                                 "valueFrom": {
                                                     "configMapKeyRef": {
-                                                        "key": "MAX_ROWS_LIMIT",
-                                                        "name": "${NAME}-${ENV}-config"
+                                                        "key": "MAX_ROWS",
+                                                        "name": "${NAME}-${ENV}-${UAT_TYPE}-config"
                                                     }
                                                 }
                                             }
                                         ],
-                                        "image": "docker-registry.default.svc:5000/servicebc-ne-tools/${NAME}:${ENV}",
+                                        "image": "docker-registry.default.svc:5000/${NAMESPACE}-tools/${NAME}:${ENV}",
                                         "imagePullPolicy": "Always",
                                         "name": "${NAME}",
                                         "resources": {},
@@ -231,6 +231,13 @@
             "description": "Value that determines how often the cronjob runs.",
             "required": true,
             "value": "0 * * * *"
+        },
+        {
+            "name": "UAT_TYPE",
+            "displayName": "UAT_TYPE",
+            "description": "Identifies what type of job is running.",
+            "required": true,
+            "value": "rejection"
         }
     ]
 }
