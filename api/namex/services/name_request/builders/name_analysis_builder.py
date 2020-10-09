@@ -1,5 +1,9 @@
 import re
 import itertools
+
+import contextlib
+import requests
+
 from . import porter, STEM_W, OTHER_W, SUBS_W, EXACT_MATCH, MINIMUM_SIMILARITY, \
     HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY
 import math
@@ -494,8 +498,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
                     similarity_dist = round(self.get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
-                    vector2_desc, entropy_desc = self.get_vector(remove_spaces_list(service.get_list_desc_search_conflicts()), list_desc,
-                                                                 desc_synonym_dict)
+                    vector2_desc, entropy_desc = self.get_vector(
+                        remove_spaces_list(service.get_list_desc_search_conflicts()), list_desc,
+                        desc_synonym_dict)
                     similarity_desc = round(
                         self.get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
 
@@ -847,3 +852,21 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         else:
             return self.check_additional_dist_desc(list_dist, service.get_list_dist(), dict_desc,
                                                    service)
+
+    def foo(self):
+        names = {'names': ['person', 'man', 'woman', 'camera', 'tv', 'genius']}
+        ret = requests.post(
+            url=''.join(['http://', 'localhost', ':7000']),
+            json=names)
+
+        print(ret.json())
+
+        score = True
+        with contextlib.suppress(StopIteration):  # in case we never find a False
+            # use generator and bail at the first False found
+            score = next(i for i in ret.json().get('result') if i == False)
+
+        return f'your score={score}'
+
+
+

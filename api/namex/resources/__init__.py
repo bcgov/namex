@@ -18,6 +18,7 @@ from .colin import colin_api
 from .statistics.wait_time_statistics import api as wait_time_stats_api
 
 
+
 # This will add the Authorize button to the swagger docs
 # TODO oauth2 & openid may not yet be supported by restplus <- check on this
 authorizations = {

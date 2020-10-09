@@ -13,7 +13,11 @@
 # limitations under the License.
 """Provides the WSGI entry point for running the application
 """
-from auto_analyze import app
+from quart import Quart
+
+from .src.auto_analyze import QUART_APP
+
+QUART_APP = Quart(__name__)
 
 if __name__ == "__main__":
-    app.run()
+    QUART_APP.run(port=7000, host='localhost')

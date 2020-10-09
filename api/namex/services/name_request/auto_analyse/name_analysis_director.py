@@ -242,7 +242,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         # Classify the tokens that were created by NameProcessingService
         self.token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
-
     '''
     This is the main execution call that wraps name analysis checks. 
     - Perform checks to ensure the name is well formed. 
@@ -261,6 +260,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             stand_alone_words = np_svc.get_stand_alone_words()
 
             analysis = []
+
+            quart_response = builder.foo()
 
             # Configure the analysis for the supplied builder
             get_classification(self, stand_alone_words, syn_svc, self.name_tokens, wc_svc, token_svc)

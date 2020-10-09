@@ -20,8 +20,7 @@ from quart import Quart, jsonify, request
 
 from .analyzer import auto_analyze
 
-
-app = Quart(__name__)
+QUART_APP = Quart(__name__)
 
 
 @app.route('/', methods=['POST'])
@@ -33,3 +32,7 @@ async def private_service():
         *[auto_analyze(name) for name in json_data.get('names')]
     )
     return jsonify(result=result)
+
+
+if __name__ == "__main__":
+    QUART_APP.run()
