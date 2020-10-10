@@ -520,6 +520,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
             # Save the name request
             nr_model.save_to_db()
+            # Record the event
+            EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
