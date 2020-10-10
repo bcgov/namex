@@ -15,8 +15,6 @@
 """
 from quart import Quart
 
-from .src.auto_analyze import QUART_APP
-
 QUART_APP = Quart(__name__)
 
 if __name__ == "__main__":

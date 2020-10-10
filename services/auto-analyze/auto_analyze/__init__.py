@@ -13,14 +13,16 @@
 # limitations under the License.
 """The service that analyizes an array of names."""
 import asyncio
-import json
-import random
+import os
 
 from quart import Quart, jsonify, request
 
 from .analyzer import auto_analyze
 
-QUART_APP = Quart(__name__)
+app = Quart(__name__)
+
+# Set config
+QUART_APP = os.getenv('QUART_APP')
 
 
 @app.route('/', methods=['POST'])
@@ -35,4 +37,10 @@ async def private_service():
 
 
 if __name__ == "__main__":
-    QUART_APP.run()
+    app.run()
+
+
+"""
+Test with this:
+curl -X POST -H "Content-Type: application/json" --data '{"names": ["something","whatever","description","body"] }' localhost:7000
+"""
