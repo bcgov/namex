@@ -19,6 +19,20 @@ from quart import Quart, jsonify, request
 
 from .analyzer import auto_analyze
 
+from nltk.stem import PorterStemmer
+porter = PorterStemmer()
+
+STEM_W = 0.85
+SUBS_W = 0.65
+OTHER_W = 3.0
+
+EXACT_MATCH = 1.0
+HIGH_SIMILARITY = 0.85
+MEDIUM_SIMILARITY = 0.71
+MINIMUM_SIMILARITY = 0.66
+
+HIGH_CONFLICT_RECORDS = 20
+
 app = Quart(__name__)
 
 # Set config
@@ -29,9 +43,14 @@ QUART_APP = os.getenv('QUART_APP')
 async def private_service():
     """Return the outcome of this private service call."""
     json_data = await request.get_json()
+    vector1_dist = json_data.get("vector1_dist")
+    vector1_desc = json_data.get("vector1_desc")
+    list_name = json_data.get("list_name")
+    dict_substitution = json_data.get("dict_substitution")
+    dict_synonyms = json_data.get("dict_synonyms")
 
     result = await asyncio.gather(
-        *[auto_analyze(name) for name in json_data.get('names')]
+        *[auto_analyze(name, list_name, vector1_dist, vector1_desc, dict_substitution, dict_synonyms) for name in json_data.get('names')]
     )
     return jsonify(result=result)
 

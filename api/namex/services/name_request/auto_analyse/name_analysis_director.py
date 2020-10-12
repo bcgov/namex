@@ -261,8 +261,6 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             analysis = []
 
-            quart_response = builder.foo()
-
             # Configure the analysis for the supplied builder
             get_classification(self, stand_alone_words, syn_svc, self.name_tokens, wc_svc, token_svc)
 
