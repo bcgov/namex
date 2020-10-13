@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Installer and setup for this module."""
-from setuptools import setup
+from glob import glob
+from os.path import basename, splitext
+
+from setuptools import find_packages, setup
 
 
 def read_requirements(filename):
@@ -27,7 +30,10 @@ REQUIREMENTS = read_requirements('requirements.txt')
 
 setup(
     name='auto_analyser_uat',
-    py_modules=['auto_analyser_uat.py'],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
+    include_package_data=True,
     zip_safe=False,
     install_requires=REQUIREMENTS
 )

@@ -22,10 +22,10 @@ import requests
 from flask import Flask, current_app
 from sqlalchemy import text
 
-from config import Config
-from models import RequestName, UatJobResult, db
-from utils import get_names_list_from_csv
-from utils.logging import setup_logging
+from auto_analyser.config import Config
+from auto_analyser.models import RequestName, UatJobResult, db
+from auto_analyser.utils import get_names_list_from_csv
+from auto_analyser.utils.logging import setup_logging
 
 
 setup_logging(
