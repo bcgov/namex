@@ -30,15 +30,18 @@ from .analyzer import auto_analyze
 
 # Set config
 QUART_APP = os.getenv('QUART_APP')
+RUN_MODE = os.getenv('FLASK_ENV', 'production')
 
 
-def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
-    print('CREATING APPLICATION')
-    quart_app = Quart(__name__)
-    quart_app.config.from_object(config.CONFIGURATION[run_mode])
-
-    db.init_app(quart_app)
-    ma.init_app(quart_app)
+async def create_app(run_mode):
+    try:
+        print('CREATING APPLICATION')
+        quart_app = Quart(__name__)
+        quart_app.config.from_object(config.CONFIGURATION[run_mode])
+        db.init_app(quart_app)
+        ma.init_app(quart_app)
+    except Exception as err:
+        raise err
 
     @quart_app.after_request
     def add_version(response):
@@ -47,7 +50,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
         return response
 
     register_shellcontext(quart_app)
-
+    await quart_app.app_context().push()
     return quart_app
 
 
@@ -65,7 +68,9 @@ def register_shellcontext(quart_app):
     quart_app.shell_context_processor(shell_context)
 
 
-app = create_app()
+loop = asyncio.get_event_loop()
+app = loop.run_until_complete(create_app(RUN_MODE))
+db.app = app  # Just set it, see if it works...
 
 
 @app.route('/', methods=['POST'])
@@ -89,5 +94,5 @@ if __name__ == "__main__":
 
 """
 Test with this:
-curl -X POST -H "Content-Type: application/json" --data '{"names": ["something","whatever","description","body"] }' localhost:7000
+curl -X POST -H "Content-Type: application/json" --data '{"names": ["blue heron tours","blue bird tours","blue mountain tours"] }' localhost:7000
 """

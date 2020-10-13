@@ -145,6 +145,9 @@ TO DO: connect to name_analysis_utils to call functions such as get_flat_list
 def get_vector(conflict_class_list, original_class_list, class_subs_dict):
     vector = dict()
     entropy = list()
+    original_class_list = original_class_list if original_class_list else []
+    class_subs_dict = class_subs_dict if class_subs_dict else {}
+
     original_class_stem = [porter.stem(name.lower()) for name in original_class_list]
 
     for idx, word in enumerate(conflict_class_list):
@@ -167,7 +170,10 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict):
             vector[k] = counter
         else:
             vector[word] = counter
-    return vector, sum(entropy) / len(entropy)
+
+    # Make sure we don't divide by zero!
+    entropy_score = sum(entropy) / len(entropy) if len(entropy) > 0 else 0
+    return vector, entropy_score
 
 
 '''
