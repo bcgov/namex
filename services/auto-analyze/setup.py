@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 
 _version_re = re.compile(r'__version__\s+=\s+(.*)')  # pylint: disable=invalid-name
 
-with open('src/auto_analyze/version.py', 'rb') as f:
+with open('auto_analyze/version.py', 'rb') as f:
     version = str(ast.literal_eval(_version_re.search(  # pylint: disable=invalid-name
         f.read().decode('utf-8')).group(1)))
 
@@ -56,8 +56,8 @@ setup(
     name="auto_analyze",
     version=version,
     author_email='thor@wolpert.ca',
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
+    packages=find_packages('auto_analyze'),
+    package_dir={'': 'auto_analyze'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
     include_package_data=True,
     license=read('LICENSE'),

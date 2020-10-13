@@ -12,31 +12,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The service that analyizes an array of names."""
+# This is important as this will add modules purporting to be Flask modules for later use by the extension.
+# Without this, Flask-SQLAlchemy may not work!
+import quart.flask_patch
+# Thanks!
+
 import asyncio
 import os
 
+
 from quart import Quart, jsonify, request
+import config
 
+from namex import models
+from namex.models import db, ma
 from .analyzer import auto_analyze
-
-from nltk.stem import PorterStemmer
-porter = PorterStemmer()
-
-STEM_W = 0.85
-SUBS_W = 0.65
-OTHER_W = 3.0
-
-EXACT_MATCH = 1.0
-HIGH_SIMILARITY = 0.85
-MEDIUM_SIMILARITY = 0.71
-MINIMUM_SIMILARITY = 0.66
-
-HIGH_CONFLICT_RECORDS = 20
-
-app = Quart(__name__)
 
 # Set config
 QUART_APP = os.getenv('QUART_APP')
+
+
+def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
+    print('CREATING APPLICATION')
+    quart_app = Quart(__name__)
+    quart_app.config.from_object(config.CONFIGURATION[run_mode])
+
+    db.init_app(quart_app)
+    ma.init_app(quart_app)
+
+    @quart_app.after_request
+    def add_version(response):
+        os.getenv('OPENSHIFT_BUILD_COMMIT', '')
+        # response.headers["API"] = 'NameX/{ver}'.format(ver=run_version)
+        return response
+
+    register_shellcontext(quart_app)
+
+    return quart_app
+
+
+def register_shellcontext(quart_app):
+    """Register shell context objects."""
+    def shell_context():
+        """Shell context objects."""
+        return {
+            'app': quart_app,
+            # 'jwt': jwt,
+            'db': db,
+            'models': models
+        }
+
+    quart_app.shell_context_processor(shell_context)
+
+
+app = create_app()
 
 
 @app.route('/', methods=['POST'])
@@ -56,8 +85,7 @@ async def private_service():
 
 
 if __name__ == "__main__":
-    app.run()
-
+    app.run(port=7000, host='localhost')
 
 """
 Test with this:

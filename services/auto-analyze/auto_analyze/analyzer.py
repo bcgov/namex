@@ -12,10 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Analyzes a single name."""
-
-from . import porter, STEM_W, OTHER_W, SUBS_W, EXACT_MATCH, MINIMUM_SIMILARITY
 from collections import Counter
 import math
+
+from namex.services.name_request.auto_analyse.name_analysis_utils \
+    import get_classification, subsequences, get_flat_list, remove_spaces_list
+
+from namex.services.name_processing.name_processing \
+    import NameProcessingService
+
+from namex.services.name_request.auto_analyse.protected_name_analysis \
+    import ProtectedNameAnalysisService
+
+from swagger_client import SynonymsApi as SynonymService
+
+from nltk.stem import PorterStemmer
+porter = PorterStemmer()
+
+STEM_W = 0.85
+SUBS_W = 0.65
+OTHER_W = 3.0
+
+EXACT_MATCH = 1.0
+HIGH_SIMILARITY = 0.85
+MEDIUM_SIMILARITY = 0.71
+MINIMUM_SIMILARITY = 0.66
+
+HIGH_CONFLICT_RECORDS = 20
 
 # async def auto_analyze(name: str) -> bool:
 #     """Return either True/False if the name passes auto analysis.
@@ -43,6 +66,10 @@ service: word_classification
 name_analysis_utils to call functions get_classification, remove_spaces_list
 '''
 
+synonym_service = SynonymService()
+name_processing_service = NameProcessingService()
+name_analysis_service = ProtectedNameAnalysisService()
+
 
 async def auto_analyze(name: str, list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
@@ -52,7 +79,7 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
             name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms))
     syn_svc = synonym_service
     nproc_svc = name_processing_service
-    service = ProtectedNameAnalysisService()
+    service = name_analysis_service
     np_svc = service.name_processing_service
     wc_svc = service.word_classification_service
     token_svc = service.token_classifier_service
