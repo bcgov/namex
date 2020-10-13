@@ -69,6 +69,7 @@ def clean_names_list(name_list: List) -> List:
 def get_names_from_namex(uat_job: UatJobResult, app: Flask, excl_names: List, priority_names: List, nrs: List) -> List:
     """Get names from namex."""
     existing_names = RequestName.get_all_names()
+    print(len(existing_names))
     sql = (
         """
         select requests.id, requests.nr_num, requests.request_type_cd, requests.state_cd, requests.submitted_date,
