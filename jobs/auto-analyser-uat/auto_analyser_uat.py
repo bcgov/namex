@@ -20,6 +20,7 @@ from urllib.parse import quote_plus
 
 import requests
 from flask import Flask, current_app
+from sqlalchemy import text
 
 from config import Config
 from models import RequestName, UatJobResult, db
@@ -68,6 +69,7 @@ def clean_names_list(name_list: List) -> List:
 def get_names_from_namex(uat_job: UatJobResult, app: Flask, excl_names: List, priority_names: List, nrs: List) -> List:
     """Get names from namex."""
     existing_names = RequestName.get_all_names()
+    print(len(existing_names))
     sql = (
         """
         select requests.id, requests.nr_num, requests.request_type_cd, requests.state_cd, requests.submitted_date,
@@ -108,7 +110,7 @@ def get_names_from_namex(uat_job: UatJobResult, app: Flask, excl_names: List, pr
         """
     )
     sql = sql.replace('[', '(').replace(']', ')').replace('"', "'")
-    new_names = db.get_engine(app, 'namex').execute(sql)
+    new_names = db.get_engine(app, 'namex').execute(text(sql))
     return new_names.fetchall()
 
 
