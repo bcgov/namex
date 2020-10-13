@@ -77,14 +77,16 @@ db.app = app  # Just set it, see if it works...
 async def private_service():
     """Return the outcome of this private service call."""
     json_data = await request.get_json()
-    vector1_dist = json_data.get("vector1_dist")
-    vector1_desc = json_data.get("vector1_desc")
+    list_dist = json_data.get("list_dist")
+    list_desc = json_data.get("list_desc")
     list_name = json_data.get("list_name")
     dict_substitution = json_data.get("dict_substitution")
     dict_synonyms = json_data.get("dict_synonyms")
+    matches = json_data.get('names')
 
+    print("Number of matches: ", len(matches))
     result = await asyncio.gather(
-        *[auto_analyze(name, list_name, vector1_dist, vector1_desc, dict_substitution, dict_synonyms) for name in json_data.get('names')]
+        *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms) for name in matches]
     )
     return jsonify(result=result)
 

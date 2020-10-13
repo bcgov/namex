@@ -75,7 +75,7 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
                        dict_synonyms: dict) -> bool:
     print(
-        'name: {0}  ,  list_name {1},  vector1_desc: {2}  ,vector1_dist: {3}  , dict_sybst: {4},  dict_syns{5}'.format(
+        'name: {0}  ,  list_name {1},  list_dist: {2}  , list_desc: {3}  , dict_sybst: {4},  dict_syns{5}'.format(
             name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms))
     syn_svc = synonym_service
     nproc_svc = name_processing_service
