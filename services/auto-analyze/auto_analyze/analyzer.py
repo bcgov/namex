@@ -78,12 +78,10 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
         'name: {0}  ,  list_name {1},  list_dist: {2}  , list_desc: {3}  , dict_sybst: {4},  dict_syns{5}'.format(
             name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms))
     syn_svc = synonym_service
-    nproc_svc = name_processing_service
     service = name_analysis_service
     np_svc = service.name_processing_service
     wc_svc = service.word_classification_service
     token_svc = service.token_classifier_service
-    stand_alone_words = nproc_svc.get_stand_alone_words()
 
     vector1_dist = text_to_vector(list_dist)
     vector1_desc = text_to_vector(list_desc)
@@ -91,6 +89,8 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
     dict_matches_counter = {}
 
     np_svc.set_name(name)
+    stand_alone_words = np_svc.get_stand_alone_words()
+
     if np_svc.name_tokens == list_name:
         similarity = EXACT_MATCH
     else:
@@ -234,7 +234,7 @@ def is_not_real_conflict(list_name, stand_alone_words, list_dist, dict_desc, ser
                                           service)
 
 
-def is_standalone_name(self, list_name, stand_alone_words):
+def is_standalone_name(list_name, stand_alone_words):
     if any(stand_alone in list_name for stand_alone in stand_alone_words):
         return True
     return False
