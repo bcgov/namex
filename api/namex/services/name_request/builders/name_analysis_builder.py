@@ -1,4 +1,6 @@
 import json
+import os
+from flask import current_app
 import re
 import itertools
 import math
@@ -16,7 +18,6 @@ from ..auto_analyse.name_analysis_utils import get_flat_list, get_conflicts_same
     list_to_string
 
 from namex.models.request import Request
-from ..auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
 from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
 from namex.services.name_request.auto_analyse import DataFrameFields
@@ -233,7 +234,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 matches = self.skip_name_matches_processed(matches)
                 list_conflicts_details, forced = self.get_most_similar_names(
                     dict_highest_counter,
-                    matches, dist_substitution_dict,
+                    set(matches), dist_substitution_dict,
                     desc_synonym_dict, list_name)
                 list_details.extend(list_conflicts_details)
 
@@ -444,30 +445,33 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
-    def get_most_similar_names(self, dict_highest_counter, matches, dist_substitution_dict, desc_synonym_dict,
+    def get_most_similar_names(self, dict_highest_counter, db_matches, dist_substitution_dict, desc_synonym_dict,
                                list_name):
+        auto_analyze_url = current_app.config.get('AUTO_ANALYZE_URL', None)
         list_details, selected_matches = [], []
         forced = False
         list_dist = list(dist_substitution_dict.keys())
         list_desc = list(desc_synonym_dict.keys())
-        if matches:
-            total = len(matches)
+
+        if db_matches:
+            total = len(db_matches)
             print("Possible conflicts returned: ", total)
 
-            json_analyze = {'names': [match.name for match in matches],
+            json_analyze = {'names': [match.name for match in db_matches],
                             'list_name': list_name,
                             'list_dist': list_dist,
                             'list_desc': list_desc,
                             'dict_substitution': dist_substitution_dict,
                             'dict_synonyms': desc_synonym_dict
                             }
-
-            matches = requests.post(url=''.join(['http://', 'localhost', ':7000']),
-                                    json=json_analyze)
-            if not matches:
+            conflict_response = requests.post(url=''.join([auto_analyze_url]),
+                                              json=json_analyze)
+            if not conflict_response:
                 warnings.warn("Quart Service did not return a result", Warning)
-            data = matches.json()
-            dict_matches_counter = dict(ChainMap(*data.get('result')))
+            conflicts = conflict_response.json()
+            dict_matches_counter = dict(ChainMap(*conflicts.get('result')))
+
+            selected_matches = [match for match in db_matches if match.name in dict_matches_counter.keys()]
 
             if dict_matches_counter:
                 all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
