@@ -20,9 +20,11 @@ import quart.flask_patch
 import asyncio
 import os
 
-
 from quart import Quart, jsonify, request
 import config
+from nltk.stem import PorterStemmer
+
+porter = PorterStemmer()
 
 from namex import models
 from namex.models import db, ma
@@ -31,6 +33,17 @@ from .analyzer import auto_analyze
 # Set config
 QUART_APP = os.getenv('QUART_APP')
 RUN_MODE = os.getenv('FLASK_ENV', 'production')
+
+STEM_W = 0.85
+SUBS_W = 0.65
+OTHER_W = 3.0
+
+EXACT_MATCH = 1.0
+HIGH_SIMILARITY = 0.85
+MEDIUM_SIMILARITY = 0.71
+MINIMUM_SIMILARITY = 0.66
+
+HIGH_CONFLICT_RECORDS = 20
 
 
 async def create_app(run_mode):
@@ -56,6 +69,7 @@ async def create_app(run_mode):
 
 def register_shellcontext(quart_app):
     """Register shell context objects."""
+
     def shell_context():
         """Shell context objects."""
         return {

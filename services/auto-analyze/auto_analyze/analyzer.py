@@ -15,6 +15,7 @@
 from collections import Counter
 import math
 
+from . import porter
 from namex.services.name_request.auto_analyse.name_analysis_utils \
     import get_classification, subsequences, get_flat_list, remove_spaces_list
 
@@ -23,22 +24,11 @@ from namex.services.name_processing.name_processing \
 
 from namex.services.name_request.auto_analyse.protected_name_analysis \
     import ProtectedNameAnalysisService
+from namex.services.name_request.builders import EXACT_MATCH, OTHER_W, MINIMUM_SIMILARITY, STEM_W, SUBS_W
 
 from swagger_client import SynonymsApi as SynonymService
 
-from nltk.stem import PorterStemmer
-porter = PorterStemmer()
 
-STEM_W = 0.85
-SUBS_W = 0.65
-OTHER_W = 3.0
-
-EXACT_MATCH = 1.0
-HIGH_SIMILARITY = 0.85
-MEDIUM_SIMILARITY = 0.71
-MINIMUM_SIMILARITY = 0.66
-
-HIGH_CONFLICT_RECORDS = 20
 
 synonym_service = SynonymService()
 name_processing_service = NameProcessingService()

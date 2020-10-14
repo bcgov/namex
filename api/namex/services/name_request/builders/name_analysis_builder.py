@@ -1,21 +1,15 @@
-import json
-import os
 from flask import current_app
 import re
 import itertools
-import math
-from collections import Counter, ChainMap
+from collections import ChainMap
 import warnings
-import contextlib
 
 import requests
-from . import porter, STEM_W, OTHER_W, SUBS_W, EXACT_MATCH, MINIMUM_SIMILARITY, \
-    HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY
+from . import EXACT_MATCH, HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
-from ..auto_analyse.name_analysis_utils import get_flat_list, get_conflicts_same_classification, \
-    get_classification, get_all_dict_substitutions, remove_spaces_list, subsequences, remove_double_letters, \
-    list_to_string
+from ..auto_analyse.name_analysis_utils import get_conflicts_same_classification, \
+    get_all_dict_substitutions, subsequences, remove_double_letters
 
 from namex.models.request import Request
 
@@ -543,57 +537,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details
 
-    def get_score(self, match_list, length_original, list_name, list_name_stem, all_subs_dict):
-        counter = 0
-        for idx, word in enumerate(match_list):
-            if length_original > idx and word.lower() == list_name[idx]:
-                counter += 1
-            elif length_original > idx and porter.stem(word.lower()) == list_name_stem[idx]:
-                counter += 0.95
-            elif length_original > idx and porter.stem(word.lower()) in list(all_subs_dict.values())[idx]:
-                counter += 0.9
-            elif word.lower() in list_name:
-                counter += 0.8
-            elif porter.stem(word.lower()) in list_name_stem:
-                counter += 0.7
-            elif porter.stem(word.lower()) in get_flat_list(all_subs_dict.values()):
-                counter += 0.6
-            else:
-                counter -= 0.2
-
-        return counter
-
-    '''
-    
-    '''
-
-    def get_vector(self, conflict_class_list, original_class_list, class_subs_dict):
-        vector = dict()
-        entropy = list()
-        original_class_stem = [porter.stem(name.lower()) for name in original_class_list]
-
-        for idx, word in enumerate(conflict_class_list):
-            k = word.lower()
-            word_stem = porter.stem(k)
-            counter = 1
-            if word.lower() in original_class_list:
-                entropy.append(1)
-            elif word_stem in original_class_stem:
-                idx = original_class_stem.index(word_stem)
-                k = original_class_list[idx]
-                entropy.append(STEM_W)
-            elif word_stem in get_flat_list(class_subs_dict.values()):
-                k = ''.join([key for (key, value) in class_subs_dict.items() if word_stem in value])
-                entropy.append(SUBS_W)
-            else:
-                counter = OTHER_W
-                entropy.append(0.0)
-            if counter == 1:
-                vector[k] = counter
-            else:
-                vector[word] = counter
-        return vector, sum(entropy) / len(entropy)
-
     def get_substitutions_distinctive(self, w_dist):
         syn_svc = self.synonym_service
 
@@ -609,17 +552,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 value.append(key)
 
         return dist_substitution_dict
-
-    def is_standalone_name(self, list_name, stand_alone_words):
-        if any(stand_alone in list_name for stand_alone in stand_alone_words):
-            return True
-        return False
-
-    def stand_alone_additional_dist_desc(self, lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2):
-        if lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__():
-            return True
-
-        return False
 
     def get_substitutions_descriptive(self, w_desc):
         syn_svc = self.synonym_service
@@ -666,26 +598,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 break
 
         return valid
-
-    def text_to_vector(self, list_name):
-        return Counter(list_name)
-
-    def get_cosine(self, vec1, vec2):
-        intersection = set(vec1.keys()) & set(vec2.keys())
-        numerator = sum([vec1[x] * vec2[x] for x in intersection])
-
-        sum1 = sum([vec1[x] ** 2 for x in list(vec1.keys())])
-        sum2 = sum([vec2[x] ** 2 for x in list(vec2.keys())])
-
-        denominator = math.sqrt(sum1) * math.sqrt(sum2)
-
-        if not denominator:
-            return 0.0
-        else:
-            return float(numerator) / denominator
-
-    def get_similarity(self, vector1, vector2, entropy):
-        return self.get_cosine(vector1, vector2) * entropy
 
     def stop_search(self, cosine, matches):
         if (len(matches) >= HIGH_CONFLICT_RECORDS and cosine >= HIGH_SIMILARITY) or (cosine == EXACT_MATCH):
@@ -763,25 +675,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return dict_compound_dist, dict_desc
 
-    def check_compound_dist(self, list_dist, list_desc, original_class_list, class_subs_dict):
-        vector_dist = {}
-        entropy_dist = 0.0
-        for i in range(2, len(list_dist) + 1):
-            compound_space_list = [x for x in subsequences(list_dist, i)]
-            compound = [x.replace(' ', '') for x in compound_space_list]
-            vector_dist, entropy_dist = self.get_vector(compound, original_class_list, class_subs_dict)
-
-        # Update descriptive list
-        if list_desc and entropy_dist > 0.0:
-            token_list = []
-            for word in compound_space_list:
-                token_list.extend(word.split())
-            intersection = [x for x in list_desc if x in token_list]
-            for word in intersection:
-                list_desc.remove(word)
-
-        return vector_dist, entropy_dist, list_desc
-
     def skip_name_matches_processed(self, matches):
         unique_matches = []
         for match in matches:
@@ -790,37 +683,3 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 unique_matches.append(match)
 
         return unique_matches
-
-    def check_additional_dist_desc(self, list_dist_user_name, list_dist_conflict, dict_desc_user_name, service):
-        for (k, v), (k2, v2) in zip(service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()):
-            same_synonym_category = porter.stem(k2) in v
-            if (
-                    k != k2 and k2 not in service.get_list_desc() and same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
-                    not same_synonym_category:
-                print("Name '{}' is not considered a real conflict.".format(service.get_processed_name()))
-                return True
-        return False
-
-    def is_not_real_conflict(self, list_name, stand_alone_words, list_dist, dict_desc, service):
-        list_desc = list(dict_desc.keys())
-        if self.is_standalone_name(list_name, stand_alone_words):
-            return self.stand_alone_additional_dist_desc(list_dist, service.get_list_dist(), list_desc,
-                                                         service.get_list_desc())
-        else:
-            return self.check_additional_dist_desc(list_dist, service.get_list_dist(), dict_desc,
-                                                   service)
-
-    def foo(self):
-        names = {'names': ['person', 'man', 'woman', 'camera', 'tv', 'genius']}
-        ret = requests.post(
-            url=''.join(['http://', 'localhost', ':7000']),
-            json=names)
-
-        print(ret.json())
-
-        score = True
-        with contextlib.suppress(StopIteration):  # in case we never find a False
-            # use generator and bail at the first False found
-            score = next(i for i in ret.json().get('result') if i == False)
-
-        return f'your score={score}'
