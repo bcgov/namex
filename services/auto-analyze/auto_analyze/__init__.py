@@ -41,12 +41,12 @@ async def create_app(run_mode):
         db.init_app(quart_app)
         ma.init_app(quart_app)
     except Exception as err:
-        raise err
+        print('Error creating application in auto-analyze service: ' + repr(err.with_traceback(None)))
+        raise
 
     @quart_app.after_request
     def add_version(response):
         os.getenv('OPENSHIFT_BUILD_COMMIT', '')
-        # response.headers["API"] = 'NameX/{ver}'.format(ver=run_version)
         return response
 
     register_shellcontext(quart_app)
