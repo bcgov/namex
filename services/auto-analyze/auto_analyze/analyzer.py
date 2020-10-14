@@ -40,32 +40,6 @@ MINIMUM_SIMILARITY = 0.66
 
 HIGH_CONFLICT_RECORDS = 20
 
-# async def auto_analyze(name: str) -> bool:
-#     """Return either True/False if the name passes auto analysis.
-#
-#     For fun it approves all names of even length.
-#     """
-#     print(f'> {name}')
-#     rand = int(random.uniform(1, 5))
-#     await asyncio.sleep(rand)
-#     print(f'< {name} {rand}')
-#
-#     if len(name) % 2:
-#         return False
-#     return True
-
-'''
-TO DO: Call services from namex api:
-Synonym Service
-ProtectedNameAnalysisService()
-    -Name Processing Service
-    -Word Classification Service
-name_analysis_utils to call functions such as get_classification, remove_spaces_list
-service: word_classification
-
-name_analysis_utils to call functions get_classification, remove_spaces_list
-'''
-
 synonym_service = SynonymService()
 name_processing_service = NameProcessingService()
 name_analysis_service = ProtectedNameAnalysisService()
@@ -73,7 +47,7 @@ name_analysis_service = ProtectedNameAnalysisService()
 
 async def auto_analyze(name: str, list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
-                       dict_synonyms: dict) -> bool:
+                       dict_synonyms: dict) -> dict:
     print(
         'name: {0}  ,  list_name {1},  list_dist: {2}  , list_desc: {3}  , dict_sybst: {4},  dict_syns{5}'.format(
             name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms))
@@ -137,11 +111,6 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
     return dict_matches_counter
 
 
-'''
-TO DO: connect to name_analysis_utils to call functions such as get_flat_list
-'''
-
-
 def get_vector(conflict_class_list, original_class_list, class_subs_dict):
     vector = dict()
     entropy = list()
@@ -174,11 +143,6 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict):
     # Make sure we don't divide by zero!
     entropy_score = sum(entropy) / len(entropy) if len(entropy) > 0 else 0
     return vector, entropy_score
-
-
-'''
-TO DO: connect to name_analysis_utils to call functions such as subsequences
-'''
 
 
 def check_compound_dist(list_dist, list_desc, original_class_list, class_subs_dict):
