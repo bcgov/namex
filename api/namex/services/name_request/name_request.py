@@ -7,7 +7,7 @@ from namex.utils.common import convert_to_ascii
 
 from namex.constants import NameState
 
-from namex.models import Request, Name, State, Comment, Applicant
+from namex.models import Request, Name, State, Comment, Applicant, DecisionReason
 
 from .abstract_name_request import AbstractNameRequestMixin
 from .name_request_state import apply_nr_state_change, get_nr_state_actions
@@ -508,6 +508,16 @@ class NameRequestService(AbstractNameRequestMixin):
         if consent_words_list and len(consent_words_list) > 0:
             submitted_name = self.map_submitted_name_consent_words(submitted_name, consent_words_list)
 
+        ## add macros for specific entities and actions
+        if new_state_code in [State.COND_RESERVE, State.RESERVED]:
+            macro_list = []
+            if self.request_action == 'MVE' and self.request_entity != 'UL':
+                macro_list.append('Continuation')
+            if self.request_action == 'MVE' and self.request_entity == 'UL':
+                macro_list.append('Ulc Cont In')
+        if len(macro_list) > 0 :
+            submitted_name = self.map_submitted_name_macros(submitted_name, macro_list)
+
         return submitted_name
 
     def map_submitted_name_attrs(self, submitted_name, name):
@@ -570,6 +580,32 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return submitted_name
 
+    def map_submitted_name_macros(self, submitted_name,macro_list):
+        decision_text = submitted_name.decision_text
+        for macro in macro_list:
+            try:
+                macro_text = None
+                if macro != '' or len(macro) > 0:
+                    macro_text = DecisionReason.find_by_name(macro)
+            except Exception as err:
+                log_error('Error on get decision reason word. Macro Word[0]'.format(macro), err)
+                raise MapRequestNamesError('Error mapping macro words.')
+
+            try:
+                if decision_text is None:
+                    decision_text = macro + '- ' + macro_text.reason + '\n' + '\n'
+                else:
+                    if  len(decision_text) + len(macro) + len(macro_text) +1 < 1000:
+                        decision_text += macro + '- ' + macro_text.reason + '\n' + '\n'
+
+            except Exception as err:
+                raise MapRequestNamesError(err, 'Error adding macro words to decision.')
+
+
+
+        return submitted_name
+
+
     def clear_submitted_name_conflicts(self, submitted_name):
         """
         Used internally by map_submitted_name.
@@ -604,7 +640,7 @@ class NameRequestService(AbstractNameRequestMixin):
 
             try:
                 if decision_text is None:
-                    decision_text = cnd_instructions + '\n' + '\n'
+                    decision_text = consent + '- ' + cnd_instructions + '\n' + '\n'
                 else:
                     decision_text += consent + '- ' + cnd_instructions + '\n' + '\n'
 
