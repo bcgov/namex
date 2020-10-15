@@ -105,19 +105,31 @@ class UatJobResult(db.Model):
         db.session.add(self)
 
     @classmethod
-    def get_by_id(cls, job_id) -> UatJobResult:
+    def get_by_id(cls, job_id: int) -> UatJobResult:
         """Get the uat job by it's id."""
         return db.session.query(UatJobResult). \
             filter(UatJobResult.id == job_id).one_or_none()
 
     @classmethod
-    def get_jobs_with_unsent_results(cls) -> List:
-        """Get all jobs with results that haven't been sent out."""
+    def get_jobs_with_unsent_results(cls, uat_type: str = None) -> List:
+        """Get all jobs with results that haven't been sent out (optional: with the given uat_type)."""
+        if uat_type:
+            return db.session.query(UatJobResult). \
+                filter(
+                    UatJobResult.uat_type == uat_type,
+                    UatJobResult.results_sent == False,  # pylint: disable=singleton-comparison # noqa: E712;
+                    UatJobResult.uat_finished == True   # pylint: disable=singleton-comparison # noqa: E712;
+                ).all()
         return db.session.query(UatJobResult). \
-            filter(UatJobResult.results_sent == False).all()  # pylint: disable=singleton-comparison # noqa: E712;
+            filter(
+                UatJobResult.results_sent == False,  # pylint: disable=singleton-comparison # noqa: E712;
+                UatJobResult.uat_finished == True   # pylint: disable=singleton-comparison # noqa: E712;
+            ).all()
 
     @classmethod
-    def get_jobs_by_uat_type(cls, uat_type: str) -> List:
-        """Get all jobs with the given uat_type."""
-        return db.session.query(UatJobResult). \
-            filter(UatJobResult.uat_type == uat_type).all()
+    def get_jobs(cls, uat_type: str = None) -> List:
+        """Get all uat jobs (optional: with the given uat_type)."""
+        if uat_type:
+            return db.session.query(UatJobResult). \
+                filter(UatJobResult.uat_type == uat_type).all()
+        return db.session.query(UatJobResult).all()
