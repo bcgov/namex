@@ -108,7 +108,3 @@ async def private_service():
 if __name__ == "__main__":
     app.run(port=7000, host='localhost')
 
-"""
-Test with this:
-curl -X POST -H "Content-Type: application/json" --data '{"names": ["blue heron tours","blue bird tours","blue mountain tours"] }' localhost:7000
-"""
