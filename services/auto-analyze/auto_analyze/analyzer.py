@@ -24,7 +24,6 @@ from namex.services.name_processing.name_processing \
 
 from namex.services.name_request.auto_analyse.protected_name_analysis \
     import ProtectedNameAnalysisService
-from namex.services.name_request.builders import EXACT_MATCH, OTHER_W, MINIMUM_SIMILARITY, STEM_W, SUBS_W
 
 from swagger_client import SynonymsApi as SynonymService
 
