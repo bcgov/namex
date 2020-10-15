@@ -12,3 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Auto Analyse UAT service."""
+import os
+
+from flask import Flask, current_app  # noqa: I001
+# noqa:I004
+import config
+from models import db
+
+
+def create_app(run_mode=os.getenv('FLASK_ENV', 'production')) -> Flask:
+    """Return a configured Flask App using the Factory method."""
+    app = Flask(__name__)
+    app.config.from_object(config.CONFIGURATION[run_mode])
+    db.init_app(app)
+    app.app_context().push()
+    current_app.logger.debug('created the Flask App and pushed the App Context')
+
+    return app
