@@ -20,9 +20,8 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager  # class for handling a set of commands
 
 # pylint: disable=unused-import; included so it can build the database migrations
-import models  # NOQA:F401
-from auto_analyser_uat import create_app
-from models import db
+from auto_analyser_uat import create_app, models  # NOQA:F401
+from auto_analyser_uat.models import db
 
 
 APP = create_app()

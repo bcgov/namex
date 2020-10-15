@@ -15,9 +15,9 @@
 import os
 
 from flask import Flask, current_app  # noqa: I001
-# noqa:I004
-import config
-from models import db
+# noqa:I004, I003
+from auto_analyser_uat import config
+from auto_analyser_uat.models import db
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')) -> Flask:
