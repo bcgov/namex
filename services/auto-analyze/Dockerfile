@@ -1,4 +1,4 @@
-FROM python:3.8.5-buster
+FROM python:3.6.12-buster
 USER root
 
 # Create working directory
