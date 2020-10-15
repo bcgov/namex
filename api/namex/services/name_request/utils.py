@@ -30,6 +30,20 @@ def normalize_nr_num(nr_num_str):
     return None
 
 
+def is_temp_nr_num(nr_num_str):
+    matches = re.findall(nr_regex, nr_num_str, flags=re.IGNORECASE)
+    # If there's a match and the match has a second capturing group (valid NR digits) then proceed
+    if len(matches) == 1 and matches[0][1]:
+        # Get the first capturing group if it exists, convert to upper case, and remove any spaces
+        nr_type = str(matches[0][0]).upper().replace(' ', '') if matches[0][
+            0] else 'NR'  # Default to NR if not supplied
+
+        if nr_type in ['NRL', 'L']:
+            return True
+
+    return False
+
+
 def has_active_payment(nr, payment_id=None):
     payments = nr.payments.all()
     if payments and payment_id:

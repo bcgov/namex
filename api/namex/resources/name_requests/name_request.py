@@ -10,7 +10,7 @@ from namex.models import Request, State, Event
 
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
-from namex.services.name_request.utils import get_mapped_entity_and_action_code
+from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError
 
@@ -376,9 +376,10 @@ class NameRequestRollback(NameRequestResource):
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
-
-        # This handles the updates for NRO and Solr, if necessary
-        self.update_records_in_network_services(nr_model)
+        # Only update the record in NRO if it's a real NR, otherwise the record won't exist
+        if not is_temp_nr_num(nr_model.nrNum):
+            # This handles the updates for NRO and Solr, if necessary
+            self.update_records_in_network_services(nr_model)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)

@@ -16,10 +16,12 @@ from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Ev
 
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 
-from namex.services import EventRecorder
+# TODO: There are places to add this!
+# from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-from namex.services.payment.invoices import get_invoices
+# TODO: We may need this, code that uses this import is commented out
+# from namex.services.payment.invoices import get_invoices
 from namex.services.payment.payments import get_payment, create_payment, update_payment
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 
@@ -228,7 +230,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
             if valid_payment_action and valid_nr_state:
                 if payment_action in [NameRequestActions.COMPLETE.value]:
-                    # Save back to NRO to get the updated NR Number
+                    # Save the record to NRO, which swaps the NR-L Number for a real NR
                     update_solr = True
                     nr_model = self.add_records_to_network_services(nr_model, update_solr)
 
