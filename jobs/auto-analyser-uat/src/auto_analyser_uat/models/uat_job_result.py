@@ -87,7 +87,9 @@ class UatJobResult(db.Model):
                 RequestName.uat_job_id == self.id).all()
         total_time = 0
         for name in names:
-            total_time += name.auto_analyse_request_time
+            time = name.auto_analyse_request_time
+            if time:
+                total_time += time
         return float(total_time)/float(len(names))
 
     def get_unfinished_names(self) -> List:
