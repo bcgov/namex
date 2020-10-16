@@ -33,6 +33,16 @@ synonym_service = SynonymService()
 name_processing_service = NameProcessingService()
 name_analysis_service = ProtectedNameAnalysisService()
 
+STEM_W = 0.85
+SUBS_W = 0.65
+OTHER_W = 3.0
+
+EXACT_MATCH = 1.0
+HIGH_SIMILARITY = 0.85
+MEDIUM_SIMILARITY = 0.71
+MINIMUM_SIMILARITY = 0.66
+
+HIGH_CONFLICT_RECORDS = 20
 
 async def auto_analyze(name: str, list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
