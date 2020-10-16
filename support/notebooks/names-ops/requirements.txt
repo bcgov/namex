@@ -1,0 +1,15 @@
+Flask
+Flask-Migrate
+Flask-Script
+Flask-SQLAlchemy
+SQLAlchemy-Continuum
+requests
+psycopg2-binary
+openpyxl
+
+jupyter
+ipython-sql
+tlaplus_jupyter
+
+git+https://github.com/kialj876/namex.git#egg=auto_analyser_uat&subdirectory=jobs/auto-analyser-uat
+
