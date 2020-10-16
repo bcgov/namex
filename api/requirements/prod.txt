@@ -23,5 +23,6 @@ inflect
 werkzeug==0.16.1
 pysolr
 quart
+sentry_sdk
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
 git+https://github.com/bcgov/namex-payment-api-py-client.git@dev#egg=openapi_client
