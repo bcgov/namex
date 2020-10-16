@@ -11,5 +11,5 @@ jupyter
 ipython-sql
 tlaplus_jupyter
 
-git+https://github.com/kialj876/namex.git#egg=auto_analyser_uat&subdirectory=jobs/auto-analyser-uat
+git+https://github.com/bcgov/namex.git#egg=auto_analyser_uat&subdirectory=jobs/auto-analyser-uat
 
