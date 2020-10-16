@@ -5,26 +5,27 @@ This module is the API for the Names Examination system
 
 TODO: Fill in a larger description once the API is defined for V1
 """
+import config
+from namex.utils.logging import setup_logging
+setup_logging()  # important to do this first
+
 import os
 
 import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports; conflicts with Flake8
+from .VERSION import __version__  # noqa: F401; imported from here
 from flask import Flask
 from flask_jwt_oidc import JwtManager
+jwt = JwtManager()
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
-import config
-from namex import models
+from namex.services.nro import NROServices
+nro = NROServices()
 from namex.models import db, ma
 from namex.resources import api
-from namex.services.nro import NROServices
-from namex.utils.logging import setup_logging
+from namex import models
 from namex.utils.run_version import get_run_version
 # noqa: I003; dont know what flake8 wants here
-from .VERSION import __version__  # noqa: F401; imported from here
 
-setup_logging()  # important to do this first
-jwt = JwtManager()
-nro = NROServices()
 run_version = get_run_version()
 
 
