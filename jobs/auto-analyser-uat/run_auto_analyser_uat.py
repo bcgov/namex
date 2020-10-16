@@ -19,29 +19,18 @@ from typing import List
 from urllib.parse import quote_plus
 
 import requests
-from flask import Flask, current_app
+from flask import Flask
 from sqlalchemy import text
 
-from config import Config
-from models import RequestName, UatJobResult, db
-from utils import get_names_list_from_csv
-from utils.logging import setup_logging
+from auto_analyser_uat import create_app
+from auto_analyser_uat.models import RequestName, UatJobResult, db
+from auto_analyser_uat.utils import get_names_list_from_csv
+from auto_analyser_uat.utils.logging import setup_logging
 
 
 setup_logging(
     os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf')
 )
-
-
-def create_app(config=Config) -> Flask:
-    """Return a configured Flask App using the Factory method."""
-    app = Flask(__name__)
-    app.config.from_object(config)
-    db.init_app(app)
-    app.app_context().push()
-    current_app.logger.debug('created the Flask App and pushed the App Context')
-
-    return app
 
 
 def get_prev_job_names(job_id: int) -> List:
@@ -246,7 +235,7 @@ def run_auto_analyse_uat(uat_job: UatJobResult, app: Flask) -> int:
 
 if __name__ == '__main__':
     try:
-        app = create_app(Config)
+        app = create_app()
         uat_type = app.config['UAT_TYPE']
         app.logger.debug(f'Running {uat_type}...')
 

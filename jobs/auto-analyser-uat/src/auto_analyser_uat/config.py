@@ -9,10 +9,10 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 CONFIGURATION = {
-    'development': 'config.DevConfig',
-    'testing': 'config.TestConfig',
-    'production': 'config.ProdConfig',
-    'default': 'config.ProdConfig'
+    'development': 'auto_analyser_uat.config.DevConfig',
+    'testing': 'auto_analyser_uat.config.TestConfig',
+    'production': 'auto_analyser_uat.config.ProdConfig',
+    'default': 'auto_analyser_uat.config.ProdConfig'
 }
 
 
