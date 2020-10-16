@@ -51,8 +51,10 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
 
         # Return any combination of these checks
         if not self.skip_search_conflicts:
-            check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(), self.name_tokens,
-                                                         False, self.get_designation_end_list(), self.get_designation_any_list(),
+            check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+                                                         self.compound_descriptive_name_tokens,
+                                                         False, self.get_designation_end_list(),
+                                                         self.get_designation_any_list(),
                                                          stop_words_list)
 
             if check_conflicts.is_valid:
@@ -67,7 +69,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                 results.append(check_conflicts)
 
         check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-                                                           self.name_tokens, True, self.get_designation_end_list(),
+                                                           self.compound_descriptive_name_tokens, True,
+                                                           self.get_designation_end_list(),
                                                            self.get_designation_any_list(), stop_words_list)
 
         if check_conflicts_queue.is_valid:
@@ -76,8 +79,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                 [self.get_list_desc_search_conflicts()],
                 self.name_tokens_search_conflict,
                 self.processed_name,
-                False,
-                True
+                check_name_is_well_formed=False,
+                queue=True
             )
 
         if not check_conflicts_queue.is_valid:
