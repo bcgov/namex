@@ -34,17 +34,6 @@ from .analyzer import auto_analyze
 QUART_APP = os.getenv('QUART_APP')
 RUN_MODE = os.getenv('FLASK_ENV', 'production')
 
-STEM_W = 0.85
-SUBS_W = 0.65
-OTHER_W = 3.0
-
-EXACT_MATCH = 1.0
-HIGH_SIMILARITY = 0.85
-MEDIUM_SIMILARITY = 0.71
-MINIMUM_SIMILARITY = 0.66
-
-HIGH_CONFLICT_RECORDS = 20
-
 
 async def create_app(run_mode):
     try:
