@@ -288,7 +288,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                         self.get_position_word_consent(words_consent.lower().replace(" ", ""), name_sin_plural))
                     word_consent_original_list.append(words_consent)
                     break
-
+        word_consent_original_list = list(set(word_consent_original_list))
         words_consent_list_response = []
         for key in sorted(words_consent_dict):
             words_consent_list_response.append(list_name[key])
