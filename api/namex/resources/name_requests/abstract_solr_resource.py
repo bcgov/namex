@@ -65,7 +65,7 @@ class AbstractSolrResource(Resource):
 
         # Only update solr for corp entity types
         # TODO: Use the actual codes from the constants file...
-        if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED] and \
+        if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED, State.CANCELLED] and \
                 nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
 
             cls.create_solr_nr_doc(SOLR_CORE, nr_model)
