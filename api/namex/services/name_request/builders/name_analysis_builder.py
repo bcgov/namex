@@ -170,7 +170,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed, queue):
         dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = {}, {}, {}, {}
-
+        # Need to check if the name is well formed?
         if check_name_is_well_formed:
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
             desc_synonym_dict = self.get_dictionary(desc_synonym_dict, w_desc)
@@ -276,13 +276,19 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         word_consent_original_list = []
         name_singular_plural_list = list(set(get_plural_singular_name(name)))
 
-        for words_consent in all_words_consent_list:
-            for name_sin_plural in name_singular_plural_list:
-                if re.search(r'\b{}\b'.format(re.escape(words_consent.lower())), name_sin_plural.lower()):
+        for name_sin_plural in name_singular_plural_list:
+            for words_consent in all_words_consent_list:
+                if re.search(r'\b{0}\b'.format(re.escape(words_consent.lower())), name_sin_plural.lower()):
                     words_consent_dict.update(self.get_position_word_consent(words_consent, name_sin_plural))
                     word_consent_original_list.append(words_consent)
                     break
-
+                elif re.search(r'\b{0}\b'.format(re.escape(words_consent.lower().replace(" ", ""))),
+                               name_sin_plural.lower()):
+                    words_consent_dict.update(
+                        self.get_position_word_consent(words_consent.lower().replace(" ", ""), name_sin_plural))
+                    word_consent_original_list.append(words_consent)
+                    break
+        word_consent_original_list = list(set(word_consent_original_list))
         words_consent_list_response = []
         for key in sorted(words_consent_dict):
             words_consent_list_response.append(list_name[key])

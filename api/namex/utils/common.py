@@ -74,9 +74,12 @@ def get_plural_singular_name(name):
     for word in name.split():
         val = []
         singular = p.singular_noun(word)
-        if singular is not False:
-            val.extend([singular])
-        val.extend([word.lower()])
+        plural = p.plural_noun(word)
+        if singular:
+            val.append(singular.lower())
+        if plural:
+            val.append(plural.lower())
+        val.append(word.lower())
         d[word] = (list(set(val)))
 
     name_list = []

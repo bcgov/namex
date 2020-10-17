@@ -197,16 +197,18 @@ def get_classification_summary(list_dist, list_desc, list_name):
 def get_conflicts_same_classification(builder, name_tokens, processed_name, list_dist, list_desc):
     list_dist, list_desc = \
         list_distinctive_descriptive(name_tokens, list_dist, list_desc)
-    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name, True)
+    # Search conflicts coming from check_name_is_well_formed analysis
+    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name,
+                                               check_name_is_well_formed=True)
 
     return check_conflicts
 
 
 def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token_svc):
     desc_compound_dict = get_compound_descriptives(service, syn_svc)
-    service.set_name_tokens(update_compound_tokens(list(desc_compound_dict.keys()), match))
+    service.set_compound_descriptive_name_tokens(update_compound_tokens(list(desc_compound_dict.keys()), match))
 
-    service.token_classifier = wc_svc.classify_tokens(service.name_tokens)
+    service.token_classifier = wc_svc.classify_tokens(service.compound_descriptive_name_tokens)
     service._list_dist_words, service._list_desc_words, service._list_none_words = service.word_classification_tokens
 
     if service.get_list_none() and service.get_list_none().__len__() > 0:
@@ -215,26 +217,27 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
                 service.get_list_dist(),
                 service.get_list_desc(),
                 service.get_list_none(),
-                service.name_tokens
+                service.compound_descriptive_name_tokens
             )
     service._list_dist_words, service._list_desc_words, dict_desc = check_synonyms(syn_svc,
                                                                                    stand_alone_words,
                                                                                    service.get_list_dist(),
                                                                                    service.get_list_desc(),
-                                                                                   service.name_tokens)
+                                                                                   service.compound_descriptive_name_tokens)
 
     service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())
 
-    service.set_name_tokens(
-        update_compound_tokens(service.get_list_dist() + service.get_list_desc(), service.name_tokens))
+    service.set_compound_descriptive_name_tokens(
+        update_compound_tokens(service.get_list_dist() + service.get_list_desc(),
+                               service.compound_descriptive_name_tokens))
 
     dict_name_words_original = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
-                                                          service.name_tokens)
+                                                          service.compound_descriptive_name_tokens)
     # service.set_name_tokens(remove_spaces_list(service.name_tokens))
     print("Original Classification:")
     print(dict_name_words_original)
 
-    service.set_name_tokens_search_conflict(service.name_tokens)
+    service.set_name_tokens_search_conflict(service.compound_descriptive_name_tokens)
     service._list_dist_words_search_conflicts = remove_misplaced_distinctive(list(service.get_list_dist()),
                                                                              service.get_list_desc(),
                                                                              service.name_tokens_search_conflict)

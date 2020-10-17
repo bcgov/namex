@@ -93,6 +93,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_processing_service.name_tokens if np_svc else ''
 
     @property
+    def compound_descriptive_name_tokens(self):
+        np_svc = self.name_processing_service
+        return self.name_processing_service.compound_descriptive_name_tokens if np_svc else ''
+
+    @property
     def name_tokens_search_conflict(self):
         np_svc = self.name_processing_service
         return self.name_processing_service.name_tokens_search_conflict if np_svc else ''
@@ -199,6 +204,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         self.name_processing_service.name_tokens = name_tokens
 
     # API for extending implementations
+    def get_compound_descriptive_name_tokens(self):
+        return self.compound_descriptive_name_tokens
+
+    # API for extending implementations
+    def set_compound_descriptive_name_tokens(self, name_tokens):
+        self.name_processing_service.compound_descriptive_name_tokens = name_tokens
+
+    # API for extending implementations
     def get_name_tokens_search_conflict(self):
         return self.name_tokens_search_conflict
 
@@ -274,7 +287,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 self._dict_name_words,
                 self._list_dist_words,
                 self._list_desc_words,
-                self.name_tokens,
+                self.compound_descriptive_name_tokens,
                 self.processed_name,
                 self.name_original_tokens
             )

@@ -75,6 +75,14 @@ class NameProcessingService(GetSynonymListsMixin):
         self._name_tokens = val
 
     @property
+    def compound_descriptive_name_tokens(self):
+        return self._compound_descriptive_name_tokens
+
+    @compound_descriptive_name_tokens.setter
+    def compound_descriptive_name_tokens(self, val):
+        self._compound_descriptive_name_tokens = val
+
+    @property
     def name_tokens_search_conflict(self):
         return self._name_tokens_search_conflict
 
@@ -120,6 +128,7 @@ class NameProcessingService(GetSynonymListsMixin):
         self.name_original_tokens = None
         self.processed_name = None
         self.name_tokens = None
+        self._compound_descriptive_name_tokens = None
         self.name_tokens_search_conflict = None
         self.distinctive_word_tokens = None
         self.descriptive_word_tokens = None
