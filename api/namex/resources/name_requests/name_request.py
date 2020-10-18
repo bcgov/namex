@@ -5,7 +5,7 @@ from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
-from namex.constants import NameRequestActions, NameRequestRollbackActions
+from namex.constants import NameRequestPatchActions, NameRequestRollbackActions
 from namex.models import Request, State, Event
 
 from namex.services import EventRecorder
@@ -121,7 +121,7 @@ class NameRequestResource(BaseNameRequestResource):
 @api.route('/<int:nr_id>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @api.doc(params={
     'nr_id': 'NR ID - This field is required',
-    'nr_action': 'NR Action - One of [EDIT, CANCEL, RESEND]'
+    'nr_action': 'NR Action - One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND]'
 })
 class NameRequestFields(NameRequestResource):
     @api.expect(nr_request)
@@ -135,10 +135,9 @@ class NameRequestFields(NameRequestResource):
         We use this to:
         - Edit a subset of NR fields
         - Cancel an NR
-        - Change the state of an NR to [CANCELLED, INPROGRESS, HOLD, APPROVED, REJECTED
-        - Apply the following actions to an NR [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]
+        - Change the state of an NR
         :param nr_id:
-        :param nr_action: One of [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]
+        :param nr_action: One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND]
         :return:
         """
         try:
@@ -150,9 +149,9 @@ class NameRequestFields(NameRequestResource):
             nr_svc = self.nr_service
 
             nr_action = str(nr_action).upper()  # Convert to upper-case, just so we can support lower case action strings
-            nr_action = NameRequestActions[nr_action].value \
-                if NameRequestActions.has_value(nr_action) \
-                else NameRequestActions.EDIT.value
+            nr_action = NameRequestPatchActions[nr_action].value \
+                if NameRequestPatchActions.has_value(nr_action) \
+                else NameRequestPatchActions.EDIT.value
 
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
@@ -172,6 +171,10 @@ class NameRequestFields(NameRequestResource):
                 else:
                     msg = 'Invalid state change requested - the Name Request state cannot be changed to [' + data.get('stateCd', '') + ']'
 
+                # Check the action, make sure it's valid
+                if not NameRequestPatchActions.has_value(nr_action):
+                    is_valid = False
+                    msg = 'Invalid Name Request PATCH action, please use one of [' + ', '.join([action.value for action in NameRequestPatchActions]) + ']'
                 return is_valid, msg
 
             is_valid_patch, validation_msg = validate_patch_request(self.request_data)
@@ -182,14 +185,11 @@ class NameRequestFields(NameRequestResource):
 
             def handle_patch_actions(action, model):
                 return {
-                    NameRequestActions.EDIT.value: self.handle_patch_edit,
-                    NameRequestActions.UPGRADE.value: self.handle_patch_upgrade,
-                    NameRequestActions.CANCEL.value: self.handle_patch_cancel,
-                    NameRequestActions.REFUND.value: self.handle_patch_refund,
-                    # TODO: This is a frontend only action throw an error!
-                    # NameRequestActions.RECEIPT.value: self.patch_receipt,
-                    NameRequestActions.REAPPLY.value: self.handle_patch_reapply,
-                    NameRequestActions.RESEND.value: self.handle_patch_resend
+                    NameRequestPatchActions.CHECKOUT.value: self.handle_patch_checkout,
+                    NameRequestPatchActions.CHECKIN.value: self.handle_patch_checkin,
+                    NameRequestPatchActions.EDIT.value: self.handle_patch_edit,
+                    NameRequestPatchActions.CANCEL.value: self.handle_patch_cancel,
+                    NameRequestPatchActions.RESEND.value: self.handle_patch_resend
                 }.get(action)(model)
 
             # This handles updates if the NR state is 'patchable'
@@ -206,15 +206,47 @@ class NameRequestFields(NameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
+    def handle_patch_checkout(self, nr_model):
+        # TODO: Should we automatically check in a record when an edit is successful?
+        # TODO: Can we ONLY check out a draft?
+        nr_svc = self.nr_service
+
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, State.INPROGRESS)
+
+        # This handles the updates for NRO and Solr, if necessary
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
+
+        # Record the event
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, nr_svc.request_data)
+
+        return nr_model
+
+    def handle_patch_checkin(self, nr_model):
+        # TODO: Should we automatically check in a record when an edit is successful?
+        # TODO: Can we ONLY check in a draft?
+        nr_svc = self.nr_service
+
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, State.DRAFT)
+
+        # This handles the updates for NRO and Solr, if necessary
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
+
+        # Record the event
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkin]', nr_model, nr_svc.request_data)
+
+        return nr_model
+
     def handle_patch_edit(self, nr_model):
+        # TODO: Should we automatically check in a record when an edit is successful?
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = False
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [edit]', nr_model, nr_svc.request_data)
@@ -228,8 +260,7 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = False
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-send]', nr_model, nr_svc.request_data)
@@ -248,39 +279,11 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = True
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=True)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [cancel]', nr_model, nr_svc.request_data)
 
-        return nr_model
-
-    def handle_patch_upgrade(self, nr_model):
-        """
-        MOVED TO PAYMENT
-        Upgrade the Name Request to priority, create the payment and save the record.
-        :param nr_model:
-        :return:
-        """
-        return nr_model
-
-    def handle_patch_reapply(self, nr_model):
-        """
-        MOVED TO PAYMENT
-        Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
-        extend the expiration by an additional year (plus the default 56 days).
-        :param nr_model:
-        :return:
-        """
-        return nr_model
-
-    def handle_patch_refund(self, nr_model):
-        """
-        MOVED TO PAYMENT
-        :param nr_model:
-        :return:
-        """
         return nr_model
 
     def update_nr_fields(self, nr_model, new_state):

@@ -115,8 +115,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
 
     """
     The actual methods that map the request data to our domain models and persist the data.
-    These are implemented statically so we can call them statically from our tests without having to 
-    instantiate a NameRequestResource.
+    These are implemented statically so we can call them statically from our tests without having to instantiate a NameRequestResource.
     """
 
     @staticmethod
@@ -145,6 +144,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     def put_nr(nr, svc):
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
+        All request data is mapped.
         :param nr: The name request model
         :param svc A NameRequestService instance
         :return:
@@ -164,11 +164,16 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     def patch_nr(nr, request_data, svc):
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
+        Re-map the names and the applicants (just the applicant / contact if applicable).
         :param request_data: A request data object
         :param nr: The name request model
         :param svc A NameRequestService instance
         :return:
         """
+        # Check request data
+        print('patch_nr request data\n')
+        print(repr(request_data))
+
         if nr.stateCd in request_editable_states:
             # Map data from request_data to the name request
             map_draft_attrs = nr.stateCd == State.DRAFT
