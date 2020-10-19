@@ -13,6 +13,8 @@ from namex.utils.api_resource import clean_url_path_param, handle_exception
 
 from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
 from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event
+from namex.services import EventRecorder
+
 
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 
@@ -282,9 +284,11 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     'sbcPayment': payment_response.to_dict()
                 })
 
+
                 # Record the event
                 nr_svc = self.nr_service
-                # EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment ID: {id}]'.format(id=payment.id), nr_model, data)
+                #EventRecorder.record(nr_svc.user, Event.POST + ' [payment created]', json_input )
+
 
                 response = make_response(data, 201)
                 return response
@@ -521,7 +525,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             # Save the name request
             nr_model.save_to_db()
             # Record the event
-            EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
+            EventRecorder.record(nr_svc.user, Event.PATCH + 'Payment Completed', nr_model, nr_svc.request_data)
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)

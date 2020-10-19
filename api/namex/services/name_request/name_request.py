@@ -515,8 +515,8 @@ class NameRequestService(AbstractNameRequestMixin):
                 macro_list.append('Continuation')
             if self.request_action == 'MVE' and self.request_entity == 'UL':
                 macro_list.append('Ulc Cont In')
-        if len(macro_list) > 0 :
-            submitted_name = self.map_submitted_name_macros(submitted_name, macro_list)
+            if len(macro_list) > 0 :
+                submitted_name = self.map_submitted_name_macros(submitted_name, macro_list)
 
         return submitted_name
 
