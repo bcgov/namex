@@ -51,7 +51,7 @@ class RequestName(db.Model):
 
     auto_analyse_issue_text = db.Column('auto_analyse_issue_text', db.VARCHAR(2048))
     auto_analyse_conflict1 = db.Column('auto_analyse_conflict1', db.VARCHAR(1024))
-    auto_analyse_issue_type = db.Column('auto_analyse_issue_type', db.VARCHAR(20))
+    auto_analyse_issue_type = db.Column('auto_analyse_issue_type', db.VARCHAR(1024))
     auto_analyse_response = db.Column('auto_analyse_response', JSONB)
     auto_analyse_result = db.Column('auto_analyse_result', db.VARCHAR(20))
 
