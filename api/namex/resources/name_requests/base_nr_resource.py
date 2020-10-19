@@ -2,6 +2,7 @@ from flask import request, current_app
 
 from namex.utils.logging import setup_logging
 
+from namex.constants import NameRequestPatchActions
 from namex.models import State
 
 from namex.services.name_request import NameRequestService
@@ -21,6 +22,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     """
     _nr_service = None
     _request_data = None
+    _nr_action = None
 
     @property
     def nr_service(self):
@@ -39,6 +41,14 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     @request_data.setter
     def request_data(self, data):
         self._request_data = data
+
+    @property
+    def nr_action(self):
+        return self._nr_action
+
+    @nr_action.setter
+    def nr_action(self, nr_action):
+        self._nr_action = nr_action
 
     def initialize(self):
         self.validate_config(current_app)
@@ -99,9 +109,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
         :param svc A NameRequestService instance
         :return:
         """
-        request_data = self.request_data  # Valid request data
-
-        return self.patch_nr(nr, request_data, svc)
+        return self.patch_nr(nr, svc, self.nr_action, self.request_data)
 
     def handle_nr_approval(self, nr, svc):
         """
@@ -161,18 +169,26 @@ class BaseNameRequestResource(AbstractNameRequestResource):
         return nr
 
     @staticmethod
-    def patch_nr(nr, request_data, svc):
+    def patch_nr(nr, svc, nr_action, request_data):
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
         Re-map the names and the applicants (just the applicant / contact if applicable).
-        :param request_data: A request data object
         :param nr: The name request model
         :param svc A NameRequestService instance
+        :param nr_action: The Name Request action
+        :param request_data: A request data object
         :return:
         """
-        # Check request data
-        print('patch_nr request data\n')
-        print(repr(request_data))
+        lock_actions = [NameRequestPatchActions.CHECKIN.value, NameRequestPatchActions.CHECKOUT.value]
+
+        if nr_action in lock_actions and nr.stateCd in [State.DRAFT, State.INPROGRESS]:
+            # Map the checkout data
+            nr.checkedOutBy = request_data.get('checkedOutBy', None)
+            nr.checkedOutDt = request_data.get('checkedOutDt', None)
+
+            nr = svc.save_request(nr)
+            # Return the updated name request
+            return nr
 
         if nr.stateCd in request_editable_states:
             # Map data from request_data to the name request

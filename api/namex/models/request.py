@@ -104,6 +104,12 @@ class Request(db.Model):
     _source = db.Column('source', db.String(15), default=ValidSources.NRO)
     tradeMark = db.Column('trade_mark', db.String(100))
 
+    # Check-In / Check-Out (for INPROGRESS)
+    # A UUID granted to the user that checks out the Name Request
+    checkedOutBy = db.Column('checked_out_by', db.String(64), index=True)
+    # This date time allows jobs to see when the Name Request was checked out
+    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True))
+
     # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
 
@@ -213,7 +219,9 @@ class Request(db.Model):
             'names': [name.as_dict() for name in self.names.all()],
             'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
             'comments': [comment.as_dict() for comment in self.comments.all()],
-            'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
+            'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()],
+            'checkedOutBy': self.checkedOutBy,
+            'checkedOutDt': self.checkedOutDt
         }
 
     @classmethod

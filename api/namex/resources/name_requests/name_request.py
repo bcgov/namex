@@ -1,4 +1,6 @@
-from flask import current_app, jsonify
+from uuid import uuid4
+from datetime import datetime
+from flask import current_app, request, jsonify
 from flask_restplus import cors
 
 from namex.utils.logging import setup_logging
@@ -123,7 +125,7 @@ class NameRequestResource(BaseNameRequestResource):
     'nr_id': 'NR ID - This field is required',
     'nr_action': 'NR Action - One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND]'
 })
-class NameRequestFields(NameRequestResource):
+class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     def patch(self, nr_id, nr_action):
@@ -141,18 +143,41 @@ class NameRequestFields(NameRequestResource):
         :return:
         """
         try:
-            # Find the existing name request
-            nr_model = Request.query.get(nr_id)
-
-            # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
-            self.initialize()
-            nr_svc = self.nr_service
-
             nr_action = str(nr_action).upper()  # Convert to upper-case, just so we can support lower case action strings
             nr_action = NameRequestPatchActions[nr_action].value \
                 if NameRequestPatchActions.has_value(nr_action) \
                 else NameRequestPatchActions.EDIT.value
 
+            # Find the existing name request
+            nr_model = Request.query.get(nr_id)
+
+            def initialize(_self):
+                if nr_action:
+                    _self.nr_action = nr_action
+
+                if nr_action is NameRequestPatchActions.CHECKOUT.value:
+                    # The request payload will be empty when making this call, add them to the request
+                    _self.request_data = {
+                        # Doesn't have to be a UUID but this is easy and works for a pretty unique token
+                        'checkedOutBy': str(uuid4()),
+                        'checkedOutDt': datetime.now()
+                    }
+                    # Set the request data to the service
+                    _self.nr_service.request_data = self.request_data
+                elif nr_action is NameRequestPatchActions.CHECKIN.value:
+                    # The request payload will be empty when making this call, add them to the request
+                    _self.request_data = {
+                        'checkedOutBy': None,
+                        'checkedOutDt': None
+                    }
+                    # Set the request data to the service
+                    _self.nr_service.request_data = self.request_data
+                else:
+                    super().initialize()
+
+            initialize(self)
+
+            nr_svc = self.nr_service
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
@@ -198,10 +223,22 @@ class NameRequestFields(NameRequestResource):
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
 
-            # Don't bother returning a response object if we're checking in or checking out
-            if nr_action in [NameRequestPatchActions.CHECKOUT.value, NameRequestPatchActions.CHECKIN.value]:
+            # Don't return the whole response object if we're checking in or checking out
+            if nr_action == NameRequestPatchActions.CHECKOUT.value:
                 response_data = {
-                    'state': response_data.get('stateCd', ''),
+                    'id': nr_id,
+                    'checkedOutBy': response_data.get('checkedOutBy'),
+                    'checkedOutDt': response_data.get('checkedOutDt'),
+                    'state': response_data.get('state', ''),
+                    'stateCd': response_data.get('stateCd', ''),
+                    'actions': nr_svc.current_state_actions
+                }
+                return jsonify(response_data), 200
+
+            if nr_action == NameRequestPatchActions.CHECKIN.value:
+                response_data = {
+                    'id': nr_id,
+                    'state': response_data.get('state', ''),
                     'stateCd': response_data.get('stateCd', ''),
                     'actions': nr_svc.current_state_actions
                 }
@@ -227,8 +264,7 @@ class NameRequestFields(NameRequestResource):
         # This handles the updates for NRO and Solr, if necessary
         nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
 
-        # Record the event
-        EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, nr_svc.request_data)
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, {})
 
         return nr_model
 
@@ -244,7 +280,7 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
 
         # Record the event
-        EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkin]', nr_model, nr_svc.request_data)
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkin]', nr_model, {})
 
         return nr_model
 
@@ -323,7 +359,7 @@ class NameRequestFields(NameRequestResource):
 @api.doc(params={
     'nr_id': 'NR Number - This field is required',
 })
-class NameRequestRollback(NameRequestResource):
+class NameRequestRollback(BaseNameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     def patch(self, nr_id, action):
