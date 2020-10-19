@@ -14,7 +14,7 @@ from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
 from namex.services.name_request.exceptions import \
-    NameRequestException, InvalidInputError
+    NameRequestException, InvalidInputError, NameRequestIsInProgressError
 
 from .api_namespace import api
 from .api_models import nr_request
@@ -152,10 +152,20 @@ class NameRequestFields(BaseNameRequestResource):
             nr_model = Request.query.get(nr_id)
 
             def initialize(_self):
+                _self.validate_config(current_app)
+                request_json = request.get_json()
+
                 if nr_action:
                     _self.nr_action = nr_action
 
                 if nr_action is NameRequestPatchActions.CHECKOUT.value:
+                    # Make sure the NR isn't already checked out
+                    checked_out_by_different_user = nr_model.checkedOutBy is not None and nr_model.checkedOutBy != request_json.get('checkedOutBy', None)
+                    # To test this in the UI, uncomment the next line!
+                    # checked_out_by_different_user = True
+                    if checked_out_by_different_user:
+                        raise NameRequestIsInProgressError()
+
                     # The request payload will be empty when making this call, add them to the request
                     _self.request_data = {
                         # Doesn't have to be a UUID but this is easy and works for a pretty unique token
@@ -248,6 +258,9 @@ class NameRequestFields(BaseNameRequestResource):
             response_data['actions'] = nr_svc.current_state_actions
             return jsonify(response_data), 200
 
+        except NameRequestIsInProgressError as err:
+            # Might as well use the Mozilla WebDAV HTTP Locked status, it's pretty close
+            return handle_exception(err, err.message, 423)
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
         except Exception as err:
