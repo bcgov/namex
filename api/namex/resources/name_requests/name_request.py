@@ -161,8 +161,6 @@ class NameRequestFields(BaseNameRequestResource):
                 if nr_action is NameRequestPatchActions.CHECKOUT.value:
                     # Make sure the NR isn't already checked out
                     checked_out_by_different_user = nr_model.checkedOutBy is not None and nr_model.checkedOutBy != request_json.get('checkedOutBy', None)
-                    # To test this in the UI, uncomment the next line!
-                    # checked_out_by_different_user = True
                     if checked_out_by_different_user:
                         raise NameRequestIsInProgressError()
 
@@ -267,30 +265,24 @@ class NameRequestFields(BaseNameRequestResource):
             return handle_exception(err, repr(err), 500)
 
     def handle_patch_checkout(self, nr_model):
-        # TODO: Should we automatically check in a record when an edit is successful?
-        # TODO: Can we ONLY check out a draft?
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, State.INPROGRESS)
 
-        # This handles the updates for NRO and Solr, if necessary
-        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
+        # TODO: Lorna, call new oracle method to check out the record
 
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, {})
 
         return nr_model
 
     def handle_patch_checkin(self, nr_model):
-        # TODO: Should we automatically check in a record when an edit is successful?
-        # TODO: Can we ONLY check in a draft?
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, State.DRAFT)
 
-        # This handles the updates for NRO and Solr, if necessary
-        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
+        # TODO: Lorna, call new oracle method to check out the record
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkin]', nr_model, {})
