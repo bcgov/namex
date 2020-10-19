@@ -147,6 +147,23 @@ def to_draft(resource, nr, on_success_cb=None):
     return nr
 
 
+def to_inprogress(resource, nr, on_success_cb=None):
+    valid_states = [State.DRAFT, State.INPROGRESS]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.INPROGRESS,
+            valid_states=', '.join(valid_states)
+        ))
+
+    resource.next_state_code = State.INPROGRESS
+    nr.stateCd = State.INPROGRESS
+
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
+
+
 def to_cond_reserved(resource, nr, on_success_cb):
     valid_states = [State.DRAFT, State.COND_RESERVE]
     if nr.stateCd not in valid_states:
@@ -263,6 +280,7 @@ def apply_nr_state_change(self, name_request, next_state, on_success=None):
     :return:
     """
     return {
+        State.INPROGRESS: to_inprogress,
         State.DRAFT: to_draft,
         State.COND_RESERVE: to_cond_reserved,
         State.RESERVED: to_reserved,

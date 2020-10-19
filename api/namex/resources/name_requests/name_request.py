@@ -197,6 +197,16 @@ class NameRequestFields(NameRequestResource):
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
+
+            # Don't bother returning a response object if we're checking in or checking out
+            if nr_action in [NameRequestPatchActions.CHECKOUT.value, NameRequestPatchActions.CHECKIN.value]:
+                response_data = {
+                    'state': response_data.get('stateCd', ''),
+                    'stateCd': response_data.get('stateCd', ''),
+                    'actions': nr_svc.current_state_actions
+                }
+                return jsonify(response_data), 200
+
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = nr_svc.current_state_actions
             return jsonify(response_data), 200
