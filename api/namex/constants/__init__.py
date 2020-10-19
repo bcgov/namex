@@ -446,7 +446,14 @@ class NameRequestHoldActions(AbstractEnum):
 
 
 class NameRequestInProgressActions(AbstractEnum):
-    pass
+    """
+    These should mostly be the same as the ones for a draft, but they are used differently.
+    Define these separately.
+    """
+    EDIT = NameRequestActions.EDIT.value
+    UPGRADE = NameRequestActions.UPGRADE.value
+    REFUND = NameRequestActions.REFUND.value
+    RECEIPT = NameRequestActions.RECEIPT.value
 
 
 class NameRequestExpiredActions(AbstractEnum):
