@@ -2,6 +2,7 @@ import re
 import warnings
 
 from . import LanguageCodes
+from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
 from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning
 
 # from namex.services.synonyms.synonym import SynonymService
@@ -25,7 +26,7 @@ Setting the name using NameProcessingService.set_name will clean the name and se
 '''
 
 
-class NameProcessingService(GetSynonymListsMixin):
+class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
     @property
     def name_as_submitted(self):
         return self._name_as_submitted
@@ -242,7 +243,7 @@ class NameProcessingService(GetSynonymListsMixin):
 
         return exception_stopword_designation
 
-    def _prepare_data(self):
+    def prepare_data(self):
         syn_svc = self.synonym_service
 
         # Query database for word designations
@@ -273,7 +274,7 @@ class NameProcessingService(GetSynonymListsMixin):
     def _process_name(self):
         try:
             # Prepare any data that we need to pre-process the name
-            self._prepare_data()
+            # self._prepare_data()
 
             # Clean the provided name and tokenize the string
             self.name_tokens = self._clean_name_words(
