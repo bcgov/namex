@@ -439,11 +439,14 @@ class NameRequestRollback(BaseNameRequestResource):
         # Only update the record in NRO if it's a real NR, otherwise the record won't exist
         if not is_temp_nr_num(nr_model.nrNum):
             # This handles the updates for NRO and Solr, if necessary
-            self.update_records_in_network_services(nr_model, update_solr=True)
-        else:
-            temp_nr_num = nr_model.nrNum
-            # Update SOLR
-            self.update_solr_service(nr_model, temp_nr_num)
+            #self.update_records_in_network_services(nr_model, update_solr=True)
+            nr_model = self.update_request_in_nro(nr_model, self.on_nro_save_success)
+
+        #delete in solr for temp or real NR because it is cancelled
+        if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL','XCP']:
+                SOLR_CORE = 'possible.conflicts'
+                self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
+
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
 

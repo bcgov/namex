@@ -6,6 +6,7 @@ from namex.constants import NameRequestPatchActions
 from namex.models import State
 
 from namex.services.name_request import NameRequestService
+from namex.services.virtual_word_condition import VirtualWordConditionService
 from namex.services.name_request.exceptions import NameRequestException
 
 from .abstract_nr_resource import AbstractNameRequestResource
@@ -29,6 +30,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
         try:
             if not self._nr_service:
                 self._nr_service = NameRequestService()
+                self._nr_service.virtual_wc_service = VirtualWordConditionService()
         except Exception as err:
             raise NameRequestException(err, message='Error initializing NameRequestService')
 

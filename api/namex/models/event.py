@@ -60,11 +60,10 @@ class Event(db.Model):
     @classmethod
     def get_approved_names_counter(cls):
         auto_approved_names_counter = db.session.query(
-            func.count(Event.id).label('approvedNamesCounter')).filter(Event.action == EventAction.PUT.value,
-                                                                       Event.userId == EventUserId.SERVICE_ACCOUNT.value,
-                                                                       Event.stateCd == EventState.APPROVED.value,
-                                                                       func.date_trunc('day',
-                                                                                       Event.eventDate) == func.date_trunc(
-                                                                           'day', func.now())
-                                                                       ).all()
+            func.count(Event.id).label('approvedNamesCounter'))\
+            .filter(Event.action == Event.PATCH + 'Payment Completed')\
+            .filter(Event.userId == EventUserId.SERVICE_ACCOUNT.value)\
+            .filter(Event.stateCd.in_(('APPROVED','CONDITIONAL')))\
+            .filter(func.date_trunc('day', Event.eventDate) == func.date_trunc('day', func.now()))\
+            .all()
         return auto_approved_names_counter.pop()
