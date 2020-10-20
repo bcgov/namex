@@ -29,7 +29,6 @@ class Config(object):
     SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
     NRO_EXTRACTOR_URI = os.getenv('NRO_EXTRACTOR_URI', None)
     AUTO_ANALYZE_URL = os.getenv('AUTO_ANALYZE_URL', None)
-    SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
     ALEMBIC_INI = 'migrations/alembic.ini'
 
