@@ -25,4 +25,4 @@ lxml
 inflect
 werkzeug==0.16.1
 pysolr
-sentry_sdk
+

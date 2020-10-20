@@ -11,12 +11,10 @@ setup_logging()  # important to do this first
 
 import os
 
-import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports; conflicts with Flake8
 from .VERSION import __version__  # noqa: F401; imported from here
 from flask import Flask
 from flask_jwt_oidc import JwtManager
 jwt = JwtManager()
-from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
 from namex.services.nro import NROServices
 nro = NROServices()
@@ -33,13 +31,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Create app."""
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
-
-    # Configure Sentry
-    if app.config.get('SENTRY_DSN', None):
-        sentry_sdk.init(
-            dsn=app.config.get('SENTRY_DSN'),
-            integrations=[FlaskIntegration()]
-        )
 
     db.init_app(app)
     ma.init_app(app)
