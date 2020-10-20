@@ -12,6 +12,7 @@ class Payment(db.Model):
     _payment_token = db.Column('payment_id', db.String(4096))
     _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
     _payment_status_code = db.Column('payment_status_code', db.String(50))
+    payment_note = db.Column('payment_note', db.String(100))
 
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
 
@@ -49,6 +50,7 @@ class Payment(db.Model):
             'id': self.id,
             'nr_id': self.nrId,
             'payment_token': self.payment_token,
+            'payment_note': self.payment_note,
             'payment_completion_date': self.payment_completion_date,
             'payment_status_code': self.payment_status_code
         }
