@@ -35,7 +35,6 @@ class Name(db.Model):
 
     # Required for name request name analysis
     _name_type_cd = db.Column('name_type_cd', db.String(10))
-    _clean_name = db.Column('clean_name', db.String(1024), index=True)
 
     NOT_EXAMINED = 'NE'
     APPROVED = 'APPROVED'
@@ -55,20 +54,10 @@ class Name(db.Model):
     def name_type_cd(self, value: str):
         self._name_type_cd = value
 
-    @property
-    def clean_name(self):
-        """Property containing the cleaned approved name used in analysis in Name Request"""
-        return self._clean_name
-
-    @clean_name.setter
-    def clean_name(self, value: str):
-        self._clean_name = value
-
     def as_dict(self):
         return {
             'id': self.id,
             'name': self.name,
-            'clean_name': self.clean_name,
             'name_type_cd': self.name_type_cd,
             'designation': self.designation,
             'choice': self.choice,

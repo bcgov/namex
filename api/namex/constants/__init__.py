@@ -381,15 +381,42 @@ class NameState(AbstractEnum):
 
 
 class NameRequestActions(AbstractEnum):
+    # Non-payment related actions
+    CHECKOUT = 'CHECKOUT'
+    CHECKIN = 'CHECKIN'
     EDIT = 'EDIT'
-    UPGRADE = 'UPGRADE'  # Upgrade priority
     CANCEL = 'CANCEL'
-    REFUND = 'REFUND'  # Cancel with refund
-    RECEIPT = 'RECEIPT'
-    # Needed for name request reservation before completing the NR
+    RESEND = 'RESEND'
+    # Payment related actions
+    UPGRADE = 'UPGRADE'
     REAPPLY = 'REAPPLY'
-    RESEND = 'RESEND'  # Re-send notification
+    REFUND = 'REFUND'
+    RECEIPT = 'RECEIPT'
     COMPLETE = 'COMPLETE'
+
+
+class NameRequestPatchActions(AbstractEnum):
+    """
+    This subset of actions is used by the NameRequest PATCH,
+    and are NOT payment related.
+    """
+    CHECKOUT = NameRequestActions.CHECKOUT.value
+    CHECKIN = NameRequestActions.CHECKIN.value
+    EDIT = NameRequestActions.EDIT.value
+    CANCEL = NameRequestActions.CANCEL.value
+    RESEND = NameRequestActions.RESEND.value
+
+
+class NameRequestPaymentActions(AbstractEnum):
+    """
+    This subset of actions is used by the NameRequest PATCH,
+    and are NOT payment related.
+    """
+    UPGRADE = NameRequestActions.UPGRADE.value
+    REAPPLY = NameRequestActions.REAPPLY.value
+    REFUND = NameRequestActions.REFUND.value
+    RECEIPT = NameRequestActions.RECEIPT.value
+    COMPLETE = NameRequestActions.COMPLETE.value
 
 
 class NameRequestDraftActions(AbstractEnum):
@@ -419,7 +446,14 @@ class NameRequestHoldActions(AbstractEnum):
 
 
 class NameRequestInProgressActions(AbstractEnum):
-    pass
+    """
+    These should mostly be the same as the ones for a draft, but they are used differently.
+    Define these separately.
+    """
+    EDIT = NameRequestActions.EDIT.value
+    UPGRADE = NameRequestActions.UPGRADE.value
+    REFUND = NameRequestActions.REFUND.value
+    RECEIPT = NameRequestActions.RECEIPT.value
 
 
 class NameRequestExpiredActions(AbstractEnum):

@@ -10,6 +10,7 @@ from namex.services.nro import NROServicesError
 from namex.services import EventRecorder
 from namex.services.nro.change_nr import update_nr, _get_event_id, _create_nro_transaction
 from namex.services.nro.add_nr import new_nr
+from namex.services.nro.checkin_checkout_nr import manage_nr_locks
 
 from .exceptions import NROServicesError
 from .utils import nro_examiner_name
@@ -364,6 +365,33 @@ class NROServices(object):
             current_app.logger.error(err.with_traceback(None))
 
         return warnings if len(warnings) > 0 else None
+
+    def checkin_checkout_nr(self, nr, action):
+        warnings = []
+        try:
+
+            con = self.connection
+            con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
+
+            cursor = con.cursor()
+            manage_nr_locks(nr, cursor, action, con)
+
+            con.commit()
+
+            return None
+
+        except Exception as err:
+            warnings.append({'type': 'warn',
+                             'code': 'unable_to_update_request_changes_in_NRO',
+                             'message': 'Unable to update the Request details in NRO,'
+                                        ' please manually verify record is up to date in NRO before'
+                                        ' continuing.'
+                             })
+            current_app.logger.error(err.with_traceback(None))
+
+        return warnings if len(warnings) > 0 else None
+
+
 
     def cancel_nr(self, nr, examiner_username):
         """Sets the status of the Request in NRO to "C" (Cancelled)

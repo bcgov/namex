@@ -52,6 +52,7 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
 
         return nr_model
 
+
     @staticmethod
     def on_nr_approved(nr, svc):
         """

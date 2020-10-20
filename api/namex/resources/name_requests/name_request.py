@@ -1,18 +1,20 @@
-from flask import current_app, jsonify
+from uuid import uuid4
+from datetime import datetime
+from flask import current_app, request, jsonify
 from flask_restplus import cors
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
-from namex.constants import NameRequestActions, NameRequestRollbackActions
+from namex.constants import NameRequestPatchActions, NameRequestRollbackActions
 from namex.models import Request, State, Event
 
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
 from namex.services.name_request.exceptions import \
-    NameRequestException, InvalidInputError
+    NameRequestException, InvalidInputError, NameRequestIsInProgressError
 
 from .api_namespace import api
 from .api_models import nr_request
@@ -121,9 +123,9 @@ class NameRequestResource(BaseNameRequestResource):
 @api.route('/<int:nr_id>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @api.doc(params={
     'nr_id': 'NR ID - This field is required',
-    'nr_action': 'NR Action - One of [EDIT, CANCEL, RESEND]'
+    'nr_action': 'NR Action - One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND]'
 })
-class NameRequestFields(NameRequestResource):
+class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     def patch(self, nr_id, nr_action):
@@ -135,25 +137,55 @@ class NameRequestFields(NameRequestResource):
         We use this to:
         - Edit a subset of NR fields
         - Cancel an NR
-        - Change the state of an NR to [CANCELLED, INPROGRESS, HOLD, APPROVED, REJECTED
-        - Apply the following actions to an NR [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]
+        - Change the state of an NR
         :param nr_id:
-        :param nr_action: One of [EDIT, UPGRADE, CANCEL, REFUND, REAPPLY, RESEND]
+        :param nr_action: One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND]
         :return:
         """
         try:
+            nr_action = str(nr_action).upper()  # Convert to upper-case, just so we can support lower case action strings
+            nr_action = NameRequestPatchActions[nr_action].value \
+                if NameRequestPatchActions.has_value(nr_action) \
+                else NameRequestPatchActions.EDIT.value
+
             # Find the existing name request
             nr_model = Request.query.get(nr_id)
 
-            # Creates a new NameRequestService, validates the app config, and sets request_data to the NameRequestService instance
-            self.initialize()
+            def initialize(_self):
+                _self.validate_config(current_app)
+                request_json = request.get_json()
+
+                if nr_action:
+                    _self.nr_action = nr_action
+
+                if nr_action is NameRequestPatchActions.CHECKOUT.value:
+                    # Make sure the NR isn't already checked out
+                    checked_out_by_different_user = nr_model.checkedOutBy is not None and nr_model.checkedOutBy != request_json.get('checkedOutBy', None)
+                    if checked_out_by_different_user:
+                        raise NameRequestIsInProgressError()
+
+                    # The request payload will be empty when making this call, add them to the request
+                    _self.request_data = {
+                        # Doesn't have to be a UUID but this is easy and works for a pretty unique token
+                        'checkedOutBy': str(uuid4()),
+                        'checkedOutDt': datetime.now()
+                    }
+                    # Set the request data to the service
+                    _self.nr_service.request_data = self.request_data
+                elif nr_action is NameRequestPatchActions.CHECKIN.value:
+                    # The request payload will be empty when making this call, add them to the request
+                    _self.request_data = {
+                        'checkedOutBy': None,
+                        'checkedOutDt': None
+                    }
+                    # Set the request data to the service
+                    _self.nr_service.request_data = self.request_data
+                else:
+                    super().initialize()
+
+            initialize(self)
+
             nr_svc = self.nr_service
-
-            nr_action = str(nr_action).upper()  # Convert to upper-case, just so we can support lower case action strings
-            nr_action = NameRequestActions[nr_action].value \
-                if NameRequestActions.has_value(nr_action) \
-                else NameRequestActions.EDIT.value
-
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
@@ -172,6 +204,10 @@ class NameRequestFields(NameRequestResource):
                 else:
                     msg = 'Invalid state change requested - the Name Request state cannot be changed to [' + data.get('stateCd', '') + ']'
 
+                # Check the action, make sure it's valid
+                if not NameRequestPatchActions.has_value(nr_action):
+                    is_valid = False
+                    msg = 'Invalid Name Request PATCH action, please use one of [' + ', '.join([action.value for action in NameRequestPatchActions]) + ']'
                 return is_valid, msg
 
             is_valid_patch, validation_msg = validate_patch_request(self.request_data)
@@ -182,14 +218,11 @@ class NameRequestFields(NameRequestResource):
 
             def handle_patch_actions(action, model):
                 return {
-                    NameRequestActions.EDIT.value: self.handle_patch_edit,
-                    NameRequestActions.UPGRADE.value: self.handle_patch_upgrade,
-                    NameRequestActions.CANCEL.value: self.handle_patch_cancel,
-                    NameRequestActions.REFUND.value: self.handle_patch_refund,
-                    # TODO: This is a frontend only action throw an error!
-                    # NameRequestActions.RECEIPT.value: self.patch_receipt,
-                    NameRequestActions.REAPPLY.value: self.handle_patch_reapply,
-                    NameRequestActions.RESEND.value: self.handle_patch_resend
+                    NameRequestPatchActions.CHECKOUT.value: self.handle_patch_checkout,
+                    NameRequestPatchActions.CHECKIN.value: self.handle_patch_checkin,
+                    NameRequestPatchActions.EDIT.value: self.handle_patch_edit,
+                    NameRequestPatchActions.CANCEL.value: self.handle_patch_cancel,
+                    NameRequestPatchActions.RESEND.value: self.handle_patch_resend
                 }.get(action)(model)
 
             # This handles updates if the NR state is 'patchable'
@@ -197,24 +230,80 @@ class NameRequestFields(NameRequestResource):
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
+
+            # Don't return the whole response object if we're checking in or checking out
+            if nr_action == NameRequestPatchActions.CHECKOUT.value:
+                response_data = {
+                    'id': nr_id,
+                    'checkedOutBy': response_data.get('checkedOutBy'),
+                    'checkedOutDt': response_data.get('checkedOutDt'),
+                    'state': response_data.get('state', ''),
+                    'stateCd': response_data.get('stateCd', ''),
+                    'actions': nr_svc.current_state_actions
+                }
+                return jsonify(response_data), 200
+
+            if nr_action == NameRequestPatchActions.CHECKIN.value:
+                response_data = {
+                    'id': nr_id,
+                    'state': response_data.get('state', ''),
+                    'stateCd': response_data.get('stateCd', ''),
+                    'actions': nr_svc.current_state_actions
+                }
+                return jsonify(response_data), 200
+
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = nr_svc.current_state_actions
             return jsonify(response_data), 200
 
+        except NameRequestIsInProgressError as err:
+            # Might as well use the Mozilla WebDAV HTTP Locked status, it's pretty close
+            return handle_exception(err, err.message, 423)
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
+    def handle_patch_checkout(self, nr_model):
+        nr_svc = self.nr_service
+
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, State.INPROGRESS)
+
+        # Lock nro Request row (set status=H)
+        nro_warnings = self.lock_request_in_nro(nr_model)
+        if nro_warnings:
+            on_success = False
+            return self.on_nro_update_complete(nr_model, on_success, nro_warnings)
+
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, {})
+        return nr_model
+
+    def handle_patch_checkin(self, nr_model):
+        nr_svc = self.nr_service
+
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr_fields(nr_model, State.DRAFT)
+
+        #set status back to D after Edit is complete
+        nro_warnings = self.unlock_request_in_nro(nr_model)
+        if nro_warnings:
+            on_success = False
+            return self.on_nro_update_complete(nr_model, on_success, nro_warnings)
+        # Record the event
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkin]', nr_model, {})
+
+        return nr_model
+
     def handle_patch_edit(self, nr_model):
+        # TODO: Should we automatically check in a record when an edit is successful?
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = False
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [edit]', nr_model, nr_svc.request_data)
@@ -228,8 +317,7 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = False
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-send]', nr_model, nr_svc.request_data)
@@ -248,39 +336,11 @@ class NameRequestFields(NameRequestResource):
         nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
 
         # This handles the updates for NRO and Solr, if necessary
-        update_solr = True
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=True)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [cancel]', nr_model, nr_svc.request_data)
 
-        return nr_model
-
-    def handle_patch_upgrade(self, nr_model):
-        """
-        MOVED TO PAYMENT
-        Upgrade the Name Request to priority, create the payment and save the record.
-        :param nr_model:
-        :return:
-        """
-        return nr_model
-
-    def handle_patch_reapply(self, nr_model):
-        """
-        MOVED TO PAYMENT
-        Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
-        extend the expiration by an additional year (plus the default 56 days).
-        :param nr_model:
-        :return:
-        """
-        return nr_model
-
-    def handle_patch_refund(self, nr_model):
-        """
-        MOVED TO PAYMENT
-        :param nr_model:
-        :return:
-        """
         return nr_model
 
     def update_nr_fields(self, nr_model, new_state):
@@ -310,7 +370,7 @@ class NameRequestFields(NameRequestResource):
 @api.doc(params={
     'nr_id': 'NR Number - This field is required',
 })
-class NameRequestRollback(NameRequestResource):
+class NameRequestRollback(BaseNameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     def patch(self, nr_id, action):

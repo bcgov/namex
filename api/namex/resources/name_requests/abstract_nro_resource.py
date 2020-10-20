@@ -106,6 +106,12 @@ class AbstractNROResource(Resource):
         else:
             raise NameRequestException(message='Invalid state exception [' + name_request.stateCd + '], cannot update Name Request in NRO when Request state is NOT in DRAFT or CANCELLED')
 
+    def lock_request_in_nro(self, name_request, on_success=None):
+        nro_warnings = self.nro_service.checkin_checkout_nr(name_request,'LOCK')
+
+    def unlock_request_in_nro(self, name_request, on_success=None):
+        nro_warnings = self.nro_service.checkin_checkout_nr(name_request, 'UNLOCK')
+
     def on_nro_update_complete(self, name_request, on_success, warnings, is_new_record=False):
         """
         Used internally. Called by:

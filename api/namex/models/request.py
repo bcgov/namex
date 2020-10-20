@@ -99,10 +99,13 @@ class Request(db.Model):
     _request_action_cd = db.Column('request_action_cd', db.String(10))
     _entity_type_cd = db.Column('entity_type_cd', db.String(10))
     consent_dt = db.Column('consent_dt', db.DateTime(timezone=True))
-    _payment_token = db.Column('payment_id', db.String(4096))
-    _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
     _source = db.Column('source', db.String(15), default=ValidSources.NRO)
     tradeMark = db.Column('trade_mark', db.String(100))
+
+    # Check-In / Check-Out (for INPROGRESS)
+    # A UUID granted to the user that checks out the Name Request
+    checkedOutBy = db.Column('checked_out_by', db.String(64),index=True)
+    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True),index=True)
 
     # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
@@ -123,16 +126,6 @@ class Request(db.Model):
 
         results = [is_not_consumed(n) is False for n in names]
         return True in results
-
-    @property
-    def latest_payment(self):
-        payments = self.payments.all()
-        return payments[0]
-
-    @property
-    def latest_payment_completion_date(self):
-        payments = self.payments.all()
-        return payments[0]
 
     @property
     def is_expired(self):
@@ -213,7 +206,9 @@ class Request(db.Model):
             'names': [name.as_dict() for name in self.names.all()],
             'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
             'comments': [comment.as_dict() for comment in self.comments.all()],
-            'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()]
+            'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()],
+            'checkedOutBy': self.checkedOutBy,
+            'checkedOutDt': self.checkedOutDt
         }
 
     @classmethod
@@ -227,14 +222,9 @@ class Request(db.Model):
         # next_nr = db.engine.execute(seq)
         # self.nr = 'NR{0:0>8}'.format(next_nr)
 
-        # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
-        # try:
         db.session.add(self)
         db.session.commit()
-        # except Exception as err:
-        #    print(repr(err))
-        #    traceback.print_exc()
-        #    raise
+
 
     def delete_from_db(self):
         # TODO: Add listener onto the SQLALchemy event to block deletes
