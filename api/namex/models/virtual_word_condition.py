@@ -34,8 +34,10 @@ class VirtualWordCondition(db.Model):
         query = cls.query.with_entities(*criteria.fields) \
             .filter(and_(*criteria.filters))
 
+        results = query.all()
+        cls.close_session()
         # print(query.statement)
-        return query.all()
+        return results
 
     def save_to_db(self):
         db.session.add(self)
@@ -43,6 +45,10 @@ class VirtualWordCondition(db.Model):
 
     def save_to_session(self):
         db.session.add(self)
+
+    @classmethod
+    def close_session(cls):
+        db.session.close()
 
 
 class VirtualWordConditionSchema(ma.ModelSchema):

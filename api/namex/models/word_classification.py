@@ -49,6 +49,7 @@ class WordClassification(db.Model):
             .filter(cls.end_dt.is_(None)) \
             .filter(cls.start_dt <= date.today()) \
             .filter(cls.approved_dt <= date.today()).all()
+        cls.close_session()
         return results
 
     @classmethod
@@ -59,11 +60,13 @@ class WordClassification(db.Model):
             .filter(cls.end_dt.is_(None)) \
             .filter(cls.start_dt <= date.today()) \
             .filter(cls.approved_dt <= date.today()).all()
+        cls.close_session()
         return results
 
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
+        db.session.close()
 
     def save_to_session(self):
         db.session.add(self)
@@ -71,6 +74,11 @@ class WordClassification(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
+        db.session.close()
+
+    @classmethod
+    def close_session(cls):
+        db.session.close()
 
 
 class WordClassificationSchema(ma.ModelSchema):
