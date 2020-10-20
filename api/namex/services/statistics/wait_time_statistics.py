@@ -19,14 +19,22 @@ class WaitTimeStatsService:
     @classmethod
     def get_waiting_time_priority_queue(cls, unit):
         waiting_time = Request.get_waiting_time_priority_queue(unit)
+        if waiting_time.examinationTime is None:
+            return 0
+        else:
+            priority = math.ceil(waiting_time.examinationTime)
 
-        return math.ceil(waiting_time.examinationTime)
+        return priority
 
     @classmethod
     def get_waiting_time_regular_queue(cls, unit):
         waiting_time = Request.get_waiting_time_regular_queue(unit)
+        if waiting_time.examinationTime is None:
+            return 0
+        else:
+            regular =  math.ceil(waiting_time.examinationTime)
 
-        return math.ceil(waiting_time.examinationTime)
+        return regular
 
     @classmethod
     def get_statistics(cls):
