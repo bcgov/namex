@@ -19,20 +19,10 @@ import quart.flask_patch
 
 import asyncio
 import os
-
-from quart import Quart, jsonify, request, current_app
+from quart import Quart, jsonify, request
 import config
-from nltk.stem import PorterStemmer
-
-porter = PorterStemmer()
-
-from namex.services.name_processing.name_processing \
-    import NameProcessingService
-
 from namex.services.name_request.auto_analyse.protected_name_analysis \
     import ProtectedNameAnalysisService
-from swagger_client import SynonymsApi as SynonymService
-
 from namex import models
 from namex.models import db, ma
 from .analyzer import auto_analyze
@@ -44,13 +34,14 @@ RUN_MODE = os.getenv('FLASK_ENV', 'production')
 
 async def create_app(run_mode):
     try:
-        current_app.logger.debug('CREATING APPLICATION')
         quart_app = Quart(__name__)
+        quart_app.logger.debug('APPLICATION CREATED')
         quart_app.config.from_object(config.CONFIGURATION[run_mode])
         db.init_app(quart_app)
         ma.init_app(quart_app)
     except Exception as err:
-        current_app.logger.debug('Error creating application in auto-analyze service: {0}'.format(repr(err.with_traceback(None))))
+        quart_app.logger.debug(
+            'Error creating application in auto-analyze service: {0}'.format(repr(err.with_traceback(None))))
         raise
 
     @quart_app.after_request
@@ -99,10 +90,11 @@ async def private_service():
     dict_synonyms = json_data.get("dict_synonyms")
     matches = json_data.get('names')
 
-    current_app.logger.debug('Number of matches: {0}'.format(len(matches)))
+    app.logger.debug('Number of matches: {0}'.format(len(matches)))
 
     result = await asyncio.gather(
-        *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data) for name in matches]
+        *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data) for
+          name in matches]
     )
     return jsonify(result=result)
 
