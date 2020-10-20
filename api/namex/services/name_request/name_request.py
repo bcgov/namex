@@ -581,7 +581,6 @@ class NameRequestService(AbstractNameRequestMixin):
         return submitted_name
 
     def map_submitted_name_macros(self, submitted_name,macro_list):
-        decision_text = submitted_name.decision_text
         for macro in macro_list:
             try:
                 macro_text = None
@@ -592,11 +591,11 @@ class NameRequestService(AbstractNameRequestMixin):
                 raise MapRequestNamesError('Error mapping macro words.')
 
             try:
-                if decision_text is None:
-                    decision_text = macro + '- ' + macro_text.reason + '\n' + '\n'
+                if submitted_name.decision_text is None:
+                    submitted_name.decision_text = macro + '- ' + macro_text.reason + '\n' + '\n'
                 else:
-                    if  len(decision_text) + len(macro) + len(macro_text) +1 < 1000:
-                        decision_text += macro + '- ' + macro_text.reason + '\n' + '\n'
+                    if  len(submitted_name.decision_text) + len(macro) + len(macro_text) +10 < 1000:
+                        submitted_name.decision_text += macro + '- ' + macro_text.reason + '\n' + '\n'
 
             except Exception as err:
                 raise MapRequestNamesError(err, 'Error adding macro words to decision.')
