@@ -594,8 +594,7 @@ class NameRequestService(AbstractNameRequestMixin):
                 if submitted_name.decision_text is None:
                     submitted_name.decision_text = macro + '- ' + macro_text.reason + '\n' + '\n'
                 else:
-                    if  len(submitted_name.decision_text) + len(macro) + len(macro_text) +10 < 1000:
-                        submitted_name.decision_text += macro + '- ' + macro_text.reason + '\n' + '\n'
+                    submitted_name.decision_text += macro + '- ' + macro_text.reason + '\n' + '\n'
 
             except Exception as err:
                 raise MapRequestNamesError(err, 'Error adding macro words to decision.')
