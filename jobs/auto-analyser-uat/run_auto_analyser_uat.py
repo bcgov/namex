@@ -90,9 +90,9 @@ def get_names_from_namex(uat_job: UatJobResult, app: Flask, excl_names: List, pr
                 """
             )
         else:  # uat_job.uat_type == uat_accuracy
-            sql += "and requests.state_cd in ('DRAFT') order by requests.submitted_date asc nulls last"
+            sql += " and requests.state_cd in ('DRAFT') order by requests.submitted_date asc nulls last"
 
-    sql += (f"limit {app.config['MAX_ROWS']}")
+    sql += (f" limit {app.config['MAX_ROWS']}")
     sql = sql.replace('[', '(').replace(']', ')').replace('"', "'")
     new_names = db.get_engine(app, 'namex').execute(text(sql))
     return new_names.fetchall()
