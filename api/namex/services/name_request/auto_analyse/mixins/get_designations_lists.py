@@ -3,6 +3,8 @@ class GetDesignationsListsMixin(object):
     _designated_end_words = []
     _designated_any_words = []
 
+    _designated_all_words = []
+
     _eng_designated_end_words = []
     _eng_designated_any_words = []
 
@@ -53,6 +55,9 @@ class GetDesignationsListsMixin(object):
 
     def get_designated_any_words(self):
         return self._designated_any_words
+
+    def get_designated_all_words(self):
+        return self._designated_all_words
 
     def get_eng_designated_end_words(self):
         return self._eng_designated_end_words

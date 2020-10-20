@@ -4,8 +4,6 @@ import warnings
 from . import LanguageCodes
 from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
 from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning
-
-# from namex.services.synonyms.synonym import SynonymService
 from namex.services.word_classification.word_classification import WordClassificationService
 
 from .mixins.get_synonym_lists import GetSynonymListsMixin
@@ -139,22 +137,9 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
     Set and process a submitted name string using the process_name class method.
     '''
 
-    def set_name(self, name):
-        # syn_svc = SynonymService()
+    def set_name(self, name, np_svc_prep_data):
         self.name_as_submitted = name  # Store the user's submitted name string
-
-        # self._prefixes = syn_svc.get_prefixes().data
-        # prefixes = '|'.join(self._prefixes)
-        # name = syn_svc.get_regex_prefixes(
-        #     text=name,
-        #     prefixes_str=prefixes
-        # ).data
-        #
-        # self.name_first_part = remove_french(name)
-        # # self.name_original_tokens = name.lower().split()
-        # self.name_original_tokens = [x for x in [x.strip() for x in re.split('([ &/-])', name.lower())] if x]
-
-        self._process_name()
+        self._process_name(np_svc_prep_data)
 
     def set_name_tokenized(self, name):
         all_designations = self._designated_all_words
@@ -193,15 +178,15 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         name = remove_french(words, designation_alternators)
         self.name_first_part = name
 
-        exceptions_ws = syn_svc.get_exception_regex(text=name).data
-        exceptions_ws.extend(self.exception_virtual_word_condition(name, vwc_svc))
+        #exceptions_ws = syn_svc.get_exception_regex(text=name).data
+        #exceptions_ws.extend(self.exception_virtual_word_condition(name, vwc_svc))
 
         tokens = syn_svc.get_transform_text(
             text=name,
             designation_all=designation_all,
             prefix_list=prefix_list,
             number_list=number_list,
-            exceptions_ws=exceptions_ws
+            exceptions_ws=[]
         ).data
 
         tokens = tokens.split()
@@ -271,20 +256,17 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
     @:param string:name
     '''
 
-    def _process_name(self):
+    def _process_name(self, np_svc_prep_data):
         try:
-            # Prepare any data that we need to pre-process the name
-            # self._prepare_data()
-
             # Clean the provided name and tokenize the string
             self.name_tokens = self._clean_name_words(
                 self.name_as_submitted,
                 # These properties are mixed in via GetSynonymListsMixin
                 # See the class constructor
-                self._stop_words,
-                self._designated_all_words,
-                self._prefixes,
-                self._number_words
+                np_svc_prep_data.get_stop_words(),
+                np_svc_prep_data.get_designated_all_words(),
+                np_svc_prep_data.get_prefixes(),
+                np_svc_prep_data.get_number_words()
             )
 
             # Store clean, processed name to instance
