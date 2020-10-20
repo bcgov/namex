@@ -44,15 +44,20 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         list_dist = procedure_result.values['list_dist']  # Don't lower case this one it's a list wrapped list
         list_desc = procedure_result.values['list_desc']  # Don't lower case this one it's a list wrapped list
         list_conflicts = procedure_result.values['list_conflicts']  # Don't lower case this one it's a dict
-        start_date = procedure_result.values['start_date']
-        id_num = procedure_result.values['id']
-        source = procedure_result.values['source']
+        if procedure_result.values['source'] == 'nr':
+            start_date = ''
+            id_num = ''
+            source = procedure_result.values['source']
+        else:
+            start_date = procedure_result.values['start_date']
+            id_num = procedure_result.values['id']
+            source = procedure_result.values['source']
 
         issue = self.create_issue()
         if issue.issue_type == AnalysisIssueCodes.CORPORATE_CONFLICT:
             issue.line1 = "Too similar to an existing name."
         else:
-            issue.line1 = "Too similar to an existing name in queue."
+            issue.line1 = "Too similar to an existing name under examination."
 
         '''
         eg:
@@ -162,12 +167,12 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         issue.conflicts = []
 
         conflict = Conflict(
-            name=current_conflict_name,
-            date=date.today(),
-            start_date=start_date,
-            id=id_num,
-            source=source
-        )
+                name=current_conflict_name,
+                date=date.today(),
+                start_date=start_date,
+                id=id_num,
+                source=source
+             )
 
         issue.conflicts.append(conflict)
 
