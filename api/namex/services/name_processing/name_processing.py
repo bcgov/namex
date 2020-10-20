@@ -153,7 +153,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
             warnings.warn("Parameters in clean_name_words function are not set.", Warning)
 
         syn_svc = self.synonym_service
-        vwc_svc = self.virtual_word_condition_service
+        # vwc_svc = self.virtual_word_condition_service
 
         all_designations = self._designated_all_words
         all_designations.sort(key=len, reverse=True)
@@ -178,8 +178,8 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         name = remove_french(words, designation_alternators)
         self.name_first_part = name
 
-        #exceptions_ws = syn_svc.get_exception_regex(text=name).data
-        #exceptions_ws.extend(self.exception_virtual_word_condition(name, vwc_svc))
+        # exceptions_ws = syn_svc.get_exception_regex(text=name).data
+        # exceptions_ws.extend(self.exception_virtual_word_condition(name, vwc_svc))
 
         tokens = syn_svc.get_transform_text(
             text=name,
