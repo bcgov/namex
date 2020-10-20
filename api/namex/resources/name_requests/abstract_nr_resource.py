@@ -52,18 +52,6 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
 
         return nr_model
 
-    def checkout_nro_request(self,nr_model,user_name):
-
-
-
-        return nr_model
-
-    def checkin_nro_request(selfself, nr_model, user_name):
-        nro_warnings = self.nro_service.change_nr(name_request,
-
-
-        return nr_model
-
 
     @staticmethod
     def on_nr_approved(nr, svc):
