@@ -271,10 +271,12 @@ class NameRequestFields(BaseNameRequestResource):
         nr_model = self.update_nr_fields(nr_model, State.INPROGRESS)
 
         # Lock nro Request row (set status=H)
-        nr_model = self.lock_request_in_nro(nr_model)
+        nro_warnings = self.lock_request_in_nro(nr_model)
+        if nro_warnings:
+            on_success = False
+            return self.on_nro_update_complete(nr_model, on_success, nro_warnings)
 
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, {})
-
         return nr_model
 
     def handle_patch_checkin(self, nr_model):
@@ -284,8 +286,10 @@ class NameRequestFields(BaseNameRequestResource):
         nr_model = self.update_nr_fields(nr_model, State.DRAFT)
 
         #set status back to D after Edit is complete
-        nr_model = self.unlock_request_in_nro(nr_model)
-
+        nro_warnings = self.unlock_request_in_nro(nr_model)
+        if nro_warnings:
+            on_success = False
+            return self.on_nro_update_complete(nr_model, on_success, nro_warnings)
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkin]', nr_model, {})
 

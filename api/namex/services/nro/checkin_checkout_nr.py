@@ -11,19 +11,21 @@ def manage_nr_locks(nr, ora_cursor,action,con):
     """
 
     eid = _get_event_id(ora_cursor)
-    current_app.logger.debug('got to checkin_nr() for NR:{}'.format(nr.nrNum))
+
     current_app.logger.debug('event ID for NR Details edit:{}'.format(eid))
     _create_nro_transaction(ora_cursor, nr, eid, transaction_type='ADMIN')
     con.commit()
 
     if action == 'LOCK':
+        current_app.logger.debug('got to checkout_nr() for NR:{}'.format(nr.nrNum))
         _update_nro_request_state_to_hold(ora_cursor, nr, eid)
     else:
+        current_app.logger.debug('got to checkin_nr() for NR:{}'.format(nr.nrNum))
         _update_nro_request_state_to_draft(ora_cursor, nr, eid)
 
     con.commit()
 
-    current_app.logger.debug('got to the end of checkin_nr()')
+    current_app.logger.debug('got to the end of checkinout_nr()')
 
 def _get_event_id(oracle_cursor):  # -> (int)
     """gets the event_id to be used for updating the NR history
@@ -50,7 +52,7 @@ def _create_nro_transaction(oracle_cursor, nr, event_id, transaction_type='ADMIN
 
     oracle_cursor.execute("""
     INSERT INTO transaction (transaction_id, request_id, transaction_type_cd, event_id, staff_idir)
-      VALUES (transaction_seq.nextval, :request_id, :transaction_type, :event_id, 'namerequest')
+      VALUES (transaction_seq.nextval, :request_id, :transaction_type, :event_id, 'namereq')
     """,
                           request_id=nr.requestId,
                           transaction_type=transaction_type,
