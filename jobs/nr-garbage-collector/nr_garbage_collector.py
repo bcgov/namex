@@ -2,7 +2,6 @@
 from flask import Flask, current_app
 from namex import db
 from namex.models import Request, State
-from namex.resources.name_requests.resource import NameRequestResource
 from namex.utils.logging import setup_logging
 from sqlalchemy import text
 
