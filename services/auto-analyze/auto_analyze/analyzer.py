@@ -36,7 +36,8 @@ name_analysis_service = ProtectedNameAnalysisService()
 
 STEM_W = 0.85
 SUBS_W = 0.65
-OTHER_W = 3.0
+OTHER_W_DESC = 3.0
+OTHER_W_DIST = 1.1
 
 EXACT_MATCH = 1.0
 HIGH_SIMILARITY = 0.85
@@ -74,9 +75,9 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
         get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc)
 
         vector2_dist, entropy_dist = get_vector(service.get_list_dist_search_conflicts(), list_dist,
-                                                dict_substitution)
+                                                dict_substitution, True)
 
-        if all(value == OTHER_W for value in vector2_dist.values()):
+        if all(value == OTHER_W_DIST for value in vector2_dist.values()):
             vector2_dist, entropy_dist, _ = check_compound_dist(list_dist=list(vector2_dist.keys()),
                                                                 list_desc=None,
                                                                 original_class_list=list_dist,
@@ -113,7 +114,7 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
     return dict_matches_counter
 
 
-def get_vector(conflict_class_list, original_class_list, class_subs_dict):
+def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=False):
     vector = dict()
     entropy = list()
     original_class_list = original_class_list if original_class_list else []
@@ -135,7 +136,7 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict):
             k = ''.join([key for (key, value) in class_subs_dict.items() if word_stem in value])
             entropy.append(SUBS_W)
         else:
-            counter = OTHER_W
+            counter = OTHER_W_DIST if dist else OTHER_W_DESC
             entropy.append(0.0)
         if counter == 1:
             vector[k] = counter
