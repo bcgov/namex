@@ -245,9 +245,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
     def set_name(self, name):
         np_svc = self.name_processing_service
+        np_svc_prep_data = self.name_processing_service
         wc_svc = self.word_classification_service
 
-        np_svc.set_name(name)
+        np_svc_prep_data.prepare_data()
+        np_svc.set_name(name, np_svc_prep_data)
         np_svc.set_name_tokenized(np_svc.name_first_part)
 
         self._list_name_words = np_svc.name_tokens

@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Analyzes a single name."""
+import logging
 from collections import Counter
 import math
 
-from . import porter
+from nltk.stem import PorterStemmer
 from namex.services.name_request.auto_analyse.name_analysis_utils \
     import get_classification, subsequences, get_flat_list, remove_spaces_list
 
@@ -27,7 +28,7 @@ from namex.services.name_request.auto_analyse.protected_name_analysis \
 
 from swagger_client import SynonymsApi as SynonymService
 
-
+porter = PorterStemmer()
 
 synonym_service = SynonymService()
 name_processing_service = NameProcessingService()
@@ -44,10 +45,12 @@ MINIMUM_SIMILARITY = 0.66
 
 HIGH_CONFLICT_RECORDS = 20
 
+
 async def auto_analyze(name: str, list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
-                       dict_synonyms: dict) -> dict:
-    print(
+                       dict_synonyms: dict,
+                       np_svc_prep_data: name_analysis_service) -> dict:
+    logging.getLogger(__name__).debug(
         'name: {0}  ,  list_name {1},  list_dist: {2}  , list_desc: {3}  , dict_sybst: {4},  dict_syns{5}'.format(
             name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms))
     syn_svc = synonym_service
@@ -61,7 +64,7 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
 
     dict_matches_counter = {}
 
-    np_svc.set_name(name)
+    np_svc.set_name(name, np_svc_prep_data)
     stand_alone_words = np_svc.get_stand_alone_words()
 
     if np_svc.name_tokens == list_name:
@@ -97,7 +100,7 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
             get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
 
         similarity = round((similarity_dist + similarity_desc) / 2, 2)
-        print(similarity)
+        logging.getLogger(__name__).debug('similarity: {0}'.format(similarity))
 
     if similarity == EXACT_MATCH or (
             similarity >= MINIMUM_SIMILARITY and not is_not_real_conflict(list_name,
@@ -216,6 +219,8 @@ def check_additional_dist_desc(list_dist_user_name, list_dist_conflict, dict_des
         if (
                 k != k2 and k2 not in service.get_list_desc() and same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
                 not same_synonym_category:
-            print("Name '{}' is not considered a real conflict.".format(service.get_processed_name()))
+            logging.getLogger(__name__).debug(
+                "Name '{}' is not considered a real conflict.".format(service.get_processed_name()))
+
             return True
     return False

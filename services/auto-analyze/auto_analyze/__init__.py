@@ -19,13 +19,10 @@ import quart.flask_patch
 
 import asyncio
 import os
-
 from quart import Quart, jsonify, request
 import config
-from nltk.stem import PorterStemmer
-
-porter = PorterStemmer()
-
+from namex.services.name_request.auto_analyse.protected_name_analysis \
+    import ProtectedNameAnalysisService
 from namex import models
 from namex.models import db, ma
 from .analyzer import auto_analyze
@@ -37,13 +34,14 @@ RUN_MODE = os.getenv('FLASK_ENV', 'production')
 
 async def create_app(run_mode):
     try:
-        print('CREATING APPLICATION')
         quart_app = Quart(__name__)
+        quart_app.logger.debug('APPLICATION CREATED')
         quart_app.config.from_object(config.CONFIGURATION[run_mode])
         db.init_app(quart_app)
         ma.init_app(quart_app)
     except Exception as err:
-        print('Error creating application in auto-analyze service: ' + repr(err.with_traceback(None)))
+        quart_app.logger.debug(
+            'Error creating application in auto-analyze service: {0}'.format(repr(err.with_traceback(None))))
         raise
 
     @quart_app.after_request
@@ -79,6 +77,11 @@ db.app = app  # Just set it, see if it works...
 @app.route('/', methods=['POST'])
 async def private_service():
     """Return the outcome of this private service call."""
+    name_analysis_service = ProtectedNameAnalysisService()
+    service = name_analysis_service
+    np_svc_prep_data = service.name_processing_service
+    np_svc_prep_data.prepare_data()
+
     json_data = await request.get_json()
     list_dist = json_data.get("list_dist")
     list_desc = json_data.get("list_desc")
@@ -87,9 +90,11 @@ async def private_service():
     dict_synonyms = json_data.get("dict_synonyms")
     matches = json_data.get('names')
 
-    print("Number of matches: ", len(matches))
+    app.logger.debug('Number of matches: {0}'.format(len(matches)))
+
     result = await asyncio.gather(
-        *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms) for name in matches]
+        *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data) for
+          name in matches]
     )
     return jsonify(result=result)
 
