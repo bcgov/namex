@@ -1,7 +1,6 @@
 import json
 
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 from flask import current_app, request, make_response, jsonify
 from flask_restplus import cors, fields
@@ -599,11 +598,11 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             if nr_model.submitCount < 3:
                 if nr_model.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
                     # If request action is REH or REST extend by 1 year (+ 56 default) days
-                    nr_model = nr_svc.extend_expiry_date(nr_model, (datetime.utcnow() + relativedelta(years=1, days=56)))
+                    nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow(), days=421)
                     nr_model = nr_svc.update_request_submit_count(nr_model)
                 else:
                     # Extend expiry date by (default) 56 days
-                    nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow())
+                    nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow(), days=56)
                     nr_model = nr_svc.update_request_submit_count(nr_model)
 
                 nr_model.save_to_db()
