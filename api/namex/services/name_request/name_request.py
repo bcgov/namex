@@ -5,7 +5,7 @@ from namex.utils.logging import setup_logging
 from namex.utils.api_resource import log_error
 from namex.utils.common import convert_to_ascii
 
-from namex.constants import NameState
+from namex.constants import NameState, RequestAction, NameRequestActions
 
 from namex.models import Request, Name, State, Comment, Applicant, DecisionReason
 
@@ -206,10 +206,19 @@ class NameRequestService(AbstractNameRequestMixin):
                 name_request.consentFlag = 'Y'
 
             if new_state_code in [State.RESERVED, State.COND_RESERVE]:
-                name_request.expirationDate = self.create_expiry_date(
-                    start=name_request.submittedDate,
-                    expires_in_days=56,
-                    tz=timezone('UTC')
+
+                if name_request.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
+                    name_request.expirationDate = self.create_expiry_date(
+                        start=name_request.submittedDate,
+                        expires_in_days=421,
+                        tz=timezone('UTC')
+                    )
+                else:
+
+                    name_request.expirationDate = self.create_expiry_date(
+                        start=name_request.submittedDate,
+                        expires_in_days=56,
+                        tz=timezone('UTC')
                 )
         except Exception as err:
             raise MapRequestDataError(err)
