@@ -162,7 +162,7 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return name_request
 
-    def extend_expiry_date(self, name_request, start_date=None):
+    def extend_expiry_date(self, name_request, start_date=None,days=56):
         start_datetime = start_date if start_date else datetime.utcnow()
         """
         Extends the expiry date by 56 days from today's date
@@ -172,7 +172,7 @@ class NameRequestService(AbstractNameRequestMixin):
         try:
             name_request.expirationDate = self.create_expiry_date(
                 start=start_datetime,
-                expires_in_days=56,
+                expires_in_days=days,
                 tz=timezone('UTC')
             )
         except Exception as err:
@@ -206,15 +206,6 @@ class NameRequestService(AbstractNameRequestMixin):
                 name_request.consentFlag = 'Y'
 
             if new_state_code in [State.RESERVED, State.COND_RESERVE]:
-
-                if name_request.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
-                    name_request.expirationDate = self.create_expiry_date(
-                        start=name_request.submittedDate,
-                        expires_in_days=421,
-                        tz=timezone('UTC')
-                    )
-                else:
-
                     name_request.expirationDate = self.create_expiry_date(
                         start=name_request.submittedDate,
                         expires_in_days=56,
