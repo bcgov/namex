@@ -227,6 +227,14 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
 
     service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())
 
+    # Check if words are in the same category
+    if 2 < service.get_list_dist().__len__() == match.__len__():
+        service._list_desc_words = [service.get_list_dist().pop()]
+        dict_desc.update({service.get_list_desc()[0]: service.get_list_desc()})
+    elif 2 < service.get_list_desc().__len__() == match.__len__():
+        service._list_dist_words = [service.get_list_desc().pop(0)]
+        dict_desc.pop(service.get_list_dist()[0], None)
+
     service.set_compound_descriptive_name_tokens(
         update_compound_tokens(service.get_list_dist() + service.get_list_desc(),
                                service.compound_descriptive_name_tokens))
