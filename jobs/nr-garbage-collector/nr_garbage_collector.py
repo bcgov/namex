@@ -4,7 +4,7 @@ from namex import db
 from namex.models import Request, State
 from namex.utils.logging import setup_logging
 from sqlalchemy import text
-
+import pysolr
 from config import get_named_config
 
 
@@ -21,6 +21,17 @@ def create_app(environment='production'):
 
     return app
 
+def delete_solr_doc(solr_base_url,solr_core, doc_id):
+    solr = pysolr.Solr(solr_base_url + solr_core + '/', timeout=10)
+    result = solr.delete(id=doc_id, commit=True)
+
+    return result
+
+def add_solr_doc(solr_base_url, solr_core, solr_docs):
+    solr = pysolr.Solr(solr_base_url + solr_core + '/', timeout=10)
+    result = solr.add(solr_docs, commit=True)
+
+    return result
 
 def run_nr_garbage_collection():
     """Search for stale test NRs and cancel them."""
@@ -28,6 +39,8 @@ def run_nr_garbage_collection():
 
     delay = current_app.config.get('STALE_THRESHOLD')
     max_rows = current_app.config.get('MAX_ROWS_LIMIT')
+    solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
+    SOLR_URL = solr_base_url  + '/solr/'
     cancelled_nrs = []
     try:
         reqs = db.session.query(Request). \
@@ -39,6 +52,7 @@ def run_nr_garbage_collection():
             with_for_update().all()
 
         row_count = 0
+
         for r in reqs:
             row_count += 1
 
@@ -49,7 +63,7 @@ def run_nr_garbage_collection():
             if r.names.all():
                 try:
                     current_app.logger.debug(f'deleting {r.nrNum} from possible.conflicts...')
-                    deletion = NameRequestResource.delete_solr_doc('possible.conflicts', r.nrNum)
+                    deletion = delete_solr_doc(SOLR_URL,'possible.conflicts', r.nrNum)
                     if deletion:
                         cancelled_nrs.append(
                             {
@@ -77,7 +91,7 @@ def run_nr_garbage_collection():
         current_app.logger.error(err)
         current_app.logger.debug(f'adding {len(cancelled_nrs)} back into possible conflicts...')
         try:
-            addition = NameRequestResource.add_solr_doc('possible.conflicts', cancelled_nrs)
+            addition = add_solr_doc(SOLR_URL,'possible.conflicts', cancelled_nrs)
             if addition:
                 current_app.logger.debug(f'successfully added {len(cancelled_nrs)} back into possible.conflics.')
             else:
