@@ -8,6 +8,7 @@ class GetWordClassificationListsMixin(object):
     _list_none_words = []
     _list_processed_names = []
     _list_incorrect_classification = []
+    _dict_name_words_search_conflicts = {}
     _dict_name_words = {}
 
     def get_list_name(self):
@@ -36,6 +37,9 @@ class GetWordClassificationListsMixin(object):
 
     def get_dict_name(self):
         return self._dict_name_words
+
+    def get_dict_name_search_conflicts(self):
+        return self._dict_name_words_search_conflicts
 
     def get_processed_names(self):
         return self._list_processed_names

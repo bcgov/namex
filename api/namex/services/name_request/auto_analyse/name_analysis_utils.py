@@ -231,11 +231,11 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
         update_compound_tokens(service.get_list_dist() + service.get_list_desc(),
                                service.compound_descriptive_name_tokens))
 
-    dict_name_words_original = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
+    service._dict_name_words = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
                                                           service.compound_descriptive_name_tokens)
     # service.set_name_tokens(remove_spaces_list(service.name_tokens))
     print("Original Classification:")
-    print(dict_name_words_original)
+    print(service.get_dict_name())
 
     service.set_name_tokens_search_conflict(service.compound_descriptive_name_tokens)
     service._list_dist_words_search_conflicts = remove_misplaced_distinctive(list(service.get_list_dist()),
@@ -254,13 +254,13 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
         update_token_list(service.get_list_dist_search_conflicts() + service.get_list_desc_search_conflicts(),
                           service.name_tokens_search_conflict))
 
-    service._dict_name_words = get_classification_summary(service.get_list_dist_search_conflicts(),
-                                                          service.get_list_desc_search_conflicts(),
-                                                          service.name_tokens_search_conflict)
+    service._dict_name_words_search_conflicts = get_classification_summary(service.get_list_dist_search_conflicts(),
+                                                                           service.get_list_desc_search_conflicts(),
+                                                                           service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 
     print("Classification for search conflict:")
-    print(service.get_dict_name())
+    print(service.get_dict_name_search_conflicts())
 
 
 def subsequences(iterable, length):
