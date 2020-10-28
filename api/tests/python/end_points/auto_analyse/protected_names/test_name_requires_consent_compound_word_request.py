@@ -21,7 +21,12 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
                                  {'word': 'BLAKE', 'classification': 'DIST'},
                                  {'word': 'BLAKE', 'classification': 'DESC'},
                                  {'word': 'ENGINEERING', 'classification': 'DIST'},
-                                 {'word': 'ENGINEERING', 'classification': 'DESC'}
+                                 {'word': 'ENGINEERING', 'classification': 'DESC'},
+                                 {'word': 'SAANICH', 'classification': 'DIST'},
+                                 {'word': 'FIRE', 'classification': 'DIST'},
+                                 {'word': 'FIRE', 'classification': 'DESC'},
+                                 {'word': 'PROTECTION', 'classification': 'DIST'},
+                                 {'word': 'PROTECTION', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
@@ -33,7 +38,15 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
         {
             'words': 'CONSULTING ENGINEER, ENGINEER, ENGINEERING, INGENIERE, INGENIEUR, INGENIEUR CONSIEL, P ENG, PROFESSIONAL ENGINEER',
             'consent_required': True, 'allow_use': True
-        }
+        },
+        {
+            'words': 'Fire Fighter, Fire Fighters, Fire Protection, Fire Services, Firefighter, Firefighters, Fire Department, Fire Rescue, Fire Suppression',
+            'consent_required': True, 'allow_use': True
+        },
+        {
+            'words': 'FIRE, FIRE RESPONSE, FIRE DEPARTMENT, FIRE BRIGADE, FIRE SERVICES, FIRE SUPPRESSION, FIRE RESCUE, ROAD RESCUE, STRUCTURE FIRE',
+            'consent_required': True, 'allow_use': True
+        },
     ]
     save_words_list_virtual_word_condition(words_list_virtual_word_condition)
 
@@ -49,13 +62,12 @@ def test_name_requires_consent_compound_word_request_response(client, jwt, app):
             'entity_type_cd': 'CR',
             'request_action_cd': 'NEW'
         },
-        # All words are identified as distinctive because none of them are in synonym table
-        # {
-        #     'name': 'BLAKE ENGINEERING LTD.',
-        #     'location': 'BC',
-        #     'entity_type_cd': 'CR',
-        #     'request_action_cd': 'NEW'
-        # }
+        {
+            'name': 'SAANICH FIRE PROTECTION LTD.',
+            'location': 'BC',
+            'entity_type_cd': 'CR',
+            'request_action_cd': 'NEW'
+        }
     ]
 
     for entry in test_params:
