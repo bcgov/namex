@@ -17,7 +17,8 @@ from ..auto_analyse.analysis_issues import \
     DesignationMisplacedIssue, \
     EndDesignationMoreThanOnceIssue, \
     DesignationNonExistentIssue, \
-    QueueNameConflictIssue
+    QueueNameConflictIssue, \
+    IncorrectYearIssue
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisResponseCodes
 
@@ -31,6 +32,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.TOO_MANY_WORDS: TooManyWordsIssue,
         AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD: ContainsUnclassifiableWordIssue,
         AnalysisIssueCodes.INCORRECT_CATEGORY: IncorrectCategoryIssue,
+        AnalysisIssueCodes.INCORRECT_YEAR: IncorrectYearIssue,
         AnalysisIssueCodes.WORDS_TO_AVOID: ContainsWordsToAvoidIssue,
         AnalysisIssueCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisIssueCodes.DESIGNATION_NON_EXISTENT: DesignationNonExistentIssue,
@@ -100,6 +102,10 @@ class AnalysisResponse:
 
     @abc.abstractmethod
     def build_add_descriptive_word_issue(self, procedure_result, issue_count, issue_idx):
+        return None
+
+    @abc.abstractmethod
+    def build_incorrect_year_issue(self, procedure_result, issue_count, issue_idx):
         return None
 
     @abc.abstractmethod
@@ -176,6 +182,9 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD:
                         issue = self.build_add_descriptive_word_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.INCORRECT_YEAR:
+                        issue = self.build_incorrect_year_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.TOO_MANY_WORDS:
                         issue = self.build_too_many_words_issue(procedure_result, issue_count, issue_idx)

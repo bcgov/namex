@@ -15,7 +15,8 @@ from .issues import \
     BcWordSpecialUseIssue as WordSpecialUseIssue, \
     BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue, \
     BcDesignationMisplacedIssue as DesignationMisplacedIssue, \
-    BcDesignationNonExistentIssue as DesignationNonExistentIssue
+    BcDesignationNonExistentIssue as DesignationNonExistentIssue, \
+    BcIncorrectYearIssue as IncorrectYearIssue
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
@@ -44,6 +45,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.TOO_MANY_WORDS: TooManyWordsIssue,
         AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD: ContainsUnclassifiableWordIssue,
         AnalysisIssueCodes.INCORRECT_CATEGORY: IncorrectCategoryIssue,
+        AnalysisIssueCodes.INCORRECT_YEAR: IncorrectYearIssue,
         AnalysisIssueCodes.WORDS_TO_AVOID: ContainsWordsToAvoidIssue,
         AnalysisIssueCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisIssueCodes.DESIGNATION_NON_EXISTENT: DesignationNonExistentIssue,
@@ -158,6 +160,20 @@ class BcAnalysisResponse(AnalysisResponse):
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
+        ])
+
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def build_incorrect_year_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = send_to_examiner_setup()
+        # Tweak the header
+        option1.header = "Option 1"
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up

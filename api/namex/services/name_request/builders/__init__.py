@@ -1,3 +1,9 @@
+import datetime
+
 EXACT_MATCH = 1.0
 HIGH_SIMILARITY = 0.85
 HIGH_CONFLICT_RECORDS = 20
+
+now = datetime.datetime.now()
+CURRENT_YEAR = now.year
+HUNDRED_YEARS_AGO = CURRENT_YEAR - 100
