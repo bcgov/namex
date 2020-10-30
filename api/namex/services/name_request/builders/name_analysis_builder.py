@@ -37,8 +37,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result = ProcedureResult()
         result.is_valid = True
 
-        result_array = []
-
         first_classification = None
         if name_dict:
             first_classification = next(iter(name_dict.values()))
@@ -709,6 +707,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             if year == CURRENT_YEAR and CURRENT_YEAR in EXCEPTION_YEARS:
                 incorrect_years.append(str(year))
             elif year == CURRENT_YEAR + 1 and CURRENT_MONTH == 12 and CURRENT_DAY >= 15:
+                # Following year from Dec 15th to Dec 30th is allowed. Do not add to the list,
+                # just continue checking the remaining years if they exist.
                 pass
             elif LOWER_LIMIT_TIME <= year <= UPPER_LIMIT_TIME:
                 incorrect_years.append(str(year))
