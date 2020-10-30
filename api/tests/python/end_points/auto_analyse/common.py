@@ -106,6 +106,16 @@ def assert_conflict_message(issue_type, issues, queue=False):
     assert is_correct is True
 
 
+@pytest.mark.skip
+def assert_is_number(issue_type, issues):
+    is_number = False
+    for issue in issues:
+        if issue.get('issue_type') == issue_type.value:
+            is_number = all(name_action.get('word').isnumeric() for name_action in issue.get('name_actions'))
+
+    assert is_number is True
+
+
 def save_words_list_classification(words_list):
     from namex.models import WordClassification as WordClassificationDAO
     for record in words_list:

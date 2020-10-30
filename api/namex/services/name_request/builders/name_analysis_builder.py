@@ -5,7 +5,8 @@ from collections import ChainMap
 import warnings
 
 import requests
-from . import EXACT_MATCH, HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY, HUNDRED_YEARS_AGO, CURRENT_YEAR
+from . import EXACT_MATCH, HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY, CURRENT_YEAR, LOWER_LIMIT_TIME, \
+    UPPER_LIMIT_TIME, EXCEPTION_YEARS, CURRENT_MONTH, CURRENT_DAY
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import get_conflicts_same_classification, \
@@ -705,7 +706,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             pass
 
         for year in years_in_name:
-            if year < HUNDRED_YEARS_AGO or year > CURRENT_YEAR:
+            if year == CURRENT_YEAR and CURRENT_YEAR in EXCEPTION_YEARS:
+                incorrect_years.append(str(year))
+            elif year == CURRENT_YEAR + 1 and CURRENT_MONTH == 12 and CURRENT_DAY >= 15:
+                pass
+            elif LOWER_LIMIT_TIME <= year <= UPPER_LIMIT_TIME:
                 incorrect_years.append(str(year))
 
         if incorrect_years:
