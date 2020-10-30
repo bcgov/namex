@@ -316,7 +316,7 @@ class BcAnalysisResponse(AnalysisResponse):
         return issue
 
     def build_end_designation_more_than_once_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = two_designations_order_setup()
+        option1 = send_to_examiner_setup()
         # Tweak the header
         option1.header = "Option 1"
 
