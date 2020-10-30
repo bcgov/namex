@@ -23,7 +23,7 @@ def test_designation_existence_incomplete_designation_request_response(client, j
 
     test_params = [
         {
-            'name': 'ARMSTRONG PLUMBING SOCIETE A RESPONSABILITE',
+            'name': 'ARMSTRONG PLUMBING SOCIETE RESPONSABILITE',
             'location': 'BC',
             'entity_type_cd': 'CR',
             'request_action_cd': 'NEW'
