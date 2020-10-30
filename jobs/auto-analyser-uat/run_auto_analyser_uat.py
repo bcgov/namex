@@ -93,7 +93,7 @@ def get_names_from_namex(uat_job: UatJobResult, app: Flask, excl_names: List, pr
             sql += " and requests.state_cd in ('DRAFT') order by requests.submitted_date asc nulls last"
 
     sql += (f" limit {app.config['MAX_ROWS']}")
-    sql = sql.replace('[', '(').replace(']', ')').replace('"', "'")
+    sql = sql.replace('[', '(').replace(']', ')').replace(', "', ", '").replace('",', "',")
     new_names = db.get_engine(app, 'namex').execute(text(sql))
     return new_names.fetchall()
 
@@ -125,21 +125,42 @@ def send_to_auto_analyzer(name: RequestName, app: Flask):
         'request_action_cd': 'NEW'
     }
     url_query = '&'.join(f'{key}={quote_plus(value)}' for (key, value) in payload.items())
-    response = requests.get(
-        f"{app.config['AUTO_ANALYSE_URL']}?{url_query}",
-        timeout=10000
-    )
+    response = requests.get(f"{app.config['AUTO_ANALYSE_URL']}?{url_query}")
     if response.status_code != HTTPStatus.OK:
+        name.auto_analyse_issue_type = response.status_code
+        name.auto_analyse_request_time = response.elapsed.total_seconds()
+        if response.status_code < 500:
+            name.auto_analyse_response = response.json()
         raise Exception(f'Error auto analyser returned {response.status_code}')
     return response
+
+
+def check_auto_analyse_approved(name: RequestName) -> bool:
+    """Check if auto analyser approved would have approved this name based on uat result.
+
+    Broke this down to make it very clear how we decide this in case it changes or gets augmented in the future.
+    """
+    # unnecessary but easier to understand the logic this way
+    if name.auto_analyse_result.upper() == 'AVAILABLE':
+        return True
+
+    # if there are any issues/conflicts that are NOT from itself OR a name in its own NR then return false
+    for issue in name.auto_analyse_response.get('issues', []):
+        if issue['issue_type'] != 'queue_conflict':
+            return False
+        for conflict in issue.get('conflicts', []):
+            if conflict.get('id') != name.nr_num and (conflict.get('id') or conflict.get('name') != name.name):
+                return False
+
+    return True
 
 
 def set_uat_result(name: RequestName):
     """Set the uat result for the name based on the job type."""
     if name.name_state != 'NE':  # if they have state 'NE' result will be updated later
-        if name.name_state == 'REJECTED' and name.auto_analyse_result != 'AVAILABLE':
+        if name.name_state == 'REJECTED' and not check_auto_analyse_approved(name):
             name.uat_result = RequestName.Results.PASS.value
-        elif name.name_state == 'APPROVED' and name.auto_analyse_result == 'AVAILABLE':
+        elif name.name_state == 'APPROVED' and check_auto_analyse_approved(name):
             name.uat_result = RequestName.Results.PASS.value
         else:
             name.uat_result = RequestName.Results.FAIL.value
@@ -172,13 +193,17 @@ def uat_accuracy_update(app: Flask, excluded_names: List, prioritized_names: Lis
             if name.name == n['name']:
                 namex_name = n
                 break
-        if namex_name and namex_name['state'] != 'NE':
+        if namex_name and namex_name['state'] == 'NE' and namex_name['state_cd'] not in ['DRAFT', 'INPROGRESS', 'HOLD']:
+            # name will never get examined so remove it from job
+            name.uat_job_id = None
+            name.save()
+        elif namex_name and namex_name['state'] != 'NE':
             # update the uat_result
             name.name_state = namex_name['state']
             name.nr_state = namex_name['state_cd']
-            name.conflict1_num = namex_name['conflict1_num'],
-            name.conflict1 = namex_name['conflict1'],
-            name.decision_text = namex_name['decision_text'],
+            name.conflict1_num = namex_name['conflict1_num']
+            name.conflict1 = namex_name['conflict1']
+            name.decision_text = namex_name['decision_text']
             set_uat_result(name)
             name.save()
             # update the job if all names finished
@@ -210,7 +235,7 @@ def run_auto_analyse_uat(uat_job: UatJobResult, app: Flask) -> int:
                 name.auto_analyse_issue_text = result_json['issues'][0]['line1']
                 name.auto_analyse_issue_type = result_json['issues'][0]['issue_type']
                 if result_json['issues'][0]['conflicts']:
-                    name.auto_analyse_conflicts = result_json['issues'][0]['conflicts'][0]['name']
+                    name.auto_analyse_conflict1 = result_json['issues'][0]['conflicts'][0]['name']
             set_uat_result(name)
             name.save()
             app.logger.debug(f'{name.name} auto analyse time: {name.auto_analyse_request_time}')
