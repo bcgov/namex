@@ -49,6 +49,20 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
 
         self._get_designations(request_types)
 
+        # Set designations and run our check
+        self._set_designations()
+
+        check_designation_more_than_one = builder.check_end_designation_more_than_once(
+            self.get_original_name_tokenized(),
+            self.get_designation_end_list(),
+            self.get_all_designations_user(),
+            self.get_misplaced_designation_end()
+        )
+
+        if not check_designation_more_than_one.is_valid:
+            results.append(check_designation_more_than_one)
+            return results
+
         # Return any combination of these checks
         if not self.skip_search_conflicts:
             check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
@@ -95,9 +109,6 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         if not check_words_requiring_consent.is_valid:
             results.append(check_words_requiring_consent)
 
-        # Set designations and run our check
-        self._set_designations()
-
         check_designation_existence = builder.check_designation_existence(
             self.get_original_name_tokenized(),
             self.get_all_designations(),
@@ -118,23 +129,13 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
             if not check_designation_mismatch.is_valid:
                 results.append(check_designation_mismatch)
 
-            check_designation_more_than_one = builder.check_end_designation_more_than_once(
+            check_designation_misplaced = builder.check_designation_misplaced(
                 self.get_original_name_tokenized(),
-                self.get_designation_end_list(),
-                self.get_all_designations_user(),
                 self.get_misplaced_designation_end()
             )
 
-            if not check_designation_more_than_one.is_valid:
-                results.append(check_designation_more_than_one)
-            else:
-                check_designation_misplaced = builder.check_designation_misplaced(
-                    self.get_original_name_tokenized(),
-                    self.get_misplaced_designation_end()
-                )
-
-                if not check_designation_misplaced.is_valid:
-                    results.append(check_designation_misplaced)
+            if not check_designation_misplaced.is_valid:
+                results.append(check_designation_misplaced)
 
         check_special_words = builder.check_word_special_use(
             self.name_tokens,
