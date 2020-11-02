@@ -12,6 +12,7 @@ from .end_designation_more_than_once import EndDesignationMoreThanOnceIssue
 from .designation_misplaced import DesignationMisplacedIssue
 from .designation_non_existent import DesignationNonExistentIssue
 from .incorrect_category import IncorrectCategory as IncorrectCategoryIssue
+from .incorrect_year import IncorrectYear as IncorrectYearIssue
 from .name_requires_consent import NameRequiresConsentIssue
 from .too_many_words import TooManyWordsIssue
 from .word_special_use import WordSpecialUse as WordSpecialUseIssue

@@ -15,7 +15,8 @@ from ...common import token_header, claims
                          [
                              # ("NO. 295 CATHEDRAL VENTURES LTD.", "CATHEDRAL HOLDINGS LTD."), # To be fixed with 4844:FixesFromUATRejectionTesting
                              # ("NO. 295 SCS NO. 003 VENTURES LTD.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             # Incorrect Year in name
+                             # ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
                              ("ABC TWO PLUMBING ONE INC.", "ABC PLUMBING & HEATING LTD."),
                              # ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
                              # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
