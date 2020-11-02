@@ -67,8 +67,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
         if not self.skip_search_conflicts:
             check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
                                                          self.compound_descriptive_name_tokens,
-                                                         False, self.get_designation_end_list(),
-                                                         self.get_designation_any_list(),
+                                                         False, self.get_designation_end_list_all(),
+                                                         self.get_designation_any_list_all(),
                                                          stop_words_list)
 
             if check_conflicts.is_valid:
@@ -84,8 +84,8 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
 
         check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
                                                            self.compound_descriptive_name_tokens, True,
-                                                           self.get_designation_end_list(),
-                                                           self.get_designation_any_list(), stop_words_list)
+                                                           self.get_designation_end_list_all(),
+                                                           self.get_designation_any_list_all(), stop_words_list)
 
         if check_conflicts_queue.is_valid:
             check_conflicts_queue = builder.search_conflicts(
@@ -146,10 +146,3 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
             results.append(check_special_words)
 
         return results
-
-    def get_designations_search_conflict(self):
-        designations = {
-            DesignationPositionCodes.END.value: self.get_designation_end_list_correct()} if self.get_designation_end_list_correct() else {
-            DesignationPositionCodes.ANY.value: self.get_designation_any_list()}
-
-        return designations
