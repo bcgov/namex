@@ -39,4 +39,6 @@ install-dev:
 	pip install --upgrade pip ;\
 	pip install -Ur requirements/prod.txt ;\
 	pip install -Ur requirements/dev.txt
-	
+
+flake8:
+	flake8 nr_garbage_collector.py config.py

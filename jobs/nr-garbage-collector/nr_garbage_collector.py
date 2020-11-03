@@ -1,13 +1,12 @@
 """Script used to regularly cancel test NRs."""
 from flask import Flask, current_app
-from namex import db
+from namex import db, nro
 from namex.models import Request, State
+from namex.resources.name_requests.abstract_solr_resource import AbstractSolrResource
 from namex.utils.logging import setup_logging
-from sqlalchemy import text
-import pysolr
-from config import get_named_config, Config
-from namex import nro
-import cx_Oracle
+from sqlalchemy import and_, or_, text
+
+from config import get_named_config
 
 
 setup_logging()  # important to do this first
@@ -23,60 +22,31 @@ def create_app(environment='production'):
 
     return app
 
-def delete_solr_doc(solr_base_url,solr_core, doc_id):
-    solr = pysolr.Solr(solr_base_url + solr_core + '/', timeout=10)
-    result = solr.delete(id=doc_id, commit=True)
 
-    return result
-
-def add_solr_doc(solr_base_url, solr_core, solr_docs):
-    solr = pysolr.Solr(solr_base_url + solr_core + '/', timeout=10)
-    result = solr.add(solr_docs, commit=True)
-
-    return result
-
-
-def process_SOLR_POSTGRES(r, cancelled_nrs, SOLR_URL):  
-    original_state = r.stateCd
-    r.stateCd = State.CANCELLED
-    if r.names.all():
-        try:            
-            deletion = delete_solr_doc(SOLR_URL,'possible.conflicts', r.nrNum)
-            if deletion:
-                cancelled_nrs.append(
-                    {
-                        'id': r.nrNum,
-                        'name': r.names[0].name,
-                        'source': 'NR',
-                        'start_date': r.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
-                    }
-                )
-                current_app.logger.debug(f'successfully deleted {r.nrNum} from possible.conflics.')
-            else:
-                raise Exception(f'Failed to delete {r.nrNum} from solr possible.conflicts core')
+def delete_from_solr(request, original_state: str, cancelled_nrs: list) -> list:
+    """Delete doc from solr core."""
+    if request.names.all():
+        try:
+            current_app.logger.debug('          -- deleted from solr')
+            # deletion = AbstractSolrResource.delete_solr_doc('possible.conflicts', request.nrNum)
+            # if deletion:
+            #     cancelled_nrs.append(
+            #         {
+            #             'id': request.nrNum,
+            #             'name': request.names[0].name,
+            #             'source': 'NR',
+            #             'start_date': request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
+            #         }
+            #     )
+            #     current_app.logger.debug(' -- deleted from solr')
+            # else:
+            #     raise Exception(f'Failed to delete {request.nrNum} from solr possible.conflicts core')
         except Exception as err:
             current_app.logger.error(err)
-            current_app.logger.debug(f'setting {r.nrNum} back to original state...')
-            r.stateCd = original_state
+            current_app.logger.debug(f'setting {request.nrNum} back to original state...')
+            request.stateCd = original_state
 
-    db.session.add(r)
-
-
-
-def process_POSTGRES_ORACLE(r, cancelled_nrs):  
-    original_state = r.stateCd
-    r.stateCd = State.CANCELLED
-    if r.names.all():
-        try:             
-            nro.cancel_nr(r, 'nr_garbage_collector') 
-
-            # save record
-            r.save_to_db()            
-
-        except Exception as err:
-            current_app.logger.debug(err.with_traceback(None))
-
-    db.session.add(r)
+    return cancelled_nrs
 
 
 def run_nr_garbage_collection():
@@ -85,36 +55,33 @@ def run_nr_garbage_collection():
 
     delay = current_app.config.get('STALE_THRESHOLD')
     max_rows = current_app.config.get('MAX_ROWS_LIMIT')
-    solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
-    SOLR_URL = solr_base_url  + '/solr/'
     cancelled_nrs = []
 
     try:
-        row_count = 0
-
         reqs = db.session.query(Request). \
-            filter(Request.stateCd.in_((State.DRAFT, State.COND_RESERVE, State.RESERVED))). \
+            filter(or_(Request.stateCd.in_((State.COND_RESERVE, State.RESERVED)),
+                       and_(Request.stateCd == State.DRAFT, or_(and_(Request.payments == None,  # noqa
+                            Request._source == 'NAMEREQUEST'), Request.nrNum.contains('NR L'))))). \
             filter(Request.lastUpdate <= text(f"(now() at time zone 'utc') - INTERVAL '{delay} SECONDS'")). \
             order_by(Request.lastUpdate.asc()). \
             limit(max_rows). \
-            with_for_update().all()       
-        
+            with_for_update().all()
 
-        for r in reqs:     
-            if r.stateCd==State.DRAFT and not r.payments.all() and r._source=='NAMEREQUEST':
-                # Must be cancelled in postgres, and cancelled in oracle                
-                process_POSTGRES_ORACLE(r, cancelled_nrs) 
-                row_count += 1
-            elif r.stateCd in [State.DRAFT, State.RESERVED , State.COND_RESERVE]:            
-                if r.nrNum.startswith('NR L'):
-                    # Must be deleted in solr, cancelled in postgres                    
-                    process_SOLR_POSTGRES(r, cancelled_nrs, SOLR_URL)       
-                    row_count += 1             
-                elif r.stateCd in [State.RESERVED , State.COND_RESERVE]:
-                    # Must be deleted in solr, cancelled in postgres, added and cancelled in oracle                    
-                    process_SOLR_POSTGRES(r, cancelled_nrs, SOLR_URL) 
-                    process_POSTGRES_ORACLE(r, cancelled_nrs) 
-                    row_count += 1
+        row_count = 0
+        for r in reqs:
+            current_app.logger.debug(f'Cancelling {r.nrNum}...')
+            original_state = r.stateCd
+            r.stateCd = State.CANCELLED
+            current_app.logger.debug(' -- cancelled in postgres')
+            if 'NR L' not in r.nrNum:
+                # Must be cancelled in oracle
+                nro.cancel_nr(r, 'nr_garbage_collector')
+                current_app.logger.debug(' -- cancelled in oracle')
+
+            # all cases are deleted from solr and cancelled in postgres
+            cancelled_nrs = delete_from_solr(r, original_state, cancelled_nrs)
+            db.session.add(r)
+            row_count += 1
 
         # db.session.commit()
         current_app.logger.debug(f'Successfully cancelled {row_count} NRs.')
@@ -124,7 +91,7 @@ def run_nr_garbage_collection():
         current_app.logger.error(err)
         current_app.logger.debug(f'adding {len(cancelled_nrs)} back into possible conflicts...')
         try:
-            addition = add_solr_doc(SOLR_URL,'possible.conflicts', cancelled_nrs)
+            addition = AbstractSolrResource.add_solr_doc('possible.conflicts', cancelled_nrs)
             if addition:
                 current_app.logger.debug(f'successfully added {len(cancelled_nrs)} back into possible.conflics.')
             else:

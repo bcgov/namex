@@ -25,5 +25,3 @@ nltk==3.4.5
 lxml
 inflect
 werkzeug==0.16.1
-pysolr
-
