@@ -21,7 +21,7 @@ class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
-            show_examination_button=False,
+            show_examination_button=True,
             conflicts=None,
             setup=None,
             name_actions=[]
@@ -37,10 +37,7 @@ class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
         list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = self.create_issue()
-        issue.line1 = "There can be only one designation. You must choose either " + self._join_list_words(
-            correct_end_designations_lc, "</b>  or  <b>")
-
-        issue.designations = correct_end_designations_lc
+        issue.line1 = "You are including multiple corporate designations which will need to be examined. "
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_incl_designation_lc:

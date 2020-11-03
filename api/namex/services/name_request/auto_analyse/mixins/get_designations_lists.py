@@ -25,7 +25,7 @@ class GetDesignationsListsMixin(object):
     _fr_designation_all_list_correct = []
 
     _all_designations_user = []
-    #_all_designations_user_no_periods = []
+    # _all_designations_user_no_periods = []
 
     # All designations for entity type typed bu user
     designations_entity_type_user = []
@@ -46,6 +46,9 @@ class GetDesignationsListsMixin(object):
 
     # All possible entity types found related to company name.
     _all_entity_type = []
+
+    _designation_any_list_all = []
+    _designation_end_list_all = []
 
     _entity_end_designation_dict = {}
     _entity_any_designation_dict = {}
@@ -107,7 +110,7 @@ class GetDesignationsListsMixin(object):
     def get_all_designations_user(self):
         return self._all_designations_user
 
-    #def get_all_designations_user_no_periods(self):
+    # def get_all_designations_user_no_periods(self):
     #    return self._all_designations_user_no_periods
 
     def get_all_designations(self):
@@ -118,3 +121,9 @@ class GetDesignationsListsMixin(object):
 
     def get_designation_end_list(self):
         return self._designation_end_list
+
+    def get_designation_any_list_all(self):
+        return self._designation_any_list_all
+
+    def get_designation_end_list_all(self):
+        return self._designation_end_list_all

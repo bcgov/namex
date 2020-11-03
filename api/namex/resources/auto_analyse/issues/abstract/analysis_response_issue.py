@@ -160,9 +160,10 @@ class AnalysisResponseIssue:
 
     def adjust_word_index(self, original_name_str, name_original_tokens, name_tokens, word_idx, offset_designations=True):
         all_designations = self.analysis_response.analysis_service.get_all_designations()
+        list_original = self._lc_list_items(name_original_tokens)
         # all_designations_user = self.analysis_response.analysis_service.get_all_designations_user()
 
-        original_tokens = deque(name_original_tokens)
+        original_tokens = deque(list_original)
         processed_tokens = deque(name_tokens)
         processed_token_idx = 0
 

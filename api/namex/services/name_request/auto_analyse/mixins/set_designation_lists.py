@@ -69,7 +69,8 @@ class SetDesignationsListsMixin(object):
         elif XproUnprotectedNameEntityTypes.has_value(entity_type) and XproUnprotectedNameEntityTypes(entity_type):
             entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
         else:
-            raise Exception('Could not set entity type user designations - entity type [' + entity_type + '] was not found in BC or XPRO entity types!')
+            raise Exception(
+                'Could not set entity type user designations - entity type [' + entity_type + '] was not found in BC or XPRO entity types!')
 
         self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.ANY.value,
@@ -141,19 +142,19 @@ class SetDesignationsListsMixin(object):
 
         for key, value in request_type_list_dict.items():
             if DesignationPositionCodes.END.value in value:
-                self._designation_end_list.extend(syn_svc.get_designations(entity_type_code=key,
-                                                                           position_code=DesignationPositionCodes.END.value,
-                                                                           lang=LanguageCodes.ENG.value).data)
-                self._designation_end_list.extend(syn_svc.get_designations(entity_type_code=key,
-                                                                           position_code=DesignationPositionCodes.END.value,
-                                                                           lang=LanguageCodes.FR.value).data)
+                self._designation_end_list_all.extend(syn_svc.get_designations(entity_type_code=key,
+                                                                               position_code=DesignationPositionCodes.END.value,
+                                                                               lang=LanguageCodes.ENG.value).data)
+                self._designation_end_list_all.extend(syn_svc.get_designations(entity_type_code=key,
+                                                                               position_code=DesignationPositionCodes.END.value,
+                                                                               lang=LanguageCodes.FR.value).data)
             if DesignationPositionCodes.ANY.value in value:
-                self._designation_any_list.extend(syn_svc.get_designations(entity_type_code=key,
-                                                                           position_code=DesignationPositionCodes.ANY.value,
-                                                                           lang=LanguageCodes.ENG.value).data)
-                self._designation_any_list.extend(syn_svc.get_designations(entity_type_code=key,
-                                                                           position_code=DesignationPositionCodes.ANY.value,
-                                                                           lang=LanguageCodes.FR.value).data)
+                self._designation_any_list_all.extend(syn_svc.get_designations(entity_type_code=key,
+                                                                               position_code=DesignationPositionCodes.ANY.value,
+                                                                               lang=LanguageCodes.ENG.value).data)
+                self._designation_any_list_all.extend(syn_svc.get_designations(entity_type_code=key,
+                                                                               position_code=DesignationPositionCodes.ANY.value,
+                                                                               lang=LanguageCodes.FR.value).data)
 
-        self._designation_end_list = sorted(set(self._designation_end_list), key=len, reverse= True)
-        self._designation_any_list = sorted(set(self._designation_any_list), key=len, reverse= True)
+        self._designation_end_list_all = sorted(set(self._designation_end_list_all), key=len, reverse=True)
+        self._designation_any_list_all = sorted(set(self._designation_any_list_all), key=len, reverse=True)
