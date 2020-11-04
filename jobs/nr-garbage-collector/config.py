@@ -62,6 +62,12 @@ class Config(object):
         name=DB_NAME,
     )
 
+    NRO_USER = os.getenv('NRO_USER', '')
+    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
+    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
+    NRO_HOST = os.getenv('NRO_HOST', '')
+    NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
+
 
 class DevConfig(Config):
     """Dev environment config."""

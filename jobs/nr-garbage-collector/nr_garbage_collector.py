@@ -28,19 +28,19 @@ def delete_from_solr(request, original_state: str, cancelled_nrs: list) -> list:
     if request.names.all():
         try:
             current_app.logger.debug('          -- deleted from solr')
-            # deletion = AbstractSolrResource.delete_solr_doc('possible.conflicts', request.nrNum)
-            # if deletion:
-            #     cancelled_nrs.append(
-            #         {
-            #             'id': request.nrNum,
-            #             'name': request.names[0].name,
-            #             'source': 'NR',
-            #             'start_date': request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
-            #         }
-            #     )
-            #     current_app.logger.debug(' -- deleted from solr')
-            # else:
-            #     raise Exception(f'Failed to delete {request.nrNum} from solr possible.conflicts core')
+            deletion = AbstractSolrResource.delete_solr_doc('possible.conflicts', request.nrNum)
+            if deletion:
+                cancelled_nrs.append(
+                    {
+                        'id': request.nrNum,
+                        'name': request.names[0].name,
+                        'source': 'NR',
+                        'start_date': request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
+                    }
+                )
+                current_app.logger.debug(' -- deleted from solr')
+            else:
+                raise Exception(f'Failed to delete {request.nrNum} from solr possible.conflicts core')
         except Exception as err:
             current_app.logger.error(err)
             current_app.logger.debug(f'setting {request.nrNum} back to original state...')
@@ -83,7 +83,7 @@ def run_nr_garbage_collection():
             db.session.add(r)
             row_count += 1
 
-        # db.session.commit()
+        db.session.commit()
         current_app.logger.debug(f'Successfully cancelled {row_count} NRs.')
         app.do_teardown_appcontext()
 
