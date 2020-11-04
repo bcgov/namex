@@ -40,7 +40,7 @@ class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
         issue.line1 = "You are including multiple corporate designations which will need to be examined. "
 
         # Loop over the list_name words, we need to decide to do with each word
-        for word in list_name_incl_designation_lc:
+        for word in correct_end_designations_lc:
             offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
                 self.analysis_response.name_as_submitted,
                 self.analysis_response.name_original_tokens,
