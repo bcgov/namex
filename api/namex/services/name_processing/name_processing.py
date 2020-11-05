@@ -154,13 +154,11 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
 
         syn_svc = self.synonym_service
         # vwc_svc = self.virtual_word_condition_service
-
-        all_designations = self._designated_all_words
-        all_designations.sort(key=len, reverse=True)
-        designation_alternators = '|'.join(map(re.escape, all_designations))
+        designation_all.sort(key=len, reverse=True)
+        designation_alternators = '|'.join(map(re.escape, designation_all))
 
         exception_designation = self.exception_designation(name)
-        exception_stop_words_designation = list(set(self.exception_designation_stop_word(stop_words, all_designations)))
+        exception_stop_words_designation = list(set(self.exception_designation_stop_word(stop_words, designation_all)))
         exception_stop_words_designation.sort(key=len, reverse=True)
 
         name_original_tokens = [x for x in [x.strip() for x in re.split('([ &/-])', name.lower())] if x]
