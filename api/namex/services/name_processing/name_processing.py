@@ -149,7 +149,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         self.name_as_submitted_tokenized = regex.findall(name.lower())
 
     def _clean_name_words(self, name, stop_words=[], designation_all=[], prefix_list=[], number_list=[]):
-        if not name or not stop_words or not prefix_list and not number_list:
+        if not name or not stop_words or not designation_all or not prefix_list or not number_list:
             warnings.warn("Parameters in clean_name_words function are not set.", Warning)
 
         syn_svc = self.synonym_service
