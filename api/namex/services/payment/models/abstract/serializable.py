@@ -1,7 +1,10 @@
 import jsonpickle
 
 
-class Serializable(object):
+class Serializable(dict):
+    def as_dict(self):
+        return self.__dict__
+
     def to_json_test(self):
         # Allows us to unwrap the response when we're running pytests
         return jsonpickle.encode(self)
