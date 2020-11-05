@@ -545,6 +545,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         return nr_model
 
     def complete_refund(self, nr_model, payment_id):
+        # This is just some sample code for what to do to implement refunds when we get to it...
         # nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'

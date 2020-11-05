@@ -208,6 +208,7 @@ def execute_get_payment(client, nr_id, payment_id):
     payload = json.loads(response.data)
 
     assert isinstance(payload.get('id'), int) is True
+    # TODO: Check invoices / receipts...
     # assert isinstance(payload.get('invoices'), list) is True
 
     return payload
@@ -315,7 +316,8 @@ def test_payment_creation(client):
         payment = test_create_payment(client)
 
         # TODO: There's really no way to complete this payment that I know of... without using a browser...
-        completed_nr = execute_complete_payment(client, payment, 'COMPLETE')
+        # completed_nr = execute_complete_payment(client, payment, 'COMPLETE')
+        execute_complete_payment(client, payment, 'COMPLETE')
         completed_payment = execute_get_payment(client, payment['nrId'], payment['id'])
 
         assert payment['id'] == completed_payment['id']
@@ -331,6 +333,7 @@ def test_payment_creation(client):
 def test_payment_receipt(client):
     try:
         test_payment_creation(client)
+        # TODO: Not sure how to test this... still working on it...
         # payment_receipt = execute_get_receipt(client, payment['id'])
     except Exception as err:
         print(repr(err))

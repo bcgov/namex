@@ -134,8 +134,8 @@ class ClientConfig:
 class BaseClient:
     def __init__(self, **kwargs):
         self.configuration = kwargs.get('configuration', ClientConfig({
-            'host': PAYMENT_SVC_URL + '/' if PAYMENT_SVC_URL[-1] is not '/' else PAYMENT_SVC_URL,
-            'prefix': PAYMENT_SVC_PREFIX + '/' if PAYMENT_SVC_PREFIX[-1] is not '/' else PAYMENT_SVC_PREFIX,
+            'host': PAYMENT_SVC_URL + '/' if PAYMENT_SVC_URL[-1] != '/' else PAYMENT_SVC_URL,
+            'prefix': PAYMENT_SVC_PREFIX + '/' if PAYMENT_SVC_PREFIX[-1] != '/' else PAYMENT_SVC_PREFIX,
             'temp_path': None
         }))
         self.headers = {}
