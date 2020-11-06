@@ -45,12 +45,10 @@ def handle_auth_error(ex):
 class PaymentFees(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
     @payment_api.expect(calculate_fees_request_schema)
     @payment_api.response(200, 'Success')
     @payment_api.response(400, 'Bad Request')
     @payment_api.response(500, 'Internal Server Error')
-    # @marshal_with()
     @payment_api.doc(params={
     })
     def post():

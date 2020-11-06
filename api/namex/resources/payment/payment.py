@@ -12,12 +12,11 @@ from namex.utils.api_resource import clean_url_path_param, handle_exception
 
 from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
 from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event
+# TODO: There are places we will use this!
 from namex.services import EventRecorder
 
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 
-# TODO: There are places to add this!
-# from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.payments import get_payment, create_payment
@@ -169,10 +168,8 @@ class FindNameRequestPayments(AbstractNameRequestResource):
 })
 class CreateNameRequestPayment(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
-    # @marshal_with()
     @payment_api.doc(params={
         'nr_id': 'Name Request number',
         'payment_action': 'Payment NR Action - One of [COMPLETE, UPGRADE, REAPPLY]'
@@ -289,8 +286,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 })
 class NameRequestPayment(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
     @payment_api.response(200, 'Success', '')
+    # TODO: Update schema and marshal
     # @marshal_with(payment_response_schema)
     def get(self, nr_id, payment_id):
         try:
