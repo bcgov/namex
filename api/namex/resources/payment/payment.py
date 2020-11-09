@@ -12,31 +12,24 @@ from namex.utils.api_resource import clean_url_path_param, handle_exception
 
 from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
 from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event
+# TODO: There are places we will use this!
 from namex.services import EventRecorder
-
 
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 
-# TODO: There are places to add this!
-# from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-# TODO: We may need this, code that uses this import is commented out
-# from namex.services.payment.invoices import get_invoices
-from namex.services.payment.payments import get_payment, create_payment, update_payment
+from namex.services.payment.payments import get_payment, create_payment
+from namex.services.payment.models import PaymentRequest, Payment
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 
 from .api_namespace import api as payment_api
 from .utils import build_payment_request, merge_payment_request
 
-from openapi_client.models import PaymentRequest
-
 setup_logging()  # It's important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
-MSG_NOT_FOUND = 'Resource not found'
-MSG_ERROR_CREATING_RESOURCE = 'Could not create / update resource'
 
 
 def validate_request(request):
@@ -146,15 +139,6 @@ class FindNameRequestPayments(AbstractNameRequestResource):
             # Wrap our payment
             for payment in nr_payments:
                 payment_response = get_payment(payment.payment_token)
-                # TODO: Replace this when we're ready!
-                invoices_response = []  # get_invoices(payment.payment_token)
-
-                if not payment_response:
-                    return None
-                # Don't blow up just because we can't get the invoices
-                if not invoices_response or isinstance(invoices_response, list) is False:
-                    invoices_response = []
-
                 # Wrap the response, providing info from both the SBC Pay response and the payment we created
                 response_data.append({
                     'id': payment.id,
@@ -162,9 +146,9 @@ class FindNameRequestPayments(AbstractNameRequestResource):
                     'token': payment.payment_token,
                     'statusCode': payment.payment_status_code,
                     'completionDate': payment.payment_completion_date,
-                    'invoices': invoices_response,
                     'payment': payment.as_dict(),
-                    'sbcPayment': payment_response.to_dict()
+                    'sbcPayment': payment_response.as_dict(),
+                    'receipts': payment_response.receipts
                 })
 
             return jsonify(response_data), 200
@@ -184,10 +168,8 @@ class FindNameRequestPayments(AbstractNameRequestResource):
 })
 class CreateNameRequestPayment(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
-    # @marshal_with()
     @payment_api.doc(params={
         'nr_id': 'Name Request number',
         'payment_action': 'Payment NR Action - One of [COMPLETE, UPGRADE, REAPPLY]'
@@ -247,28 +229,24 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 payment_request = merge_payment_request(nr_model, json.loads(json_input))
 
             # Grab the info we need off the request
-            payment_info = payment_request.get('paymentInfo')
+            payment_info = payment_request.get('paymentInfo', {})
             filing_info = payment_request.get('filingInfo')
             business_info = payment_request.get('businessInfo')
 
             # Create our payment request
             req = PaymentRequest(
-                payment_info=payment_info,
-                filing_info=filing_info,
-                business_info=business_info
+                paymentInfo=payment_info,
+                filingInfo=filing_info,
+                businessInfo=business_info
             )
 
-            payment_response = create_payment(req)
-
-            if not payment_response:
-                raise PaymentServiceError(message=MSG_ERROR_CREATING_RESOURCE)
-
-            if payment_response and payment_response.status_code == PaymentStatusCode.CREATED.value:
+            payment_response = create_payment(req.as_dict())
+            if payment_response.statusCode == PaymentStatusCode.CREATED.value:
                 # Save the payment info to Postgres
                 payment = PaymentDAO()
                 payment.nrId = nr_model.id
                 payment.payment_token = str(payment_response.id)
-                payment.payment_completion_date = payment_response.created_on
+                payment.payment_completion_date = payment_response.createdOn
                 payment.payment_status_code = PaymentState.CREATED.value
                 payment.save_to_db()
 
@@ -280,14 +258,12 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     'statusCode': payment.payment_status_code,
                     'completionDate': payment.payment_completion_date,
                     'payment': payment.as_dict(),
-                    'sbcPayment': payment_response.to_dict()
+                    'sbcPayment': payment_response.as_dict()
                 })
-
 
                 # Record the event
                 nr_svc = self.nr_service
-                #EventRecorder.record(nr_svc.user, Event.POST + ' [payment created]', json_input )
-
+                # EventRecorder.record(nr_svc.user, Event.POST + ' [payment created]', json_input)
 
                 response = make_response(data, 201)
                 return response
@@ -310,8 +286,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 })
 class NameRequestPayment(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
     @payment_api.response(200, 'Success', '')
+    # TODO: Update schema and marshal
     # @marshal_with(payment_response_schema)
     def get(self, nr_id, payment_id):
         try:
@@ -326,10 +302,6 @@ class NameRequestPayment(AbstractNameRequestResource):
             payment = PaymentDAO.query.get(payment_id)
 
             payment_response = get_payment(payment.payment_token)
-
-            if not payment_response:
-                return jsonify(message=MSG_NOT_FOUND), 404  # TODO: What if we have a record?
-
             # Wrap the response, providing info from both the SBC Pay response and the payment we created
             data = jsonify({
                 'id': payment.id,
@@ -338,58 +310,9 @@ class NameRequestPayment(AbstractNameRequestResource):
                 'statusCode': payment.payment_status_code,
                 'completionDate': payment.payment_completion_date,
                 'payment': payment.as_dict(),
-                'sbcPayment': payment_response.to_dict()
+                'sbcPayment': payment_response.as_dict()
             })
 
-            response = make_response(data, 200)
-            return response
-
-        except PaymentServiceError as err:
-            return handle_exception(err, err.message, 500)
-        except SBCPaymentException as err:
-            return handle_exception(err, err.message, err.status_code)
-        except SBCPaymentError as err:
-            return handle_exception(err, err.message, 500)
-        except Exception as err:
-            return handle_exception(err, err, 500)
-
-    @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    @payment_api.expect(payment_request_schema)
-    @payment_api.response(200, 'Success', '')
-    # @marshal_with()
-    def put(self, nr_id, payment_id):
-        try:
-            # Find the existing name request
-            nr_model = RequestDAO.query.get(nr_id)
-
-            if not nr_model:
-                # Should this be a 400 or 404... hmmm
-                return jsonify(message='{nr_id} not found'.format(nr_id=nr_id)), 400
-
-            payment_id = clean_url_path_param(payment_id)
-
-            json_input = request.get_json()
-            if not json_input:
-                return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
-
-            # Grab the info we need off the request
-            payment_info = json_input.get('paymentInfo')
-            filing_info = json_input.get('filingInfo')
-            business_info = json_input.get('businessInfo')
-
-            # Update our payment request
-            req = PaymentRequest(
-                payment_info=payment_info,
-                filing_info=filing_info,
-                business_info=business_info
-            )
-
-            payment_response = update_payment(payment_id, req)
-            if not payment_response:
-                raise PaymentServiceError(message=MSG_ERROR_CREATING_RESOURCE)
-
-            data = jsonify(payment_response.to_dict())
             response = make_response(data, 200)
             return response
 
@@ -436,9 +359,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 _self.nr_service.request_data = self.request_data
 
             initialize(self)
-
             nr_svc = self.nr_service
-
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
@@ -498,9 +419,9 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         sbc_payment_response = get_payment(payment.payment_token)
 
         # TODO: Throw errors if this fails!
-        if sbc_payment_response.status_code in [PaymentStatusCode.COMPLETED.value]:
+        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
             payment.payment_status_code = PaymentState.COMPLETED.value
-            payment.payment_completion_date = sbc_payment_response.created_on
+            payment.payment_completion_date = sbc_payment_response.createdOn
             payment.save_to_db()
 
             # Use apply_state_change to change state, as it enforces the State change pattern
@@ -523,14 +444,12 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
             # Save the name request
             nr_model.save_to_db()
+
             # Record the event
-            EventRecorder.record(nr_svc.user, Event.PATCH + 'Payment Completed', nr_model, nr_svc.request_data)
+            # EventRecorder.record(nr_svc.user, Event.PATCH + ' [pay]', nr_model, nr_svc.request_data)
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
-
-        # Record the event
-        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [upgrade]', nr_model, nr_svc.request_data)
 
         return nr_model
 
@@ -551,9 +470,9 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         sbc_payment_response = get_payment(payment.payment_token)
 
         # TODO: Throw errors if this fails!
-        if sbc_payment_response.status_code in [PaymentStatusCode.COMPLETED.value]:
+        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
             payment.payment_status_code = PaymentState.COMPLETED.value
-            payment.payment_completion_date = sbc_payment_response.created_on
+            payment.payment_completion_date = sbc_payment_response.createOn
             payment.save_to_db()
 
             nr_model.priorityCd = 'Y'
@@ -590,9 +509,9 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         sbc_payment_response = get_payment(payment.payment_token)
 
         # TODO: Throw errors if this fails!
-        if sbc_payment_response.status_code in [PaymentStatusCode.COMPLETED.value]:
+        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
             payment.payment_status_code = PaymentState.COMPLETED.value
-            payment.payment_completion_date = sbc_payment_response.created_on
+            payment.payment_completion_date = sbc_payment_response.createdOn
             payment.save_to_db()
 
             if nr_model.submitCount < 3:
@@ -623,7 +542,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         return nr_model
 
     def complete_refund(self, nr_model, payment_id):
-        nr_svc = self.nr_service
+        # This is just some sample code for what to do to implement refunds when we get to it...
+        # nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
         # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
@@ -633,6 +553,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         # nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Record the event
-        # EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
+        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [refund]', nr_model, nr_svc.request_data)
 
         return nr_model
