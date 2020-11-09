@@ -21,7 +21,7 @@ from ...common import token_header, claims
                              # The only way to be rejected is to have an exact match. We need to implement an exact match for
                              # Stand-alone names to avoid comparing with many names, just exact matches should be returned.
                              # ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."),
-                             ("LE BLUE CAFE LTD.", "LE BLUE RESTAURANT LTD.")
+                             ("LE BLUE CAFE LTD.", "LE BLUE FOX CAFE INC.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)

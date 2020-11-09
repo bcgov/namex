@@ -21,7 +21,7 @@ from ...common import token_header, claims
                              # Stand alone names with additional distinctive or descriptive have to be approved.
                              # Test case no longer valid
                              #("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."),
-                             ("LE BLUE CAFE LTD.", "LE BLUE RESTAURANT LTD.")
+                             ("LE BLUE CAFE LTD.", "LE BLUE FOX CAFE INC.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
