@@ -498,10 +498,10 @@ class Request(db.Model):
             substitutions = '|'.join(map(str, special_characters_dist))
             if not check_name_is_well_formed:
                 e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
-                    r'^(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
+                    r'(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
             else:
                 e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
-                    r'^\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
+                    r'\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
 
         return criteria
 

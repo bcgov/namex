@@ -41,7 +41,7 @@ builder = NameAnalysisBuilder(name_analysis_service)
 STEM_W = 0.85
 SUBS_W = 0.65
 OTHER_W_DESC = 3.0
-OTHER_W_DIST = 1.1
+OTHER_W_DIST = 0.35
 
 EXACT_MATCH = 1.0
 HIGH_SIMILARITY = 0.85
