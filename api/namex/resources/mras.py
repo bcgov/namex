@@ -122,7 +122,7 @@ class MrasProfile(Resource):
                 raise MrasServiceException(mras_error=mras_error)
 
             # Just return true or false, the profile either exists or it doesn't
-            return jsonify(response.ok), 200
+            return jsonify(response), 200
         except MrasServiceException as err:
             return handle_exception(err, err.message, err.error_code)
         except Exception as err:
