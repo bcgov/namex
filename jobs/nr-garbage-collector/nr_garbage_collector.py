@@ -60,8 +60,8 @@ def run_nr_garbage_collection():
     try:
         reqs = db.session.query(Request). \
             filter(or_(Request.stateCd.in_((State.COND_RESERVE, State.RESERVED)),
-                       and_(Request.stateCd == State.DRAFT, or_(and_(Request.payments == None,  # noqa
-                            Request._source == 'NAMEREQUEST'), Request.nrNum.contains('NR L'))))). \
+                       and_(Request.stateCd == State.DRAFT, or_(Request._source == 'NAMEREQUEST',
+                            Request.nrNum.contains('NR L'))))). \
             filter(Request.lastUpdate <= text(f"(now() at time zone 'utc') - INTERVAL '{delay} SECONDS'")). \
             order_by(Request.lastUpdate.asc()). \
             limit(max_rows). \
@@ -69,19 +69,31 @@ def run_nr_garbage_collection():
 
         row_count = 0
         for r in reqs:
-            current_app.logger.debug(f'Cancelling {r.nrNum}...')
-            original_state = r.stateCd
-            r.stateCd = State.CANCELLED
-            current_app.logger.debug(' -- cancelled in postgres')
-            if 'NR L' not in r.nrNum:
-                # Must be cancelled in oracle
-                nro.cancel_nr(r, 'nr_garbage_collector')
-                current_app.logger.debug(' -- cancelled in oracle')
+            ignore_nr = False
+            if r.payments:
+                # only cancel this NR if there is a payment_status_code=CREATED and payment_completion_date
+                for payment in r.payments:
+                    if payment.payment_status_code != 'CREATED' or not payment.payment_completion_date:
+                        # skip this NR
+                        ignore_nr = True
+                    else:
+                        # if there are any payments that fit this criteria, cancel it
+                        ignore_nr = False
+                        break
+            if not ignore_nr:
+                current_app.logger.debug(f'Cancelling {r.nrNum}...')
+                original_state = r.stateCd
+                r.stateCd = State.CANCELLED
+                current_app.logger.debug(' -- cancelled in postgres')
+                if 'NR L' not in r.nrNum:
+                    # Must be cancelled in oracle
+                    nro.cancel_nr(r, 'nr_garbage_collector')
+                    current_app.logger.debug(' -- cancelled in oracle')
 
-            # all cases are deleted from solr and cancelled in postgres
-            cancelled_nrs = delete_from_solr(r, original_state, cancelled_nrs)
-            db.session.add(r)
-            row_count += 1
+                # all cases are deleted from solr and cancelled in postgres
+                cancelled_nrs = delete_from_solr(r, original_state, cancelled_nrs)
+                db.session.add(r)
+                row_count += 1
 
         db.session.commit()
         current_app.logger.debug(f'Successfully cancelled {row_count} NRs.')
