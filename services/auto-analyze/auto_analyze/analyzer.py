@@ -20,6 +20,9 @@ from nltk.stem import PorterStemmer
 from namex.services.name_request.auto_analyse.name_analysis_utils \
     import get_classification, subsequences, get_flat_list, remove_spaces_list
 
+from namex.services.name_request.builders.name_analysis_builder \
+    import NameAnalysisBuilder
+
 from namex.services.name_processing.name_processing \
     import NameProcessingService
 
@@ -33,6 +36,7 @@ porter = PorterStemmer()
 synonym_service = SynonymService()
 name_processing_service = NameProcessingService()
 name_analysis_service = ProtectedNameAnalysisService()
+builder = NameAnalysisBuilder(name_analysis_service)
 
 STEM_W = 0.85
 SUBS_W = 0.65
@@ -74,14 +78,24 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
         match_list = np_svc.name_tokens
         get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc)
 
+        dist_db_substitution_dict = builder.get_substitutions_distinctive(service.get_list_dist())
+        desc_tmp_synonym_dict = builder.get_substitutions_descriptive(service.get_list_desc())
+
+        dict_synonyms = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms) if desc_tmp_synonym_dict.__len__() > \
+                                                                                    dict_synonyms.__len__() else remove_extra_value(
+            dict_synonyms, desc_tmp_synonym_dict)
+
+        # Update key in desc_db_synonym_dict
+        desc_db_synonym_dict = update_dictionary_key(desc_tmp_synonym_dict, dict_synonyms)
+
         vector2_dist, entropy_dist = get_vector(service.get_list_dist_search_conflicts(), list_dist,
-                                                dict_substitution, True)
+                                                dist_db_substitution_dict, True)
 
         if all(value == OTHER_W_DIST for value in vector2_dist.values()):
             vector2_dist, entropy_dist, _ = check_compound_dist(list_dist=list(vector2_dist.keys()),
                                                                 list_desc=None,
                                                                 original_class_list=list_dist,
-                                                                class_subs_dict=dict_substitution)
+                                                                class_subs_dict=dist_db_substitution_dict)
 
         if not vector2_dist:
             match_list_desc = list(service.get_list_desc())
@@ -90,13 +104,13 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
                 list_dist=match_list_dist_desc,
                 list_desc=service.get_list_desc(),
                 original_class_list=list_dist,
-                class_subs_dict=dict_substitution)
+                class_subs_dict=dict_synonyms)
 
         similarity_dist = round(get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
         vector2_desc, entropy_desc = get_vector(
             remove_spaces_list(service.get_list_desc_search_conflicts()), list_desc,
-            dict_synonyms)
+            desc_db_synonym_dict)
         similarity_desc = round(
             get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
 
@@ -120,16 +134,16 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=F
     original_class_list = original_class_list if original_class_list else []
     class_subs_dict = class_subs_dict if class_subs_dict else {}
 
-    original_class_stem = [porter.stem(name.lower()) for name in original_class_list]
+    conflict_class_stem = [porter.stem(name.lower()) for name in conflict_class_list]
 
-    for idx, word in enumerate(conflict_class_list):
+    for idx, word in enumerate(original_class_list):
         k = word.lower()
         word_stem = porter.stem(k)
         counter = 1
-        if word.lower() in original_class_list:
+        if word.lower() in conflict_class_list:
             entropy.append(1)
-        elif word_stem in original_class_stem:
-            idx = original_class_stem.index(word_stem)
+        elif word_stem in conflict_class_stem:
+            idx = conflict_class_stem.index(word_stem)
             k = original_class_list[idx]
             entropy.append(STEM_W)
         elif word_stem in get_flat_list(class_subs_dict.values()):
@@ -225,3 +239,20 @@ def check_additional_dist_desc(list_dist_user_name, list_dist_conflict, dict_des
 
             return True
     return False
+
+
+def remove_extra_value(d1, d2):
+    for k2, v2 in d2.items():
+        for k1, v1 in d1.items():
+            if len(set(v1) ^ set(v2)) == 1:
+                v1.remove(k1)
+    return d1
+
+
+def update_dictionary_key(user, db):
+    user_keys = tuple(user.keys())
+    user_values = tuple(user.values())
+
+    new_db = {user_keys[user_values.index(value)] if value in user_values else key: value for key, value in db.items()}
+
+    return new_db
