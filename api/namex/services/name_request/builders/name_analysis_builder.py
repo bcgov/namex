@@ -171,13 +171,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed, queue):
         dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = {}, {}, {}, {}
+        desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
         # Need to check if the name is well formed?
         if check_name_is_well_formed:
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
-            desc_synonym_dict = self.get_dictionary(desc_synonym_dict, w_desc)
         else:
             dist_substitution_dict = self.get_substitutions_distinctive(w_dist)
-            desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
 
         list_conflict_details = list()
 
