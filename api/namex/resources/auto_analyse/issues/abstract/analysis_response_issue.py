@@ -1,4 +1,5 @@
 import abc
+import re
 from collections import deque
 
 # Import DTOs
@@ -15,6 +16,7 @@ class AnalysisResponseIssue:
     '''
     @:param setup_config Setup[]
     '''
+
     def __init__(self, analysis_response, setup_config):
         self.analysis_response = analysis_response
         self.name_tokens = analysis_response.name_tokens
@@ -61,6 +63,7 @@ class AnalysisResponseIssue:
     '''
     @:param setup_config Setup[]
     '''
+
     def set_issue_setups(self, setup_config):
         self.setup_config = setup_config
 
@@ -159,8 +162,16 @@ class AnalysisResponseIssue:
         return False, 0, 0, current_processed_token
 
     def adjust_word_index(self, original_name_str, name_original_tokens, name_tokens, word_idx, offset_designations=True):
+        # remove punctuations
+        name_original_tokens = [re.sub(r'(?<=[a-zA-Z\.])\'[Ss]', '', x) for x in name_original_tokens]
+        name_original_tokens = [re.sub(r'[^A-Za-z0-9.]+', ' ', x) for x in name_original_tokens]
+
         all_designations = self.analysis_response.analysis_service.get_all_designations()
+
+        all_designations = self._lc_list_items(all_designations)
         list_original = self._lc_list_items(name_original_tokens)
+
+        name_tokens = self._lc_list_items(name_tokens)
         # all_designations_user = self.analysis_response.analysis_service.get_all_designations_user()
 
         original_tokens = deque(list_original)
@@ -175,7 +186,7 @@ class AnalysisResponseIssue:
         previous_original_token = None
         current_original_token = None
 
-        unprocessed_name_string = original_name_str.lower()
+        unprocessed_name_string = original_name_str.upper()
 
         while len(original_tokens) > 0:
             # Check to see if we're dealing with a composite, if so, get the offset amount
