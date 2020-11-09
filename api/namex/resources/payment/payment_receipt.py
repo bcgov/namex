@@ -39,7 +39,7 @@ def handle_auth_error(ex):
 class PaymentReceipt(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    @payment_api.response(201)
+    @payment_api.response(201, 'Created', '')
     def post(payment_id):
         try:
             payment = PaymentDAO.query.get(payment_id)
