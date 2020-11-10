@@ -127,15 +127,15 @@ class UatJobResult(db.Model):
             ).all()
 
     @classmethod
-    def get_finished_jobs(cls, uat_type: str = None) -> List:
+    def get_jobs(cls, uat_type: str = None, finished: bool = True) -> List:
         """Get all finished uat jobs (optional: with the given uat_type)."""
         if uat_type:
             return db.session.query(UatJobResult). \
                 filter(
                     UatJobResult.uat_type == uat_type,
-                    UatJobResult.uat_finished == True   # pylint: disable=singleton-comparison # noqa: E712;
+                    UatJobResult.uat_finished == finished   # pylint: disable=singleton-comparison # noqa: E712;
                 ).all()
         return db.session.query(UatJobResult). \
             filter(
-                UatJobResult.uat_finished == True   # pylint: disable=singleton-comparison # noqa: E712;
+                UatJobResult.uat_finished == finished   # pylint: disable=singleton-comparison # noqa: E712;
             ).all()
