@@ -215,6 +215,16 @@ def uat_accuracy_update(app: Flask, excluded_names: List, prioritized_names: Lis
             count += 1
             if count == app.config['MAX_ROWS']:
                 break
+    # check for any job instances stuck in unfinished state
+    for job in UatJobResult.get_jobs(finished=False):
+        unfinished_names = job.get_unfinished_names()
+        if float(len(unfinished_names))/float(len(job.get_names())) < 0.03:
+            for name in unfinished_names:
+                # orphan the name (will be deleted later)
+                name.uat_job_id = None
+                name.save()
+            # set job to finished
+            job.uat_finished = True
     return count
 
 
