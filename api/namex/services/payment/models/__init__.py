@@ -98,6 +98,7 @@ class Payment(Serializable):
     paid: float
     refund: float
     total: float
+    isPaymentActionRequired: bool
     statusCode: str = ''
     createdBy: str = ''
     createdName: str = ''
