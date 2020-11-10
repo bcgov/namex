@@ -98,7 +98,7 @@ class Payment(Serializable):
     paid: float
     refund: float
     total: float
-    isPaymentActionRequired: bool
+    isPaymentActionRequired: bool = field(default_factory=bool)
     statusCode: str = ''
     createdBy: str = ''
     createdName: str = ''
