@@ -68,7 +68,7 @@ class RequestAction(AbstractEnum):
 
 
 '''
-We use the full name in the Enum code KEY so there is always context to what the code type represents, 
+We use the full name in the Enum code KEY so there is always context to what the code type represents,
 so we don't always have to refer to the Enum description, documentation, or this file.
 
 The Enum code VALUE (str) is the actual mapping value for the Enum code type
@@ -387,6 +387,7 @@ class NameRequestActions(AbstractEnum):
     EDIT = 'EDIT'
     CANCEL = 'CANCEL'
     RESEND = 'RESEND'
+    INCORPORATE = 'INCORPORATE'
     # Payment related actions
     UPGRADE = 'UPGRADE'
     REAPPLY = 'REAPPLY'
@@ -435,6 +436,7 @@ class NameRequestActiveActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
     REAPPLY = NameRequestActions.REAPPLY.value
     RESEND = NameRequestActions.RESEND.value
+    INCORPORATE = NameRequestActions.INCORPORATE.value
 
 
 class NameRequestReservedActions(AbstractEnum):
