@@ -245,7 +245,10 @@ def remove_extra_value(d1, d2):
     for k2, v2 in d2.items():
         for k1, v1 in d1.items():
             if len(set(v1) ^ set(v2)) == 1:
-                v1.remove(k1)
+                try:
+                    v1.remove(k1)
+                except ValueError:
+                    pass
     return d1
 
 
