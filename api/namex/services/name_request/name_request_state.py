@@ -4,7 +4,7 @@ from namex.constants import \
     NameRequestActions, \
     NameRequestDraftActions, NameRequestReservedActions, NameRequestActiveActions, NameRequestCancelledActions, \
     NameRequestHoldActions, NameRequestInProgressActions, NameRequestExpiredActions, NameRequestConsumedActions, \
-    NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions
+    NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions, EntityTypes \
 
 from namex.models import State
 
@@ -88,6 +88,16 @@ def display_resend_action(nr_model=None):
     return True
 
 
+def display_incorporate_action(nr_model=None):
+    try:
+        if nr_model and nr_model.requestTypeCd == EntityTypes.BENEFIT_COMPANY.value:
+            return True
+
+        return False
+    except Exception as err:
+        raise NameRequestActionError(err)
+
+
 action_handlers = {
     NameRequestActions.EDIT.value: display_edit_action,
     NameRequestActions.UPGRADE.value: display_upgrade_action,
@@ -95,7 +105,8 @@ action_handlers = {
     NameRequestActions.REFUND.value: display_refund_action,
     NameRequestActions.RECEIPT.value: display_receipt_action,
     NameRequestActions.REAPPLY.value: display_reapply_action,
-    NameRequestActions.RESEND.value: display_resend_action
+    NameRequestActions.RESEND.value: display_resend_action,
+    NameRequestActions.INCORPORATE.value: display_incorporate_action
 }
 
 
