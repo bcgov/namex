@@ -148,14 +148,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
-    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name, check_name_is_well_formed=False,
+    def search_conflicts(self, list_dist_words, list_desc_words, list_name, name, stand_alone_words, check_name_is_well_formed=False,
                          queue=False):
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
         self._list_processed_names = list()
         for w_dist, w_desc in zip(list_dist_words, list_desc_words):
             if w_dist and w_desc:
-                list_details, forced = self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name,
+                list_details, forced = self.get_conflicts(dict_highest_counter, w_dist, w_desc, list_name, stand_alone_words,
                                                           check_name_is_well_formed, queue)
                 list_conflicts.extend(list_details)
                 list_conflicts = [i for n, i in enumerate(list_conflicts) if
@@ -169,9 +169,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return self.prepare_response(most_similar_names, queue, list_name, list_dist_words, list_desc_words)
 
-    def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, check_name_is_well_formed, queue):
+    def get_conflicts(self, dict_highest_counter, w_dist, w_desc, list_name, stand_alone_words, check_name_is_well_formed, queue):
         dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = {}, {}, {}, {}
         desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
+
+        # Check if a token is stand-alone word
+        desc_synonym_dict = self.get_stand_alone_substitutions(desc_synonym_dict, stand_alone_words)
+
         # Need to check if the name is well formed?
         if check_name_is_well_formed:
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
@@ -572,6 +576,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 value.append(key)
 
         return desc_synonym_dict
+
+    def get_stand_alone_substitutions(self, desc_synonym_dict, stand_alone):
+        for key, value in desc_synonym_dict.items():
+            if key in stand_alone:
+                value.pop()
+                value.extend(stand_alone)
+
+        return desc_synonym_dict
+
 
     def check_name_is_well_formed_response(self, list_original_name, list_name, list_dist, result_code):
         result = ProcedureResult()
