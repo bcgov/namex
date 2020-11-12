@@ -81,14 +81,12 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
         dist_db_substitution_dict = builder.get_substitutions_distinctive(service.get_list_dist())
         desc_tmp_synonym_dict = builder.get_substitutions_descriptive(service.get_list_desc())
 
-        dict_synonyms = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms) if desc_tmp_synonym_dict.__len__() > \
-                                                                                    dict_synonyms.__len__() else remove_extra_value(
-            dict_synonyms, desc_tmp_synonym_dict)
+        dict_synonyms = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
 
         # Update key in desc_db_synonym_dict
         desc_db_synonym_dict = update_dictionary_key(desc_tmp_synonym_dict, dict_synonyms)
 
-        vector2_dist, entropy_dist = get_vector(service.get_list_dist_search_conflicts(), list_dist,
+        vector2_dist, entropy_dist = get_vector(service.get_list_dist(), list_dist,
                                                 dist_db_substitution_dict, True)
 
         if all(value == OTHER_W_DIST for value in vector2_dist.values()):
@@ -109,7 +107,7 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
         similarity_dist = round(get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
         vector2_desc, entropy_desc = get_vector(
-            remove_spaces_list(service.get_list_desc_search_conflicts()), list_desc,
+            remove_spaces_list(service.get_list_desc()), list_desc,
             desc_db_synonym_dict)
         similarity_desc = round(
             get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
@@ -154,8 +152,6 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=F
             entropy.append(0.0)
         if counter == 1:
             vector[k] = counter
-        else:
-            vector[word] = counter
 
     # Make sure we don't divide by zero!
     entropy_score = sum(entropy) / len(entropy) if len(entropy) > 0 else 0
@@ -245,10 +241,9 @@ def remove_extra_value(d1, d2):
     for k2, v2 in d2.items():
         for k1, v1 in d1.items():
             if len(set(v1) ^ set(v2)) == 1:
-                try:
-                    v1.remove(k1)
-                except ValueError:
-                    pass
+                v1.remove(k1)
+            elif len(set(v1) ^ set(v2)) == 0:
+                d1[k2] = d1.pop(k1)
     return d1
 
 
