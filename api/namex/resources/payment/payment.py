@@ -472,7 +472,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         # TODO: Throw errors if this fails!
         if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
             payment.payment_status_code = PaymentState.COMPLETED.value
-            payment.payment_completion_date = sbc_payment_response.createOn
+            payment.payment_completion_date = sbc_payment_response.createdOn
             payment.save_to_db()
 
             nr_model.priorityCd = 'Y'
