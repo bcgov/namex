@@ -243,8 +243,11 @@ def remove_extra_value(d1, d2):
     for k2, v2 in d2.items():
         for k1, v1 in d1.items():
             if len(set(v1) ^ set(v2)) == 1 and k1 not in v2:
-                v1.remove(k1)
-                break
+                try:
+                    v1.remove(k1)
+                    break
+                except ValueError:
+                    pass
             elif (len(set(v1) ^ set(v2)) == 1 and k1 in v2) or len(set(v1) ^ set(v2)) == 0:
                 d1[k2] = d1.pop(k1)
                 break
