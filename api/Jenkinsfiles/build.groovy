@@ -97,7 +97,7 @@ properties([
 ])
 
 def run_pipeline = true
-if( triggerBuild(CONTEXT_DIRECTORY ) == "" ) 
+if( triggerBuild(CONTEXT_DIRECTORY ) == "" ) {
     try {
         timeout(time: 1, unit: 'DAYS') {
             input message: "Run namex-api-pipeline?", id: "1234"
