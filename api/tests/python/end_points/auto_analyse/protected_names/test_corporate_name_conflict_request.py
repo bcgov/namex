@@ -21,7 +21,10 @@ from ...common import token_header, claims
                              # The only way to be rejected is to have an exact match. We need to implement an exact match for
                              # Stand-alone names to avoid comparing with many names, just exact matches should be returned.
                              # ("PACIFIC BLUE ENGINEERING & ENTERPRISES LTD.", "PACIFIC BLUE ENTERPRISES LTD."),
-                             ("LE BLUE CAFE LTD.", "LE BLUE FOX CAFE INC.")
+                             ("LE BLUE CAFE LTD.", "LE BLUE FOX CAFE INC."),
+                             ("SWIFT EDUCATION SERVICES LTD", "CANADA SWIFT INTERNATIONAL EDUCATION CORP."),
+                             ("CANDID CONSULTING SERVICES LTD.","CANDID COMMUNITY CONSULTING CORP."),
+                             ("SMART SUPPLY LTD.", "COASTAL SMART SUPPLIES LTD.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -56,6 +59,31 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                                  {'word': 'PETER', 'classification': 'DIST'},
                                  {'word': 'LE', 'classification': 'DIST'},
                                  {'word': 'LE', 'classification': 'DESC'},
+                                 {'word': 'SWIFT', 'classification': 'DIST'},
+                                 {'word': 'SWIFT', 'classification': 'DESC'},
+                                 {'word': 'EDUCATION', 'classification': 'DIST'},
+                                 {'word': 'EDUCATION', 'classification': 'DESC'},
+                                 {'word': 'SERVICES', 'classification': 'DIST'},
+                                 {'word': 'SERVICES', 'classification': 'DESC'},
+                                 {'word': 'CANADA', 'classification': 'DIST'},
+                                 {'word': 'CANADA', 'classification': 'DESC'},
+                                 {'word': 'INTERNATIONAL', 'classification': 'DIST'},
+                                 {'word': 'INTERNATIONAL', 'classification': 'DESC'},
+                                 {'word': 'SMART', 'classification': 'DIST'},
+                                 {'word': 'SMART', 'classification': 'DESC'},
+                                 {'word': 'SUPPLY', 'classification': 'DIST'},
+                                 {'word': 'SUPPLY', 'classification': 'DESC'},
+                                 {'word': 'COASTAL', 'classification': 'DIST'},
+                                 {'word': 'COASTAL', 'classification': 'DESC'},
+                                 {'word': 'SUPPLIES', 'classification': 'DIST'},
+                                 {'word': 'SUPPLIES', 'classification': 'DESC'},
+                                 {'word': 'CANDID', 'classification': 'DIST'},
+                                 {'word': 'CONSULTING', 'classification': 'DIST'},
+                                 {'word': 'CONSULTING', 'classification': 'DESC'},
+                                 {'word': 'SERVICES', 'classification': 'DIST'},
+                                 {'word': 'SERVICES', 'classification': 'DESC'},
+                                 {'word': 'COMMUNITY', 'classification': 'DIST'},
+                                 {'word': 'COMMUNITY', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
@@ -66,7 +94,8 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                         'ABC CREDIT BUREAU COLLECTIONS LIMITED', 'ABC JEWELLERY & LOAN PAWNBROKERS LTD.',
                         'PACIFIC BLUE ENTERPRISES LTD.', 'PACIFIC ENGINEERING LTD.', 'PACIFIC HOLDINGS LTD.',
                         'BLUE PETER HOLDINGS INC.', 'BLUE WATER VENTURES LTD.', 'LE BLUE FOX CAFE INC.',
-                        'LE BLUE RESTAURANT LTD.']
+                        'LE BLUE RESTAURANT LTD.','CANADA SWIFT INTERNATIONAL EDUCATION CORP.',
+                        'COASTAL SMART SUPPLIES LTD.', 'CANDID COMMUNITY CONSULTING CORP.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT

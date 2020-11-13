@@ -194,11 +194,11 @@ def get_classification_summary(list_dist, list_desc, list_name):
     return classification_summary
 
 
-def get_conflicts_same_classification(builder, name_tokens, processed_name, list_dist, list_desc):
+def get_conflicts_same_classification(builder, name_tokens, processed_name, stand_alone_words, list_dist, list_desc):
     list_dist, list_desc = \
         list_distinctive_descriptive(name_tokens, list_dist, list_desc)
     # Search conflicts coming from check_name_is_well_formed analysis
-    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name,
+    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name, stand_alone_words,
                                                check_name_is_well_formed=True)
 
     return check_conflicts
@@ -249,11 +249,6 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     service._list_dist_words_search_conflicts = remove_misplaced_distinctive(list(service.get_list_dist()),
                                                                              service.get_list_desc(),
                                                                              service.name_tokens_search_conflict)
-
-    service._list_dist_words_search_conflicts, updated_name_tokens = remove_double_letters_list_dist_words(
-        service.get_list_dist_search_conflicts(),
-        service.name_tokens_search_conflict)
-    service.set_name_tokens_search_conflict(updated_name_tokens)
 
     service._list_desc_words_search_conflicts, service._dict_desc_words_search_conflicts = remove_descriptive_same_category(
         dict_desc)
@@ -351,7 +346,7 @@ def remove_descriptive_same_category(dict_desc):
     return list(dict_desc_unique_category.keys()), dict_desc_unique_category
 
 
-def remove_double_letters_list_dist_words(list_dist, name_tokens):
+def remove_double_letters_list_dist_words(list_dist, name_tokens, dist_substitution_dict=None):
     list_dist_final = []
     for item in list_dist:
         not_double_letters_item = remove_double_letters(item)
@@ -360,5 +355,8 @@ def remove_double_letters_list_dist_words(list_dist, name_tokens):
             lambda x, value=item, singular_letter_value=not_double_letters_item: str.replace(x, value,
                                                                                              singular_letter_value),
             name_tokens))
+        if dist_substitution_dict:
+            dist_substitution_dict[not_double_letters_item] = dist_substitution_dict.pop(item)
+            dist_substitution_dict[not_double_letters_item].append(not_double_letters_item)
 
-    return list_dist_final, name_tokens
+    return list_dist_final, name_tokens, dist_substitution_dict

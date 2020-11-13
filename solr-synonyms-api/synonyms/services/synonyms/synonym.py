@@ -71,6 +71,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         filters = [
             ~func.lower(model.category).op('~')(r'\y{}\y'.format('sub')),
             ~func.lower(model.category).op('~')(r'\y{}\y'.format('stop')),
+            ~func.lower(model.category).op('~')(r'\y{}\y'.format('stand'))
         ]
 
         results = self.find_word_synonyms(word, filters, category)
