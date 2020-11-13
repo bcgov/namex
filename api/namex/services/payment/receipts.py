@@ -1,8 +1,9 @@
 from pprint import pprint
+from datetime import datetime
 
 from .client import SBCPaymentClient
 from .exceptions import SBCPaymentException
-from .models import ReceiptRequest
+from .models import ReceiptResponse
 from .models.abstract import Serializable
 
 
@@ -18,8 +19,6 @@ def generate_receipt(payment_identifier, data):
 
         # Get receipt for the payment
         api_response = api_instance.generate_receipt(payment_identifier, data.as_dict())
-
-        pprint(api_response)
         return api_response
 
     except Exception as err:
@@ -34,7 +33,7 @@ def get_receipt(payment_identifier):
         api_response = api_instance.get_receipt(payment_identifier)
 
         pprint(api_response)
-        return api_response
+        return ReceiptResponse(**api_response)
 
     except Exception as err:
         raise SBCPaymentException(err)

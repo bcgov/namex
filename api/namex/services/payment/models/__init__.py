@@ -79,26 +79,7 @@ class PaymentRequest(Serializable):
 
 
 @dataclass
-class Receipt(Serializable):
-    id: int
-    receiptAmount: float
-    receiptDate: str = ''
-    receiptNumber: str = ''
-
-
-@dataclass
-class ReceiptRequest(Serializable):
-    corpName: str = ''
-    companyActDetails: str = ''
-    businessNumber: str = ''
-    recognitionDateTime: str = ''
-    filingIdentifier: str = ''
-    filingDateTime: str = ''
-    fileName: str = ''
-
-
-@dataclass
-class Payment(Serializable):
+class PaymentInvoice(Serializable):
     id: int
     serviceFees: float
     paid: float
@@ -118,3 +99,32 @@ class Payment(Serializable):
     receipts: list = field(default_factory=list)
     references: list = field(default_factory=list)
     _links: list = field(default_factory=list)
+
+
+@dataclass
+class ReceiptRequest(Serializable):
+    corpName: str = ''
+    companyActDetails: str = ''
+    businessNumber: str = ''
+    recognitionDateTime: str = ''
+    filingIdentifier: str = ''
+    filingDateTime: str = ''
+    fileName: str = ''
+
+
+@dataclass
+class Receipt(Serializable):
+    id: int
+    receiptAmount: float
+    receiptDate: str = ''
+    receiptNumber: str = ''
+
+
+@dataclass
+class ReceiptResponse(Serializable):
+    bcOnlineAccountNumber: str = None
+    filingIdentifier: str = None
+    invoice: PaymentInvoice = field(default=PaymentInvoice)
+    invoiceNumber: str = ''
+    paymentMethod: str = ''
+    receiptNumber: str = ''

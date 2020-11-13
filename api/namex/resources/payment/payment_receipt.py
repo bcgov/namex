@@ -9,7 +9,6 @@ from namex.utils.api_resource import handle_exception
 from namex.models import Request as RequestDAO, Payment as PaymentDAO
 
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-from namex.services.payment.payments import get_payment
 from namex.services.payment.receipts import get_receipt, generate_receipt
 from namex.services.payment.models import ReceiptRequest
 
