@@ -55,12 +55,17 @@ node {
         - TAG_NAME: ${TAG_NAME}
         - SOURCE_TAG: ${SOURCE_TAG}
     """
+    if (COMPONENT_NAME == 'auto-analyze') {
+        DEPLOYMENT_NAME = "${COMPONENT_NAME}-${TAG_NAME}"
+    } else {
+        DEPLOYMENT_NAME = COMPONENT_NAME
+    }
     def old_version
     stage("Deploy ${COMPONENT_NAME}:${TAG_NAME}") {
         script {
             openshift.withCluster() {
                 openshift.withProject("${NAMESPACE}-${TAG_NAME}") {
-                    old_version = openshift.selector('dc', "${COMPONENT_NAME}").object().status.latestVersion
+                    old_version = openshift.selector('dc', "${DEPLOYMENT_NAME}").object().status.latestVersion
                 }
             }
             openshift.withCluster() {
@@ -81,22 +86,22 @@ node {
         }
     }
     stage("Verify deployment") {
-        sleep 10
+        sleep 90
         script {
             openshift.withCluster() {
                 openshift.withProject("${NAMESPACE}-${TAG_NAME}") {
-                    def new_version = openshift.selector('dc', "${COMPONENT_NAME}").object().status.latestVersion
+                    def new_version = openshift.selector('dc', "${DEPLOYMENT_NAME}").object().status.latestVersion
                     if (new_version == old_version) {
                         echo "New deployment was not triggered."
                         currentBuild.result = "FAILURE"
                         return
                     }
-                    def pod_selector = openshift.selector('pod', [ app:"${COMPONENT_NAME}" ])
+                    def pod_selector = openshift.selector('pod', [ app:"${DEPLOYMENT_NAME}" ])
                     pod_selector.untilEach {
                         pod = it.objects()[0]
                         deployment = pod.metadata.labels.deployment
                         echo deployment
-                        if (deployment ==  "${COMPONENT_NAME}-${new_version}" && pod.status.phase == 'Running' && pod.status.containerStatuses[0].ready) {
+                        if (deployment ==  "${DEPLOYMENT_NAME}-${new_version}" && pod.status.phase == 'Running' && pod.status.containerStatuses[0].ready) {
                             return true
                         } else {
                             echo "Pod for new deployment not ready"
