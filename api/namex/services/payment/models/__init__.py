@@ -88,7 +88,13 @@ class Receipt(Serializable):
 
 @dataclass
 class ReceiptRequest(Serializable):
+    corpName: str = ''
+    companyActDetails: str = ''
+    businessNumber: str = ''
+    recognitionDateTime: str = ''
+    filingIdentifier: str = ''
     filingDateTime: str = ''
+    fileName: str = ''
 
 
 @dataclass

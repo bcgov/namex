@@ -110,7 +110,7 @@ class Request(db.Model):
     # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
 
-    ##### end of table definitions
+    # End of table definitions
     REQUEST_FURNISHED = 'Y'
 
     # properties
@@ -225,7 +225,6 @@ class Request(db.Model):
         db.session.add(self)
         db.session.commit()
 
-
     def delete_from_db(self):
         # TODO: Add listener onto the SQLALchemy event to block deletes
         raise BusinessException({
@@ -279,8 +278,9 @@ class Request(db.Model):
         return existing_nr
 
     @classmethod
-    def find_name(cls, nr, choice):
-        return cls.query.filter_by(nrNum=nr).names.filter_by(choice=choice).one_or_none()
+    def find_name_by_choice(cls, nr_id, choice):
+        names = cls.query.filter_by(id=nr_id).first().names
+        return names.filter_by(choice=choice).one_or_none()
 
     @classmethod
     def validNRFormat(cls, nr):

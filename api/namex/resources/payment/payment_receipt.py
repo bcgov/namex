@@ -9,7 +9,9 @@ from namex.utils.api_resource import handle_exception
 from namex.models import Request as RequestDAO, Payment as PaymentDAO
 
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
+from namex.services.payment.payments import get_payment
 from namex.services.payment.receipts import get_receipt, generate_receipt
+from namex.services.payment.models import ReceiptRequest
 
 from .api_namespace import api as payment_api
 
@@ -48,10 +50,19 @@ class PaymentReceipt(Resource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return jsonify(message='{nr_id} not found'.format(nr_id=payment.nrId)), 400
+                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), 400
 
             receipt_info = get_receipt(payment.payment_token)
-            receipt_response = generate_receipt(payment.payment_token, payment.payment_completion_date)
+            name_choice = RequestDAO.find_name_by_choice(nr_model.id, 1)
+            if not name_choice:
+                return jsonify(message='Could not find name choice for {nr_id}'.format(nr_id=nr_model.id)), 400
+
+            receipt_req = ReceiptRequest(
+                corpName=name_choice.name,
+                filingDateTime=payment.payment_completion_date.strftime('%d %b %Y, %-I:%M %p')
+            )
+
+            receipt_response = generate_receipt(payment.payment_token, receipt_req)
 
             if not receipt_response:
                 return jsonify(message=MSG_NOT_FOUND), 404
@@ -81,7 +92,7 @@ class PaymentReceipt(Resource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return jsonify(message='{nr_id} not found'.format(nr_id=payment.nrId)), 400
+                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), 400
 
             receipt_response = get_receipt(payment.payment_token)
 

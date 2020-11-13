@@ -11,17 +11,13 @@ class GetReceiptRequest(Serializable):
         self.payment_identifier = kwargs.get('payment_identifier')
 
 
-def generate_receipt(payment_identifier, filing_date):
+def generate_receipt(payment_identifier, data):
     try:
         # Create an instance of the API class
         api_instance = SBCPaymentClient()
-        # Create our payment request
-        req = ReceiptRequest(
-            filingDateTime=filing_date.strftime('%B %d, %Y')
-        )
 
         # Get receipt for the payment
-        api_response = api_instance.generate_receipt(payment_identifier, req.as_dict())
+        api_response = api_instance.generate_receipt(payment_identifier, data.as_dict())
 
         pprint(api_response)
         return api_response
