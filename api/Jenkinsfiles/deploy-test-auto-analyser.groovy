@@ -20,9 +20,9 @@
 //   See: https://docs.openshift.com/container-platform/3.9/using_images/other_images/jenkins.html for a complete list of JENKINS env vars
 // define constants
 def NAMESPACE = 'servicebc-ne'
-def COMPONENT_NAME = 'solr-synonyms-api'
-def TAG_NAME = 'prod'
-def SOURCE_TAG = 'test'
+def COMPONENT_NAME = 'namex-api'
+def TAG_NAME = 'test'
+def SOURCE_TAG = 'dev'
 def DEPLOY_PIPELINE = 'deploy-service'
 def DEPLOY_PIPELINE_LOC = 'servicebc-ne-tools'
 
@@ -36,9 +36,6 @@ properties([
 
 stage("deploy ${COMPONENT_NAME}-${TAG_NAME}") {
     script {
-        timeout(time: 1, unit: 'DAYS') {
-            input message: "Deploy to PROD?", id: "1234"
-        }
         openshift.withCluster() {
             openshift.withProject("${DEPLOY_PIPELINE_LOC}") {
                 def deploy_pipeline = openshift.selector('bc', "${DEPLOY_PIPELINE}")
