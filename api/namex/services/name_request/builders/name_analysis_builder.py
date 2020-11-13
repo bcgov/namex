@@ -10,7 +10,7 @@ from . import EXACT_MATCH, HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY, CURRENT_YEAR,
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
 from ..auto_analyse.name_analysis_utils import get_conflicts_same_classification, \
-    get_all_dict_substitutions, subsequences, remove_double_letters
+    get_all_dict_substitutions, subsequences, remove_double_letters, remove_double_letters_list_dist_words
 
 from namex.models.request import Request
 
@@ -182,6 +182,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
         else:
             dist_substitution_dict = self.get_substitutions_distinctive(w_dist)
+
+        w_dist, list_name, dist_substitution_dict = remove_double_letters_list_dist_words(w_dist, list_name, dist_substitution_dict)
 
         list_conflict_details = list()
 

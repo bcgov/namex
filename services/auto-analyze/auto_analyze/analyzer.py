@@ -18,7 +18,7 @@ import math
 
 from nltk.stem import PorterStemmer
 from namex.services.name_request.auto_analyse.name_analysis_utils \
-    import get_classification, subsequences, get_flat_list, remove_spaces_list
+    import get_classification, subsequences, get_flat_list, remove_spaces_list, remove_double_letters_list_dist_words
 
 from namex.services.name_request.builders.name_analysis_builder \
     import NameAnalysisBuilder
@@ -79,8 +79,10 @@ async def auto_analyze(name: str, list_name: list, list_dist: list,
         get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc)
 
         dist_db_substitution_dict = builder.get_substitutions_distinctive(service.get_list_dist())
-        desc_tmp_synonym_dict = builder.get_substitutions_descriptive(service.get_list_desc())
+        service._list_dist_words, match_list, _ = remove_double_letters_list_dist_words(service.get_list_dist(),
+                                                                                        match_list)
 
+        desc_tmp_synonym_dict = builder.get_substitutions_descriptive(service.get_list_desc())
         dict_synonyms = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
 
         # Update key in desc_db_synonym_dict
