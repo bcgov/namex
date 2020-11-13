@@ -95,7 +95,7 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                         'PACIFIC BLUE ENTERPRISES LTD.', 'PACIFIC ENGINEERING LTD.', 'PACIFIC HOLDINGS LTD.',
                         'BLUE PETER HOLDINGS INC.', 'BLUE WATER VENTURES LTD.', 'LE BLUE FOX CAFE INC.',
                         'LE BLUE RESTAURANT LTD.','CANADA SWIFT INTERNATIONAL EDUCATION CORP.',
-                        'COASTAL SMART SUPPLIES LTD.','CANDID CONSULTING SERVICES']
+                        'COASTAL SMART SUPPLIES LTD.', 'CANDID COMMUNITY CONSULTING CORP.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
