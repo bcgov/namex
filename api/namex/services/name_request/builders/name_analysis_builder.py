@@ -36,6 +36,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                                   processed_name, list_original_name):
         result = ProcedureResult()
         result.is_valid = True
+        self.name_processing_service
 
         first_classification = None
         if name_dict:
@@ -599,7 +600,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return result
 
     def check_conflict_well_formed_response(self, processed_name, list_original_name, list_name, list_dist, issue):
-        check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, list_name,
+        np_svc = self.name_processing_service
+        check_conflicts = get_conflicts_same_classification(self, list_name, processed_name, np_svc.get_stand_alone_words(), list_name,
                                                             list_name)
         if check_conflicts.is_valid:
             return self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
