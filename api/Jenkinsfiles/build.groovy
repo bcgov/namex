@@ -119,23 +119,6 @@ if (!run_pipeline) {
 } else {
     //node/pod needs environment setup for testing
     node {
-        stage('Checkout') {
-            try {
-                echo "checking out source"
-                echo "Build: ${BUILD_ID}"
-                checkout scm
-                GIT_COMMIT_SHORT_HASH = sh (
-                        script: """git describe --always""", returnStdout: true
-                    ).trim()
-                GIT_COMMIT_AUTHOR = sh (
-                        script: """git show -s --pretty=%an""", returnStdout: true
-                    ).trim()
-
-            } catch (Exception e) {
-                echo "error during checkout: ${e}"
-                error('Aborted')
-            }
-        }//end stage
         stage('Build') {
             try {
                 echo "Building..."
