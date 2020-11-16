@@ -492,28 +492,23 @@ class Request(db.Model):
         return criteria
 
     @classmethod
-    def get_distinctive_query(cls, dist, criteria, stop_words, check_name_is_well_formed):
+    def get_distinctive_query(cls, dist, stop_words, check_name_is_well_formed):
         special_characters_dist = Request.set_special_characters_distinctive(dist)
-        for e in criteria:
-            substitutions = '|'.join(map(str, special_characters_dist))
-            if not check_name_is_well_formed:
-                e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
-                    r'(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
-            else:
-                e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(
-                    r'\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions))])
+        substitutions = '|'.join(map(str, special_characters_dist))
+        if not check_name_is_well_formed:
+            dist_criteria = r'(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)
+        else:
+            dist_criteria = r'\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)
 
-        return criteria
+        return dist_criteria
 
     @classmethod
-    def get_descriptive_query(cls, desc, criteria, queue):
+    def get_descriptive_query(cls, desc, criteria, name_criteria):
         special_characters_descriptive = Request.set_special_characters_descriptive(desc)
         for e in criteria:
-            if not queue and len(e.filters) > 5 or queue and len(e.filters) > 3:
-                e.filters.pop()
-
             substitutions = ' ?| '.join(map(str, special_characters_descriptive)) + ' ?'
-            e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r' \y{}\y'.format(substitutions))])
+            name_criteria += r'.*({})\y'.format(substitutions)
+            e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(name_criteria)])
 
         return criteria
 

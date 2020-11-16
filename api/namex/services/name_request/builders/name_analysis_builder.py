@@ -227,10 +227,10 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         for key_dist, value_dist in dist_substitution_dict.items():
             criteria = Request.get_general_query(change_filter, queue)
-            criteria = Request.get_distinctive_query(value_dist, criteria, stop_words, check_name_is_well_formed)
+            name_criteria = Request.get_distinctive_query(value_dist, stop_words, check_name_is_well_formed)
             for key_desc, value_desc in desc_synonym_dict.items():
                 print(key_dist, ":DIST ", key_desc, ":DESC")
-                criteria = Request.get_descriptive_query(value_desc, criteria, queue)
+                criteria = Request.get_descriptive_query(value_desc, criteria, name_criteria)
                 matches = Request.find_by_criteria_array(criteria, queue)
                 matches = self.skip_name_matches_processed(matches)
                 list_conflicts_details, forced = self.get_most_similar_names(
