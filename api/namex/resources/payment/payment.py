@@ -1,6 +1,7 @@
 import json
 
 from datetime import datetime
+from dateutil import parser as dateutil_parser
 
 from flask import current_app, request, make_response, jsonify
 from flask_restplus import cors, fields
@@ -20,7 +21,7 @@ from namex.resources.name_requests.abstract_nr_resource import AbstractNameReque
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.payments import get_payment, create_payment
-from namex.services.payment.models import PaymentRequest, Payment
+from namex.services.payment.models import PaymentRequest
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 
 from .api_namespace import api as payment_api
@@ -124,6 +125,25 @@ def handle_auth_error(ex):
     return response
 
 
+def custom_strftime_suffix(d):
+    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+
+
+def custom_strftime(dt_format, t):
+    return t.strftime(dt_format).replace('{S}', str(t.day) + custom_strftime_suffix(t.day))
+
+
+def format_payment_time(dt):
+    return custom_strftime('%b {S}, %Y', dt)
+
+
+def map_receipt(receipt):
+    if isinstance(receipt['receiptDate'], str):
+        receipt['receiptDate'] = format_payment_time(dateutil_parser.parse(receipt['receiptDate']))
+
+    return receipt
+
+
 @cors_preflight('GET')
 @payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
@@ -139,6 +159,7 @@ class FindNameRequestPayments(AbstractNameRequestResource):
             # Wrap our payment
             for payment in nr_payments:
                 payment_response = get_payment(payment.payment_token)
+                receipts = payment_response.receipts
                 # Wrap the response, providing info from both the SBC Pay response and the payment we created
                 response_data.append({
                     'id': payment.id,
@@ -148,7 +169,7 @@ class FindNameRequestPayments(AbstractNameRequestResource):
                     'completionDate': payment.payment_completion_date,
                     'payment': payment.as_dict(),
                     'sbcPayment': payment_response.as_dict(),
-                    'receipts': payment_response.receipts
+                    'receipts': list(map(lambda r: map_receipt(r), receipts))
                 })
 
             return jsonify(response_data), 200
@@ -302,6 +323,7 @@ class NameRequestPayment(AbstractNameRequestResource):
             payment = PaymentDAO.query.get(payment_id)
 
             payment_response = get_payment(payment.payment_token)
+            receipts = payment_response.receipts
             # Wrap the response, providing info from both the SBC Pay response and the payment we created
             data = jsonify({
                 'id': payment.id,
@@ -310,7 +332,8 @@ class NameRequestPayment(AbstractNameRequestResource):
                 'statusCode': payment.payment_status_code,
                 'completionDate': payment.payment_completion_date,
                 'payment': payment.as_dict(),
-                'sbcPayment': payment_response.as_dict()
+                'sbcPayment': payment_response.as_dict(),
+                'receipts': list(map(lambda r: map_receipt(r), receipts))
             })
 
             response = make_response(data, 200)
