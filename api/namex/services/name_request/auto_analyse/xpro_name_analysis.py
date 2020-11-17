@@ -180,21 +180,21 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
             if not check_conflicts.is_valid:
                 results.append(check_conflicts)
 
-        check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-                                                           self.compound_descriptive_name_tokens,
-                                                           True, self.get_designation_end_list_all(),
-                                                           self.get_designation_any_list_all(), stop_words_list)
+        # check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+        #                                                    self.compound_descriptive_name_tokens,
+        #                                                    True, self.get_designation_end_list_all(),
+        #                                                    self.get_designation_any_list_all(), stop_words_list)
 
-        if check_conflicts_queue.is_valid:
-            check_conflicts_queue = builder.search_conflicts(
-                [self.get_list_dist_search_conflicts()],
-                [self.get_list_desc_search_conflicts()],
-                self.name_tokens_search_conflict,
-                self.processed_name,
-                np_svc.get_stand_alone_words(),
-                check_name_is_well_formed=False,
-                queue=True
-            )
+        # if check_conflicts_queue.is_valid:
+        check_conflicts_queue = builder.search_conflicts(
+            [self.get_list_dist_search_conflicts()],
+            [self.get_list_desc_search_conflicts()],
+            self.name_tokens_search_conflict,
+            self.processed_name,
+            np_svc.get_stand_alone_words(),
+            check_name_is_well_formed=False,
+            queue=True
+        )
 
         if not check_conflicts_queue.is_valid:
             results.append(check_conflicts_queue)
