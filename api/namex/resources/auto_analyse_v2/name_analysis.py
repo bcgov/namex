@@ -97,7 +97,7 @@ def validate_name_request(location, entity_type, request_action):
 
 
 @cors_preflight('GET, POST, DELETE')
-@name_analysis_api.route('/<string:uuid>', methods=['GET', 'DELETE' 'OPTIONS'])
+@name_analysis_api.route('/<string:identifier>', methods=['GET', 'DELETE' 'OPTIONS'])
 @name_analysis_api.route('', methods=['POST', 'OPTIONS'])
 class NameAnalysisResource(Resource):
     """Wrapper service for Name analyzer."""
@@ -106,7 +106,7 @@ class NameAnalysisResource(Resource):
     @name_analysis_api.expect(NAME_ANALYSIS_REQUEST_SCHEMA)
     def post():
         """Posts a name analysis request to the name analyzer.
-        Returns a UUID if the request is successful."""
+        Returns a identifier if the request is successful."""
         json_input = request.get_json()
         location = json_input('location')
         entity_type = json_input('entity_type_cd')
@@ -128,36 +128,36 @@ class NameAnalysisResource(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    def get(uuid):
+    def get(identifier):
         """Retrieves the status of a name analysis request from the name analyzer"""
-        if not uuid:
+        if not identifier:
             return {'error': 'Invalid  name analysis request Identifier.'}, HTTPStatus.BAD_REQUEST
         try:
-            auto_analyze_svc_url = '{}/{}'.format(current_app.config.get('AUTO_ANALYZE_URL'), uuid)
+            auto_analyze_svc_url = '{}/{}'.format(current_app.config.get('AUTO_ANALYZE_URL'), identifier)
             headers = {}
             rv = requests.get(url=auto_analyze_svc_url, headers=headers, timeout=20.0)
             return rv
 
         except (exceptions.ConnectionError, exceptions.Timeout) as err:
-            current_app.logger.error(f'Auto Analyze connection failure for {uuid}', err)
-            return {'errors': [{'message': 'Unable to get name analysis for the identifier.'}]
+            current_app.logger.error(f'Auto Analyze connection failure for {identifier}', err)
+            return {'errors': [{'message': f'Unable to get name analysis results for the identifier {identifier}.'}]
                     }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    def delete(uuid):
-        """Cancels the name analysis request corresponding to the given uuid"""
-        if not uuid:
+    def delete(identifier):
+        """Cancels the name analysis request corresponding to the given identifier"""
+        if not identifier:
             return {'error': 'Invalid name analysis request identifier.'}, HTTPStatus.BAD_REQUEST
 
         try:
-            auto_analyze_svc_url = '{}/{}'.format(current_app.config.get('AUTO_ANALYZE_URL'), uuid)
+            auto_analyze_svc_url = '{}/{}'.format(current_app.config.get('AUTO_ANALYZE_URL'), identifier)
             headers = {}
             rv = requests.delete(url=auto_analyze_svc_url, headers=headers, timeout=20.0)
             return rv
 
         except (exceptions.ConnectionError, exceptions.Timeout) as err:
-            current_app.logger.error(f'Auto Analyze connection failure for {uuid}', err)
+            current_app.logger.error(f'Auto Analyze connection failure for {identifier}', err)
             return {'errors':
-                    [{'message': 'Unable to cancel name analysis for the identifier.'}]
+                    [{'message': f'Unable to cancel name analysis for the identifier {identifier}.'}]
                     }, HTTPStatus.INTERNAL_SERVER_ERROR
