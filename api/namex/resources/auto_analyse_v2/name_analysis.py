@@ -97,7 +97,7 @@ def validate_name_request(location, entity_type, request_action):
 
 
 @cors_preflight('GET, POST, DELETE')
-@name_analysis_api.route('/<string:identifier>', methods=['GET', 'DELETE' 'OPTIONS'])
+@name_analysis_api.route('/<string:identifier>', methods=['GET', 'DELETE', 'OPTIONS'])
 @name_analysis_api.route('', methods=['POST', 'OPTIONS'])
 class NameAnalysisResource(Resource):
     """Wrapper service for Name analyzer."""
@@ -108,9 +108,9 @@ class NameAnalysisResource(Resource):
         """Posts a name analysis request to the name analyzer.
         Returns a identifier if the request is successful."""
         json_input = request.get_json()
-        location = json_input('location')
-        entity_type = json_input('entity_type_cd')
-        request_action = json_input('request_action_cd')
+        location = json_input.get('location')
+        entity_type = json_input.get('entity_type_cd')
+        request_action = json_input.get('request_action_cd')
 
         if not validate_name_request(location, entity_type, request_action):
             return {'error': 'Invalid Name Request.'}, HTTPStatus.BAD_REQUEST
