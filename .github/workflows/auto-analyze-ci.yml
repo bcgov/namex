@@ -48,7 +48,7 @@ jobs:
       - name: Lint with pylint
         working-directory: ./services/auto-analyze
         run: |
-          pylint --rcfile=setup.cfg --load-plugins=pylint_flask src
+          pylint --rcfile=setup.cfg src
       - name: Lint with flake8
         working-directory: ./services/auto-analyze
         run: |
