@@ -56,9 +56,10 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
                        list_desc: list, dict_substitution: dict,
                        dict_synonyms: dict,
                        np_svc_prep_data: name_analysis_service) -> dict:
+    """Return a dictionary with name as key and similarity as value, 1.0 is an exact match."""
     logging.getLogger(__name__).debug(
-        'name: {0}  ,  list_name {1},  list_dist: {2}  , list_desc: {3}  , dict_sybst: {4},  dict_syns{5}'.format(
-            name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms))
+        'name: %s ,  list_name %s,  list_dist: %s, list_desc: %s, dict_subst: %s,  dict_syns: %s',
+        name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms)
     syn_svc = synonym_service
     service = name_analysis_service
     np_svc = service.name_processing_service
@@ -116,7 +117,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
             get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
 
         similarity = round((similarity_dist + similarity_desc) / 2, 2)
-        logging.getLogger(__name__).debug('similarity: {0}'.format(similarity))
+        logging.getLogger(__name__).debug('similarity: %s', similarity)
 
     if similarity == EXACT_MATCH or (
             similarity >= MINIMUM_SIMILARITY and not is_not_real_conflict(list_name,
@@ -130,6 +131,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
 
 
 def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=False):
+    """Return vector of words (or synonyms) found in original_class_list which are in conflict_class_list."""
     vector = dict()
     entropy = list()
     original_class_list = original_class_list if original_class_list else []
@@ -162,6 +164,7 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=F
 
 
 def check_compound_dist(list_dist, list_desc, original_class_list, class_subs_dict):
+    """Return a vector with distinctive compound items and updated list of descriptives."""
     vector_dist = {}
     entropy_dist = 0.0
     for i in range(2, len(list_dist) + 1):
@@ -182,10 +185,12 @@ def check_compound_dist(list_dist, list_desc, original_class_list, class_subs_di
 
 
 def text_to_vector(list_name):
+    """Return a vector."""
     return Counter(list_name)
 
 
 def get_cosine(vec1, vec2):
+    """Return cosine similarity between vector 1 and vector 2."""
     intersection = set(vec1.keys()) & set(vec2.keys())
     numerator = sum([vec1[x] * vec2[x] for x in intersection])
 
@@ -200,10 +205,12 @@ def get_cosine(vec1, vec2):
 
 
 def get_similarity(vector1, vector2, entropy):
+    """Return similarity between two vectors which are either both distinctives or descriptives."""
     return get_cosine(vector1, vector2) * entropy
 
 
 def is_not_real_conflict(list_name, stand_alone_words, list_dist, dict_desc, service):
+    """Return True if the name is not a real conflict. Otherwise, false if the name is a conflict."""
     list_desc = list(dict_desc.keys())
     if is_standalone_name(list_name, stand_alone_words):
         return stand_alone_additional_dist_desc(list_dist, service.get_list_dist(), list_desc,
@@ -213,12 +220,14 @@ def is_not_real_conflict(list_name, stand_alone_words, list_dist, dict_desc, ser
 
 
 def is_standalone_name(list_name, stand_alone_words):
+    """Return True if standalone name."""
     if any(stand_alone in list_name for stand_alone in stand_alone_words):
         return True
     return False
 
 
 def stand_alone_additional_dist_desc(lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2):
+    """Return True if there is an additional distinctive or descriptive in the stand-alone name."""
     if lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__():
         return True
 
@@ -226,19 +235,17 @@ def stand_alone_additional_dist_desc(lst_dist_name1, lst_dist_name2, lst_desc_na
 
 
 def check_additional_dist_desc(list_dist_user_name, list_dist_conflict, dict_desc_user_name, service):
+    """Return True if dist tokens in user name > conflicted name and different descrip are not in same category."""
     for (k, v), (k2, v2) in zip(  # pylint: disable=unused-variable; v2 not used
-        service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()
+            service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()
     ):
         same_synonym_category = porter.stem(k2) in v
-        if (k != k2
-            and k2 not in service.get_list_desc()
-            and same_synonym_category
-            and list_dist_user_name.__len__() > list_dist_conflict.__len__()
-            ) \
-                or not same_synonym_category:
 
-            logging.getLogger(__name__).debug(
-                "Name '{}' is not considered a real conflict.".format(service.get_processed_name()))
+        if (k != k2 and k2 not in service.get_list_desc() and
+            same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
+                not same_synonym_category:
+            logging.getLogger(__name__).debug('Name %s is not considered a real conflict.',
+                                              service.get_processed_name())
 
             return True
     return False
