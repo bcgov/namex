@@ -13,23 +13,22 @@
 # limitations under the License.
 """Analyzes a single name."""
 import logging
-from collections import Counter
 import math
+from collections import Counter
 
+from namex.services.name_processing.name_processing import NameProcessingService
+from namex.services.name_request.auto_analyse.name_analysis_utils import (
+    get_classification,
+    get_flat_list,
+    remove_double_letters_list_dist_words,
+    remove_spaces_list,
+    subsequences,
+)
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
+from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from nltk.stem import PorterStemmer
-from namex.services.name_request.auto_analyse.name_analysis_utils \
-    import get_classification, subsequences, get_flat_list, remove_spaces_list, remove_double_letters_list_dist_words
-
-from namex.services.name_request.builders.name_analysis_builder \
-    import NameAnalysisBuilder
-
-from namex.services.name_processing.name_processing \
-    import NameProcessingService
-
-from namex.services.name_request.auto_analyse.protected_name_analysis \
-    import ProtectedNameAnalysisService
-
 from swagger_client import SynonymsApi as SynonymService
+
 
 porter = PorterStemmer()
 
@@ -51,7 +50,9 @@ MINIMUM_SIMILARITY = 0.66
 HIGH_CONFLICT_RECORDS = 20
 
 
-async def auto_analyze(name: str, list_name: list, list_dist: list,
+# ok deep function
+async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-arguments
+                       list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
                        dict_synonyms: dict,
                        np_svc_prep_data: name_analysis_service) -> dict:
@@ -195,8 +196,7 @@ def get_cosine(vec1, vec2):
 
     if not denominator:
         return 0.0
-    else:
-        return float(numerator) / denominator
+    return float(numerator) / denominator
 
 
 def get_similarity(vector1, vector2, entropy):
@@ -208,9 +208,8 @@ def is_not_real_conflict(list_name, stand_alone_words, list_dist, dict_desc, ser
     if is_standalone_name(list_name, stand_alone_words):
         return stand_alone_additional_dist_desc(list_dist, service.get_list_dist(), list_desc,
                                                 service.get_list_desc())
-    else:
-        return check_additional_dist_desc(list_dist, service.get_list_dist(), dict_desc,
-                                          service)
+    return check_additional_dist_desc(list_dist, service.get_list_dist(), dict_desc,
+                                      service)
 
 
 def is_standalone_name(list_name, stand_alone_words):
@@ -227,11 +226,17 @@ def stand_alone_additional_dist_desc(lst_dist_name1, lst_dist_name2, lst_desc_na
 
 
 def check_additional_dist_desc(list_dist_user_name, list_dist_conflict, dict_desc_user_name, service):
-    for (k, v), (k2, v2) in zip(service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()):
+    for (k, v), (k2, v2) in zip(  # pylint: disable=unused-variable; v2 not used
+        service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()
+    ):
         same_synonym_category = porter.stem(k2) in v
-        if (
-                k != k2 and k2 not in service.get_list_desc() and same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
-                not same_synonym_category:
+        if (k != k2
+            and k2 not in service.get_list_desc()
+            and same_synonym_category
+            and list_dist_user_name.__len__() > list_dist_conflict.__len__()
+            ) \
+                or not same_synonym_category:
+
             logging.getLogger(__name__).debug(
                 "Name '{}' is not considered a real conflict.".format(service.get_processed_name()))
 
@@ -240,6 +245,7 @@ def check_additional_dist_desc(list_dist_user_name, list_dist_conflict, dict_des
 
 
 def remove_extra_value(d1, d2):
+    """Return d1 with d2 items removed."""
     for k2, v2 in d2.items():
         for k1, v1 in d1.items():
             if len(set(v1) ^ set(v2)) == 1 and k1 not in v2:
@@ -255,6 +261,7 @@ def remove_extra_value(d1, d2):
 
 
 def update_dictionary_key(user, db):
+    """Return updates key weights."""
     user_keys = tuple(user.keys())
     user_values = tuple(user.values())
 

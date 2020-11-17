@@ -11,21 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The service that analyizes an array of names."""
+"""The service that analyzes an array of names."""
 # This is important as this will add modules purporting to be Flask modules for later use by the extension.
 # Without this, Flask-SQLAlchemy may not work!
-import quart.flask_patch
 # Thanks!
-
 import asyncio
 import os
-from quart import Quart, jsonify, request
-import config
-from namex.services.name_request.auto_analyse.protected_name_analysis \
-    import ProtectedNameAnalysisService
+
+import quart.flask_patch
 from namex import models
 from namex.models import db, ma
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
+from quart import Quart, jsonify, request
+
+import config
+
 from .analyzer import auto_analyze
+
 
 # Set config
 QUART_APP = os.getenv('QUART_APP')
@@ -33,6 +35,7 @@ RUN_MODE = os.getenv('FLASK_ENV', 'production')
 
 
 async def create_app(run_mode):
+    """Create the app object for configuration and use."""
     try:
         quart_app = Quart(__name__)
         quart_app.logger.debug('APPLICATION CREATED')
@@ -45,7 +48,7 @@ async def create_app(run_mode):
         raise
 
     @quart_app.after_request
-    def add_version(response):
+    def add_version(response):  # pylint: disable=unused-variable; linter not understanding framework call
         os.getenv('OPENSHIFT_BUILD_COMMIT', '')
         return response
 
@@ -83,11 +86,11 @@ async def private_service():
     np_svc_prep_data.prepare_data()
 
     json_data = await request.get_json()
-    list_dist = json_data.get("list_dist")
-    list_desc = json_data.get("list_desc")
-    list_name = json_data.get("list_name")
-    dict_substitution = json_data.get("dict_substitution")
-    dict_synonyms = json_data.get("dict_synonyms")
+    list_dist = json_data.get('list_dist')
+    list_desc = json_data.get('list_desc')
+    list_name = json_data.get('list_name')
+    dict_substitution = json_data.get('dict_substitution')
+    dict_synonyms = json_data.get('dict_synonyms')
     matches = json_data.get('names')
 
     app.logger.debug('Number of matches: {0}'.format(len(matches)))
@@ -99,6 +102,5 @@ async def private_service():
     return jsonify(result=result)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(port=7000, host='localhost')
-
