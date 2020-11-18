@@ -324,7 +324,7 @@ def remove_spaces_list(lst):
 
 
 def remove_double_letters(name):
-    return re.sub(r'([a-zA-Z])\1+', r'\1', name)
+    return re.sub(r'\b(([a-zA-Z])\2+)\b|([a-zA-Z])\3+', r'\1\3', name)
 
 
 def list_to_string(lst):
