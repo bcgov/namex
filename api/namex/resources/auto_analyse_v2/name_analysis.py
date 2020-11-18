@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2020 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ class NameAnalysisResource(Resource):
                                json=json_input,
                                headers=headers,
                                timeout=20.0)
-            return rv
+            return rv.json(), rv.status_code
         except (exceptions.ConnectionError, exceptions.Timeout):
             return {'message': 'Unable to create name analyze request.'}, HTTPStatus.SERVICE_UNAVAILABLE
 
@@ -136,7 +136,7 @@ class NameAnalysisResource(Resource):
             auto_analyze_svc_url = '{}/{}'.format(current_app.config.get('AUTO_ANALYZE_URL'), identifier)
             headers = {}
             rv = requests.get(url=auto_analyze_svc_url, headers=headers, timeout=20.0)
-            return rv
+            return rv.json(), rv.status_code
 
         except (exceptions.ConnectionError, exceptions.Timeout) as err:
             current_app.logger.error(f'Auto Analyze connection failure for {identifier}', err)
@@ -154,7 +154,7 @@ class NameAnalysisResource(Resource):
             auto_analyze_svc_url = '{}/{}'.format(current_app.config.get('AUTO_ANALYZE_URL'), identifier)
             headers = {}
             rv = requests.delete(url=auto_analyze_svc_url, headers=headers, timeout=20.0)
-            return rv
+            return rv.json(), rv.status_code
 
         except (exceptions.ConnectionError, exceptions.Timeout) as err:
             current_app.logger.error(f'Auto Analyze connection failure for {identifier}', err)
