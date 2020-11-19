@@ -1,4 +1,4 @@
-.PHONY: setup
+.PHONY: setup build-req clean clean-build clean-pyc clean-test
 
 .PHONY: flake8
 
@@ -12,7 +12,28 @@ current_abs_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
+clean: clean-build clean-pyc clean-test
+	rm -rf venv/
 
+clean-build:
+	rm -fr build/
+	rm -fr dist/
+	rm -fr .eggs/
+	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.egg' -exec rm -f {} +
+
+clean-pyc:
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+	find . -name '__pycache__' -exec rm -fr {} +
+
+clean-test:
+	find . -name '.pytest_cache' -exec rm -fr {} +
+	rm -fr .tox/
+	rm -f .coverage
+	rm -fr htmlcov/
+	
 setup: setup-venv
 
 venv/bin/activate: requirements/prod.txt requirements/dev.txt

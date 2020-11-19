@@ -1,5 +1,5 @@
 from flask import current_app
-from flask_restplus import Resource
+from flask_restx import Resource
 
 from namex.utils.logging import setup_logging
 
@@ -107,7 +107,7 @@ class AbstractNROResource(Resource):
             raise NameRequestException(message='Invalid state exception [' + name_request.stateCd + '], cannot update Name Request in NRO when Request state is NOT in DRAFT or CANCELLED')
 
     def lock_request_in_nro(self, name_request, on_success=None):
-        nro_warnings = self.nro_service.checkin_checkout_nr(name_request,'LOCK')
+        nro_warnings = self.nro_service.checkin_checkout_nr(name_request, 'LOCK')
 
     def unlock_request_in_nro(self, name_request, on_success=None):
         nro_warnings = self.nro_service.checkin_checkout_nr(name_request, 'UNLOCK')

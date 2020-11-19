@@ -1,5 +1,5 @@
 from flask import request, jsonify, current_app
-from flask_restplus import Namespace, Resource, cors, fields as rp_fields
+from flask_restx import Namespace, Resource, cors, fields as rp_fields
 from marshmallow import Schema, validates, ValidationError, fields as ma_fields
 from namex import jwt
 
@@ -39,7 +39,7 @@ class DocumentSchema(Schema):
 
 
 @cors_preflight("POST")
-@api.route(':<string:analysis>', methods=['POST' ,'OPTIONS'])
+@api.route(':<string:analysis>', methods=['POST', 'OPTIONS'])
 class DocumentAnalysis(Resource):
     """
         :param analysis (str): the type of analysis to perform
@@ -56,7 +56,6 @@ class DocumentAnalysis(Resource):
         'content': rp_fields.String(description='string content of the document', required=True),
     })
 
-
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
@@ -67,8 +66,7 @@ class DocumentAnalysis(Resource):
 
         if analysis.lower() not in VALID_ANALYSIS:
             current_app.logger.info('requested analysis:{} is not valid'.format(analysis.lower()))
-            return jsonify \
-                (message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404
+            return jsonify(message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404
 
         json_input = request.get_json()
         if not json_input:

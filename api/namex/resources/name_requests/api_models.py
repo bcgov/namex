@@ -1,4 +1,4 @@
-from flask_restplus import fields
+from flask_restx import fields
 from .api_namespace import api
 
 applicant_model = api.model('applicant_model', {

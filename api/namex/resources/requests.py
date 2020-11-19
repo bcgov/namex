@@ -3,7 +3,7 @@
 TODO: Fill in a larger description once the API is defined for V1
 """
 from flask import request, jsonify, g, current_app, get_flashed_messages
-from flask_restplus import Namespace, Resource, fields, cors
+from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
@@ -75,7 +75,7 @@ class Echo(Resource):
 
 #################### QUEUES #######################
 @cors_preflight("GET")
-@api.route('/queues/@me/oldest', methods=['GET','OPTIONS'])
+@api.route('/queues/@me/oldest', methods=['GET', 'OPTIONS'])
 class RequestsQueue(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
     and assigns it to your auth id, and marks it as INPROGRESS
@@ -141,15 +141,15 @@ class Requests(Resource):
                                       'reqType': fields.String('The name request type')
                                       })
 
-    START=0
-    ROWS=10
+    START = 0
+    ROWS = 10
 
     # search_request_schemas = RequestsSchema(many=True)
-        # ,exclude=['id'
-        #     ,'applicants'
-        #     ,'partnerNS'
-        #     ,'requestId'
-        #     ,'previousRequestId'])
+    # ,exclude=['id'
+    #     ,'applicants'
+    #     ,'partnerNS'
+    #     ,'requestId'
+    #     ,'previousRequestId'])
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -157,7 +157,7 @@ class Requests(Resource):
     def get(*args, **kwargs):
         # validate row & start params
         start = request.args.get('start', Requests.START)
-        rows = request.args.get('rows',Requests.ROWS)
+        rows = request.args.get('rows', Requests.ROWS)
         try:
             start = int(start)
             rows = int(rows)
@@ -185,7 +185,7 @@ class Requests(Resource):
         col_keys = cols.keys()
         sort_by = ''
         order_list = ''
-        for k,v in ((x.split(":")) for x in order.split(',')):
+        for k, v in ((x.split(":")) for x in order.split(',')):
             vl = v.lower()
             if (k in col_keys) and (vl == 'asc' or vl == 'desc'):
                 if len(sort_by) > 0:
@@ -205,17 +205,18 @@ class Requests(Resource):
         current_hour = int(request.args.get('hour', 0))
 
         q = RequestDAO.query.filter()
-        if queue: q = q.filter(RequestDAO.stateCd.in_(queue))
+        if queue:
+            q = q.filter(RequestDAO.stateCd.in_(queue))
 
         if nrNum:
             nrNum = nrNum.replace('NR', '').strip()
             nrNum = nrNum.replace('nr', '').strip()
-            nrNum = '%'+nrNum+'%'
+            nrNum = '%' + nrNum + '%'
             q = q.filter(RequestDAO.nrNum.like(nrNum))
         if activeUser:
-            q = q.join(RequestDAO.activeUser).filter(User.username.ilike('%'+activeUser+'%'))
+            q = q.join(RequestDAO.activeUser).filter(User.username.ilike('%' + activeUser + '%'))
 
-        #TODO: fix count on search by compName -- returns count of all names that match
+        # TODO: fix count on search by compName -- returns count of all names that match
         # -- want it to be all NRs (nrs can have multiple names that match)
         # ---- right now count is adjusted on the frontend in method 'populateTable'
         if compName:
@@ -236,13 +237,13 @@ class Requests(Resource):
                 'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour)))
         elif submittedInterval == '7 days':
             q = q.filter(RequestDAO.submittedDate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24*6)))
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 6)))
         elif submittedInterval == '30 days':
             q = q.filter(RequestDAO.submittedDate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24*29)))
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 29)))
         elif submittedInterval == '90 days':
             q = q.filter(RequestDAO.submittedDate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24*89)))
+                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 89)))
         elif submittedInterval == '1 year':
             q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'1 YEARS\''))
         elif submittedInterval == '3 years':
@@ -255,20 +256,20 @@ class Requests(Resource):
                 '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour)))
         if lastUpdateInterval == 'Yesterday':
             today_offset = current_hour
-            yesterday_offset = today_offset+24
+            yesterday_offset = today_offset + 24
             q = q.filter(RequestDAO.lastUpdate < text(
                 '(now() at time zone \'utc\') - INTERVAL \'{today_offset} HOURS\''.format(today_offset=today_offset)))
             q = q.filter(RequestDAO.lastUpdate > text(
                 '(now() at time zone \'utc\') - INTERVAL \'{yesterday_offset} HOURS\''.format(yesterday_offset=yesterday_offset)))
         elif lastUpdateInterval == '2 days':
             q = q.filter(RequestDAO.lastUpdate > text(
-                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour+24)))
+                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24)))
         elif lastUpdateInterval == '7 days':
             q = q.filter(RequestDAO.lastUpdate > text(
-                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24*6)))
+                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 6)))
         elif lastUpdateInterval == '30 days':
             q = q.filter(RequestDAO.lastUpdate > text(
-                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24*29)))
+                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 29)))
 
         q = q.order_by(text(sort_by))
 
@@ -281,14 +282,14 @@ class Requests(Resource):
         q = q.limit(rows)
 
         # create the response
-        rep = {'response':{'start':start,
-                           'rows': rows,
-                           'numFound': count,
-                           'numPriorities': 0,
-                           'numUpdatedToday': 0,
-                           'queue': queue,
-                           'order': order_list
-                           },
+        rep = {'response': {'start': start,
+                            'rows': rows,
+                            'numFound': count,
+                            'numPriorities': 0,
+                            'numUpdatedToday': 0,
+                            'queue': queue,
+                            'order': order_list
+                            },
                'nameRequests': request_search_schemas.dump(q.all())
                }
 
@@ -322,14 +323,14 @@ class Request(Resource):
     def get(nr):
 
         # return jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
-        return jsonify(RequestDAO.query.filter_by(nrNum =nr.upper()).first_or_404().json())
+        return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
 
     @staticmethod
     # @cors.crossdomain(origin='*')
     @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def delete(nr):
 
-        return '', 501 # not implemented
+        return '', 501  # not implemented
         # nrd = RequestDAO.find_by_nr(nr)
         # even if not found we still return a 204, which is expected spec behaviour
         # if nrd:
@@ -357,7 +358,7 @@ class Request(Resource):
         """
 
         # do the cheap check first before the more expensive ones
-        #check states
+        # check states
         json_input = request.get_json()
         if not json_input:
             return jsonify({'message': 'No input data provided'}), 400
@@ -448,7 +449,6 @@ class Request(Resource):
                     if nrd.stateCd == State.CONDITIONAL and nrd.consentFlag is None:
                         nrd.consentFlag = 'Y'
 
-
                 ### COMMENTS ###
                 # we only add new comments, we do not change existing comments
                 # - we can find new comments in json as those with no ID
@@ -470,9 +470,8 @@ class Request(Resource):
 
                 ### END comments ###
 
-
             ### PREVIOUS STATE ###
-            #- None (null) is a valid value for Previous State
+            # - None (null) is a valid value for Previous State
             if 'previousStateCd' in json_input.keys():
                 nrd.previousStateCd = json_input.get('previousStateCd', None)
 
@@ -551,7 +550,6 @@ class Request(Resource):
                 json_input['submittedDate'] = str(datetime.datetime.strptime(
                     str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
-
             if json_input.get('consent_dt', None):
                 json_input['consent_dt'] = str(datetime.datetime.strptime(
                     str(json_input['consent_dt'][5:]), '%d %b %Y %H:%M:%S %Z'))
@@ -577,7 +575,6 @@ class Request(Resource):
                 if warnings:
                     MessageServices.add_message(MessageServices.WARN, 'nro_lock', warnings)
 
-
             ### REQUEST HEADER ###
 
             # update request header
@@ -598,8 +595,8 @@ class Request(Resource):
             nrd.natureBusinessInfo = convert_to_ascii(json_input.get('natureBusinessInfo', None))
             nrd.stateCd = state
             nrd.userId = user.id
-            nrd.consentFlag = json_input.get('consentFlag',None)
-            nrd.consent_dt = json_input.get('consent_dt',None)
+            nrd.consentFlag = json_input.get('consentFlag', None)
+            nrd.consent_dt = json_input.get('consent_dt', None)
 
             if reset:
                 # set the flag indicating that the NR has been reset
@@ -620,26 +617,32 @@ class Request(Resource):
             if state in State.COMPLETED_STATE + [State.CANCELLED]:
                 nrd.hasBeenReset = False
 
-
             # check if any of the Oracle db fields have changed, so we can send them back
             is_changed__request = False
             is_changed__previous_request = False
             is_changed__request_state = False
             is_changed_consent = False
-            if nrd.requestTypeCd != orig_nrd['requestTypeCd']: is_changed__request = True
-            if nrd.expirationDate != orig_nrd['expirationDate']: is_changed__request = True
-            if nrd.xproJurisdiction != orig_nrd['xproJurisdiction']: is_changed__request = True
-            if nrd.additionalInfo != orig_nrd['additionalInfo']: is_changed__request = True
-            if nrd.natureBusinessInfo != orig_nrd['natureBusinessInfo']: is_changed__request = True
-            if nrd.previousRequestId != orig_nrd['previousRequestId']: is_changed__previous_request = True
-            if nrd.stateCd != orig_nrd['state']: is_changed__request_state = True
-            if nrd.consentFlag != orig_nrd['consentFlag'] : is_changed_consent = True
+            if nrd.requestTypeCd != orig_nrd['requestTypeCd']:
+                is_changed__request = True
+            if nrd.expirationDate != orig_nrd['expirationDate']:
+                is_changed__request = True
+            if nrd.xproJurisdiction != orig_nrd['xproJurisdiction']:
+                is_changed__request = True
+            if nrd.additionalInfo != orig_nrd['additionalInfo']:
+                is_changed__request = True
+            if nrd.natureBusinessInfo != orig_nrd['natureBusinessInfo']:
+                is_changed__request = True
+            if nrd.previousRequestId != orig_nrd['previousRequestId']:
+                is_changed__previous_request = True
+            if nrd.stateCd != orig_nrd['state']:
+                is_changed__request_state = True
+            if nrd.consentFlag != orig_nrd['consentFlag']:
+                is_changed_consent = True
 
-            #Need this for a re-open
+            # Need this for a re-open
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
-               nrd.consentFlag = None
-               nrd.consent_dt = None
-
+                nrd.consentFlag = None
+                nrd.consent_dt = None
 
             ### END request header ###
 
@@ -656,7 +659,6 @@ class Request(Resource):
                     if errm:
                         # return jsonify(errm), 400
                         MessageServices.add_message(MessageServices.ERROR, 'applicants_validation', errm)
-
 
                     applicant_schema.load(appl, instance=applicants_d, partial=True)
 
@@ -679,30 +681,45 @@ class Request(Resource):
                     applicants_d.countryTypeCd = convert_to_ascii(applicants_d.countryTypeCd)
 
                     # check if any of the Oracle db fields have changed, so we can send them back
-                    if applicants_d.lastName != orig_applicant['lastName']: is_changed__applicant = True
-                    if applicants_d.firstName != orig_applicant['firstName']: is_changed__applicant = True
-                    if applicants_d.middleName != orig_applicant['middleName']: is_changed__applicant = True
-                    if applicants_d.phoneNumber != orig_applicant['phoneNumber']: is_changed__applicant = True
-                    if applicants_d.faxNumber != orig_applicant['faxNumber']: is_changed__applicant = True
-                    if applicants_d.emailAddress != orig_applicant['emailAddress']: is_changed__applicant = True
-                    if applicants_d.contact != orig_applicant['contact']: is_changed__applicant = True
-                    if applicants_d.clientFirstName != orig_applicant['clientFirstName']: is_changed__applicant = True
-                    if applicants_d.clientLastName != orig_applicant['clientLastName']: is_changed__applicant = True
-                    if applicants_d.declineNotificationInd != orig_applicant['declineNotificationInd']: is_changed__applicant = True
-                    if applicants_d.addrLine1 != orig_applicant['addrLine1']: is_changed__address = True
-                    if applicants_d.addrLine2 != orig_applicant['addrLine2']: is_changed__address = True
-                    if applicants_d.addrLine3 != orig_applicant['addrLine3']: is_changed__address = True
-                    if applicants_d.city != orig_applicant['city']: is_changed__address = True
-                    if applicants_d.postalCd != orig_applicant['postalCd']: is_changed__address = True
-                    if applicants_d.stateProvinceCd != orig_applicant['stateProvinceCd']: is_changed__address = True
-                    if applicants_d.countryTypeCd != orig_applicant['countryTypeCd']: is_changed__address = True
+                    if applicants_d.lastName != orig_applicant['lastName']:
+                        is_changed__applicant = True
+                    if applicants_d.firstName != orig_applicant['firstName']:
+                        is_changed__applicant = True
+                    if applicants_d.middleName != orig_applicant['middleName']:
+                        is_changed__applicant = True
+                    if applicants_d.phoneNumber != orig_applicant['phoneNumber']:
+                        is_changed__applicant = True
+                    if applicants_d.faxNumber != orig_applicant['faxNumber']:
+                        is_changed__applicant = True
+                    if applicants_d.emailAddress != orig_applicant['emailAddress']:
+                        is_changed__applicant = True
+                    if applicants_d.contact != orig_applicant['contact']:
+                        is_changed__applicant = True
+                    if applicants_d.clientFirstName != orig_applicant['clientFirstName']:
+                        is_changed__applicant = True
+                    if applicants_d.clientLastName != orig_applicant['clientLastName']:
+                        is_changed__applicant = True
+                    if applicants_d.declineNotificationInd != orig_applicant['declineNotificationInd']:
+                        is_changed__applicant = True
+                    if applicants_d.addrLine1 != orig_applicant['addrLine1']:
+                        is_changed__address = True
+                    if applicants_d.addrLine2 != orig_applicant['addrLine2']:
+                        is_changed__address = True
+                    if applicants_d.addrLine3 != orig_applicant['addrLine3']:
+                        is_changed__address = True
+                    if applicants_d.city != orig_applicant['city']:
+                        is_changed__address = True
+                    if applicants_d.postalCd != orig_applicant['postalCd']:
+                        is_changed__address = True
+                    if applicants_d.stateProvinceCd != orig_applicant['stateProvinceCd']:
+                        is_changed__address = True
+                    if applicants_d.countryTypeCd != orig_applicant['countryTypeCd']:
+                        is_changed__address = True
 
                 else:
                     applicants_d.delete_from_db()
                     is_changed__applicant = True
                     is_changed__address = True
-
-
 
             ### END applicants ###
 
@@ -722,7 +739,6 @@ class Request(Resource):
                 new_name_choice.name = convert_to_ascii(new_name_choice.name)
 
                 nrd.names.append(new_name_choice)
-
 
             for nrd_name in nrd.names.all():
 
@@ -748,8 +764,10 @@ class Request(Resource):
 
                         nrd.names.append(new_name_choice)
 
-                        if new_name_choice.choice == 2: is_changed__name2 = True
-                        if new_name_choice.choice == 3: is_changed__name3 = True
+                        if new_name_choice.choice == 2:
+                            is_changed__name2 = True
+                        if new_name_choice.choice == 3:
+                            is_changed__name3 = True
 
                     elif nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
@@ -777,27 +795,28 @@ class Request(Resource):
                         # convert data to ascii, removing data that won't save to Oracle
                         # - also force uppercase
                         nrd_name.name = convert_to_ascii(nrd_name.name)
-                        if (nrd_name.name is not None): nrd_name.name = nrd_name.name.upper()
+                        if (nrd_name.name is not None):
+                            nrd_name.name = nrd_name.name.upper()
 
                         # check if any of the Oracle db fields have changed, so we can send them back
                         # - this is only for editing a name from the Edit NR section, NOT making a decision
                         if nrd_name.name != orig_name['name']:
                             if nrd_name.choice == 1:
                                 is_changed__name1 = True
-                                json_input['comments'].append({'comment': 'Name choice 1 changed from {0} to {1}'\
-                                                                    .format(orig_name['name'], nrd_name.name)})
+                                json_input['comments'].append({'comment': 'Name choice 1 changed from {0} to {1}'
+                                                               .format(orig_name['name'], nrd_name.name)})
                             if nrd_name.choice == 2:
                                 is_changed__name2 = True
                                 if not nrd_name.name:
                                     deleted_names[nrd_name.choice - 1] = True
-                                json_input['comments'].append({'comment': 'Name choice 2 changed from {0} to {1}'\
-                                                                    .format(orig_name['name'], nrd_name.name)})
+                                json_input['comments'].append({'comment': 'Name choice 2 changed from {0} to {1}'
+                                                               .format(orig_name['name'], nrd_name.name)})
                             if nrd_name.choice == 3:
                                 is_changed__name3 = True
                                 if not nrd_name.name:
                                     deleted_names[nrd_name.choice - 1] = True
-                                json_input['comments'].append({'comment': 'Name choice 3 changed from {0} to {1}'\
-                                                                    .format(orig_name['name'], nrd_name.name)})
+                                json_input['comments'].append({'comment': 'Name choice 3 changed from {0} to {1}'
+                                                               .format(orig_name['name'], nrd_name.name)})
             ### END names ###
 
             ### COMMENTS ###
@@ -844,17 +863,21 @@ class Request(Resource):
                         nrd_nwpta.partnerName = convert_to_ascii(nrd_nwpta.partnerName)
                         nrd_nwpta.partnerNameNumber = convert_to_ascii(nrd_nwpta.partnerNameNumber)
 
-
                         # check if any of the Oracle db fields have changed, so we can send them back
                         tmp_is_changed = False
-                        if nrd_nwpta.partnerNameTypeCd != orig_nwpta['partnerNameTypeCd']: tmp_is_changed = True
-                        if nrd_nwpta.partnerNameNumber != orig_nwpta['partnerNameNumber']: tmp_is_changed = True
-                        if nrd_nwpta.partnerNameDate != orig_nwpta['partnerNameDate']: tmp_is_changed = True
-                        if nrd_nwpta.partnerName != orig_nwpta['partnerName']: tmp_is_changed = True
+                        if nrd_nwpta.partnerNameTypeCd != orig_nwpta['partnerNameTypeCd']:
+                            tmp_is_changed = True
+                        if nrd_nwpta.partnerNameNumber != orig_nwpta['partnerNameNumber']:
+                            tmp_is_changed = True
+                        if nrd_nwpta.partnerNameDate != orig_nwpta['partnerNameDate']:
+                            tmp_is_changed = True
+                        if nrd_nwpta.partnerName != orig_nwpta['partnerName']:
+                            tmp_is_changed = True
                         if tmp_is_changed:
-                            if nrd_nwpta.partnerJurisdictionTypeCd == 'AB': is_changed__nwpta_ab = True
-                            if nrd_nwpta.partnerJurisdictionTypeCd == 'SK': is_changed__nwpta_sk = True
-
+                            if nrd_nwpta.partnerJurisdictionTypeCd == 'AB':
+                                is_changed__nwpta_ab = True
+                            if nrd_nwpta.partnerJurisdictionTypeCd == 'SK':
+                                is_changed__nwpta_sk = True
 
             ### END nwpta ###
 
@@ -864,7 +887,6 @@ class Request(Resource):
                 for we in warning_and_errors:
                     if we['type'] == MessageServices.ERROR:
                         return jsonify(errors=warning_and_errors), 400
-
 
             # update oracle if this nr was reset
             # - first set status to H via name_examination proc, which handles clearing all necessary data and states
@@ -893,13 +915,13 @@ class Request(Resource):
                     'is_changed__nwpta_ab': False,
                     'is_changed__nwpta_sk': False,
                     'is_changed__request_state': is_changed__request_state,
-                    'is_changed_consent':  is_changed_consent
+                    'is_changed_consent': is_changed_consent
                 }
                 warnings = nro.change_nr(nrd, change_flags)
                 if warnings:
                     MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
 
-            ### Update NR Details in NRO (not for reset)
+            # Update NR Details in NRO (not for reset)
             else:
                 try:
                     change_flags = {
@@ -922,7 +944,7 @@ class Request(Resource):
                         if warnings:
                             MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
                         else:
-                            ### now it's safe to delete any names that were blanked out
+                            # now it's safe to delete any names that were blanked out
                             for nrd_name in nrd.names:
                                 if deleted_names[nrd_name.choice - 1]:
                                     nrd_name.delete_from_db()
@@ -937,11 +959,10 @@ class Request(Resource):
                     if we['type'] == MessageServices.ERROR:
                         return jsonify(errors=warning_and_errors), 400
 
-            ### Finally save the entire graph
+            # Finally save the entire graph
             nrd.save_to_db()
 
             EventRecorder.record(user, Event.PUT, nrd, json_input)
-
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400
@@ -965,7 +986,7 @@ class Request(Resource):
 
 
 @cors_preflight("GET")
-@api.route('/<string:nr>/analysis/<int:choice>/<string:analysis_type>', methods=['GET','OPTIONS'])
+@api.route('/<string:nr>/analysis/<int:choice>/<string:analysis_type>', methods=['GET', 'OPTIONS'])
 class RequestsAnalysis(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
     and assigns it to your auth id
@@ -987,7 +1008,7 @@ class RequestsAnalysis(Resource):
     @jwt.requires_auth
     def get(nr, choice, analysis_type, *args, **kwargs):
         start = request.args.get('start', RequestsAnalysis.START)
-        rows = request.args.get('rows',RequestsAnalysis.ROWS)
+        rows = request.args.get('rows', RequestsAnalysis.ROWS)
 
         if analysis_type not in ANALYTICS_VALID_ANALYSIS:
             return jsonify(message='{analysis_type} is not a valid analysis type for that name choice'
@@ -1013,8 +1034,9 @@ class RequestsAnalysis(Resource):
             return jsonify(message=msg), code
         return jsonify(results), 200
 
+
 @cors_preflight("GET")
-@api.route('/synonymbucket/<string:name>/<string:advanced_search>', methods=['GET','OPTIONS'])
+@api.route('/synonymbucket/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
 class SynonymBucket(Resource):
     START = 0
     ROWS = 1000
@@ -1031,8 +1053,9 @@ class SynonymBucket(Resource):
             return jsonify(message=msg), code
         return jsonify(results), 200
 
+
 @cors_preflight("GET")
-@api.route('/cobrsphonetics/<string:name>/<string:advanced_search>', methods=['GET','OPTIONS'])
+@api.route('/cobrsphonetics/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
 class CobrsPhoneticBucket(Resource):
     START = 0
     ROWS = 500
@@ -1050,8 +1073,9 @@ class CobrsPhoneticBucket(Resource):
             return jsonify(message=msg), code
         return jsonify(results), 200
 
+
 @cors_preflight("GET")
-@api.route('/phonetics/<string:name>/<string:advanced_search>', methods=['GET','OPTIONS'])
+@api.route('/phonetics/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
 class PhoneticBucket(Resource):
     START = 0
     ROWS = 100000
@@ -1059,7 +1083,7 @@ class PhoneticBucket(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    def get(name, advanced_search,*args, **kwargs):
+    def get(name, advanced_search, *args, **kwargs):
         start = request.args.get('start', PhoneticBucket.START)
         rows = request.args.get('rows', PhoneticBucket.ROWS)
         name = '' if name == '*' else name
@@ -1069,8 +1093,9 @@ class PhoneticBucket(Resource):
             return jsonify(message=msg), code
         return jsonify(results), 200
 
+
 @cors_preflight("GET, PUT, PATCH")
-@api.route('/<string:nr>/names/<int:choice>', methods=['GET', "PUT", "PATCH",'OPTIONS'])
+@api.route('/<string:nr>/names/<int:choice>', methods=['GET', "PUT", "PATCH", 'OPTIONS'])
 class NRNames(Resource):
 
     @staticmethod
@@ -1190,6 +1215,7 @@ class DecisionReasons(Resource):
             response.append(reason.json())
         return jsonify(response), 200
 
+
 @cors_preflight("GET")
 @api.route('/<string:nr>/syncnr', methods=['GET', 'OPTIONS'])
 class SyncNR(Resource):
@@ -1238,7 +1264,7 @@ class Stats(Resource):
 
         try:
             rows = int(rows)
-            start = (int(start)-1) * rows
+            start = (int(start) - 1) * rows
         except Exception as err:
             current_app.logger.info('start or rows not an int, err: {}'.format(err))
             return jsonify({'message': 'paging parameters were not integers'}), 406
@@ -1266,8 +1292,9 @@ class Stats(Resource):
         }
         return jsonify(rep)
 
+
 @cors_preflight("POST")
-@api.route('/<string:nr>/comments', methods=["POST",'OPTIONS'])
+@api.route('/<string:nr>/comments', methods=["POST", 'OPTIONS'])
 class NRComment(Resource):
 
     @staticmethod
@@ -1281,13 +1308,12 @@ class NRComment(Resource):
         if not nrd:
             return None, jsonify({"message": "{nr} not found".format(nr=nr)}), 404
 
-
         return nrd, None, 200
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
-    def post(nr,*args, **kwargs):
+    def post(nr, *args, **kwargs):
         json_data = request.get_json()
 
         if not json_data:
@@ -1321,7 +1347,7 @@ class NRComment(Resource):
             return jsonify({'message': 'No User'}), 404
 
         if json_data.get('comment') is None:
-            return jsonify({"message": "No comment supplied"}),400
+            return jsonify({"message": "No comment supplied"}), 400
 
         comment_instance = Comment()
         comment_instance.examinerId = user.id

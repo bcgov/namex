@@ -1,4 +1,4 @@
-from flask_restplus import Api
+from flask_restx import Api
 
 from .requests import api as nr_api
 from .ops import api as nr_ops
@@ -16,7 +16,6 @@ from .auto_analyse.paths import bc_name_analysis_api, xpro_name_analysis_api
 from .mras import mras_profile_api
 from .colin import colin_api
 from .statistics.wait_time_statistics import api as wait_time_stats_api
-
 
 
 # This will add the Authorize button to the swagger docs

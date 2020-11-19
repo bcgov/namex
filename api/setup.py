@@ -8,15 +8,15 @@ def is_package(path):
     return (
         os.path.isdir(path) and
         os.path.isfile(os.path.join(path, '__init__.py'))
-        )
+    )
 
 
-def find_packages(path, base="" ):
+def find_packages(path, base=""):
     """ Find all packages in path """
     packages = {}
     for item in os.listdir(path):
         dir = os.path.join(path, item)
-        if is_package( dir ):
+        if is_package(dir):
             if base:
                 module_name = "%(base)s.%(item)s" % vars()
             else:
@@ -52,8 +52,7 @@ def read(filepath):
 
 
 packages = find_packages(".")
-requirements = read_requirements('requirements/prod.txt')
-
+REQUIREMENTS = read_requirements('requirements.txt')
 
 setup(
     name='namex',
@@ -62,43 +61,13 @@ setup(
     package_dir=packages,
     include_package_data=True,
     license=read('LICENSE'),
-    long_description =read('README.md'),
-    install_requires=[
-        'Flask',
-        'Flask-Migrate',
-        'Flask-Script',
-        'Flask-Moment',
-        'Flask-SQLAlchemy',
-        'Flask-RESTplus',
-        'Flask-Marshmallow',
-        'flask-jwt-oidc',
-        'python-dotenv',
-        'psycopg2-binary',
-        'cx_Oracle',
-        'marshmallow',
-        'marshmallow-sqlalchemy',
-    ],
+    long_description=read('README.md'),
+    install_requires=REQUIREMENTS,
     setup_requires=[
         'pytest-runner',
     ],
     tests_require=[
         'pytest',
         'pytest-mock'
-    ],
-    classifiers=[
-          'Development Status :: Beta',
-          'Environment :: Console',
-          'Environment :: Web API',
-          'Intended Audience :: API Service Users',
-          'Intended Audience :: Developers',
-          'Intended Audience :: System Administrators',
-          'License :: OSI Approved :: Apache 2.0 License',
-          'Operating System :: MacOS :: MacOS X',
-          'Operating System :: Microsoft :: Windows',
-          'Operating System :: POSIX',
-          'Programming Language :: Python',
-          'Topic :: Communications :: Email',
-          'Topic :: Office/Business :: BC Government Registries',
-          'Topic :: Software Development :: GitHub Issue Tracking',
     ],
 )

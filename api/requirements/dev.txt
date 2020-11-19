@@ -1,6 +1,3 @@
-# Everything the developer needs in addition to the production requirements
--r prod.txt
-
 # Testing
 pytest
 pytest-mock

@@ -1,5 +1,5 @@
 from flask import request, make_response, jsonify
-from flask_restplus import Resource, cors, fields
+from flask_restx import Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging
@@ -56,7 +56,7 @@ class PaymentFees(Resource):
             json_input = request.get_json()
             if not json_input:
                 return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
-            
+
             corp_type = json_input.get('corp_type', 'NRO')  # TODO: Maybe use a constant for this, it's the default corp_type, and I am not aware of a situation where it would be changed...
             filing_type_code = json_input.get('filing_type_code')  # TODO: Maybe throw an error if these don't exist, we can't really get fees without them
             jurisdiction = json_input.get('jurisdiction', None)  # TODO: Maybe throw an error if these don't exist, we can't really get fees without them

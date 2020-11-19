@@ -6,7 +6,7 @@ from namex.utils.api_resource import handle_exception
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 from namex.services.exceptions import ApiServiceException
 from namex.utils.logging import setup_logging
-from flask_restplus import Namespace, Resource, cors, fields
+from flask_restx import Namespace, Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
 from http import HTTPStatus
@@ -26,7 +26,7 @@ def handle_auth_error(ex):
 
 
 @cors_preflight('GET')
-@api.route('/', strict_slashes=False, methods=['GET','OPTIONS'])
+@api.route('/', strict_slashes=False, methods=['GET', 'OPTIONS'])
 class WaitTimeStats(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
