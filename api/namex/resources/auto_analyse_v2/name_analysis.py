@@ -17,7 +17,7 @@ Provides end points to submit, retrieve and cancel a name analysis request.
 from http import HTTPStatus
 
 from flask import current_app, request
-from flask_restplus import Resource, cors, fields
+from flask_restx import Resource, cors, fields
 import requests  # noqa: I001; grouping out of order to make both pylint & isort happy
 from requests import exceptions  # noqa: I001; grouping out of order to make both pylint & isort happy
 
