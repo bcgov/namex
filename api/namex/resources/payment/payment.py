@@ -4,7 +4,7 @@ from datetime import datetime
 from dateutil import parser as dateutil_parser
 
 from flask import current_app, request, make_response, jsonify
-from flask_restplus import cors, fields
+from flask_restx import cors, fields
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging

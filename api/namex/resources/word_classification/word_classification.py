@@ -1,5 +1,5 @@
 from flask import jsonify, make_response, request
-from flask_restplus import Namespace, Resource, cors, fields
+from flask_restx import Namespace, Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
 from http import HTTPStatus
@@ -91,7 +91,7 @@ class WordClassification(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    #@jwt.requires_roles([User.APPROVER])
+    # @jwt.requires_roles([User.APPROVER])
     # @api.marshal_with(word_classification)
     @api.expect(word_request)
     def put(word):

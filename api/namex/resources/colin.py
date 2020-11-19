@@ -3,7 +3,7 @@ import json
 import requests
 
 from flask import current_app, jsonify
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 
 from namex.utils.auth import cors_preflight, get_client_credentials, MSG_CLIENT_CREDENTIALS_REQ_FAILED
 from namex.utils.api_resource import handle_exception

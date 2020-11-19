@@ -4,7 +4,7 @@ from lxml import etree  # Don't worry about this it exists... the module is dyna
 import requests
 
 from flask import jsonify
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception

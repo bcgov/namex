@@ -4,7 +4,7 @@ TODO: Fill in a larger description once the API is defined for V1
 """
 
 from flask import make_response, jsonify
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
 
 from namex.utils.auth import cors_preflight
@@ -54,7 +54,7 @@ def validate_name_request(location, entity_type, request_action):
         AnalysisRequestActions.ASSUMED.value,
         AnalysisRequestActions.REN.value,
         AnalysisRequestActions.REH.value
-      ]
+    ]
 
     if not valid_location:
         raise ValueError('Invalid location provided')

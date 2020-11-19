@@ -2,7 +2,7 @@ import re
 from sqlalchemy import func
 
 from flask import request, jsonify, current_app
-from flask_restplus import cors
+from flask_restx import cors
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight

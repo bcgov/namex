@@ -1,5 +1,5 @@
 from flask import jsonify
-from flask_restplus import Resource, Namespace
+from flask_restx import Resource, Namespace
 from namex.utils.run_version import get_run_version
 
 api = Namespace('namexRequestMeta', description='Namex - Metadata')

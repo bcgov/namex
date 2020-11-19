@@ -1,5 +1,5 @@
 from flask import send_file, make_response, jsonify
-from flask_restplus import Resource, cors
+from flask_restx import Resource, cors
 from flask_jwt_oidc import AuthError
 
 from namex.utils.logging import setup_logging

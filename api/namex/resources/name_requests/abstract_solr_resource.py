@@ -1,7 +1,7 @@
 import pysolr
 
 from flask import current_app
-from flask_restplus import Resource
+from flask_restx import Resource
 
 from namex.utils.logging import setup_logging
 from namex.models import State

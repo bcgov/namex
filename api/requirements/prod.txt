@@ -4,7 +4,7 @@ Flask-Migrate
 Flask-Script
 Flask-Moment
 Flask-SQLAlchemy==2.4.1
-Flask-RESTplus==0.13.0
+flask_restx
 Flask-Marshmallow==0.11.0
 flask-jwt-oidc>=0.1.5
 jsonpickle
@@ -22,6 +22,5 @@ lxml
 inflect
 werkzeug==0.16.1
 pysolr
-quart
 
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client

@@ -1,7 +1,7 @@
 from uuid import uuid4
 from datetime import datetime
 from flask import current_app, request, jsonify
-from flask_restplus import cors
+from flask_restx import cors
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
@@ -284,7 +284,7 @@ class NameRequestFields(BaseNameRequestResource):
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, State.DRAFT)
 
-        #set status back to D after Edit is complete
+        # set status back to D after Edit is complete
         nro_warnings = self.unlock_request_in_nro(nr_model)
         if nro_warnings:
             on_success = False
@@ -441,10 +441,10 @@ class NameRequestRollback(BaseNameRequestResource):
             #self.update_records_in_network_services(nr_model, update_solr=True)
             nr_model = self.update_request_in_nro(nr_model, self.on_nro_save_success)
 
-        #delete in solr for temp or real NR because it is cancelled
-        if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL','XCP']:
-                SOLR_CORE = 'possible.conflicts'
-                self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
+        # delete in solr for temp or real NR because it is cancelled
+        if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
+            SOLR_CORE = 'possible.conflicts'
+            self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
