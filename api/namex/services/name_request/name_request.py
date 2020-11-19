@@ -104,10 +104,11 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return name_request
 
-    def create_name(self):
+    @classmethod
+    def create_name(cls):
         try:
             name = Name()
-            name_id = self.get_name_sequence()
+            name_id = cls.get_name_sequence()
             name.id = name_id
             name.state = NameState.NOT_EXAMINED.value
         except Exception as err:
@@ -115,10 +116,11 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return name
 
-    def create_applicant(self):
+    @classmethod
+    def create_applicant(cls):
         try:
             applicant = Applicant()
-            applicant.partyId = self.get_applicant_sequence()
+            applicant.partyId = cls.get_applicant_sequence()
         except Exception as err:
             raise MapRequestApplicantError(err, 'Error setting applicant and / or sequence.')
 
@@ -137,15 +139,16 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return name_request
 
-    def extend_expiry_date(self, name_request, start_date=None,days=56):
+    @classmethod
+    def extend_expiry_date(cls, name_request, start_date=None,days=56):
         start_datetime = start_date if start_date else datetime.utcnow()
         """
-        Extends the expiry date by 56 days from today's date
+        Extends the expiry date by 56 days from today's date.
         :param name_request:
         :return:
         """
         try:
-            name_request.expirationDate = self.create_expiry_date(
+            name_request.expirationDate = cls.create_expiry_date(
                 start=start_datetime,
                 expires_in_days=days,
                 tz=timezone('UTC')
@@ -159,6 +162,7 @@ class NameRequestService(AbstractNameRequestMixin):
         """
         This method maps data from the HTTP request data over to the name request.
         We use this to set draft attributes, header attributes, and comments...
+        You must explicitly call this method when using an instance of the service to map data to properties on the Request model.
         :param name_request:
         :param map_attrs:
         :return:
@@ -210,6 +214,7 @@ class NameRequestService(AbstractNameRequestMixin):
     def map_request_applicants(self, name_request):
         """
         This method maps applicants from the HTTP request data over to the name request.
+        You must explicitly call this method when using an instance of the service to map applicants to the Request model.
         :param name_request:
         :return:
         """
@@ -257,6 +262,7 @@ class NameRequestService(AbstractNameRequestMixin):
     def map_request_names(self, name_request):
         """
         This method maps names from the HTTP request data over to the name request.
+        You must explicitly call this method when using an instance of the service to map names to the Request model.
         :param name_request:
         :return:
         """
@@ -322,7 +328,8 @@ class NameRequestService(AbstractNameRequestMixin):
         return apply_nr_state_change(self, name_request, next_state, on_success_cb)
 
     # CRUD methods
-    def save_request(self, name_request, on_success=None):
+    @classmethod
+    def save_request(cls, name_request, on_success=None):
         try:
             name_request.save_to_db()
             if on_success:
