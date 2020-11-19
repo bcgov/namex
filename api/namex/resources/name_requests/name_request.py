@@ -284,7 +284,7 @@ class NameRequestFields(BaseNameRequestResource):
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr_fields(nr_model, State.DRAFT)
 
-        #set status back to D after Edit is complete
+        # Set status back to D after edit is complete
         nro_warnings = self.unlock_request_in_nro(nr_model)
         if nro_warnings:
             on_success = False
@@ -295,7 +295,6 @@ class NameRequestFields(BaseNameRequestResource):
         return nr_model
 
     def handle_patch_edit(self, nr_model):
-        # TODO: Should we automatically check in a record when an edit is successful?
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -438,10 +437,10 @@ class NameRequestRollback(BaseNameRequestResource):
         # Only update the record in NRO if it's a real NR, otherwise the record won't exist
         if not is_temp_nr_num(nr_model.nrNum):
             # This handles the updates for NRO and Solr, if necessary
-            #self.update_records_in_network_services(nr_model, update_solr=True)
+            # self.update_records_in_network_services(nr_model, update_solr=True)
             nr_model = self.update_request_in_nro(nr_model, self.on_nro_save_success)
 
-        #delete in solr for temp or real NR because it is cancelled
+        # Delete in solr for temp or real NR because it is cancelled
         if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL','XCP']:
                 SOLR_CORE = 'possible.conflicts'
                 self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
