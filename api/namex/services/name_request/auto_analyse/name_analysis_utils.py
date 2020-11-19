@@ -357,6 +357,7 @@ def remove_double_letters_list_dist_words(list_dist, name_tokens, dist_substitut
             name_tokens))
         if dist_substitution_dict:
             dist_substitution_dict[not_double_letters_item] = dist_substitution_dict.pop(item)
-            dist_substitution_dict[not_double_letters_item].append(not_double_letters_item)
+            if not dist_substitution_dict.get(not_double_letters_item):
+                dist_substitution_dict[not_double_letters_item].append(not_double_letters_item)
 
     return list_dist_final, name_tokens, dist_substitution_dict

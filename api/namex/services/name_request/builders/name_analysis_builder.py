@@ -8,7 +8,7 @@ import requests
 from . import EXACT_MATCH, HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY, CURRENT_YEAR, LOWER_LIMIT_TIME, \
     UPPER_LIMIT_TIME, EXCEPTION_YEARS, CURRENT_MONTH, CURRENT_DAY
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
-from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT
+from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT, porter
 from ..auto_analyse.name_analysis_utils import get_conflicts_same_classification, \
     get_all_dict_substitutions, subsequences, remove_double_letters, remove_double_letters_list_dist_words
 
@@ -559,6 +559,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
 
         for key, value in dist_substitution_dict.items():
+            stem_w = porter.stem(key)
+            if stem_w not in value:
+                value.append(stem_w)
             if key not in value:
                 value.append(key)
 
@@ -587,7 +590,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 value.extend(stand_alone)
 
         return desc_synonym_dict
-
 
     def check_name_is_well_formed_response(self, list_original_name, list_name, list_dist, result_code):
         result = ProcedureResult()
