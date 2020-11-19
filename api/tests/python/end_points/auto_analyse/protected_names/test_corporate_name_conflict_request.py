@@ -24,7 +24,9 @@ from ...common import token_header, claims
                              ("LE BLUE CAFE LTD.", "LE BLUE FOX CAFE INC."),
                              ("SWIFT EDUCATION SERVICES LTD", "CANADA SWIFT INTERNATIONAL EDUCATION CORP."),
                              ("CANDID CONSULTING SERVICES LTD.","CANDID COMMUNITY CONSULTING CORP."),
-                             ("SMART SUPPLY LTD.", "COASTAL SMART SUPPLIES LTD.")
+                             ("SMART SUPPLY LTD.", "COASTAL SMART SUPPLIES LTD."),
+                             ("AAA POWER WASHING LTD.", "AAA STREAMLINE POWER WASHING TRUCKING LTD."),
+                             ("AAA POWER WASHING LTD.", "AAA STREAMLINE POWER WASHING TRUCKING LTD.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -84,6 +86,13 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                                  {'word': 'SERVICES', 'classification': 'DESC'},
                                  {'word': 'COMMUNITY', 'classification': 'DIST'},
                                  {'word': 'COMMUNITY', 'classification': 'DESC'},
+                                 {'word': 'AAA', 'classification': 'DIST'},
+                                 {'word': 'POWER', 'classification': 'DIST'},
+                                 {'word': 'POWER', 'classification': 'DESC'},
+                                 {'word': 'WASHING', 'classification': 'DESC'},
+                                 {'word': 'STREAMLINE', 'classification': 'DIST'},
+                                 {'word': 'TRUCKING', 'classification': 'DIST'},
+                                 {'word': 'TRUCKING', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
@@ -95,7 +104,8 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                         'PACIFIC BLUE ENTERPRISES LTD.', 'PACIFIC ENGINEERING LTD.', 'PACIFIC HOLDINGS LTD.',
                         'BLUE PETER HOLDINGS INC.', 'BLUE WATER VENTURES LTD.', 'LE BLUE FOX CAFE INC.',
                         'LE BLUE RESTAURANT LTD.','CANADA SWIFT INTERNATIONAL EDUCATION CORP.',
-                        'COASTAL SMART SUPPLIES LTD.', 'CANDID COMMUNITY CONSULTING CORP.']
+                        'COASTAL SMART SUPPLIES LTD.', 'CANDID COMMUNITY CONSULTING CORP.',
+                        'AAA STREAMLINE POWER WASHING TRUCKING LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
