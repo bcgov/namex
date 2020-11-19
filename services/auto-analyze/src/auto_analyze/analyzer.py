@@ -29,7 +29,6 @@ from namex.services.name_request.builders.name_analysis_builder import NameAnaly
 from nltk.stem import PorterStemmer
 from swagger_client import SynonymsApi as SynonymService
 
-
 porter = PorterStemmer()
 
 synonym_service = SynonymService()
@@ -85,7 +84,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
                                                                                         match_list)
 
         desc_tmp_synonym_dict = builder.get_substitutions_descriptive(service.get_list_desc())
-        dict_synonyms = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
+        desc_tmp_synonym_dict = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
 
         # Update key in desc_db_synonym_dict
         desc_db_synonym_dict = update_dictionary_key(desc_tmp_synonym_dict, dict_synonyms)
@@ -261,17 +260,16 @@ def remove_extra_value(d1, d2):
                     break
                 except ValueError:
                     pass
-            elif (len(set(v1) ^ set(v2)) == 1 and k1 in v2) or len(set(v1) ^ set(v2)) == 0:
-                d1[k2] = d1.pop(k1)
-                break
     return d1
 
 
-def update_dictionary_key(user, db):
-    """Return updates key weights."""
-    user_keys = tuple(user.keys())
-    user_values = tuple(user.values())
-
-    new_db = {user_keys[user_values.index(value)] if value in user_values else key: value for key, value in db.items()}
-
-    return new_db
+def update_dictionary_key(d1, d2):
+    """Update key dictionary in d1 with key in d2."""
+    d3 = {}
+    for k2, v2 in d2.items():
+        for k1, v1 in d1.items():
+            if (len(set(v1) ^ set(v2)) == 1 and k1 in v2) or len(set(v1) ^ set(v2)) == 0:
+                d3[k2] = v1
+            else:
+                d3[k1] = v1
+    return d3
