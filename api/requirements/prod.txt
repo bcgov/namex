@@ -22,6 +22,6 @@ lxml
 inflect
 werkzeug==0.16.1
 pysolr
-dataclasses
+dataclasses==0.8
 
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
