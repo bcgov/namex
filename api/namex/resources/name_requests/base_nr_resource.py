@@ -22,8 +22,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     functionality to communicate with NRO services and Solr.
     """
     _nr_service = None
-    _request_data = None
-    _nr_action = None
 
     @property
     def nr_service(self):
@@ -35,22 +33,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
             raise NameRequestException(err, message='Error initializing NameRequestService')
 
         return self._nr_service
-
-    @property
-    def request_data(self):
-        return self._request_data
-
-    @request_data.setter
-    def request_data(self, data):
-        self._request_data = data
-
-    @property
-    def nr_action(self):
-        return self._nr_action
-
-    @nr_action.setter
-    def nr_action(self, nr_action):
-        self._nr_action = nr_action
 
     def initialize(self):
         self.validate_config(current_app)
@@ -76,52 +58,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
         test_env = 'prod'
         if test_env in app_config:
             raise NameRequestException(message='Not Implemented')
-
-    """
-    These Event callback 'actions' are fired off when Name Request state change is triggered.
-    Generally, these just invoke the @static methods post_nr, put_nr, patch_nr, and on_nr_approved.
-    This makes testing those easier as we can call them statically from our tests without having to 
-    instantiate a NameRequestResource.
-    """
-
-    def handle_nr_creation(self, nr, svc):
-        """
-        All logic for creating the name request goes inside this handler, which is invoked on successful state change.
-        By default just call the inherited post_nr method.
-        :param nr: The name request model
-        :param svc A NameRequestService instance
-        """
-        return self.post_nr(nr, svc)
-
-    def handle_nr_update(self, nr, svc):
-        """
-        Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
-        By default just call the inherited put_nr method.
-        :param nr: The name request model
-        :param svc A NameRequestService instance
-        :return:
-        """
-        return self.put_nr(nr, svc)
-
-    def handle_nr_patch(self, nr, svc):
-        """
-        Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
-        By default just call the inherited patch_nr method.
-        :param nr: The name request model
-        :param svc A NameRequestService instance
-        :return:
-        """
-        return self.patch_nr(nr, svc, self.nr_action, self.request_data)
-
-    def handle_nr_approval(self, nr, svc):
-        """
-        This method is for updating certain parts of the name request eg. its STATE when a payment token is present in the request.
-        By default just call the inherited on_nr_approved method.
-        :param nr:
-        :param svc:
-        :return:
-        """
-        return self.on_nr_approved(nr, svc)
 
     """
     The actual methods that map the request data to our domain models and persist the data.
@@ -208,34 +144,3 @@ class BaseNameRequestResource(AbstractNameRequestResource):
         nr = svc.save_request(nr)
         # Return the updated name request
         return nr
-
-    @staticmethod
-    def on_nr_approved(nr, svc):
-        """
-        This method is for updating certain parts of the name request eg. its STATE when an active payment exists on the NR.
-        :param nr:
-        :param svc:
-        :return:
-        """
-        # Update the names, we can ignore everything else as this is only
-        # invoked when we're completing a payment
-        nr = svc.map_request_names(nr)
-        nr = svc.save_request(nr)
-        # Return the updated name request
-        return nr
-
-    @staticmethod
-    def on_nro_save_success(nr, svc):
-        """
-        Just save. Nothing else to do here.
-        :param nr:
-        :param svc:
-        :return:
-        """
-        nr = svc.save_request(nr)
-        # Return the updated name request
-        return nr
-
-    @staticmethod
-    def log_error(msg, err):
-        return msg.format(err)
