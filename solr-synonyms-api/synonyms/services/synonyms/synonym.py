@@ -40,12 +40,17 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     Designations, distinctives and descriptives return stems_text
     '''
 
-    def find_word_synonyms(self, word, filters, stand_alone=False, category=False, entity_type=None):
+    def find_word_synonyms(self, word, filters, stand_alone=False, category=False, entity_type=None, stem=False):
         model = self.get_model()
         word = word.lower() if isinstance(word, str) else None
 
         if word:
-            filters.append(func.lower(model.stems_text).op('~')(r'\y{}\y'.format(porter.stem(word).replace(" ", ""))))
+            if stem:
+                filters.append(
+                    func.lower(model.stems_text).op('~')(r'\y{}\y'.format(porter.stem(word).replace(" ", ""))))
+            else:
+                filters.append(
+                    func.lower(model.synonyms_text).op('~')(r'\y{}\y'.format(word).replace(" ", "")))
 
         field = []
         if category:
@@ -74,7 +79,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
             ~func.lower(model.category).op('~')(r'\y{}\y'.format('stand'))
         ]
 
-        results = self.find_word_synonyms(word, filters, category)
+        results = self.find_word_synonyms(word, filters, category, stem=False)
+        if not results:
+            results = self.find_word_synonyms(word, filters, category, stem=True)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
         return flattened
 
