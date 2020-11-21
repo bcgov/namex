@@ -566,16 +566,4 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
     def complete_refund(self, nr_model, payment_id):
         # This is just some sample code for what to do to implement refunds when we get to it...
-        # nr_svc = self.nr_service
-
-        # This handles updates if the NR state is 'patchable'
-        # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
-
-        # This (optionally) handles the updates for NRO and Solr, if necessary
-        # update_solr = False
-        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
-
-        # Record the event
-        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [refund]', nr_model, nr_svc.request_data)
-
         return nr_model

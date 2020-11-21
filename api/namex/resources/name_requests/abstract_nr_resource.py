@@ -28,6 +28,29 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
     def nr_action(self, nr_action):
         self._nr_action = nr_action
 
+    def update_nr(self, nr_model, new_state, on_state_changed):
+        """
+        State changes handled:
+        - to CANCELLED
+        - to INPROGRESS
+        - to HOLD
+        - to APPROVED
+        - to REJECTED
+        :param nr_model:
+        :param new_state:
+        :param new_state:
+        :param on_state_changed:
+        :return:
+        """
+        nr_svc = self.nr_service
+
+        # Use apply_state_change to change state, as it enforces the State change pattern
+        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
+        if new_state in State.VALID_STATES:
+            nr_model = nr_svc.apply_state_change(nr_model, new_state, on_state_changed)
+
+        return nr_model
+
     """
     These Event callback 'actions' are fired off when Name Request state change is triggered.
     Generally, these just invoke the @static methods post_nr, put_nr, patch_nr, and approve_nr.
