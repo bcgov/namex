@@ -141,10 +141,10 @@ class NameRequestsResource(BaseNameRequestResource):
             nr_model = nr_svc.create_name_request()
 
             # Handle state changes
-            # Use apply_state_change to change state, as it enforces the State change pattern
+            # Use update_nr as it enforces the State change pattern
             # Transition the DRAFT to the state specified in the request:
             # eg. one of [State.DRAFT, State.COND_RESERVE, State.RESERVED]
-            nr_model = nr_svc.apply_state_change(nr_model, nr_svc.request_state_code, self.handle_nr_create)
+            nr_model = self.update_nr(nr_model, nr_svc.request_state_code, self.handle_nr_create)
 
             # Record the event
             EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_svc.request_data)

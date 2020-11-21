@@ -464,9 +464,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             payment.payment_completion_date = sbc_payment_response.createdOn
             payment.save_to_db()
 
-            # Use apply_state_change to change state, as it enforces the State change pattern
-            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-
             # This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
             # If the state is COND_RESERVE update state to CONDITIONAL
             # If the state is RESERVED update state to APPROVED
@@ -474,13 +471,13 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
             if nr_model.stateCd == State.DRAFT:
                 # If the state is DRAFT, leave it as a DRAFT
-                nr_model = nr_svc.apply_state_change(nr_model, State.DRAFT, self.handle_nr_approve)
+                nr_model = self.update_nr(nr_model, State.DRAFT, self.handle_nr_approve)
             if nr_model.stateCd == State.COND_RESERVE:
                 # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
-                nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, self.handle_nr_approve)
+                nr_model = self.update_nr(nr_model, State.CONDITIONAL, self.handle_nr_approve)
             elif nr_model.stateCd == State.RESERVED:
                 # If the state is RESERVED update state to APPROVED, and update the name request as required
-                nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approve)
+                nr_model = self.update_nr(nr_model, State.APPROVED, self.handle_nr_approve)
 
             # Save the name request
             nr_model.save_to_db()
