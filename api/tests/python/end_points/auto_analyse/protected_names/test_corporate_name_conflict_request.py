@@ -26,7 +26,9 @@ from ...common import token_header, claims
                              ("CANDID CONSULTING SERVICES LTD.","CANDID COMMUNITY CONSULTING CORP."),
                              ("SMART SUPPLY LTD.", "COASTAL SMART SUPPLIES LTD."),
                              ("AAA POWER WASHING LTD.", "AAA STREAMLINE POWER WASHING TRUCKING LTD."),
-                             ("AAA POWER WASHING LTD.", "AAA STREAMLINE POWER WASHING TRUCKING LTD.")
+                             ("AAA POWER WASHING LTD.", "AAA STREAMLINE POWER WASHING TRUCKING LTD."),
+                             ("PIONEERS OF FLOORING LTD.", "PIONEER FLOOR COVERING LTD."),
+                             ("CHAMPIONS OF FLOORING LTD.", "CHAMPION HARDWOOD FLOORS LTD.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -93,6 +95,20 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                                  {'word': 'STREAMLINE', 'classification': 'DIST'},
                                  {'word': 'TRUCKING', 'classification': 'DIST'},
                                  {'word': 'TRUCKING', 'classification': 'DESC'},
+                                 {'word': 'PIONEERS', 'classification': 'DIST'},
+                                 {'word': 'FLOORING', 'classification': 'DIST'},
+                                 {'word': 'FLOORING', 'classification': 'DESC'},
+                                 {'word': 'FLOOR', 'classification': 'DIST'},
+                                 {'word': 'FLOOR', 'classification': 'DESC'},
+                                 {'word': 'FLOORS', 'classification': 'DIST'},
+                                 {'word': 'FLOORS', 'classification': 'DESC'},
+                                 {'word': 'COVERING', 'classification': 'DESC'},
+                                 {'word': 'CHAMPIONS', 'classification': 'DIST'},
+                                 {'word': 'CHAMPIONS', 'classification': 'DESC'},
+                                 {'word': 'CHAMPION', 'classification': 'DIST'},
+                                 {'word': 'CHAMPION', 'classification': 'DESC'},
+                                 {'word': 'HARDWOOD', 'classification': 'DIST'},
+                                 {'word': 'HARDWOOD', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
@@ -105,7 +121,8 @@ def test_corporate_name_conflict_request_response(client, jwt, app, name, expect
                         'BLUE PETER HOLDINGS INC.', 'BLUE WATER VENTURES LTD.', 'LE BLUE FOX CAFE INC.',
                         'LE BLUE RESTAURANT LTD.','CANADA SWIFT INTERNATIONAL EDUCATION CORP.',
                         'COASTAL SMART SUPPLIES LTD.', 'CANDID COMMUNITY CONSULTING CORP.',
-                        'AAA STREAMLINE POWER WASHING TRUCKING LTD.']
+                        'AAA STREAMLINE POWER WASHING TRUCKING LTD.','PIONEER FLOOR COVERING LTD.',
+                        'CHAMPION HARDWOOD FLOORS LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
