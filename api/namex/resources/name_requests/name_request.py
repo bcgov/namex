@@ -411,7 +411,7 @@ class NameRequestRollback(BaseNameRequestResource):
             nr_model = self.update_request_in_nro(nr_model, self.save_nr)
 
         # Delete in solr for temp or real NR because it is cancelled
-        if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL','XCP']:
+        if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
                 SOLR_CORE = 'possible.conflicts'
                 self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
 
