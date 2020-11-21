@@ -144,11 +144,28 @@ def map_receipt(receipt):
     return receipt
 
 
+class PaymentNameRequestResource(AbstractNameRequestResource):
+    @staticmethod
+    def approve_nr(nr, svc):
+        """
+        This method is for updating the name request when an active payment exists on the NR.
+        :param nr:
+        :param svc:
+        :return:
+        """
+        # Update the names, we can ignore everything else as this is only
+        # invoked when we're completing a payment
+        nr = svc.map_request_names(nr)
+        nr = svc.save_request(nr)
+        # Return the updated name request
+        return nr
+
+
 @cors_preflight('GET')
 @payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
 })
-class FindNameRequestPayments(AbstractNameRequestResource):
+class FindNameRequestPayments(PaymentNameRequestResource):
     @cors.crossdomain(origin='*')
     def get(self, nr_id):
         try:
