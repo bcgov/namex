@@ -1,9 +1,10 @@
+from typing import Callable
 from flask import request, current_app
 
 from namex.utils.logging import setup_logging
 
 from namex.constants import NameRequestPatchActions
-from namex.models import State
+from namex.models import State, Request
 
 from namex.services.name_request import NameRequestService
 from namex.services.virtual_word_condition import VirtualWordConditionService
@@ -65,7 +66,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     """
 
     @staticmethod
-    def post_nr(nr, svc):
+    def post_nr(nr: Request, svc: NameRequestService) -> Request:
         """
         All logic for creating the name request goes inside this handler, which is invoked on successful state change.
         By default just call the inherited post_nr method.
@@ -87,7 +88,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
         return nr
 
     @staticmethod
-    def put_nr(nr, svc):
+    def put_nr(nr: Request, svc: NameRequestService) -> Request:
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
         All request data is mapped.
@@ -107,7 +108,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
         return nr
 
     @staticmethod
-    def patch_nr(nr, svc, nr_action, request_data):
+    def patch_nr(nr: Request, svc: NameRequestService, nr_action, request_data: dict) -> Request:
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
         Re-map the names and the applicants (just the applicant / contact if applicable).

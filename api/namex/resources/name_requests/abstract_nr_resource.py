@@ -1,6 +1,8 @@
+from typing import Callable
+
 from namex.utils.logging import setup_logging
 
-from namex.models import State
+from namex.models import State, Request
 
 from .abstract_nro_resource import AbstractNROResource
 from .abstract_solr_resource import AbstractSolrResource
@@ -28,18 +30,12 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
     def nr_action(self, nr_action):
         self._nr_action = nr_action
 
-    def update_nr(self, nr_model, new_state, on_state_changed):
+    def update_nr(self, nr_model: Request, new_state, on_state_changed: Callable) -> Request:
         """
-        State changes handled:
-        - to CANCELLED
-        - to INPROGRESS
-        - to HOLD
-        - to APPROVED
-        - to REJECTED
+        Call this method in inheriting classes to update an NR (Request).
         :param nr_model:
         :param new_state:
-        :param new_state:
-        :param on_state_changed:
+        :param on_state_changed: A handler function to be executed after completing the state change
         :return:
         """
         nr_svc = self.nr_service
@@ -58,7 +54,7 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
     instantiate a NameRequestResource.
     """
 
-    def handle_nr_create(self, nr, svc):
+    def handle_nr_create(self, nr: Request, svc) -> Request:
         """
         All logic for creating the name request goes inside this handler, which is invoked on successful state change.
         By default just call the inherited post_nr method.
@@ -67,7 +63,7 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         """
         return self.post_nr(nr, svc)
 
-    def handle_nr_update(self, nr, svc):
+    def handle_nr_update(self, nr: Request, svc) -> Request:
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
         By default just call the inherited put_nr method.
@@ -77,7 +73,7 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         """
         return self.put_nr(nr, svc)
 
-    def handle_nr_patch(self, nr, svc):
+    def handle_nr_patch(self, nr: Request, svc) -> Request:
         """
         Logic for updating the name request DATA goes inside this handler, which is invoked on successful state change.
         By default just call the inherited patch_nr method.
@@ -87,7 +83,7 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         """
         return self.patch_nr(nr, svc, self.nr_action, self.request_data)
 
-    def handle_nr_approve(self, nr, svc):
+    def handle_nr_approve(self, nr, svc) -> Request:
         """
         This method is for updating certain parts of the name request eg. its STATE when a payment token is present in the request.
         By default just call the inherited approve_nr method.
@@ -98,27 +94,27 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         return self.approve_nr(nr, svc)
 
     @staticmethod
-    def post_nr(nr, svc):
+    def post_nr(nr: Request, svc) -> Request:
         """
         Just a default / placeholder, implement the logic in the inheriting class.
         :param nr:
         :param svc:
         :return:
         """
-        pass
+        return nr
 
     @staticmethod
-    def put_nr(nr, svc):
+    def put_nr(nr: Request, svc) -> Request:
         """
         Just a default / placeholder, implement the logic in the inheriting class.
         :param nr:
         :param svc:
         :return:
         """
-        pass
+        return nr
 
     @staticmethod
-    def patch_nr(nr, svc, nr_action, request_data):
+    def patch_nr(nr: Request, svc, nr_action, request_data) -> Request:
         """
         Just a default / placeholder, implement the logic in the inheriting class.
         :param nr:
@@ -127,10 +123,10 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         :param request_data:
         :return:
         """
-        pass
+        return nr
 
     @staticmethod
-    def approve_nr(nr, svc):
+    def approve_nr(nr: Request, svc) -> Request:
         """
         This method is for updating the name request when an active payment exists on the NR.
         Just a default / placeholder, implement the logic in the inheriting class.
@@ -138,10 +134,10 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         :param svc:
         :return:
         """
-        pass
+        return nr
 
     @staticmethod
-    def save_nr(nr, svc):
+    def save_nr(nr: Request, svc) -> Request:
         """
         Just save. Nothing else to do here.
         :param nr:
@@ -152,7 +148,7 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         # Return the updated name request
         return nr
 
-    def add_records_to_network_services(self, nr_model, update_solr=False):
+    def add_records_to_network_services(self, nr_model: Request, update_solr=False) -> Request:
         temp_nr_num = None
         if nr_model.stateCd in [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
             existing_nr_num = nr_model.nrNum
@@ -174,7 +170,7 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
 
         return nr_model
 
-    def update_records_in_network_services(self, nr_model, update_solr=False):
+    def update_records_in_network_services(self, nr_model: Request, update_solr=False) -> Request:
         temp_nr_num = None
         if nr_model.stateCd in [State.DRAFT, State.CONDITIONAL, State.APPROVED, State.CANCELLED]:
             existing_nr_num = nr_model.nrNum
