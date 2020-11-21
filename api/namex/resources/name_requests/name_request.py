@@ -118,7 +118,7 @@ class NameRequestResource(BaseNameRequestResource):
 class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def patch(self, nr_id, nr_action):
+    def patch(self, nr_id, nr_action: str):
         """
         Update a specific set of fields and/or a provided action. Fields excluded from the payload will not be updated.
         The following data format is expected when providing a data payload:
@@ -254,7 +254,7 @@ class NameRequestFields(BaseNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_patch_checkout(self, nr_model):
+    def handle_patch_checkout(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -269,7 +269,7 @@ class NameRequestFields(BaseNameRequestResource):
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, {})
         return nr_model
 
-    def handle_patch_checkin(self, nr_model):
+    def handle_patch_checkin(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -285,7 +285,7 @@ class NameRequestFields(BaseNameRequestResource):
 
         return nr_model
 
-    def handle_patch_edit(self, nr_model):
+    def handle_patch_edit(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -299,7 +299,7 @@ class NameRequestFields(BaseNameRequestResource):
 
         return nr_model
 
-    def handle_patch_resend(self, nr_model):
+    def handle_patch_resend(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -313,7 +313,7 @@ class NameRequestFields(BaseNameRequestResource):
 
         return nr_model
 
-    def handle_patch_cancel(self, nr_model):
+    def handle_patch_cancel(self, nr_model: Request):
         """
         Cancel the Name Request.
         :param nr_model:
@@ -393,7 +393,7 @@ class NameRequestRollback(BaseNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_patch_rollback(self, nr_model, action):
+    def handle_patch_rollback(self, nr_model: Request, action: str):
         """
         Roll back the Name Request.
         :param nr_model:

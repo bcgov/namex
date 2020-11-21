@@ -437,7 +437,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_payment_actions(self, action, model, payment_id):
+    def handle_payment_actions(self, action, model: RequestDAO, payment_id: int):
         return {
             NameRequestActions.COMPLETE.value: self.complete_reservation_payment,
             NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
@@ -445,7 +445,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             NameRequestActions.REFUND.value: self.complete_refund
         }.get(action)(model, payment_id)
 
-    def complete_reservation_payment(self, nr_model, payment_id):
+    def complete_reservation_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when completing an in-progress Name Request reservation.
         :param nr_model:
@@ -490,7 +490,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         return nr_model
 
-    def complete_upgrade_payment(self, nr_model, payment_id):
+    def complete_upgrade_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when upgrading an existing Name Request reservation to PRIORITY status.
         :param nr_model:
@@ -530,7 +530,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         return nr_model
 
-    def complete_reapply_payment(self, nr_model, payment_id):
+    def complete_reapply_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when re-applying for an existing Name Request reservation.
         Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
@@ -578,6 +578,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         return nr_model
 
-    def complete_refund(self, nr_model, payment_id):
+    def complete_refund(self, nr_model: RequestDAO, payment_id: int):
         # This is just some sample code for what to do to implement refunds when we get to it...
         return nr_model
