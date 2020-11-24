@@ -262,7 +262,7 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
                                                                            service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 
-    print("Classification for search conflict:")
+    print("Classification for searching conflicts in NameX DB:")
     print(service.get_dict_name_search_conflicts())
 
 

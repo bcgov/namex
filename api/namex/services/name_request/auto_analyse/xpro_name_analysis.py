@@ -172,7 +172,8 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                 check_conflicts = builder.search_conflicts(
                     [self.get_list_dist_search_conflicts()],
                     [self.get_list_desc_search_conflicts()],
-                    self.name_tokens_search_conflict,
+                    [self.get_list_desc()],
+                    self.name_tokens,
                     self.processed_name,
                     np_svc.get_stand_alone_words()
                 )
@@ -189,7 +190,8 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
         check_conflicts_queue = builder.search_conflicts(
             [self.get_list_dist_search_conflicts()],
             [self.get_list_desc_search_conflicts()],
-            self.name_tokens_search_conflict,
+            [self.get_list_desc()],
+            self.name_tokens,
             self.processed_name,
             np_svc.get_stand_alone_words(),
             check_name_is_well_formed=False,
