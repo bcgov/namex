@@ -6,6 +6,7 @@ from synonyms.models.synonym import Synonym
 from synonyms.criteria.synonym.query_criteria import SynonymQueryCriteria
 from . import LanguageCodes
 from . import porter
+from pyinflect import getInflection
 
 from .mixins.designation import SynonymDesignationMixin
 from .mixins.model import SynonymModelMixin
@@ -75,14 +76,19 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         filters = [
             ~func.lower(model.category).op('~')(r'\y{}\y'.format('sub')),
-            ~func.lower(model.category).op('~')(r'\y{}\y'.format('stop')),
-            ~func.lower(model.category).op('~')(r'\y{}\y'.format('stand'))
+            ~func.lower(model.category).op('~')(r'\y{}\y'.format('stop'))
         ]
 
         results = self.find_word_synonyms(word, filters, category, stem=False)
         if not results:
+            # Remove filter searching for synonyms_text and add filter for stems_text
+            filters.pop()
             results = self.find_word_synonyms(word, filters, category, stem=True)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
+
+        gerund = self.get_gerund_word(word)
+        flattened.append(gerund) if gerund.__len__() > 0 and gerund not in flattened else flattened
+
         return flattened
 
     def get_substitutions(self, word=None):
@@ -94,6 +100,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         results = self.find_word_synonyms(word, filters)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
+        if not flattened:
+            # Add ing to the word if applicable
+            flattened = self.get_gerund_word(word)
+
         return flattened
 
     def get_stop_words(self, word=None):
@@ -342,3 +352,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
             exceptions_ws.append('null')
 
         return exceptions_ws
+
+    def get_gerund_word(self, word):
+        gerund = getInflection(word, 'VBG')
+        return gerund[0] if gerund is not None else ''
