@@ -144,11 +144,28 @@ def map_receipt(receipt):
     return receipt
 
 
+class PaymentNameRequestResource(AbstractNameRequestResource):
+    @staticmethod
+    def approve_nr(nr, svc):
+        """
+        This method is for updating the name request when an active payment exists on the NR.
+        :param nr:
+        :param svc:
+        :return:
+        """
+        # Update the names, we can ignore everything else as this is only
+        # invoked when we're completing a payment
+        nr = svc.map_request_names(nr)
+        nr = svc.save_request(nr)
+        # Return the updated name request
+        return nr
+
+
 @cors_preflight('GET')
 @payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
 })
-class FindNameRequestPayments(AbstractNameRequestResource):
+class FindNameRequestPayments(PaymentNameRequestResource):
     @cors.crossdomain(origin='*')
     def get(self, nr_id):
         try:
@@ -420,7 +437,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_payment_actions(self, action, model, payment_id):
+    def handle_payment_actions(self, action, model: RequestDAO, payment_id: int):
         return {
             NameRequestActions.COMPLETE.value: self.complete_reservation_payment,
             NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
@@ -428,7 +445,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             NameRequestActions.REFUND.value: self.complete_refund
         }.get(action)(model, payment_id)
 
-    def complete_reservation_payment(self, nr_model, payment_id):
+    def complete_reservation_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when completing an in-progress Name Request reservation.
         :param nr_model:
@@ -447,9 +464,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             payment.payment_completion_date = sbc_payment_response.createdOn
             payment.save_to_db()
 
-            # Use apply_state_change to change state, as it enforces the State change pattern
-            # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-
             # This handles updates if the NR state is DRAFT, COND_RESERVE or RESERVED
             # If the state is COND_RESERVE update state to CONDITIONAL
             # If the state is RESERVED update state to APPROVED
@@ -457,13 +471,13 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
             if nr_model.stateCd == State.DRAFT:
                 # If the state is DRAFT, leave it as a DRAFT
-                nr_model = nr_svc.apply_state_change(nr_model, State.DRAFT, self.handle_nr_approval)
+                nr_model = self.update_nr(nr_model, State.DRAFT, self.handle_nr_approve)
             if nr_model.stateCd == State.COND_RESERVE:
                 # If the state is COND_RESERVE update state to CONDITIONAL, and update the name request as required
-                nr_model = nr_svc.apply_state_change(nr_model, State.CONDITIONAL, self.handle_nr_approval)
+                nr_model = self.update_nr(nr_model, State.CONDITIONAL, self.handle_nr_approve)
             elif nr_model.stateCd == State.RESERVED:
                 # If the state is RESERVED update state to APPROVED, and update the name request as required
-                nr_model = nr_svc.apply_state_change(nr_model, State.APPROVED, self.handle_nr_approval)
+                nr_model = self.update_nr(nr_model, State.APPROVED, self.handle_nr_approve)
 
             # Save the name request
             nr_model.save_to_db()
@@ -476,7 +490,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         return nr_model
 
-    def complete_upgrade_payment(self, nr_model, payment_id):
+    def complete_upgrade_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when upgrading an existing Name Request reservation to PRIORITY status.
         :param nr_model:
@@ -516,7 +530,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         return nr_model
 
-    def complete_reapply_payment(self, nr_model, payment_id):
+    def complete_reapply_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when re-applying for an existing Name Request reservation.
         Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
@@ -564,18 +578,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         return nr_model
 
-    def complete_refund(self, nr_model, payment_id):
+    def complete_refund(self, nr_model: RequestDAO, payment_id: int):
         # This is just some sample code for what to do to implement refunds when we get to it...
-        # nr_svc = self.nr_service
-
-        # This handles updates if the NR state is 'patchable'
-        # nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
-
-        # This (optionally) handles the updates for NRO and Solr, if necessary
-        # update_solr = False
-        # nr_model = self.update_records_in_network_services(nr_model, update_solr)
-
-        # Record the event
-        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [refund]', nr_model, nr_svc.request_data)
-
         return nr_model

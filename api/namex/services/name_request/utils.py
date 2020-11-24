@@ -161,5 +161,21 @@ def valid_state_transition(user, nr, new_state):
     return True
 
 
+def get_item_from_list(items, item_id, item_prop='id'):
+    """
+    :param items:
+    :param item_id:
+    :param item_prop:
+    :return:
+    """
+    matches = [i for i in items if i.__getattribute__(item_prop) == item_id]
+    if len(matches) == 0:
+        return None
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) > 1:
+        raise Exception('More than one match found for a given ID!')
+
+
 
 

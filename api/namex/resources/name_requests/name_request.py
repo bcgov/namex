@@ -93,7 +93,10 @@ class NameRequestResource(BaseNameRequestResource):
                 raise InvalidInputError(message=validation_msg)
 
             if nr_model.stateCd in valid_update_states:
-                nr_model = self.update_nr(nr_model)
+                nr_model = self.update_nr(nr_model, nr_model.stateCd, self.handle_nr_update)
+
+                # Record the event
+                EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
@@ -105,18 +108,6 @@ class NameRequestResource(BaseNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def update_nr(self, nr_model):
-        nr_svc = self.nr_service
-
-        # Use apply_state_change to change state, as it enforces the State change pattern
-        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-        nr_model = nr_svc.apply_state_change(nr_model, nr_model.stateCd, self.handle_nr_update)
-
-        # Record the event
-        EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
-
-        return nr_model
-
 
 @cors_preflight('PATCH')
 @api.route('/<int:nr_id>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
@@ -127,7 +118,7 @@ class NameRequestResource(BaseNameRequestResource):
 class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def patch(self, nr_id, nr_action):
+    def patch(self, nr_id, nr_action: str):
         """
         Update a specific set of fields and/or a provided action. Fields excluded from the payload will not be updated.
         The following data format is expected when providing a data payload:
@@ -263,11 +254,11 @@ class NameRequestFields(BaseNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_patch_checkout(self, nr_model):
+    def handle_patch_checkout(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, State.INPROGRESS)
+        nr_model = self.update_nr(nr_model, State.INPROGRESS, self.handle_nr_patch)
 
         # Lock nro Request row (set status=H)
         nro_warnings = self.lock_request_in_nro(nr_model)
@@ -278,13 +269,13 @@ class NameRequestFields(BaseNameRequestResource):
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, {})
         return nr_model
 
-    def handle_patch_checkin(self, nr_model):
+    def handle_patch_checkin(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, State.DRAFT)
+        nr_model = self.update_nr(nr_model, State.DRAFT, self.handle_nr_patch)
 
-        # set status back to D after Edit is complete
+        # Set status back to D after edit is complete
         nro_warnings = self.unlock_request_in_nro(nr_model)
         if nro_warnings:
             on_success = False
@@ -294,12 +285,11 @@ class NameRequestFields(BaseNameRequestResource):
 
         return nr_model
 
-    def handle_patch_edit(self, nr_model):
-        # TODO: Should we automatically check in a record when an edit is successful?
+    def handle_patch_edit(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+        nr_model = self.update_nr(nr_model, nr_model.stateCd, self.handle_nr_patch)
 
         # This handles the updates for NRO and Solr, if necessary
         nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
@@ -309,11 +299,11 @@ class NameRequestFields(BaseNameRequestResource):
 
         return nr_model
 
-    def handle_patch_resend(self, nr_model):
+    def handle_patch_resend(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, nr_model.stateCd)
+        nr_model = self.update_nr(nr_model, nr_model.stateCd, self.handle_nr_patch)
 
         # This handles the updates for NRO and Solr, if necessary
         nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
@@ -323,7 +313,7 @@ class NameRequestFields(BaseNameRequestResource):
 
         return nr_model
 
-    def handle_patch_cancel(self, nr_model):
+    def handle_patch_cancel(self, nr_model: Request):
         """
         Cancel the Name Request.
         :param nr_model:
@@ -332,34 +322,13 @@ class NameRequestFields(BaseNameRequestResource):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
+        nr_model = self.update_nr(nr_model, State.CANCELLED, self.handle_nr_patch)
 
         # This handles the updates for NRO and Solr, if necessary
         nr_model = self.update_records_in_network_services(nr_model, update_solr=True)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [cancel]', nr_model, nr_svc.request_data)
-
-        return nr_model
-
-    def update_nr_fields(self, nr_model, new_state):
-        """
-        State changes handled:
-        - to CANCELLED
-        - to INPROGRESS
-        - to HOLD
-        - to APPROVED
-        - to REJECTED
-        :param nr_model:
-        :param new_state:
-        :return:
-        """
-        nr_svc = self.nr_service
-
-        # Use apply_state_change to change state, as it enforces the State change pattern
-        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-        if new_state in State.VALID_STATES:
-            nr_model = nr_svc.apply_state_change(nr_model, new_state, self.handle_nr_patch)
 
         return nr_model
 
@@ -424,7 +393,7 @@ class NameRequestRollback(BaseNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_patch_rollback(self, nr_model, action):
+    def handle_patch_rollback(self, nr_model: Request, action: str):
         """
         Roll back the Name Request.
         :param nr_model:
@@ -434,36 +403,19 @@ class NameRequestRollback(BaseNameRequestResource):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
-        nr_model = self.update_nr_fields(nr_model, State.CANCELLED)
+        nr_model = self.update_nr(nr_model, State.CANCELLED, self.handle_nr_patch)
         # Only update the record in NRO if it's a real NR, otherwise the record won't exist
         if not is_temp_nr_num(nr_model.nrNum):
             # This handles the updates for NRO and Solr, if necessary
-            #self.update_records_in_network_services(nr_model, update_solr=True)
-            nr_model = self.update_request_in_nro(nr_model, self.on_nro_save_success)
+            # self.update_records_in_network_services(nr_model, update_solr=True)
+            nr_model = self.update_request_in_nro(nr_model, self.save_nr)
 
-        # delete in solr for temp or real NR because it is cancelled
+        # Delete in solr for temp or real NR because it is cancelled
         if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
-            SOLR_CORE = 'possible.conflicts'
-            self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
+                SOLR_CORE = 'possible.conflicts'
+                self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
-
-        return nr_model
-
-    def update_nr_fields(self, nr_model, new_state):
-        """
-        State changes handled:
-        - to CANCELLED
-        :param nr_model:
-        :param new_state:
-        :return:
-        """
-        nr_svc = self.nr_service
-
-        # Use apply_state_change to change state, as it enforces the State change pattern
-        # apply_state_change takes the model, updates it to the specified state, and executes the callback handler
-        if new_state in State.VALID_STATES:
-            nr_model = nr_svc.apply_state_change(nr_model, new_state, self.handle_nr_patch)
 
         return nr_model

@@ -1,7 +1,3 @@
-"""
-Integration tests for Name Request state transitions.
-TODO: These tests are incomplete, but are are important to have. Do not remove!
-"""
 import pytest
 import json
 
@@ -107,6 +103,7 @@ def test_change_request_action_entity_reqtype(client, test_map):
         }
 
         test_fields_were_updated(client, initial_data, update_data, expected_result)
+
 
 @pytest.mark.skip
 def test_change_request_actions(client):
