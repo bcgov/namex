@@ -1,5 +1,5 @@
 """
-Integration tests for Name Request state transitions.
+Test HTTP endpoints for Name Requests.
 """
 import pytest
 import json
@@ -59,7 +59,9 @@ def build_test_input_fields():
 @pytest.mark.skip
 def test_create_draft_nr(client, jwt, app):
     """
-    Create a basic draft NR
+    TODO: Just a test stub that was moved from another file that was removed.
+    This needs to be completed at some point.
+    Create a basic draft NR.
     :param client:
     :param jwt:
     :param app:
@@ -83,7 +85,9 @@ def test_create_draft_nr(client, jwt, app):
 @pytest.mark.skip
 def test_create_conditional_nr(client, jwt, app):
     """
-    Create a basic conditional NR
+    TODO: Just a test stub that was moved from another file that was removed.
+    This needs to be completed at some point.
+    Create a basic conditional NR.
     :param client:
     :param jwt:
     :param app:
@@ -107,6 +111,8 @@ def test_create_conditional_nr(client, jwt, app):
 @pytest.mark.skip
 def test_create_reserved_nr(client, jwt, app):
     """
+    TODO: Just a test stub that was moved from another file that was removed.
+    This needs to be completed at some point.
     Create a basic reserved NR
     :param client:
     :param jwt:
@@ -126,7 +132,6 @@ def test_create_reserved_nr(client, jwt, app):
 
     payload = json.loads(response.data)
     assert payload is not None
-
 
 
 def test_draft_patch_edit_data(client, jwt, app):
