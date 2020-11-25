@@ -86,9 +86,6 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
             results = self.find_word_synonyms(word, filters, category, stem=True)
         flattened = list(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results))))))
 
-        gerund = self.get_gerund_word(word)
-        flattened.append(gerund) if gerund.__len__() > 0 and gerund not in flattened else flattened
-
         return flattened
 
     def get_substitutions(self, word=None):
@@ -353,6 +350,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         return exceptions_ws
 
-    def get_gerund_word(self, word):
-        gerund = getInflection(word, 'VBG')
-        return gerund[0] if gerund is not None else ''
+    def get_gerund_word(self, word, syn=False):
+        gerund = None
+        if syn and getInflection(word, 'VB'):
+            gerund = getInflection(word, 'VBG')
+        else:
+            gerund = getInflection(word, 'VBG')
+        return [gerund[0]] if gerund is not None else ''
