@@ -87,14 +87,17 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
 
         # Update key in desc_db_synonym_dict
         service._dict_desc_words_search_conflicts = stem_key_dictionary(desc_tmp_synonym_dict)
+        service._dict_desc_words_search_conflicts = add_key_values(service.get_dict_desc_search_conflicts())
+        dict_synonyms = stem_key_dictionary(dict_synonyms)
+        dict_synonyms = add_key_values(dict_synonyms)
+
         list_desc, dict_synonyms = remove_descriptive_same_category(dict_synonyms)
 
         service._list_desc_words = list(service.get_dict_desc_search_conflicts().keys())
 
-        #Check if list_dist needs to be spplitted based on service.get_list_dist()
+        # Check if list_dist needs to be spplitted based on service.get_list_dist()
         list_dist = get_split_compound(list_dist, service.get_list_dist())
-        service._list_dist_words= get_split_compound(service.get_list_dist(), list_dist)
-
+        service._list_dist_words = get_split_compound(service.get_list_dist(), list_dist)
 
         list_dist_stem = [porter.stem(word) for word in list_dist]
         vector1_dist = text_to_vector(list_dist_stem)
@@ -224,8 +227,7 @@ def is_not_real_conflict(list_name, stand_alone_words, list_dist, dict_desc, ser
     if is_standalone_name(list_name, stand_alone_words):
         return stand_alone_additional_dist_desc(list_dist, service.get_list_dist(), list_desc,
                                                 service.get_list_desc())
-    return check_additional_dist_desc(list_dist, service.get_list_dist(), dict_desc,
-                                      service)
+    return False
 
 
 def is_standalone_name(list_name, stand_alone_words):
@@ -240,23 +242,6 @@ def stand_alone_additional_dist_desc(lst_dist_name1, lst_dist_name2, lst_desc_na
     if lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__():
         return True
 
-    return False
-
-
-def check_additional_dist_desc(list_dist_user_name, list_dist_conflict, dict_desc_user_name, service):
-    """Return True if dist tokens in user name > conflicted name and different descrip are not in same category."""
-    for (k, v), (k2, v2) in zip(  # pylint: disable=unused-variable; v2 not used
-            service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()
-    ):
-        same_synonym_category = porter.stem(k2) in v
-
-        if (k != k2 and k2 not in service.get_list_desc() and
-            same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
-                not same_synonym_category:
-            logging.getLogger(__name__).debug('Name %s is not considered a real conflict.',
-                                              service.get_processed_name())
-
-            return True
     return False
 
 
@@ -306,8 +291,8 @@ def stem_key_dictionary(d1):
 
 def get_split_compound(a_dist, b_dist):
     """Split items in a_dist based on b_dist."""
-    str_tokens= ' '.join([str(elem) for elem in b_dist])
-    new_dist= list()
+    str_tokens = ' '.join([str(elem) for elem in b_dist])
+    new_dist = list()
     for element in a_dist:
         if re.search(r'\b{0}\b'.format(re.escape(str_tokens.lower())), element.lower()):
             new_dist.extend(b_dist)
@@ -315,3 +300,11 @@ def get_split_compound(a_dist, b_dist):
             new_dist.append(element)
 
     return new_dist
+
+
+def add_key_values(d1):
+    """Add key in dictionary to values if does not exist."""
+    for key, values in d1.items():
+        if key not in values:
+            values.append(key)
+    return d1
