@@ -53,7 +53,8 @@ def validate_name_request(location, entity_type, request_action):
         AnalysisRequestActions.CHG.value,
         AnalysisRequestActions.ASSUMED.value,
         AnalysisRequestActions.REN.value,
-        AnalysisRequestActions.REH.value
+        AnalysisRequestActions.REH.value,
+        AnalysisRequestActions.MVE.value
     ]
 
     if not valid_location:
@@ -118,7 +119,8 @@ class XproNameAnalysis(Resource):
                                                                            AnalysisRequestActions.CHG.value,
                                                                            AnalysisRequestActions.ASSUMED.value,
                                                                            AnalysisRequestActions.REN.value,
-                                                                           AnalysisRequestActions.REH.value):
+                                                                           AnalysisRequestActions.REH.value,
+                                                                           AnalysisRequestActions.MVE.value):
 
                 # Use UnprotectedNameAnalysisService
                 service = XproNameAnalysisService()
