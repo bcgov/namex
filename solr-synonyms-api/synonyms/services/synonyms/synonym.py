@@ -350,10 +350,6 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         return exceptions_ws
 
-    def get_gerund_word(self, word, syn=False):
-        gerund = None
-        if syn and getInflection(word, 'VB'):
-            gerund = getInflection(word, 'VBG')
-        else:
-            gerund = getInflection(word, 'VBG')
+    def get_gerund_word(self, word):
+        gerund = getInflection(word, 'VBG')
         return [gerund[0]] if gerund is not None else ''
