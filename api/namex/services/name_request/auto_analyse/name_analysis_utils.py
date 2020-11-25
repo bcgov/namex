@@ -198,7 +198,7 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, stan
     list_dist, list_desc = \
         list_distinctive_descriptive(name_tokens, list_dist, list_desc)
     # Search conflicts coming from check_name_is_well_formed analysis
-    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name, stand_alone_words,
+    check_conflicts = builder.search_conflicts(list_dist, list_desc, list_desc, name_tokens, processed_name, stand_alone_words,
                                                check_name_is_well_formed=True)
 
     return check_conflicts
