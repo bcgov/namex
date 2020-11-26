@@ -47,7 +47,7 @@ pytz==2020.4
 requests==2.25.0
 rsa==4.6
 six==1.15.0
-swagger-client @ git+https://github.com/bcgov/namex-synonyms-api-py-client.git@e04d2d760ef89edd98888ea77c518761f3663db3
 toolz==0.11.1
 urllib3==1.26.2
 zipp==3.4.0
+git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
