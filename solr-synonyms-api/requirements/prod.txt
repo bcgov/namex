@@ -24,3 +24,4 @@ eventlet
 
 werkzeug==0.16.1
 nltk
+pyinflect

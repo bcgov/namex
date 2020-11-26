@@ -198,7 +198,7 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, stan
     list_dist, list_desc = \
         list_distinctive_descriptive(name_tokens, list_dist, list_desc)
     # Search conflicts coming from check_name_is_well_formed analysis
-    check_conflicts = builder.search_conflicts(list_dist, list_desc, name_tokens, processed_name, stand_alone_words,
+    check_conflicts = builder.search_conflicts(list_dist, list_desc, list_desc, name_tokens, processed_name, stand_alone_words,
                                                check_name_is_well_formed=True)
 
     return check_conflicts
@@ -262,7 +262,7 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
                                                                            service.name_tokens_search_conflict)
     service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 
-    print("Classification for search conflict:")
+    print("Classification for searching conflicts in NameX DB:")
     print(service.get_dict_name_search_conflicts())
 
 
@@ -357,6 +357,7 @@ def remove_double_letters_list_dist_words(list_dist, name_tokens, dist_substitut
             name_tokens))
         if dist_substitution_dict:
             dist_substitution_dict[not_double_letters_item] = dist_substitution_dict.pop(item)
-            dist_substitution_dict[not_double_letters_item].append(not_double_letters_item)
+            if not dist_substitution_dict.get(not_double_letters_item):
+                dist_substitution_dict[not_double_letters_item].append(not_double_letters_item)
 
     return list_dist_final, name_tokens, dist_substitution_dict

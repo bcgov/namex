@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Analyzes a single name."""
+import itertools
+import re
 import logging
 import math
 from collections import Counter
@@ -28,7 +30,6 @@ from namex.services.name_request.auto_analyse.protected_name_analysis import Pro
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from nltk.stem import PorterStemmer
 from swagger_client import SynonymsApi as SynonymService
-
 
 porter = PorterStemmer()
 
@@ -66,13 +67,10 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
     wc_svc = service.word_classification_service
     token_svc = service.token_classifier_service
 
-    vector1_dist = text_to_vector(list_dist)
-    vector1_desc = text_to_vector(list_desc)
-
     dict_matches_counter = {}
 
     np_svc.set_name(name, np_svc_prep_data)
-    stand_alone_words = np_svc.get_stand_alone_words()
+    stand_alone_words = np_svc_prep_data.get_stand_alone_words()
 
     if np_svc.name_tokens == list_name:
         similarity = EXACT_MATCH
@@ -85,10 +83,24 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
                                                                                         match_list)
 
         desc_tmp_synonym_dict = builder.get_substitutions_descriptive(service.get_list_desc())
-        dict_synonyms = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
+        desc_tmp_synonym_dict = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
 
         # Update key in desc_db_synonym_dict
-        desc_db_synonym_dict = update_dictionary_key(desc_tmp_synonym_dict, dict_synonyms)
+        service._dict_desc_words_search_conflicts = stem_key_dictionary(desc_tmp_synonym_dict)
+        service._dict_desc_words_search_conflicts = add_key_values(service.get_dict_desc_search_conflicts())
+        dict_synonyms = stem_key_dictionary(dict_synonyms)
+        dict_synonyms = add_key_values(dict_synonyms)
+
+        list_desc, dict_synonyms = remove_descriptive_same_category(dict_synonyms)
+
+        service._list_desc_words = list(service.get_dict_desc_search_conflicts().keys())
+
+        # Check if list_dist needs to be spplitted based on service.get_list_dist()
+        list_dist = get_split_compound(list_dist, service.get_list_dist())
+        service._list_dist_words = get_split_compound(service.get_list_dist(), list_dist)
+
+        list_dist_stem = [porter.stem(word) for word in list_dist]
+        vector1_dist = text_to_vector(list_dist_stem)
 
         vector2_dist, entropy_dist = get_vector(service.get_list_dist(), list_dist,
                                                 dist_db_substitution_dict, True)
@@ -110,9 +122,12 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
 
         similarity_dist = round(get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
+        list_desc_stem = [porter.stem(word) for word in list_desc]
+        vector1_desc = text_to_vector(list_desc_stem)
+
         vector2_desc, entropy_desc = get_vector(
             remove_spaces_list(service.get_list_desc()), list_desc,
-            desc_db_synonym_dict)
+            service.get_dict_desc_search_conflicts())
         similarity_desc = round(
             get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
 
@@ -146,17 +161,14 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=F
         if word.lower() in conflict_class_list:
             entropy.append(1)
         elif word_stem in conflict_class_stem:
-            idx = conflict_class_stem.index(word_stem)
-            k = original_class_list[idx]
             entropy.append(STEM_W)
         elif word_stem in get_flat_list(class_subs_dict.values()):
-            k = ''.join([key for (key, value) in class_subs_dict.items() if word_stem in value])
             entropy.append(SUBS_W)
         else:
             counter = OTHER_W_DIST if dist else OTHER_W_DESC
             entropy.append(0.0)
         if counter == 1:
-            vector[k] = counter
+            vector[word_stem] = counter
 
     # Make sure we don't divide by zero!
     entropy_score = sum(entropy) / len(entropy) if len(entropy) > 0 else 0
@@ -215,8 +227,7 @@ def is_not_real_conflict(list_name, stand_alone_words, list_dist, dict_desc, ser
     if is_standalone_name(list_name, stand_alone_words):
         return stand_alone_additional_dist_desc(list_dist, service.get_list_dist(), list_desc,
                                                 service.get_list_desc())
-    return check_additional_dist_desc(list_dist, service.get_list_dist(), dict_desc,
-                                      service)
+    return False
 
 
 def is_standalone_name(list_name, stand_alone_words):
@@ -234,23 +245,6 @@ def stand_alone_additional_dist_desc(lst_dist_name1, lst_dist_name2, lst_desc_na
     return False
 
 
-def check_additional_dist_desc(list_dist_user_name, list_dist_conflict, dict_desc_user_name, service):
-    """Return True if dist tokens in user name > conflicted name and different descrip are not in same category."""
-    for (k, v), (k2, v2) in zip(  # pylint: disable=unused-variable; v2 not used
-            service.get_dict_desc_search_conflicts().items(), dict_desc_user_name.items()
-    ):
-        same_synonym_category = porter.stem(k2) in v
-
-        if (k != k2 and k2 not in service.get_list_desc() and
-            same_synonym_category and list_dist_user_name.__len__() > list_dist_conflict.__len__()) or \
-                not same_synonym_category:
-            logging.getLogger(__name__).debug('Name %s is not considered a real conflict.',
-                                              service.get_processed_name())
-
-            return True
-    return False
-
-
 def remove_extra_value(d1, d2):
     """Return d1 with d2 items removed."""
     for k2, v2 in d2.items():
@@ -261,17 +255,56 @@ def remove_extra_value(d1, d2):
                     break
                 except ValueError:
                     pass
-            elif (len(set(v1) ^ set(v2)) == 1 and k1 in v2) or len(set(v1) ^ set(v2)) == 0:
-                d1[k2] = d1.pop(k1)
-                break
     return d1
 
 
-def update_dictionary_key(user, db):
-    """Return updates key weights."""
-    user_keys = tuple(user.keys())
-    user_values = tuple(user.values())
+def update_dictionary_key(d1, d2):
+    """Update key dictionary in d1 with key in d2."""
+    d3 = {}
+    skip = False
+    for k1, v1 in d1.items():
+        for k2, v2 in d2.items():
+            if (len(set(v1) ^ set(v2)) == 1 and k1 in v2) or len(set(v1) ^ set(v2)) == 0:
+                d3.update({k2: v1})
+                skip = True
+                break
+        if not skip:
+            d3.update({k1: v1})
+            skip = False
+    return d3
 
-    new_db = {user_keys[user_values.index(value)] if value in user_values else key: value for key, value in db.items()}
 
-    return new_db
+def remove_descriptive_same_category(dict_desc):
+    """Remove descriptive with the same category."""
+    dict_desc_unique_category = {key: val for i, (key, val) in enumerate(dict_desc.items())
+                                 if porter.stem(key) not in itertools.chain(*list(dict_desc.values())[:i])}
+
+    return list(dict_desc_unique_category.keys()), dict_desc_unique_category
+
+
+def stem_key_dictionary(d1):
+    """Stem the dictionary key."""
+    dict_stem = {porter.stem(k): v for (k, v) in d1.items()}
+
+    return dict_stem
+
+
+def get_split_compound(a_dist, b_dist):
+    """Split items in a_dist based on b_dist."""
+    str_tokens = ' '.join([str(elem) for elem in b_dist])
+    new_dist = list()
+    for element in a_dist:
+        if re.search(r'\b{0}\b'.format(re.escape(str_tokens.lower())), element.lower()):
+            new_dist.extend(b_dist)
+        else:
+            new_dist.append(element)
+
+    return new_dist
+
+
+def add_key_values(d1):
+    """Add key in dictionary to values if does not exist."""
+    for key, values in d1.items():
+        if key not in values:
+            values.append(key)
+    return d1
