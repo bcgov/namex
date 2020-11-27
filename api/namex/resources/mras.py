@@ -1,4 +1,5 @@
 import os
+from http import HTTPStatus
 from lxml import etree  # Don't worry about this it exists... the module is dynamically loaded
 
 import requests
@@ -90,7 +91,7 @@ class MrasProfile(Resource):
             jurisdiction_ids = [j.text for j in jurisdiction_id_els]  # All we care about are the codes / IDs
 
             if province not in jurisdiction_ids:
-                return jsonify(message='Invalid request, province jurisdiction is incorrect'), 400
+                return jsonify(message='Invalid request, province jurisdiction is incorrect'), HTTPStatus.BAD_REQUEST
             else:
                 print('Valid jurisdiction IDs')
                 print(repr(jurisdiction_ids))
@@ -98,9 +99,13 @@ class MrasProfile(Resource):
             # Get the profile
             print('\nCalling MRAS Profile API using [corp_num: {corp_num}], [province: {province}]'.format(corp_num=corp_num, province=province))
             mras_url = MRAS_SVC_PROFILE_URL.format(profile_id=corp_num, source_jurisdiction_id=province)
+            # headers = {
+            #     'x-api-key': MRAS_SVC_API_KEY,
+            #     'Accept': 'application/xml'
+            # }
             headers = {
                 'x-api-key': MRAS_SVC_API_KEY,
-                'Accept': 'application/xml'
+                'Accept': 'application/json'
             }
 
             print(mras_url)
@@ -111,19 +116,20 @@ class MrasProfile(Resource):
             )
 
             # Return the auth response if an error occurs
-            if not response.status_code == 200:
-                mras_errors = load_xml_response_content(response, './/mras_error')
-                mras_error = {
-                    'error_code': mras_errors[0].find('error_code').text,
-                    'internal_error_code': mras_errors[0].find('internal_error_code').text,
-                    'internal_error_message': mras_errors[0].find('internal_error_message').text
-                }
+            if not response.status_code == HTTPStatus.OK:
+                return jsonify({'error': 'No profile found for the jurisdiction, registration number pair.'}), HTTPStatus.NOT_FOUND
+                # mras_errors = load_xml_response_content(response, './/mras_error')
+                # mras_error = {
+                #     'error_code': mras_errors[0].find('error_code').text,
+                #     'internal_error_code': mras_errors[0].find('internal_error_code').text,
+                #     'internal_error_message': mras_errors[0].find('internal_error_message').text
+                # }
 
-                raise MrasServiceException(mras_error=mras_error)
+                # raise MrasServiceException(mras_error=mras_error)
 
             # Just return true or false, the profile either exists or it doesn't
-            return jsonify(response), 200
+            return jsonify(response.json()), HTTPStatus.OK
         except MrasServiceException as err:
             return handle_exception(err, err.message, err.error_code)
         except Exception as err:
-            return handle_exception(err, 'Internal Server Error', 500)
+            return handle_exception(err, 'Internal Server Error', HTTPStatus.INTERNAL_SERVER_ERROR)

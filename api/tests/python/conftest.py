@@ -43,6 +43,7 @@ def client(app):
     """
     return app.test_client()
 
+
 @pytest.fixture(scope="session")
 def jwt(app):
     """
@@ -50,10 +51,12 @@ def jwt(app):
     """
     return _jwt
 
+
 @pytest.fixture(scope="session")
 def solr(app):
     import os
     return os.getenv('SOLR_TEST_URL')
+
 
 @pytest.fixture(scope="session")
 def client_ctx(app):
@@ -88,9 +91,9 @@ def db(app, request):
         for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
             try:
                 sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
-                print ('DROP SEQUENCE public.%s ' % seq)
+                print('DROP SEQUENCE public.%s ' % seq)
             except Exception as e:
-                print ('Error: {}'.format(e))
+                print('Error: {}'.format(e))
         sess.commit()
 
         # ############################################
