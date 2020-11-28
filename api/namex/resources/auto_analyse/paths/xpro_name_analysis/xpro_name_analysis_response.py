@@ -27,10 +27,8 @@ from ...analysis_options import \
     remove_or_replace_setup, \
     assumed_name_setup, \
     alternative_assumed_name_setup, \
-    resolve_conflict_setup, \
     send_to_examiner_setup, \
     obtain_consent_setup, \
-    conflict_self_consent_setup, \
     replace_designation_setup, \
     change_entity_type_setup, \
     change_designation_order_setup, \
@@ -69,12 +67,8 @@ class XproAnalysisResponse(AnalysisResponse):
         # If there's only one issue, display helpful hint and the examination button
         if is_only_issue:
             option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
 
             option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
@@ -82,12 +76,8 @@ class XproAnalysisResponse(AnalysisResponse):
             ])
         elif has_next_issue:
             option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
 
             option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
@@ -95,12 +85,8 @@ class XproAnalysisResponse(AnalysisResponse):
             ])
         elif not is_only_issue and has_next_issue is False:
             option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
 
             option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
@@ -114,8 +100,6 @@ class XproAnalysisResponse(AnalysisResponse):
 
     def build_add_distinctive_word_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_distinctive_setup()
-        # Tweak the header
-        option1.header = "Helpful Tip"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
@@ -128,8 +112,6 @@ class XproAnalysisResponse(AnalysisResponse):
 
     def build_add_descriptive_word_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_descriptive_setup()
-        # Tweak the header
-        option1.header = "Helpful Tip"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
@@ -143,7 +125,7 @@ class XproAnalysisResponse(AnalysisResponse):
     def build_too_many_words_issue(self, procedure_result, issue_count, issue_idx):
         option1 = too_many_words_setup()
         # Tweak the header
-        option1.header = "Helpful Tip"
+        option1.header = "Required Action"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
@@ -156,8 +138,7 @@ class XproAnalysisResponse(AnalysisResponse):
 
     def build_words_to_avoid_issue(self, procedure_result, issue_count, issue_idx):
         option1 = remove_setup()
-        # Tweak the header
-        option1.header = "Helpful Tip"
+        option1.header = "Required Action"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
@@ -170,16 +151,10 @@ class XproAnalysisResponse(AnalysisResponse):
 
     def build_name_requires_consent_issue(self, procedure_result, issue_count, issue_idx):
         option1 = remove_or_replace_setup()
-        # Tweak the header
-        option1.header = "Option 1"
 
         option2 = send_to_examiner_setup()
-        # Tweak the header
-        option2.header = "Option 2"
 
         option3 = obtain_consent_setup()
-        # Tweak the header
-        option3.header = "Option 3"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1,
@@ -209,16 +184,15 @@ class XproAnalysisResponse(AnalysisResponse):
             EntityTypes.XPRO_CORPORATION.value, EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
             EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
             else alternative_assumed_name_setup()
-        # Tweak the header
-        option1.header = "Option 1"
 
         option2 = send_to_examiner_setup()
-        # Tweak the header
-        option2.header = "Option 2"
+
+        option3 = obtain_consent_setup()
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1,
-            option2
+            option2,
+            option3
         ])
 
 
@@ -243,7 +217,7 @@ class XproAnalysisResponse(AnalysisResponse):
             EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
             else alternative_assumed_name_setup()
         # Tweak the header
-        option1.header = "Helpful Hint"
+        option1.header = "Required Action"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
@@ -256,8 +230,7 @@ class XproAnalysisResponse(AnalysisResponse):
 
     def build_non_existent_designation_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_designation_setup()
-        # Tweak the header
-        option1.header = "Option 1"
+        option1.header = "Required Action"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
@@ -270,12 +243,8 @@ class XproAnalysisResponse(AnalysisResponse):
 
     def build_designation_mismatch_issue(self, procedure_result, issue_count, issue_idx):
         option1 = replace_designation_setup()
-        # Tweak the header
-        option1.header = "Option 1"
 
         option2 = change_entity_type_setup()
-        # Tweak the header
-        option2.header = "Option 2"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1,
@@ -290,7 +259,7 @@ class XproAnalysisResponse(AnalysisResponse):
     def build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
         option1 = change_designation_order_setup()
         # Tweak the header
-        option1.header = "Option 1"
+        option1.header = "Required Action"
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1
@@ -310,12 +279,8 @@ class XproAnalysisResponse(AnalysisResponse):
         # If there's only one issue, display helpful hint and the examination button
         if is_only_issue:
             option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
 
             option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
@@ -323,12 +288,8 @@ class XproAnalysisResponse(AnalysisResponse):
             ])
         elif has_next_issue:
             option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
 
             option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
@@ -336,12 +297,8 @@ class XproAnalysisResponse(AnalysisResponse):
             ])
         elif not is_only_issue and has_next_issue is False:
             option1 = remove_or_replace_setup()
-            # Tweak the header
-            option1.header = "Option 1"
 
             option2 = send_to_examiner_setup()
-            # Tweak the header
-            option2.header = "Option 2"
 
             issue = response_issues(procedure_result.result_code)(self, [
                 option1,
