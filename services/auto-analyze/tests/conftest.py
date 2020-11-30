@@ -20,5 +20,4 @@ from auto_analyze import app as _app
 @pytest.fixture(scope='function')
 async def app():
     """Return a session-wide application configured in TEST mode."""
-    # _app = await create_app('testing')
     return _app
