@@ -87,18 +87,26 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         desc_tmp_synonym_dict = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
 
         # Update key in desc_db_synonym_dict
-        service._dict_desc_words_search_conflicts = stem_key_dictionary(desc_tmp_synonym_dict)  # pylint: disable=protected-access
-        service._dict_desc_words_search_conflicts = add_key_values(service.get_dict_desc_search_conflicts())  # pylint: disable=protected-access
+        service._dict_desc_words_search_conflicts = stem_key_dictionary(  # pylint: disable=protected-access
+            desc_tmp_synonym_dict
+        )
+        service._dict_desc_words_search_conflicts = add_key_values(  # pylint: disable=protected-access
+            service.get_dict_desc_search_conflicts()
+        )
         dict_synonyms = stem_key_dictionary(dict_synonyms)
         dict_synonyms = add_key_values(dict_synonyms)
 
         list_desc, dict_synonyms = remove_descriptive_same_category(dict_synonyms)
 
-        service._list_desc_words = list(service.get_dict_desc_search_conflicts().keys())  # pylint: disable=protected-access
+        service._list_desc_words = list(  # pylint: disable=protected-access
+            service.get_dict_desc_search_conflicts().keys()
+        )
 
         # Check if list_dist needs to be spplitted based on service.get_list_dist()
         list_dist = get_split_compound(list_dist, service.get_list_dist())
-        service._list_dist_words = get_split_compound(service.get_list_dist(), list_dist)  # pylint: disable=protected-access
+        service._list_dist_words = get_split_compound(  # pylint: disable=protected-access
+            service.get_list_dist(),
+            list_dist)
 
         list_dist_stem = [porter.stem(word) for word in list_dist]
         vector1_dist = text_to_vector(list_dist_stem)
