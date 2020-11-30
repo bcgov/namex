@@ -7,7 +7,7 @@ from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
-from namex.constants import NameRequestPatchActions, NameRequestRollbackActions
+from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
 from namex.models import Request, State, Event
 
 from namex.services import EventRecorder
@@ -15,6 +15,7 @@ from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError, NameRequestIsInProgressError
+from namex.services.payment.payments import refund_payment
 
 from .api_namespace import api
 from .api_models import nr_request
@@ -113,7 +114,7 @@ class NameRequestResource(BaseNameRequestResource):
 @api.route('/<int:nr_id>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @api.doc(params={
     'nr_id': 'NR ID - This field is required',
-    'nr_action': 'NR Action - One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND]'
+    'nr_action': 'NR Action - One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND, REQUEST_REFUND]'
 })
 class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
@@ -212,7 +213,8 @@ class NameRequestFields(BaseNameRequestResource):
                     NameRequestPatchActions.CHECKIN.value: self.handle_patch_checkin,
                     NameRequestPatchActions.EDIT.value: self.handle_patch_edit,
                     NameRequestPatchActions.CANCEL.value: self.handle_patch_cancel,
-                    NameRequestPatchActions.RESEND.value: self.handle_patch_resend
+                    NameRequestPatchActions.RESEND.value: self.handle_patch_resend,
+                    NameRequestPatchActions.REQUEST_REFUND.value: self.handle_patch_request_refund
                 }.get(action)(model)
 
             # This handles updates if the NR state is 'patchable'
@@ -329,6 +331,38 @@ class NameRequestFields(BaseNameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [cancel]', nr_model, nr_svc.request_data)
+
+        return nr_model
+
+    def handle_patch_request_refund(self, nr_model: Request):
+        """
+        Can the NR and request a refund for ALL associated Name Request payments.
+        :param nr_model:
+        :return:
+        """
+        nr_svc = self.nr_service
+
+        # This handles updates if the NR state is 'patchable'
+        nr_model = self.update_nr(nr_model, State.REFUND_REQUESTED, self.handle_nr_patch)
+
+        # Handle the payments
+        valid_states = [
+            PaymentState.COMPLETED.value,
+            PaymentState.PARTIAL.value
+        ]
+        # Cancel any payments associated with the NR
+        for payment in nr_model.payments.all():
+            if payment.payment_status_code in valid_states:
+                # refund_payment(payment.payment_token, {'reason': 'Name Request user requested refund'})
+                refund_payment(payment.payment_token)
+                payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
+                payment.save_to_db()
+
+        # This handles the updates for NRO and Solr, if necessary
+        nr_model = self.update_records_in_network_services(nr_model, update_solr=True)
+
+        # Record the event
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [request-refund]', nr_model, nr_svc.request_data)
 
         return nr_model
 

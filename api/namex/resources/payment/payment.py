@@ -20,7 +20,7 @@ from namex.resources.name_requests.abstract_nr_resource import AbstractNameReque
 
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-from namex.services.payment.payments import get_payment, create_payment
+from namex.services.payment.payments import get_payment, create_payment, refund_payment
 from namex.services.payment.models import PaymentRequest
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 
@@ -442,7 +442,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             NameRequestActions.COMPLETE.value: self.complete_reservation_payment,
             NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
             NameRequestActions.REAPPLY.value: self.complete_reapply_payment,
-            NameRequestActions.REFUND.value: self.complete_refund
+            NameRequestActions.REQUEST_REFUND.value: self.request_refund
         }.get(action)(model, payment_id)
 
     def complete_reservation_payment(self, nr_model: RequestDAO, payment_id: int):
@@ -578,6 +578,26 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         return nr_model
 
-    def complete_refund(self, nr_model: RequestDAO, payment_id: int):
-        # This is just some sample code for what to do to implement refunds when we get to it...
+    def request_refund(self, nr_model: RequestDAO, payment_id: int):
+        """
+        Processes a SINGLE refund request.
+        This is different from the 'refund' in the NameRequest resource PATCH namerequests/{nrId}/REQUEST_REFUND
+        which cancels the NR and refunds any associated payments.
+        :param nr_model:
+        :param payment_id:
+        :return:
+        """
+        # Handle the payments
+        valid_states = [
+            PaymentState.COMPLETED.value,
+            PaymentState.PARTIAL.value
+        ]
+        # Cancel any payments associated with the NR
+        for payment in nr_model.payments.all():
+            if payment.payment_status_code in valid_states and payment.payment_id == payment_id:
+                # refund_payment(payment.payment_token, {'reason': 'Name Request user requested refund'})
+                refund_payment(payment.payment_token)
+                payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
+                payment.save_to_db()
+
         return nr_model
