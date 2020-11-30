@@ -13,9 +13,9 @@
 # limitations under the License.
 """Analyzes a single name."""
 import itertools
-import re
 import logging
 import math
+import re
 from collections import Counter
 
 from namex.services.name_processing.name_processing import NameProcessingService
@@ -30,6 +30,7 @@ from namex.services.name_request.auto_analyse.protected_name_analysis import Pro
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from nltk.stem import PorterStemmer
 from swagger_client import SynonymsApi as SynonymService
+
 
 porter = PorterStemmer()
 
@@ -86,18 +87,18 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         desc_tmp_synonym_dict = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
 
         # Update key in desc_db_synonym_dict
-        service._dict_desc_words_search_conflicts = stem_key_dictionary(desc_tmp_synonym_dict)
-        service._dict_desc_words_search_conflicts = add_key_values(service.get_dict_desc_search_conflicts())
+        service._dict_desc_words_search_conflicts = stem_key_dictionary(desc_tmp_synonym_dict)  # pylint: disable=protected-access
+        service._dict_desc_words_search_conflicts = add_key_values(service.get_dict_desc_search_conflicts())  # pylint: disable=protected-access
         dict_synonyms = stem_key_dictionary(dict_synonyms)
         dict_synonyms = add_key_values(dict_synonyms)
 
         list_desc, dict_synonyms = remove_descriptive_same_category(dict_synonyms)
 
-        service._list_desc_words = list(service.get_dict_desc_search_conflicts().keys())
+        service._list_desc_words = list(service.get_dict_desc_search_conflicts().keys())  # pylint: disable=protected-access
 
         # Check if list_dist needs to be spplitted based on service.get_list_dist()
         list_dist = get_split_compound(list_dist, service.get_list_dist())
-        service._list_dist_words = get_split_compound(service.get_list_dist(), list_dist)
+        service._list_dist_words = get_split_compound(service.get_list_dist(), list_dist)  # pylint: disable=protected-access
 
         list_dist_stem = [porter.stem(word) for word in list_dist]
         vector1_dist = text_to_vector(list_dist_stem)
@@ -154,7 +155,7 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=F
 
     conflict_class_stem = [porter.stem(name.lower()) for name in conflict_class_list]
 
-    for idx, word in enumerate(original_class_list):
+    for idx, word in enumerate(original_class_list):  # pylint: disable=unused-variable
         k = word.lower()
         word_stem = porter.stem(k)
         counter = 1
@@ -180,7 +181,7 @@ def check_compound_dist(list_dist, list_desc, original_class_list, class_subs_di
     vector_dist = {}
     entropy_dist = 0.0
     for i in range(2, len(list_dist) + 1):
-        compound_space_list = [x for x in subsequences(list_dist, i)]
+        compound_space_list = [x for x in subsequences(list_dist, i)]  # pylint: disable=unnecessary-comprehension
         compound = [x.replace(' ', '') for x in compound_space_list]
         vector_dist, entropy_dist = get_vector(compound, original_class_list, class_subs_dict)
 
@@ -247,7 +248,7 @@ def stand_alone_additional_dist_desc(lst_dist_name1, lst_dist_name2, lst_desc_na
 
 def remove_extra_value(d1, d2):
     """Return d1 with d2 items removed."""
-    for k2, v2 in d2.items():
+    for k2, v2 in d2.items():  # pylint: disable=unused-variable
         for k1, v1 in d1.items():
             if len(set(v1) ^ set(v2)) == 1 and k1 not in v2:
                 try:
