@@ -1,6 +1,6 @@
 # Just installs the production requirements.
-hypercorn
-quart
+Hypercorn==0.11.1
+Quart==0.13.1
 requests==2.25.0
 nltk==3.4.5
 Flask-SQLAlchemy==2.4.1
