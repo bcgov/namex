@@ -57,7 +57,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         if issue.issue_type == AnalysisIssueCodes.CORPORATE_CONFLICT:
             issue.line1 = "Too similar to an existing name."
         else:
-            issue.line1 = "Too similar to an existing name under examination."
+            issue.line1 = "Too similar to a name currently being reviewed."
 
         '''
         eg:

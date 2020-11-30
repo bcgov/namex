@@ -33,7 +33,7 @@ class DesignationNonExistentIssue(AnalysisResponseIssue):
         correct_designations = self._lc_list_items(procedure_result.values['correct_designations'])
 
         issue = self.create_issue()
-        issue.line1 = "Further Action. A designation is required. Please select one from Option 1 below."
+        issue.line1 = "A designation is required."
         issue.designations = correct_designations
 
         # Setup boxes

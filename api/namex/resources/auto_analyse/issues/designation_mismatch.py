@@ -45,7 +45,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         entity_type_description = get_entity_type_description(self.entity_type)
 
         issue = self.create_issue()
-        issue.line1 = "The " + self._join_list_words(incorrect_designations_lc) + " designation(s) cannot be used with selected entity type of " + entity_type_description + " </b>."
+        issue.line1 = "The " + self._join_list_words(incorrect_designations_lc) + " designation cannot be used for a " + entity_type_description + " </b>."
         issue.designations = correct_designations_lc
 
         # Loop over the list_name words, we need to decide to do with each word

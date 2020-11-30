@@ -34,8 +34,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         list_none = self._lc_list_items(procedure_result.values['list_none'])
 
         issue = self.create_issue()
-        issue.line1 = "The word(s) " + self._join_list_words(list_none) + " have not previously been approved for use."
-        issue.line2 = "Please check wait times at the top of the screen."
+        issue.line1 = "The word(s) " + self._join_list_words(list_none) + " require further review by staff."
 
         issue.name_actions = []
         for word in list_none:

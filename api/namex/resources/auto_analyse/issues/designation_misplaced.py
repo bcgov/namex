@@ -38,7 +38,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
 
         issue = self.create_issue()
         issue.line1 = "The " + self._join_list_words(misplaced_end_designation_lc) + \
-                      " designation(s) must be at the end of the name."
+                      " designation must be at the end of the name."
 
         # Loop over the list_name words, we need to decide to do with each word
         for word in list_name_incl_designation_lc:

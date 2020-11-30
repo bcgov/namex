@@ -22,10 +22,10 @@ class AddDistinctiveSetup(Setup):
 def add_distinctive_setup():
     return AddDistinctiveSetup(
         type="add_distinctive",
-        header=Template("Add Distinctive"),
+        header=Template("Add Words"),
         line1=Template(
-            "Add some words to the beginning of your name that sets your name apart. For example, an individual's name or initials; a geographic location; a colour; a coined, made-up word; or an acronym."),
-        line2=Template("Example: Change 'Renovations Ltd.' → 'Joe's Renovations Ltd.")
+            "Add some words to the beginning of your name that set your name apart. For example: an individual's name or initials, a geographic location, a colour, a coined, made-up word, or an acronym."),
+        line2=Template("Example: Change &quot;Renovations Ltd.&quot; to &quot;Joe's Renovations Ltd.")
     )
 
 
@@ -36,10 +36,10 @@ class AddDescriptiveSetup(Setup):
 def add_descriptive_setup():
     return AddDescriptiveSetup(
         type="add_descriptive",
-        header=Template("Add Descriptive"),
+        header=Template("Add Words"),
         line1=Template(
             "Add some additional words that help describe what your business does. For example, the product or service you provide."),
-        line2=Template("Example: Change 'Joe's Ltd.' → 'Joe's Renovations Ltd.")
+        line2=Template("Example: Change &quot;Joe's Ltd.&quot; to &quot;Joe's Renovations Ltd.")
     )
 
 
@@ -65,8 +65,8 @@ class RemoveSetup(Setup):
 def remove_setup():
     return RemoveSetup(
         type="remove",
-        header=Template("Remove"),
-        line1=Template("Please remove or replace the word from your search and try again."),
+        header=Template("Remove or Replace Word(s)"),
+        line1=Template("Remove or replace the highlighted words and try your search again."),
         line2=Template("")
     )
 
@@ -78,8 +78,8 @@ class RemoveOrReplaceSetup(Setup):
 def remove_or_replace_setup():
     return RemoveOrReplaceSetup(
         type="remove_or_replace",
-        header=Template("Remove or Replace"),
-        line1=Template("Please remove or replace the highlighted words and try your search again."),
+        header=Template("Remove or Replace Word(s)"),
+        line1=Template("Remove or replace the highlighted words and try your search again."),
         line2=Template("")
     )
 
@@ -105,9 +105,10 @@ class ResolveConflictSetup(Setup):
 def resolve_conflict_setup():
     return ResolveConflictSetup(
         type="resolve_conflict",
-        header=Template("Resolve Conflict"),
-        line1=Template("Add a word to the beginning of the name that sets it apart like a person’s name or initials."),
-        line2=Template("Or remove the word(s) $list_remove and replace them with different ones.")
+        header=Template("Add Words"),
+        line1=Template("Add a word to the beginning of the name that sets it apart (like a person’s name or initials) "
+                       "or change some of the words in the name."),
+        line2=Template("")
     )
 
 
@@ -118,9 +119,9 @@ class AssumedNameSetup(Setup):
 def assumed_name_setup():
     return AssumedNameSetup(
         type="assumed_name",
-        header=Template("Assumed Name"),
-        line1=Template("Extra provincial or registration of a foreign entity in BC requires use of an Assumed Name when there is an existing BC entity with a similar name."),
-        action=Template("I want to send my name to be examined as an Assumed Name."),
+        header=Template("Assume a Name"),
+        line1=Template("If the name of an extraprovincial business is too similar to an existing BC business, you must use (assume) a different name in BC. Assumed names must be reviewed Registries staff."),
+        action=Template("I want to assume a name in BC"),
         # checkbox=Template("I want to send my name to be examined as an Assumed Name.")
     )
 
@@ -134,8 +135,7 @@ def alternative_assumed_name_setup():
         type="assumed_name",
         header=Template("Not Assumed Name"),
         line1=Template(
-            "There is an existing BC entity with a similar name therefore you must use a different name in BC. "
-            "This may require you to register the new name in your home jurisdiction first before proceeding here."),
+            "There is an existing BC entity with a similar name therefore you must use a different name in BC. This may require you to register the new name in your home jurisdiction first before proceeding here."),
         line2=Template("")
     )
 
@@ -147,11 +147,11 @@ class SendToExaminerSetup(Setup):
 def send_to_examiner_setup():
     return SendToExaminerSetup(
         type="send_to_examiner",
-        header=Template("Send to Examiner"),
+        header=Template("Send for Review"),
         line1=Template(
-            "You can choose to submit this name for examination. Please check wait times at the top of the screen."),
+            "You can choose to submit this name for review without changes. Please check wait times at the top of the screen."),
         line2=Template(""),
-        action=Template("I want my name examined.")
+        action=Template("I want to send my name for review")
     )
 
 
@@ -164,9 +164,9 @@ def obtain_consent_setup():
         type="obtain_consent",
         header=Template("Obtain Consent"),
         line1=Template(
-            "This name can be approved, but you will be required to send written consent to the BC Business Registry."),
+            "This name may be approved if you are able to get written consent <b>from the registered owner of the conflicting name.</b>"),
         line2=Template(""),
-        action=Template("I am able to obtain and send written consent.")
+        action=Template("I will submit written consent to the BC Business Registry")
     )
 
 
@@ -177,11 +177,11 @@ class SelfConsentSetup(Setup):
 def conflict_self_consent_setup():
     return SelfConsentSetup(
         type="conflict_self_consent",
-        header=Template("Conflict Self Consent"),
+        header=Template("Obtain Consent"),
         line1=Template(
-            "This name can be approved if you are the registered owner of the conflicting name, but you are required to send written consent to the BC Business Registry."),
+            "This name may be approved if you are able to get written consent <b>from the registered owner of the conflicting name.</b>"),
         line2=Template(""),
-        action=Template("I am the registered owner of the conflicting name. I will send written consent.")
+        action=Template("I will submit written consent to the BC Business Registry")
     )
 
 
@@ -192,7 +192,7 @@ class ReplaceDesignationSetup(Setup):
 def replace_designation_setup():
     return ReplaceDesignationSetup(
         type="replace_designation",
-        header=Template("Replace Designation"),
+        header=Template("Change Designation"),
         line1=Template("Change the designation from to one of the following:"),
         line2=Template("")
     )
@@ -205,8 +205,8 @@ class AddDesignationSetup(Setup):
 def add_designation_setup():
     return AddDesignationSetup(
         type="add_designation",
-        header=Template("Add Designation"),
-        line1=Template("Please select a designation from one of the following:"),
+        header=Template("Select Designation"),
+        line1=Template("Select a designation from the following:"),
         line2=Template("")
     )
 
@@ -218,9 +218,10 @@ class ChangeDesignationSetup(Setup):
 def change_designation_order_setup():
     return ChangeDesignationSetup(
         type="change designation at the end",
-        header=Template("Change Designation order"),
-        line1=Template("Change designation order to the end of the name."),
-        line2=Template("")
+        header=Template("Change Designation Order"),
+        line1=Template("Move the designation to the end of the name."),
+        line2=Template(""),
+        label=Template("Move Designation")
     )
 
 
@@ -231,11 +232,11 @@ class ChangeEntityTypeSetup(Setup):
 def change_entity_type_setup():
     return ChangeEntityTypeSetup(
         type="change_entity_type",
-        header=Template("Change Entity Type"),
+        header=Template("Change Business Type"),
         line1=Template(
-            "The designation you have selected is not appropriate for this entity type. You can choose to select a different type by pressing the 'RESTART and CHANGE TYPE' button."),
+            "Restart name search and select a different business type."),
         line2=Template(""),
-        label=Template("Change $entity_type to $correct_designations")
+        label=Template("Start Search Over")
     )
 
 

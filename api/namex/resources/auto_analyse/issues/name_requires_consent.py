@@ -39,7 +39,6 @@ class NameRequiresConsentIssue(AnalysisResponseIssue):
 
         issue = self.create_issue()
         issue.line1 = "The word(s) " + self._join_list_words(list_consent_original) + " are restricted and may require consent."
-        issue.line2 = "Please check the options below."
 
         issue.name_actions = []
         for word in list_consent:
