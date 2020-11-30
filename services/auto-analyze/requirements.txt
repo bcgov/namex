@@ -1,17 +1,17 @@
 # Just installs the production requirements.
 hypercorn
 quart
-requests
+requests==2.25.0
 nltk==3.4.5
 Flask-SQLAlchemy==2.4.1
 Flask-Marshmallow==0.11.0
 marshmallow==2.19.2
 marshmallow-sqlalchemy==0.19.0
-pandas
-inflect
+pandas==1.1.4
+inflect==5.0.2
 werkzeug
-pysolr
-jsonpickle
+pysolr==3.9.0
+jsonpickle==1.4.1
 lxml==4.6.1
 
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
