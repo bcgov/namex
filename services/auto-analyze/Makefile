@@ -93,11 +93,12 @@ mac-cov:	install-dev coverage-report
 ## run pylint on the package and tests
 pylint:
 	pylint --rcfile=setup.cfg \
-	 src/$(project_name)
+	 src/$(project_name) \
+	 src/config.py
 
 ## run flake8 on the package and tests
 flake8:
-	flake8 src/$(project_name) tests
+	flake8 src/$(project_name) src/config.py tests
 
 ## Verify source code license headers.
 license:
