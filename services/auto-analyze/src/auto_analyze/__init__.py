@@ -18,13 +18,13 @@
 import asyncio
 import os
 
+import config  # pylint: disable=wrong-import-order; # noqa: I001
 import quart.flask_patch
 from namex import models
 from namex.models import db, ma
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from quart import Quart, jsonify, request
 
-import config
 
 from .analyzer import auto_analyze
 
