@@ -102,7 +102,7 @@ action_handlers = {
     NameRequestActions.EDIT.value: display_edit_action,
     NameRequestActions.UPGRADE.value: display_upgrade_action,
     NameRequestActions.CANCEL.value: display_cancel_action,
-    NameRequestActions.REFUND.value: display_refund_action,
+    NameRequestActions.REQUEST_REFUND.value: display_refund_action,
     NameRequestActions.RECEIPT.value: display_receipt_action,
     NameRequestActions.REAPPLY.value: display_reapply_action,
     NameRequestActions.RESEND.value: display_resend_action,
@@ -279,6 +279,30 @@ def to_cancelled(resource, nr, on_success_cb):
     return nr
 
 
+def to_refund_requested(resource, nr, on_success_cb):
+    # Allow cancelled to cancelled state transition here, if this is not to be allowed, catch it when validating the request
+    # valid_states = [State.APPROVED, State.CONDITIONAL]
+    valid_states = State.CANCELLABLE_STATES
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.REFUND_REQUESTED,
+            valid_states=', '.join(valid_states)
+        ))
+
+    # TODO: Confirm that we don't need to check for expiry!
+    # if nr.is_expired is True:
+    #    raise NameRequestIsExpiredError()
+    # if nr.has_consumed_name is True:
+    #    raise NameRequestIsConsumedError()
+
+    resource.next_state_code = State.REFUND_REQUESTED
+    nr.stateCd = State.REFUND_REQUESTED
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
+
+
 def apply_nr_state_change(self, name_request, next_state, on_success=None):
     """
     This is where we handle entity state changes.
@@ -298,5 +322,6 @@ def apply_nr_state_change(self, name_request, next_state, on_success=None):
         State.CONDITIONAL: to_conditional,
         State.APPROVED: to_approved,
         State.REJECTED: to_rejected,
-        State.CANCELLED: to_cancelled
+        State.CANCELLED: to_cancelled,
+        State.REFUND_REQUESTED: to_refund_requested
     }.get(next_state)(self, name_request, on_success)

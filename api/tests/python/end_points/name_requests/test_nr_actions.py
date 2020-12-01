@@ -630,7 +630,7 @@ def test_draft_patch_refund(client, jwt, app):
 
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.REFUND.value, draft_nr.get('id'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.REQUEST_REFUND.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 

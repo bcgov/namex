@@ -87,7 +87,7 @@ def test_draft_response_actions(client, jwt, app):
         NameRequestActions.UPGRADE.value,
         # TODO: Spreadsheet conflicts with task
         # TODO: Show refund action ONLY if there is an existing payment!
-        # NameRequestActions.REFUND.value,
+        # NameRequestActions.REQUEST_REFUND.value,
         # TODO: Show receipt action ONLY if there is an existing payment!
         # NameRequestActions.RECEIPT.value
     ])
