@@ -31,7 +31,6 @@ from namex.services.name_request.builders.name_analysis_builder import NameAnaly
 from nltk.stem import PorterStemmer
 from swagger_client import SynonymsApi as SynonymService
 
-
 porter = PorterStemmer()
 
 synonym_service = SynonymService()
@@ -88,12 +87,12 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
 
         # Update key in desc_db_synonym_dict
         service._dict_desc_words_search_conflicts = stem_key_dictionary(  # pylint: disable=protected-access
-            desc_tmp_synonym_dict
-        )
+            desc_tmp_synonym_dict, stand_alone_words)
+
         service._dict_desc_words_search_conflicts = add_key_values(  # pylint: disable=protected-access
             service.get_dict_desc_search_conflicts()
         )
-        dict_synonyms = stem_key_dictionary(dict_synonyms)
+        dict_synonyms = stem_key_dictionary(dict_synonyms, stand_alone_words)
         dict_synonyms = add_key_values(dict_synonyms)
 
         list_desc, dict_synonyms = remove_descriptive_same_category(dict_synonyms)
@@ -112,7 +111,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         vector1_dist = text_to_vector(list_dist_stem)
 
         vector2_dist, entropy_dist = get_vector(service.get_list_dist(), list_dist,
-                                                dist_db_substitution_dict, True)
+                                                dist_db_substitution_dict, dist=True)
 
         if all(value == OTHER_W_DIST for value in vector2_dist.values()):
             vector2_dist, entropy_dist, _ = check_compound_dist(list_dist=list(vector2_dist.keys()),
@@ -131,17 +130,18 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
 
         similarity_dist = round(get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
-        list_desc_stem = [porter.stem(word) for word in list_desc]
+        list_desc_stem = [porter.stem(word) if word not in stand_alone_words else word for word in list_desc]
         vector1_desc = text_to_vector(list_desc_stem)
 
         vector2_desc, entropy_desc = get_vector(
             remove_spaces_list(service.get_list_desc()), list_desc,
-            service.get_dict_desc_search_conflicts())
+            service.get_dict_desc_search_conflicts(), stand_alone_words=stand_alone_words)
         similarity_desc = round(
             get_similarity(vector1_desc, vector2_desc, entropy_desc), 2)
 
         similarity = round((similarity_dist + similarity_desc) / 2, 2)
         logging.getLogger(__name__).debug('similarity: %s', similarity)
+        print("similarity: ", similarity)
 
     if similarity == EXACT_MATCH or (
             similarity >= MINIMUM_SIMILARITY and not is_not_real_conflict(list_name,
@@ -154,23 +154,22 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
     return dict_matches_counter
 
 
-def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=False):
+def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=False, stand_alone_words=[]):
     """Return vector of words (or synonyms) found in original_class_list which are in conflict_class_list."""
     vector = dict()
     entropy = list()
     original_class_list = original_class_list if original_class_list else []
     class_subs_dict = class_subs_dict if class_subs_dict else {}
 
-    conflict_class_stem = [porter.stem(name.lower()) for name in conflict_class_list]
+    conflict_class_stem = [porter.stem(name.lower()) if
+                           name not in stand_alone_words else name.lower() for name in conflict_class_list]
 
     for idx, word in enumerate(original_class_list):  # pylint: disable=unused-variable
         k = word.lower()
-        word_stem = porter.stem(k)
+        word_stem = porter.stem(k) if k not in stand_alone_words else k
         counter = 1
-        if word.lower() in conflict_class_list:
+        if word.lower() in conflict_class_list or word_stem in conflict_class_stem:
             entropy.append(1)
-        elif word_stem in conflict_class_stem:
-            entropy.append(STEM_W)
         elif word_stem in get_flat_list(class_subs_dict.values()):
             entropy.append(SUBS_W)
         else:
@@ -291,9 +290,9 @@ def remove_descriptive_same_category(dict_desc):
     return list(dict_desc_unique_category.keys()), dict_desc_unique_category
 
 
-def stem_key_dictionary(d1):
+def stem_key_dictionary(d1, stand_alone_words=[]):
     """Stem the dictionary key."""
-    dict_stem = {porter.stem(k): v for (k, v) in d1.items()}
+    dict_stem = dict((porter.stem(k), v) if k not in stand_alone_words else (k, v) for k, v in d1.items())
 
     return dict_stem
 
