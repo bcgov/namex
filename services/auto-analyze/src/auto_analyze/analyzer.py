@@ -143,12 +143,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         logging.getLogger(__name__).debug('similarity: %s', similarity)
         print("similarity: ", similarity)
 
-    if similarity == EXACT_MATCH or (
-            similarity >= MINIMUM_SIMILARITY and not is_not_real_conflict(list_name,
-                                                                          stand_alone_words,
-                                                                          list_dist,
-                                                                          dict_synonyms,
-                                                                          service)):
+    if similarity >= MINIMUM_SIMILARITY:
         dict_matches_counter.update({name: similarity})
 
     return dict_matches_counter
@@ -227,30 +222,6 @@ def get_cosine(vec1, vec2):
 def get_similarity(vector1, vector2, entropy):
     """Return similarity between two vectors which are either both distinctives or descriptives."""
     return get_cosine(vector1, vector2) * entropy
-
-
-def is_not_real_conflict(list_name, stand_alone_words, list_dist, dict_desc, service):
-    """Return True if the name is not a real conflict. Otherwise, false if the name is a conflict."""
-    list_desc = list(dict_desc.keys())
-    if is_standalone_name(list_name, stand_alone_words):
-        return stand_alone_additional_dist_desc(list_dist, service.get_list_dist(), list_desc,
-                                                service.get_list_desc())
-    return False
-
-
-def is_standalone_name(list_name, stand_alone_words):
-    """Return True if standalone name."""
-    if any(stand_alone in list_name for stand_alone in stand_alone_words):
-        return True
-    return False
-
-
-def stand_alone_additional_dist_desc(lst_dist_name1, lst_dist_name2, lst_desc_name1, lst_desc_name2):
-    """Return True if there is an additional distinctive or descriptive in the stand-alone name."""
-    if lst_dist_name1.__len__() != lst_dist_name2.__len__() or lst_desc_name1.__len__() != lst_desc_name2.__len__():
-        return True
-
-    return False
 
 
 def remove_extra_value(d1, d2):
