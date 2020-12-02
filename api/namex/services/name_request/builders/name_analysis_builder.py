@@ -498,7 +498,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
                 # Get  N highest score (values) and shortest names (key)
                 dict_highest_counter.update({k: v for k, v in
-                                             sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
+                                             sorted(dict_matches_counter.items(), key=lambda item: (-item[1], len(item[0])))[
                                              0:MAX_MATCHES_LIMIT]})
                 list_details = self.get_details_higher_score(dict_highest_counter, selected_matches, all_subs_dict)
                 forced = True if any(value == EXACT_MATCH for value in dict_highest_counter.values()) else False
