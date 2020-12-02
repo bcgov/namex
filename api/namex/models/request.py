@@ -507,7 +507,7 @@ class Request(db.Model):
     def get_descriptive_query(cls, desc, criteria, name_criteria):
         special_characters_descriptive = Request.set_special_characters_descriptive(desc)
         for e in criteria:
-            substitutions = r's\W* ?| '.join(map(str, special_characters_descriptive)) + 's\W* ?'
+            substitutions = r' ?| '.join(map(str, special_characters_descriptive))
             name_criteria += r'.*({})\y'.format(substitutions)
             e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(name_criteria)])
 
