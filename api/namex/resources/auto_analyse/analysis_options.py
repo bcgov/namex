@@ -133,10 +133,10 @@ class AlternativeAssumedNameSetup(Setup):
 def alternative_assumed_name_setup():
     return AlternativeAssumedNameSetup(
         type="assumed_name",
-        header=Template("Not Assumed Name"),
+        header=Template("Change Business Name"),
         line1=Template(
-            "There is an existing BC entity with a similar name therefore you must use a different name in BC. This may require you to register the new name in your home jurisdiction first before proceeding here."),
-        line2=Template("")
+            "The name of your business must be the same in BC and your home jurisdiction. Change your business name in your home jurisdiction and obtain the same name in BC."),
+        line2=Template("Before obtaining a new name, check to see if the name is available in both jurisdictions.")
     )
 
 
