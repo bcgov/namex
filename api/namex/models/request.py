@@ -496,9 +496,9 @@ class Request(db.Model):
         special_characters_dist = Request.set_special_characters_distinctive(dist)
         substitutions = '|'.join(map(str, special_characters_dist))
         if not check_name_is_well_formed:
-            dist_criteria = r'(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)
+            dist_criteria = r'(no.?)*\s*\d*\s*\W*({0})?\W*\y({1}s?)\W*\s*\y'.format(stop_words, substitutions)
         else:
-            dist_criteria = r'\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)
+            dist_criteria = r'\s*\W*({0})?\W*\y*({1}s?)\W*\s*\y'.format(stop_words, substitutions)
 
         return dist_criteria
 
