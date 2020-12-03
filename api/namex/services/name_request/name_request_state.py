@@ -4,7 +4,8 @@ from namex.constants import \
     NameRequestActions, \
     NameRequestDraftActions, NameRequestReservedActions, NameRequestActiveActions, NameRequestCancelledActions, \
     NameRequestHoldActions, NameRequestInProgressActions, NameRequestExpiredActions, NameRequestConsumedActions, \
-    NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions, EntityTypes \
+    NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions, EntityTypes, \
+    NameRequestCompletedActions
 
 from namex.models import State
 
@@ -135,7 +136,10 @@ def get_nr_state_actions(next_state, nr_model=None):
             State.HOLD: build_actions(NameRequestHoldActions.list(), nr_model),
             State.HISTORICAL: build_actions(NameRequestHistoricalActions.list(), nr_model),
             State.CANCELLED: build_actions(NameRequestCancelledActions.list(), nr_model),
-            State.REJECTED: build_actions(NameRequestActiveRejectedActions.list(), nr_model)
+            State.REFUND_REQUESTED: build_actions(NameRequestCancelledActions.list(), nr_model),
+            State.EXPIRED: build_actions(NameRequestExpiredActions.list(), nr_model),
+            State.REJECTED: build_actions(NameRequestActiveRejectedActions.list(), nr_model),
+            State.COMPLETED: build_actions(NameRequestCompletedActions.list(), nr_model)
         }.get(next_state)
     except Exception as err:
         raise NameRequestActionError(err)

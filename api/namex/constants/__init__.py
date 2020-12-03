@@ -437,8 +437,6 @@ class NameRequestActiveActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
     REAPPLY = NameRequestActions.REAPPLY.value
     RESEND = NameRequestActions.RESEND.value
-    INCORPORATE = NameRequestActions.INCORPORATE.value
-    REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
 
 
 class NameRequestReservedActions(AbstractEnum):
@@ -446,7 +444,7 @@ class NameRequestReservedActions(AbstractEnum):
 
 
 class NameRequestHoldActions(AbstractEnum):
-    pass
+    RECEIPT = NameRequestActions.RECEIPT.value
 
 
 class NameRequestInProgressActions(AbstractEnum):
@@ -454,17 +452,13 @@ class NameRequestInProgressActions(AbstractEnum):
     These should mostly be the same as the ones for a draft, but they are used differently.
     Define these separately.
     """
-    EDIT = NameRequestActions.EDIT.value
-    UPGRADE = NameRequestActions.UPGRADE.value
     RECEIPT = NameRequestActions.RECEIPT.value
-    REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
 
 
 class NameRequestExpiredActions(AbstractEnum):
     """
     Actions available when an NR is in an APPROVED or CONDITIONAL state, expired, and NOT consumed.
     """
-    EDIT = NameRequestActions.EDIT.value
     RECEIPT = NameRequestActions.RECEIPT.value
     RESEND = NameRequestActions.RESEND.value
 
@@ -484,6 +478,10 @@ class NameRequestHistoricalActions(AbstractEnum):
 
 
 class NameRequestCancelledActions(AbstractEnum):
+    RECEIPT = NameRequestActions.RECEIPT.value
+
+
+class NameRequestCompletedActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
 
 
