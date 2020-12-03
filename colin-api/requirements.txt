@@ -6,6 +6,7 @@ Flask-SQLAlchemy
 Flask-Marshmallow
 Flask-OIDC
 flask-jwt-oidc
+Werkzeug==0.16.0
 
 pytest-flask
 python-jose-cryptodome

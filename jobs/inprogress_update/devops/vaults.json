@@ -1,0 +1,10 @@
+[
+    {
+        "vault": "namex",
+        "application": [
+            "postgres-namex",
+            "nro-service",
+            "inprogress-update"
+        ]
+    }
+]

@@ -1,0 +1,15 @@
+[
+    {
+        "vault": "keycloak",
+        "application": [
+            "jwt-base"
+        ]
+    },
+    {
+        "vault": "namex",
+        "application": [
+            "colin-api",
+            "jwt"
+        ]
+    }
+]

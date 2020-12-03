@@ -1,0 +1,138 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    name: postgresql-oracle-fdw-names
+    environment: dev
+    role: db
+  name: postgresql-oracle-fdw-names-dev
+spec:
+  replicas: 1
+  selector:
+    name: postgresql-oracle-fdw-names
+    environment: dev
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: postgresql-oracle-fdw-names
+        environment: dev
+        role: db
+    spec:
+      containers:
+        - env:
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  key: database-user
+                  name: postgresql-oracle-fdw-names-dev
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: postgresql-oracle-fdw-names-dev
+            - name: POSTGRESQL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: admin-password
+                  name: postgresql-oracle-fdw-names-dev
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: database-name
+                  name: postgresql-oracle-fdw-names-dev
+            - name: FDW_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: fdw-name
+                  name: postgresql-oracle-fdw-names-dev
+            - name: FDW_SCHEMA
+              valueFrom:
+                secretKeyRef:
+                  key: fdw-foreign-schema
+                  name: postgresql-oracle-fdw-names-dev
+            - name: FDW_FOREIGN_SERVER
+              valueFrom:
+                secretKeyRef:
+                  key: fdw-foreign-server
+                  name: postgresql-oracle-fdw-names-dev
+            - name: FDW_USER
+              valueFrom:
+                secretKeyRef:
+                  key: fdw-user
+                  name: postgresql-oracle-fdw-names-dev
+            - name: FDW_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: fdw-password
+                  name: postgresql-oracle-fdw-names-dev
+            - name: FDW_SCHEMA
+              valueFrom:
+                secretKeyRef:
+                  key: fdw-schema
+                  name: postgresql-oracle-fdw-names-dev
+          image: image-registry.openshift-image-registry.svc:5000/f2b77c-tools/postgresql-oracle-fdw:96-24
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          name: postgresql-oracle-fdw-names-dev
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-i'
+                - '-c'
+                - >-
+                  psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d
+                  $POSTGRESQL_DATABASE -c 'SELECT 1'
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 512Mi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /var/lib/pgsql/data
+              name: postgresql-oracle-fdw-names-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: postgresql-oracle-fdw-names-data
+          persistentVolumeClaim:
+            claimName: postgresql-oracle-fdw-names-dev
+  test: false
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - postgresql-oracle-fdw-names-dev
+        from:
+          kind: ImageStreamTag
+          name: 'postgresql-oracle-fdw:96-24'
+          namespace: f2b77c-tools
+      type: ImageChange
+    - type: ConfigChange

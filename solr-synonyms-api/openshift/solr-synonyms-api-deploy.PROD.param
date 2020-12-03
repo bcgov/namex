@@ -1,6 +1,0 @@
-#============================================================
-# OpenShift template parameters for:
-# Component: namex solr-synonyms-api
-# JSON Template File: templates/solr-synonyms-api-deploy.json
-#============================================================
-TAG_NAME=prod

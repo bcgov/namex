@@ -1,4 +1,11 @@
-FROM python:3.8.5-buster
+FROM python:3.8.6-buster
+
+ARG BUILD_DATE
+ARG VCS_REF
+
+LABEL build_date=$BUILD_DATE
+LABEL vcs_ref=$VCS_REF
+
 USER root
 
 # Create working directory

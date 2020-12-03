@@ -6,5 +6,3 @@ Flask
 Flask-SQLAlchemy
 pytz
 
-
-git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
