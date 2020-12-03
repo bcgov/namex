@@ -602,7 +602,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_stand_alone_substitutions(self, desc_synonym_dict, stand_alone):
         for key, value in desc_synonym_dict.items():
             if key in stand_alone:
-                value.pop()
                 value.extend(stand_alone)
 
         return desc_synonym_dict
