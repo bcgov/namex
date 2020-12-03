@@ -13,23 +13,16 @@ from ...common import token_header, claims
 
 @pytest.mark.parametrize("name, expected",
                          [
-                             # ("NO. 295 CATHEDRAL VENTURES LTD.", "CATHEDRAL HOLDINGS LTD."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             # ("NO. 295 SCS NO. 003 VENTURES LTD.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             # Incorrect Year in name
-                             # ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             ("ABC TWO PLUMBING ONE INC.", "ABC PLUMBING & HEATING LTD."),
-                             # ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
-                             # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>
+                             ("NO. 295 CATHEDRAL VENTURES LTD.", "CATHEDRAL VENTURES TRADING LTD."),
+                             # ("NO. 295 SCS VENTURES LTD.", "SCS SOLUTIONS INC."),
+                             ("1800 ARMSTRONG -- PLUMBING 1900 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             ("ABC TWO PLUMBING INC.", "ABC PLUMBING & HEATING LTD."),
+                             ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."),
                              ("RE/MAX LUMBY INC.", "REMAX LUMBY"),
-                             # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
-                             # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>
                              ("RE MAX LUMBY INC.", "REMAX LUMBY"),
                              ("468040 B.C. LTD.", "468040 BC LTD."),
-                             # ("S, C & S HOLDINGS INC.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             # ENGINEERING not found in synonyms, then considered a distintive, the only match obtained is
-                             # EQTEC SOLUTIONS LTD. which is not close enough with current similarity score (0.6 vs 0.67 -->threshold)
-                             # ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.") # To be fixed with 4844:FixesFromUATRejectionTesting
+                             ("S, C & S HOLDINGS INC.", "SCS SOLUTIONS INC."),
+                             ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)

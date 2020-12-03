@@ -22,9 +22,9 @@ from ...common import token_header, claims
                              ('VANCOUVER ISLAND AUTOSPA LTD.','VANCOUVER ISLAND CAR WASH LTD.'),
                              ('VANCOUVER ISLAND AUTO SPA LTD.','VANCOUVER ISLAND CAR WASH LTD.'),
                              ('WESTWOOD PRE-SCHOOL DEVELOPMENT LTD.', 'WESTWOOD EARLY CHILDHOOD DEVELOPMENT LTD.'),
-                             ('WESTWOOD BIOFUEL LTD.','WESTWOOD LIQUIFIED NATURAL GAS LTD.'),
-                             ('WESTWOOD BIO FUEL LTD.','WESTWOOD LIQUIFIED NATURAL GAS LTD.'),
-                             ('WESTWOOD BIO FUELING LTD.', 'WESTWOOD LIQUIFIED NATURAL GAS LTD.')
+                             ('WESTWOOD BIOFUEL LTD.','WESTWOOD NATURAL GAS PRODUCTS LTD.'),
+                             ('WESTWOOD BIO FUEL LTD.','WESTWOOD NATURAL GAS PRODUCTS LTD.'),
+                             ('WESTWOOD BIO FUELING LTD.', 'WESTWOOD NATURAL GAS PRODUCTS LTD.')
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
