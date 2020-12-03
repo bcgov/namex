@@ -104,8 +104,8 @@ class Request(db.Model):
 
     # Check-In / Check-Out (for INPROGRESS)
     # A UUID granted to the user that checks out the Name Request
-    checkedOutBy = db.Column('checked_out_by', db.String(64), index=True)
-    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True), index=True)
+    checkedOutBy = db.Column('checked_out_by', db.String(64),index=True)
+    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True),index=True)
 
     # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
@@ -463,8 +463,7 @@ class Request(db.Model):
             elif word in list_desc:
                 name.extend(Request.set_special_characters_descriptive([word]))
             else:
-                raise Exception(
-                    'Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
+                raise Exception('Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
 
         criteria = cls.get_designations_in_name(criteria, name, any_designation_list, end_designation_list, stop_words)
 
@@ -497,9 +496,9 @@ class Request(db.Model):
         special_characters_dist = Request.set_special_characters_distinctive(dist)
         substitutions = '|'.join(map(str, special_characters_dist))
         if not check_name_is_well_formed:
-            dist_criteria = r'(no.?)*\s*\d*\s*\W*({0})?\W*\y({1})\W*\s*\y'.format(stop_words, substitutions)
+            dist_criteria = r'(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)
         else:
-            dist_criteria = r'\s*\W*({0})?\W*\y*({1})\W*\s*\y'.format(stop_words, substitutions)
+            dist_criteria = r'\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)
 
         return dist_criteria
 
@@ -507,7 +506,7 @@ class Request(db.Model):
     def get_descriptive_query(cls, desc, criteria, name_criteria):
         special_characters_descriptive = Request.set_special_characters_descriptive(desc)
         for e in criteria:
-            substitutions = r' ?| '.join(map(str, special_characters_descriptive))
+            substitutions = ' ?| '.join(map(str, special_characters_descriptive)) + ' ?'
             name_criteria += r'.*({})\y'.format(substitutions)
             e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(name_criteria)])
 
@@ -556,7 +555,7 @@ class Request(db.Model):
         list_special_characters = []
         for element in list_d:
             list_special_characters.append(
-                r'\W*'.join(element[i:i + 1] + element[i:i + 1] + '?' for i in range(0, len(element), 1))+ r'\W*s?')
+                r'\W*'.join(element[i:i + 1] + element[i:i + 1] + '?' for i in range(0, len(element), 1)) + r'\W*s?')
 
         return list_special_characters
 
