@@ -83,6 +83,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
                                                                                         match_list)
 
         desc_tmp_synonym_dict = builder.get_substitutions_descriptive(service.get_list_desc())
+        desc_tmp_synonym_dict = builder.get_stand_alone_substitutions(desc_tmp_synonym_dict, stand_alone_words)
         desc_tmp_synonym_dict = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
 
         # Update key in desc_db_synonym_dict
