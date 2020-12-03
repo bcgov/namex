@@ -95,6 +95,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         dict_synonyms = stem_key_dictionary(dict_synonyms, stand_alone_words)
         dict_synonyms = add_key_values(dict_synonyms)
 
+        dict_synonyms = remove_descriptive_original(dict_synonyms, service.get_dict_desc_search_conflicts())
         list_desc, dict_synonyms = remove_descriptive_same_category(dict_synonyms)
 
         service._list_desc_words = list(  # pylint: disable=protected-access
@@ -259,6 +260,38 @@ def remove_descriptive_same_category(dict_desc):
                                  if porter.stem(key) not in itertools.chain(*list(dict_desc.values())[:i])}
 
     return list(dict_desc_unique_category.keys()), dict_desc_unique_category
+
+
+def get_key_intersection(dict_desc, dict_desc2):
+    """Obtain intersection of keys in dictionary."""
+    return dict_desc.keys() & dict_desc2.keys()
+
+
+def get_values_intersection(dict_desc, inter_keys):
+    """Obtain values for keys in intersection."""
+    inter_values = list()
+    for key, value in dict_desc.items():
+        if key in inter_keys:
+            inter_values.extend(value)
+    return inter_values
+
+
+def remove_descriptive_original(dict_original_desc, dict_conflict_desc):
+    """Remove descriptives in original name in the same category while keeping descriptive in common with conflict"""
+    inter_keys = get_key_intersection(dict_original_desc, dict_conflict_desc)
+    if not inter_keys:
+        return dict_original_desc
+
+    inter_values = get_values_intersection(dict_original_desc, inter_keys)
+    d1 = {}
+
+    for key, value in dict_original_desc.items():
+        if key in inter_keys:
+            d1.update({key: value})
+        elif list(set(value) & set(inter_values)).__len__() == 0:
+            d1.update({key: value})
+
+    return d1
 
 
 def stem_key_dictionary(d1, stand_alone_words=[]):
