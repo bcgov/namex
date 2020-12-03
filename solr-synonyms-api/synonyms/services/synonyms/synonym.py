@@ -132,7 +132,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         filters = [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('stand-alone'))
+            func.lower(model.category).op('~')(r'\y({})\y'.format(r'stand-alone|stand-alone-\d'))
         ]
 
         results = self.find_word_synonyms(None, filters, stand_alone=True)
