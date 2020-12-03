@@ -72,7 +72,7 @@ def display_receipt_action(nr_model=None):
 
 def display_reapply_action(nr_model=None):
     try:
-        if nr_model and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
+        if nr_model and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED) and nr_model.submitCount < 3:
             if nr_model.expirationDate and not nr_model.is_expired:
                 todays_date = datetime.utcnow().date()
                 expiry_date = nr_model.expirationDate.date()
