@@ -208,14 +208,22 @@ class BaseClient:
             merged_headers = {**self.headers, **custom_headers}
 
             url = self.build_url(url)
-            response = requests.request(
-                method.value,
-                url,
-                params=params,
-                # Dump and load to serialize dates
-                json=json.loads(json.dumps(data, default=str)),
-                headers=merged_headers
-            )
+            if data:
+                response = requests.request(
+                    method.value,
+                    url,
+                    params=params,
+                    # Dump and load to serialize dates
+                    json=json.loads(json.dumps(data, default=str)) if data else None,
+                    headers=merged_headers
+                )
+            else:
+                response = requests.request(
+                    method.value,
+                    url,
+                    params=params,
+                    headers=merged_headers
+                )
 
             if not response or not response.ok:
                 raise ApiRequestError(response)
