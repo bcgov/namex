@@ -15,6 +15,7 @@ function get_client_credentials {
       --data grant_type=client_credentials \
       --data client_id=$PAYMENT_SVC_AUTH_CLIENT_ID \
       --data client_secret=$PAYMENT_SVC_CLIENT_SECRET)
+      --data {}
     echo $result | jq --raw-output '.access_token'
 }
 
