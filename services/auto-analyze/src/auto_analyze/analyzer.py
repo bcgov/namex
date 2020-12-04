@@ -16,6 +16,8 @@ import itertools
 import logging
 import math
 import re
+import warnings
+
 from collections import Counter
 
 from namex.services.name_processing.name_processing import NameProcessingService
@@ -151,12 +153,12 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
     return dict_matches_counter
 
 
-def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=False, stand_alone_words=[]):
+def get_vector(conflict_class_list=[], original_class_list=[], class_subs_dict={}, dist=False, stand_alone_words=[]):
     """Return vector of words (or synonyms) found in original_class_list which are in conflict_class_list."""
     vector = dict()
     entropy = list()
-    original_class_list = original_class_list if original_class_list else []
-    class_subs_dict = class_subs_dict if class_subs_dict else {}
+    if not conflict_class_list or not original_class_list or not class_subs_dict:
+        warnings.warn("Parameters in get_vector function are not set.", Warning)
 
     conflict_class_stem = [porter.stem(name.lower()) if
                            name not in stand_alone_words else name.lower() for name in conflict_class_list]
@@ -287,9 +289,7 @@ def remove_descriptive_original(dict_original_desc, dict_conflict_desc):
     d1 = {}
 
     for key, value in dict_original_desc.items():
-        if key in inter_keys:
-            d1.update({key: value})
-        elif list(set(value) & set(inter_values)).__len__() == 0:
+        if key in inter_keys or list(set(value) & set(inter_values)).__len__() == 0:
             d1.update({key: value})
 
     return d1
