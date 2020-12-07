@@ -216,11 +216,15 @@ class XproAnalysisResponse(AnalysisResponse):
             EntityTypes.XPRO_CORPORATION.value, EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
             EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
             else alternative_assumed_name_setup()
-        # Tweak the header
-        option1.header = "Required Action"
+
+        option2 = send_to_examiner_setup()
+
+        option3 = obtain_consent_setup()
 
         issue = response_issues(procedure_result.result_code)(self, [
-            option1
+            option1,
+            option2,
+            option3
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
