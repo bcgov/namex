@@ -204,7 +204,7 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, stan
     return check_conflicts
 
 
-def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token_svc):
+def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token_svc, conflict=False):
     desc_compound_dict = get_compound_descriptives(service, syn_svc)
     service.set_compound_descriptive_name_tokens(update_compound_tokens(list(desc_compound_dict.keys()), match))
 
@@ -228,12 +228,13 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())
 
     # Check if words are in the same category
-    if 2 < service.get_list_dist().__len__() == match.__len__():
-        service._list_desc_words = [service.get_list_dist().pop()]
-        dict_desc.update({service.get_list_desc()[0]: service.get_list_desc()})
-    elif 2 < service.get_list_desc().__len__() == match.__len__():
-        service._list_dist_words = [service.get_list_desc().pop(0)]
-        dict_desc.pop(service.get_list_dist()[0], None)
+    if conflict:
+        if 2 < service.get_list_dist().__len__() == match.__len__():
+            service._list_desc_words = [service.get_list_dist().pop()]
+            dict_desc.update({service.get_list_desc()[0]: service.get_list_desc()})
+        elif 2 < service.get_list_desc().__len__() == match.__len__():
+            service._list_dist_words = [service.get_list_desc().pop(0)]
+            dict_desc.pop(service.get_list_dist()[0], None)
 
     service.set_compound_descriptive_name_tokens(
         update_compound_tokens(service.get_list_dist() + service.get_list_desc(),
