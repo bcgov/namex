@@ -90,6 +90,7 @@ class PaymentInvoice(Serializable):
     createdBy: str = ''
     createdName: str = ''
     createdOn: str = ''
+    updatedBy: str = ''
     updatedName: str = ''
     updatedOn: str = ''
     paymentMethod: str = ''

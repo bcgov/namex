@@ -596,7 +596,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         for payment in nr_model.payments.all():
             if payment.payment_status_code in valid_states and payment.payment_id == payment_id:
                 # refund_payment(payment.payment_token, {'reason': 'Name Request user requested refund'})
-                refund_payment(payment.payment_token)
+                refund_payment(payment.payment_token, {})
                 payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
                 payment.save_to_db()
 
