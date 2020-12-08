@@ -77,7 +77,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         similarity = EXACT_MATCH
     else:
         match_list = np_svc.name_tokens
-        get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc)
+        get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc, True)
 
         dist_db_substitution_dict = builder.get_substitutions_distinctive(service.get_list_dist())
         service._list_dist_words, match_list, _ = remove_double_letters_list_dist_words(service.get_list_dist(),
