@@ -78,10 +78,6 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                 analysis.append(check_word_limit)
                 return analysis
 
-            check_word_unclassified = builder.check_unclassified_words(self.name_tokens, self.get_list_none())
-            if not check_word_unclassified.is_valid:
-                analysis.append(check_word_unclassified)
-
             # If the error coming back is that a name is not well formed
             # OR if the error coming back has words to avoid...
             # eg. result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
@@ -129,7 +125,6 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
             analysis_issues_sort_order = [
                 AnalysisIssueCodes.WORDS_TO_AVOID,
                 AnalysisIssueCodes.TOO_MANY_WORDS,
-                AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
                 AnalysisIssueCodes.WORD_SPECIAL_USE,
                 AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
                 AnalysisIssueCodes.QUEUE_CONFLICT,
