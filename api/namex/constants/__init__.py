@@ -153,6 +153,14 @@ class BCProtectedNameEntityTypes(AbstractEnum):
     COMMUNITY_CONTRIBUTION_COMPANY = EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value
 
 
+class BCProtectedNameXproEntityTypes(AbstractEnum):
+    SOLE_PROPRIETORSHIP = EntityTypes.SOLE_PROPRIETORSHIP.value
+    DOING_BUSINESS_AS = EntityTypes.DOING_BUSINESS_AS.value
+    GENERAL_PARTNERSHIP = EntityTypes.GENERAL_PARTNERSHIP.value
+    LIMITED_PARTNERSHIP = EntityTypes.LIMITED_PARTNERSHIP.value
+    LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value
+
+
 # TODO: Are these still valid for unprotected?
 class BCUnprotectedNameEntityTypes(AbstractEnum):
     SOLE_PROPRIETORSHIP = EntityTypes.SOLE_PROPRIETORSHIP.value
@@ -169,13 +177,6 @@ class XproUnprotectedNameEntityTypes(AbstractEnum):
     XPRO_LIMITED_PARTNERSHIP = EntityTypes.XPRO_LIMITED_PARTNERSHIP.value
     XPRO_LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value
     XPRO_COOPERATIVE = EntityTypes.XPRO_COOPERATIVE.value
-    SOLE_PROPRIETORSHIP = EntityTypes.SOLE_PROPRIETORSHIP.value
-    DOING_BUSINESS_AS = EntityTypes.DOING_BUSINESS_AS.value
-    GENERAL_PARTNERSHIP = EntityTypes.GENERAL_PARTNERSHIP.value
-    LIMITED_PARTNERSHIP = EntityTypes.LIMITED_PARTNERSHIP.value
-    LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value
-
-
 
 
 # Request types (legacy) used in search conflicts

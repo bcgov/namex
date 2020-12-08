@@ -7,6 +7,7 @@ from flask import make_response, jsonify
 from flask_restx import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
 
+from namex.services.name_request.auto_analyse.xpro_name_analysis import XproNameAnalysisService
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import get_query_param_str
 from namex.utils.logging import setup_logging
@@ -16,7 +17,8 @@ from .bc_name_analysis_response import BcAnalysisResponse as AnalysisResponse
 from namex.services.name_request.auto_analyse import AnalysisRequestActions
 
 from namex.constants import \
-    ValidLocations, BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
+    ValidLocations, BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
+    BCProtectedNameXproEntityTypes
 
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
@@ -137,6 +139,7 @@ class BcNameAnalysis(Resource):
 
         valid_location = location == ValidLocations.CA_BC.value
         valid_protected_entity_type = entity_type in BCProtectedNameEntityTypes.list()
+        valid_protected_xpro_entity_type = entity_type in BCProtectedNameXproEntityTypes.list()
         valid_unprotected_entity_type = entity_type in BCUnprotectedNameEntityTypes.list()
         is_protected_action = request_action in [AnalysisRequestActions.NEW.value, AnalysisRequestActions.CHG.value, AnalysisRequestActions.MVE.value]
         is_unprotected_action = request_action in [AnalysisRequestActions.NEW.value]
@@ -145,6 +148,11 @@ class BcNameAnalysis(Resource):
             if valid_location and valid_protected_entity_type and is_protected_action:
                 # Use ProtectedNameAnalysisService
                 service = ProtectedNameAnalysisService()
+                builder = NameAnalysisBuilder(service)
+
+            elif valid_location and valid_protected_xpro_entity_type and is_protected_action:
+                # Use XproNameAnalysisService
+                service = XproNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
 
             elif valid_location and valid_unprotected_entity_type and is_unprotected_action:
