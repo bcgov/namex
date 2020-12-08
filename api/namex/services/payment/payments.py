@@ -34,7 +34,7 @@ def refund_payment(payment_identifier, model=None):
         api_instance = SBCPaymentClient()
         api_response = api_instance.refund_payment(payment_identifier, data)
         pprint(api_response)
-        return PaymentInvoice(**api_response)
+        return PaymentInvoice(**api_response) if api_response else None
 
     except Exception as err:
         raise SBCPaymentException(err)
