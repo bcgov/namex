@@ -453,7 +453,6 @@ class NameRequestInProgressActions(AbstractEnum):
     Define these separately.
     """
     RECEIPT = NameRequestActions.RECEIPT.value
-    REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
 
 
 class NameRequestExpiredActions(AbstractEnum):
