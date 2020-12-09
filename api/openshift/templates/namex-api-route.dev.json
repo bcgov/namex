@@ -10,6 +10,9 @@
             "kind": "Route",
             "apiVersion": "v1",
             "metadata": {
+                "annotations": {
+                    "haproxy.router.openshift.io/timeout": "120s"
+                },
                 "name": "namex-api-route",
                 "creationTimestamp": null,
                 "labels": {
