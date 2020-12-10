@@ -127,9 +127,7 @@ class XproAnalysisResponse(AnalysisResponse):
         # Tweak the header
         option1.header = "Required Action"
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
