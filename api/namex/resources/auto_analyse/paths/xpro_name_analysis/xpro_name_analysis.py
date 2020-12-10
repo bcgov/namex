@@ -89,6 +89,7 @@ class XproNameAnalysis(Resource):
       CHG = Change your name
       ASSUMED = Assumed Name only for certain entity types. handled on the fornt-end
     """
+
     @staticmethod
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
@@ -122,8 +123,7 @@ class XproNameAnalysis(Resource):
                                                                            AnalysisRequestActions.REH.value,
                                                                            AnalysisRequestActions.MVE.value):
 
-                # Use UnprotectedNameAnalysisService
-                service = XproNameAnalysisService()
+                service = ProtectedNameAnalysisService() if request_action == AnalysisRequestActions.MVE.value else XproNameAnalysisService()
                 builder = NameAnalysisBuilder(service)
 
             else:
@@ -133,6 +133,10 @@ class XproNameAnalysis(Resource):
                 raise ValueError('Invalid service provided')
             if not builder:
                 raise ValueError('Invalid builder provided')
+
+            # Update entity type to Protected Name
+            if request_action == AnalysisRequestActions.MVE.value:
+                entity_type = entity_type[1:] if entity_type[0] == 'X' else entity_type
 
             # Register and initialize the builder
             service.use_builder(builder)  # Required step! TODO: Enforce this!
