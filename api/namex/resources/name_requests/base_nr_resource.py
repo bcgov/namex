@@ -56,10 +56,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
             cls.log_error('ENV is not set', None)
             raise NameRequestException(message='Internal server error')
 
-        test_env = 'prod'
-        if test_env in app_config:
-            raise NameRequestException(message='Not Implemented')
-
     """
     The actual methods that map the request data to our domain models and persist the data.
     These are implemented statically so we can call them statically from our tests without having to instantiate a NameRequestResource.
