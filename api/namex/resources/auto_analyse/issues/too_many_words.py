@@ -9,7 +9,7 @@ from ..response_objects import NameAnalysisIssue
 
 class TooManyWordsIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.TOO_MANY_WORDS
-    status_text = "Further Action Required"
+    status_text = "Further Review Required"
     issue = None
 
     def create_issue(self):
@@ -30,8 +30,7 @@ class TooManyWordsIssue(AnalysisResponseIssue):
 
     def configure_issue(self, procedure_result):
         issue = self.create_issue()
-        issue.line1 = "Names longer than three words, not including proper designations, may be sent to examination."
-        issue.line2 = "Please check wait times at the top of the screen."
+        issue.line1 = "This name cannot be analyzed here and must be sent to staff for review."
 
         # Setup boxes
         issue.setup = self.setup_config
