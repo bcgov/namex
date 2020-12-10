@@ -435,7 +435,7 @@ class NameRequestActiveActions(AbstractEnum):
     EDIT = NameRequestActions.EDIT.value
     CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
     RECEIPT = NameRequestActions.RECEIPT.value
-    REAPPLY = NameRequestActions.REAPPLY.value
+    # REAPPLY = NameRequestActions.REAPPLY.value
     # RESEND = NameRequestActions.RESEND.value
 
 
@@ -453,7 +453,6 @@ class NameRequestInProgressActions(AbstractEnum):
     Define these separately.
     """
     RECEIPT = NameRequestActions.RECEIPT.value
-    REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
 
 
 class NameRequestExpiredActions(AbstractEnum):
