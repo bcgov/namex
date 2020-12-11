@@ -218,7 +218,7 @@
                                                 "name": "MIN_EXAMINE_DELAY_SECONDS",
                                                 "valueFrom": {
                                                     "configMapKeyRef": {
-                                                        "key": "MIN_DELAY_SECONDS",
+                                                        "key": "MIN_EXAMINE_DELAY_SECONDS",
                                                         "name": "${NAME}-${ENV}-config"
                                                     }
                                                 }
@@ -227,7 +227,7 @@
                                                 "name": "MIN_CLIENT_DELAY_SECONDS",
                                                 "valueFrom": {
                                                     "configMapKeyRef": {
-                                                        "key": "MIN_DELAY_SECONDS",
+                                                        "key": "MIN_CLIENT_DELAY_SECONDS",
                                                         "name": "${NAME}-${ENV}-config"
                                                     }
                                                 }

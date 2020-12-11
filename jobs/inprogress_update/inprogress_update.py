@@ -58,7 +58,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             db.session.add(r)
             errors = nro.checkin_checkout_nr(r, 'UNLOCK')
             if errors:
-                raise Exception('Failed to update nro.')
+                raise RuntimeError('Failed to update nro.')
             # commit here to keep this entry in sync with NRO (in case errors happen later)
             db.session.commit()
 
