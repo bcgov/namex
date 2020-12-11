@@ -57,6 +57,8 @@ node {
     """
     if (COMPONENT_NAME == 'auto-analyze') {
         DEPLOYMENT_NAME = "${COMPONENT_NAME}-${TAG_NAME}"
+    } else if (COMPONENT_NAME == 'namex-api-runtime') {
+        DEPLOYMENT_NAME = 'namex-api'
     } else {
         DEPLOYMENT_NAME = COMPONENT_NAME
     }
@@ -101,7 +103,7 @@ node {
                         pod = it.objects()[0]
                         deployment = pod.metadata.labels.deployment
                         echo deployment
-                        if (deployment ==  "${DEPLOYMENT_NAME}-${new_version}" && pod.status.phase == 'Running' && pod.status.containerStatuses[0].ready) {
+                        if (deployment == "${DEPLOYMENT_NAME}-${new_version}" && pod.status.phase == 'Running' && pod.status.containerStatuses[0].ready) {
                             return true
                         } else {
                             echo "Pod for new deployment not ready"
