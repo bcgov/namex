@@ -1,3 +1,4 @@
+from namex.constants import BCUnprotectedNameEntityTypes
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
@@ -295,6 +296,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             )
             if check_name_is_well_formed.result_code in (
                     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
+                    self.entity_type not in (BCUnprotectedNameEntityTypes.list()) and \
                     not check_name_is_well_formed.is_valid:
                 analysis.append(check_name_is_well_formed)
             elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
@@ -380,7 +382,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.DESIGNATION_NON_EXISTENT,
                 AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE,
                 AnalysisIssueCodes.DESIGNATION_MISPLACED,
-                AnalysisIssueCodes.DESIGNATION_MISMATCH
+                AnalysisIssueCodes.DESIGNATION_MISMATCH,
+                AnalysisIssueCodes.DESIGNATION_REMOVAL
             ]
 
             analysis = analysis + self.do_analysis()

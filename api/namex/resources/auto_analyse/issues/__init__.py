@@ -8,6 +8,7 @@ from .contains_words_to_avoid import ContainsWordsToAvoidIssue
 from .corporate_name_conflict import CorporateNameConflictIssue
 from .queue_name_conflict import QueueNameConflictIssue
 from .designation_mismatch import DesignationMismatchIssue
+from .designation_removal import DesignationRemovalIssue
 from .end_designation_more_than_once import EndDesignationMoreThanOnceIssue
 from .designation_misplaced import DesignationMisplacedIssue
 from .designation_non_existent import DesignationNonExistentIssue

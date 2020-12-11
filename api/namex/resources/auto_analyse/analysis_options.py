@@ -1,5 +1,6 @@
 from .response_objects.setup import Setup
 from string import Template
+from .utils import join_list_words
 
 
 class HelpfulHintSetup(Setup):
@@ -120,7 +121,8 @@ def assumed_name_setup():
     return AssumedNameSetup(
         type="assumed_name",
         header=Template("Assume a Name"),
-        line1=Template("If the name of an extraprovincial business is too similar to an existing BC business, you must use (assume) a different name in BC. Assumed names must be reviewed Registries staff."),
+        line1=Template(
+            "If the name of an extraprovincial business is too similar to an existing BC business, you must use (assume) a different name in BC. Assumed names must be reviewed Registries staff."),
         action=Template("I want to assume a name in BC"),
         # checkbox=Template("I want to send my name to be examined as an Assumed Name.")
     )
@@ -198,6 +200,20 @@ def replace_designation_setup():
     )
 
 
+class RemoveDesignationSetup(Setup):
+    pass
+
+
+def remove_designation_setup(all_designations_user):
+    return ReplaceDesignationSetup(
+        type="remove_designation",
+        header=Template("Remove Designation"),
+        line1=Template(
+            "Remove the designation(s) from your name: " + join_list_words([element.upper() for element in all_designations_user])),
+        line2=Template("")
+    )
+
+
 class AddDesignationSetup(Setup):
     pass
 
@@ -251,3 +267,6 @@ def two_designations_order_setup():
         line1=Template("Please select one of the designations listed here:"),
         line2=Template("")
     )
+
+
+

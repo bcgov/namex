@@ -363,20 +363,29 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
-
         mismatch_entity_designation_list = []
-        for idx, token in enumerate(list_name):
-            if token in all_designations and token not in all_designations_user:
-                mismatch_entity_designation_list.append(token)
 
-        if mismatch_entity_designation_list:
+        if not all_designations_user and all_designations:
             result.is_valid = False
-            result.result_code = AnalysisIssueCodes.DESIGNATION_MISMATCH
+            result.result_code = AnalysisIssueCodes.DESIGNATION_REMOVAL
             result.values = {
                 'list_name': list_name,
-                'incorrect_designations': mismatch_entity_designation_list,
+                'incorrect_designations': all_designations,
                 'correct_designations': all_designations_user,
             }
+        else:
+            for idx, token in enumerate(list_name):
+                if token in all_designations and token not in all_designations_user:
+                    mismatch_entity_designation_list.append(token)
+
+            if mismatch_entity_designation_list:
+                result.is_valid = False
+                result.result_code = AnalysisIssueCodes.DESIGNATION_MISMATCH
+                result.values = {
+                    'list_name': list_name,
+                    'incorrect_designations': mismatch_entity_designation_list,
+                    'correct_designations': all_designations_user,
+                }
 
         return result
 

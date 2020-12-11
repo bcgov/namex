@@ -33,10 +33,13 @@ from ...analysis_options import \
     replace_designation_setup, \
     change_entity_type_setup, \
     change_designation_order_setup, \
-    add_designation_setup, two_designations_order_setup
+    add_designation_setup, two_designations_order_setup, remove_designation_setup
 
 
 # Execute analysis returns a response strategy code
+from ...issues.designation_removal import DesignationRemovalIssue
+
+
 def response_issues(issue_code):
     issue_types = {
         AnalysisIssueCodes.CHECK_IS_VALID: CheckIsValidIssue,
@@ -50,6 +53,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisIssueCodes.DESIGNATION_NON_EXISTENT: DesignationNonExistentIssue,
         AnalysisIssueCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
+        AnalysisIssueCodes.DESIGNATION_REMOVAL: DesignationRemovalIssue,
         AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE: EndDesignationMoreThanOnceIssue,
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
@@ -256,6 +260,21 @@ class BcAnalysisResponse(AnalysisResponse):
 
     def build_designation_mismatch_issue(self, procedure_result, issue_count, issue_idx):
         option1 = replace_designation_setup()
+
+        option2 = change_entity_type_setup()
+
+        issue = response_issues(procedure_result.result_code)(self, [
+            option1,
+            option2
+        ])
+
+        # Add the procedure to the stack of executed_procedures so we know what issues have been set up
+        self.executed_procedures.append(procedure_result.result_code)
+
+        return issue
+
+    def build_designation_removal_issue(self, procedure_result, issue_count, issue_idx):
+        option1 = remove_designation_setup(procedure_result.values.get('incorrect_designations',[]))
 
         option2 = change_entity_type_setup()
 

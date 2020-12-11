@@ -78,6 +78,7 @@ class AnalysisIssueCodes(str, Enum):
     DESIGNATION_MISMATCH = 'designation_mismatch'
     END_DESIGNATION_MORE_THAN_ONCE = 'end_designation_more_than_once'
     DESIGNATION_MISPLACED = 'designation_misplaced'
+    DESIGNATION_REMOVAL = 'designation_removal'
     NAME_REQUIRES_CONSENT = 'consent_required'
     DESIGNATION_NON_EXISTENT = 'designation_non_existent'
 
