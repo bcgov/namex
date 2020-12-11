@@ -161,7 +161,8 @@ class AnalysisResponseIssue:
 
         return False, 0, 0, current_processed_token
 
-    def adjust_word_index(self, original_name_str, name_original_tokens, name_tokens, word_idx, offset_designations=True):
+    def adjust_word_index(self, original_name_str, name_original_tokens, name_tokens, word_idx,
+                          offset_designations=True):
         # remove punctuations
         name_original_tokens = [re.sub(r'(?<=[a-zA-Z\.])\'[Ss]', '', x) for x in name_original_tokens]
         name_original_tokens = [re.sub(r'[^A-Za-z0-9.]+', ' ', x) for x in name_original_tokens]
@@ -220,7 +221,8 @@ class AnalysisResponseIssue:
                         if offset_designations:
                             # Does the current word have any punctuation associated with?
                             next_char = ''
-                            if len(unprocessed_name_string) > 0 and len(original_tokens) > 0 and unprocessed_name_string[0] == original_tokens[0]:
+                            if len(unprocessed_name_string) > 0 and len(original_tokens) > 0 and \
+                                    unprocessed_name_string[0] == original_tokens[0]:
                                 next_char = original_tokens[0]
 
                             token_is_designation = (current_original_token + next_char) in all_designations

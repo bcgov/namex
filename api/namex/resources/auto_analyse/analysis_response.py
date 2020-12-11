@@ -8,6 +8,7 @@ from ..auto_analyse.analysis_issues import \
     AddDescriptiveWordIssue, \
     ContainsWordsToAvoidIssue, \
     DesignationMismatchIssue, \
+    DesignationRemovalIssue,\
     TooManyWordsIssue, \
     NameRequiresConsentIssue, \
     ContainsUnclassifiableWordIssue, \
@@ -37,6 +38,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.NAME_REQUIRES_CONSENT: NameRequiresConsentIssue,
         AnalysisIssueCodes.DESIGNATION_NON_EXISTENT: DesignationNonExistentIssue,
         AnalysisIssueCodes.DESIGNATION_MISMATCH: DesignationMismatchIssue,
+        AnalysisIssueCodes.DESIGNATION_REMOVAL: DesignationRemovalIssue,
         AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE: EndDesignationMoreThanOnceIssue,
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
@@ -137,6 +139,10 @@ class AnalysisResponse:
         return None
 
     @abc.abstractmethod
+    def build_designation_removal_issue(self, procedure_result, issue_count, issue_idx):
+        return None
+
+    @abc.abstractmethod
     def build_end_designation_more_than_once_issue(self, procedure_result, issue_count, issue_idx):
         return None
 
@@ -203,6 +209,9 @@ class AnalysisResponse:
 
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISMATCH:
                         issue = self.build_designation_mismatch_issue(procedure_result, issue_count, issue_idx)
+
+                    if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_REMOVAL:
+                        issue = self.build_designation_removal_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE:
                         issue = self.build_end_designation_more_than_once_issue(procedure_result,issue_count, issue_idx)
