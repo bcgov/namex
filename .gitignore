@@ -74,6 +74,7 @@ __pycache__
 /**/.envrc
 /**/*.temp
 /**/*.last
+/**/*/stopwords.txt
 
 # Security
 #########################

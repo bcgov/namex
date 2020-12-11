@@ -39,6 +39,7 @@ class Event(db.Model):
     UPDATE_FROM_NRO = 'update_from_nro'
     NRO_UPDATE = 'nro_update'
     MARKED_ON_HOLD = 'marked_on_hold'
+    SET_TO_DRAFT = 'set_to_draft'
 
     VALID_ACTIONS = [GET, PUT, PATCH, POST, DELETE]
 
