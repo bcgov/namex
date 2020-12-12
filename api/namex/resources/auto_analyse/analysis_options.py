@@ -166,7 +166,7 @@ def obtain_consent_setup():
         type="obtain_consent",
         header=Template("Obtain Consent"),
         line1=Template(
-            "This name may be approved if you are able to get written consent <b>from the registered owner of the conflicting name.</b>"),
+            "This name may be approved if you are able to get written consent <b>from the appropriate authority.</b>"),
         line2=Template(""),
         action=Template("I will submit written consent to the BC Business Registry")
     )
