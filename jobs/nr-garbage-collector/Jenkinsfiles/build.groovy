@@ -51,6 +51,8 @@ node {
             openshift.withCluster() {
                 openshift.withProject() {
                     echo "Building ${COMPONENT_NAME} ..."
+                    def base_build = openshift.selector("bc", "${COMPONENT_NAME}-base")
+                    base_build.startBuild("--wait=true").logs("-f")
                     def build = openshift.selector("bc", "${COMPONENT_NAME}")
                     build.startBuild("--wait=true").logs("-f")
                 }
