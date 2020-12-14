@@ -240,8 +240,8 @@ class AnalysisResponseIssue:
                                 continue
 
             # Check for repeated tokens - this has been moved to get_next_token_if_composite
-            # if current_original_token == previous_original_token:
-                # word_idx_offset += 1
+            if current_original_token == previous_original_token:
+                word_idx_offset += 1
 
             # We only need to run this until we encounter the specified word
             if current_original_token == target_word and word_idx == processed_token_idx:
@@ -249,7 +249,7 @@ class AnalysisResponseIssue:
                 continue
 
             # if previous_original_token != current_original_token and len(processed_tokens) > 0:
-            if len(processed_tokens) > 0:
+            if len(processed_tokens) > 0 and current_original_token != previous_original_token:
                 processed_token_idx += 1
                 processed_tokens.popleft()
 
