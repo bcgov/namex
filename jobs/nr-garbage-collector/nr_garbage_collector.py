@@ -17,6 +17,7 @@ def create_app(environment='production'):
     app = Flask(__name__)
     app.config.from_object(get_named_config(environment))
     db.init_app(app)
+    nro.init_app(app)
     app.app_context().push()
     current_app.logger.debug('created the Flask App and pushed the App Context')
 
