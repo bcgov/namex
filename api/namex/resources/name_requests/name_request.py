@@ -8,7 +8,7 @@ from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
 from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
-from namex.models import Request, State, Event
+from namex.models import Request, State, Event, User
 
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
@@ -154,6 +154,10 @@ class NameRequestFields(BaseNameRequestResource):
                     checked_out_by_different_user = nr_model.checkedOutBy is not None and nr_model.checkedOutBy != request_json.get('checkedOutBy', None)
                     if checked_out_by_different_user:
                         raise NameRequestIsInProgressError()
+
+                    # set the user id of the request to name_request_service_account
+                    service_account_user = User.find_by_username('name_request_service_account')
+                    nr_model.userId = service_account_user.id
 
                     # The request payload will be empty when making this call, add them to the request
                     _self.request_data = {
