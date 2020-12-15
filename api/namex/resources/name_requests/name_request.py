@@ -41,8 +41,9 @@ class NameRequestResource(BaseNameRequestResource):
         try:
             nr_model = Request.query.get(nr_id)
 
-            if nr_model.requestTypeCd:
-                # If requestTypeCd is set, remap request_entity (entity_type_cd) and request_action (request_action_cd)
+            if nr_model.requestTypeCd and (not nr_model.entity_type_cd or not nr_model.request_action_cd):
+                # If requestTypeCd is set, but a request_entity (entity_type_cd) and a request_action (request_action_cd)
+                # are not, use get_mapped_entity_and_action_code to map the values from the requestTypeCd
                 entity_type, request_action = get_mapped_entity_and_action_code(nr_model.requestTypeCd)
                 nr_model.entity_type_cd = entity_type
                 nr_model.request_action_cd = request_action
