@@ -1,6 +1,7 @@
 import abc
 import re
 from collections import deque
+import re
 
 # Import DTOs
 from ...response_objects import NameAnalysisIssue
@@ -196,7 +197,8 @@ class AnalysisResponseIssue:
 
             if processed_name_string:
                 # Only replace the first match!
-                unprocessed_name_string = unprocessed_name_string.replace(processed_name_string, '', 1).strip()
+                unprocessed_name_string = re.sub(r'{0}(\'[Ss])?'.format(processed_name_string), '',
+                                                 unprocessed_name_string, 1).strip()
 
             # Handle composite tokens
             if composite_token:
@@ -227,8 +229,8 @@ class AnalysisResponseIssue:
 
                             token_is_designation = (current_original_token + next_char) in all_designations
                             if original_tokens and token_is_designation:
-                                original_tokens.popleft()
-                                unprocessed_name_string = unprocessed_name_string[1:].strip()
+                                # original_tokens.popleft()
+                                unprocessed_name_string = unprocessed_name_string.strip()
 
                             # Skip designations
                             if token_is_designation or current_original_token not in name_tokens:
@@ -257,6 +259,7 @@ class AnalysisResponseIssue:
 
         offset_idx = word_idx + word_idx_offset + composite_token_offset
 
-        print('Adjusted word index for word [' + target_word + '] from [' + str(word_idx) + '] -> [' + str(offset_idx) + ']')
+        print('Adjusted word index for word [' + target_word + '] from [' + str(word_idx) + '] -> [' + str(
+            offset_idx) + ']')
 
         return offset_idx, word_idx, word_idx_offset, composite_token_offset
