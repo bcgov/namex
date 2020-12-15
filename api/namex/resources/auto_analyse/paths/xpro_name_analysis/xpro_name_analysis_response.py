@@ -178,19 +178,19 @@ class XproAnalysisResponse(AnalysisResponse):
         :param issue_idx:
         :return:
         """
-        option1 = assumed_name_setup() if self.entity_type in (
-            EntityTypes.XPRO_CORPORATION.value, EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
-            EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
-            else alternative_assumed_name_setup()
+        # option1 = assumed_name_setup() if self.entity_type in (
+        #     EntityTypes.XPRO_CORPORATION.value, EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+        #     EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
+        #     else alternative_assumed_name_setup()
 
-        option2 = send_to_examiner_setup()
+        option1 = send_to_examiner_setup()
 
-        option3 = obtain_consent_setup()
+        option2 = obtain_consent_setup()
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1,
             option2,
-            option3
+            #option3
         ])
 
 
@@ -210,19 +210,19 @@ class XproAnalysisResponse(AnalysisResponse):
         return issue
 
     def build_queue_conflict_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = assumed_name_setup() if self.entity_type in (
-            EntityTypes.XPRO_CORPORATION.value, EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
-            EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
-            else alternative_assumed_name_setup()
+        # option1 = assumed_name_setup() if self.entity_type in (
+        #     EntityTypes.XPRO_CORPORATION.value, EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+        #     EntityTypes.XPRO_LIMITED_LIABILITY_COMPANY.value) \
+        #     else alternative_assumed_name_setup()
 
-        option2 = send_to_examiner_setup()
+        option1 = send_to_examiner_setup()
 
-        option3 = obtain_consent_setup()
+        option2 = obtain_consent_setup()
 
         issue = response_issues(procedure_result.result_code)(self, [
             option1,
             option2,
-            option3
+            #option3
         ])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
