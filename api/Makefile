@@ -49,7 +49,7 @@ setup-venv: requirements/dev.txt
 	test -f venv/bin/activate || python3.6 -m venv  $(current_abs_dir)/venv
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;
-	pip install -Ur requirements/dev.txt;
+	pip install -Ur requirements.txt;
 	touch venv/bin/activate
 
 ## run flake8 on the package and tests
