@@ -158,6 +158,9 @@ def valid_state_transition(user, nr, new_state):
     elif new_state in State.RELEASE_STATES:
         if nr.userId != user.id or nr.stateCd != State.INPROGRESS:
             return False
+    elif nr.stateCd == State.INPROGRESS:
+        if nr.userId != user.id:
+            return False
     return True
 
 
