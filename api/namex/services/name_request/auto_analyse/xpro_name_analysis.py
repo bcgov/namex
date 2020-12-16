@@ -151,68 +151,68 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
     '''
 
     def do_analysis(self):
-        builder = self.builder
-
         results = []
-        np_svc = self._name_processing_service
-        stop_words_list = np_svc.get_stop_words()
+        if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
+            builder = self.builder
+            np_svc = self._name_processing_service
+            stop_words_list = np_svc.get_stop_words()
 
-        self._get_designations(request_types)
+            self._get_designations(request_types)
 
-        # Return any combination of these checks
-        if not self.skip_search_conflicts and auto_analyze_config in ('EXACT_MATCH', 'SEARCH_CONFLICTS'):
-            check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-                                                         self.compound_descriptive_name_tokens,
-                                                         False, self.get_designation_end_list_all(),
-                                                         self.get_designation_any_list_all(), stop_words_list)
+            # Return any combination of these checks
+            if not self.skip_search_conflicts and auto_analyze_config in ('EXACT_MATCH', 'SEARCH_CONFLICTS'):
+                check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+                                                             self.compound_descriptive_name_tokens,
+                                                             False, self.get_designation_end_list_all(),
+                                                             self.get_designation_any_list_all(), stop_words_list)
 
-            if check_conflicts.is_valid and auto_analyze_config in 'SEARCH_CONFLICTS':
-                check_conflicts = builder.search_conflicts(
-                    [self.get_list_dist_search_conflicts()],
-                    [self.get_list_desc_search_conflicts()],
-                    [self.get_list_desc()],
-                    self.name_tokens,
-                    self.processed_name,
-                    np_svc.get_stand_alone_words()
-                )
+                if check_conflicts.is_valid and auto_analyze_config in 'SEARCH_CONFLICTS':
+                    check_conflicts = builder.search_conflicts(
+                        [self.get_list_dist_search_conflicts()],
+                        [self.get_list_desc_search_conflicts()],
+                        [self.get_list_desc()],
+                        self.name_tokens,
+                        self.processed_name,
+                        np_svc.get_stand_alone_words()
+                    )
 
-            if not check_conflicts.is_valid:
-                results.append(check_conflicts)
+                if not check_conflicts.is_valid:
+                    results.append(check_conflicts)
 
-        # check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-        #                                                    self.compound_descriptive_name_tokens,
-        #                                                    True, self.get_designation_end_list_all(),
-        #                                                    self.get_designation_any_list_all(), stop_words_list)
+            # check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+            #                                                    self.compound_descriptive_name_tokens,
+            #                                                    True, self.get_designation_end_list_all(),
+            #                                                    self.get_designation_any_list_all(), stop_words_list)
 
-        # if check_conflicts_queue.is_valid:
-        # check_conflicts_queue = builder.search_conflicts(
-        #     [self.get_list_dist_search_conflicts()],
-        #     [self.get_list_desc_search_conflicts()],
-        #     [self.get_list_desc()],
-        #     self.name_tokens,
-        #     self.processed_name,
-        #     np_svc.get_stand_alone_words(),
-        #     check_name_is_well_formed=False,
-        #     queue=True
-        # )
-        #
-        # if not check_conflicts_queue.is_valid:
-        #     results.append(check_conflicts_queue)
+            # if check_conflicts_queue.is_valid:
+            # check_conflicts_queue = builder.search_conflicts(
+            #     [self.get_list_dist_search_conflicts()],
+            #     [self.get_list_desc_search_conflicts()],
+            #     [self.get_list_desc()],
+            #     self.name_tokens,
+            #     self.processed_name,
+            #     np_svc.get_stand_alone_words(),
+            #     check_name_is_well_formed=False,
+            #     queue=True
+            # )
+            #
+            # if not check_conflicts_queue.is_valid:
+            #     results.append(check_conflicts_queue)
 
-        # TODO: Use the list_name array, don't use a string in the method!
-        # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
-        check_words_requiring_consent = builder.check_words_requiring_consent(
-            self.name_tokens, self.processed_name
-        )
+            # TODO: Use the list_name array, don't use a string in the method!
+            # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
+            check_words_requiring_consent = builder.check_words_requiring_consent(
+                self.name_tokens, self.processed_name
+            )
 
-        if not check_words_requiring_consent.is_valid:
-            results.append(check_words_requiring_consent)
+            if not check_words_requiring_consent.is_valid:
+                results.append(check_words_requiring_consent)
 
-        # We don't need to check for designations, so we're skipping that here...
+            # We don't need to check for designations, so we're skipping that here...
 
-        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_processed_name())
+            check_special_words = builder.check_word_special_use(self.name_tokens, self.get_processed_name())
 
-        if not check_special_words.is_valid:
-            results.append(check_special_words)
+            if not check_special_words.is_valid:
+                results.append(check_special_words)
 
         return results
