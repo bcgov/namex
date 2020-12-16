@@ -234,6 +234,10 @@ class Request(db.Model):
         }, 403)
 
     @classmethod
+    def close_session(cls):
+        db.session.close()
+
+    @classmethod
     def get_queued_oldest(cls, userObj):
         """
         Gets the Next NR# from the database
@@ -443,6 +447,7 @@ class Request(db.Model):
     def get_waiting_time_priority_queue(cls, unit):
         median_waiting_time = cls.get_waiting_time(unit)
         priority_waiting_time = median_waiting_time.filter(Request.priorityCd == RequestPriority.Y.value).all()
+        cls.close_session()
 
         return priority_waiting_time.pop()
 
@@ -450,6 +455,7 @@ class Request(db.Model):
     def get_waiting_time_regular_queue(cls, unit):
         median_waiting_time = cls.get_waiting_time(unit)
         regular_waiting_time = median_waiting_time.filter(Request.priorityCd != RequestPriority.Y.value).all()
+        cls.close_session()
 
         return regular_waiting_time.pop()
 

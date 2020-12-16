@@ -59,6 +59,10 @@ class Event(db.Model):
         raise BusinessException()
 
     @classmethod
+    def close_session(cls):
+        db.session.close()
+
+    @classmethod
     def get_approved_names_counter(cls):
         auto_approved_names_counter = db.session.query(
             func.count(Event.id).label('approvedNamesCounter'))\
@@ -67,4 +71,5 @@ class Event(db.Model):
             .filter(Event.stateCd.in_(('APPROVED','CONDITIONAL')))\
             .filter(func.date_trunc('day', Event.eventDate) == func.date_trunc('day', func.now()))\
             .all()
+        cls.close_session()
         return auto_approved_names_counter.pop()
