@@ -1,3 +1,4 @@
+import os
 from datetime import (datetime)
 
 from .name_analysis_director import NameAnalysisDirector
@@ -25,6 +26,7 @@ Notes:
 '''
 
 d = datetime.now()  # Was just used for perf analysis
+auto_analyze_config = os.getenv('AUTO_ANALYZE_CONFIG')
 
 
 class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
@@ -157,13 +159,13 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
         self._get_designations(request_types)
 
         # Return any combination of these checks
-        if not self.skip_search_conflicts:
+        if not self.skip_search_conflicts and auto_analyze_config in ('EXACT_MATCH', 'SEARCH_CONFLICTS'):
             check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
                                                          self.compound_descriptive_name_tokens,
                                                          False, self.get_designation_end_list_all(),
                                                          self.get_designation_any_list_all(), stop_words_list)
 
-            if check_conflicts.is_valid:
+            if check_conflicts.is_valid and auto_analyze_config in 'SEARCH_CONFLICTS':
                 check_conflicts = builder.search_conflicts(
                     [self.get_list_dist_search_conflicts()],
                     [self.get_list_desc_search_conflicts()],
