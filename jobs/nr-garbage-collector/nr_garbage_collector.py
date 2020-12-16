@@ -1,7 +1,8 @@
 """Script used to regularly cancel test NRs."""
 from flask import Flask, current_app
 from namex import db, nro
-from namex.models import Request, State
+from namex.constants import PaymentStatusCode, ValidSources
+from namex.models import Payment, Request, State
 from namex.resources.name_requests.abstract_solr_resource import AbstractSolrResource
 from namex.utils.logging import setup_logging
 from sqlalchemy import and_, or_, text
@@ -59,6 +60,17 @@ def run_nr_garbage_collection():
     cancelled_nrs = []
 
     try:
+        # keeping nro separately
+        nro_reqs = db.session.query(Request).join(Payment). \
+            filter(
+                Request._source == ValidSources.NRO.value,
+                Request.stateCd != State.CANCELLED,
+                Payment._payment_status_code == PaymentStatusCode.CREATED.value,
+                Request.lastUpdate <= text(f"(now() at time zone 'utc') - INTERVAL '{delay} SECONDS'")). \
+            order_by(Request.lastUpdate.asc()). \
+            limit(max_rows). \
+            with_for_update().all()
+
         reqs = db.session.query(Request). \
             filter(or_(Request.stateCd.in_((State.COND_RESERVE, State.RESERVED)),
                        and_(Request.stateCd == State.DRAFT, or_(Request._source == 'NAMEREQUEST',
@@ -69,7 +81,7 @@ def run_nr_garbage_collection():
             with_for_update().all()
 
         row_count = 0
-        for r in reqs:
+        for r in reqs+nro_reqs:
             ignore_nr = False
             if r.payments:
                 # only cancel this NR if there is a payment_status_code=CREATED and payment_completion_date
