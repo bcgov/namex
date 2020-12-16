@@ -34,7 +34,6 @@ class Synonym(db.Model):
     '''
     Find a term by column.
     '''
-
     @classmethod
     def find(cls, term, col):
         print('finding {} for {}'.format(col, term))
@@ -64,7 +63,6 @@ class Synonym(db.Model):
                       func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))
                     ]
     '''
-
     @classmethod
     def find_by_criteria(cls, criteria=None):
         SynonymQueryCriteria.is_valid_criteria(criteria)
@@ -72,13 +70,7 @@ class Synonym(db.Model):
         query = cls.query.with_entities(*criteria.fields) \
             .filter(and_(*criteria.filters))
 
-        results = query.all()
-        cls.close_session()
-        return results
-
-    @classmethod
-    def close_session(cls):
-        db.session.close()
+        return query.all()
 
 
 class SynonymSchema(ma.ModelSchema):
