@@ -67,4 +67,5 @@ class Event(db.Model):
             .filter(Event.stateCd.in_(('APPROVED','CONDITIONAL')))\
             .filter(func.date_trunc('day', Event.eventDate) == func.date_trunc('day', func.now()))\
             .all()
+        cls.close_session()
         return auto_approved_names_counter.pop()
