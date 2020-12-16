@@ -290,24 +290,24 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                     analysis.append(check_words_to_avoid)
                     return analysis
 
+                self.set_skip_search_conflicts(True)
+                check_name_is_well_formed = builder.check_name_is_well_formed(
+                    self._dict_name_words,
+                    self._list_dist_words,
+                    self._list_desc_words,
+                    self.compound_descriptive_name_tokens,
+                    self.processed_name,
+                    self.name_original_tokens
+                )
+                if check_name_is_well_formed.result_code in (
+                        AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
+                        self.entity_type not in (BCUnprotectedNameEntityTypes.list()) and \
+                        not check_name_is_well_formed.is_valid:
+                    analysis.append(check_name_is_well_formed)
+                elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
                     self.set_skip_search_conflicts(True)
-                    check_name_is_well_formed = builder.check_name_is_well_formed(
-                        self._dict_name_words,
-                        self._list_dist_words,
-                        self._list_desc_words,
-                        self.compound_descriptive_name_tokens,
-                        self.processed_name,
-                        self.name_original_tokens
-                    )
-                    if check_name_is_well_formed.result_code in (
-                            AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
-                            self.entity_type not in (BCUnprotectedNameEntityTypes.list()) and \
-                            not check_name_is_well_formed.is_valid:
-                        analysis.append(check_name_is_well_formed)
-                    elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
-                        self.set_skip_search_conflicts(True)
-                    else:
-                        self.set_skip_search_conflicts(False)
+                else:
+                    self.set_skip_search_conflicts(False)
 
                 check_name_has_valid_number = builder.is_valid_year(self.name_original_tokens)
                 if not check_name_has_valid_number.is_valid:
