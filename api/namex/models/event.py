@@ -59,6 +59,10 @@ class Event(db.Model):
         raise BusinessException()
 
     @classmethod
+    def close_session(cls):
+        db.session.close()
+
+    @classmethod
     def get_approved_names_counter(cls):
         auto_approved_names_counter = db.session.query(
             func.count(Event.id).label('approvedNamesCounter'))\

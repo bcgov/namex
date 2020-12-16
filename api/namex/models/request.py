@@ -234,6 +234,10 @@ class Request(db.Model):
         }, 403)
 
     @classmethod
+    def close_session(cls):
+        db.session.close()
+
+    @classmethod
     def get_queued_oldest(cls, userObj):
         """
         Gets the Next NR# from the database
