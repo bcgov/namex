@@ -72,6 +72,10 @@ class Synonym(db.Model):
         cls.close_session()
         return query.all()
 
+    @classmethod
+    def close_session(cls):
+        db.session.close()
+
 
 class SynonymSchema(ma.ModelSchema):
     class Meta:
