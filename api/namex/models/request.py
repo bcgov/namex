@@ -104,8 +104,8 @@ class Request(db.Model):
 
     # Check-In / Check-Out (for INPROGRESS)
     # A UUID granted to the user that checks out the Name Request
-    checkedOutBy = db.Column('checked_out_by', db.String(64),index=True)
-    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True),index=True)
+    checkedOutBy = db.Column('checked_out_by', db.String(64), index=True)
+    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True), index=True)
 
     # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
@@ -232,6 +232,10 @@ class Request(db.Model):
             "description":
                 "NRs cannot be deleted, maybe try cancelling instead"
         }, 403)
+
+    @classmethod
+    def close_session(cls):
+        db.session.close()
 
     @classmethod
     def get_queued_oldest(cls, userObj):
@@ -443,13 +447,16 @@ class Request(db.Model):
     def get_waiting_time_priority_queue(cls, unit):
         median_waiting_time = cls.get_waiting_time(unit)
         priority_waiting_time = median_waiting_time.filter(Request.priorityCd == RequestPriority.Y.value).all()
+        cls.close_session()
 
         return priority_waiting_time.pop()
 
     @classmethod
     def get_waiting_time_regular_queue(cls, unit):
         median_waiting_time = cls.get_waiting_time(unit)
+
         regular_waiting_time = median_waiting_time.filter(Request.priorityCd != RequestPriority.Y.value).all()
+        cls.close_session()
 
         return regular_waiting_time.pop()
 
@@ -463,7 +470,8 @@ class Request(db.Model):
             elif word in list_desc:
                 name.extend(Request.set_special_characters_descriptive([word]))
             else:
-                raise Exception('Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
+                raise Exception(
+                    'Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
 
         criteria = cls.get_designations_in_name(criteria, name, any_designation_list, end_designation_list, stop_words)
 
@@ -529,7 +537,9 @@ class Request(db.Model):
             query_all = queries[0].union(queries[1])
 
         print(query_all.statement)
-        return query_all.all()
+        results = query_all.all()
+        cls.close_session()
+        return results
 
     @classmethod
     def find_by_criteria(cls, criteria=None, limit=10):
@@ -547,8 +557,10 @@ class Request(db.Model):
         # TODO: Only log if LOCAL_DEV_MODE / DEBUG conf exists
         # query_str = '\n' + str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
         # current_app.logger.debug(query_str)
+        results = query.all()
+        cls.close_session()
 
-        return query.all()
+        return results
 
     @classmethod
     def set_special_characters_distinctive(cls, list_d):

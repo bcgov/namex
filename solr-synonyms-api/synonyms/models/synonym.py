@@ -69,8 +69,12 @@ class Synonym(db.Model):
 
         query = cls.query.with_entities(*criteria.fields) \
             .filter(and_(*criteria.filters))
-
+        cls.close_session()
         return query.all()
+
+    @classmethod
+    def close_session(cls):
+        db.session.close()
 
 
 class SynonymSchema(ma.ModelSchema):
