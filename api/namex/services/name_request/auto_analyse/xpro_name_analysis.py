@@ -63,17 +63,18 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                 return analysis
 
             # We conduct the same check for well formed names but report just search conflicts for extra-provincial names
-            check_conflict_in_name_is_well_formed = builder.check_name_is_well_formed(
-                self._dict_name_words,
-                self._list_dist_words,
-                self._list_desc_words,
-                self.name_tokens,
-                self.processed_name,
-                self.name_original_tokens
-            )
-            if check_conflict_in_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
-                analysis.append(check_conflict_in_name_is_well_formed)
-                return analysis
+            if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
+                check_conflict_in_name_is_well_formed = builder.check_name_is_well_formed(
+                    self._dict_name_words,
+                    self._list_dist_words,
+                    self._list_desc_words,
+                    self.name_tokens,
+                    self.processed_name,
+                    self.name_original_tokens
+                )
+                if check_conflict_in_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                    analysis.append(check_conflict_in_name_is_well_formed)
+                    return analysis
 
             check_word_limit = builder.check_word_limit(self.name_tokens)
             if not check_word_limit.is_valid:
