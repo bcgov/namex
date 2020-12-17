@@ -1,3 +1,5 @@
+import os
+
 from namex.constants import BCUnprotectedNameEntityTypes
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_designations_lists import GetDesignationsListsMixin
@@ -25,6 +27,8 @@ from swagger_client import SynonymsApi as SynonymService
 '''
 This is the director for AutoAnalyseService.
 '''
+
+auto_analyze_config = os.getenv('AUTO_ANALYZE_CONFIG')
 
 
 class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
@@ -280,111 +284,112 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             # Configure the analysis for the supplied builder
             get_classification(self, stand_alone_words, syn_svc, self.name_tokens, wc_svc, token_svc)
 
-            check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
-            if not check_words_to_avoid.is_valid:
-                analysis.append(check_words_to_avoid)
-                return analysis
+            if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
+                check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
+                if not check_words_to_avoid.is_valid:
+                    analysis.append(check_words_to_avoid)
+                    return analysis
 
-            self.set_skip_search_conflicts(True)
-            check_name_is_well_formed = builder.check_name_is_well_formed(
-                self._dict_name_words,
-                self._list_dist_words,
-                self._list_desc_words,
-                self.compound_descriptive_name_tokens,
-                self.processed_name,
-                self.name_original_tokens
-            )
-            if check_name_is_well_formed.result_code in (
-                    AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
-                    self.entity_type not in (BCUnprotectedNameEntityTypes.list()) and \
-                    not check_name_is_well_formed.is_valid:
-                analysis.append(check_name_is_well_formed)
-            elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
                 self.set_skip_search_conflicts(True)
-            else:
-                self.set_skip_search_conflicts(False)
+                check_name_is_well_formed = builder.check_name_is_well_formed(
+                    self._dict_name_words,
+                    self._list_dist_words,
+                    self._list_desc_words,
+                    self.compound_descriptive_name_tokens,
+                    self.processed_name,
+                    self.name_original_tokens
+                )
+                if check_name_is_well_formed.result_code in (
+                        AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
+                        self.entity_type not in (BCUnprotectedNameEntityTypes.list()) and \
+                        not check_name_is_well_formed.is_valid:
+                    analysis.append(check_name_is_well_formed)
+                elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                    self.set_skip_search_conflicts(True)
+                else:
+                    self.set_skip_search_conflicts(False)
 
-            check_name_has_valid_number = builder.is_valid_year(self.name_original_tokens)
-            if not check_name_has_valid_number.is_valid:
-                analysis.append(check_name_has_valid_number)
-                return analysis
+                check_name_has_valid_number = builder.is_valid_year(self.name_original_tokens)
+                if not check_name_has_valid_number.is_valid:
+                    analysis.append(check_name_has_valid_number)
+                    return analysis
 
-            if analysis:
-                return analysis
+                if analysis:
+                    return analysis
 
-            check_word_limit = builder.check_word_limit(self.name_tokens)
-            if not check_word_limit.is_valid:
-                analysis.append(check_word_limit)
-                return analysis
+                check_word_limit = builder.check_word_limit(self.name_tokens)
+                if not check_word_limit.is_valid:
+                    analysis.append(check_word_limit)
+                    return analysis
 
-            check_word_unclassified = builder.check_unclassified_words(self.name_tokens, self.get_list_none())
-            if not check_word_unclassified.is_valid:
-                analysis.append(check_word_unclassified)
+                check_word_unclassified = builder.check_unclassified_words(self.name_tokens, self.get_list_none())
+                if not check_word_unclassified.is_valid:
+                    analysis.append(check_word_unclassified)
 
-            # If the error coming back is that a name is not well formed
-            # OR if the error coming back has words to avoid...
-            # eg. result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
-            # don't return the result yet, the name is well formed, we just have an unclassified
-            # word in the result.
+                # If the error coming back is that a name is not well formed
+                # OR if the error coming back has words to avoid...
+                # eg. result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
+                # don't return the result yet, the name is well formed, we just have an unclassified
+                # word in the result.
 
-            issues_that_must_be_fixed = [
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisIssueCodes.INCORRECT_YEAR,
-                AnalysisIssueCodes.WORDS_TO_AVOID,
-                AnalysisIssueCodes.TOO_MANY_WORDS
-            ]
+                issues_that_must_be_fixed = [
+                    AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                    AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                    AnalysisIssueCodes.INCORRECT_YEAR,
+                    AnalysisIssueCodes.WORDS_TO_AVOID,
+                    AnalysisIssueCodes.TOO_MANY_WORDS
+                ]
 
-            issue_must_be_fixed = False
-            result_codes = list(map(lambda r: r.result_code, analysis))
+                issue_must_be_fixed = False
+                result_codes = list(map(lambda r: r.result_code, analysis))
 
-            for code in result_codes:
-                if code in issues_that_must_be_fixed:
-                    issue_must_be_fixed = True
-                    break
+                for code in result_codes:
+                    if code in issues_that_must_be_fixed:
+                        issue_must_be_fixed = True
+                        break
 
-            if issue_must_be_fixed:
-                return analysis
-                #  Name is not well formed - do not continue
+                if issue_must_be_fixed:
+                    return analysis
+                    #  Name is not well formed - do not continue
 
-            # If the WORD_TO_AVOID check failed, the UNCLASSIFIED_WORD check
-            # will have failed too because words to avoid are never classified.
-            # Strip out the unclassified words errors involving the same name words.
-            list_avoid = []
+                # If the WORD_TO_AVOID check failed, the UNCLASSIFIED_WORD check
+                # will have failed too because words to avoid are never classified.
+                # Strip out the unclassified words errors involving the same name words.
+                list_avoid = []
 
-            has_words_to_avoid = self._has_analysis_issue_type(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
-            if has_words_to_avoid:
-                matched_words_to_avoid = \
-                    self._get_analysis_issue_type_issues(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
+                has_words_to_avoid = self._has_analysis_issue_type(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
+                if has_words_to_avoid:
+                    matched_words_to_avoid = \
+                        self._get_analysis_issue_type_issues(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
 
-                for procedure_result in matched_words_to_avoid:
-                    list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
+                    for procedure_result in matched_words_to_avoid:
+                        list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
 
-                def remove_words_to_avoid(result):
-                    if result.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
-                        for word in list_avoid:
-                            result.values['list_none'].remove(word)
-                    return result
+                    def remove_words_to_avoid(result):
+                        if result.result_code == AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD:
+                            for word in list_avoid:
+                                result.values['list_none'].remove(word)
+                        return result
 
-                analysis = list(map(remove_words_to_avoid, analysis))
+                    analysis = list(map(remove_words_to_avoid, analysis))
 
-            analysis_issues_sort_order = [
-                AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                AnalysisIssueCodes.INCORRECT_YEAR,
-                AnalysisIssueCodes.WORDS_TO_AVOID,
-                AnalysisIssueCodes.TOO_MANY_WORDS,
-                AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
-                AnalysisIssueCodes.WORD_SPECIAL_USE,
-                AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
-                AnalysisIssueCodes.QUEUE_CONFLICT,
-                AnalysisIssueCodes.CORPORATE_CONFLICT,
-                AnalysisIssueCodes.DESIGNATION_NON_EXISTENT,
-                AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE,
-                AnalysisIssueCodes.DESIGNATION_MISPLACED,
-                AnalysisIssueCodes.DESIGNATION_MISMATCH,
-                AnalysisIssueCodes.DESIGNATION_REMOVAL
-            ]
+                analysis_issues_sort_order = [
+                    AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                    AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                    AnalysisIssueCodes.INCORRECT_YEAR,
+                    AnalysisIssueCodes.WORDS_TO_AVOID,
+                    AnalysisIssueCodes.TOO_MANY_WORDS,
+                    AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD,
+                    AnalysisIssueCodes.WORD_SPECIAL_USE,
+                    AnalysisIssueCodes.NAME_REQUIRES_CONSENT,
+                    AnalysisIssueCodes.QUEUE_CONFLICT,
+                    AnalysisIssueCodes.CORPORATE_CONFLICT,
+                    AnalysisIssueCodes.DESIGNATION_NON_EXISTENT,
+                    AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE,
+                    AnalysisIssueCodes.DESIGNATION_MISPLACED,
+                    AnalysisIssueCodes.DESIGNATION_MISMATCH,
+                    AnalysisIssueCodes.DESIGNATION_REMOVAL
+                ]
 
             analysis = analysis + self.do_analysis()
             if self.skip_search_conflicts:
