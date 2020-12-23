@@ -394,6 +394,7 @@ class NameRequestActions(AbstractEnum):
     RECEIPT = 'RECEIPT'
     COMPLETE = 'COMPLETE'
     REQUEST_REFUND = 'REQUEST_REFUND'
+    RETRY_PAYMENT = 'RETRY_PAYMENT'
 
 
 class NameRequestPatchActions(AbstractEnum):
@@ -419,6 +420,12 @@ class NameRequestPaymentActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
     COMPLETE = NameRequestActions.COMPLETE.value
     REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
+
+
+class NameRequestPendingPaymentActions(AbstractEnum):
+    EDIT = NameRequestActions.EDIT.value
+    CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
+    RETRY_PAYMENT = NameRequestActions.RETRY_PAYMENT.value
 
 
 class NameRequestDraftActions(AbstractEnum):

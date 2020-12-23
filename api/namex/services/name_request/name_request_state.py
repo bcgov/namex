@@ -5,7 +5,7 @@ from namex.constants import \
     NameRequestDraftActions, NameRequestReservedActions, NameRequestActiveActions, NameRequestCancelledActions, \
     NameRequestHoldActions, NameRequestInProgressActions, NameRequestExpiredActions, NameRequestConsumedActions, \
     NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions, EntityTypes, \
-    NameRequestCompletedActions
+    NameRequestCompletedActions, NameRequestPendingPaymentActions
 
 from namex.models import State
 
@@ -127,6 +127,7 @@ def get_nr_state_actions(next_state, nr_model=None):
     try:
         return {
             State.DRAFT: build_actions(NameRequestDraftActions.list(), nr_model),
+            State.PENDING_PAYMENT: build_actions(NameRequestPendingPaymentActions.list(), nr_model),
             State.RESERVED: build_actions(NameRequestReservedActions.list(), nr_model),
             State.COND_RESERVE: build_actions(NameRequestReservedActions.list(), nr_model),
             # Not expired

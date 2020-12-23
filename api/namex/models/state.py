@@ -9,6 +9,7 @@ class State(db.Model):
 
     # Request States
     DRAFT = 'DRAFT'
+    PENDING_PAYMENT = 'PENDING_PAYMENT'
     INPROGRESS = 'INPROGRESS'
     CANCELLED = 'CANCELLED'
     REFUND_REQUESTED = 'REFUND_REQUESTED'
