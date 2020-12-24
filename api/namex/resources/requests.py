@@ -208,6 +208,7 @@ class Requests(Resource):
         if queue:
             q = q.filter(RequestDAO.stateCd.in_(queue))
 
+        q = q.filter(RequestDAO.nrNum.notlike('NR L%'))
         if nrNum:
             nrNum = nrNum.replace('NR', '').strip()
             nrNum = nrNum.replace('nr', '').strip()

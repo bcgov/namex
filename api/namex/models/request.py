@@ -249,7 +249,9 @@ class Request(db.Model):
 
         # this will error if there's nothing in the queue - likelihood ~ 0
         r = db.session.query(Request). \
-            filter(Request.stateCd.in_([State.DRAFT])). \
+            filter(
+                Request.stateCd.in_([State.DRAFT]),
+                Request.nrNum.notlike('NR L%')). \
             order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
             with_for_update().first()
         # this row is now locked
@@ -272,7 +274,10 @@ class Request(db.Model):
         this assumes that a user can ONLY EVER have 1 Request in progress at a time.
         """
         existing_nr = db.session.query(Request). \
-            filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS). \
+            filter(
+                Request.userId == userObj.id, 
+                Request.stateCd == State.INPROGRESS,
+                Request.nrNum.notlike('NR L%')). \
             one_or_none()
 
         return existing_nr
