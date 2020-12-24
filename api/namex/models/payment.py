@@ -1,7 +1,7 @@
-"""Payments for a Request
-"""
-from . import db
-from datetime import datetime
+"""Payments for a Request."""
+from sqlalchemy import event
+
+from namex.models import State, db
 
 
 class Payment(db.Model):
@@ -62,6 +62,29 @@ class Payment(db.Model):
     def delete_from_db(self):
         pass
 
+@event.listens_for(Payment, 'after_insert')
+@event.listens_for(Payment, 'before_update')
+def update_nr_state(mapper, connection, target):
+    """Set the state of the NR based on payment_status_code."""
+    from namex.models import Request
 
-
-
+    payment = target
+    nr = Request.find_by_id(payment.nrId)
+    if nr:
+        # could not make this update properly via the model so used raw sql
+        if payment.payment_status_code == 'COMPLETED':
+            connection.execute(
+                f"""
+                UPDATE requests
+                SET state_cd='{State.DRAFT}'
+                WHERE id={nr.id}
+                """
+            )
+        else:
+            connection.execute(
+                f"""
+                UPDATE requests
+                SET state_cd='{State.PENDING_PAYMENT}'
+                WHERE id={nr.id}
+                """
+            )
