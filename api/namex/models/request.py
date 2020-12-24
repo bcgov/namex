@@ -9,7 +9,7 @@ from flask import current_app
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # from flask_sqlalchemy import get_debug_queries
 from namex.exceptions import BusinessException
-from sqlalchemy import event, not_
+from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.dialects import postgresql
 from sqlalchemy import and_, func, Date
@@ -259,7 +259,7 @@ class Request(db.Model):
                 Request.nrNum.notlike('NR L%')). \
             order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
             with_for_update().first()
-            # this row is now locked
+        # this row is now locked
 
         if not r:
             raise BusinessException(None, 404)
