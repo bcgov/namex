@@ -88,6 +88,19 @@ def display_reapply_action(nr_model=None):
 def display_resend_action(nr_model=None):
     return True
 
+def display_retry_payment(nr_model=None):
+    """Logic for displaying retry payment button."""
+    try:
+        print('retry payment method')
+        if nr_model and nr_model.stateCd in (State.PENDING_PAYMENT):
+            payment = nr.payments.one_or_none()
+            if payment:
+                if payment.payment_status_code != 'COMPLETED':
+                    return True
+        return False
+    except Exception as err:
+        raise NameRequestActionError(err)
+
 
 def display_incorporate_action(nr_model=None):
     try:
@@ -152,7 +165,7 @@ def get_nr_state_actions(next_state, nr_model=None):
 
 
 def to_draft(resource, nr, on_success_cb=None):
-    valid_states = [State.DRAFT, State.INPROGRESS]
+    valid_states = [State.DRAFT, State.INPROGRESS, State.PENDING_PAYMENT]
     if nr.stateCd not in valid_states:
         raise InvalidStateError(message=invalid_state_transition_msg.format(
             current_state=nr.stateCd,

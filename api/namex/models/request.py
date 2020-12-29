@@ -212,6 +212,11 @@ class Request(db.Model):
         }
 
     @classmethod
+    def find_by_id(cls, internal_id: int):
+        """Find NR by the internal id."""
+        return cls.query.filter_by(id=internal_id).one_or_none()
+
+    @classmethod
     def find_by_nr(cls, nr):
         return cls.query.filter_by(nrNum=nr).one_or_none()
 
