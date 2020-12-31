@@ -403,7 +403,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             nr_svc.nr_num = nr_model.nrNum
             nr_svc.nr_id = nr_model.id
 
-            valid_update_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED]
+            valid_update_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.PENDING_PAYMENT]
 
             # This could be moved out, but it's fine here for now
             def validate_patch_request(nr):
