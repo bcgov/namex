@@ -499,7 +499,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         """
         nr_svc = self.nr_service
 
-        if not nr_model.stateCd == State.DRAFT:
+        if nr_model.stateCd not in [State.DRAFT, State.PENDING_PAYMENT]:
             raise PaymentServiceError(message='Error upgrading Name Request, request is in an invalid state!')
 
         # Update the state of the payment
