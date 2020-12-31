@@ -72,19 +72,20 @@ def update_nr_state(mapper, connection, target):
     nr = Request.find_by_id(payment.nrId)
     if nr:
         # could not make this update properly via the model so used raw sql
-        if payment.payment_status_code == 'COMPLETED':
-            connection.execute(
-                f"""
-                UPDATE requests
-                SET state_cd='{State.DRAFT}'
-                WHERE id={nr.id}
-                """
-            )
-        else:
-            connection.execute(
-                f"""
-                UPDATE requests
-                SET state_cd='{State.PENDING_PAYMENT}'
-                WHERE id={nr.id}
-                """
-            )
+        if payment.payment_status_code != 'REFUND_REQUESTED':
+            if payment.payment_status_code == 'COMPLETED':
+                connection.execute(
+                    f"""
+                    UPDATE requests
+                    SET state_cd='{State.DRAFT}'
+                    WHERE id={nr.id}
+                    """
+                )
+            else:
+                connection.execute(
+                    f"""
+                    UPDATE requests
+                    SET state_cd='{State.PENDING_PAYMENT}'
+                    WHERE id={nr.id}
+                    """
+                )
