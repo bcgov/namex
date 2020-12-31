@@ -273,6 +273,16 @@ class Request(db.Model):
         return r, True
 
     @classmethod
+    def get_oldest_draft(cls):
+        """Get the oldest NR in DRAFT state."""
+        return db.session.query(Request). \
+            filter(
+                Request.stateCd.in_([State.DRAFT]),
+                Request.nrNum.notlike('NR L%')). \
+            order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
+            first()
+
+    @classmethod
     def get_inprogress(cls, userObj):
         """
         Gets the Next NR# from the database where the STATUS == INPROGRESS and assigned to the user

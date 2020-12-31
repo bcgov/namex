@@ -1,4 +1,5 @@
 import math
+from datetime import datetime
 
 from namex.models import Request
 from namex.models import Event
@@ -38,9 +39,19 @@ class WaitTimeStatsService:
 
     @classmethod
     def get_statistics(cls):
-        response_values = [cls.get_approved_names_counter(),
+        # For now not using this to improve performance
+        # response_values = [cls.get_approved_names_counter(),
+        #                    cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
+        #                    cls.get_waiting_time_regular_queue(unit=UnitTime.DAY.value)]
+
+        oldest_draft = Request.get_oldest_draft()
+        todays_date = datetime.utcnow().date()
+        submitted_date = oldest_draft.submittedDate.date()
+        delta = todays_date - submitted_date
+
+        response_values = [0,
                            cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
-                           cls.get_waiting_time_regular_queue(unit=UnitTime.DAY.value)]
+                           delta.days]
 
         response = query_result_to_dict(response_keys, response_values)
 
