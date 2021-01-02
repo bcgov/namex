@@ -289,6 +289,9 @@ class NameAnalysisDirector(GetSynonymListsMixin, GetDesignationsListsMixin, GetW
             self._substitutions = builder.get_substitutions_distinctive(self.get_list_dist())
             self._dict_dist_words = self._substitutions
 
+            check_name_is_well_formed = None  # Make sure it exists before assignment
+            analysis_issues_sort_order = []  # Make sure it exists before assignment
+
             if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
                 check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
                 if not check_words_to_avoid.is_valid:

@@ -57,7 +57,7 @@ REQUIREMENTS = read_requirements('requirements.txt')
 
 setup(
     name='namex',
-    version='0.1.1b',
+    version='1.0.0',
     packages=packages.keys(),
     package_dir=packages,
     include_package_data=True,

@@ -39,6 +39,7 @@ quart_app: Quart | None = None
 
 
 async def create_app(run_mode):
+    quart_app = None
     """Create the app object for configuration and use."""
     try:
         quart_app = Quart(__name__)
