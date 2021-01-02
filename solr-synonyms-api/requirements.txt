@@ -1,2 +1,27 @@
-# Just installs the production requirements.
--r requirements/prod.txt
+python-dotenv
+
+Flask==1.1.2
+Flask-RESTplus==0.13.0
+Flask-SQLAlchemy==2.4.1
+Flask-Marshmallow==0.11.0
+
+flask-migrate
+flask_script
+flask-jwt-oidc>=0.1.5
+
+sqlalchemy
+jsonpickle
+
+marshmallow==2.19.2
+marshmallow-sqlalchemy==0.19.0
+
+psycopg2-binary
+
+gunicorn
+gunicorn[eventlet]
+greenlet
+eventlet
+
+werkzeug==0.16.1
+nltk
+pyinflect
