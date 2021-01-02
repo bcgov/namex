@@ -55,7 +55,7 @@ packages = find_packages(".")
 REQUIREMENTS = read_requirements('requirements.txt')
 
 setup(
-    name='namex',
+    name='synonyms_api',
     version='1.0.0',
     packages=packages.keys(),
     package_dir=packages,

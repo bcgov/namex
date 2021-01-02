@@ -14,6 +14,7 @@ pysolr==3.9.0
 jsonpickle==1.4.1
 lxml==4.6.1
 
-git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
+git+https://github.com/bcdevlucas/namex.git#egg=namex&subdirectory=api
+git+https://github.com/bcdevlucas/namex.git#egg=synonyms_api&subdirectory=solr_synonyms_api
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
 git+https://github.com/bcgov/namex-payment-api-py-client.git@dev#egg=openapi_client

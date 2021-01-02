@@ -168,6 +168,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         return self.name_as_submitted_tokenized
 
     def __init__(self):
+        # TODO: Swap this out for the actual service we don't want to call service via API, it's too slow
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.word_condition_service = VirtualWordConditionService()
@@ -283,6 +284,9 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
             # Configure the analysis for the supplied builder
             get_classification(self, stand_alone_words, syn_svc, self.name_tokens, wc_svc, token_svc)
+
+            check_name_is_well_formed = None  # Make sure it exists before assignment
+            analysis_issues_sort_order = []  # Make sure it exists before assignment
 
             if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
                 check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
@@ -406,7 +410,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def sort_analysis_issues(self, analysis_issues, sort_order):
         sorted_analysis_issues = []
 
-        while True:
+        while True and len(sort_order) > 0:
             issue_type = sort_order.pop(0)
 
             # Serve unclassified words first if there are words that require consent in the name

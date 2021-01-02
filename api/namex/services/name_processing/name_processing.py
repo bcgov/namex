@@ -7,6 +7,9 @@ from ..name_request.auto_analyse.name_analysis_utils import remove_french, remov
 from namex.services.word_classification.word_classification import WordClassificationService
 
 from .mixins.get_synonym_lists import GetSynonymListsMixin
+from .exceptions import \
+    GetStopWordsApiError, GetPrefixesApiError, GetNumberWordsApiError, GetStandAloneApiError, \
+    GetDesignatedEndAllWordsApiError, GetDesignatedAnyAllWordsApiError
 
 from swagger_client import SynonymsApi as SynonymService
 
@@ -118,6 +121,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         self._virtual_word_condition_service = svc
 
     def __init__(self):
+        # TODO: Swap this out for the actual service we don't want to call service via API, it's too slow
         self.synonym_service = SynonymService()
         self.word_classification_service = WordClassificationService()
         self.virtual_word_condition_service = VirtualWordConditionService()
@@ -232,16 +236,45 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         # Query database for word designations
         # These properties are mixed in via GetSynonymListsMixin
         # See the class constructor
-        self._stop_words = syn_svc.get_stop_words().data
-        self._prefixes = syn_svc.get_prefixes().data
-        self._number_words = syn_svc.get_number_words().data
-        self._stand_alone_words = syn_svc.get_stand_alone().data
+        try:
+            self._stop_words = syn_svc.get_stop_words().data
+        except Exception as err:
+            raise GetStopWordsApiError(err)
 
-        self._eng_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.ENG.value).data
-        self._eng_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.ENG.value).data
+        try:
+            self._prefixes = syn_svc.get_prefixes().data
+        except Exception as err:
+            raise GetPrefixesApiError(err)
 
-        self._fr_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.FR.value).data
-        self._fr_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.FR.value).data
+        try:
+            self._number_words = syn_svc.get_number_words().data
+        except Exception as err:
+            raise GetNumberWordsApiError(err)
+
+        try:
+            self._stand_alone_words = syn_svc.get_stand_alone().data
+        except Exception as err:
+            raise GetStandAloneApiError(err)
+
+        try:
+            self._eng_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.ENG.value).data
+        except Exception as err:
+            raise GetDesignatedEndAllWordsApiError(err)
+
+        try:
+            self._eng_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.ENG.value).data
+        except Exception as err:
+            raise GetDesignatedAnyAllWordsApiError(err)
+
+        try:
+            self._fr_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.FR.value).data
+        except Exception as err:
+            raise GetDesignatedEndAllWordsApiError(err)
+
+        try:
+            self._fr_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.FR.value).data
+        except Exception as err:
+            raise GetDesignatedAnyAllWordsApiError(err)
 
         self._designated_end_words = self._eng_designated_end_words + self._fr_designated_end_words
         self._designated_any_words = self._eng_designated_any_words + self._fr_designated_any_words

@@ -20,7 +20,7 @@ class VirtualWordConditionService:
         model = self.get_model()
 
         filters = [
-            model.rc_allow_use == false(),
+            model.rc_allow_use == false()
         ]
 
         criteria = VirtualWordConditionCriteria(

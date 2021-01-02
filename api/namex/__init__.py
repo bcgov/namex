@@ -37,7 +37,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     ma.init_app(app)
 
     api.init_app(app)
-    setup_jwt_manager(app, jwt)
+    # setup_jwt_manager(app, jwt)
 
     nro.init_app(app)
     cache.init_app(app)

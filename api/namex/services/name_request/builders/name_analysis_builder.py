@@ -1,3 +1,5 @@
+from abc import ABC
+
 from flask import current_app
 import re
 import itertools
@@ -15,7 +17,10 @@ from ..auto_analyse.name_analysis_utils import get_conflicts_same_classification
 from namex.models.request import Request
 
 from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
+from namex.utils.profiling import profile
+
 from namex.services.name_request.auto_analyse import DataFrameFields
+
 
 WORD = re.compile(r"\w+")
 
@@ -25,15 +30,15 @@ Sample builder
 '''
 
 
-class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
-    '''
-    Check to see if a provided name is valid
-    Override the abstract / base class method
-    @return ProcedureResult[] An array of procedure results
-    '''
-
+class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name,
                                   processed_name, list_original_name):
+        """
+        Check to see if a provided name is valid
+        Override the abstract / base class method
+        @return ProcedureResult[] An array of procedure results
+        """
         result = ProcedureResult()
         result.is_valid = True
         self.name_processing_service
@@ -64,12 +69,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
-    '''
-    Override the abstract / base class method.
-    @return ProcedureResult
-    '''
-
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_word_limit(self, list_name):
+        """
+        Override the abstract / base class method.
+        @return ProcedureResult
+        """
         result = ProcedureResult()
         result.is_valid = True
 
@@ -91,6 +96,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_unclassified_words(self, list_name, list_none):
         result = ProcedureResult()
         result.is_valid = True
@@ -117,6 +123,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_words_to_avoid(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -149,6 +156,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def search_conflicts(self, list_dist_words, list_desc_criteria, list_desc_words, list_name, name, stand_alone_words,
                          check_name_is_well_formed=False, queue=False):
         list_conflicts, most_similar_names = [], []
@@ -171,6 +179,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return self.prepare_response(most_similar_names, queue, list_name, list_dist_words, list_desc_words)
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc_criteria, w_desc, list_name, stand_alone_words,
                       check_name_is_well_formed, queue):
         dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = {}, {}, {}, {}
@@ -226,6 +235,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_conflict_details, forced
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_conflicts_db(self, dist_substitution_dict, desc_synonym_criteria_dict, desc_synonym_dict,
                          dict_highest_counter, change_filter,
                          list_name, check_name_is_well_formed, queue):
@@ -260,6 +270,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details, forced
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False, end_list_designations=None,
                            any_list_designations=None, stop_words=None):
         result = ProcedureResult()
@@ -290,6 +301,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_words_requiring_consent(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -326,6 +338,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_position_word_consent(self, words_consent, name_sin_plural):
         word_consent_tokenized = words_consent.lower().split()
         name_sin_plur_tokenized = name_sin_plural.split()
@@ -337,6 +350,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return words_consent_dict
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_designation_existence(self, list_name, all_designations, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
@@ -360,6 +374,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
@@ -397,6 +412,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_end_designation_more_than_once(self, list_name, all_designation_end_list, correct_designations_user,
                                              misplaced_designation_end):
         result = ProcedureResult()
@@ -430,6 +446,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_designation_misplaced(self, list_name, misplaced_designation_end):
         result = ProcedureResult()
         result.is_valid = True
@@ -449,6 +466,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     @return ProcedureResult
     '''
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_word_special_use(self, list_name, name_processed):
         result = ProcedureResult()
         result.is_valid = True
@@ -475,45 +493,52 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return result
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_most_similar_names(self, dict_highest_counter, db_matches, dist_substitution_dict, desc_synonym_dict,
                                list_name):
-        auto_analyze_url = current_app.config.get('AUTO_ANALYZE_URL', None)
-        list_details, selected_matches = [], []
-        forced = False
-        list_dist = list(dist_substitution_dict.keys())
-        list_desc = list(desc_synonym_dict.keys())
+        try:
+            auto_analyze_url = current_app.config.get('AUTO_ANALYZE_URL', None)
+            list_details, selected_matches = [], []
+            forced = False
+            list_dist = list(dist_substitution_dict.keys())
+            list_desc = list(desc_synonym_dict.keys())
 
-        if db_matches:
-            total = len(db_matches)
-            print("Possible conflicts returned: ", total)
+            if db_matches:
+                total = len(db_matches)
+                print("Possible conflicts returned: ", total)
 
-            json_analyze = {'names': [match.name for match in db_matches],
-                            'list_name': list_name,
-                            'list_dist': list_dist,
-                            'list_desc': list_desc,
-                            'dict_substitution': dist_substitution_dict,
-                            'dict_synonyms': desc_synonym_dict
-                            }
-            conflict_response = requests.post(url=''.join([auto_analyze_url]),
-                                              json=json_analyze)
-            if not conflict_response:
-                warnings.warn("Quart Service did not return a result", Warning)
-            conflicts = conflict_response.json()
-            dict_matches_counter = dict(ChainMap(*conflicts.get('result')))
+                json_analyze = {'names': [match.name for match in db_matches],
+                                'list_name': list_name,
+                                'list_dist': list_dist,
+                                'list_desc': list_desc,
+                                'dict_substitution': dist_substitution_dict,
+                                'dict_synonyms': desc_synonym_dict
+                                }
+                conflict_response = requests.post(url=''.join([auto_analyze_url]),
+                                                  json=json_analyze)
+                if not conflict_response:
+                    warnings.warn("Quart Service did not return a result", Warning)
+                conflicts = conflict_response.json()
+                dict_matches_counter = dict(ChainMap(*conflicts.get('result')))
 
-            selected_matches = [match for match in db_matches if match.name in dict_matches_counter.keys()]
+                selected_matches = [match for match in db_matches if match.name in dict_matches_counter.keys()]
 
-            if dict_matches_counter:
-                all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
-                # Get  N highest score (values) and shortest names (key)
-                dict_highest_counter.update({k: v for k, v in
-                                             sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
-                                             0:MAX_MATCHES_LIMIT]})
-                list_details = self.get_details_higher_score(dict_highest_counter, selected_matches, all_subs_dict)
-                forced = True if any(value == EXACT_MATCH for value in dict_highest_counter.values()) else False
+                if dict_matches_counter:
+                    all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
+                    # Get  N highest score (values) and shortest names (key)
+                    dict_highest_counter.update({k: v for k, v in
+                                                 sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
+                                                 0:MAX_MATCHES_LIMIT]})
+                    list_details = self.get_details_higher_score(dict_highest_counter, selected_matches, all_subs_dict)
+                    forced = True if any(value == EXACT_MATCH for value in dict_highest_counter.values()) else False
 
-        return list_details, forced
+                return list_details, forced
+            else:
+                print('No conflicts were found')
+        except Exception as err:
+            raise
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def prepare_response(self, most_similar_names, queue, list_name, list_dist_words, list_desc_words):
         conflict_name = {}
         result = ProcedureResult()
@@ -573,6 +598,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return list_details
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_substitutions_distinctive(self, w_dist):
         syn_svc = self.synonym_service
 
@@ -592,6 +618,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         return dist_substitution_dict
 
+    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_substitutions_descriptive(self, w_desc):
         syn_svc = self.synonym_service
 

@@ -17,6 +17,7 @@
 # Thanks!
 import asyncio
 import os
+from time import time
 
 import config  # pylint: disable=wrong-import-order; # noqa: I001
 import quart.flask_patch
@@ -35,6 +36,7 @@ RUN_MODE = os.getenv('FLASK_ENV', 'production')
 
 
 async def create_app(run_mode):
+    quart_app = None
     """Create the app object for configuration and use."""
     try:
         quart_app = Quart(__name__)
@@ -95,10 +97,19 @@ async def private_service():
 
     app.logger.debug('Number of matches: {0}'.format(len(matches)))
 
+    start_time = time()
     result = await asyncio.gather(
         *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data) for
           name in matches]
     )
+    print('--- Conflict analysis for {count} matches in {time} seconds ---'.format(
+        count=len(matches),
+        time=(time() - start_time)
+    ))
+    print('--- Average match analysis time: {time} seconds / name ---'.format(
+        time=((time() - start_time) / len(matches))
+    ))
+
     return jsonify(result=result)
 
 

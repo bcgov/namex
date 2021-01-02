@@ -15,6 +15,7 @@
 import itertools
 import logging
 import math
+from time import time
 import re
 from collections import Counter
 
@@ -24,7 +25,7 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import (
     get_flat_list,
     remove_double_letters_list_dist_words,
     remove_spaces_list,
-    subsequences,
+    subsequences
 )
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
@@ -34,6 +35,7 @@ from swagger_client import SynonymsApi as SynonymService
 
 porter = PorterStemmer()
 
+# TODO: Swap this out for the actual service we don't want to call service via API, it's too slow
 synonym_service = SynonymService()
 name_processing_service = NameProcessingService()
 name_analysis_service = ProtectedNameAnalysisService()
@@ -57,7 +59,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
                        list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
                        dict_synonyms: dict,
-                       np_svc_prep_data: name_analysis_service) -> dict:
+                       np_svc_prep_data: NameProcessingService) -> dict:
     """Return a dictionary with name as key and similarity as value, 1.0 is an exact match."""
     logging.getLogger(__name__).debug(
         'name: %s ,  list_name %s,  list_dist: %s, list_desc: %s, dict_subst: %s,  dict_syns: %s',
@@ -77,7 +79,11 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         similarity = EXACT_MATCH
     else:
         match_list = np_svc.name_tokens
+        start_time = time()
         get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc, True)
+        print('--- auto_analyze->get_classification execution time: {time} seconds ---'.format(
+            time=(time() - start_time)
+        ))
 
         dist_db_substitution_dict = builder.get_substitutions_distinctive(service.get_list_dist())
         service._list_dist_words, match_list, _ = remove_double_letters_list_dist_words(service.get_list_dist(),
