@@ -16,6 +16,7 @@ def find_packages(path, base=""):
     packages = {}
     for item in os.listdir(path):
         dir = os.path.join(path, item)
+        print(dir)
         if is_package(dir):
             if base:
                 module_name = "%(base)s.%(item)s" % vars()
@@ -55,7 +56,7 @@ packages = find_packages(".")
 REQUIREMENTS = read_requirements('requirements.txt')
 
 setup(
-    name='synonyms_api',
+    name='synonyms',
     version='1.0.0',
     packages=packages.keys(),
     package_dir=packages,
