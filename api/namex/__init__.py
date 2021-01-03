@@ -48,6 +48,15 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
         response.headers['API'] = 'NameX/{ver}'.format(ver=run_version)
         return response
 
+    @app.after_request
+    def after_request(response):
+        if db is not None:
+            print('Closing Namex service DB connections')
+            db.engine.dispose()
+
+        return response
+
+
     register_shellcontext(app)
 
     return app

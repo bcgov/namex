@@ -41,7 +41,7 @@ from . import db
 porter = PorterStemmer()
 
 # TODO: Swap this out for the actual service we don't want to call service via API, it's too slow
-synonym_service = SynonymService()
+synonym_service = SynonymApiService()
 name_processing_service = NameProcessingService()
 name_analysis_service = ProtectedNameAnalysisService()
 builder = NameAnalysisBuilder(name_analysis_service)
