@@ -1,18 +1,18 @@
-         2063 function calls (2037 primitive calls) in 0.018 seconds
+         2841 function calls (2697 primitive calls) in 0.009 seconds
 
    Ordered by: cumulative time
-   List reduced from 304 to 10 due to restriction <10>
+   List reduced from 377 to 10 due to restriction <10>
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        1    0.000    0.000    0.018    0.018 name_analysis_builder.py:601(get_substitutions_distinctive)
-        1    0.000    0.000    0.017    0.017 synonyms_api.py:307(get_all_substitutions_synonyms)
-        1    0.000    0.000    0.017    0.017 synonyms_api.py:329(get_all_substitutions_synonyms_with_http_info)
-        1    0.000    0.000    0.017    0.017 api_client.py:282(call_api)
-        1    0.000    0.000    0.017    0.017 api_client.py:102(__call_api)
-        1    0.000    0.000    0.017    0.017 api_client.py:342(request)
-        1    0.000    0.000    0.017    0.017 rest.py:232(GET)
-        1    0.000    0.000    0.017    0.017 rest.py:108(request)
-        1    0.000    0.000    0.017    0.017 request.py:58(request)
-        1    0.000    0.000    0.017    0.017 request.py:82(request_encode_url)
+        1    0.000    0.000    0.009    0.009 name_analysis_builder.py:601(get_substitutions_distinctive)
+        1    0.000    0.000    0.009    0.009 model.py:9(get_all_substitutions_synonyms)
+        2    0.000    0.000    0.009    0.004 synonym.py:97(get_substitutions)
+        2    0.000    0.000    0.008    0.004 synonym.py:44(find_word_synonyms)
+        2    0.000    0.000    0.008    0.004 synonym.py:66(find_by_criteria)
+        2    0.000    0.000    0.007    0.004 query.py:3357(all)
+        2    0.000    0.000    0.007    0.004 query.py:3530(__iter__)
+        2    0.000    0.000    0.007    0.003 query.py:3555(_execute_and_instances)
+        2    0.000    0.000    0.006    0.003 base.py:943(execute)
+        2    0.000    0.000    0.006    0.003 elements.py:296(_execute_on_connection)
 
 

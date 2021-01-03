@@ -63,7 +63,7 @@ setup(
     include_package_data=True,
     license=read('LICENSE'),
     long_description=read('README.md'),
-    install_requires=REQUIREMENTS,
+    # install_requires=REQUIREMENTS,
     setup_requires=[
         'pytest-runner',
     ],
