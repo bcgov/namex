@@ -4,24 +4,36 @@ import collections
 from synonyms.constants import \
     BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes
 
-from synonyms.utils.service_utils import get_flat_list
-
 from . import SynonymServiceMixin
 from .. import DesignationPositionCodes, LanguageCodes
 
 
 class SynonymDesignationMixin(SynonymServiceMixin):
-    def get_designated_end_all_words(self):
-        return self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG.value)
+    def get_designated_end_all_words(self, lang):
+        lang = lang if isinstance(lang, str) else LanguageCodes.ENG.value
+        return self.get_designations(None, DesignationPositionCodes.END.value, lang)
 
-    def get_designated_any_all_words(self):
-        return self.get_designations(None, DesignationPositionCodes.ANY, LanguageCodes.ENG.value)
+    def get_designated_any_all_words(self, lang):
+        lang = lang if isinstance(lang, str) else LanguageCodes.ENG.value
+        return self.get_designations(None, DesignationPositionCodes.ANY, lang)
 
+    # TODO: Fix / check this Arturo!
     def get_misplaced_end_designations(self, name, designation_end_entity_type):
-        # en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
         if not designation_end_entity_type:
             return list()
-        designation_any_rgx = '(' + '|'.join(map(str, designation_end_entity_type)) + ')'
+        designation_end_rgx = '(' + '|'.join(map(str, designation_end_entity_type)) + ')'
+        designation_end_regex = r'\b{}\s'.format(designation_end_rgx)
+
+        # Returns list of tuples
+        misplaced_designation_end_list = re.findall(designation_end_regex, name.lower())
+
+        return misplaced_designation_end_list
+
+    # TODO: Fix / check this Arturo!
+    def get_misplaced_any_designations(self, name, designation_any_entity_type):
+        if not designation_any_entity_type:
+            return list()
+        designation_any_rgx = '(' + '|'.join(map(str, designation_any_entity_type)) + ')'
         designation_any_regex = r'\b{}\s'.format(designation_any_rgx)
 
         # Returns list of tuples
@@ -176,7 +188,14 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
             entity_end_designation_dict[entity_type.value] = designation_end
 
-        return entity_end_designation_dict
+        output = []
+        for key in entity_end_designation_dict:
+            output.append({
+                'key': key,
+                'list': entity_end_designation_dict[key]
+            })
+
+        return output
 
     def get_all_any_designations(self):
         entity_types = [
@@ -194,7 +213,14 @@ class SynonymDesignationMixin(SynonymServiceMixin):
 
             entity_any_designation_dict[entity_type.value] = designation_any
 
-        return entity_any_designation_dict
+        output = []
+        for key in entity_any_designation_dict:
+            output.append({
+                'key': key,
+                'list': entity_any_designation_dict[key]
+            })
+
+        return output
 
     def get_entity_type_by_value(self, entity_type_dicts, designation):
         entity_list = list()

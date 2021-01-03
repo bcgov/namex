@@ -22,7 +22,7 @@ or by accessing this configuration directly.
 import os
 
 from dotenv import find_dotenv, load_dotenv
-
+from sqlalchemy.pool import NullPool
 
 # This will load all the envars from a .env file located in the project root
 load_dotenv(find_dotenv())
@@ -62,6 +62,11 @@ class Config:  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME
     )
+    # SQLALCHEMY_POOL_SIZE = 500  # Disable pooling
+    # SQLALCHEMY_POOL_RECYCLE = 5  # Auto recycle connections after 5s of inactivity
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'poolclass': NullPool
+    }
 
     SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
 

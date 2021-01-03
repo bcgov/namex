@@ -13,7 +13,6 @@ werkzeug
 pysolr==3.9.0
 jsonpickle==1.4.1
 lxml==4.6.1
-
 ../../api
 ../../solr-synonyms-api
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client

@@ -16,13 +16,13 @@ def flatten_tuple_results(results):
 
 
 def parse_dict_of_lists(results):
-    # TODO: This is a temporary method to transform data from the synonyms api
-    # I don't really like that we have to use this, but it's the quickest way to get things
-    # running again after pulling out the synonyms service into a self-contained app
-    output = {}
-    for item in results:
-        output[item.key] = sorted(list(set(item.list)), key=len, reverse=True)
-    return output
+    try:
+        output = {}
+        for item in results:
+            output[getattr(item, 'key')] = sorted(list(set(getattr(item, 'list'))), key=len, reverse=True)
+        return output
+    except Exception as err:
+        raise err
 
 
 def query_result_to_dict(result):

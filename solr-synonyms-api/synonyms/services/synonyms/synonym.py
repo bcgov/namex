@@ -88,6 +88,12 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         return flattened
 
+    def get_word_synonyms(self, word=None, category=False):
+        """
+        Alias for get_synonyms, used when using the Synonyms service directly instead of via the HTTP API.
+        """
+        return self.get_synonyms(word, category)
+
     def get_substitutions(self, word=None):
         model = self.get_model()
 
@@ -102,6 +108,12 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
             flattened = self.get_gerund_word(word)
 
         return flattened
+
+    def get_word_substitutions(self, word=None):
+        """
+        Alias for get_substitutions, used when using the Synonyms service directly instead of via the HTTP API.
+        """
+        return self.get_synonyms(word)
 
     def get_stop_words(self, word=None):
         model = self.get_model()

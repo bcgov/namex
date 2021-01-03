@@ -130,15 +130,8 @@ class _AllSubstitutionsSynonyms(Resource):
         service = SynonymService()
         results = service.get_all_substitutions_synonyms(words, words_are_distinctive)
 
-        output = []
-        for key in results:
-            output.append({
-                'key': key,
-                'list': results[key]
-            })
-
         return {
-            'data': output
+            'data': results
         }
 
 
@@ -163,15 +156,8 @@ class _AllCategoriesSynonyms(Resource):
         service = SynonymService()
         results = service.get_all_categories_synonyms(list_desc)
 
-        output = []
-        for key in results:
-            output.append({
-                'key': key,
-                'list': results[key]
-            })
-
         return {
-            'data': output
+            'data': results
         }
 
 
@@ -347,33 +333,6 @@ class _DesignatedAnyAllWords(Resource):
 
         service = SynonymService()
         results = service.get_designations(entity_type_code, position_code, lang)
-
-        return {
-            'data': results
-        }
-
-
-@api.route('/misplaced-end-designations', strict_slashes=False, methods=['GET'])
-class _MisplacedEndDesignations(Resource):
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
-    # @api.expect()
-    @api.response(200, 'SynonymsApi', response_list)
-    @marshal_with(response_list)
-    @api.doc(params={
-        'name': '',
-        'designation_end_entity_type': ''
-    })
-    def get():
-        name = unquote_plus(request.args.get('name'))
-        designation_end_entity_type = unquote_plus(request.args.get('designation_end_entity_type'))
-
-        if not validate_request(request.args):
-            return
-
-        service = SynonymService()
-        results = service.get_misplaced_end_designations(name, designation_end_entity_type)
 
         return {
             'data': results
@@ -607,15 +566,8 @@ class _AllEndDesignations(Resource):
         service = SynonymService()
         results = service.get_all_end_designations()
 
-        output = []
-        for key in results:
-            output.append({
-                'key': key,
-                'list': results[key]
-            })
-
         return {
-            'data': output
+            'data': results
         }
 
 
@@ -636,15 +588,8 @@ class _AllAnyDesignations(Resource):
         service = SynonymService()
         results = service.get_all_any_designations()
 
-        output = []
-        for key in results:
-            output.append({
-                'key': key,
-                'list': results[key]
-            })
-
         return {
-            'data': output
+            'data': results
         }
 
 
@@ -693,7 +638,7 @@ class _ExceptionRegex(Resource):
             return
 
         service = SynonymService()
-        results = service.exception_regex(text)
+        results = service.get_exception_regex(text)
 
         return {
             'data': results

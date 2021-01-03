@@ -31,6 +31,7 @@ from namex.services.name_request.auto_analyse.protected_name_analysis import Pro
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from nltk.stem import PorterStemmer
 from swagger_client import SynonymsApi as SynonymService
+from . import db
 
 
 porter = PorterStemmer()
@@ -60,6 +61,8 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
                        list_desc: list, dict_substitution: dict,
                        dict_synonyms: dict,
                        np_svc_prep_data: NameProcessingService) -> dict:
+    # print('--- Connection pool status ---')
+    # print(db.engine.pool.status())
     """Return a dictionary with name as key and similarity as value, 1.0 is an exact match."""
     logging.getLogger(__name__).debug(
         'name: %s ,  list_name %s,  list_dist: %s, list_desc: %s, dict_subst: %s,  dict_syns: %s',

@@ -6,7 +6,10 @@ Model accessors for the Synonym service.
 
 
 class SynonymModelMixin(SynonymServiceMixin):
-    def get_all_substitutions_synonyms(self, list_d, distinctive=True):
+    def get_all_substitutions_synonyms(self, list_d=None, distinctive=True):
+        if list_d is None:
+            list_d = []
+
         aux_list = []
         dict_subs = {}
 
@@ -20,10 +23,20 @@ class SynonymModelMixin(SynonymServiceMixin):
             else:
                 dict_subs.update({word: [word.lower()]})
 
-        # Return {'mountain': ['mount', 'mountain', 'mt', 'mtn']} based on list_d
-        return dict_subs
+        # eg. {'mountain': ['mount', 'mountain', 'mt', 'mtn']} based on list_d
+        output = []
+        for key in dict_subs:
+            output.append({
+                'key': key,
+                'list': dict_subs[key]
+            })
 
-    def get_all_categories_synonyms(self, list_d):
+        return output
+
+    def get_all_categories_synonyms(self, list_d=None):
+        if list_d is None:
+            list_d = []
+
         aux_list = []
         dict_subs = {}
 
@@ -34,6 +47,13 @@ class SynonymModelMixin(SynonymServiceMixin):
             else:
                 dict_subs.update({word: None})
 
-        # Return {'shop': ['beauty', 'store', 'sales', 'reatail'],
+        # eg. {'shop': ['beauty', 'store', 'sales', 'reatail'],
         #         'coffee': ['non-alcoholic-beverages','restaurant']} based on list_d
-        return dict_subs
+        output = []
+        for key in dict_subs:
+            output.append({
+                'key': key,
+                'list': dict_subs[key]
+            })
+
+        return output
