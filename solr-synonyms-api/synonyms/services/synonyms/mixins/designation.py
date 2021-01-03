@@ -17,11 +17,23 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         lang = lang if isinstance(lang, str) else LanguageCodes.ENG.value
         return self.get_designations(None, DesignationPositionCodes.ANY, lang)
 
+    # TODO: Fix / check this Arturo!
     def get_misplaced_end_designations(self, name, designation_end_entity_type):
-        # en_designation_end_all_list = self.get_designations(None, DesignationPositionCodes.END, LanguageCodes.ENG)
         if not designation_end_entity_type:
             return list()
-        designation_any_rgx = '(' + '|'.join(map(str, designation_end_entity_type)) + ')'
+        designation_end_rgx = '(' + '|'.join(map(str, designation_end_entity_type)) + ')'
+        designation_end_regex = r'\b{}\s'.format(designation_end_rgx)
+
+        # Returns list of tuples
+        misplaced_designation_end_list = re.findall(designation_end_regex, name.lower())
+
+        return misplaced_designation_end_list
+
+    # TODO: Fix / check this Arturo!
+    def get_misplaced_any_designations(self, name, designation_any_entity_type):
+        if not designation_any_entity_type:
+            return list()
+        designation_any_rgx = '(' + '|'.join(map(str, designation_any_entity_type)) + ')'
         designation_any_regex = r'\b{}\s'.format(designation_any_rgx)
 
         # Returns list of tuples

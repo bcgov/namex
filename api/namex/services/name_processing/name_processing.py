@@ -17,7 +17,7 @@ from .exceptions import \
     GetStopWordsApiError, GetPrefixesApiError, GetNumberWordsApiError, GetStandAloneApiError, \
     GetDesignatedEndAllWordsApiError, GetDesignatedAnyAllWordsApiError
 
-from swagger_client import SynonymsApi as SynonymService
+from synonyms.services import SynonymService
 
 from ..virtual_word_condition.virtual_word_condition import VirtualWordConditionService
 
@@ -111,11 +111,11 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin, Get
         self._word_classification_service = svc
 
     @property
-    def synonym_service(self):
+    def synonym_service(self) -> SynonymService:
         return self._synonym_service
 
     @synonym_service.setter
-    def synonym_service(self, svc):
+    def synonym_service(self, svc: SynonymService):
         self._synonym_service = svc
 
     @property
@@ -177,25 +177,25 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin, Get
         name = remove_stop_words(name, stop_words, exception_stop_words_designation)
 
         prefixes = '|'.join(prefix_list)
-        words = syn_svc.get_regex_prefixes(
+        words = syn_svc.regex_prefixes(
             text=name,
-            prefixes_str=prefixes,
+            prefixes=prefixes,
             exception_designation=exception_designation
-        ).data
+        )
 
         name = remove_french(words, designation_alternators)
         self.name_first_part = name
 
-        # exceptions_ws = syn_svc.get_exception_regex(text=name).data
+        # exceptions_ws = syn_svc.get_exception_regex(text=name)
         # exceptions_ws.extend(self.exception_virtual_word_condition(name, vwc_svc))
 
-        tokens = syn_svc.get_transform_text(
+        tokens = syn_svc.regex_transform(
             text=name,
             designation_all=designation_all,
             prefix_list=prefix_list,
             number_list=number_list,
             exceptions_ws=[]
-        ).data
+        )
 
         tokens = tokens.split()
 
@@ -243,42 +243,42 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin, Get
         # These properties are mixed in via GetSynonymListsMixin
         # See the class constructor
         try:
-            self._stop_words = syn_svc.get_stop_words().data
+            self._stop_words = syn_svc.get_stop_words()
         except Exception as err:
             raise GetStopWordsApiError(err)
 
         try:
-            self._prefixes = syn_svc.get_prefixes().data
+            self._prefixes = syn_svc.get_prefixes()
         except Exception as err:
             raise GetPrefixesApiError(err)
 
         try:
-            self._number_words = syn_svc.get_number_words().data
+            self._number_words = syn_svc.get_number_words()
         except Exception as err:
             raise GetNumberWordsApiError(err)
 
         try:
-            self._stand_alone_words = syn_svc.get_stand_alone().data
+            self._stand_alone_words = syn_svc.get_standalone()
         except Exception as err:
             raise GetStandAloneApiError(err)
 
         try:
-            self._eng_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.ENG.value).data
+            self._eng_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.ENG.value)
         except Exception as err:
             raise GetDesignatedEndAllWordsApiError(err)
 
         try:
-            self._eng_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.ENG.value).data
+            self._eng_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.ENG.value)
         except Exception as err:
             raise GetDesignatedAnyAllWordsApiError(err)
 
         try:
-            self._fr_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.FR.value).data
+            self._fr_designated_end_words = syn_svc.get_designated_end_all_words(lang=LanguageCodes.FR.value)
         except Exception as err:
             raise GetDesignatedEndAllWordsApiError(err)
 
         try:
-            self._fr_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.FR.value).data
+            self._fr_designated_any_words = syn_svc.get_designated_any_all_words(lang=LanguageCodes.FR.value)
         except Exception as err:
             raise GetDesignatedAnyAllWordsApiError(err)
 

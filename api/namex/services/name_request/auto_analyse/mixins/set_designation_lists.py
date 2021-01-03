@@ -35,12 +35,12 @@ class SetDesignationsListsMixin(object):
         syn_svc = self.synonym_service
         designation_any_list = self._designation_any_list
 
-        all_any_designations = syn_svc.get_all_any_designations().data
+        all_any_designations = syn_svc.get_all_any_designations()
 
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
             entity_any_designation_dict=parse_dict_of_lists(all_any_designations),
             all_designation_any_end_list=designation_any_list
-        ).data
+        )
 
     '''
     Set the corresponding entity type for designations <end> found in name
@@ -50,12 +50,12 @@ class SetDesignationsListsMixin(object):
         syn_svc = self.synonym_service
         designation_end_list = self._designation_end_list
 
-        all_end_designations = syn_svc.get_all_end_designations().data
+        all_end_designations = syn_svc.get_all_end_designations()
 
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
             entity_end_designation_dict=parse_dict_of_lists(all_end_designations),
             all_designation_any_end_list=designation_end_list
-        ).data
+        )
 
     def _set_designations_by_entity_type_user(self):
         syn_svc = self.synonym_service
@@ -74,19 +74,19 @@ class SetDesignationsListsMixin(object):
 
         self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.ANY.value,
-                                                                          lang=LanguageCodes.ENG.value).data
+                                                                          lang=LanguageCodes.ENG.value)
 
         self._eng_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.END.value,
-                                                                          lang=LanguageCodes.ENG.value).data
+                                                                          lang=LanguageCodes.ENG.value)
 
         self._fr_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                          position_code=DesignationPositionCodes.ANY.value,
-                                                                         lang=LanguageCodes.FR.value).data
+                                                                         lang=LanguageCodes.FR.value)
 
         self._fr_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                          position_code=DesignationPositionCodes.END.value,
-                                                                         lang=LanguageCodes.FR.value).data
+                                                                         lang=LanguageCodes.FR.value)
 
         self._eng_designation_all_list_correct = self._eng_designation_any_list_correct + self._eng_designation_end_list_correct
         self._eng_designation_all_list_correct.sort(key=len, reverse=True)
@@ -119,10 +119,10 @@ class SetDesignationsListsMixin(object):
         # Just take ARMSTRONG PLUMBING LTD. and perform analysis of designations.
         name_first_part = np_svc.name_first_part
 
-        self._designation_any_list = syn_svc.get_designation_any_in_name(name=name_first_part).data
-        self._designation_end_list = syn_svc.get_designation_end_in_name(name=name_first_part).data
+        self._designation_any_list = syn_svc.get_designation_any_in_name(name=name_first_part)
+        self._designation_end_list = syn_svc.get_designation_end_in_name(name=name_first_part)
 
-        self._all_designations = syn_svc.get_designation_all_in_name(name=name_first_part).data
+        self._all_designations = syn_svc.get_designation_all_in_name(name=name_first_part)
 
     '''
     Set designations in position <end> found any other place in the company name, these designations are misplaced.
@@ -134,7 +134,7 @@ class SetDesignationsListsMixin(object):
         correct_designation_end_list = self._designation_end_list_correct
 
         designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
-                                                                                       designation_end_list=correct_designation_end_list).data
+                                                                                       designation_end_list=correct_designation_end_list)
         self._misplaced_designation_end_list = designation_end_misplaced_list
 
     def _get_designations(self, request_type_list_dict):
@@ -144,17 +144,17 @@ class SetDesignationsListsMixin(object):
             if DesignationPositionCodes.END.value in value:
                 self._designation_end_list_all.extend(syn_svc.get_designations(entity_type_code=key,
                                                                                position_code=DesignationPositionCodes.END.value,
-                                                                               lang=LanguageCodes.ENG.value).data)
+                                                                               lang=LanguageCodes.ENG.value))
                 self._designation_end_list_all.extend(syn_svc.get_designations(entity_type_code=key,
                                                                                position_code=DesignationPositionCodes.END.value,
-                                                                               lang=LanguageCodes.FR.value).data)
+                                                                               lang=LanguageCodes.FR.value))
             if DesignationPositionCodes.ANY.value in value:
                 self._designation_any_list_all.extend(syn_svc.get_designations(entity_type_code=key,
                                                                                position_code=DesignationPositionCodes.ANY.value,
-                                                                               lang=LanguageCodes.ENG.value).data)
+                                                                               lang=LanguageCodes.ENG.value))
                 self._designation_any_list_all.extend(syn_svc.get_designations(entity_type_code=key,
                                                                                position_code=DesignationPositionCodes.ANY.value,
-                                                                               lang=LanguageCodes.FR.value).data)
+                                                                               lang=LanguageCodes.FR.value))
 
         self._designation_end_list_all = sorted(set(self._designation_end_list_all), key=len, reverse=True)
         self._designation_any_list_all = sorted(set(self._designation_any_list_all), key=len, reverse=True)

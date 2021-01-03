@@ -44,13 +44,13 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         original_name = self.get_original_name()
 
         # designation any/end_list get the designation at any/end place as long as they are placed correctly:
-        designation_any_list = syn_svc.get_designation_any_in_name(name=original_name).data
-        designation_end_list = syn_svc.get_designation_end_in_name(name=original_name).data
+        designation_any_list = syn_svc.get_designation_any_in_name(name=original_name)
+        designation_end_list = syn_svc.get_designation_end_in_name(name=original_name)
 
         # all_designations gets all the designations regardless they are placed correctly or not.
         # For instance, if limited liability partnership (end designation) is placed in a different location then
         # we will get the designation in here, but not in the previous lists (designation any/end list)
-        all_designations = syn_svc.get_designation_all_in_name(name=original_name).data
+        all_designations = syn_svc.get_designation_all_in_name(name=original_name)
 
         for idx, designation in enumerate(designation_any_list):
             if not designation in all_designations:
@@ -69,8 +69,10 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         original_name = self.get_original_name()
         correct_designation_end = self._designation_end_list_correct
         correct_designation_any = self._designation_any_list_correct
-        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(name=original_name, designation_any_entity_type=correct_designation_any).data
-        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(name=original_name, designation_end_entity_type=correct_designation_end).data
+        # TODO: Fix this call Arturo!
+        self._misplaced_designation_any_list = syn_svc.get_misplaced_any_designations(name=original_name, designation_any_entity_type=correct_designation_any)
+        # TODO: Fix this call Arturo!
+        self._misplaced_designation_end_list = syn_svc.get_misplaced_end_designations(name=original_name, designation_end_entity_type=correct_designation_end)
 
         self._misplaced_designation_all_list = self._misplaced_designation_any_list + self._misplaced_designation_end_list
 
@@ -99,13 +101,13 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
             entity_type_code=entity_type_code.value,
             position_code=DesignationPositionCodes.ANY.value,
             lang=LanguageCodes.ENG.value
-        ).data
+        )
 
         end_list = syn_svc.get_designations(
             entity_type_code=entity_type_code.value,
             position_code=DesignationPositionCodes.END.value,
             lang=LanguageCodes.ENG.value
-        ).data
+        )
 
         self._designation_any_list_correct.extend(any_list)
         self._designation_end_list_correct.extend(end_list)
@@ -114,26 +116,26 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
         syn_svc = self.synonym_service
         designation_any_list = self._designation_any_list
 
-        designations = syn_svc.get_all_end_designations().data
+        designations = syn_svc.get_all_end_designations()
         designations_dict = parse_dict_of_lists(designations)
 
         self._entity_type_any_designation = syn_svc.get_entity_type_any_designation(
             entity_any_designation_dict=designations_dict,
             all_designation_any_end_list=designation_any_list
-        ).data
+        )
 
     def _set_entity_type_end_designation(self):
         syn_svc = self.synonym_service
         # entity_end_designation_dict = self._entity_end_designation_dict
         designation_end_list = self._designation_end_list
 
-        designations = syn_svc.get_all_any_designations().data
+        designations = syn_svc.get_all_any_designations()
         designations_dict = parse_dict_of_lists(designations)
 
         self._entity_type_end_designation = syn_svc.get_entity_type_end_designation(
             entity_end_designation_dict=designations_dict,
             all_designation_any_end_list=designation_end_list
-        ).data
+        )
 
     def _set_designations(self):
         self._set_designations_by_entity_type_user()

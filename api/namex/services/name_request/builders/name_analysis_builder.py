@@ -620,9 +620,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
         syn_svc = self.synonym_service
 
         all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            words=w_dist,
-            words_are_distinctive=True
-        ).data
+            list_d=w_dist,
+            distinctive=True
+        )
 
         dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
 
@@ -642,9 +642,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
         syn_svc = self.synonym_service
 
         all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            words=[desc.replace(" ", "") for desc in w_desc],
-            words_are_distinctive=False
-        ).data
+            list_d=[desc.replace(" ", "") for desc in w_desc],
+            distinctive=False
+        )
 
         desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
 

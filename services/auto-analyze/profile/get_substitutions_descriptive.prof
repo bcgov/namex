@@ -1,0 +1,18 @@
+         1852 function calls (1822 primitive calls) in 0.014 seconds
+
+   Ordered by: cumulative time
+   List reduced from 295 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.014    0.014 name_analysis_builder.py:621(get_substitutions_descriptive)
+        1    0.000    0.000    0.014    0.014 synonyms_api.py:307(get_all_substitutions_synonyms)
+        1    0.000    0.000    0.014    0.014 synonyms_api.py:329(get_all_substitutions_synonyms_with_http_info)
+        1    0.000    0.000    0.014    0.014 api_client.py:282(call_api)
+        1    0.000    0.000    0.014    0.014 api_client.py:102(__call_api)
+        1    0.000    0.000    0.013    0.013 api_client.py:342(request)
+        1    0.000    0.000    0.013    0.013 rest.py:232(GET)
+        1    0.000    0.000    0.013    0.013 rest.py:108(request)
+        1    0.000    0.000    0.013    0.013 request.py:58(request)
+        1    0.000    0.000    0.013    0.013 request.py:82(request_encode_url)
+
+

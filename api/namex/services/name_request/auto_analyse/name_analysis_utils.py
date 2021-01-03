@@ -142,7 +142,7 @@ def check_numbers_beginning(syn_svc, tokens):
     if tokens[0].isdigit():
         for idx, token in enumerate(tokens[1:]):
             if not token.isdigit():
-                if not syn_svc.get_word_synonyms(word=token).data:
+                if not syn_svc.get_word_synonyms(word=token):
                     tokens = tokens[idx + 1:]
                 break
     return tokens
