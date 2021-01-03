@@ -62,7 +62,7 @@ async def create_app(run_mode):
         list_name = json_data.get('list_name')
         dict_substitution = json_data.get('dict_substitution')
         dict_synonyms = json_data.get('dict_synonyms')
-        matches = json_data.get('names')[:75]
+        matches = json_data.get('names')[:20]
 
         app.logger.debug('Number of matches: {0}'.format(len(matches)))
 

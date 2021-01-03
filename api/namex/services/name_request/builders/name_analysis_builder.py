@@ -17,7 +17,7 @@ from ..auto_analyse.name_analysis_utils import get_conflicts_same_classification
 from namex.models.request import Request
 
 from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
-from namex.utils.profiling import profile
+from namex.utils.profiling import profile, print_time
 
 from namex.services.name_request.auto_analyse import DataFrameFields
 
@@ -31,6 +31,7 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
+    @print_time()
     @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name,
                                   processed_name, list_original_name):
@@ -69,7 +70,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_word_limit(self, list_name):
         """
         Override the abstract / base class method.
@@ -91,13 +92,13 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    '''
-    Override the abstract / base class method.
-    @return ProcedureResult
-    '''
-
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    @print_time()
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_unclassified_words(self, list_name, list_none):
+        """
+        Override the abstract / base class method.
+        @return ProcedureResult
+        """
         result = ProcedureResult()
         result.is_valid = True
         if list_none.__len__() > 0:
@@ -118,13 +119,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    '''
-    Override the abstract / base class method.
-    @return ProcedureResult
-    '''
-
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_words_to_avoid(self, list_name, name):
+        """
+        Override the abstract / base class method.
+        @return ProcedureResult
+        """
         result = ProcedureResult()
         result.is_valid = True
 
@@ -149,16 +149,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    '''
-    Override the abstract / base class method
-    Input: list_dist = ['MOUNTAIN', 'VIEW']
-           list_desc = ['FOOD', 'GROWERS']
-    @return ProcedureResult
-    '''
-
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @print_time()
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def search_conflicts(self, list_dist_words, list_desc_criteria, list_desc_words, list_name, name, stand_alone_words,
                          check_name_is_well_formed=False, queue=False):
+        """
+        Override the abstract / base class method
+        Input: list_dist = ['MOUNTAIN', 'VIEW']
+               list_desc = ['FOOD', 'GROWERS']
+        @return ProcedureResult
+        """
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
         self._list_processed_names = list()
@@ -179,7 +179,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return self.prepare_response(most_similar_names, queue, list_name, list_dist_words, list_desc_words)
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @print_time()
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_conflicts(self, dict_highest_counter, w_dist, w_desc_criteria, w_desc, list_name, stand_alone_words,
                       check_name_is_well_formed, queue):
         dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = {}, {}, {}, {}
@@ -235,6 +236,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return list_conflict_details, forced
 
+    @print_time()
     @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_conflicts_db(self, dist_substitution_dict, desc_synonym_criteria_dict, desc_synonym_dict,
                          dict_highest_counter, change_filter,
@@ -270,6 +272,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return list_details, forced
 
+    @print_time()
     @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False, end_list_designations=None,
                            any_list_designations=None, stop_words=None):
@@ -301,7 +304,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
     @return ProcedureResult
     '''
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_words_requiring_consent(self, list_name, name):
         result = ProcedureResult()
         result.is_valid = True
@@ -338,7 +341,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_position_word_consent(self, words_consent, name_sin_plural):
         word_consent_tokenized = words_consent.lower().split()
         name_sin_plur_tokenized = name_sin_plural.split()
@@ -350,7 +353,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return words_consent_dict
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_designation_existence(self, list_name, all_designations, all_designations_user):
         result = ProcedureResult()
         result.is_valid = True
@@ -365,17 +368,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    '''
-    Override the abstract / base class method
-    list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
-    entity_type_user: Entity type typed by user. 'CR' by default
-    all_designations: All Designations found in name (either misplaced or not)
-    all_designations_user: All designations for the entity type typed by the user. 
-    @return ProcedureResult
-    '''
-
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_designation_mismatch(self, list_name, entity_type_user, all_designations, all_designations_user):
+        """
+        Override the abstract / base class method
+        list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
+        entity_type_user: Entity type typed by user. 'CR' by default
+        all_designations: All Designations found in name (either misplaced or not)
+        all_designations_user: All designations for the entity type typed by the user.
+        @return ProcedureResult
+        """
         result = ProcedureResult()
         result.is_valid = True
         mismatch_entity_designation_list = []
@@ -404,17 +406,16 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    '''
-    Override the abstract / base class method
-    list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
-    designation_end_list: Correct end designations
-    misplaced_designation_end: Misplaced end designations
-    @return ProcedureResult
-    '''
-
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_end_designation_more_than_once(self, list_name, all_designation_end_list, correct_designations_user,
                                              misplaced_designation_end):
+        """
+        Override the abstract / base class method
+        list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
+        designation_end_list: Correct end designations
+        misplaced_designation_end: Misplaced end designations
+        @return ProcedureResult
+        """
         result = ProcedureResult()
         result.is_valid = True
 
@@ -439,15 +440,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    '''
-    Override the abstract / base class method
-    Just <end> designation can be misplaced in other position, it can be at the beginning, middle or before end in the name
-    Note: <any> designation can be anywhere in the name, so to be misplaced is not possible.
-    @return ProcedureResult
-    '''
-
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_designation_misplaced(self, list_name, misplaced_designation_end):
+        """
+        Override the abstract / base class method
+        Just <end> designation can be misplaced in other position, it can be at the beginning, middle or before end in the name
+        Note: <any> designation can be anywhere in the name, so to be misplaced is not possible.
+        @return ProcedureResult
+        """
         result = ProcedureResult()
         result.is_valid = True
 
@@ -461,13 +461,12 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    '''
-    Override the abstract / base class method
-    @return ProcedureResult
-    '''
-
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_word_special_use(self, list_name, name_processed):
+        """
+        Override the abstract / base class method
+        @return ProcedureResult
+        """
         result = ProcedureResult()
         result.is_valid = True
 
@@ -538,7 +537,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
         except Exception as err:
             raise
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def prepare_response(self, most_similar_names, queue, list_name, list_dist_words, list_desc_words):
         conflict_name = {}
         result = ProcedureResult()
@@ -598,7 +597,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return list_details
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_substitutions_distinctive(self, w_dist):
         syn_svc = self.synonym_service
 
@@ -618,7 +617,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return dist_substitution_dict
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_substitutions_descriptive(self, w_desc):
         syn_svc = self.synonym_service
 

@@ -145,22 +145,20 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted if np_svc else ''
 
-    '''
-    name_as_submitted_tokenized tokenize the original name and when there is a compound designation made of more than one
-    word, the term is counted as token. For instance, designations such as limited liability company is counted as one token.
-    '''
-
     @property
     def name_as_submitted_tokenized(self):
+        """
+        name_as_submitted_tokenized tokenize the original name and when there is a compound designation made of more than one
+        word, the term is counted as token. For instance, designations such as limited liability company is counted as one token.
+        """
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted_tokenized if np_svc else ''
 
-    '''
-    Just an alias for name_as_submitted
-    '''
-
     @property
     def original_name(self):
+        """
+        Just an alias for name_as_submitted
+        """
         return self.name_as_submitted
 
     @property
@@ -241,15 +239,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
     def get_original_name_tokenized(self):
         return self.original_name_tokenized
 
-    '''
-    Set and preprocess a submitted name string.
-    Setting the name using np_svc.set_name will clean the name and set the following properties:
-    @:prop name_as_submitted The original name string
-    @:prop processed_name The cleaned name
-    @:prop name_tokens Word tokens generated from the cleaned name
-    '''
-
     def set_name(self, name):
+        """
+        Set and preprocess a submitted name string.
+        Setting the name using np_svc.set_name will clean the name and set the following properties:
+        @:prop name_as_submitted The original name string
+        @:prop processed_name The cleaned name
+        @:prop name_tokens Word tokens generated from the cleaned name
+        """
         np_svc = self.name_processing_service
         np_svc_prep_data = self.name_processing_service
         wc_svc = self.word_classification_service
@@ -263,15 +260,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         # Classify the tokens that were created by NameProcessingService
         self.token_classifier = wc_svc.classify_tokens(np_svc.name_tokens)
 
-    '''
-    This is the main execution call that wraps name analysis checks. 
-    - Perform checks to ensure the name is well formed. 
-    - If the name is well formed, proceed with our analysis by calling do_analysis.
-    - If you don't want to check to see if a name is well formed first, override check_name_is_well_formed in the supplied builder.
-    @:return ProcedureResult[]
-    '''
-
     def execute_analysis(self):
+        """
+        This is the main execution call that wraps name analysis checks.
+        - Perform checks to ensure the name is well formed.
+        - If the name is well formed, proceed with our analysis by calling do_analysis.
+        - If you don't want to check to see if a name is well formed first, override check_name_is_well_formed in the supplied builder.
+        @:return ProcedureResult[]
+        """
         try:
             builder = self.builder
             syn_svc = self.synonym_service
@@ -450,11 +446,10 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
         return issues
 
-    '''
-    This is the main execution call for running name analysis checks.
-    do_analysis is an abstract method and must be implemented in extending classes.
-    @:return ProcedureResult[]
-    '''
-
     def do_analysis(self):
+        """
+        This is the main execution call for running name analysis checks.
+        do_analysis is an abstract method and must be implemented in extending classes.
+        @:return ProcedureResult[]
+        """
         raise NotImplementedError('do_analysis must be implemented in extending classes')

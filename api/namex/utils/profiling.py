@@ -1,6 +1,24 @@
 import cProfile
 import pstats
 from functools import wraps
+from time import time
+
+
+def print_time():
+    def inner(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start_time = time()
+            retval = func(*args, **kwargs)
+            print('--- {func_name} ran in: {time} seconds ---'.format(
+                func_name=str(func),
+                time=(time() - start_time)
+            ))
+            return retval
+
+        return wrapper
+
+    return inner
 
 
 def profile(output_file=None, sort_by='cumulative', lines_to_print=None, strip_dirs=False):

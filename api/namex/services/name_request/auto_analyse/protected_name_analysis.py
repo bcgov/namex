@@ -1,7 +1,8 @@
 import os
 from datetime import (datetime)
 
-from namex.constants import DesignationPositionCodes
+from namex.utils.profiling import print_time
+
 from . import request_types
 from .name_analysis_director import NameAnalysisDirector
 
@@ -29,21 +30,22 @@ Notes:
 d = datetime.now()  # Was just used for perf analysis
 auto_analyze_config = os.getenv('AUTO_ANALYZE_CONFIG')
 
+
 class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
     _d = d  # Just used for perf
 
     def __init__(self):
         super(ProtectedNameAnalysisService, self).__init__()
 
-    '''
-    do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
-    This is the main execution call for running name analysis checks.
-    @:return ProcedureResult[]
-    '''
-
+    @print_time()
     def do_analysis(self):
+        """
+        do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
+        This is the main execution call for running name analysis checks.
+        @:return ProcedureResult[]
+        """
         results = []
-        if auto_analyze_config in ('WELL_FORMED_NAME','EXACT_MATCH', 'SEARCH_CONFLICTS'):
+        if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
             builder = self.builder
 
             np_svc = self.name_processing_service
