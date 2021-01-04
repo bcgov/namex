@@ -5,6 +5,7 @@ from . import LanguageCodes
 from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
 from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning
 from namex.services.word_classification.word_classification import WordClassificationService
+from namex.utils.profiling import print_time
 
 from .mixins.get_synonym_lists import GetSynonymListsMixin
 from .exceptions import \
@@ -137,11 +138,11 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         self.descriptive_word_tokens = None
         self.unclassified_word_tokens = None
 
-    '''
-    Set and process a submitted name string using the process_name class method.
-    '''
-
+    @print_time()
     def set_name(self, name, np_svc_prep_data):
+        """
+        Set and process a submitted name string using the process_name class method.
+        """
         self.name_as_submitted = name  # Store the user's submitted name string
         self._process_name(np_svc_prep_data)
 
@@ -282,12 +283,11 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         self._designated_all_words = list(set(self._designated_any_words + self._designated_end_words))
         self._designated_all_words.sort(key=len, reverse=True)
 
-    '''
-    Split a name string into classifiable tokens. Called whenever set_name is invoked.
-    @:param string:name
-    '''
-
     def _process_name(self, np_svc_prep_data):
+        """
+        Split a name string into classifiable tokens. Called whenever set_name is invoked.
+        @:param string:name
+        """
         try:
             # Clean the provided name and tokenize the string
             self.name_tokens = self._clean_name_words(

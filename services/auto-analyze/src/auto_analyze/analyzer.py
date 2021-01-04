@@ -29,6 +29,7 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import (
 )
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
+from namex.utils.profiling import print_time, profile
 from nltk.stem import PorterStemmer
 from swagger_client import SynonymsApi as SynonymService
 from . import db
@@ -56,6 +57,8 @@ HIGH_CONFLICT_RECORDS = 20
 
 
 # ok deep function
+@print_time()
+@profile(sort_by='cumulative', lines_to_print=30, strip_dirs=False)
 async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-arguments
                        list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
@@ -84,7 +87,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         match_list = np_svc.name_tokens
         start_time = time()
         get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc, True)
-        print('--- auto_analyze->get_classification execution time: {time} seconds ---'.format(
+        print('--- auto_analyze->get_classification ran in: {time} seconds ---'.format(
             time=(time() - start_time)
         ))
 

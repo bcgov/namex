@@ -31,7 +31,7 @@ Sample builder
 
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
-    @print_time()
+    # @print_time()
     @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name,
                                   processed_name, list_original_name):
@@ -92,7 +92,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    @print_time()
+    # @print_time()
     # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_unclassified_words(self, list_name, list_none):
         """
@@ -272,7 +272,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return list_details, forced
 
-    @print_time()
+    # @print_time()
     @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False, end_list_designations=None,
                            any_list_designations=None, stop_words=None):

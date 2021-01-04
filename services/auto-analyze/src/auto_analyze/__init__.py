@@ -116,6 +116,7 @@ def register_shellcontext(quart_app):
 
 
 loop = asyncio.get_event_loop()
+loop.set_debug(True)
 app = loop.run_until_complete(create_app(RUN_MODE))
 
 if __name__ == '__main__':
