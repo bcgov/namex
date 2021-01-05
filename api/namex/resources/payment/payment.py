@@ -183,6 +183,7 @@ class FindNameRequestPayments(PaymentNameRequestResource):
                     'nrId': payment.nrId,
                     'token': payment.payment_token,
                     'statusCode': payment.payment_status_code,
+                    'action': payment.payment_action,
                     'completionDate': payment.payment_completion_date,
                     'payment': payment.as_dict(),
                     'sbcPayment': payment_response.as_dict(),
@@ -286,6 +287,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 payment.payment_token = str(payment_response.id)
                 payment.payment_completion_date = payment_response.createdOn
                 payment.payment_status_code = PaymentState.CREATED.value
+                payment.payment_action = payment_action
                 payment.save_to_db()
 
                 # Wrap the response, providing info from both the SBC Pay response and the payment we created
@@ -294,6 +296,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     'nrId': payment.nrId,
                     'token': payment.payment_token,
                     'statusCode': payment.payment_status_code,
+                    'action': payment.payment_action,
                     'completionDate': payment.payment_completion_date,
                     'payment': payment.as_dict(),
                     'sbcPayment': payment_response.as_dict()
@@ -347,6 +350,7 @@ class NameRequestPayment(AbstractNameRequestResource):
                 'nrId': payment.nrId,
                 'token': payment.payment_token,
                 'statusCode': payment.payment_status_code,
+                'action': payment.payment_action,
                 'completionDate': payment.payment_completion_date,
                 'payment': payment.as_dict(),
                 'sbcPayment': payment_response.as_dict(),
