@@ -279,7 +279,7 @@ class Request(db.Model):
             filter(
                 Request.stateCd.in_([State.DRAFT]),
                 Request.nrNum.notlike('NR L%')). \
-            order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
+            order_by(Request.submittedDate.asc()). \
             first()
 
     @classmethod
