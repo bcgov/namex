@@ -392,7 +392,7 @@ class NameRequestActions(AbstractEnum):
     UPGRADE = 'UPGRADE'
     REAPPLY = 'REAPPLY'
     RECEIPT = 'RECEIPT'
-    COMPLETE = 'CREATE'
+    CREATE = 'CREATE'
     REQUEST_REFUND = 'REQUEST_REFUND'
     RETRY_PAYMENT = 'RETRY_PAYMENT'
 
@@ -418,7 +418,7 @@ class NameRequestPaymentActions(AbstractEnum):
     UPGRADE = NameRequestActions.UPGRADE.value
     REAPPLY = NameRequestActions.REAPPLY.value
     RECEIPT = NameRequestActions.RECEIPT.value
-    COMPLETE = NameRequestActions.COMPLETE.value
+    COMPLETE = NameRequestActions.CREATE.value
     REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
 
 

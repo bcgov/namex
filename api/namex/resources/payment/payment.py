@@ -213,7 +213,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
         'nr_id': 'Name Request number',
         'payment_action': 'Payment NR Action - One of [COMPLETE, UPGRADE, REAPPLY]'
     })
-    def post(self, nr_id, payment_action=NameRequestActions.COMPLETE.value):
+    def post(self, nr_id, payment_action=NameRequestActions.CREATE.value):
         """
         At this point, the Name Request will still be using a TEMPORARY NR number.
         Confirming the payment on the frontend triggers this endpoint. Here, we:
@@ -236,7 +236,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 return jsonify(message='Invalid payment action, {action} not found'.format(action=payment_action)), 400
 
             valid_payment_action = payment_action in [
-                NameRequestActions.COMPLETE.value,
+                NameRequestActions.CREATE.value,
                 NameRequestActions.UPGRADE.value,
                 NameRequestActions.REAPPLY.value
             ]
@@ -251,7 +251,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 return jsonify(message='Invalid NR state'.format(action=payment_action)), 400
 
             if valid_payment_action and valid_nr_state:
-                if payment_action in [NameRequestActions.COMPLETE.value]:
+                if payment_action in [NameRequestActions.CREATE.value]:
                     # Save the record to NRO, which swaps the NR-L Number for a real NR
                     update_solr = True
                     nr_model = self.add_records_to_network_services(nr_model, update_solr)
@@ -443,7 +443,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
     def handle_payment_actions(self, action, model: RequestDAO, payment_id: int):
         return {
-            NameRequestActions.COMPLETE.value: self.complete_reservation_payment,
+            NameRequestActions.CREATE.value: self.complete_reservation_payment,
             NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
             NameRequestActions.REAPPLY.value: self.complete_reapply_payment,
             NameRequestActions.REQUEST_REFUND.value: self.request_refund
