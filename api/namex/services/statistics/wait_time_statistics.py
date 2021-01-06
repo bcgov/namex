@@ -50,7 +50,7 @@ class WaitTimeStatsService:
         delta = todays_date - submitted_date
 
         response_values = [0,
-                           cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
+                           0, #cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
                            delta.days]
 
         response = query_result_to_dict(response_keys, response_values)

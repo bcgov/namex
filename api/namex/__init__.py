@@ -17,6 +17,7 @@ from flask_jwt_oidc import JwtManager
 jwt = JwtManager()
 
 from namex.services.nro import NROServices
+from namex.services.cache import cache
 nro = NROServices()
 from namex.models import db, ma
 from namex.resources import api
@@ -39,6 +40,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     setup_jwt_manager(app, jwt)
 
     nro.init_app(app)
+    cache.init_app(app)
 
     @app.after_request
     def add_version(response):
