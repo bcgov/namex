@@ -167,7 +167,7 @@ def execute_create_payment(client, create_payment_request):
     draft_nr = setup_draft_nr(client)
 
     nr_id = draft_nr.get('id')
-    payment_action = 'COMPLETE'
+    payment_action = 'CREATE'
     # POST /api/v1/payments/<int:nr_id>/<string:payment_action>
     request_uri = API_BASE_URI + str(nr_id) + '/' + payment_action
 
@@ -183,6 +183,7 @@ def execute_create_payment(client, create_payment_request):
     verify_payment_payload(payload)
 
     assert payload.get('statusCode') == 'CREATED'
+    assert payload.get('action') == payment_action
 
     return payload
 
