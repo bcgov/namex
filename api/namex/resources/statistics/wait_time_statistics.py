@@ -3,6 +3,7 @@ from flask import jsonify
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
+from namex.services.cache import cache
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 from namex.services.exceptions import ApiServiceException
 from namex.utils.logging import setup_logging
@@ -30,6 +31,7 @@ def handle_auth_error(ex):
 class WaitTimeStats(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
+    @cache.cached(timeout=14400) # cached for 4 hours
     def get():
         try:
             service = WaitTimeStatsService()
