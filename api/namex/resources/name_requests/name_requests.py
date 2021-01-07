@@ -149,6 +149,9 @@ class NameRequestsResource(BaseNameRequestResource):
             # Record the event
             EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_svc.request_data)
 
+            nr_model.stateCd = State.PENDING_PAYMENT
+            nr_model.save_to_db()
+
             # Update Solr - note that we don't save DRAFT name requests to Solr for corp entities only
             if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED] and \
                     nr_model.entity_type_cd in \

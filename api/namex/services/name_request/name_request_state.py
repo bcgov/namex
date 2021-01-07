@@ -278,6 +278,22 @@ def to_rejected(resource, nr, on_success_cb):
     return nr
 
 
+def to_pending_payment(resource, nr, on_success_cb):
+    valid_states = [State.PENDING_PAYMENT]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.PENDING_PAYMENT,
+            valid_states=', '.join(valid_states)
+        ))
+
+    resource.next_state_code = State.PENDING_PAYMENT
+    nr.stateCd = State.PENDING_PAYMENT
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
+
+
 def to_cancelled(resource, nr, on_success_cb):
     # Allow cancelled to cancelled state transition here, if this is not to be allowed, catch it when validating the request
     # valid_states = [State.APPROVED, State.CONDITIONAL]
@@ -346,5 +362,6 @@ def apply_nr_state_change(self, name_request, next_state, on_success=None):
         State.APPROVED: to_approved,
         State.REJECTED: to_rejected,
         State.CANCELLED: to_cancelled,
-        State.REFUND_REQUESTED: to_refund_requested
+        State.REFUND_REQUESTED: to_refund_requested,
+        State.PENDING_PAYMENT: to_pending_payment
     }.get(next_state)(self, name_request, on_success)

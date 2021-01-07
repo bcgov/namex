@@ -150,6 +150,7 @@ def test_draft_patch_edit_data(client, jwt, app):
 
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
+    assert draft_nr.get('stateCd') == 'PENDING_PAYMENT'
     assert draft_nr is not None
 
     # Take the response and edit it
@@ -199,12 +200,11 @@ def test_draft_patch_edit_data(client, jwt, app):
     patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
-
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == 'DRAFT'
+    assert patched_nr.get('stateCd') == 'PENDING_PAYMENT'
 
     # Check names
     assert_names_are_mapped_correctly(nr_data.get('names'), patched_nr.get('names'))
@@ -235,8 +235,8 @@ def test_draft_patch_edit_data(client, jwt, app):
         'priorityCd': 'Y',
         # 'priorityDate': None,
         'source': 'NAMEREQUEST',
-        'state': 'DRAFT',
-        'stateCd': 'DRAFT',
+        'state': 'PENDING_PAYMENT',
+        'stateCd': 'PENDING_PAYMENT',
         'submitCount': 1,
         # 'submittedDate': None,
         'submitter_userid': 'name_request_service_account',
@@ -287,8 +287,7 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app):
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == 'DRAFT'
+    assert patched_nr.get('stateCd') == 'PENDING_PAYMENT'
 
     # Check data
     expected_field_values = {
@@ -359,8 +358,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     print('PATCH Response #1: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == 'DRAFT'
+    assert patched_nr.get('stateCd') == 'PENDING_PAYMENT'
 
     # TODO: Check applicant(s)
 
@@ -385,8 +383,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     print('PATCH Response #2: \n' + json.dumps(re_patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(re_patched_nr.get('stateCd') == 'DRAFT')))
-    assert re_patched_nr.get('stateCd') == 'DRAFT'
+    assert re_patched_nr.get('stateCd') == 'PENDING_PAYMENT'
 
     # TODO: Check applicant(s)
 
@@ -426,8 +423,7 @@ def test_draft_patch_upgrade(client, jwt, app):
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == State.DRAFT
+    assert patched_nr.get('stateCd') == State.PENDING_PAYMENT
 
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
@@ -637,8 +633,7 @@ def test_draft_patch_refund(client, jwt, app):
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == State.DRAFT
+    assert patched_nr.get('stateCd') == State.REFUND_REQUESTED
 
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
@@ -679,8 +674,7 @@ def test_draft_patch_reapply(client, jwt, app):
     patched_nr, status_code = do_reapply()
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == State.DRAFT
+    assert patched_nr.get('stateCd') == draft_nr.get('stateCd')
 
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
@@ -728,8 +722,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == State.DRAFT
+    assert patched_nr.get('stateCd') == draft_nr.get('stateCd')
 
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
@@ -749,8 +742,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
 
     # Check state
-    print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == State.DRAFT
+    assert patched_nr.get('stateCd') == draft_nr.get('stateCd')
 
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
@@ -786,7 +778,7 @@ def test_draft_patch_resend(client, jwt, app):
 
     # Check state
     print('Assert that stateCd == DRAFT: ' + str(bool(patched_nr.get('stateCd') == 'DRAFT')))
-    assert patched_nr.get('stateCd') == State.DRAFT
+    assert patched_nr.get('stateCd') == draft_nr.get('stateCd')
 
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')

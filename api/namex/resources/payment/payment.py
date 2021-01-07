@@ -245,7 +245,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 return jsonify(message='Invalid payment action [{action}]'.format(action=payment_action)), 400
 
             # We only handle payments if the NR is in the following states
-            valid_payment_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]
+            valid_payment_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED,
+                                    State.PENDING_PAYMENT]
             valid_nr_state = nr_model.stateCd in valid_payment_states
             if not valid_nr_state:
                 return jsonify(message='Invalid NR state'.format(action=payment_action)), 400
