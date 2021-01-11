@@ -133,19 +133,9 @@ async def auto_analyze(name: str,
                                                 dist_db_substitution_dict, True)
 
         if all(value == OTHER_W_DIST for value in vector2_dist.values()):
-            vector2_dist, entropy_dist, _ = check_compound_dist(list_dist=list(vector2_dist.keys()),
-                                                                list_desc=None,
-                                                                original_class_list=list_dist,
-                                                                class_subs_dict=dist_db_substitution_dict)
-
-        if not vector2_dist:
-            match_list_desc = list(service.get_list_desc())
-            match_list_dist_desc = service.get_list_dist() + match_list_desc[0:-1]
-            vector2_dist, entropy_dist, service._list_desc_words = check_compound_dist(
-                list_dist=match_list_dist_desc,
-                list_desc=service.get_list_desc(),
-                original_class_list=list_dist,
-                class_subs_dict=dict_desc_stemmed)
+            service._list_dist_words, list_dist = check_compound_dist(service.get_list_dist(), list_dist)
+            vector2_dist, entropy_dist = get_vector(service.get_list_dist(), list_dist,
+                                                    dist_db_substitution_dict, True)
 
         similarity_dist = round(get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
@@ -216,25 +206,19 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=F
     return vector, entropy_score
 
 
-def check_compound_dist(list_dist, list_desc, original_class_list, class_subs_dict):
-    """Return a vector with distinctive compound items and updated list of descriptives."""
-    vector_dist = {}
-    entropy_dist = 0.0
-    for i in range(2, len(list_dist) + 1):
-        compound_space_list = [x for x in subsequences(list_dist, i)]  # pylint: disable=unnecessary-comprehension
-        compound = [x.replace(' ', '') for x in compound_space_list]
-        vector_dist, entropy_dist = get_vector(compound, original_class_list, class_subs_dict)
+def check_compound_dist(list_dist_conflict, list_dist):
+    """Return split compound words in distinctive found in conflict and original name"""
+    list_compound_dist = sorted(list_dist_conflict + list_dist, key=len)
 
-    # Update descriptive list
-    if list_desc and entropy_dist > 0.0:
-        token_list = []
-        for word in compound_space_list:
-            token_list.extend(word.split())
-        intersection = [x for x in list_desc if x in token_list]
-        for word in intersection:
-            list_desc.remove(word)
+    str_dist_conflict = ' '.join(list_dist_conflict)
+    str_dist = ' '.join(list_dist)
 
-    return vector_dist, entropy_dist, list_desc
+    compound_alternators = '|'.join(map(re.escape, list_compound_dist))
+    regex = re.compile(r'({0})'.format(compound_alternators))
+    compound_dist_conflict = regex.findall(str_dist_conflict)
+    compound_dist = regex.findall(str_dist)
+
+    return compound_dist_conflict, compound_dist
 
 
 def text_to_vector(list_name):
