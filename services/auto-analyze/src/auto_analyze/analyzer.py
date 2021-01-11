@@ -111,7 +111,7 @@ async def auto_analyze(name: str,
         )
 
         # Get dictionary for original words
-        dict_desc = update_dict(all_dict_synonyms, list_desc)
+        dict_desc = get_substitutions(list_desc, all_dict_synonyms)
 
         # Stem dictionary for original name
         dict_desc_stemmed = stem_key_dictionary(dict_desc)
@@ -339,6 +339,7 @@ def add_key_values(d1):
 
 
 def get_compound_synonyms(np_svc, name_tokens_clean_dict, syn_svc, dict_all_simple_synonyms):
+    """Get compound synonyms made of more than one word."""
     dct = {}
     dict_all_compound_synonyms = {}
     for key, value in name_tokens_clean_dict.items():
@@ -351,6 +352,7 @@ def get_compound_synonyms(np_svc, name_tokens_clean_dict, syn_svc, dict_all_simp
 
 
 def update_name_tokens(list_all_compound_synonyms, name_tokens_clean_dict):
+    """Update tokenization of name_tokens based on compound synonyms"""
     compound_name_tokens_clean_dict = {}
     for key, value in name_tokens_clean_dict.items():
         compound_name = update_compound_tokens(list_all_compound_synonyms, value)
@@ -360,6 +362,7 @@ def update_name_tokens(list_all_compound_synonyms, name_tokens_clean_dict):
 
 
 def get_substitutions(list_dist, all_substitution_dict):
+    """Lookup in local dictionary substitutions for distinctive / synonyms for descriptive terms"""
     substitution_dict = {}
     for dist in list_dist:
         substitutions = all_substitution_dict.get(dist)
@@ -373,6 +376,7 @@ def get_substitutions(list_dist, all_substitution_dict):
 
 
 def get_substitutions_dictionary(syn_svc, dict_substitution, dict_synonyms, list_words):
+    """Get substitutions from solr-synonyms-api if not found in local dictionary."""
     substitutions_dict = {}
     for word in list_words:
         substitutions = dict_substitution.get(word, None)
@@ -382,13 +386,3 @@ def get_substitutions_dictionary(syn_svc, dict_substitution, dict_synonyms, list
             substitutions_dict.update({word: substitutions})
 
     return substitutions_dict
-
-
-def update_dict(dict_desc, list_desc):
-    dict_desc_new = {}
-    for desc in list_desc:
-        if desc in dict_desc:
-            dict_desc_new.update({desc: dict_desc.get(desc)})
-        else:
-            dict_desc_new.update({desc: [desc]})
-    return dict_desc_new
