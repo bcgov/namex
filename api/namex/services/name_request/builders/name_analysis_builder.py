@@ -202,10 +202,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
             sorted(list_conflicts, key=lambda item: (-item['score'], item['name']))[
             0:MAX_MATCHES_LIMIT])
 
-        pr.disable()
-        # after your program ends
-        pr.dump_stats('profile.pstat')
-
         return self.prepare_response(most_similar_names, queue, list_name, list_dist_words, list_desc_words)
 
     # @print_time()

@@ -277,8 +277,8 @@ class Request(db.Model):
         """Get the oldest NR in DRAFT state."""
         return db.session.query(Request). \
             filter(
-                Request.stateCd.in_([State.DRAFT]),
-                Request.nrNum.notlike('NR L%')). \
+            Request.stateCd.in_([State.DRAFT]),
+            Request.nrNum.notlike('NR L%')). \
             order_by(Request.submittedDate.asc()). \
             first()
 
@@ -583,7 +583,8 @@ class Request(db.Model):
         list_special_characters = []
         for element in list_d:
             list_special_characters.append(
-                r'\W*'.join(element[i:i + 1] + element[i:i + 1] + r'?' for i in range(0, len(element), 1)) + r'(?:es|[a-z])?')
+                r'\W*'.join(
+                    element[i:i + 1] + element[i:i + 1] + r'?' for i in range(0, len(element), 1)) + r'(?:es|[a-z])?')
 
         return list_special_characters
 
@@ -617,7 +618,6 @@ class Request(db.Model):
                     synonyms += ' ?|'.join(map(str, special_characters_descriptive)) + ' ?|'
                     desc_list.pop(j)
                     break
-
         return synonyms
 
     @classmethod
