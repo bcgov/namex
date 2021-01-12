@@ -14,6 +14,8 @@ class Payment(db.Model):
     _payment_status_code = db.Column('payment_status_code', db.String(50))
     payment_note = db.Column('payment_note', db.String(100))
     payment_action = db.Column('payment_action', db.String(50))
+    furnished = db.Column('furnished',db.Boolean, default=False)
+
 
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
 
@@ -54,7 +56,8 @@ class Payment(db.Model):
             'payment_note': self.payment_note,
             'payment_completion_date': self.payment_completion_date,
             'payment_status_code': self.payment_status_code,
-            'payment_action': self.payment_action
+            'payment_action': self.payment_action,
+            'receipt_sent': self.furnished
         }
 
     def save_to_db(self):
