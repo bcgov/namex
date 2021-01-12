@@ -517,10 +517,11 @@ class Request(db.Model):
         name_criteria = ''
         if dist_list:
             substitutions = cls.get_distinctive(dist_list, list_name)
-            name_criteria = cls.format_criteria(name_criteria, substitutions, r'^((\w+\s\w+\s+)|\w+\s+)?\y(', r')+\y.*?')
+            name_criteria = cls.format_criteria(name_criteria, substitutions, r'^(\W*(\w+\W*\w+\W*)|\W*\w+\W*)?\y(',
+                                                r')+.*?')
         if desc_list:
             synonyms = cls.get_descriptive(desc_list, list_name)
-            name_criteria = cls.format_criteria(name_criteria, synonyms, r'\y(', ')+')
+            name_criteria = cls.format_criteria(name_criteria, synonyms, r'\y(', r')+\y')
 
         return name_criteria
 
@@ -539,6 +540,7 @@ class Request(db.Model):
             criteria += dist_criteria
         return criteria
 
+    @classmethod
     def find_by_criteria_array(cls, criteria_arr=None, queue=False):
         queries = []
         for criteria in criteria_arr:
