@@ -74,6 +74,7 @@ async def main():
     name_analysis_service = ProtectedNameAnalysisService()
     service = name_analysis_service
     np_svc_prep_data = service.name_processing_service
+    syn_svc = synonym_service
     np_svc_prep_data.prepare_data()
 
     json_data = await request.get_json()
@@ -82,16 +83,42 @@ async def main():
     list_name = json_data.get('list_name')
     dict_substitution = json_data.get('dict_substitution')
     dict_synonyms = json_data.get('dict_synonyms')
-    matches = json_data.get('names')[:20]
+    matches = json_data.get('names')
 
     app.logger.debug('Number of matches: {0}'.format(len(matches)))
 
     start_time = time()
-    result = await asyncio.gather(
-        *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data)
-          for
-          name in matches]
+    # result = await asyncio.gather(
+    #     *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data)
+    #       for
+    #       name in matches]
+    # )
+    name_tokens_clean_dict_list = await asyncio.gather(
+        *[clean_name(name, np_svc_prep_data) for name in matches]
     )
+    name_tokens_clean_dict = dict(pair for d in name_tokens_clean_dict_list for pair in d.items())
+
+    stand_alone_words = np_svc_prep_data.get_stand_alone_words()
+
+    list_words = list(set(get_flat_list(list(name_tokens_clean_dict.values()))))
+
+    dict_all_simple_synonyms = get_synonyms_dictionary(syn_svc, dict_synonyms, list_words)
+    dict_all_compound_synonyms = get_compound_synonyms(service.name_processing_service, name_tokens_clean_dict, syn_svc, dict_all_simple_synonyms)
+
+    dict_all_synonyms = {**dict_synonyms, **dict_all_simple_synonyms}
+
+    # Need to split in compound terms the name
+    name_tokens_clean_dict = update_name_tokens(list(dict_all_compound_synonyms.keys()), name_tokens_clean_dict)
+
+    list_words = list(set(get_flat_list(list(name_tokens_clean_dict.values()))))
+
+    dict_all_substitutions = get_substitutions_dictionary(syn_svc, dict_substitution, dict_all_synonyms, list_words)
+
+    result = await asyncio.gather(
+        *[auto_analyze(name, name_tokens, list_name, list_dist, list_desc, dict_all_substitutions, dict_all_synonyms, dict_all_compound_synonyms, stand_alone_words, service) for
+          name, name_tokens in name_tokens_clean_dict.items()]
+    )
+
     print('--- Conflict analysis for {count} matches in {time} seconds ---'.format(
         count=len(matches),
         time=(time() - start_time)

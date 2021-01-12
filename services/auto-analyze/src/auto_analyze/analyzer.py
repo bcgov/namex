@@ -63,46 +63,42 @@ HIGH_CONFLICT_RECORDS = 20
 @print_time()
 @profile(sort_by='cumulative', lines_to_print=30, strip_dirs=False)
 async def auto_analyze(name: str,
-                       name_tokens: list,
+                       name_tokens: list,  # pylint: disable=too-many-locals, too-many-arguments
                        list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
                        dict_synonyms: dict,
-                       np_svc_prep_data: NameProcessingService) -> dict:
+                       dict_compound_synonyms_all: dict,
+                       stand_alone_words: list,
+                       np_svc_prep_data: name_analysis_service) -> dict:
 
     # print('--- Connection pool status ---')
     # print(db.engine.pool.status())
     """Return a dictionary with name as key and similarity as value, 1.0 is an exact match."""
     logging.getLogger(__name__).debug(
         'name: %s ,  list_name %s,  list_dist: %s, list_desc: %s, dict_subst: %s,  dict_syns: %s',
-        name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms)
-    syn_svc = synonym_service
-    service = name_analysis_service
-    np_svc = service.name_processing_service
+        name_tokens, list_name, list_dist, list_desc, dict_substitution, dict_synonyms)
+
+    service = np_svc_prep_data
     wc_svc = service.word_classification_service
     token_svc = service.token_classifier_service
 
     dict_matches_counter = {}
     all_dict_synonyms = {**dict_synonyms, **dict_compound_synonyms_all}
 
-    np_svc.set_name(name, np_svc_prep_data)
-    stand_alone_words = np_svc_prep_data.get_stand_alone_words()
-
-    if np_svc.name_tokens == list_name:
+    if name_tokens == list_name:
         similarity = EXACT_MATCH
     else:
-        match_list = np_svc.name_tokens
-        start_time = time()
-        get_classification(service, stand_alone_words, syn_svc, match_list, wc_svc, token_svc, True)
-        print('--- auto_analyze->get_classification ran in: {time} seconds ---'.format(
-            time=(time() - start_time)
-        ))
+        match_list = name_tokens
 
-        dist_db_substitution_dict = builder.get_substitutions_distinctive(service.get_list_dist())
+        get_classification(service, match_list, wc_svc, token_svc, dict_compound_synonyms_all, dict_synonyms,
+                           conflict=True)
+
+        dist_db_substitution_dict = get_substitutions(service.get_list_dist(), dict_substitution)
         service._list_dist_words, match_list, _ = remove_double_letters_list_dist_words(service.get_list_dist(),
                                                                                         match_list)
 
-        desc_tmp_synonym_dict = builder.get_substitutions_descriptive(service.get_list_desc())
-        desc_tmp_synonym_dict = remove_extra_value(desc_tmp_synonym_dict, dict_synonyms)
+        desc_tmp_synonym_dict = get_substitutions(service.get_list_desc(), all_dict_synonyms)
+        desc_tmp_synonym_dict = remove_extra_value(desc_tmp_synonym_dict, all_dict_synonyms)
 
         # Update key in desc_db_synonym_dict
         service._dict_desc_words_search_conflicts = stem_key_dictionary(  # pylint: disable=protected-access
@@ -167,6 +163,20 @@ async def auto_analyze(name: str,
         dict_matches_counter.update({name: similarity})
 
     return dict_matches_counter
+
+
+async def clean_name(name: str,
+                     np_svc_prep_data: name_analysis_service) -> dict:
+    """Return a a list of clean names"""
+    logging.getLogger(__name__).debug('name: %s', name)
+
+    service = name_analysis_service
+    np_svc = service.name_processing_service
+
+    np_svc.set_name(name, np_svc_prep_data)
+    name_tokens = np_svc.name_tokens
+
+    return {name: name_tokens}
 
 
 def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=False):
