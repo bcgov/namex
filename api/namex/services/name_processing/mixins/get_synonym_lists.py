@@ -1,7 +1,8 @@
 class GetSynonymListsMixin(object):
     _prefixes = []
-    _synonyms = []
-    _substitutions = []
+    _synonyms = {}
+    _compound_synonyms ={}
+    _substitutions = {}
     _stop_words = []
     _number_words = []
     _stand_alone_words = []
@@ -11,6 +12,9 @@ class GetSynonymListsMixin(object):
 
     def get_synonyms(self):
         return self._synonyms
+
+    def get_compound_synonyms(self):
+        return self._compound_synonyms
 
     def get_substitutions(self):
         return self._substitutions

@@ -5,6 +5,7 @@ import re
 import itertools
 from collections import ChainMap
 import warnings
+import cProfile
 
 import requests
 from . import EXACT_MATCH, HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY, CURRENT_YEAR, LOWER_LIMIT_TIME, \
@@ -12,7 +13,8 @@ from . import EXACT_MATCH, HIGH_CONFLICT_RECORDS, HIGH_SIMILARITY, CURRENT_YEAR,
 from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
 from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT, porter
 from ..auto_analyse.name_analysis_utils import get_conflicts_same_classification, \
-    get_all_dict_substitutions, subsequences, remove_double_letters, remove_double_letters_list_dist_words
+    get_all_dict_substitutions, subsequences, remove_double_letters, remove_double_letters_list_dist_words, \
+    update_dict_synonyms, update_compound_tokens, remove_spaces_list
 
 from namex.models.request import Request
 
@@ -42,7 +44,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
         """
         result = ProcedureResult()
         result.is_valid = True
-        self.name_processing_service
 
         first_classification = None
         if name_dict:
@@ -151,25 +152,49 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
     # @print_time()
     # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
-    def search_conflicts(self, list_dist_words, list_desc_criteria, list_desc_words, list_name, name, stand_alone_words,
-                         check_name_is_well_formed=False, queue=False):
+    def search_conflicts(self, list_dist_words, list_desc_criteria, list_desc_words, dict_synonyms, dict_substitutions,
+                         list_name, name, stand_alone_words, check_name_is_well_formed=False, queue=False):
         """
         Override the abstract / base class method
         Input: list_dist = ['MOUNTAIN', 'VIEW']
                list_desc = ['FOOD', 'GROWERS']
         @return ProcedureResult
         """
+        pr = cProfile.Profile()
+        pr.enable()
         list_conflicts, most_similar_names = [], []
         dict_highest_counter, response = {}, {}
         self._list_processed_names = list()
         for w_dist, w_desc_criteria, w_desc in zip(list_dist_words, list_desc_criteria, list_desc_words):
             if w_dist and w_desc_criteria:
-                list_details, forced = self.get_conflicts(dict_highest_counter, w_dist, w_desc_criteria, w_desc,
-                                                          list_name, stand_alone_words,
-                                                          check_name_is_well_formed, queue)
-                list_conflicts.extend(list_details)
-                list_conflicts = [i for n, i in enumerate(list_conflicts) if
-                                  i not in list_conflicts[n + 1:]]  # Remove duplicates
+                # Send updated dictionary
+                if check_name_is_well_formed:
+                    dict_dist = update_dict_synonyms(dict_substitutions, w_dist)
+                    dict_desc = update_dict_synonyms(dict_synonyms, w_desc_criteria)
+                else:
+                    dict_dist = dict_substitutions
+                    dict_desc = dict_synonyms
+
+                matches_info_dict, matches_compound_info_dict = self.get_conflicts(dict_highest_counter, w_dist,
+                                                                                   w_desc_criteria, w_desc,
+                                                                                   dict_desc, dict_dist,
+                                                                                   list_name, stand_alone_words,
+                                                                                   check_name_is_well_formed, queue)
+                # Calling most_similar_names
+                list_conflicts = list()
+                list_conflicts_details, forced = self.get_most_similar_names(
+                    dict_highest_counter,
+                    matches_info_dict['matches'], matches_info_dict['dist_dict'],
+                    matches_info_dict['desc_dict'], matches_info_dict['list_name'])
+                list_conflicts.extend(list_conflicts_details)
+
+                if matches_compound_info_dict:
+                    list_conflicts_details, forced = self.get_most_similar_names(
+                        dict_highest_counter,
+                        matches_compound_info_dict['matches'], matches_compound_info_dict['dist_dict'],
+                        matches_compound_info_dict['desc_dict'], matches_compound_info_dict['list_name'])
+                    list_conflicts.extend(list_conflicts_details)
+
                 if forced:
                     break
 
@@ -177,14 +202,18 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
             sorted(list_conflicts, key=lambda item: (-item['score'], item['name']))[
             0:MAX_MATCHES_LIMIT])
 
+        pr.disable()
+        # after your program ends
+        pr.dump_stats('profile.pstat')
+
         return self.prepare_response(most_similar_names, queue, list_name, list_dist_words, list_desc_words)
 
     # @print_time()
     # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
-    def get_conflicts(self, dict_highest_counter, w_dist, w_desc_criteria, w_desc, list_name, stand_alone_words,
-                      check_name_is_well_formed, queue):
+    def get_conflicts(self, dict_highest_counter, w_dist, w_desc_criteria, w_desc, dict_desc, dict_dist, list_name,
+                      stand_alone_words, check_name_is_well_formed, queue):
         dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = {}, {}, {}, {}
-        desc_synonym_dict = self.get_substitutions_descriptive(w_desc)
+        desc_synonym_dict = self.get_substitutions_descriptive(w_desc, dict_desc)
 
         # Check if a token is stand-alone word
         desc_synonym_dict = self.get_stand_alone_substitutions(desc_synonym_dict, stand_alone_words)
@@ -196,55 +225,58 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
         if check_name_is_well_formed:
             dist_substitution_dict = self.get_dictionary(dist_substitution_dict, w_dist)
         else:
-            dist_substitution_dict = self.get_substitutions_distinctive(w_dist)
+            dist_substitution_dict = dict_dist
 
         w_dist, list_name, dist_substitution_dict = remove_double_letters_list_dist_words(w_dist, list_name,
-                                                                                          dist_substitution_dict)
-
-        list_conflict_details = list()
+                                                                                          dist_substitution_dict, queue)
 
         change_filter = True if self.director.skip_search_conflicts else False
-        list_details, forced = self.get_conflicts_db(dist_substitution_dict, desc_synonym_criteria_dict,
-                                                     desc_synonym_dict,
-                                                     dict_highest_counter, change_filter, list_name,
-                                                     check_name_is_well_formed, queue)
-        list_conflict_details.extend(list_details)
+        matches = self.get_conflicts_db(dist_substitution_dict, desc_synonym_criteria_dict,
+                                        desc_synonym_dict,
+                                        dict_highest_counter, change_filter, list_name,
+                                        check_name_is_well_formed, queue)
+        # list_conflict_details.extend(list_details)
+        matches_info_dict = {'matches': matches,
+                             'dist_dict': dist_substitution_dict,
+                             'desc_criteria_dict': desc_synonym_criteria_dict,
+                             'desc_dict': desc_synonym_dict,
+                             'list_name': list_name}
 
-        if not forced:
-            print("Search for conflicts considering compound-distinctive words.")
-            dist_compound_dict = self.get_compound_distinctives(dist_substitution_dict)
-            list_details, forced = self.get_conflicts_db(dist_compound_dict, desc_synonym_criteria_dict,
-                                                         desc_synonym_dict,
-                                                         dict_highest_counter,
-                                                         change_filter, list_name, check_name_is_well_formed, queue)
-            list_conflict_details.extend(list_details)
-
-        if not forced:
+        matches_compound_info_dict={}
+        if not check_name_is_well_formed:
             print("Search for conflicts considering compound-distinctive words taking one simple descriptive")
             dist_compound_dict, desc_synonym_dict_new = self.get_compound_distinctive_hybrid(dist_substitution_dict,
                                                                                              desc_synonym_dict,
                                                                                              list_name)
+            compound_list_name = update_compound_tokens(
+                list(dist_compound_dict.keys()) + list(desc_synonym_dict_new.keys()),
+                list_name)
+
             diff_keys = self.get_different_key(desc_synonym_dict_new, desc_synonym_dict)
             desc_synonym_dict = desc_synonym_dict_new
             desc_synonym_criteria_dict = self.remove_key(diff_keys, desc_synonym_criteria_dict)
 
-            list_details, forced = self.get_conflicts_db(dist_compound_dict, desc_synonym_criteria_dict,
-                                                         desc_synonym_dict,
-                                                         dict_highest_counter,
-                                                         change_filter, list_name, check_name_is_well_formed, queue)
-            list_conflict_details.extend(list_details)
+            matches_compound = (self.get_conflicts_db(dist_compound_dict, desc_synonym_criteria_dict,
+                                                      desc_synonym_dict,
+                                                      dict_highest_counter,
+                                                      change_filter, compound_list_name, check_name_is_well_formed,
+                                                      queue))
 
-        return list_conflict_details, forced
+            unique_matches_compound = self.get_unique_matches(matches, matches_compound)
+            matches_compound_info_dict = {'matches': unique_matches_compound,
+                                          'dist_dict': dist_compound_dict,
+                                          'desc_criteria_dict': desc_synonym_criteria_dict,
+                                          'desc_dict': desc_synonym_dict,
+                                          'list_name': list_name}
+
+        return matches_info_dict, matches_compound_info_dict
 
     @print_time()
     @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_conflicts_db(self, dist_substitution_dict, desc_synonym_criteria_dict, desc_synonym_dict,
                          dict_highest_counter, change_filter,
                          list_name, check_name_is_well_formed, queue):
-        stop_word_list = self.name_processing_service.get_stop_words()
-        stop_words = '|'.join(stop_word_list)
-        list_details = []
-        forced = False
+        matches = []
 
         if check_name_is_well_formed:
             print("Search conflicts for not well formed name")
@@ -253,24 +285,15 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
         else:
             print("Search conflicts for APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
 
-        for key_dist, value_dist in dist_substitution_dict.items():
-            criteria = Request.get_general_query(change_filter, queue)
-            name_criteria = Request.get_distinctive_query(value_dist, stop_words, check_name_is_well_formed)
-            for key_desc, value_desc in desc_synonym_criteria_dict.items():
-                print(key_dist, ":DIST ", key_desc, ":DESC")
-                criteria = Request.get_descriptive_query(value_desc, criteria, name_criteria)
-                matches = Request.find_by_criteria_array(criteria, queue)
-                matches = self.skip_name_matches_processed(matches)
-                list_conflicts_details, forced = self.get_most_similar_names(
-                    dict_highest_counter,
-                    set(matches), dist_substitution_dict,
-                    desc_synonym_dict, list_name)
-                list_details.extend(list_conflicts_details)
+        criteria = Request.get_general_query(change_filter, queue)
+        list_name = remove_spaces_list(list_name)
+        name_criteria = Request.get_name_criteria(list(dist_substitution_dict.values()),
+                                                  list(desc_synonym_criteria_dict.values()), list_name)
+        if name_criteria:
+            criteria = Request.insert_name_criteria(criteria, name_criteria)
+            matches = Request.find_by_criteria_array(criteria, queue)
 
-                if forced:
-                    return list_details, forced
-
-        return list_details, forced
+        return matches
 
     # @print_time()
     @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
@@ -495,47 +518,42 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
     @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_most_similar_names(self, dict_highest_counter, db_matches, dist_substitution_dict, desc_synonym_dict,
                                list_name):
-        try:
-            auto_analyze_url = current_app.config.get('AUTO_ANALYZE_URL', None)
-            list_details, selected_matches = [], []
-            forced = False
-            list_dist = list(dist_substitution_dict.keys())
-            list_desc = list(desc_synonym_dict.keys())
+        auto_analyze_url = current_app.config.get('AUTO_ANALYZE_URL', None)
+        list_details, selected_matches = [], []
+        forced = False
+        list_dist = list(dist_substitution_dict.keys())
+        list_desc = list(desc_synonym_dict.keys())
 
-            if db_matches:
-                total = len(db_matches)
-                print("Possible conflicts returned: ", total)
+        if db_matches:
+            total = len(db_matches)
+            print("Possible conflicts returned: ", total)
 
-                json_analyze = {'names': [match.name for match in db_matches],
-                                'list_name': list_name,
-                                'list_dist': list_dist,
-                                'list_desc': list_desc,
-                                'dict_substitution': dist_substitution_dict,
-                                'dict_synonyms': desc_synonym_dict
-                                }
-                conflict_response = requests.post(url=''.join([auto_analyze_url]),
-                                                  json=json_analyze)
-                if not conflict_response:
-                    warnings.warn("Quart Service did not return a result", Warning)
-                conflicts = conflict_response.json()
-                dict_matches_counter = dict(ChainMap(*conflicts.get('result')))
+            json_analyze = {'names': [match.name for match in db_matches],
+                            'list_name': list_name,
+                            'list_dist': list_dist,
+                            'list_desc': list_desc,
+                            'dict_substitution': dist_substitution_dict,
+                            'dict_synonyms': desc_synonym_dict
+                            }
+            conflict_response = requests.post(url=''.join([auto_analyze_url]),
+                                              json=json_analyze)
+            if not conflict_response:
+                warnings.warn("Quart Service did not return a result", Warning)
+            conflicts = conflict_response.json()
+            dict_matches_counter = dict(ChainMap(*conflicts.get('result')))
 
-                selected_matches = [match for match in db_matches if match.name in dict_matches_counter.keys()]
+            selected_matches = [match for match in db_matches if match.name in dict_matches_counter.keys()]
 
-                if dict_matches_counter:
-                    all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
-                    # Get  N highest score (values) and shortest names (key)
-                    dict_highest_counter.update({k: v for k, v in
-                                                 sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
-                                                 0:MAX_MATCHES_LIMIT]})
-                    list_details = self.get_details_higher_score(dict_highest_counter, selected_matches, all_subs_dict)
-                    forced = True if any(value == EXACT_MATCH for value in dict_highest_counter.values()) else False
+            if dict_matches_counter:
+                all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
+                # Get  N highest score (values) and shortest names (key)
+                dict_highest_counter.update({k: v for k, v in
+                                             sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
+                                             0:MAX_MATCHES_LIMIT]})
+                list_details = self.get_details_higher_score(dict_highest_counter, selected_matches, all_subs_dict)
+                forced = True if any(value == EXACT_MATCH for value in dict_highest_counter.values()) else False
 
-                return list_details, forced
-            else:
-                print('No conflicts were found')
-        except Exception as err:
-            raise
+        return list_details, forced
 
     # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def prepare_response(self, most_similar_names, queue, list_name, list_dist_words, list_desc_words):
@@ -617,6 +635,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return dist_substitution_dict
 
+    """
+    Lucas - this is just in here for reference while merging
     # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_substitutions_descriptive(self, w_desc):
         syn_svc = self.synonym_service
@@ -633,6 +653,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
                 value.append(key)
 
         return desc_synonym_dict
+    """
 
     def get_stand_alone_substitutions(self, desc_synonym_dict, stand_alone):
         for key, value in desc_synonym_dict.items():
@@ -743,7 +764,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
                 key_desc = list(dict_descriptive.keys())[0]
                 if idx + 1 < list_name.__len__() and list_name[idx + 1] in dict_descriptive.get(key_desc):
                     compound = [key_dist + key_desc]
-                    dict_compound_dist[list_name[idx] + list_name[idx + 1]] = compound
+                    dict_compound_dist[list_name[idx] + ' ' + list_name[idx + 1]] = compound
 
                     if list_name[idx + 1] in dict_desc:
                         del dict_desc[list_name[idx + 1]]
@@ -805,3 +826,20 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
             if not key in desc_synonym_dict_delta:
                 diff_key.append(key)
         return diff_key
+
+    def get_substitutions_descriptive(self, w_desc, dict_desc):
+        dct = {}
+        for item in w_desc:
+            if item in dict_desc:
+                dct.update({item.replace(" ", ""): dict_desc.get(item)})
+        return dct
+
+    def get_unique_matches(self, matches_gp1, matches_gp2):
+        match_names_gp1 = [match.name for match in matches_gp1]
+        unique_matches_gp2 = []
+
+        for match in matches_gp2:
+            if match.name not in match_names_gp1:
+                unique_matches_gp2.append(match)
+
+        return unique_matches_gp2

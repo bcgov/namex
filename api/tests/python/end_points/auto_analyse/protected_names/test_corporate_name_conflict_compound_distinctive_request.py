@@ -13,9 +13,10 @@ from ...common import token_header, claims
 
 @pytest.mark.parametrize("name, expected",
                          [
-                             ("SOUTH LAND BERRY FARMS LTD.", "SOUTHLAND BERRY FARMS LTD."),
-                             ("SOUTH LAND FREIGHTWAYS LTD.", "SOUTHLAND FREIGHTWAYS LTD."),
-                             ("SOUTH LAND FREIGHT WAYS LTD.", "SOUTHLAND FREIGHTWAYS LTD."),
+                             # ("SOUTH LAND BERRY FARMS LTD.", "SOUTHLAND BERRY FARMS LTD."),
+                             # ("SOUTH LAND FREIGHTWAYS LTD.", "SOUTHLAND FREIGHTWAYS LTD."),
+                             # ("SOUTH LAND FREIGHT WAYS LTD.", "SOUTHLAND FREIGHTWAYS LTD."),
+                             ("SOUTH LAND RESTAURANT LTD.", "SOUTHLANDS CAFE LTD.")
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -34,11 +35,15 @@ def test_corporate_name_conflict_compound_distinctive_request_response(client, j
                                  {'word': 'WAYS', 'classification': 'DESC'},
                                  {'word': 'LANDS', 'classification': 'DIST'},
                                  {'word': 'LANDS', 'classification': 'DESC'},
+                                 {'word': 'RESTAURANT', 'classification': 'DIST'},
+                                 {'word': 'RESTAURANT', 'classification': 'DESC'},
+                                 {'word': 'CAFE', 'classification': 'DIST'},
+                                 {'word': 'CAFE', 'classification': 'DESC'},
                                  ]
     save_words_list_classification(words_list_classification)
 
     conflict_list_db = ['SOUTHLAND BERRY FARMS LTD.', 'SOUTHLAND FREIGHTWAYS LTD.',
-                        'SOUTHLANDS RATEPAYERS LTD.']
+                        'SOUTHLANDS RATEPAYERS LTD.', 'SOUTHLANDS CAFE LTD.']
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT

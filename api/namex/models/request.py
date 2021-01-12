@@ -104,8 +104,8 @@ class Request(db.Model):
 
     # Check-In / Check-Out (for INPROGRESS)
     # A UUID granted to the user that checks out the Name Request
-    checkedOutBy = db.Column('checked_out_by', db.String(64),index=True)
-    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True),index=True)
+    checkedOutBy = db.Column('checked_out_by', db.String(64), index=True)
+    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True), index=True)
 
     # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
@@ -255,8 +255,8 @@ class Request(db.Model):
         # this will error if there's nothing in the queue - likelihood ~ 0
         r = db.session.query(Request). \
             filter(
-                Request.stateCd.in_([State.DRAFT]),
-                Request.nrNum.notlike('NR L%')). \
+            Request.stateCd.in_([State.DRAFT]),
+            Request.nrNum.notlike('NR L%')). \
             order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
             with_for_update().first()
         # this row is now locked
@@ -290,9 +290,9 @@ class Request(db.Model):
         """
         existing_nr = db.session.query(Request). \
             filter(
-                Request.userId == userObj.id, 
-                Request.stateCd == State.INPROGRESS,
-                Request.nrNum.notlike('NR L%')). \
+            Request.userId == userObj.id,
+            Request.stateCd == State.INPROGRESS,
+            Request.nrNum.notlike('NR L%')). \
             one_or_none()
 
         return existing_nr
@@ -483,7 +483,8 @@ class Request(db.Model):
             elif word in list_desc:
                 name.extend(Request.set_special_characters_descriptive([word]))
             else:
-                raise Exception('Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
+                raise Exception(
+                    'Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
 
         criteria = cls.get_designations_in_name(criteria, name, any_designation_list, end_designation_list, stop_words)
 
@@ -512,27 +513,32 @@ class Request(db.Model):
         return criteria
 
     @classmethod
-    def get_distinctive_query(cls, dist, stop_words, check_name_is_well_formed):
-        special_characters_dist = Request.set_special_characters_distinctive(dist)
-        substitutions = '|'.join(map(str, special_characters_dist))
-        if not check_name_is_well_formed:
-            dist_criteria = r'(no.?)*\s*\d*\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)
-        else:
-            dist_criteria = r'\s*\W*({0})?\W*({1})\W*\s*\y'.format(stop_words, substitutions)
+    def get_name_criteria(cls, dist_list, desc_list, list_name):
+        name_criteria = ''
+        if dist_list:
+            substitutions = cls.get_distinctive(dist_list, list_name)
+            name_criteria = cls.format_criteria(name_criteria, substitutions, r'^((\w+\s\w+\s+)|\w+\s+)?\y(', r')+\y.*?')
+        if desc_list:
+            synonyms = cls.get_descriptive(desc_list, list_name)
+            name_criteria = cls.format_criteria(name_criteria, synonyms, r'\y(', ')+')
 
-        return dist_criteria
+        return name_criteria
 
     @classmethod
-    def get_descriptive_query(cls, desc, criteria, name_criteria):
-        special_characters_descriptive = Request.set_special_characters_descriptive(desc)
+    def insert_name_criteria(cls, criteria, name_criteria):
         for e in criteria:
-            substitutions = ' ?| '.join(map(str, special_characters_descriptive)) + ' ?'
-            name_criteria += r'.*({})\y'.format(substitutions)
             e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(name_criteria)])
 
         return criteria
 
     @classmethod
+    def format_criteria(cls, criteria, substitutions, prefix, suffix):
+        if substitutions:
+            substitutions = substitutions[:-1] if substitutions[-1] == '|' else substitutions
+            dist_criteria = prefix + substitutions + suffix
+            criteria += dist_criteria
+        return criteria
+
     def find_by_criteria_array(cls, criteria_arr=None, queue=False):
         queries = []
         for criteria in criteria_arr:
@@ -575,7 +581,7 @@ class Request(db.Model):
         list_special_characters = []
         for element in list_d:
             list_special_characters.append(
-                r'\W*'.join(element[i:i + 1] + element[i:i + 1] + '?' for i in range(0, len(element), 1)))
+                r'\W*'.join(element[i:i + 1] + element[i:i + 1] + r'?' for i in range(0, len(element), 1)) + r'(?:es|[a-z])?')
 
         return list_special_characters
 
@@ -586,6 +592,31 @@ class Request(db.Model):
             list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
 
         return list_special_characters
+
+    @classmethod
+    def get_distinctive(cls, dist_list, list_name):
+        substitutions = ''
+        for i, word in enumerate(list_name):
+            for j, dist_sublist in enumerate(dist_list):
+                if word in dist_sublist:
+                    special_characters_dist = Request.set_special_characters_distinctive(dist_sublist)
+                    substitutions += '(' + '|'.join(map(str, special_characters_dist)) + ')|'
+                    dist_list.pop(j)
+                    break
+        return substitutions
+
+    @classmethod
+    def get_descriptive(cls, desc_list, list_name):
+        synonyms = ''
+        for i, word in enumerate(list_name):
+            for j, desc_sublist in enumerate(desc_list):
+                if word.replace(" ", "") in desc_sublist:
+                    special_characters_descriptive = Request.set_special_characters_descriptive(desc_sublist)
+                    synonyms += ' ?|'.join(map(str, special_characters_descriptive)) + ' ?|'
+                    desc_list.pop(j)
+                    break
+
+        return synonyms
 
     @classmethod
     def include_designations_in_name(cls, special_characters_name, any_designation_list, end_designation_list,

@@ -55,7 +55,12 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
             analysis = []
 
             # Configure the analysis for the supplied builder
-            get_classification(self, stand_alone_words, syn_svc, self.name_tokens, wc_svc, token_svc)
+            get_classification(self, self.name_tokens, wc_svc, token_svc, np_svc.get_compound_synonyms(),
+                               np_svc.get_synonyms())
+
+            # Get substitutions for distinctives:
+            self._substitutions = builder.get_substitutions_distinctive(self.get_list_dist())
+            self._dict_dist_words = self._substitutions
 
             if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
                 check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
@@ -171,7 +176,9 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                         [self.get_list_dist_search_conflicts()],
                         [self.get_list_desc_search_conflicts()],
                         [self.get_list_desc()],
-                        self.name_tokens,
+                        self.get_dict_desc(),
+                        self.get_dict_dist(),
+                        self.compound_descriptive_name_tokens,
                         self.processed_name,
                         np_svc.get_stand_alone_words()
                     )
@@ -179,25 +186,27 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                 if not check_conflicts.is_valid:
                     results.append(check_conflicts)
 
-            # check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-            #                                                    self.compound_descriptive_name_tokens,
-            #                                                    True, self.get_designation_end_list_all(),
-            #                                                    self.get_designation_any_list_all(), stop_words_list)
+            check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+                                                               self.compound_descriptive_name_tokens, True,
+                                                               self.get_designation_end_list_all(),
+                                                               self.get_designation_any_list_all(), stop_words_list)
 
-            # if check_conflicts_queue.is_valid:
-            # check_conflicts_queue = builder.search_conflicts(
-            #     [self.get_list_dist_search_conflicts()],
-            #     [self.get_list_desc_search_conflicts()],
-            #     [self.get_list_desc()],
-            #     self.name_tokens,
-            #     self.processed_name,
-            #     np_svc.get_stand_alone_words(),
-            #     check_name_is_well_formed=False,
-            #     queue=True
-            # )
-            #
-            # if not check_conflicts_queue.is_valid:
-            #     results.append(check_conflicts_queue)
+            if check_conflicts_queue.is_valid:
+                check_conflicts_queue = builder.search_conflicts(
+                    [self.get_list_dist_search_conflicts()],
+                    [self.get_list_desc_search_conflicts()],
+                    [self.get_list_desc()],
+                    self.get_dict_desc(),
+                    self.get_dict_dist(),
+                    self.compound_descriptive_name_tokens,
+                    self.processed_name,
+                    np_svc.get_stand_alone_words(),
+                    check_name_is_well_formed=False,
+                    queue=True
+                )
+
+            if not check_conflicts_queue.is_valid:
+                results.append(check_conflicts_queue)
 
             # TODO: Use the list_name array, don't use a string in the method!
             # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct

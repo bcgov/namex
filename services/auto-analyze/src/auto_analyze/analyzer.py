@@ -25,8 +25,11 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import (
     get_flat_list,
     remove_double_letters_list_dist_words,
     remove_spaces_list,
-    subsequences
+    subsequences,
+    get_compound_descriptives,
+    update_compound_tokens
 )
+
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from namex.utils.profiling import print_time, profile
@@ -59,11 +62,13 @@ HIGH_CONFLICT_RECORDS = 20
 # ok deep function
 @print_time()
 @profile(sort_by='cumulative', lines_to_print=30, strip_dirs=False)
-async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-arguments
+async def auto_analyze(name: str,
+                       name_tokens: list,
                        list_name: list, list_dist: list,
                        list_desc: list, dict_substitution: dict,
                        dict_synonyms: dict,
                        np_svc_prep_data: NameProcessingService) -> dict:
+
     # print('--- Connection pool status ---')
     # print(db.engine.pool.status())
     """Return a dictionary with name as key and similarity as value, 1.0 is an exact match."""
@@ -77,6 +82,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
     token_svc = service.token_classifier_service
 
     dict_matches_counter = {}
+    all_dict_synonyms = {**dict_synonyms, **dict_compound_synonyms_all}
 
     np_svc.set_name(name, np_svc_prep_data)
     stand_alone_words = np_svc_prep_data.get_stand_alone_words()
@@ -105,20 +111,22 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         service._dict_desc_words_search_conflicts = add_key_values(  # pylint: disable=protected-access
             service.get_dict_desc_search_conflicts()
         )
-        dict_synonyms = stem_key_dictionary(dict_synonyms)
-        dict_synonyms = add_key_values(dict_synonyms)
 
-        list_desc, dict_synonyms = remove_descriptive_same_category(dict_synonyms)
+        # Get dictionary for original words
+        dict_desc = update_dict(all_dict_synonyms, list_desc)
+
+        # Stem dictionary for original name
+        dict_desc_stemmed = stem_key_dictionary(dict_desc)
+        dict_desc_stemmed = add_key_values(dict_desc_stemmed)
+
+        list_desc, dict_desc_stemmed = remove_descriptive_same_category(dict_desc_stemmed)
 
         service._list_desc_words = list(  # pylint: disable=protected-access
             service.get_dict_desc_search_conflicts().keys()
         )
 
-        # Check if list_dist needs to be spplitted based on service.get_list_dist()
-        list_dist = get_split_compound(list_dist, service.get_list_dist())
-        service._list_dist_words = get_split_compound(  # pylint: disable=protected-access
-            service.get_list_dist(),
-            list_dist)
+        list_dist = [element.replace(" ","")for element in list_dist]
+        service._list_dist_words = [element.replace(" ","") for element in service.get_list_dist()]
 
         list_dist_stem = [porter.stem(word) for word in list_dist]
         vector1_dist = text_to_vector(list_dist_stem)
@@ -139,7 +147,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
                 list_dist=match_list_dist_desc,
                 list_desc=service.get_list_desc(),
                 original_class_list=list_dist,
-                class_subs_dict=dict_synonyms)
+                class_subs_dict=dict_desc_stemmed)
 
         similarity_dist = round(get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
@@ -155,12 +163,7 @@ async def auto_analyze(name: str,  # pylint: disable=too-many-locals, too-many-a
         similarity = round((similarity_dist + similarity_desc) / 2, 2)
         logging.getLogger(__name__).debug('similarity: %s', similarity)
 
-    if similarity == EXACT_MATCH or (
-            similarity >= MINIMUM_SIMILARITY and not is_not_real_conflict(list_name,
-                                                                          stand_alone_words,
-                                                                          list_dist,
-                                                                          dict_synonyms,
-                                                                          service)):
+    if similarity >= MINIMUM_SIMILARITY:
         dict_matches_counter.update({name: similarity})
 
     return dict_matches_counter
@@ -310,22 +313,65 @@ def stem_key_dictionary(d1):
     return dict_stem
 
 
-def get_split_compound(a_dist, b_dist):
-    """Split items in a_dist based on b_dist."""
-    str_tokens = ' '.join([str(elem) for elem in b_dist])
-    new_dist = list()
-    for element in a_dist:
-        if re.search(r'\b{0}\b'.format(re.escape(str_tokens.lower())), element.lower()):
-            new_dist.extend(b_dist)
-        else:
-            new_dist.append(element)
-
-    return new_dist
-
-
 def add_key_values(d1):
     """Add key in dictionary to values if does not exist."""
     for key, values in d1.items():
         if key not in values:
             values.append(key)
     return d1
+
+
+def get_compound_synonyms(np_svc, name_tokens_clean_dict, syn_svc, dict_all_simple_synonyms):
+    dct = {}
+    dict_all_compound_synonyms = {}
+    for key, value in name_tokens_clean_dict.items():
+        dct = get_compound_descriptives(np_svc, value, syn_svc, dict_all_simple_synonyms)
+        if dct:
+            dict_all_compound_synonyms.update(dct)
+            dct.clear()
+
+    return dict_all_compound_synonyms
+
+
+def update_name_tokens(list_all_compound_synonyms, name_tokens_clean_dict):
+    compound_name_tokens_clean_dict = {}
+    for key, value in name_tokens_clean_dict.items():
+        compound_name = update_compound_tokens(list_all_compound_synonyms, value)
+        compound_name_tokens_clean_dict.update({key: compound_name})
+
+    return compound_name_tokens_clean_dict
+
+
+def get_substitutions(list_dist, all_substitution_dict):
+    substitution_dict = {}
+    for dist in list_dist:
+        substitutions = all_substitution_dict.get(dist)
+        if not substitutions:
+            substitutions = [dist]
+        elif dist not in substitutions:
+            substitutions.append(dist)
+        substitution_dict[dist] = substitutions
+
+    return substitution_dict
+
+
+def get_substitutions_dictionary(syn_svc, dict_substitution, dict_synonyms, list_words):
+    substitutions_dict = {}
+    for word in list_words:
+        substitutions = dict_substitution.get(word, None)
+        if not substitutions and word not in dict_synonyms:
+            substitutions = syn_svc.get_word_substitutions(word=word).data
+        if substitutions:
+            substitutions_dict.update({word: substitutions})
+
+    return substitutions_dict
+
+
+def update_dict(dict_desc, list_desc):
+    dict_desc_new = {}
+    for desc in list_desc:
+        if desc in dict_desc:
+            dict_desc_new.update({desc: dict_desc.get(desc)})
+        else:
+            dict_desc_new.update({desc: [desc]})
+    return dict_desc_new

@@ -16,6 +16,13 @@ def flatten_tuple_results(results):
 
 
 def parse_dict_of_lists(results):
+    """
+    Lucas - Changed from:
+    output = {}
+    for item in results:
+        output[item.key] = sorted(list(set(item.list)), key=len, reverse=True)
+    return output
+    """
     try:
         output = {}
         for item in results:

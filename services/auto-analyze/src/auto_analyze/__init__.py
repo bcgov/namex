@@ -23,18 +23,22 @@ import config  # pylint: disable=wrong-import-order; # noqa: I001
 import quart.flask_patch
 from namex import models
 from namex.models import db, ma
+from namex.services.name_request.auto_analyse.name_analysis_utils import get_flat_list, get_synonyms_dictionary
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
+from .analyzer import get_substitutions_dictionary
 from quart import Quart, jsonify, request
+from swagger_client import SynonymsApi as SynonymService
 
-from .analyzer import auto_analyze
+from .analyzer import auto_analyze, clean_name, get_compound_synonyms, update_name_tokens
 
 # Set config
 QUART_APP = os.getenv('QUART_APP')
 RUN_MODE = os.getenv('FLASK_ENV', 'production')
 
+quart_app: Quart | None = None
+
 
 async def create_app(run_mode):
-    quart_app = None
     """Create the app object for configuration and use."""
     try:
         quart_app = Quart(__name__)
@@ -47,57 +51,6 @@ async def create_app(run_mode):
         quart_app.logger.debug(
             'Error creating application in auto-analyze service: {0}'.format(repr(err.with_traceback(None))))
         raise
-
-    @quart_app.route('/', methods=['POST'])
-    async def main():
-        """Return the outcome of this private service call."""
-        name_analysis_service = ProtectedNameAnalysisService()
-        service = name_analysis_service
-        np_svc_prep_data = service.name_processing_service
-        np_svc_prep_data.prepare_data()
-
-        json_data = await request.get_json()
-        list_dist = json_data.get('list_dist')
-        list_desc = json_data.get('list_desc')
-        list_name = json_data.get('list_name')
-        dict_substitution = json_data.get('dict_substitution')
-        dict_synonyms = json_data.get('dict_synonyms')
-        matches = json_data.get('names')[:20]
-
-        app.logger.debug('Number of matches: {0}'.format(len(matches)))
-
-        start_time = time()
-        result = await asyncio.gather(
-            *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data)
-              for
-              name in matches]
-        )
-        print('--- Conflict analysis for {count} matches in {time} seconds ---'.format(
-            count=len(matches),
-            time=(time() - start_time)
-        ))
-        print('--- Average match analysis time: {time} seconds / name ---'.format(
-            time=((time() - start_time) / len(matches))
-        ))
-
-        return jsonify(result=result)
-
-    @quart_app.after_request
-    def after_request(response):
-        if db is not None:
-            print('Closing AutoAnalyze service DB connections')
-            db.engine.dispose()
-
-        return response
-
-    @quart_app.after_request
-    def add_version(response):  # pylint: disable=unused-variable; linter not understanding framework call
-        os.getenv('OPENSHIFT_BUILD_COMMIT', '')
-        return response
-
-    register_shellcontext(quart_app)
-    await quart_app.app_context().push()
-    return quart_app
 
 
 def register_shellcontext(quart_app):
@@ -113,6 +66,60 @@ def register_shellcontext(quart_app):
         }
 
     quart_app.shell_context_processor(shell_context)
+
+
+@quart_app.route('/', methods=['POST'])
+async def main():
+    """Return the outcome of this private service call."""
+    name_analysis_service = ProtectedNameAnalysisService()
+    service = name_analysis_service
+    np_svc_prep_data = service.name_processing_service
+    np_svc_prep_data.prepare_data()
+
+    json_data = await request.get_json()
+    list_dist = json_data.get('list_dist')
+    list_desc = json_data.get('list_desc')
+    list_name = json_data.get('list_name')
+    dict_substitution = json_data.get('dict_substitution')
+    dict_synonyms = json_data.get('dict_synonyms')
+    matches = json_data.get('names')[:20]
+
+    app.logger.debug('Number of matches: {0}'.format(len(matches)))
+
+    start_time = time()
+    result = await asyncio.gather(
+        *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data)
+          for
+          name in matches]
+    )
+    print('--- Conflict analysis for {count} matches in {time} seconds ---'.format(
+        count=len(matches),
+        time=(time() - start_time)
+    ))
+    print('--- Average match analysis time: {time} seconds / name ---'.format(
+        time=((time() - start_time) / len(matches))
+    ))
+
+    return jsonify(result=result)
+
+
+@quart_app.after_request
+def after_request(response):
+    if db is not None:
+        print('Closing AutoAnalyze service DB connections')
+        db.engine.dispose()
+
+    return response
+
+
+@quart_app.after_request
+def add_version(response):  # pylint: disable=unused-variable; linter not understanding framework call
+    os.getenv('OPENSHIFT_BUILD_COMMIT', '')
+    return response
+
+    register_shellcontext(quart_app)
+    await quart_app.app_context().push()
+    return quart_app
 
 
 loop = asyncio.get_event_loop()

@@ -17,7 +17,8 @@ from ...common import token_header, claims
                              # ("NO. 295 SCS NO. 003 VENTURES LTD.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
                              # Incorrect Year in name
                              # ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             ("ABC TWO PLUMBING ONE INC.", "ABC PLUMBING & HEATING LTD."),
+                             # Rule 4: 2 additional distinctives make the name to be approved
+                             ("ABC TWO PLUMBING INC.", "ABC PLUMBING & HEATING LTD."),
                              # ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
                              # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
                              # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>

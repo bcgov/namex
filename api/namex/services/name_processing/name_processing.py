@@ -1,9 +1,14 @@
 import re
 import warnings
+import ast
+
+from nltk.stem import porter
 
 from . import LanguageCodes
 from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
-from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning
+from ..name_request.auto_analyse.mixins.get_word_classification_lists import GetWordClassificationListsMixin
+from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning, \
+    get_compound_descriptives
 from namex.services.word_classification.word_classification import WordClassificationService
 from namex.utils.profiling import print_time
 
@@ -28,7 +33,7 @@ Setting the name using NameProcessingService.set_name will clean the name and se
 '''
 
 
-class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
+class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
     @property
     def name_as_submitted(self):
         return self._name_as_submitted
@@ -132,7 +137,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         self.name_original_tokens = None
         self.processed_name = None
         self.name_tokens = None
-        self._compound_descriptive_name_tokens = None
+        self.compound_descriptive_name_tokens = None
         self.name_tokens_search_conflict = None
         self.distinctive_word_tokens = None
         self.descriptive_word_tokens = None
@@ -220,7 +225,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         return exceptions_designation
 
     def exception_designation_stop_word(self, stop_words, all_designations):
-        exception_stopword_designation= []
+        exception_stopword_designation = []
         for word in stop_words:
             for designation in all_designations:
                 if bool(re.search(r'\b{0}\b'.format(word), designation)):
@@ -282,6 +287,25 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
 
         self._designated_all_words = list(set(self._designated_any_words + self._designated_end_words))
         self._designated_all_words.sort(key=len, reverse=True)
+
+    def set_synonyms_dictionary(self, list_name):
+        syn_svc = self.synonym_service
+        for word in list_name:
+            synonym_response = syn_svc.get_word_synonyms(word=word).data
+            if synonym_response:
+                synonym_response.append(word.replace(" ",""))
+                self._synonyms.update({word: list(set(synonym_response))})
+
+    def set_compound_synonyms_dictionary(self, list_name):
+        syn_svc = self.synonym_service
+        self._compound_synonyms.update(get_compound_descriptives(self, list_name, syn_svc, {}))
+
+    def set_substitutions_dictionary(self, list_name):
+        syn_svc = self.synonym_service
+        for word in list_name:
+            substitution_response = syn_svc.get_word_substitutions(word=word).data
+            if substitution_response:
+                self._substitutions[word] = list(set(substitution_response))
 
     def _process_name(self, np_svc_prep_data):
         """

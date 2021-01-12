@@ -23,7 +23,6 @@ class SynonymModelMixin(SynonymServiceMixin):
             else:
                 dict_subs.update({word: [word.lower()]})
 
-        # eg. {'mountain': ['mount', 'mountain', 'mt', 'mtn']} based on list_d
         output = []
         for key in dict_subs:
             output.append({
@@ -47,8 +46,6 @@ class SynonymModelMixin(SynonymServiceMixin):
             else:
                 dict_subs.update({word: None})
 
-        # eg. {'shop': ['beauty', 'store', 'sales', 'reatail'],
-        #         'coffee': ['non-alcoholic-beverages','restaurant']} based on list_d
         output = []
         for key in dict_subs:
             output.append({

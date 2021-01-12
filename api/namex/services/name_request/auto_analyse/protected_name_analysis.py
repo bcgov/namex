@@ -2,6 +2,7 @@ import os
 from datetime import (datetime)
 
 from namex.utils.profiling import print_time
+from namex.constants import DesignationPositionCodes
 
 from . import request_types
 from .name_analysis_director import NameAnalysisDirector
@@ -80,7 +81,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                         [self.get_list_dist_search_conflicts()],
                         [self.get_list_desc_search_conflicts()],
                         [self.get_list_desc()],
-                        self.name_tokens,
+                        self.get_dict_desc(),
+                        self.get_dict_dist(),
+                        self.compound_descriptive_name_tokens,
                         self.processed_name,
                         np_svc.get_stand_alone_words()
                     )
@@ -88,25 +91,27 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                 if not check_conflicts.is_valid:
                     results.append(check_conflicts)
 
-            # check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-            #                                                    self.compound_descriptive_name_tokens, True,
-            #                                                    self.get_designation_end_list_all(),
-            #                                                    self.get_designation_any_list_all(), stop_words_list)
+            check_conflicts_queue = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
+                                                               self.compound_descriptive_name_tokens, True,
+                                                               self.get_designation_end_list_all(),
+                                                               self.get_designation_any_list_all(), stop_words_list)
 
-            # if check_conflicts_queue.is_valid:
-            # check_conflicts_queue = builder.search_conflicts(
-            #     [self.get_list_dist_search_conflicts()],
-            #     [self.get_list_desc_search_conflicts()],
-            #     [self.get_list_desc()],
-            #     self.name_tokens,
-            #     self.processed_name,
-            #     np_svc.get_stand_alone_words(),
-            #     check_name_is_well_formed=False,
-            #     queue=True
-            # )
-            #
-            # if not check_conflicts_queue.is_valid:
-            #     results.append(check_conflicts_queue)
+            if check_conflicts_queue.is_valid:
+                check_conflicts_queue = builder.search_conflicts(
+                    [self.get_list_dist_search_conflicts()],
+                    [self.get_list_desc_search_conflicts()],
+                    [self.get_list_desc()],
+                    self.get_dict_desc(),
+                    self.get_dict_dist(),
+                    self.compound_descriptive_name_tokens,
+                    self.processed_name,
+                    np_svc.get_stand_alone_words(),
+                    check_name_is_well_formed=False,
+                    queue=True
+                )
+
+            if not check_conflicts_queue.is_valid:
+                results.append(check_conflicts_queue)
 
             # TODO: Use the list_name array, don't use a string in the method!
             # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct

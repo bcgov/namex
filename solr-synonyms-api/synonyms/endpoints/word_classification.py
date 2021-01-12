@@ -24,11 +24,11 @@ def validate_request(request):
 class _NameProcessing(Resource):
     @staticmethod
     def get():
-        return ('results', [], 200)
+        return 'results', [], 200
 
 
 @api.route('/', strict_slashes=False, methods=['GET'])
 class _WordClassification(Resource):
     @staticmethod
     def get():
-        return ('results', [], 200)
+        return 'results', [], 200
