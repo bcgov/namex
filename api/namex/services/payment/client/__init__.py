@@ -297,3 +297,8 @@ class SBCPaymentClient(BaseClient):
         request_url = 'payment-requests/{invoice_id}/receipts'
         request_url = request_url.format(invoice_id=invoice_id)
         return self.call_api(HttpVerbs.GET, request_url)
+
+    def cancel_payment(self, invoice_id):
+        request_url = 'payment-requests/{invoice_id}'
+        request_url = request_url.format(invoice_id=invoice_id)
+        return self.call_api(HttpVerbs.DELETE, request_url)

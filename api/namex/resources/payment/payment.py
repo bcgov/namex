@@ -20,7 +20,7 @@ from namex.resources.name_requests.abstract_nr_resource import AbstractNameReque
 
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-from namex.services.payment.payments import get_payment, create_payment, refund_payment
+from namex.services.payment.payments import get_payment, create_payment, refund_payment, cancel_payment
 from namex.services.payment.models import PaymentRequest
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 
@@ -447,7 +447,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             NameRequestActions.CREATE.value: self.complete_reservation_payment,
             NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
             NameRequestActions.REAPPLY.value: self.complete_reapply_payment,
-            NameRequestActions.REQUEST_REFUND.value: self.request_refund
+            NameRequestActions.REQUEST_REFUND.value: self.request_refund,
+            NameRequestActions.CANCEL.value: self.cancel_payment
         }.get(action)(model, payment_id)
 
     def complete_reservation_payment(self, nr_model: RequestDAO, payment_id: int):
@@ -605,4 +606,19 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
                 payment.save_to_db()
 
+        return nr_model
+
+    def cancel_payment(self, nr_model: RequestDAO, payment_id: int):
+        # Cancel payment with specified id.
+        valid_states = [
+            PaymentState.CREATED.value
+        ]
+        for payment in nr_model.payments.all():
+            if payment.id == payment_id and payment.payment_status_code in valid_states:
+                sbc_payment_response = get_payment(payment.payment_token)
+                if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
+                    raise PaymentServiceError(message='Error cancelling payment. Payment is in a completed state!')
+                cancel_payment(payment.payment_token)
+                payment.payment_status_code = PaymentState.CANCELLED.value
+                payment.save_to_db()
         return nr_model
