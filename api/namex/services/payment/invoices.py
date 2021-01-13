@@ -1,4 +1,4 @@
-from pprint import pprint
+from flask import current_app
 
 from .client import SBCPaymentClient
 from .exceptions import SBCPaymentException
@@ -23,7 +23,7 @@ def get_invoice(invoice_id):
         # Get Invoice
         api_response = api_instance.get_invoice(invoice_id)
 
-        pprint(api_response)
+        current_app.logger.debug(api_response)
         return api_response
 
     except Exception as err:
@@ -37,7 +37,7 @@ def get_invoices(payment_identifier):
         # Get Invoices
         api_response = api_instance.get_invoices(payment_identifier)
 
-        pprint(api_response)
+        current_app.logger.debug(api_response)
         return api_response
 
     except Exception as err:

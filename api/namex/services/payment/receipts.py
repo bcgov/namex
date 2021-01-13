@@ -1,5 +1,4 @@
-from pprint import pprint
-from datetime import datetime
+from flask import current_app
 
 from .client import SBCPaymentClient
 from .exceptions import SBCPaymentException
@@ -32,7 +31,7 @@ def get_receipt(payment_identifier):
         # Get receipt for the payment
         api_response = api_instance.get_receipt(payment_identifier)
 
-        pprint(api_response)
+        current_app.logger.debug(api_response)
         return ReceiptResponse(**api_response)
 
     except Exception as err:
