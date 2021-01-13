@@ -72,20 +72,20 @@ class SetDesignationsListsMixin(object):
             raise Exception(
                 'Could not set entity type user designations - entity type [' + entity_type + '] was not found in BC or XPRO entity types!')
 
-        self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
-                                                                          position_code=DesignationPositionCodes.ANY.value,
+        self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_str=entity_type_code.value,
+                                                                          position_str=DesignationPositionCodes.ANY.value,
                                                                           lang=LanguageCodes.ENG.value)
 
-        self._eng_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
-                                                                          position_code=DesignationPositionCodes.END.value,
+        self._eng_designation_end_list_correct = syn_svc.get_designations(entity_type_str=entity_type_code.value,
+                                                                          position_str=DesignationPositionCodes.END.value,
                                                                           lang=LanguageCodes.ENG.value)
 
-        self._fr_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
-                                                                         position_code=DesignationPositionCodes.ANY.value,
+        self._fr_designation_any_list_correct = syn_svc.get_designations(entity_type_str=entity_type_code.value,
+                                                                         position_str=DesignationPositionCodes.ANY.value,
                                                                          lang=LanguageCodes.FR.value)
 
-        self._fr_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
-                                                                         position_code=DesignationPositionCodes.END.value,
+        self._fr_designation_end_list_correct = syn_svc.get_designations(entity_type_str=entity_type_code.value,
+                                                                         position_str=DesignationPositionCodes.END.value,
                                                                          lang=LanguageCodes.FR.value)
 
         self._eng_designation_all_list_correct = self._eng_designation_any_list_correct + self._eng_designation_end_list_correct
@@ -134,7 +134,7 @@ class SetDesignationsListsMixin(object):
         correct_designation_end_list = self._designation_end_list_correct
 
         designation_end_misplaced_list = syn_svc.get_incorrect_designation_end_in_name(tokenized_name=tokenized_name,
-                                                                                       designation_end_list=correct_designation_end_list)
+                                                                                       designation_end_entity_type=correct_designation_end_list)
         self._misplaced_designation_end_list = designation_end_misplaced_list
 
     def _get_designations(self, request_type_list_dict):
@@ -142,18 +142,18 @@ class SetDesignationsListsMixin(object):
 
         for key, value in request_type_list_dict.items():
             if DesignationPositionCodes.END.value in value:
-                self._designation_end_list_all.extend(syn_svc.get_designations(entity_type_code=key,
-                                                                               position_code=DesignationPositionCodes.END.value,
+                self._designation_end_list_all.extend(syn_svc.get_designations(entity_type_str=key,
+                                                                               position_str=DesignationPositionCodes.END.value,
                                                                                lang=LanguageCodes.ENG.value))
-                self._designation_end_list_all.extend(syn_svc.get_designations(entity_type_code=key,
-                                                                               position_code=DesignationPositionCodes.END.value,
+                self._designation_end_list_all.extend(syn_svc.get_designations(entity_type_str=key,
+                                                                               position_str=DesignationPositionCodes.END.value,
                                                                                lang=LanguageCodes.FR.value))
             if DesignationPositionCodes.ANY.value in value:
-                self._designation_any_list_all.extend(syn_svc.get_designations(entity_type_code=key,
-                                                                               position_code=DesignationPositionCodes.ANY.value,
+                self._designation_any_list_all.extend(syn_svc.get_designations(entity_type_str=key,
+                                                                               position_str=DesignationPositionCodes.ANY.value,
                                                                                lang=LanguageCodes.ENG.value))
-                self._designation_any_list_all.extend(syn_svc.get_designations(entity_type_code=key,
-                                                                               position_code=DesignationPositionCodes.ANY.value,
+                self._designation_any_list_all.extend(syn_svc.get_designations(entity_type_str=key,
+                                                                               position_str=DesignationPositionCodes.ANY.value,
                                                                                lang=LanguageCodes.FR.value))
 
         self._designation_end_list_all = sorted(set(self._designation_end_list_all), key=len, reverse=True)

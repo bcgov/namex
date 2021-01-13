@@ -635,26 +635,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return dist_substitution_dict
 
-    """
-    Lucas - this is just in here for reference while merging
-    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
-    def get_substitutions_descriptive(self, w_desc):
-        syn_svc = self.synonym_service
-
-        all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-            list_d=[desc.replace(" ", "") for desc in w_desc],
-            distinctive=False
-        )
-
-        desc_synonym_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-
-        for key, value in desc_synonym_dict.items():
-            if key not in value:
-                value.append(key)
-
-        return desc_synonym_dict
-    """
-
     def get_stand_alone_substitutions(self, desc_synonym_dict, stand_alone):
         for key, value in desc_synonym_dict.items():
             if key in stand_alone:

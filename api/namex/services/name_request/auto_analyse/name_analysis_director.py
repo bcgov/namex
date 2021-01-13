@@ -1,7 +1,5 @@
 import os
 
-from swagger_client import SynonymsApi as SynonymService
-
 from namex.constants import BCUnprotectedNameEntityTypes
 from namex.services.name_processing.mixins.get_synonym_lists import GetSynonymListsMixin
 from namex.services.name_processing.name_processing \
@@ -16,6 +14,8 @@ from . import AnalysisIssueCodes
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 from ..auto_analyse.name_analysis_utils import get_classification
+
+from synonyms.services import SynonymService
 
 '''
 This is the director for AutoAnalyseService.

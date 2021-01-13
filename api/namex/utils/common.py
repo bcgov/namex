@@ -26,7 +26,11 @@ def parse_dict_of_lists(results):
     try:
         output = {}
         for item in results:
-            output[getattr(item, 'key')] = sorted(list(set(getattr(item, 'list'))), key=len, reverse=True)
+            # TODO: This has been adjusted to handle either a dict or an object
+            if isinstance(item, dict):
+                output[item['key']] = sorted(list(set(item['list'])), key=len, reverse=True)
+            else:
+                output[getattr(item, 'key')] = sorted(list(set(getattr(item, 'list'))), key=len, reverse=True)
         return output
     except Exception as err:
         raise err

@@ -87,7 +87,7 @@ class SynonymDesignationMixin(SynonymServiceMixin):
         have to be shown as misplaced.
     '''
 
-    def get_incorrect_designation_end_in_name(self, tokenized_name, designation_end_entity_type):
+    def get_incorrect_designation_end_in_name(self, tokenized_name, designation_end_entity_type: list):
         if not designation_end_entity_type:
             return list()
 

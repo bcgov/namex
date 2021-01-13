@@ -291,7 +291,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin, Get
     def set_synonyms_dictionary(self, list_name):
         syn_svc = self.synonym_service
         for word in list_name:
-            synonym_response = syn_svc.get_word_synonyms(word=word).data
+            synonym_response = syn_svc.get_word_synonyms(word=word)
             if synonym_response:
                 synonym_response.append(word.replace(" ",""))
                 self._synonyms.update({word: list(set(synonym_response))})
@@ -303,7 +303,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin, Get
     def set_substitutions_dictionary(self, list_name):
         syn_svc = self.synonym_service
         for word in list_name:
-            substitution_response = syn_svc.get_word_substitutions(word=word).data
+            substitution_response = syn_svc.get_word_substitutions(word=word)
             if substitution_response:
                 self._substitutions[word] = list(set(substitution_response))
 

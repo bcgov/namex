@@ -97,29 +97,6 @@ def get_all_dict_substitutions(dist_substitution_dict, desc_substitution_dict, l
     return all_substitution_dict
 
 
-# Lucas - this is just in here for reference
-# def get_distinctive_substitutions(syn_svc, list_dist):
-#     all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-#         words=list_dist,
-#         words_are_distinctive=True
-#     ).data
-#
-#     dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
-#
-#     return dist_substitution_dict
-#
-#
-# def get_descriptive_substitutions(syn_svc, list_desc):
-#     all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-#         words=list_desc,
-#         words_are_distinctive=False
-#     ).data
-#
-#     desc_substitution_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
-#
-#     return desc_substitution_dict
-
-
 def lookahead(iterable):
     """Pass through all values from the given iterable, augmented by the
     information if there are more values to come after the current one
@@ -309,7 +286,7 @@ def get_valid_compound_descriptive(syn_svc, original_synonyms_dict, list_compoun
     for compound in list_compound:
         synonym_response = original_synonyms_dict.get(compound, None)
         if not synonym_response:
-            synonym_response = syn_svc.get_word_synonyms(word=compound.replace(" ", "")).data
+            synonym_response = syn_svc.get_word_synonyms(word=compound.replace(" ", ""))
 
         if synonym_response:
             if compound not in synonym_response:
@@ -411,7 +388,7 @@ def get_synonyms_dictionary(syn_svc, synonyms_original_dict, list_words):
         key= get_key_dictionary(word, synonyms_original_dict)
         synonyms = synonyms_original_dict.get(key, None)
         if not synonyms:
-            synonyms = syn_svc.get_word_synonyms(word=word).data
+            synonyms = syn_svc.get_word_synonyms(word=word)
         if synonyms:
             synonyms_dict.update({word: synonyms})
     return synonyms_dict
