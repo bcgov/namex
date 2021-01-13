@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Analyzes a single name."""
+"""
+Analyzes a single name.
+"""
+from time import time
 import itertools
 import logging
 import math
@@ -57,7 +60,6 @@ HIGH_CONFLICT_RECORDS = 20
 
 
 # ok deep function
-@print_time()
 @profile(sort_by='cumulative', lines_to_print=30, strip_dirs=False)
 async def auto_analyze(name: str,
                        name_tokens: list,  # pylint: disable=too-many-locals, too-many-arguments
@@ -70,6 +72,7 @@ async def auto_analyze(name: str,
 
     # print('--- Connection pool status ---')
     # print(db.engine.pool.status())
+    start_time = time()
     """Return a dictionary with name as key and similarity as value, 1.0 is an exact match."""
     logging.getLogger(__name__).debug(
         'name: %s ,  list_name %s,  list_dist: %s, list_desc: %s, dict_subst: %s,  dict_syns: %s',
@@ -158,6 +161,11 @@ async def auto_analyze(name: str,
 
     if similarity >= MINIMUM_SIMILARITY:
         dict_matches_counter.update({name: similarity})
+
+    print('--- Analysis for {name} in {time} seconds ---'.format(
+        time=(time() - start_time),
+        name=name
+    ))
 
     return dict_matches_counter
 

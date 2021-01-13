@@ -74,9 +74,9 @@ async def create_app(run_mode):
 
     @quart_app.after_request
     def after_request(response):
-        if db is not None:
-            print('Closing AutoAnalyze service DB connections')
-            db.engine.dispose()
+        # if db is not None:
+        #     print('Closing AutoAnalyze service DB connections')
+        #     db.engine.dispose()
 
         return response
 
@@ -110,7 +110,9 @@ async def main():
     list_name = json_data.get('list_name')
     dict_substitution = json_data.get('dict_substitution')
     dict_synonyms = json_data.get('dict_synonyms')
-    matches = json_data.get('names')
+    # TODO: Lucas - this limit is temporary we need to throttle the async loops
+    #  that process the names so we don't crash due to too many connections
+    matches = json_data.get('names')[:25]
 
     app.logger.debug('Number of matches: {0}'.format(len(matches)))
 
@@ -143,16 +145,16 @@ async def main():
     dict_all_substitutions = get_substitutions_dictionary(syn_svc, dict_substitution, dict_all_synonyms, list_words)
 
     result = await asyncio.gather(
-        *[auto_analyze(name, name_tokens, list_name , list_dist, list_desc, dict_all_substitutions,
+        *[auto_analyze(name, name_tokens, list_name, list_dist, list_desc, dict_all_substitutions,
                        dict_all_synonyms, dict_all_compound_synonyms, stand_alone_words, name_analysis_service) for
           name, name_tokens in name_tokens_clean_dict.items()]
     )
 
-    print('--- Conflict analysis for {count} matches in {time} seconds ---'.format(
+    print('### Conflict analysis for {count} matches in {time} seconds ###'.format(
         count=len(matches),
         time=(time() - start_time)
     ))
-    print('--- Average match analysis time: {time} seconds / name ---'.format(
+    print('### Average match analysis time: {time} seconds / name ###'.format(
         time=((time() - start_time) / len(matches))
     ))
 
