@@ -134,7 +134,7 @@ def custom_strftime(dt_format, t):
 
 
 def format_payment_time(dt):
-    return custom_strftime('%b {S}, %Y', dt)
+    return dt.strftime('%b %d, %Y')
 
 
 def map_receipt(receipt):
