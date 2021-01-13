@@ -74,9 +74,9 @@ async def create_app(run_mode):
 
     @quart_app.after_request
     def after_request(response):
-        # if db is not None:
-        #     print('Closing AutoAnalyze service DB connections')
-        #     db.engine.dispose()
+        if db is not None:
+            print('Closing AutoAnalyze service DB connections')
+            db.engine.dispose()
 
         return response
 
@@ -99,6 +99,9 @@ async def main():
     """
     The auto analyze service used to analyze an array of names!
     """
+    # db.session.remove()
+    # db.engine.dispose()
+
     name_analysis_service = ProtectedNameAnalysisService()
     syn_svc = SynonymService()
     np_svc_with_prep_data = name_analysis_service.name_processing_service
@@ -112,7 +115,7 @@ async def main():
     dict_synonyms = json_data.get('dict_synonyms')
     # TODO: Lucas - this limit is temporary we need to throttle the async loops
     #  that process the names so we don't crash due to too many connections
-    matches = json_data.get('names')[:25]
+    matches = json_data.get('names')[:50]
 
     app.logger.debug('Number of matches: {0}'.format(len(matches)))
 
@@ -149,6 +152,8 @@ async def main():
                        dict_all_synonyms, dict_all_compound_synonyms, stand_alone_words, name_analysis_service) for
           name, name_tokens in name_tokens_clean_dict.items()]
     )
+
+    # db.session.remove()
 
     print('### Conflict analysis for {count} matches in {time} seconds ###'.format(
         count=len(matches),

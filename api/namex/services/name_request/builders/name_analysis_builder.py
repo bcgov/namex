@@ -34,7 +34,7 @@ Sample builder
 
 class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
     # @print_time()
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name,
                                   processed_name, list_original_name):
         """
@@ -271,8 +271,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return matches_info_dict, matches_compound_info_dict
 
-    @print_time()
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @print_time()
+    # Arturo maybe we can speed this up somehow?
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_conflicts_db(self, dist_substitution_dict, desc_synonym_criteria_dict, desc_synonym_dict,
                          dict_highest_counter, change_filter,
                          list_name, check_name_is_well_formed, queue):
@@ -296,7 +297,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
         return matches
 
     # @print_time()
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def search_exact_match(self, list_dist_words, list_desc_words, list_name, queue=False, end_list_designations=None,
                            any_list_designations=None, stop_words=None):
         result = ProcedureResult()
@@ -515,7 +516,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
 
         return result
 
-    @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
+    # @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
     def get_most_similar_names(self, dict_highest_counter, db_matches, dist_substitution_dict, desc_synonym_dict,
                                list_name):
         auto_analyze_url = current_app.config.get('AUTO_ANALYZE_URL', None)

@@ -8,6 +8,7 @@ from . import porter
 from namex.services.name_request.auto_analyse import DataFrameFields
 
 from namex.utils.common import parse_dict_of_lists
+from namex.utils.profiling import profile, print_time
 
 
 # TODO: Fix caps and stuff...
@@ -204,6 +205,9 @@ def get_conflicts_same_classification(service, name_tokens, processed_name, stan
     return check_conflicts
 
 
+# Arturo maybe we can speed this up somehow?
+# @print_time()
+# @profile(sort_by='cumulative', lines_to_print=10, strip_dirs=True)
 def get_classification(service, match, wc_svc, token_svc, dict_compound_synonyms_all, dict_simple_synonyms_all={},
                        conflict=False):
     # Update name tokenization based on compound synonyms

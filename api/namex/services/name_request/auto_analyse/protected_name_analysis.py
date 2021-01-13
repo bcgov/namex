@@ -38,7 +38,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
     def __init__(self):
         super(ProtectedNameAnalysisService, self).__init__()
 
-    @print_time()
+    # @print_time()
     def do_analysis(self):
         """
         do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.

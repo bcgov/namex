@@ -143,7 +143,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin, Get
         self.descriptive_word_tokens = None
         self.unclassified_word_tokens = None
 
-    @print_time()
+    # @print_time()
     def set_name(self, name, np_svc_prep_data):
         """
         Set and process a submitted name string using the process_name class method.

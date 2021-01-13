@@ -62,8 +62,10 @@ class Config:  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME
     )
-    # SQLALCHEMY_POOL_SIZE = 500  # Disable pooling
+    # SQLALCHEMY_POOL_SIZE = 25  # Disable pooling if using NullPool
+    # SQLALCHEMY_MAX_OVERFLOW = 75  # Disable pooling if using NullPool
     # SQLALCHEMY_POOL_RECYCLE = 5  # Auto recycle connections after 5s of inactivity
+    # SQLALCHEMY_POOL_TIMEOUT = 5  # Auto timeout connections after 5s of inactivity
     SQLALCHEMY_ENGINE_OPTIONS = {
         'poolclass': NullPool
     }
@@ -105,6 +107,7 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     # Set this in your .env to debug SQL Alchemy queries (for local development)
     SQLALCHEMY_ECHO = os.getenv('DEBUG_SQL_QUERIES', None)
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True  # TODO: Just trying this to get DB connections to close...
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
         user=DB_USER,
         password=DB_PASSWORD,

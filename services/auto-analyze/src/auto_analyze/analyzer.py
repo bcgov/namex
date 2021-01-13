@@ -38,6 +38,8 @@ from namex.utils.profiling import print_time, profile
 
 from nltk.stem import PorterStemmer
 
+from . import db
+
 porter = PorterStemmer()
 
 # TODO: Swap this out for the actual service we don't want to call service via API, it's too slow
@@ -60,7 +62,7 @@ HIGH_CONFLICT_RECORDS = 20
 
 
 # ok deep function
-@profile(sort_by='cumulative', lines_to_print=30, strip_dirs=False)
+@profile(sort_by='cumulative', lines_to_print=100, strip_dirs=False)
 async def auto_analyze(name: str,
                        name_tokens: list,  # pylint: disable=too-many-locals, too-many-arguments
                        list_name: list, list_dist: list,
