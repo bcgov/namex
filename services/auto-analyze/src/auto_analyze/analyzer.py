@@ -18,6 +18,7 @@ from time import time
 import itertools
 import logging
 import math
+import re
 from collections import Counter
 
 from synonyms.services import SynonymService
@@ -42,8 +43,6 @@ from . import db
 
 porter = PorterStemmer()
 
-# TODO: Swap this out for the actual service we don't want to call service via API, it's too slow
-synonym_service = SynonymService()
 name_processing_service = NameProcessingService()
 name_analysis_service = ProtectedNameAnalysisService()
 builder = NameAnalysisBuilder(name_analysis_service)
@@ -133,9 +132,28 @@ async def auto_analyze(name: str,
                                                 dist_db_substitution_dict, True)
 
         if all(value == OTHER_W_DIST for value in vector2_dist.values()):
-            service._list_dist_words, list_dist = check_compound_dist(service.get_list_dist(), list_dist)
-            vector2_dist, entropy_dist = get_vector(service.get_list_dist(), list_dist,
+            list_dist_conflict, list_dist_original = split_compound_dist(service.get_list_dist(), list_dist)
+
+            list_dist_stem = [porter.stem(word) for word in list_dist_original]
+            vector1_dist = text_to_vector(list_dist_stem)
+
+            vector2_dist, entropy_dist = get_vector(list(filter(None, list_dist_conflict)), list(filter(None, list_dist_original)),
                                                     dist_db_substitution_dict, True)
+
+        if entropy_dist <= 0.5:
+            match_list_desc = list(service.get_list_desc())
+            match_list_dist_desc = service.get_list_dist() + list(match_list_desc[0:1])
+            vector2_dist_tmp, entropy_dist_tmp, service._list_desc_words = check_hybrid_dist(
+                list_dist=match_list_dist_desc,
+                list_desc=service.get_list_desc(),
+                original_class_list=list_dist,
+                class_subs_dict={})
+
+            list_dist_stem = [porter.stem(word) for word in list_dist]
+            vector1_dist = text_to_vector(list_dist_stem)
+
+            vector2_dist= vector2_dist_tmp if vector2_dist_tmp else vector2_dist
+            entropy_dist= entropy_dist_tmp if entropy_dist_tmp else entropy_dist
 
         similarity_dist = round(get_similarity(vector1_dist, vector2_dist, entropy_dist), 2)
 
@@ -206,7 +224,7 @@ def get_vector(conflict_class_list, original_class_list, class_subs_dict, dist=F
     return vector, entropy_score
 
 
-def check_compound_dist(list_dist_conflict, list_dist):
+def split_compound_dist(list_dist_conflict, list_dist):
     """Return split compound words in distinctive found in conflict and original name"""
     list_compound_dist = sorted(list_dist_conflict + list_dist, key=len)
 
@@ -214,11 +232,72 @@ def check_compound_dist(list_dist_conflict, list_dist):
     str_dist = ' '.join(list_dist)
 
     compound_alternators = '|'.join(map(re.escape, list_compound_dist))
-    regex = re.compile(r'({0})'.format(compound_alternators))
-    compound_dist_conflict = regex.findall(str_dist_conflict)
-    compound_dist = regex.findall(str_dist)
 
-    return compound_dist_conflict, compound_dist
+    compound_dist_conflict = re.sub(r'({})'.format(compound_alternators),r'\1 ',str_dist_conflict,0, re.IGNORECASE)
+    compound_dist = re.sub(r'({})'.format(compound_alternators), r'\1 ', str_dist, 0, re.IGNORECASE)
+
+    return list(filter(None, list(compound_dist_conflict.strip().split(" ")))), list(filter(None, list(compound_dist.strip().split(" "))))
+
+
+def get_compound_distinctive(list_dis_conflict, list_base):
+    compound_list, alternators= [],[]
+    if list_dis_conflict.__len__() == 2:
+        compound_list.append("".join(list_dis_conflict))
+    else:
+        for i in range(1, len(list_dis_conflict)):
+            compound_list.extend([word for word in subsequences(list_dis_conflict, i)])
+
+    for a in compound_list:
+        for b in list_base:
+            if porter.stem(a) in b:
+                alternators.append(a)
+
+    alternators = sorted(alternators, key=len, reverse=True)
+
+    dist_str_conflict= "".join(list_dis_conflict)
+
+    alternators = '|'.join(map(re.escape, alternators))
+    list_dist_split = re.sub(r'({})'.format(alternators), r'\1 ', dist_str_conflict, 0, re.IGNORECASE)
+
+    return list_dist_split
+
+
+def check_hybrid_dist(list_dist, list_desc, original_class_list, class_subs_dict):
+    """Return a vector with distinctive compound items and updated list of descriptives."""
+    vector2_dist = {}
+    entropy_dist = 0.0
+    results = {}
+    for i in range(2, len(list_dist) + 1):
+        compound_space_list = [x for x in subsequences(list_dist, i)]  # pylint: disable=unnecessary-comprehension
+        compound = [x.replace(' ', '') for x in compound_space_list]
+        vector2_dist, entropy_dist = get_vector(compound, original_class_list, class_subs_dict)
+
+        if entropy_dist > 0:
+            results.update({entropy_dist: vector2_dist})
+
+    # Update descriptive list
+    if list_desc and results:
+        token_list = []
+        for word in compound_space_list:
+            token_list.extend(word.split())
+        intersection = [x for x in list_desc if x in token_list]
+        for word in intersection:
+            list_desc.remove(word)
+
+    # Return the highest entropy and vector_dist
+    if results:
+        entropy_dist = max(results, key=float)
+        vector2_dist = results[entropy_dist]
+    return vector2_dist, entropy_dist, list_desc
+
+
+def get_intersection(list_desc, list_desc_conflict):
+    """Returns intersection of descriptive in original name with descriptives in conflicted name."""
+    intersection=[]
+    for desc in list_desc:
+        if desc in list_desc_conflict:
+            intersection.append(desc)
+    return intersection
 
 
 def text_to_vector(list_name):
@@ -336,7 +415,7 @@ def get_compound_synonyms(np_svc, name_tokens_clean_dict, syn_svc, dict_all_simp
 
 
 def update_name_tokens(list_all_compound_synonyms, name_tokens_clean_dict):
-    """Update tokenization of name_tokens based on compound synonyms"""
+    """Update tokenization of name_tokens based on compound synonyms."""
     compound_name_tokens_clean_dict = {}
     for key, value in name_tokens_clean_dict.items():
         compound_name = update_compound_tokens(list_all_compound_synonyms, value)
@@ -346,7 +425,7 @@ def update_name_tokens(list_all_compound_synonyms, name_tokens_clean_dict):
 
 
 def get_substitutions(list_dist, all_substitution_dict):
-    """Lookup in local dictionary substitutions for distinctive / synonyms for descriptive terms"""
+    """Lookup in local dictionary substitutions for distinctive / synonyms for descriptive terms."""
     substitution_dict = {}
     for dist in list_dist:
         substitutions = all_substitution_dict.get(dist)
@@ -362,10 +441,12 @@ def get_substitutions(list_dist, all_substitution_dict):
 def get_substitutions_dictionary(syn_svc, dict_substitution, dict_synonyms, list_words):
     """Get substitutions from solr-synonyms-api if not found in local dictionary."""
     substitutions_dict = {}
+    synonyms_all = list(dict_synonyms.keys()) + get_flat_list(list(dict_synonyms.values()))
+
     for word in list_words:
         substitutions = dict_substitution.get(word, None)
-        if not substitutions and word not in dict_synonyms:
-            substitutions = syn_svc.get_word_substitutions(word=word)
+        if not substitutions and word not in synonyms_all:
+            substitutions = syn_svc.get_word_substitutions(word=word).data
         if substitutions:
             substitutions_dict.update({word: substitutions})
 
