@@ -5,6 +5,7 @@ ipython-sql
 simplejson
 pandas
 matplotlib
+numpy
 spacy
 papermill
 schedule
@@ -23,4 +24,3 @@ httpx
 toolz
 nltk
 werkzeug
-numpy
