@@ -47,7 +47,7 @@ to setup your local development environment.
    ```
 
 4. Create pipeline and need to start pipeline manually
-5. 
+
    It will build image as a tag 'latest' and then tag it to 'dev'
    or tag it from 'dev' to 'test'
    or tag it from 'test' to 'prod'  
