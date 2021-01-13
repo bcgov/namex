@@ -15,6 +15,5 @@ jsonpickle==1.4.1
 lxml==4.6.1
 ../../api
 ../../solr-synonyms-api
-git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
-git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
-git+https://github.com/bcgov/namex-payment-api-py-client.git@dev#egg=openapi_client
+# Try to fix a dep in namex
+Flask-Caching==1.9.0

@@ -385,7 +385,7 @@ def remove_double_letters_list_dist_words(list_dist, name_tokens, dist_substitut
 def get_synonyms_dictionary(syn_svc, synonyms_original_dict, list_words):
     synonyms_dict = {}
     for word in list_words:
-        key= get_key_dictionary(word, synonyms_original_dict)
+        key = get_key_dictionary(word, synonyms_original_dict)
         synonyms = synonyms_original_dict.get(key, None)
         if not synonyms:
             synonyms = syn_svc.get_word_synonyms(word=word)

@@ -56,7 +56,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
         return response
 
-
     register_shellcontext(app)
 
     return app

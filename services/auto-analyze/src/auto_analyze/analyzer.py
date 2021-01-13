@@ -15,10 +15,11 @@
 import itertools
 import logging
 import math
-from time import time
-import re
 from collections import Counter
 
+from synonyms.services import SynonymService
+from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
+from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from namex.services.name_processing.name_processing import NameProcessingService
 from namex.services.name_request.auto_analyse.name_analysis_utils import (
     get_classification,
@@ -30,18 +31,14 @@ from namex.services.name_request.auto_analyse.name_analysis_utils import (
     update_compound_tokens
 )
 
-from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
-from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from namex.utils.profiling import print_time, profile
-from nltk.stem import PorterStemmer
-from swagger_client import SynonymsApi as SynonymService
-from . import db
 
+from nltk.stem import PorterStemmer
 
 porter = PorterStemmer()
 
 # TODO: Swap this out for the actual service we don't want to call service via API, it's too slow
-synonym_service = SynonymApiService()
+synonym_service = SynonymService()
 name_processing_service = NameProcessingService()
 name_analysis_service = ProtectedNameAnalysisService()
 builder = NameAnalysisBuilder(name_analysis_service)
@@ -370,7 +367,7 @@ def get_substitutions_dictionary(syn_svc, dict_substitution, dict_synonyms, list
     for word in list_words:
         substitutions = dict_substitution.get(word, None)
         if not substitutions and word not in dict_synonyms:
-            substitutions = syn_svc.get_word_substitutions(word=word).data
+            substitutions = syn_svc.get_word_substitutions(word=word)
         if substitutions:
             substitutions_dict.update({word: substitutions})
 
