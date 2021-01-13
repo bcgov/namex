@@ -404,6 +404,8 @@ def add_desc_in_dict_synonyms(dict_synonyms, list_desc, list_dist, list_none, li
         if word in list_desc or word in list_none:
             key = get_key_dictionary(word, dict_synonyms)
             values = dict_synonyms.get(key)
+            if not values:
+                values = dict_synonyms.get(word)
             if values:
                 dct.update({word: values})
             elif word not in list_dist:

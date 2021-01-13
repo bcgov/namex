@@ -258,8 +258,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder, ABC):
                                                       change_filter, compound_list_name, check_name_is_well_formed,
                                                       queue))
 
-            unique_matches_compound = self.get_unique_matches(matches, matches_compound)
-            matches_compound_info_dict = {'matches': unique_matches_compound,
+            matches_compound_info_dict = {'matches': matches_compound,
                                           'dist_dict': dist_compound_dict,
                                           'desc_criteria_dict': desc_synonym_criteria_dict,
                                           'desc_dict': desc_synonym_dict,
