@@ -74,9 +74,9 @@ async def create_app(run_mode):
 
     @quart_app.after_request
     def after_request(response):
-        # if db is not None:
-        #    print('Closing AutoAnalyze service DB connections')
-        #    db.engine.dispose()
+        if db is not None:
+            print('Closing AutoAnalyze service DB connections')
+            db.engine.dispose()
 
         return response
 
