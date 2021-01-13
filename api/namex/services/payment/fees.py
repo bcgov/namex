@@ -1,4 +1,4 @@
-from pprint import pprint
+from flask import current_app
 
 from .client import SBCPaymentClient
 from .exceptions import SBCPaymentException
@@ -27,7 +27,7 @@ def calculate_fees(req):
             priority=req.priority
         )
 
-        pprint(api_response)
+        current_app.logger.debug(api_response)
         return api_response
 
     except Exception as err:
