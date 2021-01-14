@@ -21,7 +21,7 @@ objects:
           spec:
             containers:
             - name: "notebook-report"
-              image: "docker-registry.default.svc:5000/servicebc-ne-tools/notebook-report-runtime:${ENV_TAG}"
+              image: "docker-registry.default.svc:5000/servicebc-ne-tools/notebook-report:${ENV_TAG}"
               imagePullPolicy: Always
               args:
               - /bin/sh

@@ -16,12 +16,11 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from namex.utils.logging import setup_logging
+from util.logging import setup_logging
 from flask import Flask, g, current_app
 from config import Config
-from namex import db
 
-setup_logging()  # important to do this first
+setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
 
 # Notebook Scheduler
 # ---------------------------------------
@@ -34,7 +33,7 @@ snapshotDir = 'snapshots'
 def create_app(config=Config):
     app = Flask(__name__)
     app.config.from_object(config)
-    db.init_app(app)
+    # db.init_app(app)
     app.app_context().push()
     current_app.logger.debug('created the Flask App and pushed the App Context')
 

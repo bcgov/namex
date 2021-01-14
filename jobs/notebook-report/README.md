@@ -46,17 +46,14 @@ to setup your local development environment.
     | oc apply -f -
    ```
 
-4. Create runtime image
+4. Create pipeline and need to start pipeline manually
+
+   It will build image as a tag 'latest' and then tag it to 'dev'
+   or tag it from 'dev' to 'test'
+   or tag it from 'test' to 'prod'  
 
    ```sh
-   oc create imagestream notebook-report-runtime
-   oc process -f notebook-report-runtime-bc-template.json \
-    | oc apply -f -
-   ```
-  
-5. Create pipeline and need to start pipeline manually
 
-   ```sh
    oc process -f notebook-report-pipeline.json \
         -p TAG_NAME=dev \
         -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
@@ -81,7 +78,7 @@ to setup your local development environment.
 
 3. Create cron
 
-   ```sh      
+   ```sh
    oc process -f cron-notebook-report.yml \
         -p ENV_TAG=dev \
     | oc apply -f -
