@@ -598,6 +598,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             PaymentState.COMPLETED.value,
             PaymentState.PARTIAL.value
         ]
+        if nr_model.stateCd not in [State.DRAFT]:
+            raise PaymentServiceError(message='Invalid NR state for cancel and refund')
         # Cancel any payments associated with the NR
         for payment in nr_model.payments.all():
             if payment.payment_status_code in valid_states and payment.payment_id == payment_id:
