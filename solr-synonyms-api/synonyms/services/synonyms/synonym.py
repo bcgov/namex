@@ -225,16 +225,11 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     '''
 
     def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
-        stand_alone_list = self.get_standalone()
-        stand_alone_list.sort(key=len, reverse=True)
-
         designation_all_regex = '|'.join(designation_all)
-        # stand_alone_regex = '$|'.join(stand_alone_list) + '$'
         # prefixes = '|'.join(prefix_list)
 
         ordinal_suffixes = 'ST|[RN]D|TH'
         internet_domains = '.COM|.ORG|.NET|.EDU'
-        # stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|ENTERPRISES$|INDUSTRIES$'
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
         # regex_prefixes is called in namex api before remove french

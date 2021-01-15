@@ -113,9 +113,7 @@ async def main():
     list_name = json_data.get('list_name')
     dict_substitution = json_data.get('dict_substitution')
     dict_synonyms = json_data.get('dict_synonyms')
-    # TODO: Lucas - this limit is temporary we need to throttle the async loops
-    #  that process the names so we don't crash due to too many connections
-    matches = json_data.get('names')[:50]
+    matches = json_data.get('names')
 
     app.logger.debug('Number of matches: {0}'.format(len(matches)))
 
