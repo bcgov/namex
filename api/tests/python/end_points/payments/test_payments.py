@@ -1,17 +1,19 @@
-import pytest
 import json
+from unittest.mock import patch
 
-from namex.constants import NameRequestPatchActions, NameRequestPaymentActions, PaymentState
-from namex.models import Request, State, Payment
+import pytest
 
-from .common import API_BASE_URI, API_BASE_NAMEREQUEST_URI
-# Import token and claims if you need it
-# from ..common import token_header, claims
-from ..common.http import build_test_query, build_request_uri
-from ..common.logging import log_request_path
-
-from tests.python.end_points.name_requests.test_setup_utils.test_helpers import create_draft_nr
+from namex.constants import (NameRequestPatchActions,
+                             NameRequestPaymentActions, PaymentState)
+from namex.models import Payment, Request, State
+from namex.services.payment.client import SBCPaymentClient
 from tests.python.end_points.common.http import get_test_headers
+from tests.python.end_points.name_requests.test_setup_utils.test_helpers import \
+    create_draft_nr
+
+from ..common.http import build_request_uri, build_test_query
+from ..common.logging import log_request_path
+from .common import API_BASE_NAMEREQUEST_URI, API_BASE_URI
 
 # Define our data
 # Check NR number is the same because these are PATCH and call change_nr
@@ -390,6 +392,7 @@ def test_create_payment(client):
     }
 
     payment = execute_create_payment(client, create_payment_request)
+    assert payment['action'] == 'CREATE'
     return payment
 
 
@@ -426,7 +429,6 @@ def test_payment_refund(client):
     :return:
     """
     try:
-        test_payment_fees(client)
         payment = test_create_payment(client)
         payment_id = payment['id']
         nr_id = payment['nrId']
@@ -446,64 +448,117 @@ def test_payment_refund(client):
 
         assert payment_id == completed_payment['id']
 
-        updated_nr = execute_refund_payment(client, payment)
-
-        assert updated_nr.get('stateCd') == State.REFUND_REQUESTED
-        # Make sure there are no actions, this state is identical to CANCELLED except there's a refund request too
-        assert updated_nr.get('actions') is None
-
-        # Get any payments and make sure they
-        payments = execute_get_payments(client, completed_payment['nrId'])
-        assert payments and isinstance(payments, list) and len(payments) == 1
-        assert payments[0]['statusCode'] == State.REFUND_REQUESTED
+        with patch.object(SBCPaymentClient, 'refund_payment', return_value={}):
+            execute_refund_payment(client, payment)
+            # Get any payments and make sure they
+            payments = execute_get_payments(client, completed_payment['nrId'])
+            assert payments and isinstance(payments, list) and len(payments) == 1
+            assert payments[0]['statusCode'] == State.REFUND_REQUESTED
     except Exception as err:
         print(repr(err))
         raise err
 
 
-def test_cancel_and_refund(client):
+def test_cancel_payment(client):
+    """
+    Assert that a payment record gets cancelled correctly.
+    """
     try:
-        test_payment_fees(client)
         payment = test_create_payment(client)
-        payment_id = payment['id']
-        nr_id = payment['nrId']
+        with patch.object(SBCPaymentClient, 'cancel_payment', return_value={}):
+            headers = get_test_headers()
+            request_uri = API_BASE_URI + str(payment.get('nrId')) + '/payment/' + str(payment.get('id')) + '/' + \
+                          NameRequestPaymentActions.CANCEL.value
+            test_params = [{}]
+            query = build_test_query(test_params)
+            path = build_request_uri(request_uri, query)
+            log_request_path(path)
 
-        # Get the NR, we created one when we generated the test payment
-        # nr = Request.query.get(payment['nrId'])
+            response = client.patch(path, data={}, headers=headers)
+            assert response.status_code == 200
 
-        # Fire off the request to complete the payment, just to test that the endpoint is there and runs,
-        # we will not actually be able to complete the payment without a browser (at this time anyway)
-        execute_complete_payment(client, payment, NameRequestPaymentActions.COMPLETE.value)
-        # Manually update the Payment, setting the stateCd to COMPLETE
-        payment_model = Payment.query.get(payment_id)
-        payment_model.payment_status_code = PaymentState.COMPLETED.value
-        payment_model.save_to_db()
-        # Get the 'completed' payment
-        completed_payment = execute_get_payment(client, nr_id, payment_id)
-
-        assert payment_id == completed_payment['id']
-
-        updated_nr = execute_cancel_and_refund_all_payments(client, completed_payment['nrId'])
-
-        assert updated_nr.get('stateCd') == State.REFUND_REQUESTED
-        # Make sure there are no actions, this state is identical to CANCELLED except there's a refund request too
-        assert updated_nr.get('actions') is None
-
-        # Get any payments and make sure they
-        payments = execute_get_payments(client, completed_payment['nrId'])
-        assert payments and isinstance(payments, list) and len(payments) == 1
-        assert payments[0]['statusCode'] == State.REFUND_REQUESTED
+            # Get namex payment and ensure that it is in a cancelled state
+            payments = execute_get_payments(client, payment['nrId'])
+            assert payments and isinstance(payments, list) and len(payments) == 1
+            assert payments[0]['statusCode'] == State.CANCELLED
     except Exception as err:
         print(repr(err))
         raise err
 
 
-@pytest.mark.skip
 def test_payment_receipt(client):
     try:
-        test_payment_completion(client)
-        # TODO: Not sure how to test this... still working on it...
-        # payment_receipt = execute_get_receipt(client, payment['id'])
+        test_payment_fees(client)
+        payment = test_create_payment(client)
+        mock_receipt_response = {
+           "bcOnlineAccountNumber": "None",
+           "filingIdentifier": "None",
+           "invoice": {
+              "_links": {
+                 "collection": "/api/v1/payment-requests/6627",
+                 "self": "/api/v1/payment-requests?invoice_id=6627"
+              },
+              "businessIdentifier": "NR 3768105",
+              "corpTypeCode": "NRO",
+              "createdBy": "SERVICE-ACCOUNT-NAME-REQUEST-SERVICE-ACCOUNT",
+              "createdName": "None None",
+              "createdOn": "2021-01-14T23:52:05.531317+00:00",
+              "id": 6627,
+              "lineItems":[
+                 {
+                    "description": "Name Request fee",
+                    "filingFees": 30.0,
+                    "futureEffectiveFees": 0.0,
+                    "gst": 0.0,
+                    "id": 8249,
+                    "priorityFees": 0.0,
+                    "pst": 0.0,
+                    "quantity": 1,
+                    "serviceFees": 1.5,
+                    "statusCode": "ACTIVE",
+                    "total": 30.0,
+                    "waivedBy": "None",
+                    "waivedFees": 0.0
+                 }
+              ],
+              "paid": 31.5,
+              "paymentMethod": "DIRECT_PAY",
+              "receipts": [
+                 {
+                    "id": 3360,
+                    "receiptAmount": 31.5,
+                    "receiptDate": "2021-01-14T00:00:00+00:00",
+                    "receiptNumber": "1234"
+                 }
+              ],
+              "references": [
+                 {
+                    "id": 6578,
+                    "invoiceNumber": "1123",
+                    "statusCode": "COMPLETED"
+                 }
+              ],
+              "refund": 0.0,
+              "serviceFees": 1.5,
+              "statusCode": "COMPLETED",
+              "total": 31.5,
+              "updatedName": "None None",
+              "updatedOn": "2021-01-14T23:52:56.810045+00:00"
+           },
+           "invoiceNumber": "1234",
+           "paymentMethod": "Credit Card",
+           "receiptNumber": "123"
+        }
+
+        with patch.object(SBCPaymentClient, 'get_receipt', return_value=mock_receipt_response):
+            request_uri = API_BASE_URI + str(payment.get('id')) + '/receipt'
+            query = build_test_query([{}])
+            path = build_request_uri(request_uri, query)
+            log_request_path(path)
+
+            response = client.get(path)
+
+            assert response.status_code == 200
     except Exception as err:
         print(repr(err))
         raise err

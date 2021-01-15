@@ -602,7 +602,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             raise PaymentServiceError(message='Invalid NR state for cancel and refund')
         # Cancel any payments associated with the NR
         for payment in nr_model.payments.all():
-            if payment.payment_status_code in valid_states and payment.payment_id == payment_id:
+            if payment.payment_status_code in valid_states and payment.id == payment_id:
                 # refund_payment(payment.payment_token, {'reason': 'Name Request user requested refund'})
                 refund_payment(payment.payment_token, {})
                 payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
