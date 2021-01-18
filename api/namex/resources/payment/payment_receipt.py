@@ -94,8 +94,7 @@ class PaymentReceipt(Resource):
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), 400
 
             receipt_response = get_receipt(payment.payment_token)
-
-            if not receipt_response:
+            if receipt_response is None:
                 return jsonify(message=MSG_NOT_FOUND), 404  # TODO: What if we have a record?
 
             response = make_response(receipt_response, 200)

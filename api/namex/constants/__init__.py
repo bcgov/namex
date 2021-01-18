@@ -420,6 +420,7 @@ class NameRequestPaymentActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
     COMPLETE = NameRequestActions.CREATE.value
     REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
+    CANCEL = NameRequestActions.CANCEL.value
 
 
 class NameRequestPendingPaymentActions(AbstractEnum):
