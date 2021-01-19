@@ -13,24 +13,24 @@ from ...common import token_header, claims
 
 @pytest.mark.parametrize("name, expected",
                          [
-                             # ("NO. 295 CATHEDRAL VENTURES LTD.", "CATHEDRAL HOLDINGS LTD."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             # ("NO. 295 SCS NO. 003 VENTURES LTD.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             # Incorrect Year in name
-                             # ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
-                             # Rule 4: 2 additional distinctives make the name to be approved
-                             ("ABC TWO PLUMBING INC.", "ABC PLUMBING & HEATING LTD."),
-                             # ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
-                             # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>
+                             # # ("NO. 295 CATHEDRAL VENTURES LTD.", "CATHEDRAL HOLDINGS LTD."), # To be fixed with 4844:FixesFromUATRejectionTesting
+                             # # ("NO. 295 SCS NO. 003 VENTURES LTD.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
+                             # # Incorrect Year in name
+                             # # ("2000 ARMSTRONG -- PLUMBING 2020 LTD.", "ARMSTRONG PLUMBING & HEATING LTD."),
+                             # # Rule 4: 2 additional distinctives make the name to be approved
+                             # ("ABC TWO PLUMBING INC.", "ABC PLUMBING & HEATING LTD."),
+                             # # ("SCS HOLDINGS INC.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
+                             # # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
+                             # # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>
                              ("RE/MAX LUMBY INC.", "REMAX LUMBY"),
-                             # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
-                             # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>
-                             ("RE MAX LUMBY INC.", "REMAX LUMBY"),
-                             ("468040 B.C. LTD.", "468040 BC LTD."),
-                             # ("S, C & S HOLDINGS INC.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
-                             # ENGINEERING not found in synonyms, then considered a distintive, the only match obtained is
-                             # EQTEC SOLUTIONS LTD. which is not close enough with current similarity score (0.6 vs 0.67 -->threshold)
-                             # ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.") # To be fixed with 4844:FixesFromUATRejectionTesting
+                             # # NO LONGER VALID TEST SCENARIO, LUMBY IS NOT SYNONYM, THEN IT IS DISTINCTIVE AND IT
+                             # # DOES NOT PASS WELL FORMED NAME DUE TO <DIST><DIST>
+                             # ("RE MAX LUMBY INC.", "REMAX LUMBY"),
+                             # ("468040 B.C. LTD.", "468040 BC LTD."),
+                             # # ("S, C & S HOLDINGS INC.", "SCS SOLUTIONS INC."), # To be fixed with 4844:FixesFromUATRejectionTesting
+                             # # ENGINEERING not found in synonyms, then considered a distintive, the only match obtained is
+                             # # EQTEC SOLUTIONS LTD. which is not close enough with current similarity score (0.6 vs 0.67 -->threshold)
+                             # # ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.") # To be fixed with 4844:FixesFromUATRejectionTesting
                          ]
                          )
 @pytest.mark.xfail(raises=ValueError)
@@ -65,8 +65,8 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
     save_words_list_name(conflict_list_db)
 
     # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+    # token = jwt.create_jwt(claims, token_header)
+    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = [
         {
@@ -81,7 +81,7 @@ def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt,
         query = '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
         path = ENDPOINT_PATH + '?' + query
         print('\n' + 'request: ' + path + '\n')
-        response = client.get(path, headers=headers)
+        response = client.get(path, headers={})  # response = client.get(path, headers=headers)
         payload = jsonpickle.decode(response.data)
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):

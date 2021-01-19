@@ -14,8 +14,8 @@ from ...common import token_header, claims
 @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_not_classified_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
-    token = jwt.create_jwt(claims, token_header)
-    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+    # token = jwt.create_jwt(claims, token_header)
+    # headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
 
     test_params = [
         {
@@ -31,7 +31,7 @@ def test_add_descriptive_word_not_classified_request_response(client, jwt, app):
 
         path = ENDPOINT_PATH + '?' + query
         print('\n' + 'request: ' + path + '\n')
-        response = client.get(path, headers=headers)
+        response = client.get(path, headers={})  # response = client.get(path, headers=headers)
         payload = jsonpickle.decode(response.data)
         print("Assert that the payload contains issues")
         if isinstance(payload.get('issues'), list):
