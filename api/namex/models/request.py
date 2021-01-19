@@ -174,8 +174,8 @@ class Request(db.Model):
 
         return {
             'id': self.id,
-            'submittedDate': self.submittedDate,
-            'lastUpdate': self.lastUpdate,
+            'submittedDate': self.submittedDate.isoformat(),
+            'lastUpdate': self.lastUpdate.isoformat(),
             'userId': '' if (self.activeUser is None) else self.activeUser.username,
             'submitter_userid': '' if (self.submitter is None) else self.submitter.username,
             # TODO: Lucas added stateCd not sure why when we're mapping to json we're sending back 'state' and not 'stateCd'
