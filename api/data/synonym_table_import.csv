@@ -1,0 +1,944 @@
+1,Numbers Sub,"10, 10t, 10th, onezero, onezeroth, ten, tenth, x","10, 10t, 10th, onezero, onezeroth, ten, tenth, x",This is a test,t
+2,Numbers Sub,"11, 11th, eleven, eleventh, oneone, oneoneth, xi","11, 11th, eleven, eleventh, oneon, oneoneth, xi",,t
+3,Numbers Sub,"12, 12th, onetwo, onetwoth, twelfth, twelve, twelveth, xii","12, 12th, onetwo, onetwoth, twelfth, twelv, twelveth, xii",,t
+4,Numbers Sub,"13, 13th, onethree, onethreeth, thirteen, thirteenth, xiii","13, 13th, onethre, onethreeth, thirteen, thirteenth, xiii",,t
+5,Numbers Sub,"14, 14th, fourteen, fourtenth, onefour, onefourth, xiv","14, 14th, fourteen, fourtenth, onefour, onefourth, xiv",,t
+6,Numbers Sub,"15, 15th, fifteen, fiftenth, onefive, onefiveth, xv","15, 15th, fifteen, fiftenth, onef, onefiveth, xv",,t
+7,Numbers Sub,"16, 16th, onesix, onesixth, sixteen, sixtenth, xvi","16, 16th, onesix, onesixth, sixteen, sixtenth, xvi",,t
+8,Numbers Sub,"17, 17th, oneseven, oneseventh, seventeen, seventeenth, xvii","17, 17th, oneseven, oneseventh, seventeen, seventeenth, xvii",,t
+9,Numbers Sub,"18, 18th, eighteen, eightenth, oneight, oneighth, xviii","18, 18th, eighteen, eightenth, oneight, oneighth, xviii",,t
+10,Numbers Sub,"19, 19th, nineteen, ninetenth, onenine, onenineth, xix","19, 19th, nineteen, ninetenth, onenin, onenineth, xix",,t
+11,Numbers Sub,"1st, first, onest","1st, first, onest",,t
+12,Aboriginal Sub,"1stnation, 1stpeople, aboriginal, firstnation, firstpeople, indian, indigenous, metis, native","1stnation, 1stpeopl, aborigin, firstnat, firstpeopl, indian, indigen, meti, nativ",,t
+13,Numbers Sub,"21, 21st, twentyfirst, twentyone, twone, twonest, xxi","21, 21st, twentyfirst, twentyon, twone, twonest, xxi",,t
+14,Numbers Sub,"22, 22nd, twentysecond, twentytwo, twotwo, twotwond, xxii","22, 22nd, twentysecond, twentytwo, twotwo, twotwond, xxii",,t
+15,Numbers Sub,"23, 23rd, twentythird, twentythree, twothree, twothreerd, xxiii","23, 23rd, twentythird, twentythre, twothre, twothreerd, xxiii",,t
+16,Numbers Sub,"24, 24th, twentyfour, twentyfourth, twofour, twofourth, xxiv","24, 24th, twentyfour, twentyfourth, twofour, twofourth, xxiv",,t
+17,Numbers Sub,"25, 25th, twentyfifth, twentyfive, twofive, twofiveth, xxv","25, 25th, twentyf, twentyfifth, twofiv, twofiveth, xxv",,t
+18,Numbers Sub,"26, 26th, twentysix, twentysixth, twosix, twosixth, xxvi","26, 26th, twentysix, twentysixth, twosix, twosixth, xxvi",,t
+19,Numbers Sub,"27, 27th, twentyseven, twentyseventh, twoseven, twoseventh, xxvii","27, 27th, twentyseven, twentyseventh, twoseven, twoseventh, xxvii",,t
+20,Numbers Sub,"28, 28th, twentyeight, twentyeighth, twoeight, twoeighth, xxviii","28, 28th, twentyeight, twentyeighth, twoeight, twoeighth, xxviii",,t
+21,Numbers Sub,"29, 29th, twentynine, twentyninth, twonine, twonineth, xxix","29, 29th, twentynin, twentyninth, twonin, twonineth, xxix",,t
+22,Resale,"2ndhand, bargain, consign, consignment, newandused, secondhand, thrift, thriftstore, upcycle, used, vintage","2ndhand, bargain, consign, newandus, secondhand, thrift, thriftstor, upcycl, use, vintag",,t
+23,Numbers Sub,"2nd, second","2nd, second",,t
+24,Numbers Sub,"3, 3rd, iii, third, three, threerd","3, 3rd, iii, third, three, threerd",,t
+25,Numbers Sub,"30, 30th, thirt, thirtieth, thirty, threezero, threezeroth, xxx","30, 30th, thirt, thirti, thirtieth, threezero, threezeroth, xxx",,t
+26,Numbers Sub,"31, 31st, thirtyfirst, thirtyone, threeone, threeonest, xxxi","31, 31st, thirtyfirst, thirtyon, threeon, threeonest, xxxi",,t
+27,Numbers Sub,"32, 32nd, thirtysecond, thirtytwo, threetwo, threetwond, xxxii","32, 32nd, thirtysecond, thirtytwo, threetwo, threetwond, xxxii",,t
+28,Numbers Sub,"33, 33rd, thirtythird, thirtythree, threethree, threethreerd, xxxiii","33, 33rd, thirtythird, thirtythre, threethre, threethreerd, xxxiii",,t
+29,Numbers Sub,"33, 33rd, thirtythird, thirtythree, threethree, xxxiii","33, 33rd, thirtythird, thirtythre, threethre, xxxiii",,t
+30,Numbers Sub,"34, 34th, thirtyfour, thirtyfourth, threefour, threefourth, xxxiv","34, 34th, thirtyfour, thirtyfourth, threefour, threefourth, xxxiv",,t
+31,Numbers Sub,"35, 35th, thirtyfifth, thirtyfive, threefive, threefiveth, xxxv","35, 35th, thirtyf, thirtyfifth, threefiv, threefiveth, xxxv",,t
+32,Numbers Sub,"36, 36th, thirtysix, thirtysixth, threesix, threesixth, xxxvi","36, 36th, thirtysix, thirtysixth, threesix, threesixth, xxxvi",,t
+33,Numbers Sub,"37, 37th, thirtyseven, thirtyseventh, threeseven, threeseventh, xxxvii","37, 37th, thirtyseven, thirtyseventh, threeseven, threeseventh, xxxvii",,t
+34,Numbers Sub,"38, 38th, thirtyeight, thirtyeighth, threeeight, threeeighth, xxxviii","38, 38th, thirtyeight, thirtyeighth, threeeight, threeeighth, xxxviii",,t
+35,Numbers Sub,"39, 39th, thirtynine, thirtyninth, threenine, threenineth, xxxix","39, 39th, thirtynin, thirtyninth, threenin, threenineth, xxxix",,t
+36,Numbers Sub,"3rd, third","3rd, third",,t
+37,Numbers Sub,"40, 40th, fortieth, forty, fourt, fourzero, fourzeroth, xl","40, 40th, forti, fortieth, fourt, fourzero, fourzeroth, xl",,t
+38,Numbers Sub,"41, 41st, fortyfirst, fortyone, fourone, fouronest, xli","41, 41st, fortyfirst, fortyon, fouron, fouronest, xli",,t
+39,Numbers Sub,"42, 42nd, fortysecond, fortytwo, fourtwo, fourtwond, xlii","42, 42nd, fortysecond, fortytwo, fourtwo, fourtwond, xlii",,t
+40,Cannabis,"420, bcbud, blunt, bud, cana, canna, cannabinoid, cannabis, cannibis, cannibus, cbd, charas, cheeba, chiba, chronic, clone, compassion, cronik, cush, dispensary, dispense, edible, fourtwenty, fourtwozero, ganja, hash, hashish, headshop, headstore, indica, kronic, kush, leaf, marihuana, marijane, marijayne, marijuana, maryjane, maryjayne, medicinal, pot, reef, reefer, ruderalls, sativa, shatter, terpene, thc, toke, weed","420, bcbud, blunt, bud, cana, canna, cannabi, cannabinoid, cannibi, cannibus, cbd, chara, cheeba, chiba, chronic, clone, compass, cronik, cush, dispens, dispensari, edibl, fourtwenti, fourtwozero, ganja, hash, hashish, headshop, headstor, indica, kronic, kush, leaf, marihuana, marijan, marijayn, marijuana, maryjan, maryjayn, medicin, pot, reef, reefer, ruderal, sativa, shatter, terpen, thc, toke, weed","terpene added Sept 11, 2018 (DB)",t
+41,Numbers Sub,"43, 43rd, fortythird, fortythree, fourthree, fourthreerd, xliii","43, 43rd, fortythird, fortythre, fourthre, fourthreerd, xliii",,t
+42,Numbers Sub,"43, 43th, fortythird, fortythree, fourthree, fourthreed, xliii","43, 43th, fortythird, fortythre, fourthre, xliii",,t
+43,Numbers Sub,"44, 44th, fortyfour, fortyfourth, fourfour, fourfourth, xliv","44, 44th, fortyfour, fortyfourth, fourfour, fourfourth, xliv",,t
+44,Numbers Sub,"45, 45th, fortyfifth, fortyfive, fourfive, fourfiveth, xlv","45, 45th, fortyf, fortyfifth, fourfiv, fourfiveth, xlv",,t
+45,Numbers Sub,"46, 46th, fortysix, fortysixth, foursix, foursixth, xlvi","46, 46th, fortysix, fortysixth, foursix, foursixth, xlvi",,t
+920,Word Sub,"suite, sweet","suit, sweet",,t
+46,Numbers Sub,"47, 47th, fortyseven, fortyseventh, fourseven, fourseventh, xlvii","47, 47th, fortyseven, fortyseventh, fourseven, fourseventh, xlvii",,t
+47,Numbers Sub,"48, 48th, fortyeight, fortyeighth, foureight, foureighth, xlviii","48, 48th, fortyeight, fortyeighth, foureight, foureighth, xlviii",,t
+48,Numbers Sub,"49, 49th, fortynine, fortyninth, fournine, fournineth, xlix","49, 49th, fortynin, fortyninth, fournin, fournineth, xlix",,t
+49,Word Sub,"4mula, 4mulas, formula, fourmula","4mula, formula, fourmula",,t
+50,Numbers Sub,"4th, fourth","4th, fourth",,t
+51,Off Road,"4by4, 4x4, allterrain, atv, backcountry, backroader, backroading, fourbyfour, fourxfour, offroad, orv, overland, quad","4by4, 4x4, allterrain, atv, backcountri, backroad, fourbyfour, fourxfour, offroad, orv, overland, quad",,t
+52,Numbers Sub,"5, 5th, fifth, five, fiveth, v","5, 5th, fifth, five, fiveth, v",,t
+53,Numbers Sub,"50, 50th, fift, fiftieth, fifty, fivezero, fivezeroth","50, 50th, fift, fifti, fiftieth, fivezero, fivezeroth",,t
+54,Numbers Sub,"51, 51st, fiftyfirst, fiftyone, fiveone, fiveonest","51, 51st, fiftyfirst, fiftyon, fiveon, fiveonest",,t
+55,Numbers Sub,"52, 52nd, fiftysecond, fiftytwo, fivetwo, fivetwond","52, 52nd, fiftysecond, fiftytwo, fivetwo, fivetwond",,t
+56,Numbers Sub,"53, 53rd, fiftythird, fiftythree, fivethree, fivethreerd","53, 53rd, fiftythird, fiftythre, fivethre, fivethreerd",,t
+57,Numbers Sub,"53, 53st, fiftythird, fiftythree, fivethree, fivethreed","53, 53st, fiftythird, fiftythre, fivethre",,t
+58,Numbers Sub,"54, 54th, fiftyfour, fiftyfourth, fivefour, fivefourth","54, 54th, fiftyfour, fiftyfourth, fivefour, fivefourth",,t
+59,Numbers Sub,"55, 55th, fiftyfifth, fiftyfive, fivefive, fivefiveth","55, 55th, fiftyf, fiftyfifth, fivef, fivefiveth",,t
+60,Numbers Sub,"56, 56th, fiftysix, fiftysixth, fivesix, fivesixth","56, 56th, fiftysix, fiftysixth, fivesix, fivesixth",,t
+61,Numbers Sub,"57, 57th, fiftyseven, fiftyseventh, fiveseven, fiveseventh","57, 57th, fiftyseven, fiftyseventh, fiveseven, fiveseventh",,t
+62,Numbers Sub,"58, 58th, fiftyeight, fiftyeighth, fiveight, fiveighth","58, 58th, fiftyeight, fiftyeighth, fiveight, fiveighth",,t
+63,Numbers Sub,"59, 59th, fiftynine, fiftyninth, fivenine, fivenineth","59, 59th, fiftynin, fiftyninth, fivenin, fivenineth",,t
+64,Numbers Sub,"5th, fifth","5th, fifth",,t
+65,Numbers Sub,"6, 6th, six, sixth, vi","6, 6th, six, sixth, vi",,t
+66,Numbers Sub,"60, 60th, sixt, sixtieth, sixty, sixzero, sixzeroth","60, 60th, sixt, sixti, sixtieth, sixzero, sixzeroth",,t
+67,Numbers Sub,"61, 61st, sixone, sixonest, sixtyfirst, sixtyone","61, 61st, sixon, sixonest, sixtyfirst, sixtyon",,t
+68,Numbers Sub,"62, 62nd, sixtwo, sixtwond, sixtysecond, sixtytwo","62, 62nd, sixtwo, sixtwond, sixtysecond, sixtytwo",,t
+69,Numbers Sub,"63, 63rd, sixthree, sixthreed, sixtythree, sixtythrird","63, 63rd, sixthre, sixtythre, sixtythrird",,t
+70,Numbers Sub,"63, 63rd, sixthree, sixthreerd, sixtythird, sixtythree","63, 63rd, sixthre, sixthreerd, sixtythird, sixtythre",,t
+71,Numbers Sub,"64, 64th, sixfour, sixfourth, sixtyfour, sixtyfourth","64, 64th, sixfour, sixfourth, sixtyfour, sixtyfourth",,t
+72,Numbers Sub,"65, 65th, sixfive, sixfiveth, sixtyfifth, sixtyfive","65, 65th, sixfiv, sixfiveth, sixtyf, sixtyfifth",,t
+73,Numbers Sub,"66, 66th, lxvi, sixsix, sixsixth, sixtysix, sixtysixth","66, 66th, lxvi, sixsix, sixsixth, sixtysix, sixtysixth",,t
+74,Numbers Sub,"67, 67th, sixseven, sixseventh, sixtyseven, sixtyseventh","67, 67th, sixseven, sixseventh, sixtyseven, sixtyseventh",,t
+75,Numbers Sub,"68, 68th, sixeight, sixeighth, sixtyeight, sixtyeighth","68, 68th, sixeight, sixeighth, sixtyeight, sixtyeighth",,t
+76,Numbers Sub,"69, 69th, lxix, sixnine, sixnineth, sixtynine, sixtyninth","69, 69th, lxix, sixnin, sixnineth, sixtynin, sixtyninth",,t
+77,Numbers Sub,"6th, sixth","6th, sixth",,t
+78,Numbers Sub,"70, 70th, sevent, seventieth, seventy, sevenzero, sevenzeroth","70, 70th, sevent, seventi, seventieth, sevenzero, sevenzeroth",,t
+79,Numbers Sub,"71, 71st, sevenone, sevenonest, seventyfirst, seventyone","71, 71st, sevenon, sevenonest, seventyfirst, seventyon",,t
+80,Numbers Sub,"72, 72nd, seventwo, seventwond, seventysecond, seventytwo","72, 72nd, seventwo, seventwond, seventysecond, seventytwo",,t
+81,Numbers Sub,"73, 73rd, seventhree, seventhreed, seventythird, seventythree","73, 73rd, seventhre, seventythird, seventythre",,t
+82,Numbers Sub,"73, 73rd, seventhree, seventhreerd, seventythird, seventythree","73, 73rd, seventhre, seventhreerd, seventythird, seventythre",,t
+83,Numbers Sub,"74, 74th, sevenfour, sevenfourth, seventyfour, seventyfourth","74, 74th, sevenfour, sevenfourth, seventyfour, seventyfourth",,t
+84,Numbers Sub,"7th, seventh","7th, seventh",,t
+85,Numbers Sub,"88, 88th, eighthree, eighthreerd, eightythird, eightythree","88, 88th, eighthre, eighthreerd, eightythird, eightythre",,t
+87,Numbers Sub,"93, 93rd, ninethree, ninethreerd, ninetythird, ninetythree","93, 93rd, ninethre, ninethreerd, ninetythird, ninetythre",,t
+88,Numbers Sub,"98, 98th, nineight, nineighth, ninetyeight, ninetyeighth","98, 98th, nineight, nineighth, ninetyeight, ninetyeighth",,t
+89,Numbers Sub,"9th, nineth","9th, nineth",,t
+90,Meat,"abattoir, abbatoir, butcher, halal, meat, pacer, pacing, packer, packing, sausage, slaughter, slaughterhouse","abattoir, abbatoir, butcher, halal, meat, pace, pacer, pack, packer, sausag, slaughter, slaughterhous",,t
+91,Word Sub,"abbe, abbie, abby, abe, abey, abie, aby","abb, abbi, abe, abey, abi",,t
+92,Names Sub,"abel, able","abel, abl",,t
+93,Construction,"abode, acre, build, builder, building, buildingsolution, built, civil, constructco, construction, constructor, contract, contracting, contractor, deconstruct, deconstruction, deconstructor, demo, demolition, dev, develop, developer, development, dwelling, estate, facilities, facility, flat, handyman, home, improvement, land, landco, list, listing, meadow, mews, passivehaus, passivehouse, propco, propert, properties, property, propertysolution, realestate, realt, realtor, realty, remodel, reno, renovation, restore, structure","abod, acr, build, builder, buildingsolut, built, civil, construct, constructco, constructor, contract, contractor, deconstruct, deconstructor, demo, demolit, dev, develop, dwell, estat, facil, flat, handyman, home, improv, land, landco, list, meadow, mew, passivehaus, passivehous, propco, propert, properti, propertysolut, realest, realt, realti, realtor, remodel, reno, renov, restor, structur",,t
+94,Education,"academia, academic, academy, class, college, curriculum, education, elearn, elearning, institute, learning, masterclass, school, ssat, university","academ, academi, academia, class, colleg, curriculum, educ, elearn, institut, learn, masterclass, school, ssat, univers",,t
+921,Word Sub,"sage, saje","sage, saje",,t
+95,Word Sub,"accelerate, xlr8, xlreight","acceler, xlr8, xlreight",,t
+96,Word Sub,"access, axis, axys","access, axi",,t
+97,Hospitality,"accommodate, concierge, hospitality, reservation","accommod, concierg, hospit, reserv",,t
+98,Accounting,"account, accountant, accounting, admin, administrative, biz, bookkeep, bookkeeper, bookkeeping, business, calculate, calculation, calculations, compliance, corporate, cpa, cpas, dictate, document, hr, humanresources, ledger, office, personnel, secretary, tax, title, transcript, transcription, type, wordpro, wordprocessing","account, admin, administr, biz, bookkeep, busi, calcul, complianc, corpor, cpa, cpas, dictat, document, hr, humanresourc, ledger, offic, personnel, secretari, tax, titl, transcript, type, wordpro, wordprocess",,t
+99,Financial,"accept, acceptance, acept, aset, asset, baretrustee, bt, capital, capitol, credit, debenture, diversified, emd, equit, equity, exemptmarketdealer, finance, financial, financing, finco, fincorp, fintec, fintech, fund, fundco, homeequity, invest, investco, investing, investment, investor, investpro, lend, lendco, lender, lending, loan, mortgage, mutual, mutualfund, nominee, payday, portfolio, royalties, royalty, securities, trust, trustco, venturecapital, wealth, wealthmanagement","accept, acept, aset, asset, baretruste, bt, capit, capitol, credit, debentur, diversifi, emd, equit, equiti, exemptmarketdeal, financ, financi, finco, fincorp, fintec, fintech, fund, fundco, homeequ, invest, investco, investor, investpro, lend, lendco, lender, loan, mortgag, mutual, mutualfund, nomine, payday, portfolio, royalti, secur, trust, trustco, venturecapit, wealth, wealthmanag",,t
+100,Sound,"acoustics, amp, amplifier, audio, bass, beat, beatz, broadcast, cd, dejay, dj, drum, electronic, foley, guitar, homeentertainment, music, radio, record, sound, stereo, tape, vj","acoust, amp, amplifi, audio, bass, beat, beatz, broadcast, cd, dejay, dj, drum, electron, foley, guitar, homeentertain, music, radio, record, sound, stereo, tape, vj",,t
+101,Word Sub,"acqua, acwa, aqua","acqua, acwa, aqua",,t
+102,Plastics,"acrylic, plastic, poli, poly, pvc, vinyl","acryl, plastic, poli, pvc, vinyl",,t
+103,Mediation,"adjudicate, adjudicated, adr, agree, agreement, arbitrate, dispute, mediate, mediated, mediation, negotiate, negotiated, negotiation, resolution, resolve","adjud, adr, agre, agreement, arbitr, disput, mediat, negoti, resolut, resolv",,t
+104,Claims,"adjust, adjustment, appraisal, claim","adjust, apprais, claim",,t
+105,Travel,"adventure, astrotourism, backpacking, cruise, cruiseship, destination, expedition, getaway, guide, guides, hiking, holiday, outdoor, recreation, safari, tour, tourist, travel, treck, trek, treking, trip, vacation, vacay, voyage","adventur, astrotour, backpack, cruis, cruiseship, destin, expedit, getaway, guid, hike, holiday, outdoor, recreat, safari, tour, tourist, travel, treck, trek, treke, trip, vacat, vacay, voyag",,t
+106,Advertising,"ads, advertise, advertising, advertize, marketing, promo, promotion","ad, advert, advertis, market, promo, promot",,t
+107,Consulting,"advise, adviser, advising, advisor, advisory, analyse, analytic, analytix, analyze, coach, coaching, consult, consultancy, consultant, consulting, counsel, counselling","advis, advisor, advisori, analys, analyt, analytix, analyz, coach, consult, counsel",,t
+108,Word Sub,"aerial, arial, ariel","aerial, arial, ariel",,t
+109,Word Sub,"aeries, aries","aeri, ari",,t
+110,Flight,"aero, aeroplane, aerospace, air, aircraft, airframe, airkraft, airpark, airplane, airstrip, arow, aviat, aviate, aviation, ayr, chopper, flight, flite, fly, flyte, hangar, hanger, heli, helicopter, helipad, jet, plane, prop, space, ultralight","aero, aeroplan, aerospac, air, aircraft, airfram, airkraft, airpark, airplan, airstrip, arow, aviat, ayr, chopper, fli, flight, flite, flyte, hangar, hanger, heli, helicopt, helipad, jet, plane, prop, space, ultralight",,t
+111,Fitness,"aerobic, athletic, athletictrain, athletictraining, athletix, barre, bodybuild, bootcamp, cardio, circuit, condition, conditioning, essentric, exercise, fit, gym, hottub, hotub, kundalini, movement, muscle, parkour, performance, pilates, pool, slim, spa, spin, spincycle, strength, thin, train, trainer, weight, workout, yoga, yogi","aerob, athlet, athletictrain, athletix, barr, bodybuild, bootcamp, cardio, circuit, condit, essentr, exercis, fit, gym, hottub, hotub, kundalini, movement, muscl, parkour, perform, pilat, pool, slim, spa, spin, spincycl, strength, thin, train, trainer, weight, workout, yoga, yogi",,t
+112,Beauty,"aesthetic, aesthetix, antiaging, barber, barbershop, beard, beautician, beautique, beauty, bodybar, brow, browbar, coif, coiffure, cosmetic, cosmetologist, cosmetology, cut, cutz, dayspa, electrolysis, esthetic, extention, eyebrow, eyelash, glam, glamour, groom, hair, hairstyle, hairstyling, healspa, laser, laserclinic, lash, lashbar, makeover, makeup, mani, manicure, manscape, medispa, medspa, microblade, nail, pedi, pedicure, pedispa, salon, serum, skin, spa, style, sugaring, tress, waxbar, waxing","aesthet, aesthetix, antiag, barber, barbershop, beard, beauti, beautician, beautiqu, bodybar, brow, browbar, coif, coiffur, cosmet, cosmetolog, cosmetologist, cut, cutz, dayspa, electrolysi, esthet, extent, eyebrow, eyelash, glam, glamour, groom, hair, hairstyl, healspa, laser, laserclin, lash, lashbar, makeov, makeup, mani, manicur, manscap, medispa, medspa, microblad, nail, pedi, pedicur, pedispa, salon, serum, skin, spa, style, sugar, tress, wax, waxbar",,t
+113,Word Sub,"agent, broker, factor","agent, broker, factor",,t
+114,Aggregate,"aggregate, crush, fill, gravel, mater, sand, soil","aggreg, crush, fill, gravel, mater, sand, soil",,t
+115,Farming,"agra, agri, agricultural, agriculture, agro, angus, catle, cattle, crop, cultivate, cultivation, farm, farming, farmland, harvest, holstein, homestead, livestock, orchard, ranch, ranchland, stable, steer","agra, agri, agricultur, agro, angus, catl, cattl, crop, cultiv, farm, farmland, harvest, holstein, homestead, livestock, orchard, ranch, ranchland, stabl, steer",,t
+116,Martial Arts,"aikido, aikikai, bjj, boxing, brazilianjiuitsu, capoeira, fight, fighting, fightnight, fightnite, grappling, hapkido, jiujitsu, judo, karate, kickbox, kickboxing, kravmaga, kungfu, martial, mixedmartialarts, mma, muaythai, pankration, sambo, savate, selfdefence, strike, striking, taekwondo, wingchun, wrestle, wrestling","aikido, aikikai, bjj, box, brazilianjiuitsu, capoeira, fight, fightnight, fightnit, grappl, hapkido, jiujitsu, judo, karat, kickbox, kravmaga, kungfu, martial, mixedmartialart, mma, muaythai, pankrat, sambo, savat, selfdef, strike, taekwondo, wingchun, wrestl",,t
+117,Mechanical,"air, aircondition, airconditioner, balance, climate, climatecontrol, comfort, cool, cooling, furnace, gas, gasfit, heat, heater, heatpump, hvac, hydronics, mechanical, pipefit, plumber, plumbers, plumbing, sheetmetal, vent, ventilation, waterheater","air, aircondit, aircondition, balanc, climat, climatecontrol, comfort, cool, furnac, gas, gasfit, heat, heater, heatpump, hvac, hydron, mechan, pipefit, plumb, plumber, sheetmet, vent, ventil, waterheat",,t
+214,Fasteners,"bolt, fasten, nut, screw, spiral","bolt, fasten, nut, screw, spiral",,t
+263,Word Sub,"key, loch, lock, lok, quay","key, loch, lock, lok, quay",,t
+118,Car Hire,"airport, airporter, blablacar, blackcar, cab, carpool, carservice, carshare, chauffeur, lift, limo, limousine, livery, lyft, pedicab, ridehailing, rider, taxi, towncar, uber, udrive","airport, blablacar, blackcar, cab, carpool, carservic, carshar, chauffeur, lift, limo, limousin, liveri, lyft, pedicab, ridehail, rider, taxi, towncar, uber, udriv",,t
+119,Word Sub,"al, all, aul, awl","al, all, aul, awl",,t
+120,Names Sub,"alan, alen, allan, allen, allin","alan, alen, allan, allen, allin",,t
+121,Security,"accesscontrol, alarm, armed, armedaccess, defence, forensic, gard, guard, homewatch, investigate, investigation, investigator, locksmith, monitor, patrol, propertywatch, protect, protection, protective, response, secure, security, surveillance, tactic, watch","accesscontrol, alarm, arm, armedaccess, defenc, forens, gard, guard, homewatch, investig, locksmith, monitor, patrol, propertywatch, protect, respons, secur, surveil, tactic, watch",,t
+122,Hardbar,"alcohol, bourbon, brandy, digestif, distillery, fireball, gin, grappa, hardbar, hooch, liquor, moonshine, rum, scotch, spirit, tequila, vodka, whiskey","alcohol, bourbon, brandi, digestif, distilleri, firebal, gin, grappa, hardbar, hooch, liquor, moonshin, rum, scotch, spirit, tequila, vodka, whiskey",,t
+123,Beer,"ale, beer, brew, brewery, craftbeer, hops, indianpaleale, ipa, lager, stout","ale, beer, brew, breweri, craftbeer, hop, indianpaleal, ipa, lager, stout",,t
+124,Bowling,"10pin, 5pin, aley, alley, biliard, bowl, bowling, lanes","10pin, 5pin, aley, alley, biliard, bowl, lane",,t
+125,Word Sub,"alfa, alpha","alfa, alpha",,t
+126,Names Sub,"alex, alick, alix, alx","alex, alick, alix, alx",,t
+127,Metal,"alloy, aluminum, casting, cnc, duct, fab, forge, foundry, iron, metal, metalart, metalwerk, metalwerx, metalwork, metalworx, metalwurk, rail, railing, reinforce, stainless, stamping, steel, tbar, tool, weld, welding","alloy, aluminum, cast, cnc, duct, fab, forg, foundri, iron, metal, metalart, metalwerk, metalwerx, metalwork, metalworx, metalwurk, rail, reinforc, stainless, stamp, steel, tbar, tool, weld",added cnc,t
+128,Tailoring,"alteration, crest, dressmacker, embroider, embroidery, mend, mending, sew, sewing, stitch, tailor, thread, threadz","alter, crest, dressmack, embroid, embroideri, mend, sew, stitch, tailor, thread, threadz",,t
+129,Word Sub,"ambiance, ambience","ambianc, ambienc",,t
+130,Firstaid,"ambulance, ambulatory, emergency, firstaid, firstresponse, medic, mtc, ofa, paramedic, paramedical","ambul, ambulatori, emerg, firstaid, firstrespons, medic, mtc, ofa, paramed",,t
+131,Weapons,"ammo, ammunition, armament, armor, arms, artillery, bullet, firearm, gun, pistol, reloading, rifle, target, weapon","ammo, ammunit, arm, armament, armor, artilleri, bullet, firearm, gun, pistol, reload, rifl, target, weapon",,t
+132,Fishing,"adipose, angling, aquaculture, aquafarm, bait, charter, crab, crabbing, excursion, fish, fisheries, fishery, fishing, fly, guide, hatchery, jigging, lure, mariculture, outfit, outfiter, outfitter, oyster, prawn, prawning, reel, rod, salmon, seafarm, seafood, shellfish, sportfish, spotprawn, tackle, trout","adipos, angl, aquacultur, aquafarm, bait, charter, crab, excurs, fish, fisheri, fli, guid, hatcheri, jig, lure, maricultur, outfit, outfitt, oyster, prawn, reel, rod, salmon, seafarm, seafood, shellfish, sportfish, spotprawn, tackl, trout",,t
+133,Pets,"animal, animalcare, criter, crittercare, paw, pet, petcare, tail, vet, veterinarian, veterinary","anim, animalcar, criter, crittercar, paw, pet, petcar, tail, vet, veterinari, veterinarian",,t
+134,Productions,"animate, animation, carton, cartoon, cast, cinema, crossreality, dud, dvd, entertain, entertainer, entertainment, extendedreality, film, filming, headshot, infotainment, kinema, kinemacolor, kinemacolour, media, model, motion, movie, multimedia, news, newsco, newsgroup, picture, podcast, production, reality, release, short, shortfilm, streaming, studios, talent, technicolor, technicolour, television, theater, theatre, tv, vcr, vid, video, videographer, videography, vids, vidz, virtual, virtualreality, vr, xr","anim, carton, cartoon, cast, cinema, crossreal, dud, dvd, entertain, extendedr, film, headshot, infotain, kinema, kinemacolor, kinemacolour, media, model, motion, movi, multimedia, news, newsco, newsgroup, pictur, podcast, product, realiti, releas, short, shortfilm, stream, studio, talent, technicolor, technicolour, televis, theater, theatr, tv, vcr, vid, video, videograph, videographi, vidz, virtual, virtualr, vr, xr",,t
+135,Communication,"answer, call, cell, cellphone, cellular, com, communicate, communication, hotline, longdistance, mobile, network, page, pager, phone, reconect, tel, telecom, telecommunication, telematic, telephone, voice, voip, wifi, wireles, wireless","answer, call, cell, cellphon, cellular, com, communic, hotlin, longdist, mobil, network, page, pager, phone, reconect, tel, telecom, telecommun, telemat, telephon, voic, voip, wifi, wirel, wireless",,t
+136,Collections,"antique, bailiff, collect, memorabilia, process, processerving, processserver, skiptracer, skiptracing, tracing, track, tracking","antiqu, bailiff, collect, memorabilia, process, processerv, processserv, skiptrac, trace, track",,t
+137,Fashion,"activewear, apparel, athletica, attire, bikini, boutique, boutiquez, casual, clothes, clothez, clothier, clothing, couture, fashion, finery, garb, garment, garmentz, kimono, lingerie, scrub, shirt, tailor, teeshirt, tshirt, uniform, wardrobe, wear, wearz","activewear, apparel, athletica, attir, bikini, boutiqu, boutiquez, casual, cloth, clothez, clothier, coutur, fashion, fineri, garb, garment, garmentz, kimono, lingeri, scrub, shirt, tailor, teeshirt, tshirt, uniform, wardrob, wear, wearz",,t
+138,Housing,"apartment, apt, condo, court, flat, loft, manor, place, residence, strata, stratum, suite, townhome, townhouse, vila, villa","apart, apt, condo, court, flat, loft, manor, place, resid, strata, stratum, suit, townhom, townhous, vila, villa",,t
+139,Beekeeping,"apiary, apiculture, apitherapy, bee, beekeeper, beekeeping, beeswax, hive, honey, mead, meadery, nectar, pollen","apiari, apicultur, apitherapi, bee, beekeep, beeswax, hive, honey, mead, meaderi, nectar, pollen",,t
+140,Sleep,"apnea, cpap, fatigue, fatiguemanagement, o2, oxygen, respiration","apnea, cpap, fatigu, fatiguemanag, o2, oxygen, respir",,t
+141,Word Sub,"apostle, apotres","apostl, apotr",,t
+142,Pharmacy,"apothecary, chemist, compounding, dispensary, drug, farma, med, medicine, meditech, medtec, medtech, otc, overthecounter, pharma, pharmacare, pharmaceutical, pharmacist, pharmacy, prescription, rx","apothecari, chemist, compound, dispensari, drug, farma, med, medicin, meditech, medtec, medtech, otc, overthecount, pharma, pharmacar, pharmaceut, pharmaci, pharmacist, prescript, rx",,t
+143,Refrigeration ,"appliance, coldstorage, cooler, foodlocker, freeze, freezer, fridge, ice, reefer, refrigeration","applianc, coldstorag, cooler, foodlock, freez, freezer, fridg, ice, reefer, refriger",,t
+262,Stores,"bazaar, bazzar, bizzarr, center, centre, mall, mercantile, plaza, retail, shop, shopping, shoppingcenter, shoppingcentre, square","bazaar, bazzar, bizzarr, center, centr, mall, mercantil, plaza, retail, shop, shoppingcent, shoppingcentr, squar",,t
+144,Software,"application, apps, businessintelligence, cloud, code, coding, computer, data, datajam, digitalconvergence, hackathon, informationtec, informationtechnology, infotec, intelligence, interactive, internetofthings, iot, it, laptop, multimedia, pc, peripheral, program, soft, software, solution, system, ui, ux, ware","app, applic, businessintellig, cloud, code, comput, data, datajam, digitalconverg, hackathon, informationtec, informationtechnolog, infotec, intellig, interact, internetofth, iot, laptop, multimedia, pc, peripher, program, soft, softwar, solut, system, ui, ux, ware",,t
+145,Word Sub,"ar, are",ar,,t
+146,Tree Service,"arb, arbor, arboriculture, arborist, arbour, brush, chipper, chipping, fall, falling, logging, prune, pruning, stump, stumpgrind, tree, treecare, treeprune, treepruning, treeservice, treesurgeon, treetop","arb, arbor, arboricultur, arborist, arbour, brush, chip, chipper, fall, log, prune, stump, stumpgrind, tree, treecar, treeprun, treeservic, treesurgeon, treetop",,t
+147,Archives,"archive, artifact, curating, curation, curator, monument, museum, preserve, records","archiv, artifact, curat, monument, museum, preserv, record",,t
+148,Word Sub,"arctic, artec, artic","arctic, artec, artic",,t
+149,Money,"argentum, bitcoin, blockchain, cloudchain, crypto, cryptocurrency, dogecoin, ether, ethereum, fulfill, fulfilment, hash, mining, pay, payment, remit, salary, setl","argentum, bitcoin, blockchain, cloudchain, crypto, cryptocurr, dogecoin, ether, ethereum, fulfil, hash, mine, pay, payment, remit, salari, setl",,t
+150,Word Sub,"armor, armour","armor, armour",,t
+151,Names Sub,"aaron, airin, aron, erin, eron","aaron, airin, aron, erin, eron",,t
+152,Word Sub,"arora, aurora","arora, aurora",,t
+153,Gallery,"art, artisan, artist, artizan, craft, gallery, mixed media, mixedmedia, sculpture, studio","art, artisan, artist, artizan, craft, galleri, mixedmedia, sculptur, studio",,t
+154,Restoration,"abatement, asbestos, biochemical, biohazard, damp, dampproofing, disaster, flood, hazard, hazmat, mold, mould, parge, pargeting, parging, remediate, remediation, restoration, waterproofing","abat, asbesto, biochem, biohazard, damp, dampproof, disast, flood, hazard, hazmat, mold, mould, parg, parget, remedi, restor, waterproof",,t
+155,Pavement,"asphalt, bitumen, blacktop, driveway, interlock, pave, pavement, pavers, pavingstone, rhode, road, roadwork, rode, tar, tarmac","asphalt, bitumen, blacktop, driveway, interlock, pave, pavement, paver, pavingston, rhode, road, roadwork, rode, tar, tarmac",,t
+156,Insurance,"assurance, asur, benefit, casualty, indemnity, insurance, insure, life, underwrite, underwriter, underwriting","assur, asur, benefit, casualti, indemn, insur, life, underwrit",,t
+157,Bedroom Furniture,"ateli, bed, dresser, furniture, futon, mattress, night stand, nightstand, sleep","ate, bed, dresser, furnitur, futon, mattress, nightstand, sleep",,t
+158,Interiors,"atelier, brush, coating, decor, design, finery, homestylist, interior, living, paint, paintco, painter, panel, panelboard, powdercoat, powdercoating, resurface, resurfacing, stage, staging, stain, wallcover, wallpaper, wallsystem","ateli, brush, coat, decor, design, fineri, homestylist, interior, live, paint, paintco, painter, panel, panelboard, powderco, powdercoat, resurfac, stage, stain, wallcov, wallpap, wallsystem",,t
+159,Sport,"athlete, athletic, badminton, basketball, championship, dodgeball, football, hike, hiking, hockey, run, soccer, sport, volleyball","athlet, badminton, basketbal, championship, dodgebal, footbal, hike, hockey, run, soccer, sport, volleybal",,t
+160,Word Sub,"atlin, atlyn","atlin, atlyn",,t
+161,Green House,"atrium, conservator, greenhouse, hothouse, skylight, skylite, solar, sunroom","atrium, conserv, greenhous, hothous, skylight, skylit, solar, sunroom",,t
+162,Events,"attraction, balloon, carnival, celebrate, celebration, ceremonies, ceremony, conferencr, convention, elope, elopement, event, exhibit, expo, fair, festival, happening, meeting, occasion, occurence, party, present, show, wedding","attract, balloon, carniv, celebr, ceremoni, conferencr, convent, elop, event, exhibit, expo, fair, festiv, happen, meet, occas, occur, parti, present, show, wed",,t
+163,Liquidate,"auction, bid, bidco, clearance, liquidate, liquidation, liquidator, overstock","auction, bid, bidco, clearanc, liquid, overstock",,t
+164,Word Sub,"audiolog, hear, here","audiolog, hear, here",,t
+165,Inventory,"audit, inventor, inventory, stock","audit, inventor, inventori, stock",,t
+166,Word Sub,"auld, old, olde, ole","auld, old, ole",,t
+167,Automobile ,"auto, autobody, autocare, automotive, autorepair, autowerks, autowerx, autowork, autoworks, autoworx, body, car, collision, custom, dealership, fix, fixer, garage, hotrod, mech, mechanic, mods, motor, repair, tune, vehicle","auto, autobodi, autocar, automot, autorepair, autowerk, autowerx, autowork, autoworx, bodi, car, collis, custom, dealership, fix, fixer, garag, hotrod, mech, mechan, mod, motor, repair, tune, vehicl",,t
+168,Sterilize,"autoclave, sterilization, sterilize","autoclav, steril",,t
+169,Accommodation,"airbnb, autocourt, bandb, bb, bedbreakfast, bnb, cabins, cottage, guest, guestsuite, hostel, hotel, inn, lodge, motel, motorcourt, motorhotel, motorinn, resort, stay, suites, timeshare, yurt","airbnb, autocourt, bandb, bb, bedbreakfast, bnb, cabin, cottag, guest, guestsuit, hostel, hotel, inn, lodg, motel, motorcourt, motorhotel, motorinn, resort, stay, suit, timeshar, yurt",,t
+170,Electrical ,"automate, cable, control, electric, electrical, electrician, highvoltage, instrument, led, light, lite, lowvoltage, lyte, measure, robot, smarthome, smarthomes, wire","autom, cabl, control, electr, electrician, highvoltag, instrument, led, light, lite, lowvoltag, lyte, measur, robot, smarthom, wire",,t
+171,Transmission,"automatic, clutch, cvt, differential, driveline, gear, manual, powertrain, trans, transmision, transmission","automat, clutch, cvt, differenti, drivelin, gear, manual, powertrain, tran, transmis, transmiss",,t
+172,Carwash,"autospa, carwash, detail","autospa, carwash, detail",,t
+173,Motorsport,"autosport, motorsport, performance, race, speed","autosport, motorsport, perform, race, speed","automotive belongs in auto TH, discussed with Debbie",t
+174,Word Sub,"avatar, avitar, avtar","avatar, avitar, avtar",,t
+175,Birds,"aviary, bird","aviari, bird",,t
+176,Awards,"award, engrave, trophy","award, engrav, trophi",,t
+177,Coverings,"awning, canopy, canvas, patiocover, rollshutter, tarp, tent","awn, canopi, canva, patiocov, rollshutt, tarp, tent",,t
+178,Word Sub,"axi, axy",axi,,t
+179,Word Sub,"aye, eye, i","aye, eye, i",,t
+180,Excavating ,"backhoe, bobcat, bulldoze, dig, ditch, doze, earth, earthwerks, earthwerx, earthworks, earthworx, earthwurks, excavate, excavating, excavator, gradal, grade, grading, hydroexcavate, hydrovac, landworks, trench, trenching, vactor, xcavating","backho, bobcat, bulldoz, dig, ditch, doze, earth, earthwerk, earthwerx, earthwork, earthworx, earthwurk, excav, gradal, grade, hydroexcav, hydrovac, landwork, trench, vactor, xcavat",,t
+181,Bakery,"bagel, bake, bakehaus, bakehouse, baker, bakery, baking, bread, cake, cakery, cookie, gluten, glutenfree, homebake, muffin, pastry, patisiery, patisserie, pie","bagel, bake, bakehaus, bakehous, baker, bakeri, bread, cake, cakeri, cooki, gluten, glutenfre, homebak, muffin, pastri, patisieri, patisseri, pie",,t
+182,Luggage,"baggage, luggage, suitcase","baggag, luggag, suitcas",,t
+183,Word Sub,"baha, baja","baha, baja",,t
+185,Food Service,"banquet, canteen, cater, chef, chefco, concession, cook, fastfood, foodserve, foodservice, foodtruck, mealprep","banquet, canteen, cater, chef, chefco, concess, cook, fastfood, foodserv, foodservic, foodtruck, mealprep",,t
+186,Word Sub,"barbecue, barbq, bbq, bq","barbecu, barbq, bbq, bq",,t
+187,Word Sub,"barclay, barkley","barclay, barkley",,t
+188,Word Sub,"bair, bare, bear, behr","bair, bare, bear, behr",,t
+190,Law,"barrister, law, lawyer, legal, legaladvice, litigate, litigation, notary, solicitor","barrist, law, lawyer, legal, legaladvic, litig, notari, solicitor",,t
+191,Bartender,"bartend, beverage, mixology","bartend, beverag, mixolog",,t
+192,Counter Tops ,"bath, cabinet, casework, counter, cupboard, kitchen, solidsurface","bath, cabinet, casework, counter, cupboard, kitchen, solidsurfac",,t
+193,Word Sub,"beach, beech","beach, beech",,t
+194,Word Sub,"beau, bough, bow","beau, bough, bow",,t
+195,Funeral,"bereave, cemetery, cremate, funeral, memorial, mortuary","bereav, cemeteri, cremat, funer, memori, mortuari",,t
+196,Word Sub,"bi, buy, by, x","bi, buy, byx",,t
+198,Motorcycle,"bike, chopper, cycle, ebike, electricbike, eride, eryde, moto, motorbike, motorcycle, mtb, mx, ride, sbk, scooter, vtwin","bike, chopper, cycl, ebik, electricbik, erid, eryd, moto, motorbik, motorcycl, mtb, mx, ride, sbk, scooter, vtwin",,t
+199,Signs,"billboard, neon, sign, signage","billboard, neon, sign, signag",,t
+200,Garbage,"bin, compost, conserve, convers, convert, disposal, ecol, effluent, environment, environmental, garbage, junk, landfill, recycle, refuse, rubbish, sanitation, scrap, tote, toter, trash, trashes, waste","bin, compost, conserv, conver, convert, dispos, ecol, effluent, environ, environment, garbag, junk, landfil, recycl, refus, rubbish, sanit, scrap, tote, toter, trash, wast",,t
+201,Prenatal and Infant Care,"birth, doula, hypnobirth, hypnobirthing, midwife, midwifery, midwifes, midwive, midwives, obstetrician, waterbirth","birth, doula, hypnobirth, midwif, midwiferi, midwiv, obstetrician, waterbirth",,t
+202,Restaurant,"bar, bistro, breakfast, buffet, cabaret, cafe, cafeteria, cantina, chai, coffee, commissary, cuisine, deli, delicatessen, dhaba, dine, diner, dining, eat, eater, eatery, eats, eatz, edible, flavour, food, galley, gastropub, gourmet, grill, grocerant, grub, keto, kitchen, lounge, meal, noodle, pantry, pizza, pizzeria, plate, pub, publichouse, restaurant, sandwich, snack, snax, socialhouse, soup, steak, sub, sushi, takeout, taphouse, taverna, tea, tiffin, trattoria, treat, treatery","bar, bistro, breakfast, buffet, cabaret, cafe, cafeteria, cantina, chai, coffe, commissari, cuisin, deli, delicatessen, dhaba, dine, diner, eat, eater, eateri, eatz, edibl, flavour, food, galley, gastropub, gourmet, grill, grocer, grub, keto, kitchen, loung, meal, noodl, pantri, pizza, pizzeria, plate, pub, publichous, restaur, sandwich, snack, snax, socialhous, soup, steak, sub, sushi, takeout, taphous, taverna, tea, tiffin, trattoria, treat, treateri",,t
+203,Word Sub,"bite, byte","bite, byte",,t
+204,Blacksmith,"blacksmith, blacksmithing, farrier, forging, horseshoe","blacksmith, farrier, forg, horsesho",,t
+205,Explosive,"blast, dynamite, explosive, nitro, powder, tnt","blast, dynamit, explos, nitro, powder, tnt",,t
+206,Word Sub,"bleu, blew, blu, blue","bleu, blew, blu, blue",,t
+207,Curtains,"blind, cover, curtain, drape, shade, shutter, window","blind, cover, curtain, drape, shade, shutter, window",,t
+208,Flowers,"bloom, blossom, floral, florist, flower, petals","bloom, blossom, floral, florist, flower, petal",,t
+209,Drafting,"2d, 3d, blueprint, cad, draft, drafting, draught, draw, plan","2d, 3d, blueprint, cad, draft, draught, draw, plan",,t
+210,Word Sub,"blvd, boulevard","blvd, boulevard",,t
+211,Watersports,"board, canoe, flyboard, hydrosport, jetski, kayak, longboard, outrigger, outriggercanoe, outriggerpaddle, paddle, paddleboard, paddlesurf, standupaddleboard, standuppaddle, sup, surf, surfboard, tubing, wake, wakeboard, whitewater","board, cano, flyboard, hydrosport, jetski, kayak, longboard, outrigg, outriggercano, outriggerpaddl, paddl, paddleboard, paddlesurf, standupaddleboard, standuppaddl, sup, surf, surfboard, tube, wake, wakeboard, whitewat",,t
+212,Boat,"boat, catamaran, hydroturf, marina, marine, nautical, outboard, sail, ship, vessel, watercraft, yacht","boat, catamaran, hydroturf, marin, marina, nautic, outboard, sail, ship, vessel, watercraft, yacht",,t
+213,Alternative Therapies,"bodywork, chiro, chiropractic, chiropractor, injury, injurycare, kinesiologist, kinesiology, massage, meditation, myodetox, naturopath, naturopathic, osteo, osteopath, osteopathy, osteotherapy, physio, physiotherapy, reflex, reflexology, reflx, rehab, rehabilitation, shiatsu, therap, therapeutics, therapy","bodywork, chiro, chiropract, chiropractor, injuri, injurycar, kinesiolog, kinesiologist, massag, medit, myodetox, naturopath, osteo, osteopath, osteopathi, osteotherapi, physio, physiotherapi, reflex, reflexolog, reflx, rehab, rehabilit, shiatsu, therap, therapeut, therapi",,t
+215,Print,"2d, 3d, book, calligraphy, copied, copy, desktop, director, duplicate, edit, freelance, gazette, graff, graph, guide, litho, magazine, news, press, print, publication, publish, report, reproduction, screen, weekly, write","2d, 3d, book, calligraphi, copi, desktop, director, duplic, edit, freelanc, gazett, graff, graph, guid, litho, magazin, news, press, print, public, publish, report, reproduct, screen, week, write",,t
+216,Footwear,"boot, cobbler, footwear, moccasin, shoe, sneaker, socks, stiletto","boot, cobbler, footwear, moccasin, shoe, sneaker, sock, stiletto",,t
+217,Package,"box, container, crate, package","box, contain, crate, packag",,t
+218,Word Sub,"braemar, braymar","braemar, braymar",,t
+219,Names Sub,"brian, bryan","brian, bryan",,t
+220,masonry,"brick, brix, bryk, granite, lithological, mason, masonary, masonry, monument, mortar, parge, pargeting, parging, quartz, rock, slate, stone","brick, brix, bryk, granit, litholog, mason, masonari, masonri, monument, mortar, parg, parget, quartz, rock, slate, stone",,t
+221,wedding,"bridal, bride, elope, elopement, formal, groom, marriage, matrimony, wedding","bridal, bride, elop, formal, groom, marriag, matrimoni, wed",,t
+223,Word Sub,"bright, brite","bright, brite",,t
+224,Word Sub,"bronse, bronze","brons, bronz",,t
+225,bus,"bus, carriage, coach, shuttle, stage, trail, transit","bus, carriag, coach, shuttl, stage, trail, transit",,t
+226,Word Sub,"caesar, ceasar, cesar, cesare","caesar, ceasar, cesar",,t
+227,Word Sub,"cain, cane","cain, cane",,t
+228,tunnel,"caisson, tunnel, underground","caisson, tunnel, underground",,t
+229,Word Sub,"caladonia, caledonia","caladonia, caledonia",,t
+230,Word Sub,"caliber, calibre","calib, calibr",,t
+231,Names Sub,"calona, celowna, kelowna, klo","calona, celowna, kelowna, klo",,t
+232,Names Sub,"cambel, cambell, campbel, campbell","cambel, campbel",,t
+233,photography,"camera, capture, digital, foto, image, photo, photobooth, photographer, photography, picture, pix, portrait, sepia","camera, captur, digit, foto, imag, photo, photobooth, photograph, photographi, pictur, pix, portrait, sepia",,t
+234,rv,"5thwheel, 5wheel, camp, camper, campervan, campground, camping, fifthwheel, motorhome, recreationalvehicle, recreationvehicle, rv, tenttrailer, trailer, traveltrailer","5thwheel, 5wheel, camp, camper, campervan, campground, fifthwheel, motorhom, recreationalvehicl, recreationvehicl, rv, tenttrail, trailer, traveltrail",,t
+235,Word Sub,"can, cdn","can, cdn",,t
+236,candle,"candle, parafin, wax","candl, parafin, wax",,t
+237,Word Sub,"cando, candu","cando, candu",,t
+238,Sweets,"candy, chocolate, confection, confectionary, dessert, sugar, sweet, treat","candi, chocol, confect, confectionari, dessert, sugar, sweet, treat",,t
+239,Pets,"boarding, breed, breeder, breeding, canine, cattery, dawg, dawgz, dog, dogz, groomer, grooming, hound, k9, kennel, knine, pet, pooch, pup, puppy, retriever","board, breed, breeder, canin, catteri, dawg, dawgz, dog, dogz, groom, groomer, hound, k9, kennel, knine, pet, pooch, pup, puppi, retriev",,t
+240,Jams,"canning, jam, jelly, pickle, preserve","canning, jam, jelli, pickl, preserv",,t
+241,Word Sub,"capt, captain","capt, captain",,t
+242,Composite,"carbonfiber, carbonfibre, composite","carbonfib, carbonfibr, composit",,t
+243,Greeting,"card, greeting, station, stationary","card, greet, station, stationari",,t
+244,Employment,"career, carer, crew, employ, hour, hr, humanresource, job, labor, labour, oncall, overload, personel, personnel, placement, recruit, recruitment, staff, staffing, support, temp, temporary, workforce, workhub, workplace","career, carer, crew, employ, hour, hr, humanresourc, job, labor, labour, oncal, overload, personel, personnel, placement, recruit, staf, staff, support, temp, temporari, workforc, workhub, workplac",,t
+245,Names Sub,"caren, caron, caryn, karen, karin, karon, karyn","caren, caron, caryn, karen, karin, karon, karyn",,t
+246,Carpentry,"carpenter, carpentry, finish, finished, finishing, frame, framers, framerz, framewerk, framework, framing, join, joinary, joinery, millwerk, millwork, truss, wood, woodcraft, woodw, woodwerk, woodwork","carpent, carpentri, finish, frame, framer, framerz, framewerk, framework, join, joinari, joineri, millwerk, millwork, truss, wood, woodcraft, woodw, woodwerk, woodwork",,t
+247,Flooring,"carpet, ceramic, floor, hardwood, laminate, lino, marble, mosaic, pottery, rug, terrazzo, til, tile, tiling","carpet, ceram, floor, hardwood, lamin, lino, marbl, mosaic, potteri, rug, terrazzo, til, tile",,t
+248,Carpool,"carpool, carshare, rider, rideshare","carpool, carshar, rider, rideshar",,t
+249,Maps,"cartograph, cartographer, cartography, chart, geomatic, gis, map","cartograph, cartographi, chart, geomat, gis, map",,t
+250,Printer,"cartridge, ink, inking, inkjet, laser, lazer, printer, refill, toner","cartridg, ink, inkjet, laser, lazer, printer, refil, toner",,t
+251,Money,"cash, currency, exchange, forex, forx, fourx, intercambio, money, xchange","cash, currenc, exchang, forex, forx, fourx, intercambio, money, xchang",,t
+252,Gambling,"casino, gambling, gaming, lottery, lotto, poker","casino, gambl, game, lotteri, lotto, poker",,t
+253,Cat,"bobcat, cat, cheetah, cougar, feline, jaguar, kit, kitten, kitty, leopard, lion, lynx, panther, puma, tiger, tomcat","bobcat, cat, cheetah, cougar, felin, jaguar, kit, kitten, kitti, leopard, lion, lynx, panther, puma, tiger, tomcat",,t
+254,Vision,"cataract, cite, contact, eyecare, eyeglasses, eyewear, lens, lenz, opt, optical, optician, opticianry, retina, sight, site, sunglasses, vision","cataract, cite, contact, eyecar, eyeglass, eyewear, len, lenz, opt, optic, optician, opticianri, retina, sight, site, sunglass, vision",,t
+255,Word Sub,"c, cee, sea, see","c, cee, sea, see",,t
+256,Drywall,"ceiling, drywall, gyprock, gypsum, panel, taper, taping, texture","ceil, drywal, gyprock, gypsum, panel, tape, taper, textur",,t
+257,Wine,"cellar, oenophile, vines, vineyard, vino, vintner, viticulture, wine, winery","cellar, oenophil, vine, vineyard, vino, vintner, viticultur, wine, wineri",,t
+258,Word Sub,"celtic, seltic","celtic, seltic",,t
+259,Word Sub,"cemco, chemco","cemco, chemco",,t
+260,Concrete,"cement, concrete, crete, false, falsewerc, falsewerx, falsework, falseworx, form, forming, formwork, icf, minimix, parge, pargeting, parging, placing, precast, readymix, rebar, redimix, redmix, reinforce, shoring, shotcrete, slipform, telebelt","cement, concret, crete, fals, falsewerc, falsewerx, falsework, falseworx, form, formwork, icf, minimix, parg, parget, place, precast, readymix, rebar, redimix, redmix, reinforc, shore, shotcret, slipform, telebelt",,t
+261,Scent,"aroma, aromatherapy, essence, essentialoils, fragrance, fragrant, oils, parfum, perfume, perfumery, scent","aroma, aromatherapi, essenc, essentialoil, fragranc, fragrant, oil, parfum, perfum, perfumeri, scent",,t
+264,Word Sub,"charade, shirade","charad, shirad",,t
+265,Charity,"charity, fundraiser, philanthropy","chariti, fundrais, philanthropi",,t
+266,Word Sub,"chec, check, chek, cheque","chec, check, chek, chequ",,t
+267,Word Sub,"checker, chequer","checker, chequer",,t
+268,Dairy,"cheese, cone, cream, creamery, dairy, gelato, icecream, icecreamcone, kefir, kephir, milk, softserve, yogourt, yogurt","chees, cone, cream, creameri, dairi, gelato, icecream, icecreamcon, kefir, kephir, milk, softserv, yogourt, yogurt",,t
+269,Word Sub,"cher, shair, shar","cher, shair, shar",,t
+270,Word Sub,"chic, sheic","chic, sheic",,t
+454,Word Sub,"lam, lamb","lam, lamb",,t
+271,Poultry,"chick, chicken, egg, fowl, poultry, turkey","chick, chicken, egg, fowl, poultri, turkey",,t
+272,Word Sub,"chilcotin, tsilhqotin","chilcotin, tsilhqotin",,t
+273,Childcare,"aupair, babysit, babysitter, childcare, daycare, dayhome, earlychildhood, earlylearn, ece, educare, kidcare, kinder, kindercare, kinderhouse, kindy, kindycare, montessori, nanny, nannycare, nursery, playschool, preschool","aupair, babysit, babysitt, childcar, daycar, dayhom, earlychildhood, earlylearn, ece, educar, kidcar, kinder, kindercar, kinderhous, kindi, kindycar, montessori, nanni, nannycar, nurseri, playschool, preschool",added dayhome,t
+274,Names Sub,"chris, cris, kris","chris, cris, kris",,t
+275,Word Sub,"christmas, xmas","christma, xmas",,t
+276,Word Sub,"chrystal, cristal, cristol, crystal, crystol","chrystal, cristal, cristol, crystal, crystol",,t
+277,Word Sub,"cib, cyb, sib, syb","cib, cyb, sib, syb",,t
+278,Word Sub,"ciel, seal, seel","ciel, seal, seel",,t
+279,Word Sub,"ciera, seara, siera","ciera, seara, siera",,t
+280,Smokeshop,"cigar, cigarette, ecig, ecigarette, ecigz, ejuice, esmoke, hookah, juice, juul, juuling, pipe, smoke, tobacco, vape, vaping","cigar, cigarett, ecig, ecigarett, ecigz, ejuic, esmok, hookah, juic, juul, pipe, smoke, tobacco, vape",,t
+281,Word Sub,"cinabar, cinibar, cinnabar, cinnibar","cinabar, cinibar, cinnabar, cinnibar",,t
+282,Word Sub,"cirrus, cirus, cyrus, sirus, syris, syrus","cirrus, cirus, cyrus, sirus, syri, syrus",,t
+283,Word Sub,"citi, city",citi,,t
+284,Exteriors,"buildingenvelope, clad, exterior, hardy, parge, pargeting, parging, siding, stucco, waterproof, xterior","buildingenvelop, clad, exterior, hardi, parg, parget, side, stucco, waterproof, xterior",,t
+285,Names Sub,"clair, claire, clare, klair, klaire, klare","clair, clare, klair, klare",,t
+286,Maintenance ,"autoclave, clean, cleaned, cleaner, cleaning, cleanup, cleened, cleener, cleening, custodian, deoderize, disinfect, disinfectant, disinfecting, domestic, facilities, facility, handyman, handywork, homerepair, homeservice, homesolution, household, housekeeper, janitor, janitorial, maid, maintenance, sanitize, sterilize","autoclav, clean, cleaner, cleanup, cleen, cleener, custodian, deoder, disinfect, domest, facil, handyman, handywork, homerepair, homeservic, homesolut, household, housekeep, janitor, janitori, maid, mainten, sanit, steril",,t
+287,Word Sub,"clear, cleer","clear, cleer",,t
+288,Fabric,"cloth, drygood, fabric, material, rag, silk, textile, tx","cloth, drygood, fabric, materi, rag, silk, textil, tx",,t
+289,Golf,"clubmaker, golf, golfclubs, gulf","clubmak, golf, golfclub, gulf",,t
+290,Word Sub,"cmor, seamore, semore, seymour","cmor, seamor, semor, seymour",,t
+291,Names Sub,"ned, neid","ned, neid",,t
+292,Names Sub,"neal, neil, nel","neal, neil, nel",,t
+293,Oil & Gas ,"biofuel, cng, cngs, coal, drill, energy, fuel, gas, gasfitting, helium, liquifiednaturalgas, lng, lpg, lubricate, nrg, oil, oilfield, petro, petroleum, pipeline, propane, resource","biofuel, cng, cngs, coal, drill, energi, fuel, gas, gasfit, helium, liquifiednaturalga, lng, lpg, lubric, nrg, oil, oilfield, petro, petroleum, pipelin, propan, resourc",,t
+294,Word Sub,"knight, knite, knyte, nait, night, nite, nyte","knight, knite, knyte, nait, night, nite, nyte",,t
+295,Teach ,"edu, educate, education, educational, educator, educo, instruct, instructco, instructional, jobshadow, knowledge, learn, learning, lesson, mentor, mentoring, professor, scholar, scholarship, seminar, study, teach, teacher, train, trainer, tutor, tutoring","edu, educ, educo, instruct, instructco, jobshadow, knowledg, learn, lesson, mentor, professor, scholar, scholarship, seminar, studi, teach, teacher, train, trainer, tutor",,t
+296,Utilities ,"cogen, energy, generate, hydro, hydropower, linelocate, linelocating, power, powerline, thermal, underground, utility","cogen, energi, generat, hydro, hydropow, lineloc, power, powerlin, thermal, underground, util",,t
+297,Word Sub,"coat, cote","coat, cote",,t
+298,Word Sub,"cohlman, coleman, colman","cohlman, coleman, colman",,t
+299,vending,"coin, coyne, numismat, vend, vending, vendingmachine","coin, coyn, numismat, vend, vendingmachin",,t
+300,Radiator,"cooling, radiator","cool, radiat",,t
+301,pawn,"collateral, pawn","collater, pawn",,t
+302,Word Sub,"colombia, columbia","colombia, columbia",,t
+303,Word Sub,"color, colour","color, colour",,t
+304,Computer,"compute, computer, pc, pcrepair, tec, tech, technology, tek","comput, pc, pcrepair, tec, tech, technolog, tek",,t
+305,Concepts,"concept, dream, idea","concept, dream, idea",,t
+306,Warehouse,"container, depot, reload, selfstorage, storage, terminal, transload, warehouse, warehousing","contain, depot, reload, selfstorag, storag, termin, transload, wareh, warehous",,t
+307,handle,"convey, handle","convey, handl",,t
+308,Word Sub,"cosi, cosy, cozi, cozy","cosi, cozi",,t
+309,Names Sub,"cotenai, cotenay, cutenai, kootenay","cotenai, cotenay, cutenai, kootenay",,t
+310,Names Sub,"courtenay, courtney","courtenay, courtney",,t
+311,Hobby,"craft, hobby, radiocontrol, rc","craft, hobbi, radiocontrol, rc",,t
+312,High Risk Work,"aeriallift, bakersscaffold, boomtruck, cantilever, crane, dogging, dogman, erect, erector, highrisk, highriskworklicence, hrwl, rig, rigger, rigging, rigs, scaffold, scaffolding, scissorlift","aeriallift, bakersscaffold, boomtruck, cantilev, crane, dog, dogman, erect, erector, highrisk, highriskworklic, hrwl, rig, rigger, scaffold, scissorlift",,t
+313,Needlework,"broomlace, crochet, crossstitch, embroider, embroidery, knit, loom, spin, spool, spun, stitch, weave, wool, woven, xstitch, yarn","broomlac, crochet, crossstitch, embroid, embroideri, knit, loom, spin, spool, spun, stitch, weav, wool, woven, xstitch, yarn",,t
+314,Names Sub,"kwahlicum, qualicum","kwahlicum, qualicum",,t
+315,Word Sub,"kwest, quest, qwest","kwest, quest, qwest",,t
+316,Word Sub,"kwestar, qestar, questar, sequester","kwestar, qestar, questar, sequest",,t
+317,Word Sub,"kwic, kwick, kwik, quick","kwic, kwick, kwik, quick",,t
+318,Word Sub,"cygnet, signet","cygnet, signet",,t
+319,drum,"cymbal, drum, percusion, percussion","cymbal, drum, percus, percuss",,t
+320,Word Sub,"cypress, cyprus","cypress, cyprus",,t
+321,Word Sub,"dahl, dol, doll","dahl, dol, doll",,t
+322,Word Sub,"daily, daley, daly","daili, daley, dali",,t
+323,Names Sub,"davey, davie, davy","davey, davi",,t
+324,Word Sub,"day, dey","day, dey",,t
+325,Word Sub,"deal, del","deal, del",,t
+326,Word Sub,"delight, delite","delight, delit",,t
+327,Word Sub,"delucks, delux, deluxe, dlux, dulux","deluck, delux, dlux, dulux",,t
+542,Word Sub,"saber, sabre","saber, sabr",,t
+328,salvage,"demo, demolition, dismantle, salvage","demo, demolit, dismantl, salvag",,t
+329,Dental,"braces, dental, dentist, dentistry, headgear, hygiene, implant, maxillofacial, oral, orthodontist, periodontist","brace, dental, dentist, dentistri, headgear, hygien, implant, maxillofaci, oral, orthodontist, periodontist",,t
+330,Word Sub,"dew, do, du, due","dew, do, du, due",,t
+331,xray,"diagnostic, mri, sonograph, ultrasound, xray","diagnost, mri, sonograph, ultrasound, xray",,t
+332,Names Sub,"dickson, dixon, dixson","dickson, dixon, dixson",,t
+333,Diet,"diet, keto, ketogenic, naturalsupplement, nourish, nutraceutical, nutri, nutrition, paleo, supplement, suppliment, vita, vitamin, weightloss","diet, keto, ketogen, naturalsuppl, nourish, nutraceut, nutri, nutrit, paleo, supplement, suppliment, vita, vitamin, weightloss",,t
+334,Word Sub,"dinamo, dynamo","dinamo, dynamo",,t
+335,scuba,"dive, diver, scuba, submarine, subsea, underwater","dive, diver, scuba, submarin, subsea, underwat",,t
+336,Doctor,"doc, doctor, dr, md, medicaldoctor","doc, doctor, dr, md, medicaldoctor",,t
+337,Word Sub,"dolfin, dolphin","dolfin, dolphin",,t
+338,Word Sub,"don, done, dun, dunn","don, done, dun, dunn",,t
+339,drain,"drain, drainage, outfall, septic, sewage, sewer, wastewater","drain, drainag, outfal, septic, sewag, sewer, wastewat",added drainage,t
+340,Word Sub,"dri, dry, drye","dri, drye",,t
+341,driving,"driving, motoring","drive, motor",,t
+342,drone,"drone, uav, unmaned","drone, uav, unman",,t
+343,Names Sub,"duane, dwayne","duan, dwayn",,t
+344,Names Sub,"dundarave, dunderave","dundarav, dunderav",,t
+345,Internet,"broadband, chat, commerce, cyber, dropship, ecom, ecomm, ecommerce, email, homepage, host, internet, isp, modem, net, network, online, searchengine, seo, server, socialmedia, web, wifi","broadband, chat, commerc, cyber, dropship, ecom, ecomm, ecommerc, email, homepag, host, internet, isp, modem, net, network, onlin, searchengin, seo, server, socialmedia, web, wifi",,t
+346,Word Sub,"early, irly","earli, ir",,t
+347,Word Sub,"easi, easy, eazi, eazy, ez, eze","easi, eazi, ez, eze",,t
+348,gutter,"eave, eavestrough, gutter","eav, eavestrough, gutter",,t
+349,Word Sub,"ecel, ecsel, exel, xcel, xcl, xell, xl, xsel","ecel, ecsel, exel, xcel, xcl, xell, xl, xsel",,t
+350,Names Sub,"eddie, eddy",eddi,,t
+351,fx,"effect, fx, props, sfx, specialeffect, stunt, vfx","effect, fx, prop, sfx, specialeffect, stunt, vfx",,t
+352,Numbers Sub,"8, ate, eight, eighth","8, ate, eight, eighth",,t
+353,Numbers Sub,"eighteight, eighteighth, eightyeight, eightyeighth","eighteight, eighteighth, eightyeight, eightyeighth",,t
+354,Numbers Sub,"eightfive, eightfiveth, eightyfifth, eightyfive","eightfiv, eightfiveth, eightyf, eightyfifth",,t
+355,Numbers Sub,"eightfour, eightfourth, eightyfour, eightyfourth","eightfour, eightfourth, eightyfour, eightyfourth",,t
+356,Numbers Sub,"80, eightieth, eightt, eighty, eightzero, eightzeroth","80, eighti, eightieth, eightt, eightzero, eightzeroth",,t
+357,Numbers Sub,"eightnine, eightnineth, eightynine, eightyninth","eightnin, eightnineth, eightynin, eightyninth",,t
+358,Numbers Sub,"eightone, eightonest, eightyfirst, eightyone","eighton, eightonest, eightyfirst, eightyon",,t
+359,Numbers Sub,"eightseven, eightseventh, eightyseven, eightyseventh","eightseven, eightseventh, eightyseven, eightyseventh",,t
+360,Numbers Sub,"eightsix, eightsixth, eightysix, eightysixth","eightsix, eightsixth, eightysix, eightysixth",,t
+361,Numbers Sub,"eightwo, eightwond, eightysecond, eightytwo","eightwo, eightwond, eightysecond, eightytwo",,t
+362,Senior,"care, caregiver, caregiving, elder, geriatric, help, homecare, homesupport, retire, senior","care, caregiv, elder, geriatr, help, homecar, homesupport, retir, senior",,t
+363,lift,"elevate, elevator, lift","elev, lift",,t
+364,Word Sub,"elic, elis","eli, elic",,t
+365,immigrate,"emigra, emigrate, imigra, imigration, immigrate, immigration, landing, newcomer, settlement, visa","emigr, emigra, imigr, imigra, immigr, land, newcom, settlement, visa",,t
+366,Word Sub,"encore, oncor","encor, oncor",,t
+367,Translation,"english, esl, interpret, interpreter, language, translate","english, esl, interpret, languag, translat",,t
+368,horse,"colt, equestrian, equine, farrier, gymkhana, hoof, hooves, horse, horsemanship, pony, ride, riding, saddle","colt, equestrian, equin, farrier, gymkhana, hoof, hoov, hors, horsemanship, poni, ride, saddl",,t
+369,tractor,"equipment, implement, tractor","equip, implement, tractor",,t
+370,Names Sub,"erwin, irwin","erwin, irwin",,t
+371,Word Sub,"esix, essex, esx, sx","esix, essex, esx, sx",,t
+372,Word Sub,"euro, uro","euro, uro",,t
+373,Word Sub,"ewe, u, yew, you","ewe, u, yew, you",,t
+374,muffler,"exhaust, muffler","exhaust, muffler",,t
+375,import,"exim, export, exported, exporting, impex, import, imported, importing, impx, imx, trade, trader, trading, xim","exim, export, impex, import, impx, imx, trade, trader, xim",,t
+376,pest,"capture, exterminate, exterminator, fumigate, pest","captur, extermin, fumig, pest",,t
+377,Word Sub,"extreme, xstream, xtreme","extrem, xstream, xtreme",,t
+378,Word Sub,"fantasy, phantasy","fantasi, phantasi",,t
+379,fastfood,"carryout, fastfood, takeout","carryout, fastfood, takeout",,t
+380,Word Sub,"father, fr","father, fr",,t
+381,Animal Supplies,"feed, fodder, grain, hay, petfood","feed, fodder, grain, hay, petfood",,t
+382,Word Sub,"fenix, feonix, phenix, pheonix, phoenix","fenix, feonix, phenix, pheonix, phoenix",,t
+383,Word Sub,"fiber, fibre","fiber, fibr",,t
+384,Word Sub,"filipina, filipino, philipina, philipino, pinoy","filipina, filipino, philipina, philipino, pinoy",,t
+385,Word Sub,"fire, fyre","fire, fyre",,t
+386,Numbers Sub,"first, one, onest","first, one, onest",,t
+387,install,"fitter, install, layer, laying","fitter, instal, lay, layer",,t
+388,traffic,"flag, flagger, pilotcar, traffic","flag, flagger, pilotcar, traffic",,t
+389,Word Sub,"flair, flare","flair, flare",,t
+390,insulate,"foam, insulate, insulation, spray, sprayfoam","foam, insul, spray, sprayfoam",,t
+391,soccer,"footbal, footie, soccer","footbal, footi, soccer",,t
+392,Numbers Sub,"for, four, fourth, iv","four, fourth, iv",,t
+393,timber,"compassing, compassman, forest, forestry, log, lumber, mill, paper, ply, precut, pulp, reman, salvage, saw, sawmill, timber, wood","compass, compassman, forest, forestri, log, lumber, mill, paper, pli, precut, pulp, reman, salvag, saw, sawmil, timber, wood",,t
+394,forester,"forester, forestmanager, forestry, reforest, silviculture, timbermanager, treeplant","forest, forestmanag, forestri, reforest, silvicultur, timbermanag, treeplant",,t
+395,Word Sub,"fort, ft","fort, ft",,t
+396,Word Sub,"frame, frayme, phrame, phrayme","frame, fraym, phrame, phraym",,t
+397,Names Sub,"fraiser, fras, fraser, frasier, fraz, frazer, frazier","fraiser, fras, fraser, frasier, fraz, frazer, frazier",,t
+398,Produce,"berry, blueberry, fresh, freshmart, fruit, green, microgreen, orchard, produce, sabzi, veg, vegetable, veggies, veggy, vegi","berri, blueberri, fresh, freshmart, fruit, green, microgreen, orchard, produc, sabzi, veg, veget, veggi, vegi",,t
+465,Word Sub,"linc, link, links, linx, lync, lynk, lynx","linc, link, linx, lync, lynk, lynx",,t
+466,Word Sub,"lion, lyon","lion, lyon",,t
+399,Names Sub,"cremini, deathcap, fungi, fungus, maitake, morel, mushroom, mycology, porcini, portabello, reishi, shiitake, shroom, toadstool","cremini, deathcap, fungi, fungus, maitak, morel, mushroom, mycolog, porcini, portabello, reishi, shiitak, shroom, toadstool",,t
+400,Word Sub,"fushion, fusion, fuzion, phusiion, phusion, phuzion","fushion, fusion, fuzion, phusiion, phusion, phuzion",,t
+401,Names Sub,"gaea, gaia","gaea, gaia",,t
+402,Names Sub,"gaihl, gail, gale, gayle","gaihl, gail, gale, gayl",,t
+403,Names Sub,"galley, kitchen","galley, kitchen",,t
+404,Games,"esport, game, gaming, play, puzzle, toy","esport, game, play, puzzl, toy",,t
+405,Garden,"aeroponic, aquaponic, bark, blow, blower, blowin, botanical, botany, cultivate, cultivating, cultivation, ecoscape, garden, gardener, grass, greenhouse, greens, greenspace, ground, grow, grower, guttation, hardscape, harvest, harvesting, horticulture, hydroponic, hydroseed, hydroseeding, landscape, landscaping, lawn, lawncare, microgreen, mow, mulch, nursery, plant, plantation, rockscape, scape, sod, softscape, sow, stonescape, succulent, transpiration, tropical, turf, weed, xeriscape, yard, yardworks","aeropon, aquapon, bark, blow, blower, blowin, botan, botani, cultiv, ecoscap, garden, grass, green, greenhous, greenspac, ground, grow, grower, guttat, hardscap, harvest, horticultur, hydropon, hydrose, hydroseed, landscap, lawn, lawncar, microgreen, mow, mulch, nurseri, plant, plantat, rockscap, scape, sod, softscap, sow, stonescap, succul, transpir, tropic, turf, weed, xeriscap, yard, yardwork",,t
+406,Names Sub,"genesis, genesys, genisis, genysis","genesi, genisi, genysi",,t
+407,Names Sub,"geof, geoff, geoffrey, geofrey, jef, jeff, jeffrey, jefrey","geof, geoff, geoffrey, geofrey, jef, jeff, jeffrey, jefrey",,t
+408,Names Sub,"geri, gerry, gery, jeri, jerry, jery","geri, gerri, jeri, jerri",,t
+409,Glass ,"autoglass, glas, glass, glassart, glasstec, glasstech, glassteck, glassworks, glaze, glazier, glazing, mirror, pane, shower, thermal, thermopane, window, windshield","autoglass, glas, glass, glassart, glasstec, glasstech, glassteck, glasswork, glaze, glazier, mirror, pane, shower, thermal, thermopan, window, windshield",,t
+410,Names Sub,"glide, glider, sailplane, soar","glide, glider, sailplan, soar",,t
+412,Word Sub,"goar, gore","goar, gore",,t
+413,Word Sub,"gofer, gopher","gofer, gopher",,t
+414,Word Sub,"goru, guru","goru, guru",,t
+415,Word Sub,"governor, guvner, guvnor","governor, guvner, guvnor",,t
+416,Names Sub,"grace, graice, grase, grayce","grace, graic, grase, grayc",,t
+417,Names Sub,"graeme, graham, gram","graem, graham, gram",,t
+418,Word Sub,"gray, grey","gray, grey",,t
+419,Word Sub,"griffin, griffon, griffyn, grifin, grifon, grifyn, griphin, griphon, griphyn, gryphon","griffin, griffon, griffyn, grifin, grifon, grifyn, griphin, griphon, griphyn, gryphon",,t
+420,water,"h20, h2o, htwo, spring, water","h20, h2o, htwo, spring, water",,t
+421,Word Sub,"hai, hi, high, hy, hye, hygh","hai, hi, high, hy, hye, hygh",,t
+422,Word Sub,"haidaway, hideaway","haidaway, hideaway",,t
+423,Word Sub,"harber, harbor, harbour","harber, harbor, harbour",,t
+424,Word Sub,"hart, heart","hart, heart",,t
+425,Word Sub,"haus, house","haus, hous",,t
+426,Word Sub,"haug, hawg, hog","haug, hawg, hog",,t
+427,health,"ayurveda, emdr, healing, health, healthcare, healthco, healthy, holistic, lighttherapy, medical, mental, pain, phototherapy, practice, practise, reiki, surgery, surgical, therapy, urgentcare, wellbeing, wellness, wholistic","ayurveda, emdr, heal, health, healthcar, healthco, healthi, holist, lighttherapi, medic, mental, pain, phototherapi, practic, practis, reiki, surgeri, surgic, therapi, urgentcar, well, wellb, wholist",,t
+428,Word Sub,"height, hite, hyte","height, hite, hyte",,t
+429,Word Sub,"hicks, hics, hiks, hix, hyc, hyx","hic, hick, hik, hix, hyc, hyx",,t
+430,Word Sub,"hailand, highland, hiland, hyland","hailand, highland, hiland, hyland",,t
+431,Word Sub,"haitec, haitech, haitek, hightec, hightech, hightek, hitec, hitek, hytec, hytek","haitec, haitech, haitek, hightec, hightech, hightek, hitec, hitek, hytec, hytek",,t
+433,Word Sub,"haiway, haiweigh, haiwey, highway, highweigh, highwey, hiway, hiweigh, hiwey, hwy, hyway, hyweigh, hywey","haiway, haiweigh, haiwey, highway, highweigh, highwey, hiway, hiweigh, hiwey, hwi, hyway, hyweigh, hywey",,t
+434,lease,"hire, landlord, lease, leasee, leasing, leasor, rent, rental, renter, renting","hire, landlord, leas, lease, leasor, rent, rental, renter",,t
+436,Numbers Sub,"hundredth, onehundred, onehundredth, onezerozeroth, onezerzero","hundredth, onehundr, onehundredth, onezerozeroth, onezerzero",,t
+438,Word Sub,"international, intl","intern, intl",,t
+439,Irrigation,"backflow, backflowtest, backflowtesting, hose, irrigate, irrigation, sprinkler, watering, watersystem","backflow, backflowtest, hose, irrig, sprinkler, water, watersystem",,t
+440,Word Sub,"isis, isys",isi,,t
+441,Word Sub,"island, isle","isl, island",,t
+442,Numbers Sub,"ix, nine, nineth, ninth","ix, nine, nineth, ninth",,t
+443,Names Sub,"jaemar, jaymar","jaemar, jaymar",,t
+444,Names Sub,"jantsen, jantzen, janzen","jantsen, jantzen, janzen",,t
+445,Wash,"jetwash, powerclean, powerwash, pressure, pressurewash, steam, steamclean, wash","jetwash, powerclean, powerwash, pressur, pressurewash, steam, steamclean, wash",,t
+446,Names Sub,"johal, johel","johal, johel",,t
+447,Names Sub,"john, jon","john, jon",,t
+448,Names Sub,"johnny, jonny","johnni, jonni",,t
+449,Names Sub,"johnson, johnston, jonson","johnson, johnston, jonson",,t
+450,Word Sub,"carma, charma, karma, kharma","carma, charma, karma, kharma",,t
+451,Keyboards,"keyboard, organ, piano, synthesizer","keyboard, organ, piano, synthes",,t
+452,Word Sub,"kwality, qualitee, qualitie, quality","kwaliti, qualite, qualiti",,t
+453,Word Sub,"cuantum, kwantem, kwantum, quantem, quantum","cuantum, kwantem, kwantum, quantem, quantum",,t
+455,Word Sub,"landsdowne, lansdowne","landsdown, lansdown",,t
+456,plaster,"lathe, plaster, stucco","lath, plaster, stucco",,t
+457,Names Sub,"laura, lora","laura, lora",,t
+458,Names Sub,"laurel, loral, lorel","laurel, loral, lorel",,t
+459,Word Sub,"lai, lay, laye, le, lei","lai, lay, le, lei",,t
+460,Word Sub,"leach, leech","leach, leech",,t
+461,Word Sub,"lear, leer","lear, leer",,t
+462,Names Sub,"lewis, louis, luis","lewi, loui, lui",,t
+463,Word Sub,"liddle, lil, little, lyttle","liddl, lil, littl, lyttl",,t
+464,Names Sub,"linda, lynda","linda, lynda",,t
+467,Word Sub,"load, lode","load, lode",,t
+468,casino,"casino, casinos, loto, lotteries, lottery, lotto, ltc, slot, sweepstake, sweepstakes","casino, loto, lotteri, lotto, ltc, slot, sweepstak",,t
+469,Word Sub,"love, luv","love, luv",,t
+470,Word Sub,"magic, magick, majic, majick, majix","magic, magick, majic, majick, majix",,t
+471,Word Sub,"magnem, magnum","magnem, magnum",,t
+472,Word Sub,"main, maine, mayne, meyne","main, mayn, meyn",,t
+473,Word Sub,"mama, mamma, moma, momma, mumma","mama, mamma, moma, momma, mumma",,t
+474,Word Sub,"manage, management, mgmt, mgr, mgt","manag, mgmt, mgr, mgt",,t
+475,Word Sub,"manufacture, manufacturing, mfg","manufactur, mfg",,t
+476,prefab,"manufacturedhome, mobilehome, modular, modularhome, prefab","manufacturedhom, mobilehom, modular, modularhom, prefab",,t
+477,Word Sub,"marcs, marx","marc, marx",,t
+478,Word Sub,"marketer, marketing, mctg, mkt","market, mctg, mkt",,t
+479,Word Sub,"meridian, meridien","meridian, meridien",,t
+480,Word Sub,"maidas, midas, mydas","maida, mida, myda",,t
+481,Word Sub,"mile, myle","mile, myle",,t
+482,Word Sub,"minit, minute","minit, minut",,t
+483,Word Sub,"maiser, maizer, miser, mizer, myser, myzer","maiser, maizer, miser, mizer, myser, myzer",,t
+484,Word Sub,"mister, mr","mister, mr",,t
+485,Word Sub,"misus, mrs","misus, mrs",,t
+486,Word Sub,"miter, mitre, myter","miter, mitr, myter",,t
+487,Word Sub,"moar, mohr, more","moar, mohr, more",,t
+488,Word Sub,"monro, monroe, munro, munroe","monro, munro",,t
+489,Word Sub,"mount, mountain, mt, mtn","mount, mountain, mt, mtn",,t
+490,organic,"botanical, botanicals, holistics, natural, organic, organix","botan, holist, natur, organ, organix",,t
+491,Word Sub,"neu, new, nieu, noo, nu","neu, new, nieu, noo, nu",,t
+492,Word Sub,"newest, nuwest, nw","newest, nuwest, nw",,t
+493,Numbers Sub,"ninefive, ninefiveth, ninetyfifth, ninetyfive","ninef, ninefiveth, ninetyf, ninetyfifth",,t
+494,Numbers Sub,"ninefour, ninefourth, ninetyfour, ninetyfourth","ninefour, ninefourth, ninetyfour, ninetyfourth",,t
+495,Numbers Sub,"ninenine, ninenineth, ninetynine, ninetyninth","ninenin, ninenineth, ninetynin, ninetyninth",,t
+496,Numbers Sub,"nineone, nineonest, ninetyfirst, ninetyone","nineon, nineonest, ninetyfirst, ninetyon",,t
+497,Numbers Sub,"nineseven, nineseventh, ninetyseven, ninetyseventh","nineseven, nineseventh, ninetyseven, ninetyseventh",,t
+498,Numbers Sub,"ninesix, ninesixth, ninetysix, ninetysixth","ninesix, ninesixth, ninetysix, ninetysixth",,t
+499,Numbers Sub,"90, 9t, ninetieth, ninety, ninezero, ninezeroth","90, 9t, nineti, ninetieth, ninezero, ninezeroth",,t
+500,Numbers Sub,"ninetwo, ninetwond, ninetysecond, ninetytwo","ninetwo, ninetwond, ninetysecond, ninetytwo",,t
+501,Word Sub,"no, number",number,,t
+502,Word Sub,"neuvo, newvo, nouveau, nuvo","neuvo, newvo, nouveau, nuvo",,t
+503,Word Sub,"odysea, odysee, odysey","odyse, odysea, odysey",,t
+504,Names Sub,"olsen, olsin, olson, olsun, olsyn","olsen, olsin, olson, olsun, olsyn",,t
+505,Word Sub,"pace, paice, payce","pace, paic, payc",,t
+506,Word Sub,"pairadice, pairadise, paradice, paradise","pairadic, pairadis, paradic, paradis",,t
+507,parts,"part, wreck, wrecker","part, wreck, wrecker",,t
+508,Word Sub,"peak, peek, piq, pique","peak, peek, piq, piqu",,t
+509,Word Sub,"pearce, pierce","pearc, pierc",,t
+510,Word Sub,"pg, prince george, princegeorge","pg, princegeorg",,t
+511,Word Sub,"persepolis, persopolis","persepoli, persopoli",,t
+512,Word Sub,"faze, phase, phaze","faze, phase, phaze",,t
+513,stamp,"philatelic, philately, stamp","philat, philatel, stamp",,t
+514,Word Sub,"pick, pik, pyck","pick, pik, pyck",,t
+515,Word Sub,"planet, planit","planet, planit",,t
+516,Names Sub,"poco, port coquitlam","poco, portcoquitlam",,t
+517,Word Sub,"point, poynt, pt","point, poynt, pt",,t
+518,POS,"pointofsale, pos, register","pointofsal, pos, regist",,t
+519,Word Sub,"portocall, portofcall","portocal, portofcal",,t
+520,ptsd,"posttrauma, ptsd, trauma","posttrauma, ptsd, trauma",,t
+521,Word Sub,"price, pryce","price, pryce",,t
+522,Word Sub,"prime, pryme","prime, pryme",,t
+523,Word Sub,"principal, principle","princip, principl",,t
+524,Word Sub,"profit, prophet, prophit","profit, prophet, prophit",,t
+525,Word Sub,"pumpkin, punkin","pumpkin, punkin",,t
+526,Names Sub,"charlotte, qc, queencharlotte","charlott, qc, queencharlott",,t
+527,Word Sub,"quail, quale, quayle","quail, qual, quayl",,t
+528,Word Sub,"quesnel, quinel","quesnel, quinel",,t
+529,Word Sub,"rae, rai, ray, reigh","rae, rai, ray, reigh",,t
+530,Word Sub,"rain, raine, rayne, reign, rein","rain, rayn, reign, rein",,t
+531,Word Sub,"rainbogh, rainbow, raynbow","rainbogh, rainbow, raynbow",,t
+532,Word Sub,"read, reed, reid","read, reed, reid",,t
+533,tow,"recover, recovered, recoveries, recovering, recovery, rescue, tow, towing","recov, recoveri, rescu, tow",,t
+534,Names Sub,"reimer, rhimer, rhymer, rimer, rymer","reimer, rhimer, rhymer, rimer, rymer",,t
+535,Word Sub,"right, rite, wright, write, wryht","right, rite, wright, write, wryht",,t
+536,Word Sub,"rhise, rhize, rhyse, rise, rize, ryse, ryze","rhise, rhize, rhyse, rise, rize, ryse, ryze",,t
+537,Word Sub,"robin, robyn","robin, robyn",,t
+538,Word Sub,"roe, row","roe, row",,t
+539,Roofing,"roof, roofing, shake, shingle","roof, shake, shingl",,t
+540,Word Sub,"rough, ruf, ruff","rough, ruf, ruff",,t
+541,tire,"rubber, tire, tyre","rubber, tire, tyre",,t
+543,saddle,"saddle, tack","saddl, tack",,t
+544,Word Sub,"saint, st","saint, st",,t
+545,Names Sub,"sampson, samson","sampson, samson",,t
+546,Word Sub,"sandalwood, sandlewood","sandalwood, sandlewood",,t
+547,Word Sub,"savor, savour","savor, savour",,t
+548,scale,"scale, weigh, weight","scale, weigh, weight",,t
+549,Word Sub,"scene, sen, son, sun","scene, sen, son, sun",,t
+550,Word Sub,"schaefer, shaefer, shafer","schaefer, shaefer, shafer",,t
+551,Word Sub,"seagul, seagull, segal, siegal, siegel","seagul, segal, siegal, siegel",,t
+552,Names Sub,"sean, shaun, shawn, shon","sean, shaun, shawn, shon",,t
+553,Numbers Sub,"second, two, twond","second, two, twond",,t
+554,Word Sub,"cirious, cirius, serious, sirious, sirius, syrious, syrius, syryus","cirious, cirius, serious, sirious, sirius, syrious, syrius, syryus",,t
+555,Word Sub,"seumas, soomas, sumas","seuma, sooma, suma",,t
+556,Numbers Sub,"7, seven, seventh","7, seven, seventh",,t
+557,Numbers Sub,"seveneight, seveneighth, seventyeight, seventyeighth","seveneight, seveneighth, seventyeight, seventyeighth",,t
+558,Numbers Sub,"sevenfive, sevenfiveth, seventyfifth, seventyfive","sevenf, sevenfiveth, seventyf, seventyfifth",,t
+559,Numbers Sub,"sevenine, sevenineth, seventynine, seventyninth","sevenin, sevenineth, seventynin, seventyninth",,t
+560,Numbers Sub,"sevenseven, sevenseventh, seventyseven, seventyseventh","sevenseven, sevenseventh, seventyseven, seventyseventh",,t
+561,Numbers Sub,"sevensix, sevensixth, seventysix, seventysixth","sevensix, sevensixth, seventysix, seventysixth",,t
+562,Word Sub,"sfu, simonfraserunivercity, simonfraseruniversity","sfu, simonfraseruniverc, simonfraserunivers",,t
+563,Word Sub,"sharen, sharin, sharon, sharyn","sharen, sharin, sharon, sharyn",,t
+564,Word Sub,"shay, shea","shay, shea",,t
+565,Word Sub,"shear, sheer, shere","shear, sheer, shere",,t
+566,Word Sub,"sincoloid, syncoloid","sincoloid, syncoloid",,t
+567,Word Sub,"sooke, sukh, tsouke","sook, sukh, tsouk",,t
+568,Word Sub,"seoul, soal, sol, sole, soul","seoul, soal, sol, sole, soul",,t
+569,Word Sub,"somer, sumer, summer","somer, sumer, summer",,t
+570,Word Sub,"sonshine, sunshine","sonshin, sunshin",,t
+571,Word Sub,"spartan, sparten, spartin, sparton, spartun, spartyn","spartan, sparten, spartin, sparton, spartun, spartyn",,t
+572,Names Sub,"stephen, steven","stephen, steven",,t
+573,Word Sub,"sterling, stirling","sterl, stirl",,t
+574,Names Sub,"stewart, stuart","stewart, stuart",,t
+575,Word Sub,"straight, strait, strate","straight, strait, strate",,t
+576,Word Sub,"strike, stryke","strike, stryke",,t
+577,Word Sub,"sulfur, sulphur","sulfur, sulphur",,t
+578,Word Sub,"team, teem","team, teem",,t
+579,Word Sub,"telerad, telrad","telerad, telrad",,t
+580,Names Sub,"teresa, theresa","teresa, theresa",,t
+581,Word Sub,"thom, tom","thom, tom",,t
+582,Word Sub,"thompson, thomson, tomson","thompson, thomson, tomson",,t
+583,Word Sub,"through, thru","through, thru",,t
+584,Word Sub,"thyme, time, tyme","thyme, time, tyme",,t
+585,Word Sub,"tough, tuff, tuph","tough, tuff, tuph",,t
+586,Word Sub,"treat, treatery, treet","treat, treateri, treet",,t
+587,Word Sub,"trai, tri, try","trai, tri",,t
+588,Word Sub,"triad, tryad, tryadd","triad, tryad, tryadd",,t
+589,Word Sub,"ubc, ubcee, ubsee, ubyssey, univercityofbc, univercityofbritishcolumbia, universityofbritishcolumbia","ubc, ubce, ubse, ubyssey, univercityofbc, univercityofbcuniversityofbc",,t
+590,Word Sub,"uneek, uneeq, uniq, unique, yewneek, yewnique, youneek, younique","uneek, uneeq, uniq, uniqu, yewneek, yewniqu, youneek, youniqu",,t
+591,Word Sub,"univercityvictoria, universityvictoria, uvic","univercityvictoria, universityvictoria, uvic",,t
+592,Word Sub,"userexper, userexperience, ux","userexp, userexperi, ux",,t
+593,Word Sub,"valee, vallee, valley, vally, valy","vale, vali, valle, valley, valli",,t
+594,Word Sub,"vancouverisland, vanisland, vanisle, vi","vancouverisland, vanisl, vanisland, vi",,t
+595,Word Sub,"view, vu, vue","view, vu, vue",,t
+596,Word Sub,"virtual, vr","virtual, vr",,t
+597,Word Sub,"walace, walis, wallace, wallis, walluce, waluce, whallace, whallus","walac, wali, wallac, walli, walluc, waluc, whallac, whallus",,t
+598,Word Sub,"weatherb, weatherbee, weatherby, wheatherb, wheatherbee, wheatherby","weatherb, weatherbe, weatherbi, wheatherb, wheatherbe, wheatherbi",,t
+599,Word Sub,"werc, werk, werkz, werx, wherc, wherk, wherx, whurc, whurk, whurx, worc, work, workz, worx, wurc, wurcz, wurk, wurkz, wurx","werc, werk, werkz, werx, wherc, wherk, wherx, whurc, whurk, whurx, worc, work, workz, worx, wurc, wurcz, wurk, wurkz, wurx",,t
+600,Word Sub,"wesix, wesx","wesix, wesx",,t
+601,Word Sub,"white, whyte, wight, wighte, wite, wyght, wyghte, wyte","white, whyte, wight, wite, wyght, wyte",,t
+602,Word Sub,"why, wi","whi, wi",,t
+603,Word Sub,"whild, whilde, whyld, whylde, wild, wilde, wyld, wylde","whild, whyld, wild, wyld",,t
+604,Word Sub,"whin, whyn, win, wyn","whin, whyn, win, wyn",,t
+605,Word Sub,"whynd, wind, wynd","whynd, wind, wynd",,t
+606,Word Sub,"whise, whize, whyse, whyze, wise, wize, wyse, wyze","whise, whize, whyse, whyze, wise, wize, wyse, wyze",,t
+607,Word Sub,"z, ze, zed, zee","zed, zee, zze",,t
+608,Numbers Sub,"20, 20th, twent, twentieth, twenty, twozero, twozeroth, xx","20, 20th, twent, twenti, twentieth, twozero, twozeroth, xx",,t
+679,Word Sub,"fhul, full, phul","fhul, full, phul",,t
+680,Word Sub,"tail, tale, tayle","tail, tale, tayl",,t
+609,Pool,"hotspring, hottub, hotub, infinitypool, infrared, pool, poolrepair, sauna, softtub, softub, spa, steam, steamroom","hotspr, hottub, hotub, infinitypool, infrar, pool, poolrepair, sauna, softtub, softub, spa, steam, steamroom",,t
+610,Non-Alcoholic Beverages,"bevco, beverage, bubbletea, chaitea, cheesetea, cider, coffee, energydrink, juice, kombucha, leaf, looseleaf, pop, shakes, sip, smoothies, soda, tea, yerba","bevco, beverag, bubbletea, chaitea, cheesetea, cider, coffe, energydrink, juic, kombucha, leaf, looseleaf, pop, shake, sip, smoothi, soda, tea, yerba",,t
+611,Word Sub,"cr8, cre8, create","cr8, cre8, creat",,t
+759,Word Sub,"tracks, tracs, trax","trac, track, trax",,t
+760,Word Sub,"audacious, oddacious","audaci, oddaci",,t
+761,Word Sub,"light, lite, lyght, lyte","light, lite, lyght, lyte",,t
+612,Fire,"fire, firedepartment, firefighter, firefighters, fireprotection, firerescue, fireservices, firestop","fire, firedepart, firefight, fireprotect, firerescu, fireservic, firestop",,t
+613,Word Sub,"ecccho, eccco, ecco, echo, eco, ekho, ekko, eko","ecccho, eccco, ecco, echo, eco, ekho, ekko, eko",,t
+614,Word Sub,"bc, bcee, beac, beacee, beec, beecee, beesea, britishcolumbia, britishcolumbian, bsea, bsee","bc, bcbcbsea, bcee, beac, beace, beec, beece, beesea, bsee",,t
+615,Word Sub,"son, sun","son, sun",,t
+616,Word Sub,"hunnthley, hunntly, huntlee, huntley, huntly, hunttle","hunnt, hunnthley, hunt, huntle, huntley, hunttl",,t
+617,Word Sub,"2, tew, to, too, two","2, tew, too, two",,t
+618,Word Sub,"ged, gedder, get, getter, gid, gidder, git, gitter","ged, gedder, get, getter, gid, gidder, git, gitter",,t
+621,Word Sub,"meagan, meaghan, megan, meghan","meagan, meaghan, megan, meghan",,t
+622,empowered,"empower, empowered, mpower, mpowered","empow, mpower",,t
+623,Word Sub,"shah, shaw","shah, shaw",,t
+624,Word Sub,"shur, sur, sure","shur, sur, sure",,t
+625,Word Sub,"st, str, street","st, str, street",,t
+626,Word Sub,"project, projex","project, projex",,t
+627,Word Sub,"mom, mum","mom, mum",,t
+628,Names Sub,"kwan, quan","kwan, quan",,t
+629,Names Sub,"andersen, anderson","andersen, anderson",,t
+630,Word Sub,"a1, ai, aone","a1, ai, aon",,t
+631,Word Sub,"1, one, un, wone, wun","1, one, un, wone, wun",,t
+632,Word Sub,"nobel, noble","nobel, nobl",,t
+633,Word Sub,"velociti, velocity",veloc,,t
+634,technology,"info, infotech, infotek, intelligence, tec, tech, technical, technician, technologies, technology, teck, tek, teq","info, infotech, infotek, intellig, tec, tech, technic, technician, technolog, teck, tek, teq",,t
+635,Word Sub,"4ever, forever, fourever","4ever, forev, fourev",,t
+636,Word Sub,"woman, women","woman, women",,t
+637,fireworks,"firewerc, firewerk, fireworc, firework, fyrew, phrotechnics, pyro, pyrotec, pyrotehnic","firewerc, firewerk, fireworc, firework, fyrew, phrotechn, pyro, pyrotec, pyrotehn",,t
+638,Word Sub,"snub, snubber, snubbers, snubbing","snub, snubber",,t
+639,brain,"brain, mental, neuro","brain, mental, neuro",,t
+640,slab,"slab, slabjack, slabjacker, slabjackers, slabjacking","slab, slabjack",,t
+642,slab,"slab, slabjack, slabjacker, slabjacking","slab, slabjack",,t
+645,fence,"fence, fencing, gate, rail","fenc, gate, rail",,t
+646,Word Sub,"neighbor, neighbour","neighbor, neighbour",,t
+647,Word Sub,"distrib, distribute, distribution, distributor","distrib, distribut, distributor",,t
+648,Word Sub,"ai, artificialintelligence","ai, artificialintellig",,t
+649,deck,"deck, gazebo, porch, sundeck, veranda","deck, gazebo, porch, sundeck, veranda",,t
+650,store,"bazaar, bazar, cashandcarry, convenience, emporium, food, freshmart, goods, grocer, grocerant, grocery, market, mart, refillery, shop, souvenir, store, supermart, variety","bazaar, bazar, cashandcarri, conveni, emporium, food, freshmart, good, grocer, groceri, market, mart, refilleri, shop, souvenir, store, supermart, varieti",,t
+651,Sales ,"buy, groupbuy, merchandise, merchandising, merchant, order, purchase, resale, retail, retailing, sale, sales, shop, spree, store, supplier, supplies, supply, vendor, wholesale, wholesaler","buy, groupbuy, merchandis, merchant, order, purchas, resal, retail, sale, shop, spree, store, suppli, supplier, vendor, wholesal",,t
+652,Word Sub,"ent, enterprise, enterprises, enterprize, enterprizes","ent, enterpr, enterpris",,t
+653,Word Sub,"laurence, lawrence","laurenc, lawrenc",,t
+654,Word Sub,"thomcat, thomkat, tomcat, tomkat","thomcat, thomkat, tomcat, tomkat",,t
+655,Feet,"feet, foot, gait, insole, orthotic, podiatrist, podiatry","feet, foot, gait, insol, orthot, podiatri, podiatrist",,t
+656,Numbers Sub,"4, for, fore, four","4, fore, four",,t
+657,Word Sub,"captive, kaptiv","captiv, kaptiv",,t
+658,,"roller, rollerderby, rollerskate, skate, skating","roller, rollerderbi, rollersk, skate",,t
+659,Names Sub,"maia, maya, miah, miya, mya, myah","maia, maya, miah, miya, mya, myah",,t
+660,Life,"life, lifestyle, living, livingco, lyfe","life, lifestyl, live, livingco, lyfe",,t
+661,Word Sub,"ind, industrial, industries, industry","ind, industri",,t
+662,Word Sub,"jinks, jyncks, jynks, jynx","jink, jynck, jynk, jynx",,t
+665,Night Life ,"afterhours, bar, beergarden, cabaret, club, cocktaillounge, discotheque, establishment, lounge, nightclub, nightspot, niteclub, parlour, pub, rathskeller, saloon, socialhouse, sociallounge, stripclub, stripjoint, tavern, wateringhole","afterhour, bar, beergarden, cabaret, club, cocktailloung, discothequ, establish, loung, nightclub, nightspot, niteclub, parlour, pub, rathskel, saloon, socialhous, socialloung, stripclub, stripjoint, tavern, wateringhol",,t
+666,Word Sub,"ren, renn, rhen, wren, wrenn","ren, renn, rhen, wren, wrenn",,t
+667,Word Sub,"freedem, freedim, freedom, freedum, friedym","freedem, freedim, freedom, freedum, friedym",,t
+668,Word Sub,"informationtechnology, infotec, it","informationtechnolog, infotec",,t
+669,Word Sub,"reuts, root, rootz, route, routes, routez","reut, root, rootz, rout, routez",,t
+670,Word Sub,"design, dezign, dsign, dzign","design, dezign, dsign, dzign",,t
+671,Word Sub,"defign, define, dfine, difine, dyfine, dyfyne","defign, defin, dfine, difin, dyfin, dyfyn",,t
+672,Word Sub,"loomis, loomus, loomys, lumis, lumos, lumus, lumys","loomi, loomus, lumi, lumo, lumus",,t
+673,Chinese Medicine,"acupuncture, chinesemedicine, tcm, traditionalchinesemedicine","acupunctur, chinesemedicin, tcm, traditionalchinesemedicin",,t
+674,Word Sub,"curious, kyrios, kyrious",curious,,t
+675,Word Sub,"logics, logix","logic, logix",,t
+676,Word Sub,"werld, world, wurld","werld, world, wurld",,t
+677,Word Sub,"deava, deavah, deeva, deevah, deva, devah, diva, divah","deava, deavah, deeva, deevah, deva, devah, diva, divah",,t
+678,Word Sub,"gemini, jemini","gemini, jemini",,t
+681,Word Sub,"excess, xess, xs","excess, xess, xs",,t
+682,Dance & Theatre,"act, actor, actress, banghra, comedian, comedy, dance, drama, entertain, entertainer, perform, performance, performer, performingart, singer, standup, theatre, thespian, thespians, troupe","act, actor, actress, banghra, comedi, comedian, danc, drama, entertain, perform, performingart, singer, standup, theatr, thespian, troup",,t
+683,Word Sub,"squeakie, squeaky, squeekie, squeeky","squeaki, squeeki",,t
+684,Word Sub,"concur, conquer, koncur, konqure","concur, conquer, koncur, konqur",,t
+685,Laundry,"dryclean, launder, launderette, laundromat, laundry, laundryroom, publicwashhouse, stainremove, wash, washing","dryclean, launder, launderett, laundri, laundromat, laundryroom, publicwashhous, stainremov, wash",,t
+686,Word Sub,"wolf, wolfe, wolff, wulf, wulfe, wulff","wolf, wolff, wulf, wulff",,t
+687,Word Sub,"metric, metrick, metrik, metrix","metric, metrick, metrik, metrix",,t
+688,Word Sub,"cariboo, caribou","cariboo, caribou",,t
+689,Word Sub,"glewd, glood, glued, gluud","glewd, glood, glu, gluud",,t
+691,Word Sub,"corner, korner","corner, korner",,t
+692,Word Sub,"door, dore","door, dore",,t
+693,Word Sub,"bizness, business","biz, busi",,t
+694,Word Sub,"simmetree, simmetry, symmetree, symmetry","simmetre, simmetri, symmetre, symmetri",,t
+695,Word Sub,"caleigh, caylee, cayley, kaleigh, kaylee, kayley","caleigh, cayle, cayley, kaleigh, kayle, kayley",,t
+696,Word Sub,"tilar, tiler, tilor, tylar, tyler, tylor","tilar, tiler, tilor, tylar, tyler, tylor",,t
+697,Word Sub,"handea, handee, handi, handy","hande, handea, handi",,t
+698,Word Sub,"reuter, rooter","reuter, rooter",,t
+699,Word Sub,"ficks, fiks, fix, fycks, fyx","fick, fik, fix, fyck, fyx",,t
+700,Word Sub,"letis, lettuce, letus","leti, lettuc, letus",,t
+701,Word Sub,"peace, piece","peac, piec",,t
+702,Word Sub,"2day, today, tooday, twoday","2day, today, tooday, twoday",,t
+703,Word Sub,"hich, hitch, hych, hytch","hich, hitch, hych, hytch",,t
+704,Word Sub,"gofer, gofor, gopher, gophor","gofer, gofor, gopher, gophor",,t
+705,Word Sub,"currant, current","currant, current",,t
+706,Word Sub,"incite, insight, insite","incit, insight, insit",,t
+707,Word Sub,"eureka, yureka","eureka, yureka",,t
+708,Word Sub,"farm, pharm","farm, pharm",,t
+709,Word Sub,"josef, joseph","josef, joseph",,t
+710,Word Sub,"lea, leah, leaya, leayah, leeya, leeyah, lia, liya, liyah","lea, leah, leaya, leayah, leeya, leeyah, lia, liya, liyah",,t
+711,Word Sub,"rewbi, rewby, roobee, roobi, roobie, rooby, roubee, roubi, rouby, rubee, rubi, rubie, ruby","rewbi, roobe, roobi, roube, roubi, rube, rubi",,t
+712,Seaweed,"carrageenan, dulse, kelp, seaweed","carrageenan, duls, kelp, seawe",,t
+713,Word Sub,"motherload, motherlode, mutherload, mutherlode","motherload, motherlod, mutherload, mutherlod",,t
+714,Word Sub,"bert, burt","bert, burt",,t
+715,Word Sub,"mo, moe, moh, mow","mo, moe, moh, mow",,t
+716,Word Sub,"moovee, moovey, moovie, movie","moove, moovey, moovi, movi",,t
+717,Word Sub,"knoti, knott, knottey, knottie, knotty, naughtea, naughtee, naughtey, naughti, naughtie, naughtt, naughty, nauti, nautt, noti, nott, nottey, notti, nottie, notty","knoti, knott, knottey, knotti, naughte, naughtea, naughtey, naughti, naughtt, nauti, nautt, noti, nott, nottey, notti",,t
+718,Word Sub,"trius, tryus","trius, tryus",,t
+719,Word Sub,"smile, smyle","smile, smyle",,t
+720,Word Sub,"beacon, becon, bekin, bekyn","beacon, becon, bekin, bekyn",,t
+721,Word Sub,"cent, scent, sent","cent, scent, sent",,t
+722,Word Sub,"ikin, kin, kinette, kinsmen","ikin, kin, kinett, kinsmen",,t
+723,Word Sub,"aeres, aerie, aeris, aerys, aires, airis, airys, ayres, ehris, ehrys, eris, erris, erys","aer, aeri, air, airi, ayr, ehri, eri, erri",,t
+724,Word Sub,"brewn, bruhn","brewn, bruhn",,t
+725,Piling,"breaking, drophammer, pile, piledrive, piledriving, piling, ramming, ramrod","break, drophamm, pile, piledr, piledriv, ram, ramrod",,t
+726,Word Sub,"oragin, oregen, oregin, oregyn, origin, origyn","oragin, oregen, oregin, oregyn, origin, origyn",,t
+727,Word Sub,"davine, devine, devyne, divine, divyne","davin, devin, devyn, divin, divyn",,t
+728,Word Sub,"aura, ora, orah, orra","aura, ora, orah, orra",,t
+729,Promotions,"coupon, invite, pass, raincheck, tab, ticket, token, voucher","coupon, invit, pass, raincheck, tab, ticket, token, voucher",,t
+730,Electronics,"anodic, autoelectronic, automated, automatic, avionic, cathodic, photoelectronic, thermionic, voltaic","anod, autoelectron, autom, automat, avion, cathod, photoelectron, thermion, voltaic",,t
+731,Word Sub,"pause, pauze, paws, pawz, pos","paus, pauz, paw, pawz, pos",,t
+732,Word Sub,"municipal, municiple","municip, municipl",,t
+733,Word Sub,"golding, goulding","gold, gould",,t
+736,Word Sub,"kneat, kneet, neat, neet","kneat, kneet, neat, neet",,t
+737,Word Sub,"sara, sarah, sera, serah","sara, sarah, sera, serah",,t
+738,Acquiring,"acquire, acquireco, acquiring, acquisition","acquir, acquireco, acquisit",,t
+739,Word Sub,"lewkee, lewkey, lewky, lukee, lukey, lukie","lewke, lewkey, lewki, luke, lukey, luki",,t
+741,Word Sub,"sharee, sharey, shari, sharie, sherrie, sherry","share, sharey, shari, sherri",,t
+742,Word Sub,"tear, teer, tier","tear, teer, tier",,t
+743,Maple Syrup,"maplesyrup, sugarbush","maplesyrup, sugarbush",,t
+744,Word Sub,"gr8, graight, grait, grate, great","gr8, graight, grait, grate, great",,t
+745,Word Sub,"pairit, pareit, parret, parrit, parrot, pearit, perret","pairit, pareit, parret, parrit, parrot, pearit, perret",,t
+746,Word Sub,"meara, mearah, meera, meerah, meira, miera, mierah, mira, mirah, mirra, mirrah","meara, mearah, meera, meerah, meira, miera, mierah, mira, mirah, mirra, mirrah",,t
+747,Word Sub,"cents, scents, sence, sense, sents","cent, scent, senc, sens, sent",,t
+748,Word Sub,"made, maid, mayd","made, maid, mayd",,t
+749,Word Sub,"knot, knott, naught, naut, not, nott","knot, knott, naught, naut, nott",,t
+750,Treatment,"abuse, addict, addiction, alchohol, detox, drug, drugandalcohol, outreach, recovery, recoveryhouse, rehab, rehabilitation, safehouse, substance, substanceabuse, treatment","abus, addict, alchohol, detox, drug, drugandalcohol, outreach, recoveri, recoveryhous, rehab, rehabilit, safehous, substanc, substanceabus, treatment",,t
+751,Infant,"baby, child, infant","babi, child, infant",,t
+753,Word Sub,"mahd, maud, maude, mawd, mod","mahd, maud, mawd, mod",,t
+754,Word Sub,"disc, disk, dysc, dysk","disc, disk, dysc, dysk",,t
+755,Word Sub,"sincerelea, sincerelee, sincereleigh, sincerely, sincyrelea, sincyrelee, sincyreleigh, sincyrely","sincer, sincerele, sincerelea, sincereleigh, sincyr, sincyrele, sincyrelea, sincyreleigh",,t
+756,Word Sub,"aeree, aerey, aerie, airee, airey, airie, arie","aere, aerey, aeri, aire, airey, airi, ari",,t
+757,Word Sub,"kidd, kiddie, kiddy, kidi","kidd, kiddi, kidi",,t
+758,Word Sub,"savaree, savary, savery, savory, savouree, savoury","savare, savari, saveri, savori, savoure, savouri",,t
+762,Word Sub,"district, distrikt","district, distrikt",,t
+763,Word Sub,"kacee, kacie, kasey, kayc, kaycee, kaysee, kaysey, kaysie, kc","kace, kaci, kasey, kayc, kayce, kayse, kaysey, kaysi, kc",,t
+764,Word Sub,"rd, rhode, road, rode, rowed","rd, rhode, road, rode, row",,t
+765,Word Sub,"colonel, kernel, kernil, kernyl","colonel, kernel, kernil, kernyl",,t
+766,Word Sub,"cousin, cuzen, cuzin, cuzzin","cousin, cuzen, cuzin, cuzzin",,t
+767,Word Sub,"knit, nit","knit, nit",,t
+768,Word Sub,"young, yung","young, yung",,t
+769,Word Sub,"scewl, school, scool, skewl, skool","scewl, school, scool, skewl, skool",,t
+824,Inspections,"inspect, inspection",inspect,,t
+825,Word Sub,"jewc, jewcee, jucee, juicy","jewc, jewce, juce, juici",,t
+770,Waterfront Manual Labour,"breakbulk, cargo, dock, docker, dockworker, load, longshoreman, marine, maritime, port, ships, stevedore, stevedoring, terminal, terminalservice, unload, vessel","breakbulk, cargo, dock, docker, dockwork, load, longshoreman, marin, maritim, port, ship, stevedor, termin, terminalservic, unload, vessel",,t
+771,Word Sub,"berd, bird, burd, byrd","berd, bird, burd, byrd",,t
+772,Word Sub,"grafite, grafyte, graphfite, graphfyte, graphite, graphyte","grafit, grafyt, graphfit, graphfyt, graphit, graphyt",,t
+773,Word Sub,"semiahmoo, semiahmu","semiahmoo, semiahmu",,t
+774,Word Sub,"hailo, hailow, halo, halow, haylo, haylow","hailo, hailow, halo, halow, haylo, haylow",,t
+775,Word Sub,"cion, cyon, psyon, seyeon, sion, syon","cion, cyon, psyon, seyeon, sion, syon",,t
+776,Word Sub,"clinic, clinick, clynic, clynick, klinic, klynic, klynick, klynyck, klynyk","clinic, clinick, clynic, clynick, klinic, klynic, klynick, klynyck, klynyk",,t
+777,Word Sub,"elev8, elevaight, elevate, eliv8, elivaight, elivate, elyv8, elyvate","elev, elev8, elevaight, eliv, eliv8, elivaight, elyv, elyv8",,t
+778,Word Sub,"souper, super","souper, super",,t
+779,Manhole,"accesschamber, cablechamber, maintenancehole, manhole, sewerhole, utilityhole","accesschamb, cablechamb, maintenancehol, manhol, sewerhol, utilityhol",,t
+780,Word Sub,"g8, gaight, gait, gate, gayte","g8, gaight, gait, gate, gayt",,t
+781,Word Sub,"enjoy, njoy","enjoy, njoy",,t
+782,Word Sub,"fat, phat","fat, phat",,t
+783,Geography,"earthscience, environmentalgeology, environmentalgeoscience, explorationgeoscience, geo, geochemical, geochemistry, geography, geologist, geology, geomatic, geopolitics, geoscience, geospatial, hydroecologic, physiographics, physiography, topography, volcanology","earthscienc, environmentalgeolog, environmentalgeosci, explorationgeosci, geo, geochem, geochemistri, geographi, geolog, geologist, geomat, geopolit, geoscienc, geospati, hydroecolog, physiograph, physiographi, topographi, volcanolog",,t
+784,Word Sub,"connection, connexion","connect, connexion",,t
+785,Word Sub,"grafficks, graffics, graffix, graficks, grafics, grafix, graphicks, graphics, graphix","graffic, graffick, graffix, grafic, grafick, grafix, graphic, graphick, graphix",,t
+786,Word Sub,"cigma, cigmah, cygma, cygmah, sigma, sigmah, sygma, sygmah","cigma, cigmah, cygma, cygmah, sigma, sigmah, sygma, sygmah",,t
+787,Word Sub,"vail, vale, vayl, vayle","vail, vale, vayl",,t
+788,Word Sub,"plain, plaine, plane, playn, playne","plain, plane, playn",,t
+789,Word Sub,"auto, awetoe, awetow, awtoe, awtow, otto, ottow","auto, aweto, awetow, awto, awtow, otto, ottow",,t
+790,Funeral,"burial, bury, casket, cremate, cremation, death, funeral, headstone, mourn, urn","buri, burial, casket, cremat, death, funer, headston, mourn, urn",,t
+791,Word Sub,"sign, sine, syne","sign, sine, syne",,t
+792,Word Sub,"acktiv, acktive, activ, active, aktiv, aktive, aktyv","acktiv, activ, aktiv, aktyv",,t
+793,Word Sub,"univercity, university","univerc, univers",,t
+794,Word Sub,"lab, labco, laboratories, laboratory","lab, labco, laboratori",,t
+795,Religion,"anglican, assembly, baptist, bible, cathedral, catholic, chapel, christian, church, congregation, faith, fellowship, gospel, hymn, ministries, missionary, moaque, pastor, preach, presbyterian, sermon, spirituality, sundayschool, synagogue, tabernacle, temple, worship","anglican, assembl, baptist, bibl, cathedr, cathol, chapel, christian, church, congreg, faith, fellowship, gospel, hymn, ministri, missionari, moaqu, pastor, preach, presbyterian, sermon, spiritu, sundayschool, synagogu, tabernacl, templ, worship",,t
+796,Word Sub,"grizlee, grizleigh, grizley, grizly, grizzlee, grizzleigh, grizzley, grizzly","grizle, grizleigh, grizley, grizli, grizzle, grizzleigh, grizzley, grizzli",,t
+797,Word Sub,"chute, shoot","chute, shoot",,t
+798,Safety,"mask, personalprotectiveequipment, ppe, protection, protective, safety","mask, personalprotectiveequip, ppe, protect, safeti",,t
+799,Word Sub,"onicks, onics, oniks, onix, onyx","onic, onick, onik, onix, onyx",,t
+800,Word Sub,"pilar, pillar, piller","pilar, pillar, piller",,t
+801,Word Sub,"wealth, wellth, welth","wealth, wellth, welth",,t
+802,Word Sub,"haedan, haeden, haedin, haedn, haedon, haedyn, haidan, haiden, haidin, haidn, haidon, haidyn, haydan, hayden, haydin, haydn, haydon, haydyn","haedan, haeden, haedin, haedn, haedon, haedyn, haidan, haiden, haidin, haidn, haidon, haidyn, haydan, hayden, haydin, haydn, haydon, haydyn",,t
+803,Word Sub,"exceed, exeed, xceed, xseed","exceed, exe, xceed, xseed",,t
+804,Word Sub,"toetal, total","toetal, total",,t
+805,Word Sub,"fin, finn, fyn, fynn","fin, finn, fyn, fynn",,t
+806,Word Sub,"lacee, lacey, lacie, layc, laycee, laycey, laycie","lace, lacey, laci, layc, layce, laycey, layci",,t
+807,Word Sub,"clean, cleen, klean, kleen","clean, cleen, klean, kleen",,t
+808,Word Sub,"kinetex, kineticks, kinetics, kinetiks, kinetix","kinet, kinetex, kinetick, kinetik, kinetix",,t
+809,Partners,"generalpartner, gp, limitedpartner, lp, managingpartner, mp, partner","generalpartn, gp, limitedpartn, lp, managingpartn, mp, partner",,t
+862,Word Substitution ,"fohn, fone, phone","fohn, fone, phone",,t
+863,Word Substitution ,"ecs, eks, ex, x","ec, ek, exx",,t
+810,Coffee,"cappuccino, coffee, coffeeshop, espresso, expresso, grind, ground, java, latte, roast, roaster","cappuccino, coffe, coffeeshop, espresso, expresso, grind, ground, java, latt, roast, roaster",,t
+811,Word Sub,"meacah, meaka, meakah, meecah, meeka, meekah, mika","meacah, meaka, meakah, meecah, meeka, meekah, mika",,t
+812,Word Sub,"rawkee, rawkey, rawkie, rockee, rockey, rockie, rocky","rawke, rawkey, rawki, rocke, rockey, rocki",,t
+813,Word Sub,"dewzee, dewzey, dewzi, dewzie, doozey, doozie, doozy, douzee, douzie","dewze, dewzey, dewzi, doozey, doozi, douze, douzi",,t
+814,Word Sub,"bach, bauck, bauk, bawk, boc, bock, bok","bach, bauck, bauk, bawk, boc, bock, bok",,t
+815,Word Sub,"skeye, ski, sky, skye","skey, ski, sky, skye",,t
+816,Word Sub,"wordist, wordyst","wordist, wordyst",,t
+817,Soap,"castile, detergent, shampoo, soap, suds","castil, deterg, shampoo, soap, sud",,t
+818,Word Sub,"safet, safetea, safetee, safety","safet, safete, safetea, safeti",,t
+819,Word Sub,"align, aline, alyne","align, alin, alyn",,t
+820,Word Sub,"jacin, jasen, jasin, jason, jasyn, jaycin, jaysen, jaysin, jayson, jaysyn","jacin, jasen, jasin, jason, jasyn, jaycin, jaysen, jaysin, jayson, jaysyn",,t
+821,Word Sub,"lean, leen, lien","lean, leen, lien",,t
+822,Word Sub,"local, lokal, lowcal, lowkl","local, lokal, lowcal, lowkl",,t
+823,Word Sub,"leau, lo, low","leau, lo, low",,t
+826,Word Sub,"reade, readi, ready, reddi, reddy, rede, redi, redy","read, readi, reddi, rede, redi",,t
+827,Word Sub,"riche, richie, ritche, ritchie","rich, richi, ritch, ritchi",,t
+828,Word Sub,"charis, karis","chari, kari",,t
+829,Machine,"machine, machinist, millwright","machin, machinist, millwright",,t
+830,Word Sub,"liht, lit, lyt","liht, lit, lyt",,t
+831,Word Sub,"b, be, bea, bee","bbe, bea, bee",,t
+833,English Designations_end Stop,"llc,l.l.c,limited liability company,llp,limited liability partnership,limited partnership,limited,ltd,ltd.,incorporated,inc,inc.,corporation,corp,corp.,ulc.,ulc,unlimited liability company","llc,l.l.c,limited liability company,llp,limited liability partnership,limited partnership,limited,ltd,ltd.,incorporated,inc,inc.,corporation,corp,corp.,ulc.,ulc,unlimited liability company",,f
+834,French Designations_end Stop,"ltee,ltee.,incorporee, societe a responsabilite limitee,societe en nom collectif a responsabilite limitee,slr,sencrl,limitee,incorporee","ltee,ltee.,incorporee, societe a responsabilite limitee,societe en nom collectif a responsabilite limitee,slr,sencrl,limitee,incorporee",,f
+836,Prefix Stop,"un,re,in,dis,en,non,in,over,mis,sub,pre,inter,fore,de,trans,super,semi,
+               anti,mid,under,ante,bene,circum,co,com,con,col,dia,ex,homo,hyper,mal,micro,
+               multi,para,poly,post,pro,retro,tele,therm,trans,uni","un,re,in,dis,en,non,in,over,mis,sub,pre,inter,fore,de,trans,super,semi,
+               anti,mid,under,ante,bene,circum,co,com,con,col,dia,ex,homo,hyper,mal,micro,
+               multi,para,poly,post,pro,retro,tele,therm,trans,uni",,f
+838,CR-Valid French Designations_end Stop,"ltee,incorporee,limitee","ltee,incorporee,limitee",,f
+839,RLC-Valid English Designations_end Stop,"l.l.c.,llc, limited liability company, limited liability co.","l.l.c.,llc, limited liability company, limited liability co.",,f
+840,LL-Valid English Designations_end Stop,"llp, limited liability partnership","llp, limited liability partnership",,f
+841,LL-Valid French Designations_end Stop,"societe a responsabilite limitee, societe en nom collectif a responsabilite limitee,slr,sencrl","societe a responsabilite limitee, societe en nom collectif a responsabilite limitee,slr,sencrl",,f
+842,CP-Valid English Designations_any Stop,"cooperative, co-operative, coop, co-op, ","cooperative, co-operative, coop, co-op, ",,f
+843,XCP-Valid English Designations_any Stop,"same as CP, ","cooperative, co-operative, coop, co-op, ",,f
+845,CC-Valid French Designations_end Stop,same as CR French,"ltee,incorporee,limitee",,f
+846,CC-Valid English Designations_any Stop,"ccc, community contribution company","ccc, community contribution company",,f
+847,UL-Valid English Designations_end Stop,"ulc, unlimited liability company","ulc, unlimited liability company",,f
+849,BC-Valid French Designations_end Stop,Same as CR French,"ltee,incorporee,limitee",,f
+850,English Designations_any Stop,"association,assoc,assoc.,assn,assn.,society,soc,soc.,foundation,co-operative,co-op,coop,cooperative, ccc, community contribution company","association,assoc,assoc.,assn,assn.,society,soc,soc.,foundation,co-operative,co-op,coop,cooperative, ccc, community contribution company",,f
+851,Word Substitution ,"lift, lyft","lift, lyft",,t
+852,Word Sub,"wired, wyred","wire, wyre",,t
+853,Word Substitution ,"royalt, royaltea, royaltee, royalty","royalt, royalte, royaltea, royalti",,t
+854,Jade,"jade, jadeite, nephrite","jade, jadeit, nephrit",,t
+856,Word Substitution ,"cson, season, seeson","cson, season, seeson",,t
+857,Word Sub,"faery, fairee, fairey, fairy, farey, ferrey, ferrie, ferry","faeri, faire, fairey, fairi, farey, ferrey, ferri",,t
+858,Word Substitution ,"nabor, naybor, naybour, neighbor, neighbour","nabor, naybor, naybour, neighbor, neighbour",,t
+859,Word Substitution ,"healthe, healthey, healthi, healthie, healthy","health, healthey, healthi",,t
+860,Word Substitution ,"flicks, flics, fliks, flix, flycks, flyx","flic, flick, flik, flix, flyck, flyx",,t
+861,Mobile Homes,"mhp, mobilehome, mobilehomepark, mobilepark","mhp, mobilehom, mobilehomepark, mobilepark",,t
+832,Stop Words Stop,"an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,company,co,co.,le","an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,company,co,co.",,f
+864,Word Substitution ,"atlas, atlis, atlus, atlys","at, atlas, atlus",,t
+865,Numbers Sub,"0, o, zero","0, o, zero",,t
+866,Word Substitution ,"feana, feanah, feena, feenah, fina, finah, pheana, pheena, pheenah, phina","feana, feanah, feena, feenah, fina, finah, pheana, pheena, pheenah, phina",,t
+867,Word Substitution ,"callo, calloh, callow, calo, kallo, kalloh, kallow, kalo","callo, calloh, callow, calo, kallo, kalloh, kallow, kalo",,t
+868,HEAVY DUTY ,"diesel, dieselmechanic, dieselrepair, hd, heavyduty, heavyequipment, repair, truckrepair","diesel, dieselmechan, dieselrepair, hd, heavyduti, heavyequip, repair, truckrepair",,t
+869,Word Substitution ,"marea, maria","marea, maria",,t
+870,Word Sub,"waigar, waygar, whaygar, wheygar","waigar, waygar, whaygar, wheygar",,t
+871,Word Sub,"a, eh",aeh,,t
+872,Word Substitution ,"ohnice, ohnus, onace, onice, onis, onus, ownace, ownice, ownis, ownus","ohnic, ohnus, onac, oni, onic, onus, ownac, owni, ownic, ownus",,t
+873,Word Substitution ,"hansan, hansen, hansin, hanson, hansun, hansyn","hansan, hansen, hansin, hanson, hansun, hansyn",,t
+874,word sub,"cinnamon, sinamen","cinnamon, sinamen",,t
+875,Word Sub,"werth, wirth, worth, wurth","werth, wirth, worth, wurth",,t
+876,Word Sub,"vairey, vairy, varee, varey, varie, varrie, vary, verey, verie, verrie, very","vairey, vairi, vare, varey, vari, varri, verey, veri, verri",,t
+935,Word Sub,"elagence, elegence","elag, eleg",,t
+936,Word Sub,"express, xpress","express, xpress",,t
+877,Word Sub,"moadem, moadum, modeim, modem, modeum, modim, modum, modym","moadem, moadum, modeim, modem, modeum, modim, modum, modym",,t
+878,Word Sub,"preamo, preamoh, preemo, preemoh, premo, premoh, primo, primoh","preamo, preamoh, preemo, preemoh, premo, premoh, primo, primoh",,t
+879,LP-Valid English Designations_end Stop,limited partnership,limited partnership,,f
+881,Word Sub,"cue, kue, q, que, queue","cue, kue, q, que, queue",,t
+882,Word Sub,"shein, shine, shyne","shein, shine, shyne",,t
+883,Word Sub,"rence, rense, rents, rentz, wrence","renc, rens, rent, rentz, wrenc",,t
+884,Word Sub,"vice, vise, vyce, vyse","vice, vise, vyce, vyse",,t
+885,Word Sub,"cs, seas, seaze, sees, seeze, seize, seze","cs, sea, seaz, see, seez, seiz, seze",,t
+886,Word Sub,"haul, hawl, holl","haul, hawl, holl",,t
+887,Word Sub,"nicksen, nicksin, nickson, nicksyn, niksen, niksin, nikson, niksyn, nixen, nixon, nycksen, nycksin, nyckson, nyxen, nyxin, nyxon","nicksen, nicksin, nickson, nicksyn, niksen, niksin, nikson, niksyn, nixen, nixon, nycksen, nycksin, nyckson, nyxen, nyxin, nyxon",,t
+888,Word Sub,"garet, garot, garret, garrot, gerit, gerrit, jerit, jerrit","garet, garot, garret, garrot, gerit, gerrit, jerit, jerrit",,t
+889,Word Sub,"bernco, bernko, burnco, burnko","bernco, bernko, burnco, burnko",,t
+890,Word Sub,"cifer, cipher, cyfer, cypher, psifer, psyfer","cifer, cipher, cyfer, cypher, psifer, psyfer",,t
+891,Word Sub,"aero, aerow, airow, airroe, airrow, arrow","aero, aerow, airow, airro, airrow, arrow",,t
+892,Word Sub,"tied, tyed","tie, ty",,t
+893,Desc that Require Consent,"engineer, engineering",engin,words that require consent but are descriptives,t
+894,Word Sub,"alea, alee, aleigh, ali, alie, alley, alli, allie","ale, alea, aleigh, ali, alley, alli",,t
+895,Word Sub,"scene, seen","scene, seen",,t
+896,Word Sub,"gypc, gypsea, gypsee, gypsie, gypsy, jipc, jipsea, jipsee, jipsie, jipsy","gypc, gypse, gypsea, gypsi, jipc, jipse, jipsea, jipsi",,t
+897,Time,"clock, horology, stopwatch, time, timer, watch, watchrepair","clock, horolog, stopwatch, time, timer, watch, watchrepair",,t
+898,Word Sub,"barrie, barry, berrie, berry, bury","barri, berri, buri",,t
+899,Word Sub,"pl8, plait, plate","pl8, plait, plate",,t
+900,Word Sub,"micasa, mikasa, mycasa, mykasa","micasa, mikasa, mycasa, mykasa",,t
+901,Word Sub,"compas, compass, compis, kompas, kompass, kompis","compa, compass, compi, kompa, kompass, kompi",,t
+902,Word Sub,"louder, lowder","louder, lowder",,t
+903,Word Sub,"cairey, cairie, cairy, carey, carrey, carri, carrie, carry, kairee, kairie, kairy, karri, kerey, keri, kerie, kerrey, kerri, kerrie, kerry, kery","cairey, cairi, carey, carrey, carri, kaire, kairi, karri, kerey, keri, kerrey, kerri",,t
+904,Word Sub,"spice, spyce","spice, spyce",,t
+905,Gymnastics,"aerobatic, balancebeam, calisthenics, cangym, cheer, exercise, floorexercise, gym, gymnast, gymnastic, paralellbars, pommelhorse, trampoline, trapeze, tumbling, vaulting","aerobat, balancebeam, calisthen, cangym, cheer, exercis, floorexercis, gym, gymnast, paralellbar, pommelhors, trampolin, trapez, tumbl, vault",,t
+906,Wildlife,"animal, conservation, environment, feral, wild, wildanimal, wildlife","anim, conserv, environ, feral, wild, wildanim, wildlif",,t
+907,Intellectual Property,"copyright, intellectualproperty, ip, patent, trademark, tradesecret","copyright, intellectualproperti, ip, patent, trademark, tradesecret",,t
+908,Word Sub,"peasey, peasy, peaz, peazee, peazie, peazy, peez, peezey, peezie, peezy, pz, pzee","peasey, peasi, peaz, peaze, peazi, peez, peezey, peezi, pz, pzee",,t
+909,Word Sub,"trew, troo, tru, true","trew, troo, tru, true",,t
+910,Word Sub,"rilee, rileigh, riley, ryelee, ryeleigh, ryeley, rylee, ryleigh, ryley","rile, rileigh, riley, ryele, ryeleigh, ryeley, ryle, ryleigh, ryley",,t
+911,Organization,"clean, clutter, hoard, hoarding, organization, organize, rearrange, sort, sorting","clean, clutter, hoard, organ, rearrang, sort",,t
+912,Alternate Transport,"busline, lightrail, lightrailtransit, lrt, masstransit, monorail, railline, railrapidtransit, railway, rapidtransit, skytrain, streetcar, streetcarline, subway, train, trainline, transit, trolley, undergroundrail, undergroundrailway, urbantransport, urbantransportation","buslin, lightrail, lightrailtransit, lrt, masstransit, monorail, raillin, railrapidtransit, railway, rapidtransit, skytrain, streetcar, streetcarlin, subway, train, trainlin, transit, trolley, undergroundrail, undergroundrailway, urbantransport",,t
+913,Word Sub,"deye, di, die, dy, dye","dey, di, die, dy, dye",,t
+914,Word Sub,"lee, leeh, leigh, li","lee, leeh, leigh, li",,t
+915,Word Sub,"happiness, happyness","happi, happy",,t
+916,Word Sub,"epic, epick, epiq, epique","epic, epick, epiq, epiqu",,t
+917,Word Sub,"c2sky, c2skye, ctosky, ctwosky, ctwoskye, sea2sky, seatosky, seatoskye, see2sky, seetosky, seetoskye","c2ski, c2skye, ctoski, ctwoski, ctwosky, sea2ski, seatoski, seatosky, see2ski, seetoski, seetosky",,t
+919,Bicycle,"bicycle, bike, bmx, bmxracing, cycle, cycling, ebike, mountainbike, trek","bicycl, bike, bmx, bmxrace, cycl, ebik, mountainbik, trek",,t
+922,Word Sub,"knott, knottea, knottee, knottey, knotty, naughtea, naughtee, naughtey, naughtie, naughtt, naughty, nott, nottea, nottee, nottey, nottie, notty","knott, knotte, knottea, knottey, knotti, naughte, naughtea, naughtey, naughti, naughtt, nott, notte, nottea, nottey, notti",,t
+923,Word Sub,"lauree, laurey, laurie, laurrey, laurrie, lorey, lori, lorrey, lorrie, lorry, lory","laure, laurey, lauri, laurrey, laurri, lorey, lori, lorrey, lorri",,t
+924,Word Sub,"center, centr, centre, scenter, scentr, scentre","center, centr, scenter, scentr",,t
+925,Word Sub,"favorit, favorite, favourit, favourite","favorit, favourit",,t
+926,Word Substitution,"cord, cordage, rope, twine","cord, cordag, rope, twine",,t
+928,Word Sub,"tighten, tighton, titan, titen, titeon, titon, tytan, tyten, tytin, tytyn","tighten, tighton, titan, titen, titeon, titon, tytan, tyten, tytin, tytyn",,t
+929,Word Sub,"calis, callis, callous, callys, kalis, kallis, kallous, kallys, kalys","cali, calli, callous, kali, kalli, kallous",,t
+930,Word Sub,"enough, enuf, enuff","enough, enuf, enuff",,t
+931,Gastropods,"gastropod, gastropoda, invertebrates, phylummollusca, slug, snail","gastropod, gastropoda, invertebr, phylummollusca, slug, snail",,t
+932,Word Sub,"fair, faire, fare, fayre, phair, phaire, phare","fair, fare, fayr, phair, phare",,t
+933,Renewable Resources,"bioenergy, biogas, energy, generate, geothermal, hydropower, renew, renewable, solar, thermal, wind","bioenergi, bioga, energi, generat, geotherm, hydropow, renew, solar, thermal, wind",,t
+934,Word Sub,"saunder, saundir, sawnder, sonder","saunder, saundir, sawnder, sonder",,t
+937,Word Sub,"masc, mask, masque","masc, mask, masqu",,t
+938,Word Sub,"sing, singh","sing, singh",,t
+939,Word Sub,"b4, be4, bea4, beafor, beafour, bee4, beefor, beefour, befor, before, befour","b4, be4, bea4, beafor, beafour, bee4, beefor, beefour, befor, befour",,t
+940,Word Sub,"veata, veatah, veeta, veetah, vita, vitah, vta, vtah","veata, veatah, veeta, veetah, vita, vitah, vta, vtah",,t
+941,Word Sub,"cervis, cervus, service, servis, servus, sirvis, sirvus, survis","cervi, cervus, servi, servic, servus, sirvi, sirvus, survi",,t
+942,Word Sub,"real, reel","real, reel",,t
+943,Word Sub,"global, globall, glowbal, glowball","global, glowbal",,t
+944,Word Sub,"vickey, vicki, vickie, vicky, viki, vikie, vikkey, vikki, vikkie","vickey, vicki, viki, vikkey, vikki",,t
+945,Word Sub,"maeven, maevenn, maevin, maevinn, maevyn, maevynn, maven, mavin, mavyn, mayvenn, mayvin, mayvyn","maeven, maevenn, maevin, maevinn, maevyn, maevynn, maven, mavin, mavyn, mayvenn, mayvin, mayvyn",,t
+946,Word Sub,"experience, xperience","experi, xperienc",,t
+947,Word Sub,"metal, metelle, mettel, mettle","metal, metell, mettel, mettl",,t
+948,Word Sub,"pracktiss, practice, practise, practiss, practyss, praktiss","pracktiss, practic, practis, practiss, practyss, praktiss",,t
+949,Word Sub,"wood, would","wood, would",,t
+950,Word Sub,"tearis, terrace, terris","teari, terrac, terri",,t
+951,Word Sub,"ceena, ceenah, cna, cnah, scenea, seana, seanah, seena, seenah, sina","ceena, ceenah, cna, cnah, scenea, seana, seanah, seena, seenah, sina",,t
+952,Word Sub,"arise, arize, aryse, aryze","aris, ariz, arys, aryz",,t
+953,Hunting ,"bear, deer, elk, game, hunt, hunting, moose, shooting, target, trapping, wildgame","bear, deer, elk, game, hunt, moos, shoot, target, trap, wildgam",,t
+954,Word Sub,"cinner, cynner, sinner, synner","cinner, cynner, sinner, synner",,t
+955,Word Sub,"adair, adare, addair, addare, adehr","adair, adar, addair, addar, adehr",,t
+956,Word Sub,"gen, genn, jen, jenn","gen, genn, jen, jenn",,t
+957,Word Sub,"hecktic, hecktick, hectic, hectick","hecktic, hecktick, hectic, hectick",,t
+958,Word Sub,"girl, gurl","girl, gurl",,t
+880,SO-Valid English Designations_any Stop,"assn, assn., assoc, assoc., association, foundation, soc, soc., society","assn, assn., assoc, assoc., association, foundation, soc, soc., society",,f
+197,Mining,"batterymetal, bauxite, bijou, bitumen, carat, cobalt, coking, copper, exploration, explore, frac, fracing, fracking, fracturing, gem, georesource, gold, goldsmith, insitu, iron, ironore, jem, jewel, jewellery, jewellry, jewelry, joial, jual, lithium, metal, metals, mine, mineral, mining, molybdenum, ore, placer, potash, prospect, prospecting, rareearth, resource, sagd, silver, silversmith, titanium, xplore, zinc","batterymet, bauxit, bijou, bitumen, carat, cobalt, coke, copper, explor, frac, frace, frack, fractur, gem, georesourc, gold, goldsmith, insitu, iron, ironor, jem, jewel, jewelleri, jewellri, jewelri, joial, jual, lithium, metal, mine, miner, molybdenum, ore, placer, potash, prospect, rareearth, resourc, sagd, silver, silversmith, titanium, xplore, zinc",,t
+1000,Hot,hot,hot,,f
+927,Word Sub,"hold, holdco, holdcorp, holdings, holdingsco,hldg","hold, holdco, holdcorp, holdingsco",,t
+855,Stand-Alone,"bc, enterprise, enterprises, holding, holdings, ventures","bc, enterprise, enterprises, holding, holdings, ventures",DO NOT EDIT USED BY THE NAME REQUEST SYSTEM,f
+2000,Stand-Alone-2,"consulting, service, services, management, industries, solutions","consulting, service, services, management, industries, solutions",,
+2001,Stand-Alone-3,"canada, international, global","canada, international, global",,
+189,Transport,"autoallocate, autoallocation, barge, busing, bussing, cargo, carrier, cartage, courier, deliver, delivery, diesel, dispatch, dray, drayage, errand, express, forward, freight, freightway, haul, haulage, hauler, hawl, hotshot, intermodal, line, lobed, logistic, logistix, lowbed, lowbedding, mail, messenger, move, mover, moving, navigate, parcel, recovery, reefer, reload, relocate, relocation, roadlines, shipper, shipping, trans, transfer, transport, transportation, truck, trucking, truckline, truckn, truckway, trux, tug, xpress","autoalloc, barg, buse, buss, cargo, carrier, cartag, courier, deliv, deliveri, diesel, dispatch, dray, drayag, errand, express, forward, freight, freightway, haul, haulag, hauler, hawl, hotshot, intermod, line, lobe, logist, logistix, lowb, lowbed, mail, messeng, move, mover, navig, parcel, recoveri, reefer, reload, reloc, roadlin, ship, shipper, tran, transfer, transport, truck, trucklin, truckn, truckway, trux, tug, xpress",added cargo,t
+848,BC-Valid English Designations_end Stop,Same as CR English,"limited,ltd.,incorporated,inc.,corporation,corp.",,f
+844,CC-Valid English Designations_end Stop,same as CR english,"limited,ltd.,incorporated,inc.,corporation,corp.",,f
+837,CR-Valid English Designations_end Stop,"limited,ltd.,incorporated,inc.,corporation,corp.,corp","limited,ltd.,incorporated,inc.,corporation,corp.,corp",,f
