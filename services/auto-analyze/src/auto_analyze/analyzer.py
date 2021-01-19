@@ -61,7 +61,7 @@ HIGH_CONFLICT_RECORDS = 20
 
 
 # ok deep function
-@profile(sort_by='cumulative', lines_to_print=100, strip_dirs=False)
+#@profile(sort_by='cumulative', lines_to_print=100, strip_dirs=False)
 async def auto_analyze(name: str,
                        name_tokens: list,  # pylint: disable=too-many-locals, too-many-arguments
                        list_name: list, list_dist: list,
@@ -446,7 +446,7 @@ def get_substitutions_dictionary(syn_svc, dict_substitution, dict_synonyms, list
     for word in list_words:
         substitutions = dict_substitution.get(word, None)
         if not substitutions and word not in synonyms_all:
-            substitutions = syn_svc.get_word_substitutions(word=word).data
+            substitutions = syn_svc.get_word_substitutions(word=word)
         if substitutions:
             substitutions_dict.update({word: substitutions})
 

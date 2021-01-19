@@ -99,9 +99,6 @@ async def main():
     """
     The auto analyze service used to analyze an array of names!
     """
-    # db.session.remove()
-    # db.engine.dispose()
-
     name_analysis_service = ProtectedNameAnalysisService()
     syn_svc = SynonymService()
     np_svc_with_prep_data = name_analysis_service.name_processing_service
@@ -118,11 +115,7 @@ async def main():
     app.logger.debug('Number of matches: {0}'.format(len(matches)))
 
     start_time = time()
-    # result = await asyncio.gather(
-    #     *[auto_analyze(name, list_name, list_dist, list_desc, dict_substitution, dict_synonyms, np_svc_prep_data)
-    #       for
-    #       name in matches]
-    # )
+
     name_tokens_clean_dict_list = await asyncio.gather(
         *[clean_name(name, np_svc_with_prep_data) for name in matches]
     )
@@ -150,8 +143,6 @@ async def main():
                        dict_all_synonyms, dict_all_compound_synonyms, stand_alone_words, name_analysis_service) for
           name, name_tokens in name_tokens_clean_dict.items()]
     )
-
-    # db.session.remove()
 
     print('### Conflict analysis for {count} matches in {time} seconds ###'.format(
         count=len(matches),
