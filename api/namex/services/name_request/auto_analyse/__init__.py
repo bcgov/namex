@@ -9,7 +9,7 @@ porter = PorterStemmer()
 # TODO: We can set this to three later (in PROD), but this is way easier to test with a higher max limit
 # eg. I can easily test for a bunch of issues using Flerkin Mountain View Engineering Cooperative
 # TODO: Make this configurable in OpenShift
-MAX_LIMIT = 5
+MAX_LIMIT = 3
 
 # TODO: Make this configurable in OpenShift
 # Limit number of matches returned to user
