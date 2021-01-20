@@ -174,8 +174,8 @@ class Request(db.Model):
 
         return {
             'id': self.id,
-            'submittedDate': self.submittedDate.isoformat(),
-            'lastUpdate': self.lastUpdate.isoformat(),
+            'submittedDate': self.submittedDate.isoformat() if self.submittedDate else None,
+            'lastUpdate': self.lastUpdate.isoformat() if self.lastUpdate else None,
             'userId': '' if (self.activeUser is None) else self.activeUser.username,
             'submitter_userid': '' if (self.submitter is None) else self.submitter.username,
             # TODO: Lucas added stateCd not sure why when we're mapping to json we're sending back 'state' and not 'stateCd'
@@ -184,14 +184,14 @@ class Request(db.Model):
             'previousStateCd': self.previousStateCd,
             'nrNum': self.nrNum,
             'consentFlag': self.consentFlag,
-            'consent_dt': self.consent_dt,
-            'expirationDate': self.expirationDate,
+            'consent_dt': self.consent_dt.isoformat() if self.consent_dt else None,
+            'expirationDate': self.expirationDate.isoformat() if self.expirationDate else None,
             'requestTypeCd': self.requestTypeCd,
             'entity_type_cd': self.entity_type_cd,
             'request_action_cd': self.request_action_cd,
             'source': self.source,
             'priorityCd': self.priorityCd,
-            'priorityDate': self.priorityDate,
+            'priorityDate': self.priorityDate.isoformat() if self.priorityDate else None,
             'xproJurisdiction': self.xproJurisdiction,
             'additionalInfo': self.additionalInfo,
             'natureBusinessInfo': self.natureBusinessInfo,

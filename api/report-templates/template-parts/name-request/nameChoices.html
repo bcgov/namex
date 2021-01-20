@@ -1,0 +1,13 @@
+<div class="separator mt-4"></div>
+<div class="section-title mt-4">Submitted Name Choices</div>
+<table class="section-data section-data-table mt-4" role="presentation">
+  {% for choice in names %}
+    <tr class="no-page-break">
+      <td class="col-33">
+        <div>
+          <span class="uppercase-text">{{ choice.choice }}. {{ choice.name }}</span>
+        </div>
+      </td>
+    </tr>
+  {% endfor %}
+</table>

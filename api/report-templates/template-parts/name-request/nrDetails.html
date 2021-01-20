@@ -1,0 +1,20 @@
+<div class="nr-details-container">
+   <table class="nr-details-table" role="presentation">
+      <tr>
+        <td class="col-10">
+           <div class="bold">Business Type:</div>
+           <div class="bold pt-2">Request Type:</div>
+           <div class="bold pt-2">Request Status:</div>
+        </td>
+        <td>
+           <div>{{entityTypeDescription}}</div>
+           <div class="pt-2">{{ requestCodeDescription }}</div>
+           <div class="pt-2">{{ nrStateDescription }}</div>
+        </td>
+      </tr>
+   </table>
+</div>
+<!-- this block is hidden but is needed for the footer: -->
+<div class="filing-identifier">
+   Name Request #{{nrNum}}
+</div>

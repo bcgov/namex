@@ -8,11 +8,11 @@ import requests
 from flask import current_app, jsonify
 from flask_restx import Resource, cors
 
-from namex.models import Request
+from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight
 from namex.utils.logging import setup_logging
-
+from namex.utils.entity_type import get_entity_type_description
 from .api_namespace import api
 
 setup_logging()  # Important to do this first
@@ -31,7 +31,10 @@ class ReportResource(Resource):
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
 
-            authenticated, token = ReportResource.get_service_client_token()
+            if nr_model.stateCd not in [State.APPROVED, State.CONDITIONAL, State.EXPIRED, State.REJECTED]:
+                return jsonify(message='Invalid NR state'.format(nr_id=nr_model.id)), HTTPStatus.BAD_REQUEST
+
+            authenticated, token = ReportResource._get_service_client_token()
             if not authenticated:
                 return jsonify(message='Error in authentication'.format(nr_id=nr_model.id)),\
                        HTTPStatus.INTERNAL_SERVER_ERROR
@@ -77,6 +80,13 @@ class ReportResource(Resource):
     def _substitute_template_parts(template_code):
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
         template_parts = [
+            'name-request/style',
+            'name-request/logo',
+            'name-request/nrDetails',
+            'name-request/nameChoices',
+            'name-request/applicantContactInfo',
+            'name-request/manageNameRequest',
+            'name-request/approvalDetails'
         ]
         # substitute template parts - marked up by [[filename]]
         for template_part in template_parts:
@@ -88,10 +98,17 @@ class ReportResource(Resource):
     @staticmethod
     def _get_template_data(nr_model):
         nr_report_json = nr_model.json()
+        nr_report_json['entityTypeDescription'] = get_entity_type_description(nr_report_json['entity_type_cd'])
+        nr_report_json['requestCodeDescription'] = \
+            ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
+        nr_report_json['nrStateDescription'] = \
+            ReportResource._get_state_cd_description(nr_report_json['stateCd'])
+        if nr_report_json['expirationDate']:
+            nr_report_json['expirationDate'] = nr_model.expirationDate.strftime('%B %-d, %Y')
         return nr_report_json
 
     @staticmethod
-    def get_service_client_token():
+    def _get_service_client_token():
         auth_url = os.getenv('PAYMENT_SVC_AUTH_URL')
         client_id = os.getenv('PAYMENT_SVC_AUTH_CLIENT_ID')
         secret = os.getenv('PAYMENT_SVC_CLIENT_SECRET')
@@ -112,3 +129,33 @@ class ReportResource(Resource):
 
         token = dict(auth.json())['access_token']
         return True, token
+
+    @staticmethod
+    def _get_request_action_cd_description(request_cd: str):
+        request_cd_description = {
+            'NEW': 'New Business Name Request',
+            'MVE': 'Move Request',
+            'REH': 'Restore or Reinstate',
+            'AML': 'Amalgamation Request',
+            'CHG': 'Change of Name Request',
+            'CNV': 'Conversion Request'
+        }
+
+        return request_cd_description.get(request_cd, None)
+
+    @staticmethod
+    def _get_state_cd_description(state_cd: str):
+        nr_state_description = {
+            'APPROVED': 'Approved',
+            'CONDITIONAL': 'Conditional Approval',
+            'REJECTED': 'Rejected',
+            'EXPIRED': 'Expired'
+        }
+
+        return nr_state_description.get(state_cd, None)
+
+
+
+
+
+

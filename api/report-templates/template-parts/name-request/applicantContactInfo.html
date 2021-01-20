@@ -1,0 +1,31 @@
+<div class="separator mt-4"></div>
+<table class="section-data section-data-table mt-4" role="presentation">
+    <tr class="no-page-break">
+      <td class="col-33">
+        <div class="section-sub-title">Applicant Information</div>
+        <div class="section-data mt-4">
+          <span class="uppercase-text">{{ applicants.firstName }} </span>
+          {% if applicants.middleName %}
+            <span class="uppercase-text">{{ applicants.middleName }}</span>
+          {% endif %}
+           <span class="uppercase-text">{{ applicants.lastName }}</span>
+           <div>{{ applicants.addrLine1 }}</div>
+           <div>
+               <span class="captitalize-text">{{ applicants.city }} </span>
+               <span>{{ applicants.stateProvinceCd }} </span>
+               <span>{{ applicants.postalCd }}</span>
+           </div>
+           <div>{{ applicants.countryTypeCd }}</div>
+        </div>
+      </td>
+       <td class="col-33">
+        <div class="section-sub-title">Primary Contact</div>
+        <div class="section-data mt-4">
+          <span>{{ applicants.emailAddress }}</span>
+          {% if applicants.phoneNumber %}
+            <span>{{ applicants.phoneNumber }}</span>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+</table>
