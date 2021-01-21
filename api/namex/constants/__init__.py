@@ -395,6 +395,7 @@ class NameRequestActions(AbstractEnum):
     CREATE = 'CREATE'
     REQUEST_REFUND = 'REQUEST_REFUND'
     RETRY_PAYMENT = 'RETRY_PAYMENT'
+    RESULT = 'RESULT'
 
 
 class NameRequestPatchActions(AbstractEnum):
@@ -442,6 +443,7 @@ class NameRequestActiveActions(AbstractEnum):
     EDIT = NameRequestActions.EDIT.value
     CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESULT = NameRequestActions.RESULT.value
     # REAPPLY = NameRequestActions.REAPPLY.value
     # RESEND = NameRequestActions.RESEND.value
 
@@ -467,6 +469,7 @@ class NameRequestExpiredActions(AbstractEnum):
     Actions available when an NR is in an APPROVED or CONDITIONAL state, expired, and NOT consumed.
     """
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESULT = NameRequestActions.RESULT.value
     # RESEND = NameRequestActions.RESEND.value
 
 
@@ -495,12 +498,14 @@ class NameRequestCompletedActions(AbstractEnum):
 class NameRequestActiveRejectedActions(AbstractEnum):
     EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESULT = NameRequestActions.RESULT.value
     # RESEND = NameRequestActions.RESEND.value
 
 
 class NameRequestExpiredRejectedActions(AbstractEnum):
     EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESULT = NameRequestActions.RESULT.value
     # RESEND = NameRequestActions.RESEND.value
 
 
