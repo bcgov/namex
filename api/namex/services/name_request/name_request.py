@@ -140,18 +140,18 @@ class NameRequestService(AbstractNameRequestMixin):
         return name_request
 
     @classmethod
-    def extend_expiry_date(cls, name_request, start_date=None,days=56):
+    def extend_expiry_date(cls, name_request, start_date=None, days=56):
+        """
+        Extends/sets the expiry date of an NR.
+
+        Default: extends the expiry date to 56 days from tomorrow's date at 00:01am.
+        """
         start_datetime = start_date if start_date else datetime.utcnow()
-        """
-        Extends the expiry date by 56 days from today's date.
-        :param name_request:
-        :return:
-        """
         try:
             name_request.expirationDate = cls.create_expiry_date(
                 start=start_datetime,
                 expires_in_days=days,
-                tz=timezone('UTC')
+                tz=timezone('US/Pacific')
             )
         except Exception as err:
             raise ExtendExpiryDateError(err)
@@ -204,7 +204,7 @@ class NameRequestService(AbstractNameRequestMixin):
                 name_request.expirationDate = self.create_expiry_date(
                     start=name_request.submittedDate,
                     expires_in_days=56,
-                    tz=timezone('UTC')
+                    tz=timezone('US/Pacific')
                 )
         except Exception as err:
             raise MapRequestDataError(err)

@@ -151,10 +151,10 @@ class AbstractNameRequestMixin(object):
         return nr_num
 
     @classmethod
-    def create_expiry_date(cls, start: datetime, expires_in_days: int, expiry_hour: int = 23, expiry_min: int = 59,
+    def create_expiry_date(cls, start: datetime, expires_in_days: int, expiry_hour: int = 0, expiry_min: int = 1,
                            tz: timezone = timezone('US/Pacific')) -> datetime:
-
-        date = (start.astimezone(tz) + timedelta(days=expires_in_days)) \
+        """Create an expiry date in given days starting tomorrow."""
+        date = (start.astimezone(tz) + timedelta(days=expires_in_days + 1)) \
             .replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
 
         return date
