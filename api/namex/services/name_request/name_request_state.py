@@ -116,6 +116,10 @@ def display_retry_payment_action(nr_model=None):
     return True
 
 
+def display_result_action(nr_model=None):
+    return True
+
+
 action_handlers = {
     NameRequestActions.EDIT.value: display_edit_action,
     NameRequestActions.UPGRADE.value: display_upgrade_action,
@@ -125,7 +129,8 @@ action_handlers = {
     NameRequestActions.REAPPLY.value: display_reapply_action,
     NameRequestActions.RESEND.value: display_resend_action,
     NameRequestActions.INCORPORATE.value: display_incorporate_action,
-    NameRequestActions.RETRY_PAYMENT.value: display_retry_payment_action
+    NameRequestActions.RETRY_PAYMENT.value: display_retry_payment_action,
+    NameRequestActions.RESULT.value: display_result_action,
 }
 
 

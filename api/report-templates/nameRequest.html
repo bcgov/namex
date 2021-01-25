@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <title>Results of Name Request</title>
+      <meta charset="UTF-8">
+      <meta name="author" content="BC Registries and Online Services">
+      [[name-request/style.html]]
+   </head>
+   <body>
+      <div class="header">
+         <table class="header-table" role="presentation">
+            <tr class="no-page-break">
+               <td>
+                  [[name-request/logo.html]]
+               </td>
+               <td>
+                  <div class="report-type">
+                     RESULTS OF NAME REQUEST
+                  </div>
+                  <div class="report-type-desc">
+                      <a href="www.bcregistry.ca/namerequest">www.bcregistry.ca/namerequest</a>
+                  </div>
+               </td>
+            </tr>
+         </table>
+         <div class="business-name-header">
+            <label class="lbl-business-name">
+               Name Request <span class="uppercase-text">{{nrNum}}</span>
+            </label>
+         </div>
+      </div>
+      [[name-request/nrDetails.html]]
+      {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' %}
+         <div class="section-header mt-5 pt-4">APPROVAL DETAILS</div>
+      {% else %}
+         <div class="section-header mt-5 pt-4">RESULT DETAILS</div>
+      {% endif %}
+      <div class="container pt-4">
+         {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' %}
+            [[name-request/approvalDetails.html]]
+            [[name-request/manageNameRequest.html]]
+         {% endif %}
+         [[name-request/nameChoices.html]]
+         [[name-request/applicantContactInfo.html]]
+      </div>
+   </body>
+</html>

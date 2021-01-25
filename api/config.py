@@ -30,6 +30,8 @@ class Config(object):
     NRO_EXTRACTOR_URI = os.getenv('NRO_EXTRACTOR_URI', None)
     AUTO_ANALYZE_URL = os.getenv('AUTO_ANALYZE_URL', None)
     AUTO_ANALYZE_CONFIG = os.getenv('AUTO_ANALYZE_CONFIG', None)
+    REPORT_SVC_URL = os.getenv('REPORT_SVC_URL', None)
+    REPORT_TEMPLATE_PATH = os.getenv('REPORT_PATH', 'report-templates')
 
     ALEMBIC_INI = 'migrations/alembic.ini'
 

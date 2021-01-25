@@ -1,0 +1,28 @@
+<div>
+  {% for choice in names %}
+  {% if choice.state == 'CONDITION' or choice.state == 'APPROVED' %}
+     <div class="section-sub-title highlighted-blue-text">
+         <div>
+             <span>Approved Name: </span>
+             <span class="uppercase-text">{{choice.name}}</span>
+         </div>
+         <div>
+             <span>Expires:</span>
+             <span>{{ expirationDate }}</span>
+         </div>
+    </div>
+    <div class="mt-4">
+        <span class="section-sub-title">Request Status:</span>
+        <span class="section-data">{{ nrStateDescription }}</span>
+    </div>
+    <div>
+        <span class="section-sub-title">Consent:</span>
+        {% if consentFlag == 'Y' %}
+            <span class="section-data">Consent Required</span>
+        {% endif%}
+    </div>
+    <div class="section-sub-title mt-4">Conditions/Comments</div>
+    <div class="section-data">{{ choice.decision_text }}</div>
+  {% endif %}
+  {% endfor %}
+</div>
