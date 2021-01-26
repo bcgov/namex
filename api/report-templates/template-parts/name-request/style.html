@@ -150,19 +150,14 @@
   		word-wrap: break-word;
 	}
 
-	/* border between rows */
-	.section-data-table tr:not(:first-child) {
-		border-top: solid 0.5px #BCBEC5;
-	}
-
 	/* vertical padding to upper border */
 	.section-data-table tr:not(:first-child) td {
-		padding-top: 1rem;
+		padding-top: 0.25rem;
 	}
 
 	/* vertical padding to lower border */
 	.section-data-table tr:not(:last-child) td {
-		padding-bottom: 1rem;
+		padding-bottom: 0.25rem;
 	}
 
 	td.col-33 { width: 33%; }
@@ -355,5 +350,46 @@
 
 	a {
 	    color: #1A5A96;
+	}
+
+	.approved-name {
+	    text-transform: uppercase;
+	    color: #2D853E
+	}
+
+	.approved-name:before {
+        content: '✓';
+        color: #2D853E
+    }
+
+	.rejected-name {
+	   text-transform: uppercase;
+	   color: #D3272C;
+	}
+
+	.rejected-name:before {
+        content: 'X';
+        color: #D3272C;
+    }
+
+	.submitted-name {
+	   text-transform: uppercase;
+	}
+
+	.decision-text {
+	  color: #313132;
+	  font-size: 11px;
+	  line-height: 11px;
+	  margin-left: 1.7rem;
+	}
+
+	.support-contact-details {
+	  color: #234075;
+	  font-size: 11px;
+	  line-height: 10px;
+	}
+
+	.support-contact-details a{
+	    text-decoration: none
 	}
 </style>

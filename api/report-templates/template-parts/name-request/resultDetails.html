@@ -1,0 +1,53 @@
+{% if stateCd == 'REJECTED' %}
+<div>
+    <div class="section-sub-title highlighted-blue-text">Your Name Request {{nrNum}} was not approved for use.</div>
+    <div class="section-data mt-4">To submit another Name Request, visit
+        <a href="www.bcregistry.ca/namerequest">www.bcregistry.ca/namerequest</a>
+    </div>
+</div>
+{% else %}
+<div>
+  {% for choice in names %}
+      {% if choice.state == 'CONDITION' or choice.state == 'APPROVED' %}
+         <div class="section-sub-title highlighted-blue-text">
+             <div>
+                 <span>Approved Name</span>
+                 {% if choice.choice == 1 %}
+                    <span class="section-data highlighted-blue-text">(1st Choice)</span>
+                 {% elif choice.choice == 2 %}
+                    <span class="section-data highlighted-blue-text">(2nd Choice)</span>
+                 {% elif choice.choice == 3 %}
+                    <span class="section-data highlighted-blue-text">(3rd Choice)</span>
+                 {% endif %}
+                 <span>: </span>
+                 <span class="uppercase-text">{{choice.name}}</span>
+             </div>
+             <div>
+                 <span>Expires:</span>
+                 <span>{{ expirationDate }}</span>
+             </div>
+        </div>
+        <div class="mt-4">
+            <span class="section-sub-title">Request Status:</span>
+            <span class="section-data">{{ nrStateDescription }}</span>
+        </div>
+        {% if choice.state == 'CONDITION' %}
+            <div>
+                <span class="section-sub-title">Consent:</span>
+                {% if consentFlag == 'Y' %}
+                    <span class="section-data">Consent Required</span>
+                {% endif%}
+            </div>
+            <div class="section-sub-title mt-4">Conditions/Comments</div>
+            <div class="section-data">{{ choice.decision_text }}</div>
+        {% endif %}
+      {% endif %}
+  {% endfor %}
+</div>
+<div class="section-sub-title mt-4">
+  <input type="checkbox" name="complete-filing" value="1">
+  <label for="complete-filing"> To complete your filing, visit
+      <a href="www.bcregistryservices.gov.bc.ca" target="_blank">www.bcregistryservices.gov.bc.ca</a> for more information
+  </label>
+</div>
+{% endif %}

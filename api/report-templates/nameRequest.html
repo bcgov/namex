@@ -18,7 +18,10 @@
                      RESULTS OF NAME REQUEST
                   </div>
                   <div class="report-type-desc">
-                      <a href="www.bcregistry.ca/namerequest">www.bcregistry.ca/namerequest</a>
+                      <span class="support-contact-details">
+                        Canada & U.S. Toll Free: 1-877-370-1033
+                        <a href="www.bcregistry.ca/namerequest">www.bcregistry.ca/namerequest</a>
+                      </span>
                   </div>
                </td>
             </tr>
@@ -36,12 +39,18 @@
          <div class="section-header mt-5 pt-4">RESULT DETAILS</div>
       {% endif %}
       <div class="container pt-4">
+         [[name-request/resultDetails.html]]
          {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' %}
-            [[name-request/approvalDetails.html]]
             [[name-request/manageNameRequest.html]]
          {% endif %}
          [[name-request/nameChoices.html]]
+         {% if additionalInfo and additionalInfo != '' %}
+            <div class="separator mt-4"></div>
+            <div class="section-sub-title mt-4">Additional Information</div>
+            <span class="section-data">{{additionalInfo}}</span>
+         {% endif %}
          [[name-request/applicantContactInfo.html]]
+
       </div>
    </body>
 </html>

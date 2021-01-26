@@ -1,11 +1,30 @@
 <div class="separator mt-4"></div>
-<div class="section-title mt-4">Submitted Name Choices</div>
-<table class="section-data section-data-table mt-4" role="presentation">
+<div class="section-sub-title mt-4">Submitted Name Choices:</div>
+<table class="section-data section-data-table mt-2" role="presentation">
   {% for choice in names %}
     <tr class="no-page-break">
       <td class="col-33">
         <div>
-          <span class="uppercase-text">{{ choice.choice }}. {{ choice.name }}</span>
+          <span class="{{ 'approved-name' if stateCd == 'APPROVED' else 'rejected-name' if stateCd ==
+           'REJECTED' else 'submitted-name' }}">
+            {{ choice.choice }}. {{ choice.name }}
+            <span class="capitalize-text">
+            {% if choice.state == 'REJECTED' %}
+              (Rejected)
+            {% elif choice.state == 'APPROVED' %}
+              (Approved)
+            {% elif choice.state == 'CONDITIONAL' %}
+              (Conditional Approval)
+            {% else %}
+              (Not Reviewed)
+            {% endif %}
+          </span>
+          </span>
+          {% if choice.decision_text != '' %}
+          <div class="section-data decision-text mt-1">
+            {{ choice.decision_text}}
+          </div>
+          {% endif %}
         </div>
       </td>
     </tr>
