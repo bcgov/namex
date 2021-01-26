@@ -44,10 +44,12 @@
       {% endif %}
   {% endfor %}
 </div>
-<div class="section-sub-title mt-4">
-  <input type="checkbox" name="complete-filing" value="1">
-  <label for="complete-filing"> To complete your filing, visit
-      <a href="www.bcregistryservices.gov.bc.ca" target="_blank">www.bcregistryservices.gov.bc.ca</a> for more information
-  </label>
+<div class="mt-4">
+  <form>
+      <input type="checkbox" name="complete-filing" value="1">
+      <label for="complete-filing" class="checkbox-label section-sub-title">To complete your filing, visit
+          <a href="www.bcregistryservices.gov.bc.ca" target="_blank">www.bcregistryservices.gov.bc.ca</a> for more information
+      </label>
+  </form>
 </div>
 {% endif %}
