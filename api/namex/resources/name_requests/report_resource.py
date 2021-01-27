@@ -158,28 +158,28 @@ class ReportResource(Resource):
     def _get_entity_type_description(entity_type_cd: str):
         entity_type_descriptions = {
             # BC Types
-            'CR': 'BC Corporation',
+            'CR': 'BC Limited Company',
             'UL': 'BC Unlimited Liability Company',
             'FR': 'BC Sole Proprietorship',
             'GP': 'BC General Partnership',
             'DBA': 'BC Doing Business As',
             'LP': 'BC Limited Partnership',
             'LL': 'BC Limited Liability Partnership',
-            'CP': 'BC Cooperative',
+            'CP': 'BC Cooperative Association',
             'BC': 'BC Benefit Company',
             'CC': 'BC Community Contribution Company',
-            'SO': 'BC Society',
+            'SO': 'BC Social Enterprise',
             'PA': 'BC Private Act',
-            'FI': 'BC Financial Institution',
+            'FI': 'BC Credit Union',
             'PAR': 'BC Parish',
             # XPRO and Foreign Types
-            'XCR': 'Extraprovincial Corporation',
+            'XCR': 'Extraprovincial Limited Company',
             'XUL': 'Extraprovincial Unlimited Liability Company',
             'RLC': 'Extraprovincial Limited Liability Company',
             'XLP': 'Extraprovincial Limited Partnership',
             'XLL': 'Extraprovincial Limited Liability Partnership',
-            'XCP': 'Extraprovincial Cooperative',
-            'XSO': 'Extraprovincial Society',
+            'XCP': 'Extraprovincial Cooperative Association',
+            'XSO': 'Extraprovincial Social Enterprise',
             # Used for mapping back to legacy oracle codes, description not required
             'FIRM': 'FIRM (Legacy Oracle)'
         }
