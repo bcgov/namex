@@ -1,9 +1,27 @@
 {% if stateCd == 'REJECTED' %}
 <div>
     <div class="section-title">Your Name Request {{nrNum}} was not approved for use.</div>
-    <div class="section-data mt-4">To submit another Name Request, visit
-        <a href="www.bcregistry.ca/namerequest" target="_blank">www.bcregistry.ca/namerequest</a>
-    </div>
+    {% if isXPRO %}
+        <div class="section-data mt-4">Please contact BC Registry staff to obtain an assumed name for an
+            extraprovincial business:
+            <div class="mt-4">
+                <span class="bold-text">Canada & U.S. Toll Free: </span>
+                <span><a href="tel:1-877-370-1033">1-877-370-1033</a></span>
+            </div>
+            <div class="mt-1">
+                <span class="bold-text">Victoria Office: </span>
+                <span><a href="tel:250-370-1033">250-370-1033</a></span>
+            </div>
+            <div class="mt-1">
+                <span class="bold-text">Email: </span>
+                <span><a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a></span>
+            </div>
+        </div>
+    {% else %}
+        <div class="section-data mt-4">To submit another Name Request, visit
+            <a href="www.bcregistry.ca/namerequest" target="_blank">www.bcregistry.ca/namerequest</a>
+        </div>
+    {% endif %}
 </div>
 {% else %}
 <div>

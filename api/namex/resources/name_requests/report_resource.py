@@ -13,7 +13,6 @@ from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight
 from namex.utils.logging import setup_logging
 from .api_namespace import api
-from namex.constants import EntityTypeDescriptions
 
 setup_logging()  # Important to do this first
 
@@ -99,10 +98,14 @@ class ReportResource(Resource):
     def _get_template_data(nr_model):
         nr_report_json = nr_model.json()
         nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.requestTypeCd)
+        isXPRO = nr_model.requestTypeCd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
+        nr_report_json['isXPRO'] = isXPRO
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
         nr_report_json['nrStateDescription'] = \
             ReportResource._get_state_cd_description(nr_report_json['stateCd'])
+        if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
+            nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
             nr_report_json['expirationDate'] = nr_model.expirationDate.strftime('%B %-d, %Y')
         return nr_report_json
