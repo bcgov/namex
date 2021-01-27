@@ -1,6 +1,6 @@
 {% if stateCd == 'REJECTED' %}
 <div>
-    <div class="section-sub-title highlighted-blue-text">Your Name Request {{nrNum}} was not approved for use.</div>
+    <div class="section-title">Your Name Request {{nrNum}} was not approved for use.</div>
     <div class="section-data mt-4">To submit another Name Request, visit
         <a href="www.bcregistry.ca/namerequest" target="_blank">www.bcregistry.ca/namerequest</a>
     </div>
@@ -9,7 +9,7 @@
 <div>
   {% for choice in names %}
       {% if choice.state == 'CONDITION' or choice.state == 'APPROVED' %}
-         <div class="section-sub-title highlighted-blue-text">
+         <div class="section-title">
              <div>
                  <span>Approved Name</span>
                  {% if choice.choice == 1 %}
@@ -28,8 +28,8 @@
              </div>
         </div>
         <div class="mt-4">
-            <span class="section-sub-title">Request Status:</span>
-            <span class="section-data">{{ nrStateDescription }}</span>
+            <span class="section-title-gray">Request Status:</span>
+            <span>{{ nrStateDescription }}</span>
         </div>
         {% if choice.state == 'CONDITION' %}
             <div>

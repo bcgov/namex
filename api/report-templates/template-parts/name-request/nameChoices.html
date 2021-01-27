@@ -1,5 +1,5 @@
 <div class="separator mt-4"></div>
-<div class="section-sub-title mt-4">Submitted Name Choices:</div>
+<div class="section-title-gray mt-4">Submitted Name Choices:</div>
 <table class="section-data section-data-table mt-2" role="presentation">
   {% for choice in names %}
     <tr class="no-page-break">
@@ -7,7 +7,7 @@
         <div>
           <span class="{{ 'approved-name' if stateCd == 'APPROVED' else 'rejected-name' if stateCd ==
            'REJECTED' else 'submitted-name' }}">
-            {{ choice.choice }}. {{ choice.name }}
+            <span class="bold-text">{{ choice.choice }}. {{ choice.name }}</span>
             <span class="capitalize-text">
             {% if choice.state == 'REJECTED' %}
               (Rejected)
