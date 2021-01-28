@@ -194,18 +194,17 @@ class BaseClient:
         try:
             if method not in HttpVerbs:
                 raise ApiClientError(message=MSG_INVALID_HTTP_VERB)
+            if not headers:
+                authenticated, token = self.get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
+                if not authenticated:
+                    raise ApiAuthError(token, message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+                headers = {
+                    'Authorization': f'Bearer {token}',
+                    'Content-Type': 'application/json'
+                }
 
-            authenticated, response = self.get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
-            if not authenticated:
-                raise ApiAuthError(response, message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
-
-            self.set_api_client_auth_header(response)
-
-            custom_headers = headers if isinstance(headers, dict) else {
-                # If using key based auth we could do something like...
-                # 'x-api-key': 'SampleKey',
-            }
-            merged_headers = {**self.headers, **custom_headers}
+            if type(headers.get('Account-Id', '')) != str:
+                headers['Account-Id'] = str(headers['Account-Id'])
 
             url = self.build_url(url)
             if data:
@@ -215,14 +214,14 @@ class BaseClient:
                     params=params,
                     # Dump and load to serialize dates
                     json=json.loads(json.dumps(data, default=str)) if data else None,
-                    headers=merged_headers
+                    headers=headers
                 )
             else:
                 response = requests.request(
                     method.value,
                     url,
                     params=params,
-                    headers=merged_headers
+                    headers=headers
                 )
 
             if not response or not response.ok:
@@ -274,14 +273,14 @@ class SBCPaymentClient(BaseClient):
 
         return self.call_api(HttpVerbs.GET, request_url, params=params)
 
-    def create_payment(self, data):
+    def create_payment(self, data, headers=None):
         request_url = 'payment-requests'
-        return self.call_api(HttpVerbs.POST, request_url, data=data)
+        return self.call_api(HttpVerbs.POST, request_url, data=data, headers=headers)
 
-    def get_payment(self, invoice_id):
+    def get_payment(self, invoice_id, headers=None):
         request_url = 'payment-requests/{invoice_id}'
         request_url = request_url.format(invoice_id=invoice_id)
-        return self.call_api(HttpVerbs.GET, request_url)
+        return self.call_api(HttpVerbs.GET, request_url, headers=headers)
 
     def refund_payment(self, invoice_id, data):
         request_url = 'payment-requests/{invoice_id}/refunds'
