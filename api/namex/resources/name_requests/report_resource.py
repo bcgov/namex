@@ -12,7 +12,6 @@ from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight
 from namex.utils.logging import setup_logging
-from namex.utils.entity_type import get_entity_type_description
 from .api_namespace import api
 
 setup_logging()  # Important to do this first
@@ -86,7 +85,7 @@ class ReportResource(Resource):
             'name-request/nameChoices',
             'name-request/applicantContactInfo',
             'name-request/manageNameRequest',
-            'name-request/approvalDetails'
+            'name-request/resultDetails'
         ]
         # substitute template parts - marked up by [[filename]]
         for template_part in template_parts:
@@ -98,13 +97,19 @@ class ReportResource(Resource):
     @staticmethod
     def _get_template_data(nr_model):
         nr_report_json = nr_model.json()
-        nr_report_json['entityTypeDescription'] = get_entity_type_description(nr_report_json['entity_type_cd'])
+        nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.requestTypeCd)
+        isXPRO = nr_model.requestTypeCd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
+        nr_report_json['isXPRO'] = isXPRO
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
         nr_report_json['nrStateDescription'] = \
             ReportResource._get_state_cd_description(nr_report_json['stateCd'])
+        if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
+            nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
             nr_report_json['expirationDate'] = nr_model.expirationDate.strftime('%B %-d, %Y')
+        if nr_report_json['submittedDate']:
+            nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
         return nr_report_json
 
     @staticmethod
@@ -133,11 +138,11 @@ class ReportResource(Resource):
     @staticmethod
     def _get_request_action_cd_description(request_cd: str):
         request_cd_description = {
-            'NEW': 'New Business Name Request',
+            'NEW': 'New Business',
             'MVE': 'Move Request',
             'REH': 'Restore or Reinstate',
-            'AML': 'Amalgamation Request',
-            'CHG': 'Change of Name Request',
+            'AML': 'Amalgamation',
+            'CHG': 'Change of Name',
             'CNV': 'Conversion Request'
         }
 
@@ -153,6 +158,39 @@ class ReportResource(Resource):
         }
 
         return nr_state_description.get(state_cd, None)
+
+    @staticmethod
+    def _get_entity_type_description(entity_type_cd: str):
+        entity_type_descriptions = {
+            # BC Types
+            'CR': 'BC Limited Company',
+            'UL': 'BC Unlimited Liability Company',
+            'FR': 'BC Sole Proprietorship',
+            'GP': 'BC General Partnership',
+            'DBA': 'BC Doing Business As',
+            'LP': 'BC Limited Partnership',
+            'LL': 'BC Limited Liability Partnership',
+            'CP': 'BC Cooperative Association',
+            'BC': 'BC Benefit Company',
+            'CC': 'BC Community Contribution Company',
+            'SO': 'BC Social Enterprise',
+            'PA': 'BC Private Act',
+            'FI': 'BC Credit Union',
+            'PAR': 'BC Parish',
+            # XPRO and Foreign Types
+            'XCR': 'Extraprovincial Limited Company',
+            'XUL': 'Extraprovincial Unlimited Liability Company',
+            'RLC': 'Extraprovincial Limited Liability Company',
+            'XLP': 'Extraprovincial Limited Partnership',
+            'XLL': 'Extraprovincial Limited Liability Partnership',
+            'XCP': 'Extraprovincial Cooperative Association',
+            'XSO': 'Extraprovincial Social Enterprise',
+            # Used for mapping back to legacy oracle codes, description not required
+            'FIRM': 'FIRM (Legacy Oracle)'
+        }
+        return entity_type_descriptions.get(entity_type_cd, None)
+
+
 
 
 
