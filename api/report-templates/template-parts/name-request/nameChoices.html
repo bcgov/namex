@@ -5,7 +5,7 @@
     <tr class="no-page-break">
       <td class="col-33">
         <div>
-          <span class="{{ 'approved-name' if stateCd == 'APPROVED' else 'rejected-name' if stateCd ==
+          <span class="{{ 'approved-name' if choice.state in ['APPROVED', 'CONDITION'] else 'rejected-name' if choice.state ==
            'REJECTED' else 'submitted-name' }}">
             <span class="bold-text">{{ choice.choice }}. {{ choice.name }}</span>
             <span class="capitalize-text">
@@ -13,7 +13,7 @@
               (Rejected)
             {% elif choice.state == 'APPROVED' %}
               (Approved)
-            {% elif choice.state == 'CONDITIONAL' %}
+            {% elif choice.state == 'CONDITION' %}
               (Conditional Approval)
             {% else %}
               (Not Reviewed)

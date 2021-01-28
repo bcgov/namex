@@ -108,6 +108,8 @@ class ReportResource(Resource):
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
             nr_report_json['expirationDate'] = nr_model.expirationDate.strftime('%B %-d, %Y')
+        if nr_report_json['submittedDate']:
+            nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
         return nr_report_json
 
     @staticmethod

@@ -45,9 +45,11 @@
          {% endif %}
          [[name-request/nameChoices.html]]
          {% if additionalInfo and additionalInfo != '' %}
-            <div class="separator mt-4"></div>
-            <div class="section-title-gray mt-4">Additional Information</div>
-            <div class="section-data mt-2">{{additionalInfo}}</div>
+            <div class="no-page-break">
+               <div class="separator mt-4"></div>
+               <div class="section-title-gray mt-4">Additional Information</div>
+               <div class="section-data mt-2">{{additionalInfo}}</div>
+            </div>
          {% endif %}
          [[name-request/applicantContactInfo.html]]
 

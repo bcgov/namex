@@ -51,23 +51,49 @@
         </div>
         {% if choice.state == 'CONDITION' %}
             <div>
-                <span class="section-sub-title">Consent:</span>
-                {% if consentFlag == 'Y' %}
-                    <span class="section-data">Consent Required</span>
-                {% endif%}
+                <span class="section-title-gray">Consent:</span>
+                    <span class="section-data-lg">
+                        {% if consentFlag == 'Y' %}
+                            Required. Not Yet Received
+                        {% elif consentFlag == 'R' %}
+                            Required. Received
+                        {% endif %}
+                    </span>
             </div>
-            <div class="section-sub-title mt-4">Conditions/Comments</div>
-            <div class="section-data">{{ choice.decision_text }}</div>
+            <div class="section-title-gray mt-4">Conditions/Comments</div>
+            <div class="section-data">
+                <span>{{ choice.decision_text }}. </span>
+                {% if consentFlag in ['Y', 'R'] %}
+                    <span>Send your consent letter so registry staff can release the condition before
+                    you incorporate or register. Consent letters will be processed within one business day
+                    of receipt.</span>
+                {% endif %}
+            </div>
         {% endif %}
       {% endif %}
   {% endfor %}
 </div>
 <div class="mt-4">
   <form>
-      <input type="checkbox" name="complete-filing" value="1">
-      <label for="complete-filing" class="checkbox-label section-sub-title">To complete your filing, visit
-          <a href="www.bcregistryservices.gov.bc.ca" target="_blank">www.bcregistryservices.gov.bc.ca</a> for more information
-      </label>
+      {% if consentFlag in ['Y', 'R'] %}
+          <div>
+              {% if consentFlag=='R' %}
+                <input type="checkbox" name="consent-box" checked>
+              {% elif consentFlag=='Y' %}
+                <input type="checkbox" name="consent-box">
+              {% endif %}
+              <label for="consent-box" class="checkbox-label section-sub-title">
+                  Send in your consent letter to
+                  <a href="mailto:bcregistries@gov.bc.ca" class="pl-2">bcregistries@gov.bc.ca</a>
+              </label>
+          </div>
+      {% endif%}
+      <div class="{{ 'mt-2' if consentFlag in ['Y', 'R'] else '' }}">
+          <input type="checkbox" name="complete-filing-box">
+          <label for="complete-filing-box" class="checkbox-label section-sub-title">To complete your filing, visit
+              <a href="www.bcregistryservices.gov.bc.ca" target="_blank">www.bcregistryservices.gov.bc.ca</a> for more information
+          </label>
+      </div>
   </form>
 </div>
 {% endif %}
