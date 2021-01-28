@@ -85,6 +85,7 @@ class PaymentInvoice(Serializable):
     paid: float
     refund: float
     total: float
+    bcolAccount: int = None
     isPaymentActionRequired: bool = field(default_factory=bool)
     statusCode: str = ''
     createdBy: str = ''

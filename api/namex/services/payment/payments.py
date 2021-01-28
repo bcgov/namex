@@ -16,11 +16,11 @@ def get_payment(payment_identifier):
         raise SBCPaymentException(err)
 
 
-def create_payment(model):
+def create_payment(model, headers):
     try:
         data = model
         api_instance = SBCPaymentClient()
-        api_response = api_instance.create_payment(data)
+        api_response = api_instance.create_payment(data, headers)
         current_app.logger.debug(api_response)
         return PaymentInvoice(**api_response)
 

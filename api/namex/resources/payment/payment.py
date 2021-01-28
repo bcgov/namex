@@ -279,9 +279,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 filingInfo=filing_info,
                 businessInfo=business_info
             )
-
-            payment_response = create_payment(req.as_dict())
-            if payment_response.statusCode == PaymentStatusCode.CREATED.value:
+            payment_response = create_payment(req.as_dict(), json_input.get('headers'))
+            if payment_response.statusCode in [PaymentStatusCode.CREATED.value, PaymentStatusCode.COMPLETED.value]:
                 # Save the payment info to Postgres
                 payment = PaymentDAO()
                 payment.nrId = nr_model.id
@@ -304,7 +303,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 })
 
                 # Record the event
-                nr_svc = self.nr_service
+                # nr_svc = self.nr_service
                 # EventRecorder.record(nr_svc.user, Event.POST + ' [payment created]', json_input)
 
                 response = make_response(data, 201)
