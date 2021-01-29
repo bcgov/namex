@@ -24,3 +24,4 @@ inflect
 werkzeug
 pysolr
 dataclasses
+pycountry
