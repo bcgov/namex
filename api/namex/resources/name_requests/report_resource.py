@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import pycountry
 from http import HTTPStatus
 from pathlib import Path
 
@@ -110,6 +111,14 @@ class ReportResource(Resource):
             nr_report_json['expirationDate'] = nr_model.expirationDate.strftime('%B %-d, %Y')
         if nr_report_json['submittedDate']:
             nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
+        if nr_report_json['applicants']['countryTypeCd']:
+            nr_report_json['applicants']['countryName'] = \
+                pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
+        actions_obj = ReportResource._get_next_action_text(nr_model.requestTypeCd)
+        if actions_obj:
+            action_text = actions_obj.get(nr_report_json['request_action_cd'])
+            if action_text:
+                nr_report_json['nextAction'] = action_text
         return nr_report_json
 
     @staticmethod
@@ -189,6 +198,129 @@ class ReportResource(Resource):
             'FIRM': 'FIRM (Legacy Oracle)'
         }
         return entity_type_descriptions.get(entity_type_cd, None)
+
+    @staticmethod
+    def _get_next_action_text(entity_type_cd: str):
+        next_action_text = {
+            # BC Types
+            'CR':  {
+               'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
+                          'corporateonline.gov.bc.ca</a> for more information'
+            },
+            'UL': {
+               'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
+                          'corporateonline.gov.bc.ca</a> for more information'
+            },
+            'FR': {
+               'NEW': 'To complete your filing, visit <a href="https://www2.gov.bc.ca/gov/content/employment-business/'
+                      'business/managing-a-business/permits-licences/businesses-incorporated-companies/'
+                      'proprietorships-partnerships/registering">Registering Proprietorships and Partnerships'
+                      '</a> for more information',
+               'DEFAULT': 'To complete your filing, visit <a href="https://www2.gov.bc.ca/gov/content/'
+                          'employment-business/business/managing-a-business/permits-licences/'
+                          'businesses-incorporated-companies/proprietorships-partnerships/registering">'
+                          'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
+                          '<a href="https://www2.gov.bc.ca/gov/content/employment-business/business/'
+                          'managing-a-business/permits-licences/businesses-incorporated-companies/'
+                          'proprietorships-partnerships/making-changes">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'GP': {
+               'NEW': 'To complete your filing, visit <a href="https://www2.gov.bc.ca/gov/content/employment-business/'
+                      'business/managing-a-business/permits-licences/businesses-incorporated-companies/'
+                      'proprietorships-partnerships/registering">Registering Proprietorships and Partnerships'
+                      '</a> for more information',
+               'DEFAULT': 'To complete your filing, visit <a href="https://www2.gov.bc.ca/gov/content/'
+                          'employment-business/business/managing-a-business/permits-licences/'
+                          'businesses-incorporated-companies/proprietorships-partnerships/registering">'
+                          'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
+                          '<a href="https://www2.gov.bc.ca/gov/content/employment-business/business/'
+                          'managing-a-business/permits-licences/businesses-incorporated-companies/'
+                          'proprietorships-partnerships/making-changes">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'DBA': {
+               'NEW': 'To complete your filing, visit <a href="https://www2.gov.bc.ca/gov/content/employment-business/'
+                      'business/managing-a-business/permits-licences/businesses-incorporated-companies/'
+                      'proprietorships-partnerships/registering">Registering Proprietorships and Partnerships'
+                      '</a> for more information',
+               'DEFAULT': 'To complete your filing, visit <a href="https://www2.gov.bc.ca/gov/content/'
+                          'employment-business/business/managing-a-business/permits-licences/'
+                          'businesses-incorporated-companies/proprietorships-partnerships/registering">'
+                          'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
+                          '<a href="https://www2.gov.bc.ca/gov/content/employment-business/business/'
+                          'managing-a-business/permits-licences/businesses-incorporated-companies/'
+                          'proprietorships-partnerships/making-changes">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'LP': {
+               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
+                          'employment-business/business/managing-a-business/permits-licences/'
+                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+                          ' download and submit a form'
+            },
+            'LL': {
+               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
+                          'employment-business/business/managing-a-business/permits-licences/'
+                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+                          ' download and submit a form'
+            },
+            'CP': 'BC Cooperative Association',
+            'BC': {
+               'DEFAULT': 'To complete your filing, visit <a href="bcregistry.ca/business">www.bcregistry.gov.bc.ca</a>'
+                          ' for more information'
+            },
+            'CC': {
+               'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
+                          'corporateonline.gov.bc.ca</a> for more information'
+            },
+            'SO': 'BC Social Enterprise',
+            'PA': {
+               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+            },
+            'FI': {
+               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+            },
+            'PAR': {
+               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+            },
+            # XPRO and Foreign Types
+            'XCR': {
+               'NEW': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
+                      'corporateonline.gov.bc.ca</a> for more information',
+               'CHG': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
+                      'corporateonline.gov.bc.ca</a> for more information',
+               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
+                          'employment-business/business/managing-a-business/permits-licences/'
+                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+                          ' download and submit a form'
+            },
+            'XUL': {
+               'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
+                          'corporateonline.gov.bc.ca</a> for more information'
+            },
+            'RLC': {
+                'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
+                          'corporateonline.gov.bc.ca</a> for more information'
+            },
+            'XLP': {
+               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
+                          'employment-business/business/managing-a-business/permits-licences/'
+                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+                          ' download and submit a form'
+            },
+            'XLL': {
+               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
+                          'employment-business/business/managing-a-business/permits-licences/'
+                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+                          ' download and submit a form'
+            },
+            'XCP': 'Extraprovincial Cooperative Association',
+            'XSO': 'Extraprovincial Social Enterprise',
+            # Used for mapping back to legacy oracle codes, description not required
+            'FIRM': 'FIRM (Legacy Oracle)'
+        }
+        return next_action_text.get(entity_type_cd, None)
 
 
 
