@@ -148,11 +148,11 @@ class ReportResource(Resource):
     def _get_request_action_cd_description(request_cd: str):
         request_cd_description = {
             'NEW': 'New Business',
-            'MVE': 'Move Request',
-            'REH': 'Restore or Reinstate',
+            'MVE': 'Continuation in',
+            'REH': 'Restoration or Reinstatement',
             'AML': 'Amalgamation',
-            'CHG': 'Change of Name',
-            'CNV': 'Conversion Request'
+            'CHG': 'Name Change',
+            'CNV': 'Alteration'
         }
 
         return request_cd_description.get(request_cd, None)

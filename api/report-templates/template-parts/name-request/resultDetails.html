@@ -54,9 +54,9 @@
                 <span class="section-title-gray">Consent:</span>
                     <span class="section-data-lg">
                         {% if consentFlag == 'Y' %}
-                            Required. Not Yet Received
+                            Required. Not Yet Received.
                         {% elif consentFlag == 'R' %}
-                            Required. Received
+                            Required. Received.
                         {% endif %}
                     </span>
             </div>
@@ -65,7 +65,7 @@
                 <span>{{ choice.decision_text }}. </span>
                 {% if consentFlag in ['Y', 'R'] %}
                     <span>Send your consent letter so registry staff can release the condition before
-                    you incorporate or register. Consent letters will be processed within one business day
+                    you incorporate or register.Consent letters will be processed within one business day
                     of receipt.</span>
                 {% endif %}
             </div>

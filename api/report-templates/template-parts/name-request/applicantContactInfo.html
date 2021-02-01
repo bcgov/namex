@@ -21,6 +21,9 @@
        <td class="col-33">
         <div class="section-title-gray">Primary Contact</div>
         <div class="section-data mt-2">
+          {% if applicants.contact %}
+          <div>{{ applicants.contact }}</div>
+          {% endif %}
           <div>{{ applicants.emailAddress }}</div>
           {% if applicants.phoneNumber %}
            <div>{{ applicants.phoneNumber }}</div>
