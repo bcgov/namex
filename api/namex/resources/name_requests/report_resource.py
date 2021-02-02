@@ -123,6 +123,8 @@ class ReportResource(Resource):
         actions_obj = ReportResource._get_next_action_text(nr_model.requestTypeCd)
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
+            if not action_text:
+                action_text = actions_obj.get('DEFAULT')
             if action_text:
                 nr_report_json['nextAction'] = action_text
         return nr_report_json
@@ -157,6 +159,7 @@ class ReportResource(Resource):
             'MVE': 'Continuation in',
             'REH': 'Restoration or Reinstatement',
             'AML': 'Amalgamation',
+            'NRO-NEWAML': 'Amalgamation',
             'CHG': 'Name Change',
             'CNV': 'Alteration'
         }
