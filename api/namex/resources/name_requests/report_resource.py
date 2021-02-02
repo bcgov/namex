@@ -161,7 +161,8 @@ class ReportResource(Resource):
             'AML': 'Amalgamation',
             'NRO-NEWAML': 'Amalgamation',
             'CHG': 'Name Change',
-            'CNV': 'Alteration'
+            'CNV': 'Alteration',
+            'NRO-REST': 'Restoration or Reinstatement'
         }
 
         return request_cd_description.get(request_cd, None)
