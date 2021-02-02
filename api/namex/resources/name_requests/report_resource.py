@@ -14,6 +14,7 @@ from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight
 from namex.utils.logging import setup_logging
 from .api_namespace import api
+from namex.services.name_request.utils import get_mapped_entity_and_action_code
 
 setup_logging()  # Important to do this first
 
@@ -97,6 +98,11 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_template_data(nr_model):
+        if nr_model.requestTypeCd and (not nr_model.entity_type_cd or not nr_model.request_action_cd):
+            # For the NRO ones.
+            entity_type, request_action = get_mapped_entity_and_action_code(nr_model.requestTypeCd)
+            nr_model.entity_type_cd = entity_type
+            nr_model.request_action_cd = request_action
         nr_report_json = nr_model.json()
         nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.requestTypeCd)
         isXPRO = nr_model.requestTypeCd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
