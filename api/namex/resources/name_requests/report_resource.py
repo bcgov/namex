@@ -104,8 +104,8 @@ class ReportResource(Resource):
             nr_model.entity_type_cd = entity_type
             nr_model.request_action_cd = request_action
         nr_report_json = nr_model.json()
-        nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.requestTypeCd)
-        isXPRO = nr_model.requestTypeCd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
+        nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.entity_type_cd)
+        isXPRO = nr_model.entity_type_cd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
@@ -120,7 +120,7 @@ class ReportResource(Resource):
         if nr_report_json['applicants']['countryTypeCd']:
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
-        actions_obj = ReportResource._get_next_action_text(nr_model.requestTypeCd)
+        actions_obj = ReportResource._get_next_action_text(nr_model.entity_type_cd)
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
