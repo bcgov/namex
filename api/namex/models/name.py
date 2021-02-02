@@ -69,7 +69,7 @@ class Name(db.Model):
             'conflict2_num': self.conflict2_num,
             'conflict3_num': self.conflict3_num,
             'decision_text': self.decision_text,
-            'consumptionDate': self.consumptionDate,
+            'consumptionDate': self.consumptionDate.isoformat() if self.consumptionDate else None,
             'corpNum': self.corpNum,
             'comment': None if self.comment is None else self.comment.as_dict()
         }
