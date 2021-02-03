@@ -48,6 +48,11 @@ class Payment(db.Model):
     def payment_status_code(self, str):
         self._payment_status_code = str
 
+    @classmethod
+    def find_by_payment_token(cls, token):
+        return cls.query.filter_by(payment_id=token).one_or_none()
+
+
     def as_dict(self):
         return {
             'id': self.id,
