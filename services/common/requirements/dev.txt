@@ -1,0 +1,25 @@
+# Testing
+pytest
+pytest-aiohttp
+pytest-asyncio
+pytest-mock
+requests
+pyhamcrest
+dpath
+
+# Lint and code style
+pydocstyle
+flake8
+flake8-blind-except
+flake8-debugger
+flake8-docstrings
+flake8-isort
+flake8-quotes
+pep8-naming
+autopep8
+coverage
+pylint
+
+# docker
+lovely-pytest-docker
+pytest_docker
