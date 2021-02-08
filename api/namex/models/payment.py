@@ -50,7 +50,7 @@ class Payment(db.Model):
 
     @classmethod
     def find_by_payment_token(cls, token):
-        return cls.query.filter_by(payment_id=token).one_or_none()
+        return cls.query.filter_by(_payment_token=token).one_or_none()
 
 
     def as_dict(self):
