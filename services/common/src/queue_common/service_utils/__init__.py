@@ -36,10 +36,6 @@ async def subscribe_to_queue(stan_client: stan.aio.client.Client,
     Returns:
        str: the name of the queue
     """
-    # entity_subject = os.getenv('LEGAL_FILING_STAN_SUBJECT')
-    # entity_queue = os.getenv('LEGAL_FILING_STAN_QUEUE')
-    # entity_durable_name = os.getenv('LEGAL_FILING_STAN_DURABLE_NAME')
-
     await stan_client.subscribe(subject=subject,
                                 queue=queue,
                                 durable_name=durable_name,

@@ -21,15 +21,11 @@ from contextlib import contextmanager
 
 import pytest
 from config import get_named_config
-# import config
 from flask import Flask
 from namex.models import db
-# from namex import jwt as _jwt
 from nats.aio.client import Client as Nats
 from sqlalchemy import event, text
 from stan.aio.client import Client as Stan
-
-# from namex_pay.config import get_named_config
 
 from . import FROZEN_DATETIME
 
@@ -80,12 +76,6 @@ def config(app):
 def client(app):  # pylint: disable=redefined-outer-name
     """Return a session-wide Flask test client."""
     return app.test_client()
-
-
-# @pytest.fixture(scope='session')
-# def jwt():
-#     """Return a session-wide jwt manager."""
-#     return _jwt
 
 
 @pytest.fixture(scope='session')

@@ -17,7 +17,6 @@ import datetime
 import json
 import random
 from flask.signals import Namespace
-# from namex.models import payment
 
 import pytest
 from queue_common.service_utils import subscribe_to_queue

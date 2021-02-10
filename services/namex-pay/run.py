@@ -22,8 +22,6 @@ from namex_pay.worker import APP_CONFIG, cb_subscription_handler, qsm
 
 if __name__ == '__main__':
 
-    # my_config = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
-
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(qsm.run(loop=event_loop,
                                           config=APP_CONFIG,
