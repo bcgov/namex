@@ -32,16 +32,6 @@ def get_payment_id_from_msg(msg: nats.aio.client.Msg):
         return None
 
 
-# 'data': {
-#     'request': {
-#         'header': {'nrNum': < nr_number >,
-#                    'effectiveDate': < date of nr >
-#                    },
-#         'paymentToken': < payment_id >,
-#         'statusCode': < payment status code >
-#     }
-# }
-
 def create_cloud_event_msg(msg_id, msg_type, source, time, identifier, json_data_body):  # pylint: disable=too-many-arguments # noqa E501
     # industry standard arguments for this message
     """Create a payload for the email service."""
@@ -58,9 +48,3 @@ def create_cloud_event_msg(msg_id, msg_type, source, time, identifier, json_data
         cloud_event_msg['data'] = json_data_body
 
     return cloud_event_msg
-
-
-# async def publish_email_message(qsm: QueueServiceManager, subject: str, filing: Filing, option: str):
-#     """Publish the email message onto the NATS emailer subject."""
-#     payload = create_email_msg(filing.id, filing.filing_type, option)
-#     await qsm.service.publish(subject, payload)

@@ -1,0 +1,9 @@
+Flask
+jsonschema
+python-dotenv
+sentry-sdk[flask]
+aiohttp
+asyncio-nats-client
+asyncio-nats-streaming
+pycountry
+Werkzeug
