@@ -49,8 +49,8 @@ class Payment(db.Model):
         self._payment_status_code = str
 
     @classmethod
-    def find_by_payment_token(cls, token):
-        return cls.query.filter_by(_payment_token=token).one_or_none()
+    def find_by_payment_token(cls, token: str):
+        return cls.query.filter_by(_payment_token=str(token)).one_or_none()
 
 
     def as_dict(self):
