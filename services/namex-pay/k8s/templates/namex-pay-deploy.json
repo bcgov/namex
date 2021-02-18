@@ -3,7 +3,7 @@
   "apiVersion": "v1",
   "metadata": {
     "annotations": {
-      "description": "Deployment template for a entity-pay service.",
+      "description": "Deployment template for a namex-pay service.",
       "tags": "${NAME}-${TAG_NAME}"
     },
     "name": "${NAME}-${TAG_NAME}-deploy-template"
@@ -228,11 +228,11 @@
                     }
                   },
                   {
-                    "name": "NATS_FILER_SUBJECT",
+                    "name": "NATS_EMAILER_SUBJECT",
                     "valueFrom": {
                       "configMapKeyRef": {
                         "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "NATS_FILER_SUBJECT"
+                        "key": "NATS_EMAILER_SUBJECT"
                       }
                     }
                   },
@@ -279,7 +279,7 @@
         "NATS_CLUSTER_ID": "${NATS_CLUSTER_ID}",
         "NATS_CLIENT_NAME": "${NATS_CLIENT_NAME}",
         "NATS_SUBJECT": "${NATS_SUBJECT}",
-        "NATS_FILER_SUBJECT": "${NATS_FILER_SUBJECT}",
+        "NATS_EMAILER_SUBJECT": "${NATS_EMAILER_SUBJECT}",
         "NATS_QUEUE": "${NATS_QUEUE}"
       }
     }
@@ -290,14 +290,14 @@
       "displayName": "Name",
       "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
       "required": true,
-      "value": "entity-pay"
+      "value": "namex-pay"
     },
     {
       "name": "APP_GROUP",
       "displayName": "App Group",
       "description": "The name assigned to all of the deployments in this project.",
       "required": true,
-      "value": "entity-pay"
+      "value": "namex-pay"
     },
     {
       "name": "APP_FILE",
@@ -311,7 +311,7 @@
       "displayName": "Database Name",
       "description": "A valid database name used by the service.",
       "required": true,
-      "value": "lear"
+      "value": "namex"
     },
     {
       "name": "SENTRY_DSN",
@@ -346,35 +346,35 @@
       "displayName": "NATS Client Name",
       "description": "NATS client name as displayed in the connection info.",
       "required": true,
-      "value": "entity.filing.payment.worker"
+      "value": "entity.namex.pay.worker"
     },
     {
       "name": "NATS_SUBJECT",
       "displayName": "NATS Subject Name",
       "description": "A unique NATS subject name that is set to receive payment tokens.",
       "required": true,
-      "value": "entity.filing.payment"
+      "value": "entity.name-request.payment"
     },
     {
-      "name": "NATS_FILER_SUBJECT",
-      "displayName": "NATS Filer Subject Name",
-      "description": "A unique NATS subject name that publishes to the filing processor.",
+      "name": "NATS_EMAILER_SUBJECT",
+      "displayName": "NATS Subject Name",
+      "description": "A unique NATS subject name that is set to receive payment tokens.",
       "required": true,
-      "value": "entity.filing.filer"
+      "value": "entity.email"
     },
     {
       "name": "NATS_QUEUE",
       "displayName": "NATS Queue Name",
       "description": "A unique NATS queue name that is set to receive payment tokens.",
       "required": true,
-      "value": "filing-worker"
+      "value": "namex-worker"
     },
     {
       "name": "IMAGE_NAMESPACE",
       "displayName": "Image Namespace",
       "required": true,
       "description": "The namespace of the OpenShift project containing the imagestream for the application.",
-      "value": "gl2uos-tools"
+      "value": "servicebc-ne-tools"
     },
     {
       "name": "TAG_NAME",

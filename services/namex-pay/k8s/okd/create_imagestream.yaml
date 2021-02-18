@@ -1,10 +1,10 @@
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
-  name: entity-pay
-  namespace: gl2uos-tools
+  name: namex-pay
+  namespace: servicebc-ne-tools
 spec:
   lookupPolicy:
     local: false
 status:
-  dockerImageRepository: 'docker-registry.default.svc:5000/gl2uos-tools/entity-pay'
+  dockerImageRepository: 'docker-registry.default.svc:5000/servicebc-ne-tools/namex-pay'
