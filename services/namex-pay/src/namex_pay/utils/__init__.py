@@ -18,6 +18,7 @@ Supply version and commit hash info.
 When deployed in OKD, it adds the last commit hash onto the version info.
 """
 import os
+
 from namex_pay.version import __version__
 
 
