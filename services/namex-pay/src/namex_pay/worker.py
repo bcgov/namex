@@ -44,6 +44,7 @@ from sqlalchemy.exc import OperationalError
 from namex_pay import config
 from namex_pay.utils.datetime import datetime, timedelta, timezone
 
+
 NAME_REQUEST_LIFESPAN_DAYS = 56  # TODO this should be defined as a lookup from somewhere
 NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup from somewhere
 
@@ -66,7 +67,7 @@ def extract_message(msg: nats.aio.client.Msg) -> Optional[dict]:
 async def publish_email_message(qsm: QueueServiceManager,  # pylint: disable=redefined-outer-name
                                 cloud_event_msg: dict):
     """Publish the email message onto the NATS emailer subject."""
-    logger.debug(f"publish to queue, subject:{APP_CONFIG.EMAIL_PUBLISH_OPTIONS['subject']}, event {cloud_event_msg}")
+    logger.debug('publish to queue, subject:%s, event:%s', APP_CONFIG.EMAIL_PUBLISH_OPTIONS['subject'], cloud_event_msg)
     await qsm.service.publish(subject=APP_CONFIG.EMAIL_PUBLISH_OPTIONS['subject'],
                               msg=cloud_event_msg)
 
@@ -88,7 +89,7 @@ async def update_payment_record(payment: Payment):
 
     payment_action = payment.payment_action
     nr = RequestDAO.find_by_id(payment.nrId)
-    if payment_action == Payment.PaymentActions.COMPLETE.value:
+    if payment_action == Payment.PaymentActions.COMPLETE.value:  # pylint: disable=R1705
         if nr.stateCd == State.PENDING_PAYMENT:
             nr.stateCd = State.DRAFT
             nr.expirationDate = datetime.utcnow() + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
@@ -118,7 +119,8 @@ async def update_payment_record(payment: Payment):
     elif payment_action == Payment.PaymentActions.REAPPLY.value:
         if nr.stateCd != State.APPROVED \
                 and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
-            msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
+            msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id}'
+            'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
             logger.debug(msg)
             capture_message(msg)
             raise QueueException(msg)
@@ -139,7 +141,7 @@ async def update_payment_record(payment: Payment):
 async def furnish_receipt_message(qsm: QueueServiceManager, payment: Payment):  # pylint: disable=redefined-outer-name
     """Send receipt info to the mail queue if it hasn't yet been done."""
     if payment.furnished == 'Y':
-        logger.debug(f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}')
+        logger.debug('Queue Issue: Duplicate, already furnished receipt for payment.id=%s', payment.id)
         capture_message(f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}')
         return
 
@@ -168,12 +170,12 @@ async def furnish_receipt_message(qsm: QueueServiceManager, payment: Payment):  
                                                          'statusCode': nr.stateCd
                                                      }}
                                                  )
-        logger.debug(f'About to publish email for payment.id={payment.id}')
+        logger.debug('About to publish email for payment.id=%s', payment.id)
         await publish_email_message(qsm, cloud_event_msg)
     except Exception as err:  # noqa: B902; bare exception to catch all
         payment.furnished = False
         payment.save_to_db()
-        logger.debug(f'Reset payment furnish status payment.id={payment.id}')
+        logger.debug('Reset payment furnish status payment.id= %s', payment.id)
         raise QueueException(f'Unable to furnish NR info. {err}') from err
 
 
@@ -183,7 +185,7 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
         raise QueueException('Flask App or token not available.')
 
     with flask_app.app_context():
-        logger.debug(f'entering process payment: {pay_msg}')
+        logger.debug('entering process payment: %s', pay_msg)
 
         # capture_message(f'Queue Issue: Unable to find payment.id={payment_id} to place on email queue')
         # return
@@ -191,11 +193,11 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
         if pay_msg.get('paymentToken', {}).get('statusCode') == PaymentState.TRANSACTION_FAILED.value:
             # TODO: The customer has cancelled out of paying, so we could note this better
             # technically the payment for this service is still pending
-            logger.debug(f'Failed transaction on queue: {pay_msg}')
+            logger.debug('Failed transaction on queue:%s', pay_msg)
             return
 
         if pay_msg.get('paymentToken', {}).get('statusCode') == PaymentState.COMPLETED.value:
-            logger.debug(f'COMPLETED transaction on queue: {pay_msg}')
+            logger.debug('COMPLETED transaction on queue: %s', pay_msg)
 
             if payment_token := pay_msg.get('paymentToken', {}).get('id'):
                 if payment := Payment.find_by_payment_token(payment_token):
@@ -203,10 +205,10 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
                     await update_payment_record(payment)
                     await furnish_receipt_message(qsm, payment)
                 else:
-                    logger.debug(f'Queue Error: Unable to find payment record for :{pay_msg}')
+                    logger.debug('Queue Error: Unable to find payment record for :%s', pay_msg)
                     capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
             else:
-                logger.debug(f'Queue Error: Missing id :{pay_msg}')
+                logger.debug('Queue Error: Missing id :%s', pay_msg)
                 capture_message(f'Queue Error: Missing id :{pay_msg}', level='error')
 
             return
