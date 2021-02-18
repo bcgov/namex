@@ -29,13 +29,12 @@ import json
 import os
 import time
 import uuid
-from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 
 import nats
 from flask import Flask
-from namex.models import db, Payment, Request as RequestDAO  # noqa:I001; import orders
+from namex.models import db, Payment, Request as RequestDAO, State  # noqa:I001; import orders
 from queue_common.messages import create_cloud_event_msg  # noqa:I005
 from queue_common.service import QueueServiceManager
 from queue_common.service_utils import QueueException, logger
@@ -43,6 +42,10 @@ from sentry_sdk import capture_message
 from sqlalchemy.exc import OperationalError
 
 from namex_pay import config
+from namex_pay.utils.datetime import datetime, timedelta, timezone
+
+NAME_REQUEST_LIFESPAN_DAYS = 56  # TODO this should be defined as a lookup from somewhere
+NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup from somewhere
 
 
 class PaymentState(Enum):
@@ -63,14 +66,80 @@ def extract_message(msg: nats.aio.client.Msg) -> Optional[dict]:
 async def publish_email_message(qsm: QueueServiceManager,  # pylint: disable=redefined-outer-name
                                 cloud_event_msg: dict):
     """Publish the email message onto the NATS emailer subject."""
-    print(f"publish to queue, subject:{APP_CONFIG.EMAIL_PUBLISH_OPTIONS['subject']}")
+    logger.debug(f"publish to queue, subject:{APP_CONFIG.EMAIL_PUBLISH_OPTIONS['subject']}, event {cloud_event_msg}")
     await qsm.service.publish(subject=APP_CONFIG.EMAIL_PUBLISH_OPTIONS['subject'],
                               msg=cloud_event_msg)
+
+
+async def update_payment_record(payment: Payment):
+    """Update the payment record in the database.
+
+    Alter the NR state as required based on the payment action.
+    Payment NR Action - One of [COMPLETE, UPGRADE, REAPPLY]
+    COMPLETE - set NR to DRAFT IFF nr.state == PENDING_PAYMENT
+    UPGRADE - set the nr.priority to True/'Y'
+    REAPPLY - add REAPPLY_EXTENSION to expiry date of NR IFF it hasn't expired
+    """
+    if payment.payment_completion_date:
+        msg = f'Queue Issue: Duplicate, payment already processed for payment.id={payment.id}'
+        logger.debug(msg)
+        capture_message(msg)
+        return
+
+    payment_action = payment.payment_action
+    nr = RequestDAO.find_by_id(payment.nrId)
+    if payment_action == Payment.PaymentActions.COMPLETE.value:
+        if nr.stateCd == State.PENDING_PAYMENT:
+            nr.stateCd = State.DRAFT
+            nr.expirationDate = datetime.utcnow() + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+            payment.payment_completion_date = datetime.utcnow()
+            payment.payment_status_code = State.COMPLETED
+
+            nr.save_to_db()
+            payment.save_to_db()
+        return
+
+    elif payment_action == Payment.PaymentActions.UPGRADE.value:
+        if nr.stateCd == State.PENDING_PAYMENT:
+            msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
+            logger.debug(msg)
+            capture_message(msg)
+            raise QueueException(msg)
+
+        nr.priorityCd = 'Y'
+        nr.priorityDate = datetime.utcnow()
+        payment.payment_completion_date = datetime.utcnow()
+        payment.payment_status_code = State.COMPLETED
+
+        nr.save_to_db()
+        payment.save_to_db()
+        return
+
+    elif payment_action == Payment.PaymentActions.REAPPLY.value:
+        if nr.stateCd != State.APPROVED \
+                and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
+            msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
+            logger.debug(msg)
+            capture_message(msg)
+            raise QueueException(msg)
+        nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+        payment.payment_completion_date = datetime.utcnow()
+        payment.payment_status_code = State.COMPLETED
+
+        nr.save_to_db()
+        payment.save_to_db()
+        return
+
+    msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
+    logger.debug(msg)
+    capture_message(msg)
+    raise QueueException(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
 
 async def furnish_receipt_message(qsm: QueueServiceManager, payment: Payment):  # pylint: disable=redefined-outer-name
     """Send receipt info to the mail queue if it hasn't yet been done."""
     if payment.furnished == 'Y':
+        logger.debug(f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}')
         capture_message(f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}')
         return
 
@@ -99,10 +168,12 @@ async def furnish_receipt_message(qsm: QueueServiceManager, payment: Payment):  
                                                          'statusCode': nr.stateCd
                                                      }}
                                                  )
+        logger.debug(f'About to publish email for payment.id={payment.id}')
         await publish_email_message(qsm, cloud_event_msg)
     except Exception as err:  # noqa: B902; bare exception to catch all
         payment.furnished = False
         payment.save_to_db()
+        logger.debug(f'Reset payment furnish status payment.id={payment.id}')
         raise QueueException(f'Unable to furnish NR info. {err}') from err
 
 
@@ -112,6 +183,7 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
         raise QueueException('Flask App or token not available.')
 
     with flask_app.app_context():
+        logger.debug(f'entering process payment: {pay_msg}')
 
         # capture_message(f'Queue Issue: Unable to find payment.id={payment_id} to place on email queue')
         # return
@@ -119,17 +191,22 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
         if pay_msg.get('paymentToken', {}).get('statusCode') == PaymentState.TRANSACTION_FAILED.value:
             # TODO: The customer has cancelled out of paying, so we could note this better
             # technically the payment for this service is still pending
+            logger.debug(f'Failed transaction on queue: {pay_msg}')
             return
 
         if pay_msg.get('paymentToken', {}).get('statusCode') == PaymentState.COMPLETED.value:
+            logger.debug(f'COMPLETED transaction on queue: {pay_msg}')
 
             if payment_token := pay_msg.get('paymentToken', {}).get('id'):
                 if payment := Payment.find_by_payment_token(payment_token):
 
+                    await update_payment_record(payment)
                     await furnish_receipt_message(qsm, payment)
                 else:
+                    logger.debug(f'Queue Error: Unable to find payment record for :{pay_msg}')
                     capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
             else:
+                logger.debug(f'Queue Error: Missing id :{pay_msg}')
                 capture_message(f'Queue Error: Missing id :{pay_msg}', level='error')
 
             return
@@ -169,8 +246,9 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
             logger.debug('Queue Error: no message on queue')
         else:
 
-            logger.debug('Extracted pay_msg: %s', pay_msg)
+            logger.debug('Begin process_payment for pay_msg: %s', pay_msg)
             await process_payment(pay_msg, FLASK_APP)
+            logger.debug('Completed process_payment for pay_msg: %s', pay_msg)
 
     except OperationalError as err:  # message goes back on the queue
         logger.error('Queue Blocked - Database Issue: %s', json.dumps(pay_msg), exc_info=True)

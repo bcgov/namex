@@ -7,3 +7,11 @@ asyncio-nats-client
 asyncio-nats-streaming
 pycountry
 Werkzeug
+
+git+https://github.com/bcgov/business-schemas.git#egg=registry_schemas
+git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
+git+https://github.com/bcgov/namex.git#egg=queue_common&subdirectory=services/common
+git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
+
+
+git+https://github.com/bcgov/namex.git#egg=queue_common&subdirectory=services/common

@@ -85,6 +85,18 @@ build: ## Build the docker container
 
 build-nc: ## Build the docker container without caching
 	docker build --no-cache -t $(PROJECT_NAME) .
+
+# expects the terminal to be oc login
+# expects export OPENSHIFT_REGISTRY_ADDRESS=""
+# expects export OPENSHIFT_NAMESPACE=""
+registry-push: build ## Push the docker container to the registry & tag dev
+	docker login $(OPENSHIFT_REGISTRY_ADDRESS) -u $(oc whoami) -p $(oc whoami -t) ; \
+	docker image tag $(PROJECT_NAME):latest $(OPENSHIFT_REGISTRY_ADDRESS)/$(OPENSHIFT_NAMESPACE)/$(PROJECT_NAME):latest ; \
+	docker image push $(OPENSHIFT_REGISTRY_ADDRESS)/$(OPENSHIFT_NAMESPACE)/$(PROJECT_NAME):latest
+
+oc-tag: registry-push
+	oc tag $(OPENSHIFT_NAMESPACE)/$(PROJECT_NAME):latest  $(OPENSHIFT_NAMESPACE)/$(PROJECT_NAME):dev
+
 #################################################################################
 # COMMANDS - Local                                                              #
 #################################################################################

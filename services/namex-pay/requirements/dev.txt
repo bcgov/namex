@@ -1,6 +1,7 @@
 # Everything the developer needs in addition to the production requirements
 # Testing
 pytest
+freezegun
 pytest-aiohttp
 pytest-asyncio
 pytest-mock

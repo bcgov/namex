@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Supply version and commit hash info.
+"""This module holds general utility functions and helpers for the main package.
+
+Supply version and commit hash info.
 
 When deployed in OKD, it adds the last commit hash onto the version info.
 """
 import os
-
 from namex_pay.version import __version__
 
 
