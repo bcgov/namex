@@ -22,6 +22,7 @@ from .api_models import nr_request
 from .base_nr_resource import BaseNameRequestResource
 from .constants import request_editable_states, contact_editable_states
 
+from ..services.statistics import UnitTime
 
 setup_logging()  # Important to do this first
 
@@ -49,6 +50,12 @@ class NameRequestResource(BaseNameRequestResource):
                 nr_model.request_action_cd = request_action
 
             response_data = nr_model.json()
+
+            # If draft, get the wait time and oldest queued request
+            if nr_model.stateCd == 'DRAFT':
+                response_data['oldest_draft'] = Request.get_oldest_draft()
+                response_data['waiting_time'] = Request.get_waiting_time_regular_queue(unit=UnitTime.DAY.value)
+
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
             return jsonify(response_data), 200
