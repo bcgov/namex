@@ -72,7 +72,7 @@ async def publish_email_message(qsm: QueueServiceManager,  # pylint: disable=red
                               msg=cloud_event_msg)
 
 
-async def update_payment_record(payment: Payment):
+async def update_payment_record(payment: Payment) -> Optional[Payment]:
     """Update the payment record in the database.
 
     Alter the NR state as required based on the payment action.
@@ -85,7 +85,7 @@ async def update_payment_record(payment: Payment):
         msg = f'Queue Issue: Duplicate, payment already processed for payment.id={payment.id}'
         logger.debug(msg)
         capture_message(msg)
-        return
+        return None
 
     payment_action = payment.payment_action
     nr = RequestDAO.find_by_id(payment.nrId)
@@ -98,7 +98,7 @@ async def update_payment_record(payment: Payment):
 
             nr.save_to_db()
             payment.save_to_db()
-        return
+        return payment
 
     elif payment_action == Payment.PaymentActions.UPGRADE.value:
         if nr.stateCd == State.PENDING_PAYMENT:
@@ -114,13 +114,13 @@ async def update_payment_record(payment: Payment):
 
         nr.save_to_db()
         payment.save_to_db()
-        return
+        return payment
 
     elif payment_action == Payment.PaymentActions.REAPPLY.value:
         if nr.stateCd != State.APPROVED \
                 and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
-            msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id}'
-            'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
+            msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
+                'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
             logger.debug(msg)
             capture_message(msg)
             raise QueueException(msg)
@@ -130,7 +130,7 @@ async def update_payment_record(payment: Payment):
 
         nr.save_to_db()
         payment.save_to_db()
-        return
+        return payment
 
     msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
     logger.debug(msg)
@@ -202,8 +202,10 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
             if payment_token := pay_msg.get('paymentToken', {}).get('id'):
                 if payment := Payment.find_by_payment_token(payment_token):
 
-                    await update_payment_record(payment)
-                    await furnish_receipt_message(qsm, payment)
+                    if update_payment := await update_payment_record(payment):
+                        payment = update_payment
+                    if payment.payment_status_code == State.COMPLETED:
+                        await furnish_receipt_message(qsm, payment)
                 else:
                     logger.debug('Queue Error: Unable to find payment record for :%s', pay_msg)
                     capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
