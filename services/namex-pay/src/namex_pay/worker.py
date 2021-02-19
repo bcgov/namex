@@ -204,7 +204,7 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
 
                     if update_payment := await update_payment_record(payment):
                         payment = update_payment
-                    if payment.payment_status_code ==State.COMPLETED:
+                    if payment.payment_status_code == State.COMPLETED:
                         await furnish_receipt_message(qsm, payment)
                 else:
                     logger.debug('Queue Error: Unable to find payment record for :%s', pay_msg)
