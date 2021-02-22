@@ -16,13 +16,12 @@ from namex.services.name_request.utils import get_mapped_entity_and_action_code,
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError, NameRequestIsInProgressError
 from namex.services.payment.payments import refund_payment
+from namex.services.statistics import UnitTime
 
 from .api_namespace import api
 from .api_models import nr_request
 from .base_nr_resource import BaseNameRequestResource
 from .constants import request_editable_states, contact_editable_states
-
-from ..services.statistics import UnitTime
 
 setup_logging()  # Important to do this first
 
@@ -457,8 +456,8 @@ class NameRequestRollback(BaseNameRequestResource):
 
         # Delete in solr for temp or real NR because it is cancelled
         if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
-                SOLR_CORE = 'possible.conflicts'
-                self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
+            SOLR_CORE = 'possible.conflicts'
+            self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
