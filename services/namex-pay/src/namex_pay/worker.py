@@ -147,6 +147,7 @@ async def furnish_receipt_message(qsm: QueueServiceManager, payment: Payment):  
 
     nr = None
 
+    logger.debug('Start of the furnishing of receipt for payment record:%s', payment.as_dict())
     try:
         payment.furnished = True
         payment.save_to_db()
@@ -204,8 +205,9 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
 
                     if update_payment := await update_payment_record(payment):
                         payment = update_payment
-                    if payment.payment_status_code == State.COMPLETED:
-                        await furnish_receipt_message(qsm, payment)
+                    
+                    await furnish_receipt_message(qsm, payment)
+                    
                 else:
                     logger.debug('Queue Error: Unable to find payment record for :%s', pay_msg)
                     capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
