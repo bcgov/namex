@@ -16,12 +16,12 @@ from namex.services.name_request.utils import get_mapped_entity_and_action_code,
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError, NameRequestIsInProgressError
 from namex.services.payment.payments import refund_payment
+from namex.services.statistics import UnitTime
 
 from .api_namespace import api
 from .api_models import nr_request
 from .base_nr_resource import BaseNameRequestResource
 from .constants import request_editable_states, contact_editable_states
-
 
 setup_logging()  # Important to do this first
 
@@ -49,6 +49,12 @@ class NameRequestResource(BaseNameRequestResource):
                 nr_model.request_action_cd = request_action
 
             response_data = nr_model.json()
+
+            # If draft, get the wait time and oldest queued request
+            if nr_model.stateCd == 'DRAFT':
+                response_data['oldest_draft'] = Request.get_oldest_draft()
+                response_data['waiting_time'] = Request.get_waiting_time_regular_queue(unit=UnitTime.DAY.value)
+
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
             return jsonify(response_data), 200
@@ -450,8 +456,8 @@ class NameRequestRollback(BaseNameRequestResource):
 
         # Delete in solr for temp or real NR because it is cancelled
         if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
-                SOLR_CORE = 'possible.conflicts'
-                self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
+            SOLR_CORE = 'possible.conflicts'
+            self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
