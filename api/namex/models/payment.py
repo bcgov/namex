@@ -1,10 +1,18 @@
 """Payments for a Request."""
+from enum import Enum
 from sqlalchemy import event
 
 from namex.models import State, db
 
 
 class Payment(db.Model):
+
+    class PaymentActions(Enum):
+        """Valid actions for a payment."""
+        COMPLETE='COMPLETE'
+        UPGRADE='UPGRADE'
+        REAPPLY='REAPPLY'
+
     __tablename__ = 'payments'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -47,6 +55,11 @@ class Payment(db.Model):
     @payment_status_code.setter
     def payment_status_code(self, str):
         self._payment_status_code = str
+
+    @classmethod
+    def find_by_payment_token(cls, token: str):
+        return cls.query.filter_by(_payment_token=str(token)).one_or_none()
+
 
     def as_dict(self):
         return {

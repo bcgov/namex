@@ -58,6 +58,7 @@ class NameRequestResource(BaseNameRequestResource):
                 response_data['oldest_draft'] = oldest_draft.isoformat()
                 response_data['waiting_time'] = Request.get_waiting_time_regular_queue(unit=UnitTime.DAY.value).examinationTime
 
+
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
             return jsonify(response_data), 200
