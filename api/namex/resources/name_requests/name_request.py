@@ -52,12 +52,16 @@ class NameRequestResource(BaseNameRequestResource):
 
             # If draft, get the wait time and oldest queued request
             if nr_model.stateCd == 'DRAFT':
-                oldest_draft = Request.get_oldest_draft().submittedDate
-                if oldest_draft is None:
-                    oldest_draft = datetime.today()
-                response_data['oldest_draft'] = oldest_draft.isoformat()
-                response_data['waiting_time'] = Request.get_waiting_time_regular_queue(unit=UnitTime.DAY.value).examinationTime
 
+                oldest_draft = Request.get_oldest_draft()
+                if oldest_draft is None:
+                    oldest_draft_date = datetime.now().astimezone()
+                else:
+                    oldest_draft_date = oldest_draft.submittedDate
+
+                delta = datetime.now().astimezone() - oldest_draft_date
+                response_data['oldest_draft'] = oldest_draft_date.isoformat()
+                response_data['waiting_time'] = delta.days
 
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
