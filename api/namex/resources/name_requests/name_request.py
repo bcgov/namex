@@ -52,6 +52,7 @@ class NameRequestResource(BaseNameRequestResource):
 
             # If draft, get the wait time and oldest queued request
             if nr_model.stateCd == 'DRAFT':
+
                 service = WaitTimeStatsService()
                 wait_time_response = service.get_waiting_time_dict()
                 response_data.update(wait_time_response)
