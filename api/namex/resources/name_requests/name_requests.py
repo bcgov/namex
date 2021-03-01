@@ -16,6 +16,7 @@ from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError
+from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 
 from namex.resources.configuration import SOLR_CORE
 from .api_namespace import api
@@ -115,6 +116,13 @@ class NameRequestsResource(BaseNameRequestResource):
                 nr_model.request_action_cd = request_action
 
             response_data = nr_model.json()
+
+            # If draft, get the wait time and oldest queued request
+            if nr_model.stateCd == 'DRAFT':
+                service = WaitTimeStatsService()
+                wait_time_response = service.get_waiting_time_dict()
+                response_data.update(wait_time_response)
+
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(results[0].stateCd, results[0])
             return jsonify(response_data), 200

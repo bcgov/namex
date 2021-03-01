@@ -16,7 +16,7 @@ from namex.services.name_request.utils import get_mapped_entity_and_action_code,
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError, NameRequestIsInProgressError
 from namex.services.payment.payments import refund_payment
-from namex.services.statistics import UnitTime
+from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 
 from .api_namespace import api
 from .api_models import nr_request
@@ -52,16 +52,9 @@ class NameRequestResource(BaseNameRequestResource):
 
             # If draft, get the wait time and oldest queued request
             if nr_model.stateCd == 'DRAFT':
-
-                oldest_draft = Request.get_oldest_draft()
-                if oldest_draft is None:
-                    oldest_draft_date = datetime.now().astimezone()
-                else:
-                    oldest_draft_date = oldest_draft.submittedDate
-
-                delta = datetime.now().astimezone() - oldest_draft_date
-                response_data['oldest_draft'] = oldest_draft_date.isoformat()
-                response_data['waiting_time'] = delta.days
+                service = WaitTimeStatsService()
+                wait_time_response = service.get_waiting_time_dict()
+                response_data.update(wait_time_response)
 
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
