@@ -38,6 +38,20 @@ class WaitTimeStatsService:
         return regular
 
     @classmethod
+    def get_waiting_time_dict(cls):
+
+        oldest_draft = Request.get_oldest_draft()
+        if oldest_draft is None:
+            oldest_draft_date = datetime.now().astimezone()
+        else:
+            oldest_draft_date = oldest_draft.submittedDate
+
+        delta = datetime.now().astimezone() - oldest_draft_date
+        response_data = {'oldest_draft': oldest_draft_date.isoformat(), 'waiting_time': delta.days}
+
+        return response_data
+
+    @classmethod
     def get_statistics(cls):
         # For now not using this to improve performance
         # response_values = [cls.get_approved_names_counter(),
