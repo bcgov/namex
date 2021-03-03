@@ -38,8 +38,8 @@ class DocumentSchema(Schema):
             raise ValidationError('Document Content must have more than 1 character.')
 
 
-@cors_preflight("POST")
-@api.route(':<string:analysis>', methods=['POST', 'OPTIONS'])
+@cors_preflight("GET")
+@api.route(':<string:analysis>', methods=['GET', 'OPTIONS'])
 class DocumentAnalysis(Resource):
     """
         :param analysis (str): the type of analysis to perform
@@ -51,24 +51,21 @@ class DocumentAnalysis(Resource):
     START = 0
     ROWS = 50
 
-    a_document = api.model('document', {
-        'type': rp_fields.String(description='The object type', enum=DocumentType._member_names_),
-        'content': rp_fields.String(description='string content of the document', required=True),
-    })
-
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    @api.expect(a_document)
-    def post(analysis=None, *args, **kwargs):
+    def get(analysis=None, *args, **kwargs):
         start = request.args.get('start', DocumentAnalysis.START)
         rows = request.args.get('rows', DocumentAnalysis.ROWS)
 
-        if analysis.lower() not in VALID_ANALYSIS:
+        if not analysis or analysis.lower() not in VALID_ANALYSIS:
             current_app.logger.info('requested analysis:{} is not valid'.format(analysis.lower()))
             return jsonify(message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404
 
-        json_input = request.get_json()
+        json_input = {
+            'content': request.args.get('content'),
+            'type': request.args.get('type', 'plain_text')
+        }
         if not json_input:
             return jsonify(message='No JSON data provided'), 400
 
