@@ -319,8 +319,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             return handle_exception(err, err, 500)
 
 
-@cors_preflight('GET, PUT')
-@payment_api.route('/<int:nr_id>/payment/<string:payment_id>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
+@cors_preflight('DELETE, GET, PUT')
+@payment_api.route('/<int:nr_id>/payment/<string:payment_id>', strict_slashes=False, methods=['DELETE', 'GET', 'PUT', 'OPTIONS'])
 @payment_api.doc(params={
     'nr_id': '',
     'payment_id': ''
@@ -368,6 +368,42 @@ class NameRequestPayment(AbstractNameRequestResource):
             return handle_exception(err, err.message, 500)
         except Exception as err:
             return handle_exception(err, err, 500)
+
+    @cors.crossdomain(origin='*')
+    def delete(self, nr_id, payment_id):
+        try:
+            # Find the existing name request
+            nr_model = RequestDAO.query.get(nr_id)
+            if not nr_model:
+                return jsonify(message=f'No NR found with id: {nr_id}.'), 404
+
+            # Find the existing payment record
+            payment = PaymentDAO.find_by_payment_token(payment_id)
+            if not payment:
+                return jsonify(message=f'No payment record with id: {payment_id}.'), 404
+
+            # check payment record state is CREATED
+            current_payment_state = payment.payment_status_code
+            if current_payment_state != PaymentStatusCode.CREATED.value:
+                return jsonify(message=f'Unable to cancel a payment record in {current_payment_state} state.'), 400
+
+            try:
+                # cancelling may change with refactor
+                cancel_payment(payment.payment_token)
+
+                payment.payment_status_code = PaymentState.CANCELLED.value
+                payment.save_to_db()
+
+                response_data = nr_model.json()
+                # Add the list of valid Name Request actions for the given state to the response
+                response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
+                return jsonify(response_data), 200
+
+            except PaymentServiceError as err:
+                # should only get here if there was a conflict (payment went through before cancel happened)
+                return handle_exception(err, err.message, 409)
+        except Exception as err:
+            return handle_exception(err, repr(err), 500)
 
 
 @cors_preflight('PATCH')
@@ -623,45 +659,3 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 payment.payment_status_code = PaymentState.CANCELLED.value
                 payment.save_to_db()
         return nr_model
-
-
-# separated from above payment actions because of imminent refactor
-@cors_preflight('PUT')
-@payment_api.route('/<int:nr_id>/cancel-payment/<int:payment_id>', methods=['PUT', 'OPTIONS'])
-class NameRequestCancelPaymentAction(AbstractNameRequestResource):
-    """Service for cancelling a specific payment record."""
-    @cors.crossdomain(origin='*')
-    def put(self, nr_id, payment_id):
-        try:
-            # Find the existing name request
-            nr_model = RequestDAO.query.get(nr_id)
-            if not nr_model:
-                return jsonify(message=f'No NR found with id: {nr_id}.'), 404
-
-            # Find the existing payment record
-            payment = PaymentDAO.find_by_payment_token(payment_id)
-            if not payment:
-                return jsonify(message=f'No payment record with id: {payment_id}.'), 404
-
-            # check payment record state is CREATED
-            current_payment_state = payment.payment_status_code
-            if current_payment_state != PaymentStatusCode.CREATED.value:
-                return jsonify(message=f'Unable to cancel a payment record in {current_payment_state} state.'), 400
-
-            try:
-                # cancelling may change with refactor
-                cancel_payment(payment.payment_token)
-
-                payment.payment_status_code = PaymentState.CANCELLED.value
-                payment.save_to_db()
-
-                response_data = nr_model.json()
-                # Add the list of valid Name Request actions for the given state to the response
-                response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
-                return jsonify(response_data), 201
-
-            except PaymentServiceError as err:
-                # should only get here if there was a conflict (payment went through before cancel happened)
-                return handle_exception(err, err.message, 409)
-        except Exception as err:
-            return handle_exception(err, repr(err), 500)
