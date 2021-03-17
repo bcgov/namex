@@ -46,7 +46,8 @@ class WaitTimeStatsService:
         else:
             oldest_draft_date = oldest_draft.submittedDate
 
-        delta = datetime.now().astimezone() - oldest_draft_date
+        # add one to waiting time to account for current day
+        delta = datetime.now().astimezone() - oldest_draft_date + 1
         response_data = {'oldest_draft': oldest_draft_date.isoformat(), 'waiting_time': delta.days}
 
         return response_data
@@ -61,7 +62,8 @@ class WaitTimeStatsService:
         oldest_draft = Request.get_oldest_draft()
         todays_date = datetime.utcnow().date()
         submitted_date = oldest_draft.submittedDate.date()
-        delta = todays_date - submitted_date
+        # add one to waiting time to account for current day
+        delta = todays_date - submitted_date + 1
 
         response_values = [0,
                            0, #cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
