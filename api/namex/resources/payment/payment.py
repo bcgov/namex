@@ -308,6 +308,12 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
                 response = make_response(data, 201)
                 return response
+            # something went wrong with status code above
+            else:
+                # log actual status code
+                print('Error with status code. Actual status code: ' + payment_response.statusCode)
+                # return generic error status to the front end
+                return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 500
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
