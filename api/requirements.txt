@@ -49,7 +49,7 @@ requests==2.25.0
 rsa==4.6
 six==1.15.0
 toolz==0.11.1
-urllib3==1.26.2
+urllib3==1.26.3
 zipp==3.4.0
 pycountry==19.8.18
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
