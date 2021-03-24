@@ -1,8 +1,8 @@
 .PHONY: setup build-req clean clean-build clean-pyc clean-test
 
-.PHONY: flake8
+.PHONY: flake8 lint
 
-project_name := namex
+PROJECT_NAME := namex
 
 SHELL:=/bin/bash
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -38,7 +38,7 @@ setup: setup-venv
 
 venv/bin/activate: requirements/prod.txt requirements/dev.txt
 	rm -rf venv/
-	test -f venv/bin/activate || python3.6 -m venv  $(current_abs_dir)/venv
+	test -f venv/bin/activate || python3 -m venv  $(current_abs_dir)/venv
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;\
 	pip install -Ur requirements/dev.txt ;
@@ -46,7 +46,7 @@ venv/bin/activate: requirements/prod.txt requirements/dev.txt
 
 setup-venv: requirements/dev.txt
 	rm -rf venv/
-	test -f venv/bin/activate || python3.6 -m venv  $(current_abs_dir)/venv
+	test -f venv/bin/activate || python3 -m venv  $(current_abs_dir)/venv
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;
 	pip install -Ur requirements.txt;
@@ -55,3 +55,20 @@ setup-venv: requirements/dev.txt
 ## run flake8 on the package and tests
 flake8:
 	flake8 $(project_name) tests
+
+lint: ## Linting with pylint
+	. venv/bin/activate && pylint --rcfile=setup.cfg $(PROJECT_NAME)
+
+#################################################################################
+# COMMANDS - CD                                                               #
+#################################################################################
+cd: build ## CD flow
+
+build: ## Build the docker container
+	docker build -t $(PROJECT_NAME) \
+	--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+	--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+	.
+
+build-nc: ## Build the docker container without caching
+	docker build --no-cache -t $(PROJECT_NAME) .
