@@ -67,6 +67,7 @@ __pycache__
 *.ntvs*
 *.njsproj
 *.sln
+.history
 
 # Convenience Files
 # ######################

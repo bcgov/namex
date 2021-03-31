@@ -304,7 +304,7 @@
       "displayName": "Image Namespace",
       "required": true,
       "description": "The namespace of the OpenShift project containing the imagestream for the application.",
-      "value": "solr"
+      "value": "f2b77c-tools"
     },
     {
       "name": "IMAGE_NAME",
@@ -324,7 +324,7 @@
       "name": "APPLICATION_DOMAIN",
       "displayName": "Application Hostname",
       "description": "The exposed hostname that will route to the application service, if left blank a value will be defaulted.",
-      "value": ""
+      "value": "apps.silver.devops.gov.bc.ca"
     },
     {
       "name": "CORES_PV_SIZE",
@@ -345,7 +345,7 @@
       "displayName": "Core Name",
       "description": "The name of the Solr core configuration to load.",
       "required": true,
-      "value": ""
+      "value": "names,possible.conflicts,trademarks"
     },
     {
       "name": "APPLICATION_HOSTNAME",

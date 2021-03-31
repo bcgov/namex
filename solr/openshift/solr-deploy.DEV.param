@@ -4,11 +4,11 @@
 # JSON Template File: templates/solr-deploy.json
 #=========================================================
 NAME=solr
-IMAGE_NAMESPACE=servicebc-ne-tools
+IMAGE_NAMESPACE=f2b77c-tools
 IMAGE_NAME=solr
 TAG_NAME=dev
 APPLICATION_HOSTNAME=namex-solr-dev
-APPLICATION_DOMAIN=pathfinder.gov.bc.ca
+APPLICATION_DOMAIN=apps.silver.devops.gov.bc.ca
 CORES_PV_SIZE=1Gi
 CORES_MOUNT_PATH=/opt/solr/server/solr/mycores
 CORE_NAME=names,possible.conflicts,trademarks

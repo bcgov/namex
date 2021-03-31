@@ -2,3 +2,5 @@ Flask
 Flask-Restplus
 python-dotenv
 requests
+gunicorn
+Werkzeug==0.16.0

@@ -1,3 +1,15 @@
-# Just installs the production requirements.
-# some setups need a requirements.txt file at the root level
--r requirements/prod.txt
+Flask-SQLAlchemy==2.5.1
+Flask==1.1.2
+Jinja2==2.11.3
+MarkupSafe==1.1.1
+SQLAlchemy==1.4.2
+Werkzeug==1.0.1
+click==7.1.2
+cx-Oracle==8.1.0
+greenlet==1.0.0
+itsdangerous==1.1.0
+psycopg2-binary==2.8.6
+python-dotenv==0.15.0
+pytz==2021.1
+git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
+git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client

@@ -1,0 +1,21 @@
+[
+    {
+        "vault": "keycloak",
+        "application": [
+            "jwt-base"
+        ]
+    },
+    {
+        "vault": "namex",
+        "application": [
+            "postgres-namex",
+            "namex-api",
+            "mras-api",
+            "nro-service",
+            "payment-service",
+            "sbc-keycloak",
+            "sentry",
+            "jwt"
+        ]
+    }
+]

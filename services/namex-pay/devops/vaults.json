@@ -1,0 +1,17 @@
+[
+    {
+        "vault": "nats",
+        "application": [
+            "base",
+            "namex-pay"
+        ]
+    },
+    {
+        "vault": "namex",
+        "application": [
+            "postgres-namex",
+            "namex-pay",
+            "sentry"
+        ]
+    }
+]

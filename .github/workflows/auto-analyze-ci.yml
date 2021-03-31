@@ -16,14 +16,21 @@ jobs:
       DATABASE_HOST: localhost
       DATABASE_PASSWORD: postgres
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./services/auto-analyze
+
+    if: github.repository == 'bcgov/namex'
+
     strategy:
       matrix:
         python-version: [3.8]
 
     services:
       postgres:
-        image: postgres:11
+        image: postgres:12
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -40,21 +47,24 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        working-directory: ./services/auto-analyze
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements/dev.txt
+          make setup
       - name: Lint with pylint
-        working-directory: ./services/auto-analyze
         run: |
-          pylint --rcfile=setup.cfg src
+          make pylint
       - name: Lint with flake8
-        working-directory: ./services/auto-analyze
         run: |
-          flake8 src tests
+          make flake8
       - name: Test with pytest
-        working-directory: ./services/auto-analyze
         run: |
-          pip install .
-          pytest
+          make test
+      #- name: Upload coverage to Codecov
+      #  uses: codecov/codecov-action@v1
+      #  with:
+      #    file: ./services/auto-analyze/coverage.xml
+      #    flags: autoanalyze
+      #    name: codecov-auto-analyze
+      #    fail_ci_if_error: true
+      - name: build to check strictness
+        run: |
+          make build-nc
