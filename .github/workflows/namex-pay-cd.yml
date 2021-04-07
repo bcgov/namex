@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - "services/name-pay/**"
+      - "services/namex-pay/**"
   workflow_dispatch:
     inputs:
       environement:
@@ -20,7 +20,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./services/name-pay
+        working-directory: ./services/namex-pay
 
     env:
       APP_NAME: "name-pay"
