@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [assigned, synchronize]
     paths:
-      - "services/name-pay/**"
+      - "services/namex-pay/**"
 
 jobs:
   name-pay-ci:

@@ -1,5 +1,6 @@
 """NAMEX display corporation details API
 """
+import os
 
 from flask import Flask
 from flask_restplus import Api
@@ -7,7 +8,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from config import Config
 from flask_jwt_oidc import JwtManager
+from app.utils.logging import setup_logging
 
+setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
 
 db = SQLAlchemy()
 

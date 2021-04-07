@@ -30,4 +30,4 @@ USER 1001
 # Set Python path
 ENV PYTHONPATH=/opt/app-root
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:application"]

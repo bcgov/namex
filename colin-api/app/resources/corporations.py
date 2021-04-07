@@ -38,8 +38,8 @@ class RequestColin(Resource):
     @cors.crossdomain(origin='*')
     @jwt.requires_roles(['names_viewer'])
     def get(corp_num):
-        logging.basicConfig(filename='info.log', level=logging.INFO)
-        logging.info('logging works')
+        # logging.basicConfig(filename='info.log', level=logging.INFO)
+        # logging.info('logging works')
         # who has access?
         if not (required_scope("names_viewer")):  # User.VIEWONLY
             return jsonify({"message": "Authentication error: You do not have the required user roles to view corp details."}), 403
