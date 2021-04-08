@@ -10,6 +10,20 @@ ENV BUILD_DATE=${BUILD_DATE}
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE}
 
+# Installing Oracle instant client
+WORKDIR /opt/oracle
+RUN apt-get update && apt-get install -y libaio1 wget unzip \
+    && wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip \
+    && wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-sqlplus-linuxx64.zip \
+    && unzip instantclient-basiclite-linuxx64.zip \
+    && rm -f instantclient-basiclite-linuxx64.zip \
+    && unzip instantclient-sqlplus-linuxx64.zip \
+    && rm -f instantclient-sqlplus-linuxx64.zip \
+    && cd /opt/oracle/instantclient* \
+    && rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci \
+    && echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf \
+    && ldconfig
+
 # Create working directory
 RUN mkdir /opt/app-root && chmod 755 /opt/app-root
 WORKDIR /opt/app-root

@@ -61,6 +61,7 @@ class NameRequestResource(BaseNameRequestResource):
             response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
             return jsonify(response_data), 200
         except Exception as err:
+            current_app.logger.debug(repr(err))
             return handle_exception(err, 'Error retrieving the NR.', 500)
 
     # REST Method Handlers
