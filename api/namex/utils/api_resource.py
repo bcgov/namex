@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import current_app, request, jsonify
 from urllib.parse import unquote_plus
 
 """
@@ -11,7 +11,7 @@ def log_error(msg, err):
 
 
 def handle_exception(err, msg, err_code):
-    print('Error: ' + repr(err))
+    current_app.logger.debug('Error: ' + repr(err))
     return jsonify(message=msg), err_code
 
 
