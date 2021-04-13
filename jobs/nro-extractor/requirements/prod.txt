@@ -1,25 +1,21 @@
-Flask==1.1.2
+Flask
 Flask-Migrate
 Flask-Script
 Flask-Moment
-Flask-SQLAlchemy==2.4.1
-Flask-RESTplus==0.13.0
-Flask-Marshmallow==0.11.0
+Flask-SQLAlchemy
+Flask-RESTX
 flask-jwt-oidc>=0.1.5
 jsonpickle
 pandas
-python-dotenv==0.8.2
+python-dotenv
 psycopg2-binary
-marshmallow==2.19.2
-marshmallow-sqlalchemy==0.19.0
 cx_Oracle
 pronouncing
 requests
 toolz
-nltk==3.4.5
 lxml
 inflect
-werkzeug==0.16.1
+werkzeug
 pysolr
 
 

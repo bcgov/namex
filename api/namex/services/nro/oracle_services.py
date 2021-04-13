@@ -513,6 +513,7 @@ class NROServices(object):
 
         add_nr_header(nr, nr_header, nr_submitter, user)
         current_app.logger.debug('completed header for {}'.format(nr.nrNum))
+        nr.add_to_db()
         if nr_applicant:
             add_applicant(nr, nr_applicant)
             current_app.logger.debug('completed applicants for {}'.format(nr.nrNum))
