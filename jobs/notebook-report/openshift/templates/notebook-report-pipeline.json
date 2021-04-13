@@ -38,9 +38,9 @@
           "contextDir": "${SOURCE_CONTEXT_DIR}"
         },
         "strategy": {
-          "type": "JenkinsPipeline",
-          "jenkinsPipelineStrategy": {
-            "jenkinsfilePath": "${JENKINS_FILE}"
+          "type": "Docker",
+          "dockerStrategy": {
+              "dockerfilePath": "Dockerfile"
           }
         },
         "output": {},

@@ -22,6 +22,7 @@ to setup your local development environment.
 
 1. Run `python -m pytest` or `pytest` command.
 
+### Important: Please remember to add run.sh permission by "git update-index --add --chmod=+x run.sh" before run.sh is commit to github. 
 ### Build API - can be done in VS Code
 
 1. Login to openshift
@@ -33,7 +34,7 @@ to setup your local development environment.
 2. switch to tools namespace
 
    ```sh
-   oc project servicebc-ne-tools
+   oc project f2b77c-tools
    ```
 
 3. Create build image
@@ -43,6 +44,7 @@ to setup your local development environment.
    oc create imagestream notebook-report
    oc process -f notebook-report-bc-template.json \
         -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
+        -p GIT_REF=development \
     | oc apply -f -
    ```
 
@@ -57,6 +59,7 @@ to setup your local development environment.
    oc process -f notebook-report-pipeline.json \
         -p TAG_NAME=dev \
         -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
+        -p GIT_REF=development \
         -p WEBHOOK=github-notebook-report-dev \
         -p JENKINS_FILE=./jenkins/dev.groovy \
     | oc apply -f -
@@ -73,7 +76,7 @@ to setup your local development environment.
 2. switch to dev namespace
 
    ```sh
-   oc project servicebc-ne-dev
+   oc project f2b77c-dev
    ```
 
 3. Create cron
