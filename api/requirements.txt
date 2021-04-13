@@ -30,7 +30,7 @@ inflect==5.3.0
 itsdangerous==1.1.0
 jsonpickle==2.0.0
 jsonschema==3.2.0
-lxml==4.6.2
+lxml==4.6.3
 marshmallow-sqlalchemy==0.19.0
 marshmallow==2.19.2
 nltk==3.4.5
