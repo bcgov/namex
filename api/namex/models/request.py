@@ -220,6 +220,9 @@ class Request(db.Model):
     def find_by_nr(cls, nr):
         return cls.query.filter_by(nrNum=nr).one_or_none()
 
+    def add_to_db(self):
+        db.session.add(self)
+
     def save_to_db(self):
         # if self.id is None:
         # NR is not the primary key, but has to be a unique value.
