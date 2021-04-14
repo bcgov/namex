@@ -41,6 +41,7 @@ objects:
 
         # Create working directory
         RUN mkdir /opt/app-root && chmod 755 /opt/app-root
+        RUN mkdir /opt/app-root/data && chmod 777 /opt/app-root/data
         WORKDIR /opt/app-root
 
         # Install the requirements
@@ -76,7 +77,7 @@ parameters:
   displayName: Name
   name: NAME
   required: true
-  value: inprogress-update
+  value: notebook-report
 - description: |
     The URL to your GIT repo, don't use the this default unless
     your just experimenting.
@@ -93,7 +94,7 @@ parameters:
   displayName: Source Context Directory
   name: SOURCE_CONTEXT_DIR
   required: false
-  value: jobs/inprogress_update
+  value: jobs/notebook-report
 - description: The tag given to the built image.
   displayName: Output Image Tag
   name: OUTPUT_IMAGE_TAG

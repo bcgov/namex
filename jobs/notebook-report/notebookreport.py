@@ -125,17 +125,12 @@ def processnotebooks(notebookdirectory):
             os.mkdir(snapshot_dir)
 
         for file in findfiles(notebookdirectory, '*.ipynb'):
+            note_book = os.path.basename(file)
             for attempt in range(retry_times):
                 try:
-                    nb = os.path.basename(file)
-
-                    pm.execute_notebook(
-                        file,
-                        os.path.join(snapshot_dir, nb),
-                        parameters=None
-                    )
+                    pm.execute_notebook(file, os.getenv('DATA_DIR', '')+'temp.ipynb', parameters=None)                  
             
-                    nbfile = nb.split('.ipynb')[0]
+                    nbfile = note_book.split('.ipynb')[0]
 
                     if nbfile == 'daily':
                         subject = "Daily NameX Stats for " + date + ext
@@ -146,7 +141,7 @@ def processnotebooks(notebookdirectory):
 
                     # send email to receivers and remove files/directories which we don't want to keep
                     send_email(subject, filename, "", "")
-                    os.remove(filename)
+                    os.remove(os.getenv('DATA_DIR', '')+'temp.ipynb') 
                     
                     status = True
                     break

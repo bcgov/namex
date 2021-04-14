@@ -22,7 +22,7 @@ to setup your local development environment.
 
 1. Run `python -m pytest` or `pytest` command.
 
-### Important: Please remember to add run.sh permission by "git update-index --add --chmod=+x run.sh" before run.sh is commit to github. 
+### Important: Please remember to do "git update-index --add --chmod=+x run.sh" before run.sh is commit to github on first time. 
 ### Build API - can be done in VS Code
 
 1. Login to openshift
@@ -40,30 +40,19 @@ to setup your local development environment.
 3. Create build image
 
    ```sh
-   cd */namex/jobs/notebook-report/openshift/templates
-   oc create imagestream notebook-report
-   oc process -f notebook-report-bc-template.json \
-        -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
-        -p GIT_REF=development \
-    | oc apply -f -
+   #cd */namex/jobs/notebook-report/openshift/templates
+   #oc create imagestream notebook-report
+   oc process -f openshift/templates/bc.yaml \
+	  -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
+	  -p GIT_REF=master \
+	  -o yaml \
+   | oc apply -f - -n f2b77c-tools     
    ```
 
-4. Create pipeline and need to start pipeline manually
+4. Checking log for building process at Console => Administrator => Builds => Builds => click image 'notebook-report' => logs
 
-   It will build image as a tag 'latest' and then tag it to 'dev'
-   or tag it from 'dev' to 'test'
-   or tag it from 'test' to 'prod'  
+5. Tag image to dev: 'oc tag notebook-report:latest notebook-report:dev'
 
-   ```sh
-
-   oc process -f notebook-report-pipeline.json \
-        -p TAG_NAME=dev \
-        -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
-        -p GIT_REF=development \
-        -p WEBHOOK=github-notebook-report-dev \
-        -p JENKINS_FILE=./jenkins/dev.groovy \
-    | oc apply -f -
-   ```
 
 ### Create cron
 
@@ -80,9 +69,12 @@ to setup your local development environment.
    ```
 
 3. Create cron
-
+   ### please remember that SCHEDULE is UTC which is 7 hour ahead of PST
    ```sh
-   oc process -f cron-notebook-report.yml \
-        -p ENV_TAG=dev \
-    | oc apply -f -
+   oc process -f openshift/templates/cronjob.yaml \
+     -p TAG=dev \
+     -p SCHEDULE="48 8 * * *" \
+     -o yaml \
+     | oc apply -f - -n f2b77c-dev
    ```
+4. Create a job to run and test it: 'oc create job notebook-report-dev --from=cronjob/notebook-report-dev -n f2b77c-dev'
