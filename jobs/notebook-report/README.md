@@ -73,8 +73,8 @@ to setup your local development environment.
    ```sh
    oc process -f openshift/templates/cronjob.yaml \
      -p TAG=dev \
-     -p SCHEDULE="48 8 * * *" \
+     -p SCHEDULE="30 14 * * *" \
      -o yaml \
      | oc apply -f - -n f2b77c-dev
    ```
-4. Create a job to run and test it: 'oc create job notebook-report-dev --from=cronjob/notebook-report-dev -n f2b77c-dev'
+4. Create a job to run and test it: 'oc create job notebook-report-dev-1 --from=cronjob/notebook-report-dev -n f2b77c-dev'
