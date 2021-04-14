@@ -64,7 +64,7 @@ def send_email(subject, filename, emailtype, errormessage):
         message.attach(MIMEText("Please see attached.", "plain"))
 
         # Open file in binary mode
-        with open(filename, "rb") as attachment:
+        with open(os.getenv('DATA_DIR', '')+filename, "rb") as attachment:
             # Add file as application/octet-stream
             # Email client can usually download this automatically as attachment
             part = MIMEBase("application", "octet-stream")
@@ -89,7 +89,8 @@ def send_email(subject, filename, emailtype, errormessage):
     server.sendmail(sender_email, email_list, message.as_string())
     logging.info('Email with subject \'' + subject + '\' has been sent successfully!')
     server.quit()
-
+    os.remove(os.getenv('DATA_DIR', '')+filename)
+    
 
 def processnotebooks(notebookdirectory):
     status = False    
@@ -115,27 +116,19 @@ def processnotebooks(notebookdirectory):
     # For weekly tasks, we only run on the specified days
     # Only run weekly report on Monday (index is 0) for previous 7 days data
     if ( notebookdirectory == 'daily' or (notebookdirectory == 'weekly' and weekno in weekreportday)): 
-
         logging.info('Processing: ' + notebookdirectory)      
 
-        # Each time a notebook is processed a snapshot is saved to a snapshot sub-directory
-        # This checks the sub-directory exists and creates it if not
-        snapshot_dir = os.path.join(notebookdirectory, snapshotDir)
-        if not os.path.isdir(snapshot_dir):
-            os.mkdir(snapshot_dir)
+        num_files = len(os.listdir(notebookdirectory))    
+        file_processed = 0
 
         for file in findfiles(notebookdirectory, '*.ipynb'):
+            file_processed += 1
+            note_book = os.path.basename(file)
             for attempt in range(retry_times):
                 try:
-                    nb = os.path.basename(file)
-
-                    pm.execute_notebook(
-                        file,
-                        os.path.join(snapshot_dir, nb),
-                        parameters=None
-                    )
+                    pm.execute_notebook(file, os.getenv('DATA_DIR', '')+'temp.ipynb', parameters=None)                  
             
-                    nbfile = nb.split('.ipynb')[0]
+                    nbfile = note_book.split('.ipynb')[0]
 
                     if nbfile == 'daily':
                         subject = "Daily NameX Stats for " + date + ext
@@ -146,7 +139,7 @@ def processnotebooks(notebookdirectory):
 
                     # send email to receivers and remove files/directories which we don't want to keep
                     send_email(subject, filename, "", "")
-                    os.remove(filename)
+                    os.remove(os.getenv('DATA_DIR', '')+'temp.ipynb') 
                     
                     status = True
                     break
@@ -164,11 +157,9 @@ def processnotebooks(notebookdirectory):
                                           .format(notebookdirectory, attempt + 1, retry_times, retry_interval))
                         time.sleep(retry_interval)
                         continue
-            if not status:
-                break
-
-        shutil.rmtree(snapshot_dir, ignore_errors=True)        
-        return status
+            if not status and num_files == file_processed:
+                break              
+    return status
 
 
 if __name__ == '__main__':

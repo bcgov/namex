@@ -2,13 +2,13 @@ apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   labels:
-    name: ${NAME}
-  name: ${NAME}-cronjob
+    name: notebook-report
+  name: notebook-report-cronjob  
 objects:
 - kind: "CronJob"
   apiVersion: "batch/v1beta1"
   metadata:
-    name: "${NAME}-${TAG}"
+    name: "notebook-report-dev"
     labels:
       name: "${NAME}"
       environment: "${TAG}"
@@ -122,11 +122,14 @@ objects:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
                         key: WEEK_REPORT_DATE
+                  - name: DATA_DIR
+                    value: '/opt/app-root/data/'     
             restartPolicy: "Never"
             terminationGracePeriodSeconds: 30
             activeDeadlineSeconds: 1600
             dnsPolicy: "ClusterFirst"
-parameters:
+parameters: 
+
   - name: NAME
     displayName: Name
     description: The name assigned to all of the OpenShift resources associated to the server instance.
@@ -166,7 +169,7 @@ parameters:
   - name: "SCHEDULE"
     displayName: "Cron Schedule"
     description: "Cron Schedule to Execute the Job (using local cluster system TZ)"
-    value: "30 7 * * *"
+    value: "30 14 * * *"
     required: true
 
   - name: "SUCCESS_JOBS_HISTORY_LIMIT"
@@ -186,3 +189,4 @@ parameters:
     description: "The number of attempts to try for a successful job outcome"
     value: "0"
     required: false
+
