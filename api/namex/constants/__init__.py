@@ -443,9 +443,9 @@ class NameRequestActiveActions(AbstractEnum):
     """
     EDIT = NameRequestActions.EDIT.value
     CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
+    REAPPLY = NameRequestActions.REAPPLY.value
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
-    # REAPPLY = NameRequestActions.REAPPLY.value
     # RESEND = NameRequestActions.RESEND.value
 
 
