@@ -54,7 +54,7 @@ class NameRequestResource(BaseNameRequestResource):
             if nr_model.stateCd == 'DRAFT':
 
                 service = WaitTimeStatsService()
-                wait_time_response = service.get_waiting_time_dict()
+                wait_time_response = service.get_waiting_time_dict(nr_model.submittedDate)
                 response_data.update(wait_time_response)
 
             # Add the list of valid Name Request actions for the given state to the response
