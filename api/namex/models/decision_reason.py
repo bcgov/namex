@@ -26,7 +26,7 @@ class DecisionReason(db.Model):
         db.session.commit()
 
 
-class DecisionReasonSchema(ma.ModelSchema):
+class DecisionReasonSchema(ma.SQLAlchemySchema):
     class Meta:
         model = DecisionReason
         # fields = ('choice', 'name', 'state')

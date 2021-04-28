@@ -67,7 +67,7 @@ class Applicant(db.Model):
         # db.session.commit()
 
 
-class ApplicantSchema(ma.ModelSchema):
+class ApplicantSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Applicant
         fields = (
@@ -85,7 +85,26 @@ class ApplicantSchema(ma.ModelSchema):
             'addrLine2',
             'addrLine3',
             'city',
+            'partyId',
             'postalCd',
             'stateProvinceCd',
             'countryTypeCd'
         )
+    firstName = fields.String(allow_none=True)
+    lastName = fields.String(allow_none=True)
+    middleName = fields.String(allow_none=True)
+    phoneNumber = fields.String(allow_none=True)
+    faxNumber = fields.String(allow_none=True)
+    emailAddress = fields.String(allow_none=True)
+    contact = fields.String(allow_none=True)
+    clientFirstName = fields.String(allow_none=True)
+    clientLastName = fields.String(allow_none=True)
+    declineNotificationInd = fields.Field(allow_none=True)
+    addrLine1 = fields.String(allow_none=True)
+    addrLine2 = fields.String(allow_none=True)
+    addrLine3 = fields.String(allow_none=True)
+    city = fields.String(allow_none=True)
+    partyId = fields.Field(allow_none=True)
+    postalCd = fields.String(allow_none=True)
+    stateProvinceCd = fields.String(allow_none=True)
+    countryTypeCd = fields.String(allow_none=True)

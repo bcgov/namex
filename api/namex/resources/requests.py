@@ -291,7 +291,7 @@ class Requests(Resource):
                             'queue': queue,
                             'order': order_list
                             },
-               'nameRequests': request_search_schemas.dump(q.all())
+               'nameRequests': [request_search_schemas.dump(q.all()), {}]
                }
 
         return jsonify(rep), 200
@@ -590,14 +590,28 @@ class Request(Resource):
             if nrd.furnished == RequestDAO.REQUEST_FURNISHED and json_input.get('furnished', None) == 'N':
                 reset = True
 
-            request_header_schema.load(json_input, instance=nrd, partial=True)
             nrd.additionalInfo = convert_to_ascii(json_input.get('additionalInfo', None))
-            nrd.furnished = json_input.get('furnished', 'N')
-            nrd.natureBusinessInfo = convert_to_ascii(json_input.get('natureBusinessInfo', None))
-            nrd.stateCd = state
-            nrd.userId = user.id
             nrd.consentFlag = json_input.get('consentFlag', None)
             nrd.consent_dt = json_input.get('consent_dt', None)
+            nrd.corpNum = json_input.get('corpNum', None)
+            nrd.checkedOutBy = json_input.get('checkedOutBy', None)
+            nrd.checkedOutDt = json_input.get('checkedOutDt', None)
+            nrd.entity_type_cd = json_input.get('entity_type_cd', None)
+            nrd.expirationDate = json_input.get('expirationDate', None)
+            nrd.furnished = json_input.get('furnished', 'N')
+            nrd.hasBeenReset = json_input.get('hasBeenReset', None)
+            nrd.homeJurisNum = json_input.get('homeJurisNum', None)
+            nrd.natureBusinessInfo = convert_to_ascii(json_input.get('natureBusinessInfo', None))
+            nrd.previousNr = json_input.get('previousNr', None)
+            nrd.previousRequestId = json_input.get('previousRequestId', None)
+            nrd.priorityCd = json_input.get('priorityCd', None)
+            nrd.priorityDate = json_input.get('priorityDate', None)
+            nrd.requestTypeCd = json_input.get('requestTypeCd', None)
+            nrd.request_action_cd = json_input.get('request_action_cd', None)
+            nrd.stateCd = state
+            nrd.tradeMark = json_input.get('tradeMark', None)
+            nrd.userId = user.id
+            nrd.xproJurisdiction = json_input.get('xproJurisdiction', None)
 
             if reset:
                 # set the flag indicating that the NR has been reset
@@ -661,25 +675,23 @@ class Request(Resource):
                         # return jsonify(errm), 400
                         MessageServices.add_message(MessageServices.ERROR, 'applicants_validation', errm)
 
-                    applicant_schema.load(appl, instance=applicants_d, partial=True)
-
                     # convert data to ascii, removing data that won't save to Oracle
-                    applicants_d.lastName = convert_to_ascii(applicants_d.lastName)
-                    applicants_d.firstName = convert_to_ascii(applicants_d.firstName)
-                    applicants_d.middleName = convert_to_ascii(applicants_d.middleName)
-                    applicants_d.phoneNumber = convert_to_ascii(applicants_d.phoneNumber)
-                    applicants_d.faxNumber = convert_to_ascii(applicants_d.faxNumber)
-                    applicants_d.emailAddress = convert_to_ascii(applicants_d.emailAddress)
-                    applicants_d.contact = convert_to_ascii(applicants_d.contact)
-                    applicants_d.clientFirstName = convert_to_ascii(applicants_d.clientFirstName)
-                    applicants_d.clientLastName = convert_to_ascii(applicants_d.clientLastName)
-                    applicants_d.addrLine1 = convert_to_ascii(applicants_d.addrLine1)
-                    applicants_d.addrLine2 = convert_to_ascii(applicants_d.addrLine2)
-                    applicants_d.addrLine3 = convert_to_ascii(applicants_d.addrLine3)
-                    applicants_d.city = convert_to_ascii(applicants_d.city)
-                    applicants_d.postalCd = convert_to_ascii(applicants_d.postalCd)
-                    applicants_d.stateProvinceCd = convert_to_ascii(applicants_d.stateProvinceCd)
-                    applicants_d.countryTypeCd = convert_to_ascii(applicants_d.countryTypeCd)
+                    applicants_d.lastName = convert_to_ascii(appl.get('lastName', None))
+                    applicants_d.firstName = convert_to_ascii(appl.get('firstName', None))
+                    applicants_d.middleName = convert_to_ascii(appl.get('middleName', None))
+                    applicants_d.phoneNumber = convert_to_ascii(appl.get('phoneNumber', None))
+                    applicants_d.faxNumber = convert_to_ascii(appl.get('faxNumber', None))
+                    applicants_d.emailAddress = convert_to_ascii(appl.get('emailAddress', None))
+                    applicants_d.contact = convert_to_ascii(appl.get('contact', None))
+                    applicants_d.clientFirstName = convert_to_ascii(appl.get('clientFirstName', None))
+                    applicants_d.clientLastName = convert_to_ascii(appl.get('clientLastName', None))
+                    applicants_d.addrLine1 = convert_to_ascii(appl.get('addrLine1', None))
+                    applicants_d.addrLine2 = convert_to_ascii(appl.get('addrLine2', None))
+                    applicants_d.addrLine3 = convert_to_ascii(appl.get('addrLine3', None))
+                    applicants_d.city = convert_to_ascii(appl.get('city', None))
+                    applicants_d.postalCd = convert_to_ascii(appl.get('postalCd', None))
+                    applicants_d.stateProvinceCd = convert_to_ascii(appl.get('stateProvinceCd', None))
+                    applicants_d.countryTypeCd = convert_to_ascii(appl.get('countryTypeCd', None))
 
                     # check if any of the Oracle db fields have changed, so we can send them back
                     if applicants_d.lastName != orig_applicant['lastName']:
@@ -756,11 +768,20 @@ class Request(Resource):
 
                         new_name_choice = Name()
                         new_name_choice.nrId = nrd.id
-
-                        names_schema.load(in_name, instance=new_name_choice, partial=False)
-
-                        # convert data to ascii, removing data that won't save to Oracle
-                        # - also force uppercase
+                        new_name_choice.choice = in_name.get('choice')
+                        new_name_choice.conflict1 = in_name.get('conflict1')
+                        new_name_choice.conflict2 = in_name.get('conflict2')
+                        new_name_choice.conflict3 = in_name.get('conflict3')
+                        new_name_choice.conflict1_num = in_name.get('conflict1_num')
+                        new_name_choice.conflict2_num = in_name.get('conflict2_num')
+                        new_name_choice.conflict3_num = in_name.get('conflict3_num')
+                        new_name_choice.consumptionDate = in_name.get('consumptionDate')
+                        new_name_choice.corpNum = in_name.get('corpNum')
+                        new_name_choice.decision_text = in_name.get('decision_text')
+                        new_name_choice.designation = in_name.get('designation')
+                        new_name_choice.name_type_cd = in_name.get('name_type_cd')
+                        new_name_choice.name = in_name.get('name')
+                        new_name_choice.state = in_name.get('state')
                         new_name_choice.name = convert_to_ascii(new_name_choice.name.upper())
 
                         nrd.names.append(new_name_choice)
@@ -776,7 +797,21 @@ class Request(Resource):
                             MessageServices.add_message(MessageServices.ERROR, 'names_validation', errors)
                             # return jsonify(errors), 400
 
-                        names_schema.load(in_name, instance=nrd_name, partial=False)
+                        nrd_name.choice = in_name.get('choice')
+                        nrd_name.conflict1 = in_name.get('conflict1')
+                        nrd_name.conflict2 = in_name.get('conflict2')
+                        nrd_name.conflict3 = in_name.get('conflict3')
+                        nrd_name.conflict1_num = in_name.get('conflict1_num')
+                        nrd_name.conflict2_num = in_name.get('conflict2_num')
+                        nrd_name.conflict3_num = in_name.get('conflict3_num')
+                        nrd_name.consumptionDate = in_name.get('consumptionDate')
+                        nrd_name.corpNum = in_name.get('corpNum')
+                        nrd_name.decision_text = in_name.get('decision_text')
+                        nrd_name.designation = in_name.get('designation')
+                        nrd_name.name_type_cd = in_name.get('name_type_cd')
+                        nrd_name.name = in_name.get('name')
+                        nrd_name.state = in_name.get('state')
+                        nrd_name.name = convert_to_ascii(nrd_name.name.upper())
 
                         # set comments (existing or cleared)
                         if in_name.get('comment', None) is not None:
@@ -861,8 +896,8 @@ class Request(Resource):
                         nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
 
                         # convert data to ascii, removing data that won't save to Oracle
-                        nrd_nwpta.partnerName = convert_to_ascii(nrd_nwpta.partnerName)
-                        nrd_nwpta.partnerNameNumber = convert_to_ascii(nrd_nwpta.partnerNameNumber)
+                        nrd_nwpta.partnerName = convert_to_ascii(in_nwpta.get('partnerName'))
+                        nrd_nwpta.partnerNameNumber = convert_to_ascii(in_nwpta.get('partnerNameNumber'))
 
                         # check if any of the Oracle db fields have changed, so we can send them back
                         tmp_is_changed = False
@@ -1140,9 +1175,10 @@ class NRNames(Resource):
         if errors:
             return jsonify(errors), 400
 
-        errors = name_comment_schema.validate(json_data['comment'], partial=True)
-        if errors:
-            return jsonify(errors), 400
+        if json_data['comment']:
+            errors = name_comment_schema.validate(json_data['comment'], partial=True)
+            if errors:
+                return jsonify(errors), 400
 
         nrd, nrd_name, msg, code = NRNames.common(nr, choice)
         if not nrd:
@@ -1152,7 +1188,21 @@ class NRNames(Resource):
         if not check_ownership(nrd, user):
             return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
 
-        names_schema.load(json_data, instance=nrd_name, partial=False)
+        nrd_name.choice = json_data.get('choice')
+        nrd_name.conflict1 = json_data.get('conflict1')
+        nrd_name.conflict2 = json_data.get('conflict2')
+        nrd_name.conflict3 = json_data.get('conflict3')
+        nrd_name.conflict1_num = json_data.get('conflict1_num')
+        nrd_name.conflict2_num = json_data.get('conflict2_num')
+        nrd_name.conflict3_num = json_data.get('conflict3_num')
+        nrd_name.consumptionDate = json_data.get('consumptionDate')
+        nrd_name.corpNum = json_data.get('corpNum')
+        nrd_name.decision_text = json_data.get('decision_text')
+        nrd_name.designation = json_data.get('designation')
+        nrd_name.name_type_cd = json_data.get('name_type_cd')
+        nrd_name.name = json_data.get('name')
+        nrd_name.state = json_data.get('state')
+        nrd_name.name = convert_to_ascii(nrd_name.name.upper())
 
         if json_data['comment'] is not None and json_data['comment']['comment'] is not None:
             comment_instance = Comment()
@@ -1196,7 +1246,21 @@ class NRNames(Resource):
         if not check_ownership(nrd, user):
             return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
 
-        names_schema.load(json_data, instance=nrd_name, partial=True)
+        nrd_name.choice = json_data.get('choice')
+        nrd_name.conflict1 = json_data.get('conflict1')
+        nrd_name.conflict2 = json_data.get('conflict2')
+        nrd_name.conflict3 = json_data.get('conflict3')
+        nrd_name.conflict1_num = json_data.get('conflict1_num')
+        nrd_name.conflict2_num = json_data.get('conflict2_num')
+        nrd_name.conflict3_num = json_data.get('conflict3_num')
+        nrd_name.consumptionDate = json_data.get('consumptionDate')
+        nrd_name.corpNum = json_data.get('corpNum')
+        nrd_name.decision_text = json_data.get('decision_text')
+        nrd_name.designation = json_data.get('designation')
+        nrd_name.name_type_cd = json_data.get('name_type_cd')
+        nrd_name.name = json_data.get('name')
+        nrd_name.state = json_data.get('state')
+        nrd_name.name = convert_to_ascii(nrd_name.name.upper())
         nrd_name.save_to_db()
 
         EventRecorder.record(user, Event.PATCH, nrd, json_data)

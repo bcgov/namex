@@ -605,14 +605,14 @@ class Request(db.Model):
         return full_name
 
 
-class RequestsSchema(ma.ModelSchema):
+class RequestsSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Request
         additional = ['stateCd']
 
     names = ma.Nested(NameSchema, many=True)
-    activeUser = ma.Nested(UserSchema, many=False, only='username')
-    submitter = ma.Nested(UserSchema, many=False, only='username')
+    activeUser = ma.Nested(UserSchema, many=False, only=('username',))
+    submitter = ma.Nested(UserSchema, many=False, only=('username',))
     comments = ma.Nested(CommentSchema, many=True, only=['comment', 'examiner', 'timestamp'])
 
     @post_dump
@@ -623,34 +623,84 @@ class RequestsSchema(ma.ModelSchema):
         return ret
 
 
-class RequestsHeaderSchema(ma.ModelSchema):
+class RequestsHeaderSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Request
         # sqla_session = db.scoped_session
         # additional = ['stateCd']
         fields = (
             'additionalInfo',
+            'applicants',
+            'checkedOutBy',
+            'checkedOutDt',
+            'comments',
             'consentFlag',
             'consent_dt',
             'corpNum',
+            'details',
+            'entity_type_cd',
             'expirationDate',
             'furnished',
             'hasBeenReset',
+            'homeJurisNum',
             'id',
+            'lastUpdate',
+            'names',
             'natureBusinessInfo',
             'nrNum',
             'nroLastUpdate',
-            'priorityCd',
-            'requestTypeCd',
-            'stateCd',
+            'nwpta',
+            'previousNr',
+            'previousRequestId',
             'previousStateCd',
+            'priorityCd',
+            'priorityDate',
+            'requestTypeCd',
+            'request_action_cd',
+            'source',
+            'state',
+            'stateCd',
+            'tradeMark',
+            'submitter_userid',
             'submitCount',
             'submittedDate',
-            'xproJurisdiction',
+            'userId',
+            'xproJurisdiction'
         )
+    additionalInfo = fields.String(allow_none=True)
+    applicants = fields.Field(allow_none=True)
+    checkedOutBy = fields.String(allow_none=True)
+    checkedOutDt = fields.Field(allow_none=True)
+    comments = fields.Field(allow_none=True)
+    consentFlag = fields.String(allow_none=True)
+    consent_dt = fields.Field(allow_none=True)
+    corpNum = fields.String(allow_none=True)
+    details = fields.Field(allow_none=True)
+    entity_type_cd = fields.String(allow_none=True)
+    expirationDate = fields.Field(allow_none=True)
+    furnished = fields.String(allow_none=True)
+    hasBeenReset = fields.Boolean(allow_none=True)
+    homeJurisNum = fields.String(allow_none=True)
+    lastUpdate = fields.Field(allow_none=True)
+    natureBusinessInfo = fields.String(allow_none=True)
+    nroLastUpdate = fields.Field(allow_none=True)
+    nwpta = fields.Field(allow_none=True)
+    previousNr = fields.String(allow_none=True)
+    previousRequestId = fields.String(allow_none=True)
+    previousStateCd = fields.String(allow_none=True)
+    priorityCd = fields.String(allow_none=True)
+    priorityDate = fields.Field(allow_none=True)
+    requestTypeCd = fields.String(allow_none=True)
+    request_action_cd = fields.String(allow_none=True)
+    source = fields.String(allow_none=True)
+    stateCd = fields.String(allow_none=True)
+    tradeMark = fields.String(allow_none=True)
+    submitter_userid = fields.String(allow_none=True)
+    userId = fields.String(allow_none=True)
+    xproJurisdiction = fields.String(allow_none=True)
 
 
-class RequestsSearchSchema(ma.ModelSchema):
+class RequestsSearchSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Request
         # sqla_session = db.scoped_session
@@ -679,5 +729,5 @@ class RequestsSearchSchema(ma.ModelSchema):
         )
 
     names = ma.Nested(NameSchema, many=True)
-    activeUser = ma.Nested(UserSchema, many=False, only='username')
-    comments = ma.Nested(CommentSchema, many=True, only=['comment', 'examiner', 'timestamp'])
+    activeUser = ma.Pluck(UserSchema, 'username', many=False)
+    comments = ma.Nested(CommentSchema, many=True, only=('comment', 'examiner', 'timestamp'))

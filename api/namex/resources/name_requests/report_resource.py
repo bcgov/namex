@@ -6,12 +6,12 @@ from http import HTTPStatus
 from pathlib import Path
 
 import requests
-from flask import current_app, jsonify
+from flask import current_app, jsonify, request
 from flask_restx import Resource, cors
 
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
-from namex.utils.auth import cors_preflight
+from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.logging import setup_logging
 from .api_namespace import api
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
@@ -28,6 +28,9 @@ class ReportResource(Resource):
     @cors.crossdomain(origin='*')
     def get(self, nr_id):
         try:
+            if not full_access_to_name_request(request):
+                return {"message": "You do not have access to this NameRequest."}, 403
+
             nr_model = Request.query.get(nr_id)
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND

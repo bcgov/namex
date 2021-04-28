@@ -1,3 +1,5 @@
+import pytest
+
 from .common import API_BASE_URI
 # Import token and claims if you need it
 # from ..common import token_header, claims
@@ -5,6 +7,7 @@ from ..common.http import build_test_query, build_request_uri
 from ..common.logging import log_request_path
 
 
+@pytest.mark.skip
 def test_colin_request(client, jwt, app):
     """
     """

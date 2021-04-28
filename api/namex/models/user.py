@@ -74,9 +74,17 @@ class User(db.Model):
         # db.session.commit()
 
 
-class UserSchema(ma.ModelSchema):
+class UserSchema(ma.SQLAlchemySchema):
     class Meta:
         model = User
+        fields = (
+            'username',
+            'firstname',
+            'lastname',
+            'sub',
+            'iss',
+            'creationDate'
+        )
 
     # id = fields.Int(dump_only=False)
     # username = fields.String()
