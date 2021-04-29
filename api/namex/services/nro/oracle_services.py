@@ -190,7 +190,7 @@ class NROServices(object):
 
             except cx_Oracle.DatabaseError as exc:
                 error, = exc.args
-                current_app.logger.error("NR#:", nr_num, "Oracle-Error-Code:", error.code)
+                current_app.logger.error("NR#: %s Oracle-Error-Code: %s Oracle-Error-Message", nr_num, error.code, error.message)
                 if con:
                     con.rollback()
                 raise NROServicesError({"code": "unable_to_set_state",
