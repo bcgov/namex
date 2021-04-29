@@ -4,7 +4,7 @@ from flask import current_app, request, jsonify
 from flask_restx import cors
 
 from namex.utils.logging import setup_logging
-from namex.utils.auth import cors_preflight
+from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.api_resource import handle_exception
 
 from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
@@ -38,6 +38,8 @@ MSG_NOT_FOUND = 'Resource not found'
 class NameRequestResource(BaseNameRequestResource):
     @cors.crossdomain(origin='*')
     def get(self, nr_id):
+
+        return {"message": "Not Implemented"}, 503
         try:
             nr_model = Request.query.get(nr_id)
 
@@ -74,6 +76,8 @@ class NameRequestResource(BaseNameRequestResource):
         :return:
         """
         try:
+            if not full_access_to_name_request(request):
+                return {"message": "You do not have access to this NameRequest."}, 403
             # Find the existing name request
             nr_model = Request.query.get(nr_id)
 
@@ -142,6 +146,9 @@ class NameRequestFields(BaseNameRequestResource):
         :return:
         """
         try:
+            if not full_access_to_name_request(request):
+                return {"message": "You do not have access to this NameRequest."}, 403
+
             nr_action = str(nr_action).upper()  # Convert to upper-case, just so we can support lower case action strings
             nr_action = NameRequestPatchActions[nr_action].value \
                 if NameRequestPatchActions.has_value(nr_action) \
@@ -257,7 +264,10 @@ class NameRequestFields(BaseNameRequestResource):
                 return jsonify(response_data), 200
 
             # Add the list of valid Name Request actions for the given state to the response
-            response_data['actions'] = nr_svc.current_state_actions
+            if (nr_action == NameRequestPatchActions.REQUEST_REFUND.value):
+                response_data['actions'] = []
+            else:
+                response_data['actions'] = nr_svc.current_state_actions
             return jsonify(response_data), 200
 
         except NameRequestIsInProgressError as err:
@@ -395,6 +405,9 @@ class NameRequestRollback(BaseNameRequestResource):
         :return:
         """
         try:
+            if not full_access_to_name_request(request):
+                return {"message": "You do not have access to this NameRequest."}, 403
+                
             # Find the existing name request
             nr_model = Request.query.get(nr_id)
 

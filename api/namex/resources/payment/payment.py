@@ -294,6 +294,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 data = jsonify({
                     'id': payment.id,
                     'nrId': payment.nrId,
+                    'nrNum': nr_model.nrNum,
                     'token': payment.payment_token,
                     'statusCode': payment.payment_status_code,
                     'action': payment.payment_action,

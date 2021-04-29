@@ -3,6 +3,7 @@
 from . import db, ma
 from marshmallow import fields
 from sqlalchemy.orm import backref
+from .comment import CommentSchema
 
 
 class Name(db.Model):
@@ -84,30 +85,50 @@ class Name(db.Model):
 
         db.session.add(self)
         db.session.commit()
+    
+    def add_to_db(self):
+        db.session.add(self)
 
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
 
 
-class NameSchema(ma.ModelSchema):
+class NameSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Name
         fields = (
-            'name',
-            'state',
             'choice',
-            'designation',
+            'comment',
             'conflict1',
             'conflict2',
             'conflict3',
             'conflict1_num',
             'conflict2_num',
             'conflict3_num',
-            'decision_text'
+            'consumptionDate',
+            'corpNum',
+            'decision_text',
+            'designation',
+            'id',
+            'name_type_cd',
+            'name',
+            'state'
         )
 
+    conflict1 = fields.String(required=False, allow_none=True)
+    conflict2 = fields.String(required=False, allow_none=True)
+    conflict3 = fields.String(required=False, allow_none=True)
+    conflict1_num = fields.Field(required=False, allow_none=True)
+    conflict2_num = fields.Field(required=False, allow_none=True)
+    conflict3_num = fields.Field(required=False, allow_none=True)
+    decision_text = fields.String(required=False, allow_none=True)
+    comment = fields.String(required=False, allow_none=True)
+    consumptionDate = fields.DateTime(required=False, allow_none=True)
+    corpNum = fields.String(required=False, allow_none=True)
+    designation = fields.String(required=False, allow_none=True)
     name = fields.String(
         required=True,
         error_messages={'required': {'message': 'name is a required field'}}
     )
+    name_type_cd = fields.String(required=False, allow_none=True)

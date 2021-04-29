@@ -5,7 +5,7 @@ from flask import request, jsonify, current_app
 from flask_restx import cors
 
 from namex.utils.logging import setup_logging
-from namex.utils.auth import cors_preflight
+from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.api_resource import handle_exception, get_query_param_str
 
 from namex.models import Request, Event, State, Applicant
@@ -31,23 +31,16 @@ setup_logging()  # Important to do this first
 @api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
 class NameRequestsResource(BaseNameRequestResource):
     @cors.crossdomain(origin='*')
-    @api.doc(params={
-        'nrNum': 'NR Number - This field is required',
-        'emailAddress': 'The applicant\'s email address - an emailAddress or a phoneNumber is required',
-        'phoneNumber': 'The applicant\'s phone number - a phoneNumber or an emailAddress is required',
-        # 'addrLine1': 'The applicant\'s address - optional'
-    })
     def get(self):
         try:
+            if not full_access_to_name_request(request):
+                return {"message": "You do not have access to this NameRequest."}, 403
+
             filters = []
 
-            # Validate the request
-            if len(request.args) == 0:
-                raise InvalidInputError(message='No query parameters were specified in the request')
-
-            nr_num_query_str = get_query_param_str('nrNum')
-            email_address_query_str = get_query_param_str('emailAddress')
-            phone_number_query_str = get_query_param_str('phoneNumber')
+            nr_num_query_str = request.headers['Bcreg-Nr'] or request.headers['Bcreg-Nrl']
+            email_address_query_str = request.headers['Bcreg-User-Email']
+            phone_number_query_str = request.headers['Bcreg-User-Phone']
 
             if not nr_num_query_str:
                 raise InvalidInputError(message='An nrNum must be provided')
@@ -58,8 +51,7 @@ class NameRequestsResource(BaseNameRequestResource):
             # Continue
             nr_num = parse_nr_num(nr_num_query_str)
             email_address = email_address_query_str
-
-            phone_number = get_query_param_str('phoneNumber')
+            phone_number = phone_number_query_str
             # Filter on addresses
             # address_line = get_query_param_str('addrLine1')
 

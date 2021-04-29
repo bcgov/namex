@@ -44,7 +44,7 @@ class State(db.Model):
         pass
 
 
-class StateSchema(ma.ModelSchema):
+class StateSchema(ma.SQLAlchemySchema):
     class Meta:
         model = State
         fields = ('cd', 'description')
