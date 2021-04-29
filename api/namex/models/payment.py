@@ -2,6 +2,7 @@
 from enum import Enum
 from sqlalchemy import event
 
+from namex.constants import PaymentState
 from namex.models import State, db
 
 
@@ -9,7 +10,7 @@ class Payment(db.Model):
 
     class PaymentActions(Enum):
         """Valid actions for a payment."""
-        COMPLETE='COMPLETE'
+        CREATE='CREATE'
         UPGRADE='UPGRADE'
         REAPPLY='REAPPLY'
 
@@ -88,10 +89,11 @@ def update_nr_state(mapper, connection, target):
 
     payment = target
     nr = Request.find_by_id(payment.nrId)
+    completed_payment_status = [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]
     if nr:
-        # could not make this update properly via the model so used raw sql
+        # TODO: take this out since the queue does this
         if payment.payment_status_code != 'REFUND_REQUESTED':
-            if payment.payment_status_code == 'COMPLETED' and nr.stateCd == 'PENDING_PAYMENT':
+            if payment.payment_status_code in completed_payment_status and nr.stateCd == 'PENDING_PAYMENT':
                 connection.execute(
                     f"""
                     UPDATE requests

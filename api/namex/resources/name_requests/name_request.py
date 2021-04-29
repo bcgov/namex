@@ -369,6 +369,7 @@ class NameRequestFields(BaseNameRequestResource):
 
         # Handle the payments
         valid_states = [
+            PaymentState.APPROVED.value,
             PaymentState.COMPLETED.value,
             PaymentState.PARTIAL.value
         ]

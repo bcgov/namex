@@ -280,13 +280,18 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 businessInfo=business_info
             )
             payment_response = create_payment(req.as_dict(), json_input.get('headers'))
-            if payment_response.statusCode in [PaymentStatusCode.CREATED.value, PaymentStatusCode.COMPLETED.value]:
+            successful_status_list = [
+                PaymentStatusCode.APPROVED.value,
+                PaymentStatusCode.CREATED.value,
+                PaymentStatusCode.COMPLETED.value
+            ]
+            if payment_response.statusCode in successful_status_list:
                 # Save the payment info to Postgres
                 payment = PaymentDAO()
                 payment.nrId = nr_model.id
                 payment.payment_token = str(payment_response.id)
                 payment.payment_completion_date = payment_response.createdOn
-                payment.payment_status_code = PaymentState.CREATED.value
+                payment.payment_status_code = payment_response.statusCode
                 payment.payment_action = payment_action
                 payment.save_to_db()
 
@@ -501,8 +506,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         sbc_payment_response = get_payment(payment.payment_token)
 
         # TODO: Throw errors if this fails!
-        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
-            payment.payment_status_code = PaymentState.COMPLETED.value
+        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value, PaymentStatusCode.APPROVED.value]:
+            payment.payment_status_code = sbc_payment_response.statusCode
             payment.payment_completion_date = sbc_payment_response.createdOn
             payment.save_to_db()
 
@@ -549,8 +554,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         sbc_payment_response = get_payment(payment.payment_token)
 
         # TODO: Throw errors if this fails!
-        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
-            payment.payment_status_code = PaymentState.COMPLETED.value
+        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value, PaymentStatusCode.APPROVED.value]:
+            payment.payment_status_code = sbc_payment_response.statusCode
             payment.payment_completion_date = sbc_payment_response.createdOn
             payment.save_to_db()
 
@@ -588,8 +593,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         sbc_payment_response = get_payment(payment.payment_token)
 
         # TODO: Throw errors if this fails!
-        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
-            payment.payment_status_code = PaymentState.COMPLETED.value
+        if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value, PaymentStatusCode.APPROVED.value]:
+            payment.payment_status_code = sbc_payment_response.statusCode
             payment.payment_completion_date = sbc_payment_response.createdOn
             payment.save_to_db()
 
@@ -631,6 +636,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         """
         # Handle the payments
         valid_states = [
+            PaymentState.APPROVED.value,
             PaymentState.COMPLETED.value,
             PaymentState.PARTIAL.value
         ]
@@ -654,7 +660,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         for payment in nr_model.payments.all():
             if payment.id == payment_id and payment.payment_status_code in valid_states:
                 sbc_payment_response = get_payment(payment.payment_token)
-                if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value]:
+                if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value, PaymentStatusCode.APPROVED.value]:
                     raise PaymentServiceError(message='Error cancelling payment. Payment is in a completed state!')
                 cancel_payment(payment.payment_token)
                 payment.payment_status_code = PaymentState.CANCELLED.value
