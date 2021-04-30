@@ -138,7 +138,7 @@ async def test_update_payment_record(app, session,
     'start_payment_date,'
     , [
         ('draft',  # test name
-         Payment.PaymentActions.CREATE.value,  # payment action [COMPLETE|UPGRADE|REAPPLY]
+         Payment.PaymentActions.CREATE.value,  # payment action [CREATE|UPGRADE|REAPPLY]
          State.PENDING_PAYMENT,  # start state of NR
          'N',  # start state of Priority
          None,  # start of frozen time

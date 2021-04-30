@@ -211,7 +211,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
     @payment_api.response(200, 'Success', '')
     @payment_api.doc(params={
         'nr_id': 'Name Request number',
-        'payment_action': 'Payment NR Action - One of [COMPLETE, UPGRADE, REAPPLY]'
+        'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY]'
     })
     def post(self, nr_id, payment_action=NameRequestActions.CREATE.value):
         """
@@ -416,7 +416,7 @@ class NameRequestPayment(AbstractNameRequestResource):
 @payment_api.route('/<int:nr_id>/payment/<int:payment_id>/<string:payment_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
 @payment_api.doc(params={
     'nr_id': 'NR Number - This field is required',
-    'payment_action': 'Payment NR Action - One of [COMPLETE, UPGRADE, REAPPLY, REFUND]'
+    'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, REFUND]'
 })
 class NameRequestPaymentAction(AbstractNameRequestResource):
     # REST Method Handlers
