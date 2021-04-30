@@ -52,6 +52,7 @@ NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup
 class PaymentState(Enum):
     """Render all the payment states we know what to do with."""
 
+    APPROVED = 'APPROVED'
     COMPLETED = 'COMPLETED'
     TRANSACTION_FAILED = 'TRANSACTION_FAILED'
 
