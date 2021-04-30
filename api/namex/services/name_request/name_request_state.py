@@ -7,6 +7,7 @@ from namex.constants import \
     NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions, EntityTypes, \
     NameRequestCompletedActions, NameRequestPendingPaymentActions
 
+from namex.constants import PaymentState
 from namex.models import State
 
 from .utils import has_active_payment, has_complete_payment
@@ -95,7 +96,7 @@ def display_retry_payment(nr_model=None):
         if nr_model and nr_model.stateCd in (State.PENDING_PAYMENT):
             payment = nr.payments.one_or_none()
             if payment:
-                if payment.payment_status_code != 'COMPLETED':
+                if payment.payment_status_code not in [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]:
                     return True
         return False
     except Exception as err:
