@@ -294,6 +294,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 data = jsonify({
                     'id': payment.id,
                     'nrId': payment.nrId,
+                    'nrNum': nr_model.nrNum,
                     'token': payment.payment_token,
                     'statusCode': payment.payment_status_code,
                     'action': payment.payment_action,
@@ -308,6 +309,12 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
                 response = make_response(data, 201)
                 return response
+            # something went wrong with status code above
+            else:
+                # log actual status code
+                current_app.logger.debug('Error with status code. Actual status code: ' + payment_response.statusCode)
+                # return generic error status to the front end
+                return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 402
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)

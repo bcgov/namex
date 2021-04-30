@@ -81,6 +81,6 @@ class WordClassification(db.Model):
         db.session.close()
 
 
-class WordClassificationSchema(ma.ModelSchema):
+class WordClassificationSchema(ma.SQLAlchemySchema):
     class Meta:
         model = WordClassification

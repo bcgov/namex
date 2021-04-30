@@ -51,6 +51,6 @@ class VirtualWordCondition(db.Model):
         db.session.close()
 
 
-class VirtualWordConditionSchema(ma.ModelSchema):
+class VirtualWordConditionSchema(ma.SQLAlchemySchema):
     class Meta:
         model = VirtualWordCondition

@@ -36,15 +36,15 @@ class Comment(db.Model):
         pass
 
 
-class CommentSchema(ma.ModelSchema):
+class CommentSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Comment
         fields = ('comment', 'timestamp', 'examiner', 'id')
 
-    examiner = ma.Nested(UserSchema, many=False, only='username')
+    examiner = ma.Nested(UserSchema, many=False, only=('username',))
 
 
-class NameCommentSchema(ma.ModelSchema):
+class NameCommentSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Comment
         fields = ('comment',)

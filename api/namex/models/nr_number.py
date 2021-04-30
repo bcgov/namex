@@ -35,6 +35,6 @@ class NRNumber(db.Model):
         db.session.commit()
 
 
-class NRNumberSchema(ma.ModelSchema):
+class NRNumberSchema(ma.SQLAlchemySchema):
     class Meta:
         model = NRNumber
