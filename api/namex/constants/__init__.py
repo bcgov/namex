@@ -551,6 +551,7 @@ class PaymentStatusCode(AbstractEnum):
     There are also certain differences - on our side we track when a refund is requested, which does not mean a refund
     has been issued as on the SBC Pay side, for example (there are other cases too).
     """
+    APPROVED = 'APPROVED'
     CREATED = 'CREATED'
     COMPLETED = 'COMPLETED'
     PARTIAL = 'PARTIAL'
@@ -564,6 +565,7 @@ class PaymentState(AbstractEnum):
     """
     Internal PaymentState codes for Payment model.
     """
+    APPROVED = 'APPROVED'
     CREATED = 'CREATED'  # A payment has been created
     PENDING = 'PENDING'  # A newly created Payment
     INPROGRESS = 'IN_PROGRESS'

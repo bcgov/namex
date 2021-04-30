@@ -89,7 +89,7 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
 
     payment_action = payment.payment_action
     nr = RequestDAO.find_by_id(payment.nrId)
-    if payment_action == Payment.PaymentActions.COMPLETE.value:  # pylint: disable=R1705
+    if payment_action == Payment.PaymentActions.CREATE.value:  # pylint: disable=R1705
         if nr.stateCd == State.PENDING_PAYMENT:
             nr.stateCd = State.DRAFT
             nr.expirationDate = datetime.utcnow() + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
@@ -197,7 +197,8 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
             logger.debug('Failed transaction on queue:%s', pay_msg)
             return
 
-        if pay_msg.get('paymentToken', {}).get('statusCode') == PaymentState.COMPLETED.value:
+        complete_payment_status = [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]
+        if pay_msg.get('paymentToken', {}).get('statusCode') in complete_payment_status:
             logger.debug('COMPLETED transaction on queue: %s', pay_msg)
 
             if payment_token := pay_msg.get('paymentToken', {}).get('id'):
