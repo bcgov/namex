@@ -38,7 +38,7 @@ class WaitTimeStatsService:
         return regular
 
     @classmethod
-    def get_waiting_time_dict(cls):
+    def get_waiting_time_dict(cls, submitted_date):
 
         oldest_draft = Request.get_oldest_draft()
         if oldest_draft is None:
@@ -47,7 +47,7 @@ class WaitTimeStatsService:
             oldest_draft_date = oldest_draft.submittedDate
 
         # add one to waiting time to account for current day
-        delta = datetime.now().astimezone() - oldest_draft_date + timedelta(days=1)
+        delta = submitted_date - oldest_draft_date
         response_data = {'oldest_draft': oldest_draft_date.isoformat(), 'waiting_time': delta.days}
 
         return response_data
