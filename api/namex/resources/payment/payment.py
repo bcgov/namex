@@ -32,6 +32,9 @@ setup_logging()  # It's important to do this first
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 
+NAME_REQUEST_LIFESPAN_DAYS = 56  # TODO this should be defined as a lookup from somewhere
+NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup from somewhere
+
 
 def validate_request(request):
     return True
@@ -292,9 +295,41 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 payment.payment_token = str(payment_response.id)
                 payment.payment_completion_date = payment_response.createdOn
                 # namex-pay will set payment_status_code to completed state after actioning it on the queue
-                payment.payment_status_code = PaymentStatusCode.CREATED.value
+                payment.payment_status_code = payment_response.statusCode
                 payment.payment_action = payment_action
                 payment.save_to_db()
+
+                # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
+                # TODO: send email / furnish payment for these
+                if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
+                    if payment_action == Payment.PaymentActions.CREATE.value:  # pylint: disable=R1705
+                        if nr.stateCd == State.PENDING_PAYMENT:
+                            nr.stateCd = State.DRAFT
+                        nr.expirationDate = datetime.utcnow() + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+                        payment.payment_completion_date = datetime.utcnow()
+
+                    elif payment_action == Payment.PaymentActions.UPGRADE.value:
+                        # TODO: handle this (refund payment and prevent action?)
+                        if nr.stateCd == State.PENDING_PAYMENT:
+                            msg = f'Upgrading a non-DRAFT NR for payment.id={payment.id}'
+                            current_app.logger.debug(msg)
+
+                        nr.priorityCd = 'Y'
+                        nr.priorityDate = datetime.utcnow()
+                        payment.payment_completion_date = datetime.utcnow()
+
+                    elif payment_action == Payment.PaymentActions.REAPPLY.value:
+                        # TODO: handle this (refund payment and prevent action?)
+                        if nr.stateCd != State.APPROVED \
+                                and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
+                            msg = f'Extend NR for payment.id={payment.id} nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
+                            current_app.logger.debug(msg)
+
+                        nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+                        payment.payment_completion_date = datetime.utcnow()
+                    
+                    nr.save_to_db()
+                    payment.save_to_db()
 
                 # Wrap the response, providing info from both the SBC Pay response and the payment we created
                 data = jsonify({

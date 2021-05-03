@@ -93,7 +93,6 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
     if payment_action == Payment.PaymentActions.CREATE.value:  # pylint: disable=R1705
         if nr.stateCd == State.PENDING_PAYMENT:
             nr.stateCd = State.DRAFT
-            nr.expirationDate = datetime.utcnow() + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
             payment.payment_completion_date = datetime.utcnow()
             payment.payment_status_code = State.COMPLETED
 
