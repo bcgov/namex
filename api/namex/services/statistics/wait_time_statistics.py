@@ -41,8 +41,7 @@ class WaitTimeStatsService:
     @classmethod
     def get_waiting_time_dict(cls):
         try:
-            oldest_draft = Request.get_oldest_draft()
-            if oldest_draft is None:
+            if not (oldest_draft := Request.get_oldest_draft()):
                 oldest_draft_date = datetime.now().astimezone()
             else:
                 oldest_draft_date = oldest_draft.submittedDate
