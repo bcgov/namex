@@ -180,18 +180,42 @@ class FindNameRequestPayments(PaymentNameRequestResource):
             for payment in nr_payments:
                 payment_response = get_payment(payment.payment_token)
                 receipts = payment_response.receipts
-                # Wrap the response, providing info from both the SBC Pay response and the payment we created
-                response_data.append({
-                    'id': payment.id,
-                    'nrId': payment.nrId,
-                    'token': payment.payment_token,
-                    'statusCode': payment.payment_status_code,
-                    'action': payment.payment_action,
-                    'completionDate': payment.payment_completion_date,
-                    'payment': payment.as_dict(),
-                    'sbcPayment': payment_response.as_dict(),
-                    'receipts': list(map(lambda r: map_receipt(r), receipts))
-                })
+                if not receipts and payment_response.statusCode == PaymentState.APPROVED.value:
+                    # generate temp receipts for approved payments
+                    current_app.logger.debug('adding temporary receipt details.')
+                    receipts = [
+                        {
+                            'id': payment.payment_token,
+                            'receiptAmount': None,
+                            'receiptDate': None,
+                            'receiptNumber': 'Pending'
+                        }
+                    ]
+                    payment_response.receipts = receipts
+                    response_data.append({
+                        'id': payment.id,
+                        'nrId': payment.nrId,
+                        'token': payment.payment_token,
+                        'statusCode': payment.payment_status_code,
+                        'action': payment.payment_action,
+                        'completionDate': payment.payment_completion_date,
+                        'payment': payment.as_dict(),
+                        'sbcPayment': payment_response.as_dict(),
+                        'receipts': receipts
+                    })
+                else:
+                    # Wrap the response, providing info from both the SBC Pay response and the payment we created
+                    response_data.append({
+                        'id': payment.id,
+                        'nrId': payment.nrId,
+                        'token': payment.payment_token,
+                        'statusCode': payment.payment_status_code,
+                        'action': payment.payment_action,
+                        'completionDate': payment.payment_completion_date,
+                        'payment': payment.as_dict(),
+                        'sbcPayment': payment_response.as_dict(),
+                        'receipts': list(map(lambda r: map_receipt(r), receipts))
+                    })
 
             return jsonify(response_data), 200
         except PaymentServiceError as err:
@@ -283,78 +307,82 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 businessInfo=business_info
             )
             payment_response = create_payment(req.as_dict(), json_input.get('headers'))
-            successful_status_list = [
-                PaymentStatusCode.APPROVED.value,
-                PaymentStatusCode.CREATED.value,
-                PaymentStatusCode.COMPLETED.value
-            ]
-            if payment_response.statusCode in successful_status_list:
-                # Save the payment info to Postgres
-                payment = PaymentDAO()
-                payment.nrId = nr_model.id
-                payment.payment_token = str(payment_response.id)
-                payment.payment_completion_date = payment_response.createdOn
-                # namex-pay will set payment_status_code to completed state after actioning it on the queue
-                payment.payment_status_code = payment_response.statusCode
-                payment.payment_action = payment_action
-                payment.save_to_db()
-
-                # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
-                # TODO: send email / furnish payment for these
-                if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
-                    if payment_action == PaymentDAO.PaymentActions.CREATE.value:  # pylint: disable=R1705
-                        if nr_model.stateCd == State.PENDING_PAYMENT:
-                            nr_model.stateCd = State.DRAFT
-                        payment.payment_completion_date = datetime.utcnow()
-
-                    elif payment_action == PaymentDAO.PaymentActions.UPGRADE.value:
-                        # TODO: handle this (refund payment and prevent action?)
-                        if nr_model.stateCd == State.PENDING_PAYMENT:
-                            msg = f'Upgrading a non-DRAFT NR for payment.id={payment.id}'
-                            current_app.logger.debug(msg)
-
-                        nr_model.priorityCd = 'Y'
-                        nr_model.priorityDate = datetime.utcnow()
-                        payment.payment_completion_date = datetime.utcnow()
-
-                    elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
-                        # TODO: handle this (refund payment and prevent action?)
-                        if nr_model.stateCd != State.APPROVED \
-                                and nr_model.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
-                            msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
-                            current_app.logger.debug(msg)
-
-                        nr_model.expirationDate = nr_model.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
-                        payment.payment_completion_date = datetime.utcnow()
-                    
-                    nr_model.save_to_db()
+            try:
+                successful_status_list = [
+                    PaymentStatusCode.APPROVED.value,
+                    PaymentStatusCode.CREATED.value,
+                    PaymentStatusCode.COMPLETED.value
+                ]
+                if payment_response.statusCode in successful_status_list:
+                    # Save the payment info to Postgres
+                    payment = PaymentDAO()
+                    payment.nrId = nr_model.id
+                    payment.payment_token = str(payment_response.id)
+                    payment.payment_completion_date = payment_response.createdOn
+                    # namex-pay will set payment_status_code to completed state after actioning it on the queue
+                    payment.payment_status_code = payment_response.statusCode
+                    payment.payment_action = payment_action
                     payment.save_to_db()
 
-                # Wrap the response, providing info from both the SBC Pay response and the payment we created
-                data = jsonify({
-                    'id': payment.id,
-                    'nrId': payment.nrId,
-                    'nrNum': nr_model.nrNum,
-                    'token': payment.payment_token,
-                    'statusCode': payment.payment_status_code,
-                    'action': payment.payment_action,
-                    'completionDate': payment.payment_completion_date,
-                    'payment': payment.as_dict(),
-                    'sbcPayment': payment_response.as_dict()
-                })
+                    # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
+                    # TODO: send email / furnish payment for these
+                    if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
+                        if payment_action == PaymentDAO.PaymentActions.CREATE.value:  # pylint: disable=R1705
+                            if nr_model.stateCd == State.PENDING_PAYMENT:
+                                nr_model.stateCd = State.DRAFT
+                            payment.payment_completion_date = datetime.utcnow()
 
-                # Record the event
-                # nr_svc = self.nr_service
-                # EventRecorder.record(nr_svc.user, Event.POST + ' [payment created]', json_input)
+                        elif payment_action == PaymentDAO.PaymentActions.UPGRADE.value:
+                            # TODO: handle this (refund payment and prevent action?)
+                            if nr_model.stateCd == State.PENDING_PAYMENT:
+                                msg = f'Upgrading a non-DRAFT NR for payment.id={payment.id}'
+                                current_app.logger.debug(msg)
 
-                response = make_response(data, 201)
-                return response
-            # something went wrong with status code above
-            else:
-                # log actual status code
-                current_app.logger.debug('Error with status code. Actual status code: ' + payment_response.statusCode)
-                # return generic error status to the front end
-                return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 402
+                            nr_model.priorityCd = 'Y'
+                            nr_model.priorityDate = datetime.utcnow()
+                            payment.payment_completion_date = datetime.utcnow()
+
+                        elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
+                            # TODO: handle this (refund payment and prevent action?)
+                            if nr_model.stateCd != State.APPROVED \
+                                    and nr_model.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
+                                msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
+                                current_app.logger.debug(msg)
+
+                            nr_model.expirationDate = nr_model.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+                            payment.payment_completion_date = datetime.utcnow()
+                        
+                        nr_model.save_to_db()
+                        payment.save_to_db()
+
+                    # Wrap the response, providing info from both the SBC Pay response and the payment we created
+                    data = jsonify({
+                        'id': payment.id,
+                        'nrId': payment.nrId,
+                        'nrNum': nr_model.nrNum,
+                        'token': payment.payment_token,
+                        'statusCode': payment.payment_status_code,
+                        'action': payment.payment_action,
+                        'completionDate': payment.payment_completion_date,
+                        'payment': payment.as_dict(),
+                        'sbcPayment': payment_response.as_dict()
+                    })
+
+                    # Record the event
+                    # nr_svc = self.nr_service
+                    # EventRecorder.record(nr_svc.user, Event.POST + ' [payment created]', json_input)
+
+                    response = make_response(data, 201)
+                    return response
+                # something went wrong with status code above
+                else:
+                    # log actual status code
+                    current_app.logger.debug('Error with status code. Actual status code: ' + payment_response.statusCode)
+                    # return generic error status to the front end
+                    return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 402
+            except Exception as err:
+                current_app.logger.error(err.with_traceback(None))
+                return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 500
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
@@ -391,18 +419,42 @@ class NameRequestPayment(AbstractNameRequestResource):
 
             payment_response = get_payment(payment.payment_token)
             receipts = payment_response.receipts
-            # Wrap the response, providing info from both the SBC Pay response and the payment we created
-            data = jsonify({
-                'id': payment.id,
-                'nrId': payment.nrId,
-                'token': payment.payment_token,
-                'statusCode': payment.payment_status_code,
-                'action': payment.payment_action,
-                'completionDate': payment.payment_completion_date,
-                'payment': payment.as_dict(),
-                'sbcPayment': payment_response.as_dict(),
-                'receipts': list(map(lambda r: map_receipt(r), receipts))
-            })
+            if not receipts and payment_response.statusCode == PaymentState.APPROVED.value:
+                # generate temp receipts for approved payments
+                current_app.logger.debug('adding temporary receipt details.')
+                receipts = [
+                    {
+                        'id': payment.payment_token,
+                        'receiptAmount': None,
+                        'receiptDate': None,
+                        'receiptNumber': 'Pending'
+                    }
+                ]
+                payment_response.receipts = receipts
+                data.append({
+                    'id': payment.id,
+                    'nrId': payment.nrId,
+                    'token': payment.payment_token,
+                    'statusCode': payment.payment_status_code,
+                    'action': payment.payment_action,
+                    'completionDate': payment.payment_completion_date,
+                    'payment': payment.as_dict(),
+                    'sbcPayment': payment_response.as_dict(),
+                    'receipts': receipts
+                })
+            else:
+                # Wrap the response, providing info from both the SBC Pay response and the payment we created
+                data.append({
+                    'id': payment.id,
+                    'nrId': payment.nrId,
+                    'token': payment.payment_token,
+                    'statusCode': payment.payment_status_code,
+                    'action': payment.payment_action,
+                    'completionDate': payment.payment_completion_date,
+                    'payment': payment.as_dict(),
+                    'sbcPayment': payment_response.as_dict(),
+                    'receipts': list(map(lambda r: map_receipt(r), receipts))
+                })
 
             response = make_response(data, 200)
             return response
