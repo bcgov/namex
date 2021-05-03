@@ -302,33 +302,32 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
                 # TODO: send email / furnish payment for these
                 if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
-                    if payment_action == Payment.PaymentActions.CREATE.value:  # pylint: disable=R1705
-                        if nr.stateCd == State.PENDING_PAYMENT:
-                            nr.stateCd = State.DRAFT
-                        nr.expirationDate = datetime.utcnow() + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+                    if payment_action == PaymentDAO.PaymentActions.CREATE.value:  # pylint: disable=R1705
+                        if nr_model.stateCd == State.PENDING_PAYMENT:
+                            nr_model.stateCd = State.DRAFT
                         payment.payment_completion_date = datetime.utcnow()
 
-                    elif payment_action == Payment.PaymentActions.UPGRADE.value:
+                    elif payment_action == PaymentDAO.PaymentActions.UPGRADE.value:
                         # TODO: handle this (refund payment and prevent action?)
-                        if nr.stateCd == State.PENDING_PAYMENT:
+                        if nr_model.stateCd == State.PENDING_PAYMENT:
                             msg = f'Upgrading a non-DRAFT NR for payment.id={payment.id}'
                             current_app.logger.debug(msg)
 
-                        nr.priorityCd = 'Y'
-                        nr.priorityDate = datetime.utcnow()
+                        nr_model.priorityCd = 'Y'
+                        nr_model.priorityDate = datetime.utcnow()
                         payment.payment_completion_date = datetime.utcnow()
 
-                    elif payment_action == Payment.PaymentActions.REAPPLY.value:
+                    elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
                         # TODO: handle this (refund payment and prevent action?)
-                        if nr.stateCd != State.APPROVED \
-                                and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
-                            msg = f'Extend NR for payment.id={payment.id} nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
+                        if nr_model.stateCd != State.APPROVED \
+                                and nr_model.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
+                            msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
                             current_app.logger.debug(msg)
 
-                        nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+                        nr_model.expirationDate = nr_model.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
                         payment.payment_completion_date = datetime.utcnow()
                     
-                    nr.save_to_db()
+                    nr_model.save_to_db()
                     payment.save_to_db()
 
                 # Wrap the response, providing info from both the SBC Pay response and the payment we created
