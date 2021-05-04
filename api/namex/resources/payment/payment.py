@@ -318,7 +318,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     payment = PaymentDAO()
                     payment.nrId = nr_model.id
                     payment.payment_token = str(payment_response.id)
-                    payment.payment_completion_date = payment_response.createdOn
                     # namex-pay will set payment_status_code to completed state after actioning it on the queue
                     payment.payment_status_code = payment_response.statusCode
                     payment.payment_action = payment_action
