@@ -60,7 +60,7 @@ jobs:
         if: failure()
         with:
           type: ${{ job.status }}
-          job_name: "*Solr Admin APP Built to ${{env.TAG_NAME}}*"
+          job_name: "*NRO Extractor Built to ${{env.TAG_NAME}}*"
           channel: "#registries-bot"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true

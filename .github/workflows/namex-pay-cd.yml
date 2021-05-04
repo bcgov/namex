@@ -1,4 +1,4 @@
-name: Name Pay CD
+name: Namex Pay CD
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
         default: "dev"
 
 jobs:
-  name-pay-cd:
+  namex-pay-cd:
     runs-on: ubuntu-20.04
 
     defaults:
@@ -23,7 +23,7 @@ jobs:
         working-directory: ./services/namex-pay
 
     env:
-      APP_NAME: "name-pay"
+      APP_NAME: "namex-pay"
 
     if: github.repository == 'bcgov/namex'
     steps:
@@ -65,7 +65,7 @@ jobs:
         if: failure()
         with:
           type: ${{ job.status }}
-          job_name: "*Auto Analyze Built and Deployed to ${{env.TAG_NAME}}*"
+          job_name: "*Namex Pay Built and Deployed to ${{env.TAG_NAME}}*"
           channel: "#registries-bot"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
