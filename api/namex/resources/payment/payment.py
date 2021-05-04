@@ -457,8 +457,7 @@ class NameRequestPayment(AbstractNameRequestResource):
                     'receipts': list(map(lambda r: map_receipt(r), receipts))
                 })
 
-            response = make_response(data, 200)
-            return response
+            return jsonify(data), 200
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
