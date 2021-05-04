@@ -997,7 +997,6 @@ class Request(Resource):
 
             # Finally save the entire graph
             nrd.save_to_db()
-
             EventRecorder.record(user, Event.PUT, nrd, json_input)
 
         except ValidationError as ve:

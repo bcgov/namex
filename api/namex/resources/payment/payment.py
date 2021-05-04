@@ -419,6 +419,7 @@ class NameRequestPayment(AbstractNameRequestResource):
 
             payment_response = get_payment(payment.payment_token)
             receipts = payment_response.receipts
+            data = []
             if not receipts and payment_response.statusCode == PaymentState.APPROVED.value:
                 # generate temp receipts for approved payments
                 current_app.logger.debug('adding temporary receipt details.')
