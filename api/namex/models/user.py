@@ -14,6 +14,13 @@ class User(db.Model):
     sub = db.Column(db.String(36), unique=True)
     iss = db.Column(db.String(1024))
     creationDate = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    # for name examination
+    searchColumns = db.column(
+        db.String(1000),
+        nullable=False,
+        default='Status,LastModifiedBy,NameRequestNumber,Names,NatureOfBusiness,\
+            Priority,ClientNotification,Submitted,LastUpdate,LastComment'
+    )
 
     APPROVER = 'names_approver'
     EDITOR = 'names_editor'

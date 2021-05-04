@@ -144,13 +144,6 @@ class Requests(Resource):
     START = 0
     ROWS = 10
 
-    # search_request_schemas = RequestsSchema(many=True)
-    # ,exclude=['id'
-    #     ,'applicants'
-    #     ,'partnerNS'
-    #     ,'requestId'
-    #     ,'previousRequestId'])
-
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
