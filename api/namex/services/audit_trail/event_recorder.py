@@ -1,5 +1,5 @@
 from flask import current_app
-from namex import models
+from namex.models import Event
 from datetime import datetime
 import json
 
@@ -22,8 +22,7 @@ class EventRecorder(object):
 
     @staticmethod
     def create_event(user, action, nr, data_dict):
-
-        event = models.Event(
+        event = Event(
             eventDate = datetime.utcnow(),
             action = action,
             eventJson = json.dumps(data_dict),
