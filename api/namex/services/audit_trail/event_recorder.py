@@ -10,9 +10,7 @@ class EventRecorder(object):
     @staticmethod
     def record(user, action, nr, data_dict, save_to_session=False):
         try:
-            print(5)
             event = EventRecorder.create_event(user, action, nr, data_dict)
-            print(6)
             if save_to_session:
                 event.save_to_session()
             else:
