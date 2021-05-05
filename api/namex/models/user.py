@@ -15,9 +15,8 @@ class User(db.Model):
     iss = db.Column(db.String(1024))
     creationDate = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     # for name examination
-    searchColumns = db.column(
+    searchColumns = db.Column(
         db.String(1000),
-        nullable=False,
         default='Status,LastModifiedBy,NameRequestNumber,Names,NatureOfBusiness,\
             Priority,ClientNotification,Submitted,LastUpdate,LastComment'
     )

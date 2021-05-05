@@ -23,7 +23,7 @@ class UserSettings(Resource):
             
         except Exception as err:
             current_app.logger.error(f'unable to get user settings: {err.with_traceback(None)}')
-            return jsonify({"message": "Error getting user settings."}), 500
+            return jsonify({'message': 'Error getting user settings.'}), 500
     
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -32,9 +32,11 @@ class UserSettings(Resource):
         try:
             # GET existing or CREATE new user based on the JWT info
             user = User.find_by_jwtToken(g.jwt_oidc_token_info)
+            if not user:
+                return jsonify({'message': 'Could not find existing user to update settings for.'}), 400
             json_input = request.get_json()
-            if not user or not json_input or not json_input.get('searchColumns'):
-                return {}
+            if not json_input or not json_input.get('searchColumns'):
+                return jsonify({'message': 'Invalid user settings provided in payload.'}), 400
             search_columns = ''
             for column in json_input.get('searchColumns'):
                 search_columns += column + ','
@@ -44,4 +46,4 @@ class UserSettings(Resource):
             
         except Exception as err:
             current_app.logger.error(f'unable to update user settings: {err.with_traceback(None)}')
-            return jsonify({"message": "Error updating user settings."}), 500
+            return jsonify({'message': 'Error updating user settings.'}), 500
