@@ -1,25 +1,29 @@
-from flask import jsonify
-from flask_restx import Resource, Namespace
+from flask import current_app, jsonify, g, request
+from flask_restx import cors, Resource, Namespace
 from sqlalchemy import text, exc
+
+from namex import jwt
 from namex.models import User, State, Comment, NameCommentSchema, Event
-from namex.utils import get_or_create_user_by_jwt
+from namex.services.name_request.utils import get_or_create_user_by_jwt
+from namex.utils.auth import cors_preflight
 
 api = Namespace('namexUserSettings', description='Namex - get/update user settings')
 
 
 @cors_preflight('GET, PUT')
-@api.route('/usersettings', methods=['GET', 'PUT', 'OPTIONS'])
+@api.route('', methods=['GET', 'PUT', 'OPTIONS'])
 class UserSettings(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    def get():
+    def get(*args, **kwargs):
         try:
+            token = jwt.get_token_auth_header()
             # GET existing or CREATE new user based on the JWT info
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             search_columns = user.searchColumns.split(',')
-            jsonify({ 'searchColumns': search_columns }), 200
+            return jsonify({ 'searchColumns': search_columns }), 200
             
         except Exception as err:
             current_app.logger.error(f'unable to get user settings: {err.with_traceback(None)}')
@@ -39,7 +43,10 @@ class UserSettings(Resource):
                 return jsonify({'message': 'Invalid user settings provided in payload.'}), 400
             search_columns = ''
             for column in json_input.get('searchColumns'):
-                search_columns += column + ','
+                if search_columns != '':
+                    search_columns += ',' + column
+                else:
+                    search_columns += column
             user.searchColumns = search_columns
             user.save_to_db()
             return {}, 204
