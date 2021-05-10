@@ -192,7 +192,7 @@ class Requests(Resource):
         activeUser = request.args.get('activeUser', None)
         compName = request.args.get('compName', None)
         firstName = request.args.get('firstName', None)
-        lastName = request.args.get('firstName', None)
+        lastName = request.args.get('lastName', None)
         consentOption = request.args.get('consentOption', None)
         priority = request.args.get('ranking', None)
         notification = request.args.get('notification', None)
