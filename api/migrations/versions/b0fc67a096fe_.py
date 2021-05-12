@@ -37,7 +37,7 @@ def upgrade():
                 }
             ]
         )
-    except:
+    except IntegrityError:
         pass
 
 

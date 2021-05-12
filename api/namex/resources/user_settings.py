@@ -19,7 +19,6 @@ class UserSettings(Resource):
     @jwt.requires_auth
     def get(*args, **kwargs):
         try:
-            token = jwt.get_token_auth_header()
             # GET existing or CREATE new user based on the JWT info
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             search_columns = user.searchColumns.split(',')
