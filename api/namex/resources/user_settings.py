@@ -53,4 +53,4 @@ class UserSettings(Resource):
             
         except Exception as err:
             current_app.logger.error(f'unable to update user settings: {err.with_traceback(None)}')
-            return jsonify({'message': 'Error updating user settings.'}), 500
+            return jsonify({'message': f'Error updating user settings.'}), 500

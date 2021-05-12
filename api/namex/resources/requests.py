@@ -206,8 +206,12 @@ class Requests(Resource):
 
         q = q.filter(RequestDAO.nrNum.notlike('NR L%'))
         if nrNum:
-            nrNum = nrNum.replace('NR', '').strip()
-            nrNum = nrNum.replace('nr', '').strip()
+            # set any variation of mixed case 'nr' to 'NR'
+            nrNum = nrNum.upper().strip()
+            # remove spaces within string
+            nrNum = nrNum.replace(' ', '')
+            # add single space between NR and number
+            nrNum = nrNum.replace('NR', 'NR ')
             nrNum = '%' + nrNum + '%'
             q = q.filter(RequestDAO.nrNum.like(nrNum))
         if activeUser:
@@ -234,7 +238,7 @@ class Requests(Resource):
         if consentOption == 'Yes':
             q = q.filter(RequestDAO.consentFlag == 'Y')
         elif consentOption == 'No':
-            q = q.filter(RequestDAO.priorityCd != 'Y')
+            q = q.filter(RequestDAO.consentFlag != 'Y')
 
         if priority == 'Standard':
             q = q.filter(RequestDAO.priorityCd != 'Y')

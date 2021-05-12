@@ -17,7 +17,7 @@ from marshmallow import Schema, fields, post_load, post_dump
 from .nwpta import PartnerNameSystem
 from .user import User, UserSchema
 from .comment import Comment, CommentSchema
-from .applicant import Applicant
+from .applicant import Applicant, ApplicantSchema
 from .name import Name, NameSchema
 from .payment import Payment
 from .event import Event
@@ -725,9 +725,11 @@ class RequestsSearchSchema(ma.SQLAlchemySchema):
             'submittedDate',
             'xproJurisdiction',
             'names',
-            'activeUser'
+            'activeUser',
+            'applicants'
         )
 
     names = ma.Nested(NameSchema, many=True)
     activeUser = ma.Pluck(UserSchema, 'username', many=False)
     comments = ma.Nested(CommentSchema, many=True, only=('comment', 'examiner', 'timestamp'))
+    applicants = ma.Nested(ApplicantSchema, many=True, only=('firstName', 'lastName'))
