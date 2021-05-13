@@ -16,7 +16,7 @@ from namex import jwt, nro, services
 from namex.exceptions import BusinessException
 from namex.models import db, ValidationError
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
-from namex.models import Name, NameSchema, PartnerNameSystemSchema
+from namex.models import Applicant, Name, NameSchema, PartnerNameSystemSchema
 from namex.models import User, State, Comment, NameCommentSchema, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
@@ -144,13 +144,6 @@ class Requests(Resource):
     START = 0
     ROWS = 10
 
-    # search_request_schemas = RequestsSchema(many=True)
-    # ,exclude=['id'
-    #     ,'applicants'
-    #     ,'partnerNS'
-    #     ,'requestId'
-    #     ,'previousRequestId'])
-
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
@@ -198,6 +191,9 @@ class Requests(Resource):
         nrNum = request.args.get('nrNum', None)
         activeUser = request.args.get('activeUser', None)
         compName = request.args.get('compName', None)
+        firstName = request.args.get('firstName', None)
+        lastName = request.args.get('lastName', None)
+        consentOption = request.args.get('consentOption', None)
         priority = request.args.get('ranking', None)
         notification = request.args.get('notification', None)
         submittedInterval = request.args.get('submittedInterval', None)
@@ -210,8 +206,12 @@ class Requests(Resource):
 
         q = q.filter(RequestDAO.nrNum.notlike('NR L%'))
         if nrNum:
-            nrNum = nrNum.replace('NR', '').strip()
-            nrNum = nrNum.replace('nr', '').strip()
+            # set any variation of mixed case 'nr' to 'NR'
+            nrNum = nrNum.upper().strip()
+            # remove spaces within string
+            nrNum = nrNum.replace(' ', '')
+            # add single space between NR and number
+            nrNum = nrNum.replace('NR', 'NR ')
             nrNum = '%' + nrNum + '%'
             q = q.filter(RequestDAO.nrNum.like(nrNum))
         if activeUser:
@@ -221,7 +221,24 @@ class Requests(Resource):
         # -- want it to be all NRs (nrs can have multiple names that match)
         # ---- right now count is adjusted on the frontend in method 'populateTable'
         if compName:
+            compName = compName.strip().replace(' ', '%')
             q = q.join(RequestDAO.names).filter(Name.name.ilike('%' + compName + '%'))
+        
+        if firstName:
+            firstName = firstName.strip().replace(' ', '%')
+            q = q.join(RequestDAO.applicants).filter(Applicant.firstName.ilike('%' + firstName + '%'))
+        
+        if lastName:
+            lastName = lastName.strip().replace(' ', '%')
+            q = q.join(RequestDAO.applicants).filter(Applicant.lastName.ilike('%' + lastName + '%'))
+        
+        if consentOption == 'Received':
+            q = q.filter(RequestDAO.consent_dt.isnot(None))
+            print(q)
+        if consentOption == 'Yes':
+            q = q.filter(RequestDAO.consentFlag == 'Y')
+        elif consentOption == 'No':
+            q = q.filter(RequestDAO.consentFlag != 'Y')
 
         if priority == 'Standard':
             q = q.filter(RequestDAO.priorityCd != 'Y')

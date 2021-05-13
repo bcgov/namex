@@ -18,6 +18,8 @@ from .mras import mras_profile_api
 from .colin import colin_api
 from .statistics.wait_time_statistics import api as wait_time_stats_api
 
+from .user_settings import api as user_settings_api
+
 
 # This will add the Authorize button to the swagger docs
 # TODO oauth2 & openid may not yet be supported by restplus <- check on this
@@ -52,3 +54,4 @@ api.add_namespace(payment_api, path='/payments')
 api.add_namespace(mras_profile_api, path='/mras-profile')
 api.add_namespace(colin_api, path='/colin')
 api.add_namespace(wait_time_stats_api, path='/statistics')
+api.add_namespace(user_settings_api, path='/usersettings')
