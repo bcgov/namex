@@ -7,6 +7,7 @@ Create Date: 2021-05-05 14:24:03.870443
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import table, column
 from sqlalchemy import String
 
