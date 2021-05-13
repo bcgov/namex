@@ -5,13 +5,10 @@ Revises: 0d8662dfb68a
 Create Date: 2021-05-05 14:24:03.870443
 
 """
-from sqlalchemy.sql.expression import true
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.sql import table, column
 from sqlalchemy import String
-from sqlalchemy import engine_from_config
-from sqlalchemy.engine import reflection
 
 
 # revision identifiers, used by Alembic.
