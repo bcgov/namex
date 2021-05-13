@@ -1,6 +1,7 @@
 from flask import send_file, make_response, jsonify
 from flask_restx import Resource, cors
 from flask_jwt_oidc import AuthError
+from pytz import timezone
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
@@ -56,9 +57,11 @@ class PaymentReceipt(Resource):
             if not name_choice:
                 return jsonify(message='Could not find name choice for {nr_id}'.format(nr_id=nr_model.id)), 400
 
+            tz_aware_payment_completion_date = payment.payment_completion_date.replace(tzinfo=timezone('UTC'))
+            localized_payment_completion_date = tz_aware_payment_completion_date.astimezone(timezone('US/Pacific'))
             receipt_req = ReceiptRequest(
                 corpName=name_choice.name,
-                filingDateTime=payment.payment_completion_date.strftime('%d %b %Y, %-I:%M %p')
+                filingDateTime=localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %P Pacific time')
             )
 
             receipt_response = generate_receipt(payment.payment_token, receipt_req)
