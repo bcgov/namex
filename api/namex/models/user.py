@@ -17,6 +17,7 @@ class User(db.Model):
     # for name examination
     searchColumns = db.Column(
         db.String(1000),
+        nullable=False,
         default='Status,LastModifiedBy,NameRequestNumber,Names,ApplicantFirstName,ApplicantLastName,NatureOfBusiness,ConsentRequired,Priority,ClientNotification,Submitted,LastUpdate,LastComment'
     )
 
