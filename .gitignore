@@ -40,6 +40,7 @@ Thumbs.db
 .idea/name-examination.iml
 .idea/vcs.xml
 .idea/workspace.xml
+*.iml
 
 # JS + Node files #
 ######################
@@ -100,6 +101,7 @@ solr/cores/.DS_Store
 **/.pytest_cache
 .coverage
 .hypothesis
+http-client.*
 
 # Solr core data
 #######################

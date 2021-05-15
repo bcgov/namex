@@ -1,6 +1,8 @@
 import re
 import inflect
 from itertools import product
+import datetime
+from pytz import UTC
 
 _parse_csv_line = lambda x: (x.split(','))
 
@@ -94,6 +96,12 @@ def convert_to_ascii(value):
         return value.encode("ascii", "ignore").decode('ascii')
     except Exception as err:
         return value
+
+
+def convert_to_utc_date_time(date_time_str: str):
+    """Convert datetime string with utc offset to datetime object"""
+    date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S%z')
+    return date_time_obj.astimezone(UTC)
 
 
 # def remove_numbers_list(list_name):
