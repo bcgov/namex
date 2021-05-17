@@ -8,15 +8,10 @@ from typing import List
 from namex.models import Applicant, Name, Request, State, User
 from tests.python.end_points.services.utils import create_header
 from tests.python.end_points.common.utils import (
-    get_utc_now,
-    get_utc_now_str,
-    get_utc_now_min_time_str,
-    get_utc_now_with_delta,
-    get_utc_now_with_delta_str,
-    get_utc_now_with_min_delta_str,
-    get_utc_now_max_time_str,
-    get_utc_now_with_max_delta_str,
-    escape_date_time
+    get_utc_server_now_with_delta,
+    get_server_now_str,
+    get_utc_server_now,
+    get_utc_server_now_with_delta_str
 )
 
 # TODO: import these helper functions from somewhere shared by the tests
@@ -361,43 +356,38 @@ def test_namex_search_last_name(client, jwt, app, search_name):
         assert search_name in nr['applicants'][0]['lastName']
 
 
-@pytest.mark.parametrize('submitted_start_date_time, expected_result_count', [
-    (get_utc_now_min_time_str(), 7),
-    (get_utc_now_with_min_delta_str(timedelta(days=-2)), 10),
-    (get_utc_now_with_min_delta_str(timedelta(days=-32)), 12),
-    (get_utc_now_with_min_delta_str(timedelta(days=-6*(365))), 15),
-    (get_utc_now_with_min_delta_str(timedelta(days=1)), 5),
-    (get_utc_now_with_min_delta_str(timedelta(days=20)), 4),
-    (get_utc_now_with_min_delta_str(timedelta(days=101)), 2),
-    (get_utc_now_with_min_delta_str(timedelta(days=5*(365))), 1),
-    (get_utc_now_with_min_delta_str(timedelta(days=5*(365)+1)), 0),
-    (get_utc_now_with_min_delta_str(timedelta(days=6*(365))), 0)
+@pytest.mark.parametrize('submitted_start_date, expected_result_count', [
+    (get_utc_server_now_with_delta_str(timedelta(days=-1)), 9),
+    (get_utc_server_now_with_delta_str(timedelta(days=-2)), 9),
+    (get_utc_server_now_with_delta_str(timedelta(-5*(365)+1)), 11),
+    (get_utc_server_now_with_delta_str(timedelta(-5*(365))), 12),
+    (get_server_now_str(), 6),
+    (get_utc_server_now_with_delta_str(timedelta(days=1)), 4),
+    (get_utc_server_now_with_delta_str(timedelta(days=5*(365))), 1),
+    (get_utc_server_now_with_delta_str(timedelta(days=5*(365)+1)), 0),
 ])
-def test_namex_search_submitted_start_date_time(client, jwt, app, submitted_start_date_time, expected_result_count):
+def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_date, expected_result_count):
     """Test searching by submitted start date."""
 
     submitted = [
-        get_utc_now_with_delta(timedelta(days=-5*(365))),
-        get_utc_now_with_delta(timedelta(days=-1*(365))),
-        get_utc_now_with_delta(timedelta(days=-100)),
-        get_utc_now_with_delta(timedelta(days=-31)),
-        get_utc_now_with_delta(timedelta(days=-15)),
-        get_utc_now_with_delta(timedelta(days=-1)),
-        get_utc_now_with_delta(timedelta(days=-1)),
-        get_utc_now_with_delta(timedelta(days=-1)),
-        get_utc_now(),
-        get_utc_now(),
-        get_utc_now_with_delta(timedelta(days=1)),
-        get_utc_now_with_delta(timedelta(days=31)),
-        get_utc_now_with_delta(timedelta(days=100)),
-        get_utc_now_with_delta(timedelta(days=1*(365))),
-        get_utc_now_with_delta(timedelta(days=5*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-5*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-100)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now(),
+        get_utc_server_now(),
+        get_utc_server_now_with_delta(timedelta(days=1)),
+        get_utc_server_now_with_delta(timedelta(days=100)),
+        get_utc_server_now_with_delta(timedelta(days=1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=5*(365))),
     ]
     generate_nrs(len(submitted), [], [], submitted)
 
     # get the resource (this is what we are testing)
     rv = client.get(
-        f'api/v1/requests?submittedStartDateTime={submitted_start_date_time}&rows=1000',
+        f'api/v1/requests?submittedStartDate={submitted_start_date}&rows=1000',
         headers=create_header(jwt, [User.VIEWONLY])
     )
     data = rv.data
@@ -410,44 +400,40 @@ def test_namex_search_submitted_start_date_time(client, jwt, app, submitted_star
     assert response_count == expected_result_count
 
 
-@pytest.mark.parametrize('submitted_end_date_time, expected_result_count', [
-    (get_utc_now_with_max_delta_str(timedelta(days=-1)), 8),
-    (get_utc_now_with_max_delta_str(timedelta(days=-32)), 3),
-    (get_utc_now_with_max_delta_str(timedelta(-5*(365))), 1),
-    (get_utc_now_with_min_delta_str(timedelta(-5*(365))), 0),
-    (get_utc_now_with_max_delta_str(timedelta(-6*(365))), 0),
-    (get_utc_now_min_time_str(), 8),
-    (get_utc_now_max_time_str(), 10),
-    (get_utc_now_with_max_delta_str(timedelta(days=1)), 11),
-    (get_utc_now_with_max_delta_str(timedelta(days=100)), 13),
-    (get_utc_now_with_max_delta_str(timedelta(days=5*(365)+1)), 15),
-    (get_utc_now_with_max_delta_str(timedelta(days=6*(365))), 15),
+@pytest.mark.parametrize('submitted_end_date, expected_result_count', [
+    (get_utc_server_now_with_delta_str(timedelta(-5*(365)-1)), 0),
+    (get_utc_server_now_with_delta_str(timedelta(-5*(365))), 1),
+    (get_utc_server_now_with_delta_str(timedelta(days=-105)), 2),
+    (get_utc_server_now_with_delta_str(timedelta(days=-1)), 6),
+    (get_server_now_str(), 8),
+    (get_utc_server_now_with_delta_str(timedelta(days=1)), 9),
+    (get_utc_server_now_with_delta_str(timedelta(days=1*(365))), 11),
+    (get_utc_server_now_with_delta_str(timedelta(days=5*(365)-1)), 11),
+    (get_utc_server_now_with_delta_str(timedelta(days=5*(365))), 12),
+    (get_utc_server_now_with_delta_str(timedelta(days=6*(365))), 12),
 ])
-def test_namex_search_submitted_end_date_time(client, jwt, app, submitted_end_date_time, expected_result_count):
+def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, expected_result_count):
     """Test searching by submitted end date."""
 
     submitted = [
-        get_utc_now_with_delta(timedelta(days=-5*(365))),
-        get_utc_now_with_delta(timedelta(days=-1*(365))),
-        get_utc_now_with_delta(timedelta(days=-100)),
-        get_utc_now_with_delta(timedelta(days=-31)),
-        get_utc_now_with_delta(timedelta(days=-15)),
-        get_utc_now_with_delta(timedelta(days=-1)),
-        get_utc_now_with_delta(timedelta(days=-1)),
-        get_utc_now_with_delta(timedelta(days=-1)),
-        get_utc_now(),
-        get_utc_now(),
-        get_utc_now_with_delta(timedelta(days=1)),
-        get_utc_now_with_delta(timedelta(days=31)),
-        get_utc_now_with_delta(timedelta(days=100)),
-        get_utc_now_with_delta(timedelta(days=1*(365))),
-        get_utc_now_with_delta(timedelta(days=5*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-5*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-100)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now(),
+        get_utc_server_now(),
+        get_utc_server_now_with_delta(timedelta(days=1)),
+        get_utc_server_now_with_delta(timedelta(days=100)),
+        get_utc_server_now_with_delta(timedelta(days=1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=5*(365))),
     ]
     generate_nrs(len(submitted), [], [], submitted)
 
     # get the resource (this is what we are testing)
     rv = client.get(
-        f'api/v1/requests?submittedEndDateTime={submitted_end_date_time}&rows=1000',
+        f'api/v1/requests?submittedEndDate={submitted_end_date}&rows=1000',
         headers=create_header(jwt, [User.VIEWONLY])
     )
     data = rv.data
@@ -459,23 +445,71 @@ def test_namex_search_submitted_end_date_time(client, jwt, app, submitted_end_da
     assert response_count >= 0
     assert response_count == expected_result_count
 
-# todo add test for submitted start and end date time
 
-@pytest.mark.parametrize('submitted_start_date_time, submitted_end_date_time', [
-    (escape_date_time('2021-05-11 00:00:00-07:00'), escape_date_time('2021-05-01 23:59:59-07:00')),
-    (get_utc_now_str(), get_utc_now_with_delta_str(timedelta(days=-29))),
-    (get_utc_now_str(), get_utc_now_with_delta_str(timedelta(days=-55)))
+# @pytest.mark.parametrize('submitted_start_date, submitted_end_date, expected_result_count', [
+#     (get_utc_server_now_with_delta_str(timedelta(days=-5*(365))), get_utc_server_now_with_delta_str(timedelta(days=-5*(365))), 0),
+#     # (get_utc_server_now_with_delta_str(timedelta(days=-5*(365))), get_utc_server_now_with_delta_str(timedelta(days=-100), 12),
+#
+#
+#
+#     # (get_utc_server_now_with_delta_str(timedelta(days=-2)), 9),
+#     # (get_utc_server_now_with_delta_str(timedelta(-5*(365)+1)), 11),
+#     # (get_utc_server_now_with_delta_str(timedelta(-5*(365))), 12),
+#     # (get_server_now_str(), 6),
+#     # (get_utc_server_now_with_delta_str(timedelta(days=1)), 4),
+#     # (get_utc_server_now_with_delta_str(timedelta(days=5*(365))), 1),
+#     # (get_utc_server_now_with_delta_str(timedelta(days=5*(365)+1)), 0),
+# ])
+# def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_start_date, submitted_end_date, expected_result_count):
+#     """Test searching by submitted start date."""
+#
+#     submitted = [
+#         get_utc_server_now_with_delta(timedelta(days=-5*(365))),
+#         get_utc_server_now_with_delta(timedelta(days=-1*(365))),
+#         get_utc_server_now_with_delta(timedelta(days=-100)),
+#         get_utc_server_now_with_delta(timedelta(days=-1)),
+#         get_utc_server_now_with_delta(timedelta(days=-1)),
+#         get_utc_server_now_with_delta(timedelta(days=-1)),
+#         get_utc_server_now(),
+#         get_utc_server_now(),
+#         get_utc_server_now_with_delta(timedelta(days=1)),
+#         get_utc_server_now_with_delta(timedelta(days=100)),
+#         get_utc_server_now_with_delta(timedelta(days=1*(365))),
+#         get_utc_server_now_with_delta(timedelta(days=5*(365))),
+#     ]
+#     generate_nrs(len(submitted), [], [], submitted)
+#
+#     # get the resource (this is what we are testing)
+#     rv = client.get(
+#         f'api/v1/requests?submittedStartDate={submitted_start_date}&submittedEndDateTime={submitted_end_date}&rows=1000',
+#         headers=create_header(jwt, [User.VIEWONLY])
+#     )
+#     data = rv.data
+#     assert data
+#     resp = json.loads(data.decode('utf-8'))
+#
+#     assert resp.get('nameRequests') and resp.get('response')
+#     response_count = len(resp['nameRequests'][0])
+#     assert response_count >= 0
+#     assert response_count == expected_result_count
+
+
+
+@pytest.mark.parametrize('submitted_start_date, submitted_end_date', [
+    ('2021-03-11', '2021-03-01'),
+    ('2021-03-11', '2021-03-10'),
+    ('2020-03-11', '2000-01-25'),
 ])
 def test_namex_search_submitted_end_date_before_submitted_start_date(client,
                                                                      jwt,
                                                                      app,
-                                                                     submitted_start_date_time,
-                                                                     submitted_end_date_time):
+                                                                     submitted_start_date,
+                                                                     submitted_end_date):
     """Test searching by submitted end date before submitted start date."""
 
     # get the resource (this is what we are testing)
     rv = client.get(
-        f'api/v1/requests?submittedStartDateTime={submitted_start_date_time}&submittedEndDateTime={submitted_end_date_time}',
+        f'api/v1/requests?submittedStartDate={submitted_start_date}&submittedEndDate={submitted_end_date}&submittedEndDate={submitted_end_date}&rows=100000',
         headers=create_header(jwt, [User.VIEWONLY])
     )
 
@@ -485,26 +519,26 @@ def test_namex_search_submitted_end_date_before_submitted_start_date(client,
     assert rv.data
     resp = json.loads(rv.data.decode('utf-8'))
     assert resp.get('message')
-    assert resp.get('message') == 'submittedEndDateTime must be after submittedStartDateTime'
+    assert resp.get('message') == 'submittedEndDate must be after submittedStartDate'
 
 
-@pytest.mark.parametrize('submitted_interval, submitted_start_date_time, submitted_end_date_time', [
-    ('Today', get_utc_now_str(), get_utc_now_str()),
-    ('7 days', get_utc_now_str(), get_utc_now_str()),
-    ('90 days', get_utc_now_str(), ''),
-    ('1 year', '', get_utc_now_str()),
+@pytest.mark.parametrize('submitted_interval, submitted_start_date, submitted_end_date', [
+    ('Today', '2021-05-01', '2021-05-13'),
+    ('7 days', '2021-05-01', '2021-05-13'),
+    ('90 days', '2021-05-01', ''),
+    ('1 year', '', '2021-05-01'),
 ])
 def test_namex_search_submitted_interval_with_submitted_start_and_end_date(client,
                                                                      jwt,
                                                                      app,
                                                                      submitted_interval,
-                                                                     submitted_start_date_time,
-                                                                     submitted_end_date_time):
+                                                                     submitted_start_date,
+                                                                     submitted_end_date):
     """Test searching by submitted interval with submitted start and end date."""
 
     # get the resource (this is what we are testing)
     rv = client.get(
-        f'api/v1/requests?submittedInterval={submitted_interval}&submittedStartDateTime={submitted_start_date_time}&submittedEndDateTime={submitted_end_date_time}',
+        f'api/v1/requests?submittedInterval={submitted_interval}&submittedStartDate={submitted_start_date}&submittedEndDate={submitted_end_date}',
         headers=create_header(jwt, [User.VIEWONLY])
     )
 
@@ -514,35 +548,32 @@ def test_namex_search_submitted_interval_with_submitted_start_and_end_date(clien
     assert rv.data
     resp = json.loads(rv.data.decode('utf-8'))
     assert resp.get('message')
-    assert 'submittedInterval cannot be used in conjuction with submittedStartDateTime and submittedEndDateTime' in resp.get('message')
+    assert 'submittedInterval cannot be used in conjuction with submittedStartDate and submittedEndDate' in resp.get('message')
 
 
-@pytest.mark.parametrize('submitted_start_date_time, submitted_end_date_time, valid_start_date, valid_end_date', [
-    ('11-05-2021', escape_date_time('2021-02-03 23:59:59+02:00'), False, True),
-    ('2021-12-01a', escape_date_time('2001-08-22 23:59:59-05:00'), False, True),
-    ('asdfdsf0sadfsf', escape_date_time('2001-07-11 23:59:59-07:00'), False, True),
-    (escape_date_time('2021-05-02a 00:00:00-07:00'), escape_date_time('2021-05-11 23:59:59-07:00'), False, True),
-    (escape_date_time('2021-05-02 00:00:00-07:00'), '20211-05-010', True, False),
-    (escape_date_time('2005-01-12 00:23:00-05:00'), '2021-05-01', True, False),
-    (escape_date_time('2005-01-12 00:23:00-05:00'), escape_date_time('2005-01-12 00:23:00-05:002'), True, False),
-    (escape_date_time('2005-01-12 00:23:00-05:00'), 'asdfsdfdsf', True, False),
-    (escape_date_time('2005-01-12 a00:23:00-05:00'), escape_date_time('a2021-05-11 23:59:59-07:00'), False, False),
+@pytest.mark.parametrize('submitted_start_date, submitted_end_date, valid_start_date, valid_end_date', [
+    ('11-05-2021', '2021-02-03', False, True),
+    ('2021-12-01a', '2001-08-22', False, True),
+    ('asdfdsf0sadfsf', '2001-07-11', False, True),
+    ('2005-01-12', '05-01-2021', True, False),
+    ('2005-01-12', 'asdfsdf', True, False),
+    ('2005-01-12', '2005-01-15asd', True, False),
     ('asdfsdf', 'badfasdfsdf', False, False),
     ('02-23-2005', '07-11-2006', False, False),
-    ('2005-02-23', '2006-07-11', False, False),
+    ('2005-02-232', '2006-07-113', False, False),
 ])
 def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
                                                                        jwt,
                                                                        app,
-                                                                       submitted_start_date_time,
-                                                                       submitted_end_date_time,
+                                                                       submitted_start_date,
+                                                                       submitted_end_date,
                                                                        valid_start_date,
                                                                        valid_end_date):
     """Test searching by submitted start and end date with incorrect date formats."""
 
     # get the resource (this is what we are testing)
     rv = client.get(
-        f'api/v1/requests?submittedStartDateTime={submitted_start_date_time}&submittedEndDateTime={submitted_end_date_time}',
+        f'api/v1/requests?submittedStartDate={submitted_start_date}&submittedEndDate={submitted_end_date}',
         headers=create_header(jwt, [User.VIEWONLY])
     )
 
@@ -555,8 +586,8 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
     assert msg
 
     if not valid_start_date:
-        assert 'Invalid submittedStartDateTime: ' in msg
-        assert 'Must be of date format %Y-%m-%d %H:%M:%S%z' in msg
+        assert 'Invalid submittedStartDate: ' in msg
+        assert 'Must be of date format %Y-%m-%d' in msg
     elif(valid_start_date and not valid_end_date):
-        assert 'Invalid submittedEndDateTime: ' in msg
-        assert 'Must be of date format %Y-%m-%d %H:%M:%S%z' in msg
+        assert 'Invalid submittedEndDate: ' in msg
+        assert 'Must be of date format %Y-%m-%d' in msg
