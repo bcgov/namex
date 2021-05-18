@@ -30,7 +30,7 @@ def upgrade():
 
     conn = op.get_bind()
     cd_exists = conn.execute("select * from states where cd='PENDING_PAYMENT'")
-    if not cd_exists:
+    if not cd_exists.one_or_none():
         states_table = table(
             'states',
             column('cd', String),
