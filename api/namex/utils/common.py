@@ -1,6 +1,10 @@
 import re
 import inflect
 from itertools import product
+from datetime import  datetime, time
+from dateutil import tz
+
+from namex.constants import DATE_FORMAT_NAMEX_SEARCH
 
 _parse_csv_line = lambda x: (x.split(','))
 
@@ -94,6 +98,25 @@ def convert_to_ascii(value):
         return value.encode("ascii", "ignore").decode('ascii')
     except Exception as err:
         return value
+
+
+
+def convert_to_utc_min_date_time(date_str: str):
+    """Convert server date string to UTC datetime with min time."""
+    server_date_time = datetime.strptime(date_str, DATE_FORMAT_NAMEX_SEARCH)
+    min_time = time(hour=0, minute=0, second=0, microsecond=0)
+    server_date_time = datetime.combine(server_date_time, min_time, tzinfo=tz.tzlocal())
+    utc_date_time = server_date_time.astimezone(tz.UTC)
+    return utc_date_time
+
+
+def convert_to_utc_max_date_time(date_str: str):
+    """Convert server date string to UTC datetime with max time."""
+    server_date_time = datetime.strptime(date_str, DATE_FORMAT_NAMEX_SEARCH)
+    max_time = time(hour=23, minute=59, second=59, microsecond=999999)
+    server_date_time = datetime.combine(server_date_time, max_time, tzinfo=tz.tzlocal())
+    utc_date_time = server_date_time.astimezone(tz.UTC)
+    return utc_date_time
 
 
 # def remove_numbers_list(list_name):

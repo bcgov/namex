@@ -10,6 +10,8 @@ dsg_end = 'Designations_end'
 dsg_any = 'Designations_any'
 stop_w = 'Stop Words'
 
+DATE_FORMAT_NAMEX_SEARCH = '%Y-%m-%d'
+DATE_TIME_FORMAT_SQL = '%Y-%m-%d %H:%M:%S%z'
 
 class AbstractEnum(Enum):
     @classmethod

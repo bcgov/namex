@@ -6,6 +6,7 @@ from flask import request, jsonify, g, current_app, get_flashed_messages
 from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
+from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.utils.logging import setup_logging
 
 from sqlalchemy.orm.exc import NoResultFound
@@ -24,7 +25,9 @@ from namex.models import DecisionReason
 from namex.services import ServicesError, MessageServices, EventRecorder
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 
-from namex.utils.common import convert_to_ascii
+from namex.utils.common import (convert_to_ascii,
+                                convert_to_utc_min_date_time,
+                                convert_to_utc_max_date_time)
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
@@ -199,6 +202,8 @@ class Requests(Resource):
         submittedInterval = request.args.get('submittedInterval', None)
         lastUpdateInterval = request.args.get('lastUpdateInterval', None)
         current_hour = int(request.args.get('hour', 0))
+        submittedStartDate = request.args.get('submittedStartDate', None)
+        submittedEndDate = request.args.get('submittedEndDate', None)
 
         q = RequestDAO.query.filter()
         if queue:
@@ -223,15 +228,15 @@ class Requests(Resource):
         if compName:
             compName = compName.strip().replace(' ', '%')
             q = q.join(RequestDAO.names).filter(Name.name.ilike('%' + compName + '%'))
-        
+
         if firstName:
             firstName = firstName.strip().replace(' ', '%')
             q = q.join(RequestDAO.applicants).filter(Applicant.firstName.ilike('%' + firstName + '%'))
-        
+
         if lastName:
             lastName = lastName.strip().replace(' ', '%')
             q = q.join(RequestDAO.applicants).filter(Applicant.lastName.ilike('%' + lastName + '%'))
-        
+
         if consentOption == 'Received':
             q = q.filter(RequestDAO.consent_dt.isnot(None))
             print(q)
@@ -288,6 +293,40 @@ class Requests(Resource):
         elif lastUpdateInterval == '30 days':
             q = q.filter(RequestDAO.lastUpdate > text(
                 '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 29)))
+
+        if submittedInterval and (submittedStartDate or submittedEndDate):
+            return jsonify({"message": "submittedInterval cannot be used in conjuction with submittedStartDate and submittedEndDate"}), 400
+
+        submittedStartDateTimeUtcObj = None
+        submittedEndDateTimeUtcObj = None
+
+        if submittedStartDate:
+            try:
+                submittedStartDateTimeUtcObj = convert_to_utc_min_date_time(submittedStartDate)
+                # convert date to format db expects
+                submittedStartDateTimeUtc = submittedStartDateTimeUtcObj.strftime(DATE_TIME_FORMAT_SQL)
+                q = q.filter(RequestDAO.submittedDate >=
+                             text('\'{submittedStartDateTimeUtc}\''
+                              .format(submittedStartDateTimeUtc=submittedStartDateTimeUtc)))
+            except ValueError as ve:
+                return jsonify({"message": "Invalid submittedStartDate: {}.  Must be of date format %Y-%m-%d"
+                               .format(submittedStartDate)}), 400
+
+        if submittedEndDate:
+            try:
+                submittedEndDateTimeUtcObj = convert_to_utc_max_date_time(submittedEndDate)
+                # convert date to format db expects
+                submittedEndDateTimeUtc = submittedEndDateTimeUtcObj.strftime(DATE_TIME_FORMAT_SQL)
+                q = q.filter(RequestDAO.submittedDate <=
+                             text('\'{submittedEndDateTimeUtc}\''
+                                  .format(submittedEndDateTimeUtc=submittedEndDateTimeUtc)))
+            except ValueError as ve:
+                return jsonify({"message": "Invalid submittedEndDate: {}.  Must be of date format %Y-%m-%d"
+                               .format(submittedEndDate)}), 400
+
+        if (submittedStartDateTimeUtcObj and submittedEndDateTimeUtcObj)\
+            and submittedEndDateTimeUtcObj < submittedStartDateTimeUtcObj:
+            return jsonify({"message": "submittedEndDate must be after submittedStartDate"}), 400
 
         q = q.order_by(text(sort_by))
 
