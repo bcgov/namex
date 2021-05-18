@@ -3,7 +3,8 @@ import inflect
 from itertools import product
 from datetime import  datetime, time
 from dateutil import tz
-from pytz import UTC
+
+from namex.constants import DATE_FORMAT_NAMEX_SEARCH
 
 _parse_csv_line = lambda x: (x.split(','))
 
@@ -99,22 +100,23 @@ def convert_to_ascii(value):
         return value
 
 
+
 def convert_to_utc_min_date_time(date_str: str):
-    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+    """Convert server date string to UTC datetime with min time."""
+    server_date_time = datetime.strptime(date_str, DATE_FORMAT_NAMEX_SEARCH)
     min_time = time(hour=0, minute=0, second=0, microsecond=0)
-    return datetime.combine(date_obj, min_time, tzinfo=tz.UTC)
+    server_date_time = datetime.combine(server_date_time, min_time, tzinfo=tz.tzlocal())
+    utc_date_time = server_date_time.astimezone(tz.UTC)
+    return utc_date_time
 
 
 def convert_to_utc_max_date_time(date_str: str):
-    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+    """Convert server date string to UTC datetime with max time."""
+    server_date_time = datetime.strptime(date_str, DATE_FORMAT_NAMEX_SEARCH)
     max_time = time(hour=23, minute=59, second=59, microsecond=999999)
-    return datetime.combine(date_obj, max_time, tzinfo=tz.UTC)
-
-
-# def convert_to_utc_date_time(date_time_str: str):
-#     """Convert datetime string with utc offset to datetime object"""
-#     date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S%z')
-#     return date_time_obj.astimezone(UTC)
+    server_date_time = datetime.combine(server_date_time, max_time, tzinfo=tz.tzlocal())
+    utc_date_time = server_date_time.astimezone(tz.UTC)
+    return utc_date_time
 
 
 # def remove_numbers_list(list_name):

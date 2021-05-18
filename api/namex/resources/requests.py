@@ -6,9 +6,7 @@ from flask import request, jsonify, g, current_app, get_flashed_messages
 from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
-from pytz import timezone, UTC
-from dateutil import tz
-
+from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.utils.logging import setup_logging
 
 from sqlalchemy.orm.exc import NoResultFound
@@ -297,7 +295,7 @@ class Requests(Resource):
                 '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 29)))
 
         if submittedInterval and (submittedStartDate or submittedEndDate):
-            return jsonify({"message": "submittedInterval cannot be used in conjuction with submittedStartDate and submittedEndDateTime"}), 400
+            return jsonify({"message": "submittedInterval cannot be used in conjuction with submittedStartDate and submittedEndDate"}), 400
 
         submittedStartDateTimeUtcObj = None
         submittedEndDateTimeUtcObj = None
@@ -306,7 +304,7 @@ class Requests(Resource):
             try:
                 submittedStartDateTimeUtcObj = convert_to_utc_min_date_time(submittedStartDate)
                 # convert date to format db expects
-                submittedStartDateTimeUtc = submittedStartDateTimeUtcObj.strftime('%Y-%m-%d %H:%M:%S%z')
+                submittedStartDateTimeUtc = submittedStartDateTimeUtcObj.strftime(DATE_TIME_FORMAT_SQL)
                 q = q.filter(RequestDAO.submittedDate >=
                              text('\'{submittedStartDateTimeUtc}\''
                               .format(submittedStartDateTimeUtc=submittedStartDateTimeUtc)))
@@ -318,7 +316,7 @@ class Requests(Resource):
             try:
                 submittedEndDateTimeUtcObj = convert_to_utc_max_date_time(submittedEndDate)
                 # convert date to format db expects
-                submittedEndDateTimeUtc = submittedEndDateTimeUtcObj.strftime('%Y-%m-%d %H:%M:%S%z')
+                submittedEndDateTimeUtc = submittedEndDateTimeUtcObj.strftime(DATE_TIME_FORMAT_SQL)
                 q = q.filter(RequestDAO.submittedDate <=
                              text('\'{submittedEndDateTimeUtc}\''
                                   .format(submittedEndDateTimeUtc=submittedEndDateTimeUtc)))

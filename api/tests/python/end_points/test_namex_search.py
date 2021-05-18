@@ -10,8 +10,8 @@ from tests.python.end_points.services.utils import create_header
 from tests.python.end_points.common.utils import (
     get_utc_server_now_with_delta,
     get_server_now_str,
-    get_utc_server_now,
-    get_utc_server_now_with_delta_str
+    get_server_now_with_delta_str,
+    get_utc_server_now
 )
 
 # TODO: import these helper functions from somewhere shared by the tests
@@ -357,14 +357,14 @@ def test_namex_search_last_name(client, jwt, app, search_name):
 
 
 @pytest.mark.parametrize('submitted_start_date, expected_result_count', [
-    (get_utc_server_now_with_delta_str(timedelta(days=-1)), 9),
-    (get_utc_server_now_with_delta_str(timedelta(days=-2)), 9),
-    (get_utc_server_now_with_delta_str(timedelta(-5*(365)+1)), 11),
-    (get_utc_server_now_with_delta_str(timedelta(-5*(365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=-1)), 9),
+    (get_server_now_with_delta_str(timedelta(days=-2)), 9),
+    (get_server_now_with_delta_str(timedelta(-5*(365)+1)), 11),
+    (get_server_now_with_delta_str(timedelta(-5*(365))), 12),
     (get_server_now_str(), 6),
-    (get_utc_server_now_with_delta_str(timedelta(days=1)), 4),
-    (get_utc_server_now_with_delta_str(timedelta(days=5*(365))), 1),
-    (get_utc_server_now_with_delta_str(timedelta(days=5*(365)+1)), 0),
+    (get_server_now_with_delta_str(timedelta(days=1)), 4),
+    (get_server_now_with_delta_str(timedelta(days=5*(365))), 1),
+    (get_server_now_with_delta_str(timedelta(days=5*(365)+1)), 0),
 ])
 def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_date, expected_result_count):
     """Test searching by submitted start date."""
@@ -401,16 +401,16 @@ def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_dat
 
 
 @pytest.mark.parametrize('submitted_end_date, expected_result_count', [
-    (get_utc_server_now_with_delta_str(timedelta(-5*(365)-1)), 0),
-    (get_utc_server_now_with_delta_str(timedelta(-5*(365))), 1),
-    (get_utc_server_now_with_delta_str(timedelta(days=-105)), 2),
-    (get_utc_server_now_with_delta_str(timedelta(days=-1)), 6),
+    (get_server_now_with_delta_str(timedelta(-5*(365)-1)), 0),
+    (get_server_now_with_delta_str(timedelta(-5*(365))), 1),
+    (get_server_now_with_delta_str(timedelta(days=-105)), 2),
+    (get_server_now_with_delta_str(timedelta(days=-1)), 6),
     (get_server_now_str(), 8),
-    (get_utc_server_now_with_delta_str(timedelta(days=1)), 9),
-    (get_utc_server_now_with_delta_str(timedelta(days=1*(365))), 11),
-    (get_utc_server_now_with_delta_str(timedelta(days=5*(365)-1)), 11),
-    (get_utc_server_now_with_delta_str(timedelta(days=5*(365))), 12),
-    (get_utc_server_now_with_delta_str(timedelta(days=6*(365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=1)), 9),
+    (get_server_now_with_delta_str(timedelta(days=1*(365))), 11),
+    (get_server_now_with_delta_str(timedelta(days=5*(365)-1)), 11),
+    (get_server_now_with_delta_str(timedelta(days=5*(365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=6*(365))), 12),
 ])
 def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, expected_result_count):
     """Test searching by submitted end date."""
@@ -446,52 +446,49 @@ def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, e
     assert response_count == expected_result_count
 
 
-# @pytest.mark.parametrize('submitted_start_date, submitted_end_date, expected_result_count', [
-#     (get_utc_server_now_with_delta_str(timedelta(days=-5*(365))), get_utc_server_now_with_delta_str(timedelta(days=-5*(365))), 0),
-#     # (get_utc_server_now_with_delta_str(timedelta(days=-5*(365))), get_utc_server_now_with_delta_str(timedelta(days=-100), 12),
-#
-#
-#
-#     # (get_utc_server_now_with_delta_str(timedelta(days=-2)), 9),
-#     # (get_utc_server_now_with_delta_str(timedelta(-5*(365)+1)), 11),
-#     # (get_utc_server_now_with_delta_str(timedelta(-5*(365))), 12),
-#     # (get_server_now_str(), 6),
-#     # (get_utc_server_now_with_delta_str(timedelta(days=1)), 4),
-#     # (get_utc_server_now_with_delta_str(timedelta(days=5*(365))), 1),
-#     # (get_utc_server_now_with_delta_str(timedelta(days=5*(365)+1)), 0),
-# ])
-# def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_start_date, submitted_end_date, expected_result_count):
-#     """Test searching by submitted start date."""
-#
-#     submitted = [
-#         get_utc_server_now_with_delta(timedelta(days=-5*(365))),
-#         get_utc_server_now_with_delta(timedelta(days=-1*(365))),
-#         get_utc_server_now_with_delta(timedelta(days=-100)),
-#         get_utc_server_now_with_delta(timedelta(days=-1)),
-#         get_utc_server_now_with_delta(timedelta(days=-1)),
-#         get_utc_server_now_with_delta(timedelta(days=-1)),
-#         get_utc_server_now(),
-#         get_utc_server_now(),
-#         get_utc_server_now_with_delta(timedelta(days=1)),
-#         get_utc_server_now_with_delta(timedelta(days=100)),
-#         get_utc_server_now_with_delta(timedelta(days=1*(365))),
-#         get_utc_server_now_with_delta(timedelta(days=5*(365))),
-#     ]
-#     generate_nrs(len(submitted), [], [], submitted)
-#
-#     # get the resource (this is what we are testing)
-#     rv = client.get(
-#         f'api/v1/requests?submittedStartDate={submitted_start_date}&submittedEndDateTime={submitted_end_date}&rows=1000',
-#         headers=create_header(jwt, [User.VIEWONLY])
-#     )
-#     data = rv.data
-#     assert data
-#     resp = json.loads(data.decode('utf-8'))
-#
-#     assert resp.get('nameRequests') and resp.get('response')
-#     response_count = len(resp['nameRequests'][0])
-#     assert response_count >= 0
-#     assert response_count == expected_result_count
+@pytest.mark.parametrize('submitted_start_date, submitted_end_date, expected_result_count', [
+    (get_server_now_with_delta_str(timedelta(days=-5*(365)-2)), get_server_now_with_delta_str(timedelta(days=-5*(365)-1)), 0),
+    (get_server_now_with_delta_str(timedelta(days=-5*(365)-2)), get_server_now_with_delta_str(timedelta(days=-5*(365))), 1),
+    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_with_delta_str(timedelta(days=-100)), 3),
+    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_str(), 8),
+    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_with_delta_str(timedelta(days=1*(365))), 11),
+    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_with_delta_str(timedelta(days=5*(365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_with_delta_str(timedelta(days=6*(365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=-1)), get_server_now_with_delta_str(timedelta(days=100)), 7),
+    (get_server_now_str(), get_server_now_str(), 2),
+])
+def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_start_date, submitted_end_date, expected_result_count):
+    """Test searching by submitted start date and submitted end date."""
+
+    submitted = [
+        get_utc_server_now_with_delta(timedelta(days=-5*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-100)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now_with_delta(timedelta(days=-1)),
+        get_utc_server_now(),
+        get_utc_server_now(),
+        get_utc_server_now_with_delta(timedelta(days=1)),
+        get_utc_server_now_with_delta(timedelta(days=100)),
+        get_utc_server_now_with_delta(timedelta(days=1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=5*(365))),
+    ]
+    generate_nrs(len(submitted), [], [], submitted)
+
+    # get the resource (this is what we are testing)
+    rv = client.get(
+        f'api/v1/requests?submittedStartDate={submitted_start_date}&submittedEndDate={submitted_end_date}&rows=1000',
+        headers=create_header(jwt, [User.VIEWONLY])
+    )
+    data = rv.data
+    assert data
+    resp = json.loads(data.decode('utf-8'))
+
+    assert resp.get('nameRequests') and resp.get('response')
+    response_count = len(resp['nameRequests'][0])
+    assert response_count >= 0
+    assert response_count == expected_result_count
 
 
 
