@@ -88,24 +88,7 @@ jobs:
         id: test
         run: |
           make test
-      - name: Temporarily save coverage.xml
-        uses: actions/upload-artifact@v2
-        with:
-          name: namex-api-coverage
-          path: ./api/coverage.xml
-          retention-days: 1
-
-  coverage:
-    needs: testing
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Retrieve saved coverage.xml
-        uses: actions/download-artifact@v2
-        with:
-          name: namex-api-coverage
-
       - name: Upload coverage to Codecov
-        if: hashFiles('./api/coverage.xml') != ''
         uses: codecov/codecov-action@v1
         with:
           file: ./api/coverage.xml

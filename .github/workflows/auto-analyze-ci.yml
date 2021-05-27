@@ -6,8 +6,49 @@ on:
     paths:
       - "services/auto-analyze/**"
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./services/auto-analyze
+
 jobs:
-  auto-analyze-ci:
+  setup-job:
+    runs-on: ubuntu-20.04
+
+    if: github.repository == 'bcgov/namex'
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: "true"
+
+  linting:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          make setup
+      - name: Lint with pylint
+        id: pylint
+        run: |
+          make pylint
+      - name: Lint with flake8
+        id: flake8
+        run: |
+          make flake8
+
+  testing:
+    needs: setup-job
     env:
       DATABASE_TEST_USERNAME: postgres
       DATABASE_TEST_PASSWORD: postgres
@@ -17,16 +58,6 @@ jobs:
       DATABASE_PASSWORD: postgres
 
     runs-on: ubuntu-20.04
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./services/auto-analyze
-
-    if: github.repository == 'bcgov/namex'
-
-    strategy:
-      matrix:
-        python-version: [3.8]
 
     services:
       postgres:
@@ -49,25 +80,25 @@ jobs:
       - name: Install dependencies
         run: |
           make setup
-      - name: Lint with pylint
-        run: |
-          make pylint
-        continue-on-error: true
-      - name: Lint with flake8
-        run: |
-          make flake8
-        continue-on-error: true
       - name: Test with pytest
+        id: test
         run: |
           make test
-        continue-on-error: true
-      #- name: Upload coverage to Codecov
-      #  uses: codecov/codecov-action@v1
-      #  with:
-      #    file: ./services/auto-analyze/coverage.xml
-      #    flags: autoanalyze
-      #    name: codecov-auto-analyze
-      #    fail_ci_if_error: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./services/auto-analyze/coverage.xml
+          flags: autoanalyze
+          name: codecov-auto-api
+          fail_ci_if_error: true
+
+  build-check:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
       - name: build to check strictness
+        id: build
         run: |
           make build-nc

@@ -19,9 +19,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: setup check
-        run: |
-          echo "setup check pass."
+      - run: "true"
 
   linting:
     needs: setup-job
@@ -59,10 +57,6 @@ jobs:
 
     runs-on: ubuntu-20.04
 
-    strategy:
-      matrix:
-        python-version: [3.8]
-
     services:
       postgres:
         image: postgres:12
@@ -88,27 +82,10 @@ jobs:
         id: test
         run: |
           make test
-      - name: Temporarily save coverage.xml
-        uses: actions/upload-artifact@v2
-        with:
-          name: colin-api-coverage
-          path: ./api/coverage.xml
-          retention-days: 1
-
-  coverage:
-    needs: testing
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Retrieve saved coverage.xml
-        uses: actions/download-artifact@v2
-        with:
-          name: colin-api-coverage
-
       - name: Upload coverage to Codecov
-        if: hashFiles('./colin-api/coverage.xml') != ''
         uses: codecov/codecov-action@v1
         with:
-          file: ./api/coverage.xml
+          file: ./colin-api/coverage.xml
           flags: colinapi
           name: codecov-colin-api
           fail_ci_if_error: true

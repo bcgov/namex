@@ -6,15 +6,24 @@ on:
     paths:
       - "solr-feeder/**"
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./solr-feeder
+
 jobs:
-  solr-feeder-ci:
+  setup-job:
     runs-on: ubuntu-20.04
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./solr-feeder
 
     if: github.repository == 'bcgov/namex'
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: "true"
+
+  linting:
+    needs: setup-job
+    runs-on: ubuntu-20.04
 
     strategy:
       matrix:
@@ -30,24 +39,45 @@ jobs:
         run: |
           make setup
       - name: Lint with pylint
+        id: pylint
         run: |
           make pylint
-        continue-on-error: true
       - name: Lint with flake8
+        id: flake8
         run: |
           make flake8
-        continue-on-error: true
+
+  testing:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          make setup
       - name: Test with pytest
+        id: test
         run: |
           make test
-        continue-on-error: true
       #- name: Upload coverage to Codecov
       #  uses: codecov/codecov-action@v1
       #  with:
-      #    file: ./api/coverage.xml
-      #    flags: namexapi
-      #    name: codecov-namex-api
+      #    file: ./queue_services/entity-pay/coverage.xml
+      #    flags: entitypay
+      #    name: codecov-entity-pay
       #    fail_ci_if_error: true
+
+  build-check:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
       - name: build to check strictness
+        id: build
         run: |
           make build-nc
