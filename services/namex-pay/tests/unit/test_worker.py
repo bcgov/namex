@@ -125,7 +125,6 @@ async def test_update_payment_record(app, session,
 
             assert nr_final.stateCd == end_request_state
             assert nr_final.priorityCd == end_priority
-            assert nr_final.expirationDate == (start_datetime or now) + timedelta(days=days_after_start_datetime)
             assert eval(f'payment_final.payment_completion_date {end_payment_has_value} None')
             assert payment_final.payment_status_code == end_payment_state
 

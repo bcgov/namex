@@ -147,7 +147,7 @@ class NameRequestsResource(BaseNameRequestResource):
             nr_model = self.update_nr(nr_model, nr_svc.request_state_code, self.handle_nr_create)
 
             # Record the event
-            EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_svc.request_data)
+            EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_model.json())
 
             nr_model.stateCd = State.PENDING_PAYMENT
             nr_model.save_to_db()

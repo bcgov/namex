@@ -1,4 +1,4 @@
-Flask
+Flask==1.1.2
 jsonschema
 python-dotenv
 sentry-sdk[flask]

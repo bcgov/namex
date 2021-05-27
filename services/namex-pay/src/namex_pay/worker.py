@@ -34,7 +34,8 @@ from typing import Optional
 
 import nats
 from flask import Flask
-from namex.models import db, Payment, Request as RequestDAO, State  # noqa:I001; import orders
+from namex.models import db, Event, Payment, Request as RequestDAO, State, User  # noqa:I001; import orders
+from namex.services import EventRecorder
 from queue_common.messages import create_cloud_event_msg  # noqa:I005
 from queue_common.service import QueueServiceManager
 from queue_common.service_utils import QueueException, logger
@@ -206,9 +207,19 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
 
                     if update_payment := await update_payment_record(payment):
                         payment = update_payment
-                    
+                        # record event
+                        nr = RequestDAO.find_by_id(payment.nrId)
+                        # TODO: create a namex_pay user for this
+                        user = User.find_by_username('name_request_service_account')
+                        EventRecorder.record(
+                            user,
+                            Event.NAMEX_PAY + f' [payment completed] { payment.payment_action }',
+                            nr,
+                            nr.json()
+                        )
+
                     await furnish_receipt_message(qsm, payment)
-                    
+
                 else:
                     logger.debug('Queue Error: Unable to find payment record for :%s', pay_msg)
                     capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')

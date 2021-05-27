@@ -88,7 +88,7 @@ try:
 
             nro_data_pump_update(r, ora_cursor, expires_days)
             db.session.add(r)
-            EventRecorder.record(user, Event.NRO_UPDATE, r, {}, save_to_session=True)
+            EventRecorder.record(user, Event.NRO_UPDATE, r, r.json(), save_to_session=True)
 
             ora_con.commit()
             db.session.commit()
