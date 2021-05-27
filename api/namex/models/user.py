@@ -21,6 +21,7 @@ class User(db.Model):
         default='Status,LastModifiedBy,NameRequestNumber,Names,ApplicantFirstName,ApplicantLastName,NatureOfBusiness,ConsentRequired,Priority,ClientNotification,Submitted,LastUpdate,LastComment'
     )
 
+    STAFF = 'staff'
     APPROVER = 'names_approver'
     EDITOR = 'names_editor'
     VIEWONLY = 'names_viewer'

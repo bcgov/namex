@@ -7,12 +7,13 @@ from flask import current_app, request, make_response, jsonify
 from flask_restx import cors, fields
 from flask_jwt_oidc import AuthError
 
+from namex import jwt
 from namex.utils.logging import setup_logging
-from namex.utils.auth import cors_preflight
+from namex.utils.auth import cors_preflight, validate_roles
 from namex.utils.api_resource import clean_url_path_param, handle_exception
 
 from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
-from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event
+from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event, User
 # TODO: There are places we will use this!
 from namex.services import EventRecorder
 
@@ -300,13 +301,41 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             filing_info = payment_request.get('filingInfo')
             business_info = payment_request.get('businessInfo')
 
+            headers = json_input.get('headers')
+            auth = headers.get('Authorization')
+            account_info = {}
+            if auth and validate_roles(jwt, auth, [User.STAFF]):
+                if routing_slip_number := headers.get('routingSlipNumber'):
+                    account_info['routingSlip'] = routing_slip_number
+                    del headers['routingSlipNumber']
+
+                if bcol_account_number := headers.get('bcolAccountNumber'):
+                    account_info['bcolAccountNumber'] = bcol_account_number
+                    del headers['bcolAccountNumber']
+
+                if dat_number := headers.get('datNumber'):
+                    account_info['datNumber'] = dat_number
+                    del headers['datNumber']
+
+                if folio_number := headers.get('folioNumber'):
+                    filing_info['folioNumber'] = folio_number
+                    del headers['folioNumber']
+
+                filing_info.get('filingTypes')[0]['waiveFees'] = headers.get('waiveFees', False)
+                if 'waiveFees' in headers:
+                    del headers['waiveFees']
+
             # Create our payment request
             req = PaymentRequest(
                 paymentInfo=payment_info,
                 filingInfo=filing_info,
                 businessInfo=business_info
             )
-            payment_response = create_payment(req.as_dict(), json_input.get('headers'))
+
+            if account_info:
+                req['accountInfo'] = account_info
+
+            payment_response = create_payment(req.as_dict(), headers)
             try:
                 successful_status_list = [
                     PaymentStatusCode.APPROVED.value,
@@ -364,7 +393,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                         'action': payment.payment_action,
                         'completionDate': payment.payment_completion_date,
                         'payment': payment.as_dict(),
-                        'sbcPayment': payment_response.as_dict()
+                        'sbcPayment': payment_response.as_dict(),
+                        'isPaymentActionRequired': payment_response.isPaymentActionRequired
                     })
 
                     # Record the event
