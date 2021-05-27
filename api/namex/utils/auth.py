@@ -1,7 +1,9 @@
 import string
 
+from jose import jwt
 import requests
 from flask import Request, current_app
+from flask_jwt_oidc.jwt_manager import JwtManager
 
 from namex.models import Request as RequestDAO
 
@@ -96,3 +98,13 @@ def get_client_credentials(auth_url, client_id, secret):
     return True, token
 
 
+def validate_roles(_jwt: JwtManager, authorization: str, required_roles):
+    """Validate roles in authorization token."""
+    parts = authorization.split()
+    token = parts[1]
+    _jwt._validate_token(token)
+    unverified_claims = jwt.get_unverified_claims(token)
+    roles_in_token = unverified_claims['realm_access']['roles']
+    if all(elem in roles_in_token for elem in required_roles):
+        return True
+    return False
