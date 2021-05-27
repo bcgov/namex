@@ -1,4 +1,4 @@
-# Everything the developer needs in addition to the production requirements
+# Everything the developer needs outside of the production requirements
 # Testing
 pytest
 freezegun

@@ -255,6 +255,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
         try:
             # Find the existing name request
             nr_model = RequestDAO.query.get(nr_id)
+            # only used for adding namerequest service user to event recording 
+            nr_svc = self.nr_service
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
@@ -370,6 +372,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                             nr_model.priorityDate = datetime.utcnow()
                             payment.payment_completion_date = datetime.utcnow()
 
+
                         elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
                             # TODO: handle this (refund payment and prevent action?)
                             if nr_model.stateCd != State.APPROVED \
@@ -379,6 +382,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
                             nr_model.expirationDate = nr_model.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
                             payment.payment_completion_date = datetime.utcnow()
+                        
+                        EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
                         
                         nr_model.save_to_db()
                         payment.save_to_db()
@@ -398,8 +403,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     })
 
                     # Record the event
-                    # nr_svc = self.nr_service
-                    # EventRecorder.record(nr_svc.user, Event.POST + ' [payment created]', json_input)
+                    EventRecorder.record(nr_svc.user, Event.POST + f' [payment created] { payment_action }', nr_model, nr_model.json())
 
                     response = make_response(data, 201)
                     return response
@@ -407,6 +411,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 else:
                     # log actual status code
                     current_app.logger.debug('Error with status code. Actual status code: ' + payment_response.statusCode)
+                    EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
                     # return generic error status to the front end
                     return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 402
             except Exception as err:

@@ -1,8 +1,10 @@
-from namex.models import Event as EventDAO, Request as RequestDAO, User, State
+import copy, json
 from flask import jsonify
 from flask_restx import Resource, Namespace, cors
-from namex.utils.auth import cors_preflight
+
 from namex import jwt
+from namex.models import Event as EventDAO, Request as RequestDAO, User, State
+from namex.utils.auth import cors_preflight
 
 from namex.utils.logging import setup_logging
 setup_logging()  # important to do this first
@@ -32,19 +34,89 @@ class Events(Resource):
 
         event_results = EventDAO.query.filter_by(nrId=request_id).order_by("id").all()
 
+        # info needed for each event
+        nr_event_info = {
+            'additionalInfo': None,
+            'consent_dt': None,
+            'consentFlag': None,
+            'corpNum': None,
+            'eventDate': None,
+            'expirationDate': None,
+            'names': [],
+            'priorityCd': None,
+            'requestTypeCd': None,
+            'request_action_cd': None,
+            'stateCd': None,
+            'user_action': None,
+            'user_name': None
+        }
+        # previous event (used for 'user_action' logic)
         e_dict_previous = dict()
-        e_txn_history = dict()
-        i = 0
+        # transaction history that will be returned in the payload
+        e_txn_history = []
 
         for e in event_results:
 
             e_dict = e.json()
-            user_action = ""
-            user_name = ""
+            event_json_data = dict(json.loads(e_dict['jsonData']))
 
+            # skip unneeded events for transaction history due to workflow:
+            # - 1. patch[checkout] changes the NR state to inprogress
+            # - 2. patch[edit] changes NR information (not including state)
+            # - 3. patch[checkin] changes the NR state back to it's previous state
+            if e_dict['action'] in ['patch [checkout]', 'patch [checkin]']:
+                continue
+
+            # update NR state unless action was a patch [edit] (see comment above for why)
+            if e_dict['action'] != 'patch [edit]':
+                nr_event_info['stateCd'] = e_dict['stateCd']
+                # TODO: capture below cases in the event record data
+                # if state is CONDITIONAL and consentFlag is null, then set it to Y
+                if nr_event_info['stateCd'] == State.CONDITIONAL and nr_event_info['consentFlag'] in ['N', None]:
+                    nr_event_info['consentFlag'] = 'Y'
+                # if state is not CONDITIONAL remove event consent data
+                if nr_event_info['stateCd'] != State.CONDITIONAL:
+                    nr_event_info['consentFlag'] = 'N'
+                    nr_event_info['consent_dt'] = None
+
+            # TODO: make event data consistent across all events (requires changes in event recording across the api)
+            # - current process is to save payload given, but we need the nr info that was updated saved too
+
+            # if data is a name, update nr_event_info with corresponding name choice
+            if all(key in event_json_data.keys() for key in ['choice', 'name']):
+                update_index = 0
+                for name, i in zip(nr_event_info['names'], range(len(nr_event_info['names']))):
+                    if name['choice'] == event_json_data['choice']:
+                        # save index so we can update it
+                        update_index = i
+                        break
+                # paste new name info over the old one
+                nr_event_info['names'][update_index] = event_json_data
+
+            # else update nr_event_info with any changed event data (should be formatted same as an NR json)
+            else:
+                for key in nr_event_info.keys():
+                    if key in event_json_data.keys():
+                        # stateCd updated from e_dict already (not always accurate in event_json_data)
+                        if key == 'stateCd':
+                            print(e_dict['action'], key)
+                            continue
+                        # otherwise update nr_event_info
+                        print('updating', key)
+                        nr_event_info[key] = event_json_data[key]
+
+            # update event date
+            nr_event_info['eventDate'] = e_dict['eventDate']
+            
+            # update username
             user = User.query.filter_by(id=e_dict['userId']).first().json()
+            nr_event_info['user_name'] = user['username']
 
-            if e_dict["action"] == "update_from_nro" and (e_dict["stateCd"] == State.INPROGRESS or e_dict["stateCd"] == State.DRAFT):
+            # update user action
+            user_action = e_dict["action"]
+            if e_dict["action"] == "patch [edit]":
+                user_action = "Edit NR Details (Name Request)"
+            if e_dict["action"] == "update_from_nro" and (e_dict["stateCd"] in [State.INPROGRESS, State.DRAFT]):
                 user_action = "Get NR Details from NRO"
             if e_dict["action"] == "get" and e_dict["stateCd"] == State.INPROGRESS:
                 user_action = "Get Next NR"
@@ -55,11 +127,13 @@ class Events(Resource):
             if e_dict["action"] == "marked_on_hold" and e_dict["stateCd"] == State.HOLD:
                 user_action = "Marked on Hold"
             if e_dict["action"] == "put" and e_dict["stateCd"] == State.DRAFT:
-                user_action = "Edit NR Details"
+                user_action = "Edit NR Details (NameX)"
             if e_dict["action"] == "put" and e_dict["stateCd"] == State.INPROGRESS and "additional" in e_dict["jsonData"]:
-                if len(e_dict_previous) == 0 or (e_dict_previous["stateCd"] == State.HOLD or e_dict_previous["stateCd"] == State.DRAFT or e_dict_previous["stateCd"] == State.INPROGRESS):
-                    user_action = "Edit NR Details"
-                if e_dict_previous and e_dict_previous["stateCd"] == State.APPROVED or e_dict_previous["stateCd"] == State.REJECTED or e_dict_previous["stateCd"] == State.CONDITIONAL:
+                if len(e_dict_previous) == 0 or (e_dict_previous["stateCd"] in [State.HOLD, State.DRAFT, State.INPROGRESS]):
+                    user_action = "Edit NR Details (NameX)"
+                if e_dict_previous and e_dict_previous["stateCd"] in [State.APPROVED, State.REJECTED, State.CONDITIONAL]:
+                    # event data will still have an expiration date, but actual NR will have cleared
+                    nr_event_info['expirationDate'] = None
                     if '"furnished": "Y"' in e_dict["jsonData"]:
                         user_action = "Reset"
                     else:
@@ -86,20 +160,38 @@ class Events(Resource):
                 user_action = "Set to Historical by NRO(Migration)"
             if e_dict["stateCd"] == State.COMPLETED and (e_dict["action"] == "post" or e_dict["action"] == "update_from_nro"):
                 user_action = "Migrated by NRO"
+            if e_dict["action"] == "post" and (e_dict["stateCd"] in [State.DRAFT, State.PENDING_PAYMENT] and not e_dict_previous):
+                # state of these will be DRAFT, but show as PENDING_PAYMENT to avoid confusion
+                user_action = "Created NRL"
+                nr_event_info['stateCd'] = State.PENDING_PAYMENT
+            if "[payment created] CREATE" in e_dict["action"]:
+                user_action = "Created NR (Payment Initialized)"
+            if "[payment completed] CREATE" in e_dict["action"]:
+                user_action = "Created NR (Payment Completed)"
+            if "[payment created] UPGRADE" in e_dict["action"]:
+                user_action = "Upgraded Priority (Payment Initialized)"
+            if "[payment completed] UPGRADE" in e_dict["action"]:
+                user_action = "Upgraded Priority (Payment Completed)"
+            if "[payment created] REAPPLY" in e_dict["action"]:
+                user_action = "Reapplied NR (Payment Initialized)"
+            if "[payment completed] REAPPLY" in e_dict["action"]:
+                user_action = "Reapplied NR (Payment Completed)"
 
+
+            nr_event_info['user_action'] = user_action
+
+            # add event to transaction history (at the beginning of the list)
+            e_txn_history.insert(0, copy.deepcopy(nr_event_info))
+
+            # set previous event
             e_dict_previous = e_dict
-            e_dict["user_action"] = user_action
-            e_dict["user_name"] = user["username"]
 
-            i = i + 1
-            e_txn_history[i] = {}
-            e_txn_history[i] = e_dict
+        if len(e_txn_history) == 0:
+            return jsonify({ 'message': f'No valid events for {nr} found'}), 404
 
-        if i == 0:
-            return jsonify({"message": "No valid events for NR:{} found".format(nr)}), 404
+        resp = {
+            'response': { 'count': len(e_txn_history) },
+            'transactions': e_txn_history
+        }
 
-        rep = {'response': {'count': i},
-               'transactions': e_txn_history
-               }
-
-        return jsonify(rep), 200
+        return jsonify(resp), 200

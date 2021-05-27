@@ -1,12 +1,12 @@
-Flask
-jsonschema
-python-dotenv
+Flask==1.1.2
+jsonschema==3.2.0
+python-dotenv==0.17.1
 sentry-sdk[flask]
-aiohttp
-asyncio-nats-client
-asyncio-nats-streaming
-pycountry
-Werkzeug
+aiohttp==3.7.4.post0
+asyncio-nats-client==0.11.4
+asyncio-nats-streaming==0.4.0
+pycountry==20.7.3
+Werkzeug==2.0.1
 
 git+https://github.com/bcgov/business-schemas.git#egg=registry_schemas
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api

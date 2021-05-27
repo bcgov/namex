@@ -1,7 +1,8 @@
-from flask import current_app
-from namex.models import Event
-from datetime import datetime
 import json
+from datetime import datetime
+from flask import current_app
+
+from namex.models import Event
 
 
 
@@ -16,8 +17,9 @@ class EventRecorder(object):
             else:
                 event.save_to_db()
         except Exception as err:
+            current_app.logger.error(err.with_traceback(None))
             current_app.logger.error('AUDIT BROKEN: change was - NRNUM: {}, ACTION: {}, USER {}, JSON{}'
-                                     .format(nr.nr_num, action, user.username, data_dict)
+                                     .format(nr.nrNum, action, user.username, data_dict)
                                     )
 
     @staticmethod
@@ -28,7 +30,7 @@ class EventRecorder(object):
             eventJson = json.dumps(data_dict),
             nrId = nr.id,
             stateCd = nr.stateCd,
-            userId = user.id
+            userId = user.id if user else None
         )
         return event
 
