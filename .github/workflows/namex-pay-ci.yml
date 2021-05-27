@@ -1,15 +1,15 @@
-name: Name Pay CI
+name: Namex API CI
 
 on:
   pull_request:
     types: [assigned, synchronize]
     paths:
-      - "services/name-pay/**"
+      - "services/namex-pay/**"
 
 defaults:
   run:
     shell: bash
-    working-directory: ./services/name-pay
+    working-directory: ./services/namex-pay
 
 jobs:
   setup-job:
@@ -94,26 +94,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: namex-pay-coverage
-          path: ./services/name-pay/coverage.xml
+          flags: namexpayapi
+          path: ./services/namex-pay/coverage.xml
           retention-days: 1
-
-  coverage:
-    needs: testing
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Retrieve saved coverage.xml
-        uses: actions/download-artifact@v2
-        with:
-          name: namex-pay-coverage
-
-      - name: Upload coverage to Codecov
-        if: hashFiles('./services/name-pay/coverage.xml') != ''
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./services/name-pay/coverage.xml
-          flags: namexpay
-          name: codecov-namex-pay
-          fail_ci_if_error: true
 
   build-check:
     needs: setup-job
