@@ -99,11 +99,12 @@ class Events(Resource):
                     if key in event_json_data.keys():
                         # stateCd updated from e_dict already (not always accurate in event_json_data)
                         if key == 'stateCd':
-                            print(e_dict['action'], key)
                             continue
                         # otherwise update nr_event_info
-                        print('updating', key)
                         nr_event_info[key] = event_json_data[key]
+                # entity_type_cd for namerequest is used to change requestTypeCd in namex (it is being mapped incorrectly)
+                if 'entity_type_cd' in event_json_data.keys() and 'requestTypeCd' not in event_json_data.keys():
+                    nr_event_info['requestTypeCd'] = event_json_data['entity_type_cd']
 
             # update event date
             nr_event_info['eventDate'] = e_dict['eventDate']
