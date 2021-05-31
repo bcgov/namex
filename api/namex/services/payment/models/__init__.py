@@ -38,6 +38,11 @@ class BusinessInfo(Serializable):
     businessName: str
     contactInfo: ContactInfo
 
+@dataclass
+class AccountInfo(Serializable):
+    routingSlip: str
+    bcolAccountNumber: str
+    datNumber: str
 
 @dataclass
 class PaymentRequest(Serializable):
@@ -76,6 +81,7 @@ class PaymentRequest(Serializable):
     paymentInfo: PaymentInfo
     filingInfo: FilingInfo
     businessInfo: BusinessInfo
+    accountInfo: AccountInfo
 
 
 @dataclass

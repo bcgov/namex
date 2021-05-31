@@ -331,11 +331,9 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             req = PaymentRequest(
                 paymentInfo=payment_info,
                 filingInfo=filing_info,
-                businessInfo=business_info
+                businessInfo=business_info,
+                accountInfo=account_info
             )
-
-            if account_info:
-                req['accountInfo'] = account_info
 
             payment_response = create_payment(req.as_dict(), headers)
             try:
