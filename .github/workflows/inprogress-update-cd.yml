@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "jobs/inprogress-update/**"
+      - "jobs/inprogress_update/**"
   workflow_dispatch:
     inputs:
       environment:
@@ -16,7 +16,7 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ./jobs/inprogress-update
+    working-directory: ./jobs/inprogress_update
 
 env:
   APP_NAME: "inprogress-update"
