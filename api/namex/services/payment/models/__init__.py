@@ -103,6 +103,9 @@ class PaymentInvoice(Serializable):
     paymentMethod: str = ''
     businessIdentifier: str = ''
     corpTypeCode: str = ''
+    routingSlip: str = ''
+    datNumber: str = ''
+    folioNumber: str = ''
     lineItems: list = field(default_factory=list)
     receipts: list = field(default_factory=list)
     references: list = field(default_factory=list)
