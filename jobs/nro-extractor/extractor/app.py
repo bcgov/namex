@@ -112,7 +112,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 action
             ))
 
-            if nr and (nr.stateCd != State.DRAFT):
+            if nr and (nr.stateCd not in [State.DRAFT, State.PENDING_PAYMENT]):
 
                 # do NOT ignore updates of completed NRs, since those are CONSUME transactions -
                 # the only kind that gets into the namex_feeder table for completed NRs
@@ -131,7 +131,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num, name_request=nr)
 
                 namex_db.session.add(nr)
-                EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, {}, save_to_session=True)
+                EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, nr.json(), save_to_session=True)
                 current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
 
                 success = update_feeder_row(ora_con

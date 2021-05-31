@@ -34,6 +34,7 @@ from typing import Optional
 
 import nats
 from flask import Flask
+from namex import nro
 from namex.models import db, Event, Payment, Request as RequestDAO, State, User  # noqa:I001; import orders
 from namex.services import EventRecorder
 from queue_common.messages import create_cloud_event_msg  # noqa:I005
@@ -217,6 +218,28 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
                             nr,
                             nr.json()
                         )
+                        # try to update NRO otherwise send a sentry msg for OPS
+                        if payment.payment_action in [payment.PaymentActions.UPGRADE, payment.PaymentActions.REAPPLY]:
+                            change_flags = {
+                                'is_changed__request': True,
+                                'is_changed__previous_request': False,
+                                'is_changed__applicant': False,
+                                'is_changed__address': False,
+                                'is_changed__name1': False,
+                                'is_changed__name2': False,
+                                'is_changed__name3': False,
+                                'is_changed__nwpta_ab': False,
+                                'is_changed__nwpta_sk': False,
+                                'is_changed__request_state': False,
+                                'is_changed_consent': False
+                            }
+                            warnings = nro.change_nr(nr, change_flags)
+                            if warnings:
+                                logger.error('Queue Error: Unable to update NRO :%s', warnings)
+                                capture_message(
+                                    f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
+                                    level='error'
+                                )
 
                     await furnish_receipt_message(qsm, payment)
 
@@ -232,9 +255,9 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
         # if we're here and haven't been able to action it,
         # then we've received an unknown token
         # Capture it to the log and remove it rom the queue
-        logger.error('Unknown payment token given: %s', payment_token)
+        logger.error('Unknown payment token given: %s', pay_msg.get('paymentToken', {}))
         capture_message(
-            f'Queue Error: Unknown paymentToken:{payment_token}',
+            f'Queue Error: Unknown paymentToken:{pay_msg.get("paymentToken", {})}',
             level='error')
 
 

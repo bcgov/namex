@@ -17,9 +17,13 @@ def create_expiry_date(start: datetime, expires_in_days: int, expiry_hour: int =
 
 def nro_data_pump_update(nr, ora_cursor, expires_days=56):
 
-    expiry_date = create_expiry_date(start=nr.lastUpdate, expires_in_days=expires_days, tz=timezone('US/Pacific'))
+    expiry_date = create_expiry_date(
+        start=nr.lastUpdate,
+        expires_in_days=expires_days,
+        tz=timezone('US/Pacific')
+    )
 
-    print (expiry_date)
+    current_app.logger.debug(f'Setting expiry date to: { expiry_date }')
     # init dict for examiner comment data, populated below in loop through names
     examiner_comment = {
         'choice': 0,
@@ -35,14 +39,13 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
     current_app.logger.debug('processing names for :{}'.format(nr.nrNum))
     for name in nr.names.all():
         choice = name.choice - 1
-        if name.state in [Name.APPROVED, name.CONDITION]:
+        if name.state in [Name.APPROVED, Name.CONDITION]:
             nro_names[choice]['state'] = 'A'
         elif name.state == Name.REJECTED:
             nro_names[choice]['state'] = 'R'
         else:
             nro_names[choice]['state'] = 'NE'
 
-        decision_text = ''
         # some defensive coding here to handle approve/reject/condition where no decision text is available
         # TODO determine if there a business rule requiring APPROVE|REJECTED|CONDITION to have a decision?
         if name.state in [Name.APPROVED, Name.CONDITION, Name.REJECTED]:
@@ -64,13 +67,15 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
                 examiner_comment['choice'] = name.choice
                 examiner_comment['comment'] = name.comment.comment.encode("ascii","ignore").decode('ascii')
 
+    status = 'A' if (nr.stateCd in [State.APPROVED, State.CONDITIONAL]) else 'R'
+    consent = 'Y' if (nr.consentFlag == 'Y' or nr.stateCd == State.CONDITIONAL) else 'N'
     current_app.logger.debug('sending {} to NRO'.format(nr.nrNum))
     current_app.logger.debug('nr:{}; stateCd:{}; status: {}; expiry_dt:{}; consent:{}; examiner:{}'
                              .format(nr.nrNum,
                                      nr.stateCd,
-                                     'A' if (nr.stateCd in [State.APPROVED, State.CONDITIONAL]) else 'R',
+                                     status,
                                      expiry_date.strftime('%Y%m%d'),
-                                     'Y' if (nr.consentFlag == 'Y' or nr.stateCd == State.CONDITIONAL) else 'N',
+                                     consent,
                                      nro_examiner_name(nr.activeUser.username)
                                      ))
 
@@ -78,10 +83,9 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
     ret = ora_cursor.callfunc("NRO_DATAPUMP_PKG.name_examination_func",
                               str,
                               [nr.nrNum,  # p_nr_number
-                               'A' if (nr.stateCd in [State.APPROVED, State.CONDITIONAL]) else 'R',  # p_status
+                               status,  # p_status
                                expiry_date.strftime('%Y%m%d'),  # p_expiry_date
-                               'Y' if (nr.consentFlag == 'Y' or nr.stateCd == State.CONDITIONAL) else 'N',
-                               # p_consent_flag
+                               consent,  # p_consent_flag
                                nro_examiner_name(nr.activeUser.username),  # p_examiner_id
                                nro_names[0]['decision'],  # p_choice1
                                nro_names[1]['decision'],  # p_choice2
