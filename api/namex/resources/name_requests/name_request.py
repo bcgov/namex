@@ -386,7 +386,7 @@ class NameRequestFields(BaseNameRequestResource):
         nr_model = self.update_records_in_network_services(nr_model, update_solr=True)
 
         # Record the event
-        EventRecorder.record(nr_svc.user, Event.PATCH + ' [request-refund]', nr_model, nr_svc.request_data)
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [request-refund]', nr_model, nr_model.json())
 
         return nr_model
 
@@ -477,6 +477,6 @@ class NameRequestRollback(BaseNameRequestResource):
             self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
 
         # Record the event
-        EventRecorder.record(nr_svc.user, Event.PATCH, nr_model, nr_svc.request_data)
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [rollback]', nr_model, nr_model.json())
 
         return nr_model

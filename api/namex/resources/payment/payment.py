@@ -7,23 +7,19 @@ from flask import current_app, request, make_response, jsonify
 from flask_restx import cors, fields
 from flask_jwt_oidc import AuthError
 
-from namex import jwt
-from namex.utils.logging import setup_logging
-from namex.utils.auth import cors_preflight, validate_roles
-from namex.utils.api_resource import clean_url_path_param, handle_exception
-
+from namex import jwt, nro
 from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
 from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event, User
-# TODO: There are places we will use this!
-from namex.services import EventRecorder
-
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
-
+from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.payments import get_payment, create_payment, refund_payment, cancel_payment
 from namex.services.payment.models import PaymentRequest
 from namex.services.name_request.utils import has_active_payment, get_active_payment
+from namex.utils.logging import setup_logging
+from namex.utils.auth import cors_preflight, validate_roles
+from namex.utils.api_resource import clean_url_path_param, handle_exception
 
 from .api_namespace import api as payment_api
 from .utils import build_payment_request, merge_payment_request
@@ -381,10 +377,32 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                             nr_model.expirationDate = nr_model.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
                             payment.payment_completion_date = datetime.utcnow()
                         
-                        EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
-                        
                         nr_model.save_to_db()
                         payment.save_to_db()
+                        EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
+                        if payment_action in [payment.PaymentActions.UPGRADE, payment.PaymentActions.REAPPLY]:
+                            change_flags = {
+                                'is_changed__request': True,
+                                'is_changed__previous_request': False,
+                                'is_changed__applicant': False,
+                                'is_changed__address': False,
+                                'is_changed__name1': False,
+                                'is_changed__name2': False,
+                                'is_changed__name3': False,
+                                'is_changed__nwpta_ab': False,
+                                'is_changed__nwpta_sk': False,
+                                'is_changed__request_state': False,
+                                'is_changed_consent': False
+                            }
+                            warnings = nro.change_nr(nr_model, change_flags)
+                            if warnings:
+                                # log error for ops, but return success (namex is still up to date)
+                                msg = f'API Error: Unable to update NRO for {nr_model.nrNum} {payment_action}: {warnings}'
+                                current_app.logger.error(msg)
+                    
+                    else:
+                        # Record the event
+                        EventRecorder.record(nr_svc.user, Event.POST + f' [payment created] { payment_action }', nr_model, nr_model.json())
 
                     # Wrap the response, providing info from both the SBC Pay response and the payment we created
                     data = jsonify({
@@ -399,9 +417,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                         'sbcPayment': payment_response.as_dict(),
                         'isPaymentActionRequired': payment_response.isPaymentActionRequired
                     })
-
-                    # Record the event
-                    EventRecorder.record(nr_svc.user, Event.POST + f' [payment created] { payment_action }', nr_model, nr_model.json())
 
                     response = make_response(data, 201)
                     return response
@@ -524,6 +539,8 @@ class NameRequestPayment(AbstractNameRequestResource):
 
                 payment.payment_status_code = PaymentState.CANCELLED.value
                 payment.save_to_db()
+                nr_svc = self.nr_service
+                EventRecorder.record(nr_svc.user, Event.DELETE + f' [payment cancelled] {payment.payment_action}', nr_model, nr_model.json())
 
                 response_data = nr_model.json()
                 # Add the list of valid Name Request actions for the given state to the response
@@ -655,7 +672,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             nr_model.save_to_db()
 
             # Record the event
-            # EventRecorder.record(nr_svc.user, Event.PATCH + ' [pay]', nr_model, nr_svc.request_data)
+            EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment completed] RESERVE', nr_model, nr_model.json())
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
@@ -698,7 +715,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
 
         # Record the event
-        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [upgrade]', nr_model, nr_svc.request_data)
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment completed] UPGRADE', nr_model, nr_model.json())
 
         return nr_model
 
@@ -746,7 +763,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
 
         # Record the event
-        # EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-apply]', nr_model, nr_svc.request_data)
+        EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment completed] REAPPLY', nr_model, nr_model.json())
 
         return nr_model
 
@@ -774,6 +791,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 refund_payment(payment.payment_token, {})
                 payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
                 payment.save_to_db()
+                nr_svc = self.nr_service
+                EventRecorder.record(nr_svc.user, Event.PATCH + f' [payment refunded] {payment.payment_action}', nr_model, nr_model.json())
 
         return nr_model
 
@@ -790,4 +809,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 cancel_payment(payment.payment_token)
                 payment.payment_status_code = PaymentState.CANCELLED.value
                 payment.save_to_db()
+                # record the event
+                nr_svc = self.nr_service
+                EventRecorder.record(nr_svc.user, Event.DELETE + f' [payment cancelled] {payment.payment_action}', nr_model, nr_model.json())
         return nr_model

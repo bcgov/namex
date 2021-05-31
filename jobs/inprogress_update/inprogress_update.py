@@ -63,7 +63,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             # commit here to keep this entry in sync with NRO (in case errors happen later)
             db.session.commit()
 
-            EventRecorder.record(user, Event.SET_TO_DRAFT, r, {}, save_to_session=True)
+            EventRecorder.record(user, Event.SET_TO_DRAFT, r, r.json(), save_to_session=True)
 
         # for nrs edited by examiners
         examine_reqs = db.session.query(Request). \
@@ -93,7 +93,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
                 event = Event.MARKED_ON_HOLD
 
             db.session.add(r)
-            EventRecorder.record(user, event, r, {}, save_to_session=True)
+            EventRecorder.record(user, event, r, r.json(), save_to_session=True)
 
         db.session.commit()
         return row_count, True
@@ -105,6 +105,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
 
 
 if __name__ == '__main__':
+    # TODO: make service account for inporgress updater
     NRO_SERVICE_ACCOUNT = 'NRO_SERVICE_ACCOUNT'
     app = create_app(Config)
     client_delay, examine_delay, max_rows = get_ops_params()

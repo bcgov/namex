@@ -288,7 +288,7 @@ class NROServices(object):
                     nr = nrf
                 nr.stateCd = nr_saved_state
                 nr.save_to_db()
-                EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, {})
+                EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, nr.json())
 
             except Exception as missed_error:
                 warnings.append({'type': 'warn',

@@ -3,7 +3,7 @@ from flask import jsonify
 from flask_restx import Resource, Namespace, cors
 
 from namex import jwt
-from namex.models import Event as EventDAO, Request as RequestDAO, User, State
+from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment, payment
 from namex.utils.auth import cors_preflight
 
 from namex.utils.logging import setup_logging
@@ -42,6 +42,7 @@ class Events(Resource):
             'corpNum': None,
             'eventDate': None,
             'expirationDate': None,
+            'furnished': None,
             'names': [],
             'priorityCd': None,
             'requestTypeCd': None,
@@ -56,7 +57,7 @@ class Events(Resource):
         e_txn_history = []
 
         for e in event_results:
-
+            previous_nr_event_info = copy.deepcopy(nr_event_info)
             e_dict = e.json()
             event_json_data = dict(json.loads(e_dict['jsonData']))
 
@@ -117,7 +118,7 @@ class Events(Resource):
             user_action = e_dict["action"]
             if e_dict["action"] == "patch [edit]":
                 user_action = "Edit NR Details (Name Request)"
-            if e_dict["action"] == "update_from_nro" and (e_dict["stateCd"] in [State.INPROGRESS, State.DRAFT]):
+            if e_dict["action"] == "update_from_nro":
                 user_action = "Get NR Details from NRO"
             if e_dict["action"] == "get" and e_dict["stateCd"] == State.INPROGRESS:
                 user_action = "Get Next NR"
@@ -135,7 +136,7 @@ class Events(Resource):
                 if e_dict_previous and e_dict_previous["stateCd"] in [State.APPROVED, State.REJECTED, State.CONDITIONAL]:
                     # event data will still have an expiration date, but actual NR will have cleared
                     nr_event_info['expirationDate'] = None
-                    if '"furnished": "Y"' in e_dict["jsonData"]:
+                    if previous_nr_event_info['furnished'] == 'Y':
                         user_action = "Reset"
                     else:
                         user_action = "Re-Open"
@@ -165,19 +166,34 @@ class Events(Resource):
                 # state of these will be DRAFT, but show as PENDING_PAYMENT to avoid confusion
                 user_action = "Created NRL"
                 nr_event_info['stateCd'] = State.PENDING_PAYMENT
-            if "[payment created] CREATE" in e_dict["action"]:
-                user_action = "Created NR (Payment Initialized)"
-            if "[payment completed] CREATE" in e_dict["action"]:
-                user_action = "Created NR (Payment Completed)"
-            if "[payment created] UPGRADE" in e_dict["action"]:
-                user_action = "Upgraded Priority (Payment Initialized)"
-            if "[payment completed] UPGRADE" in e_dict["action"]:
-                user_action = "Upgraded Priority (Payment Completed)"
-            if "[payment created] REAPPLY" in e_dict["action"]:
-                user_action = "Reapplied NR (Payment Initialized)"
-            if "[payment completed] REAPPLY" in e_dict["action"]:
-                user_action = "Reapplied NR (Payment Completed)"
+            if '[rollback]' in e_dict['action']:
+                user_action = "UI Error - NR Rolled Back"
 
+            payment_action = ''
+            payment_display = {
+                Payment.PaymentActions.CREATE.value: 'Created NR',
+                Payment.PaymentActions.REAPPLY.value: 'Reapplied NR',
+                Payment.PaymentActions.UPGRADE.value: 'Upgraded Priority'
+            }
+            for action in Payment.PaymentActions:
+                if action.value in e_dict['action']:
+                    payment_action = action.value
+                    break
+            if payment_action:
+                if '[payment created]' in e_dict['action']:
+                    user_action = f'{payment_display[payment_action]} (Payment Initialized)'
+                elif '[payment completed]' in e_dict['action']:
+                    user_action = f'{payment_display[payment_action]} (Payment Completed)'
+                elif '[payment cancelled]' in e_dict['action']:
+                    user_action = f'{payment_display[payment_action]} (Payment Cancelled)'
+                elif '[payment refunded]' in e_dict['action']:
+                    user_action = f'{payment_display[payment_action]} (Payment Refunded)'
+                else:
+                    user_action = f'{payment_display[payment_action]} (Unknown)'
+
+            # case where they refund the whole NR (not just a specific payment/event)
+            if "request-refund" in e_dict["action"]:
+                user_action = "Refund Requested"
 
             nr_event_info['user_action'] = user_action
 
