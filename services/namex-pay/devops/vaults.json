@@ -11,6 +11,7 @@
         "application": [
             "postgres-namex",
             "namex-pay",
+            "nro-service",
             "sentry"
         ]
     }
