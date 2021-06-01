@@ -85,7 +85,7 @@ class Events(Resource):
 
             # if data is a name, update nr_event_info with corresponding name choice
             if all(key in event_json_data.keys() for key in ['choice', 'name']):
-                if nr_event_info['names']:
+                if len(nr_event_info['names']) > 0:
                     update_index = 0
                     for name, i in zip(nr_event_info['names'], range(len(nr_event_info['names']))):
                         if name['choice'] == event_json_data['choice']:
