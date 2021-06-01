@@ -111,7 +111,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 None if (not nr) else nr.stateCd,
                 action
             ))
-
+            # TODO: remove this 'if' -- left it in just in case (see below todo)
             if nr and (nr.stateCd not in [State.DRAFT, State.PENDING_PAYMENT]):
 
                 # do NOT ignore updates of completed NRs, since those are CONSUME transactions -
@@ -127,8 +127,19 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                                                 , error_message='Ignored - Request: not processed')
                     ora_con.commit()
                     continue
-            # prevent new NRs from namerequest going through here
-            if not nr or (nr and nr.stateCd not in [State.DRAFT, State.PENDING_PAYMENT]):
+            # ignore existing NRs not in completed state, update the feeder row to C
+            # TODO: check if this should check the 'action' for specific values like above 'if'
+            if nr and nr.stateCd not in State.COMPLETED_STATE:
+                success = update_feeder_row(
+                    ora_con, id=row['id'],
+                    status='C',
+                    send_count=1 + 0 if (row['send_count'] is None) else row['send_count'],
+                    error_message='Ignored - Request: not processed'
+                )
+                ora_con.commit()
+                continue
+            # for any NRs in a completed state or NRs that don't exist in NameX
+            else:
                 try:
                     nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num, name_request=nr)
 
