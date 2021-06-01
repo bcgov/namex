@@ -85,14 +85,17 @@ class Events(Resource):
 
             # if data is a name, update nr_event_info with corresponding name choice
             if all(key in event_json_data.keys() for key in ['choice', 'name']):
-                update_index = 0
-                for name, i in zip(nr_event_info['names'], range(len(nr_event_info['names']))):
-                    if name['choice'] == event_json_data['choice']:
-                        # save index so we can update it
-                        update_index = i
-                        break
-                # paste new name info over the old one
-                nr_event_info['names'][update_index] = event_json_data
+                if len(nr_event_info['names']) > 0:
+                    update_index = 0
+                    for name, i in zip(nr_event_info['names'], range(len(nr_event_info['names']))):
+                        if name['choice'] == event_json_data['choice']:
+                            # save index so we can update it
+                            update_index = i
+                            break
+                    # paste new name info over the old one
+                    nr_event_info['names'][update_index] = event_json_data
+                else:
+                    nr_event_info['names'].append(event_json_data)
 
             # else update nr_event_info with any changed event data (should be formatted same as an NR json)
             else:
@@ -168,6 +171,8 @@ class Events(Resource):
                 nr_event_info['stateCd'] = State.PENDING_PAYMENT
             if '[rollback]' in e_dict['action']:
                 user_action = "UI Error - NR Rolled Back"
+            if '[cancel]' in e_dict['action']:
+                user_action = "Cancelled in Name Request"
 
             payment_action = ''
             payment_display = {
