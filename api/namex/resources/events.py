@@ -59,7 +59,9 @@ class Events(Resource):
         for e in event_results:
             previous_nr_event_info = copy.deepcopy(nr_event_info)
             e_dict = e.json()
-            event_json_data = dict(json.loads(e_dict['jsonData']))
+
+            # handle parsing new and older data
+            event_json_data = dict(json.loads(e_dict['jsonData'])) if type(e_dict['jsonData']) == str else e_dict['jsonData']
 
             # skip unneeded events for transaction history due to workflow:
             # - 1. patch[checkout] changes the NR state to inprogress
