@@ -139,3 +139,4 @@ class ReceiptResponse(Serializable):
     invoiceNumber: str = ''
     paymentMethod: str = ''
     receiptNumber: str = ''
+    routingSlipNumber: str = ''
