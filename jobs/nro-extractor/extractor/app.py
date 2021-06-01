@@ -127,36 +127,38 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                                                 , error_message='Ignored - Request: not processed')
                     ora_con.commit()
                     continue
-            try:
-                nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num, name_request=nr)
+            # prevent new NRs from namerequest going through here
+            if not nr or (nr and nr.stateCd not in [State.DRAFT, State.PENDING_PAYMENT]):
+                try:
+                    nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num, name_request=nr)
 
-                namex_db.session.add(nr)
-                EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, nr.json(), save_to_session=True)
-                current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
+                    namex_db.session.add(nr)
+                    EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, nr.json(), save_to_session=True)
+                    current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
 
-                success = update_feeder_row(ora_con
-                                            , id=row['id']
-                                            , status='C'
-                                            , send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
-                                            , error_message=None)
+                    success = update_feeder_row(ora_con
+                                                , id=row['id']
+                                                , status='C'
+                                                , send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
+                                                , error_message=None)
 
-                if success:
+                    if success:
+                        ora_con.commit()
+                        current_app.logger.debug('Oracle commit done')
+                        namex_db.session.commit()
+                        current_app.logger.debug('Postgresql commit done')
+                    else:
+                        raise Exception()
+
+                except Exception as err:
+                    current_app.logger.error(err.with_traceback(None))
+                    success = update_feeder_row(ora_con
+                                                , id=row['id']
+                                                , status=row['status']
+                                                , send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
+                                                , error_message=err.with_traceback(None))
+                    namex_db.session.rollback()
                     ora_con.commit()
-                    current_app.logger.debug('Oracle commit done')
-                    namex_db.session.commit()
-                    current_app.logger.debug('Postgresql commit done')
-                else:
-                    raise Exception()
-
-            except Exception as err:
-                current_app.logger.error(err.with_traceback(None))
-                success = update_feeder_row(ora_con
-                                            , id=row['id']
-                                            , status=row['status']
-                                            , send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
-                                            , error_message=err.with_traceback(None))
-                namex_db.session.rollback()
-                ora_con.commit()
 
         return row_count
 

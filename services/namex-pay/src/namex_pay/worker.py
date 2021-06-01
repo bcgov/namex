@@ -95,11 +95,11 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
     if payment_action == Payment.PaymentActions.CREATE.value:  # pylint: disable=R1705
         if nr.stateCd == State.PENDING_PAYMENT:
             nr.stateCd = State.DRAFT
-            payment.payment_completion_date = datetime.utcnow()
-            payment.payment_status_code = State.COMPLETED
-
             nr.save_to_db()
-            payment.save_to_db()
+
+        payment.payment_completion_date = datetime.utcnow()
+        payment.payment_status_code = State.COMPLETED
+        payment.save_to_db()
         return payment
 
     elif payment_action == Payment.PaymentActions.UPGRADE.value:
