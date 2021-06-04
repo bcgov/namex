@@ -323,6 +323,10 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 if 'waiveFees' in headers:
                     del headers['waiveFees']
 
+                # This is to support staff-payment-enabled switch to false in Launch Darkly
+                if not account_info:
+                    headers = {}
+
             # Create our payment request
             req = PaymentRequest(
                 paymentInfo=payment_info,
