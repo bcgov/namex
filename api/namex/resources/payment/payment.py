@@ -319,12 +319,13 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     filing_info['folioNumber'] = folio_number
                     del headers['folioNumber']
 
-                filing_info.get('filingTypes')[0]['waiveFees'] = headers.get('waiveFees', False)
+                waive_fees = headers.get('waiveFees', False)
+                filing_info.get('filingTypes')[0]['waiveFees'] = waive_fees
                 if 'waiveFees' in headers:
                     del headers['waiveFees']
 
                 # This is to support staff-payment-enabled switch to false in Launch Darkly
-                if not account_info:
+                if not account_info and not waive_fees:
                     headers = {}
 
             # Create our payment request
