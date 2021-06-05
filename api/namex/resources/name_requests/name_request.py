@@ -15,7 +15,7 @@ from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError, NameRequestIsInProgressError
-from namex.services.payment.payments import refund_payment
+from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 
 from .api_namespace import api
@@ -377,8 +377,9 @@ class NameRequestFields(BaseNameRequestResource):
         # Cancel any payments associated with the NR
         for payment in nr_model.payments.all():
             if payment.payment_status_code in valid_states:
-                # refund_payment(payment.payment_token, {'reason': 'Name Request user requested refund'})
-                refund_payment(payment.payment_token, {})
+                if NameRequestFields._should_refund_sbc_payment(payment.payment_token):
+                    # refund_payment(payment.payment_token, {'reason': 'Name Request user requested refund'})
+                    refund_payment(payment.payment_token, {})
                 payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
                 payment.save_to_db()
 
@@ -390,6 +391,16 @@ class NameRequestFields(BaseNameRequestResource):
 
         return nr_model
 
+    @staticmethod
+    def _should_refund_sbc_payment(payment_token) -> bool:
+        refund_sbc_payment = True
+        payment_response = get_payment(payment_token)
+        if payment_response.routingSlip:
+            refund_sbc_payment = False
+        elif len(payment_response.lineItems) == 1 and payment_response.lineItems[0]['waivedBy']:
+            refund_sbc_payment = False
+
+        return refund_sbc_payment
 
 @cors_preflight('PATCH')
 @api.route('/<int:nr_id>/rollback/<string:action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
