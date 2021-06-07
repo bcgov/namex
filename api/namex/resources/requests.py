@@ -10,7 +10,7 @@ from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.utils.logging import setup_logging
 
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import func, text
+from sqlalchemy import and_, func, or_, text
 from sqlalchemy.inspection import inspect
 
 from namex import jwt, nro, services
@@ -222,12 +222,18 @@ class Requests(Resource):
         if activeUser:
             q = q.join(RequestDAO.activeUser).filter(User.username.ilike('%' + activeUser + '%'))
 
-        # TODO: fix count on search by compName -- returns count of all names that match
-        # -- want it to be all NRs (nrs can have multiple names that match)
-        # ---- right now count is adjusted on the frontend in method 'populateTable'
         if compName:
             compName = compName.strip().replace(' ', '%')
-            q = q.join(RequestDAO.names).filter(Name.name.ilike('%' + compName + '%'))
+            ## nameSearch column is populated like: '|1<name 1>|2<name 2>|3<name 3>
+            # to ensure we don't get a match that spans over a single name
+            compName1 = '|1%' + compName + '%|2'
+            compName2 = '|2%' + compName + '%|3'
+            compName3 = '|3%' + compName + '%'
+            q = q.filter(or_(
+                    RequestDAO.nameSearch.ilike(compName1),
+                    RequestDAO.nameSearch.ilike(compName2),
+                    RequestDAO.nameSearch.ilike(compName3)
+                ))
 
         if firstName:
             firstName = firstName.strip().replace(' ', '%')
@@ -238,12 +244,11 @@ class Requests(Resource):
             q = q.join(RequestDAO.applicants).filter(Applicant.lastName.ilike('%' + lastName + '%'))
 
         if consentOption == 'Received':
-            q = q.filter(RequestDAO.consent_dt.isnot(None))
-            print(q)
+            q = q.filter(or_(RequestDAO.consentFlag == 'R', RequestDAO.consent_dt.isnot(None)))
         if consentOption == 'Yes':
             q = q.filter(RequestDAO.consentFlag == 'Y')
         elif consentOption == 'No':
-            q = q.filter(RequestDAO.consentFlag != 'Y')
+            q = q.filter(and_(RequestDAO.consentFlag == 'N', RequestDAO.consent_dt == None))
 
         if priority == 'Standard':
             q = q.filter(RequestDAO.priorityCd != 'Y')

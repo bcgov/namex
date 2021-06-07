@@ -1,9 +1,11 @@
 """Name hold a name choice for a Request
 """
-from . import db, ma
+# from . import db, ma
 from marshmallow import fields
+from sqlalchemy import event
 from sqlalchemy.orm import backref
-from .comment import CommentSchema
+
+from namex.models import db, ma
 
 
 class Name(db.Model):
@@ -93,6 +95,36 @@ class Name(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+@event.listens_for(Name, 'after_insert')
+@event.listens_for(Name, 'after_update')
+def update_nr_name_search(mapper, connection, target):
+    """Add any changes to the name to the request.nameSearch column."""
+    from namex.models import Request
+
+    name = target
+    nr = Request.find_by_id(name.nrId)
+    if nr:
+        # get the names associated with the NR
+        names_q = connection.execute(
+            f"""
+            SELECT names.name from names
+            JOIN requests on requests.id = names.nr_id
+            WHERE requests.id={nr.id}
+            """
+        )
+        # format the names into a string like: |1<name1>|2<name2>|3<name3>
+        names = [x[0] for x in names_q.all()]
+        name_search = ''
+        for item, index in zip(names, range(len(names))):
+            name_search += f'|{index + 1}{item}'
+        # update the name_search field of the nr with the formatted string
+        connection.execute(
+            f"""
+            UPDATE requests
+            SET name_search='{name_search}'
+            WHERE id={nr.id}
+            """
+        )
 
 class NameSchema(ma.SQLAlchemySchema):
     class Meta:
