@@ -372,7 +372,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                             nr_model.priorityDate = datetime.utcnow()
                             payment.payment_completion_date = datetime.utcnow()
 
-
                         elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
                             # TODO: handle this (refund payment and prevent action?)
                             if nr_model.stateCd != State.APPROVED \
@@ -386,7 +385,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                         nr_model.save_to_db()
                         payment.save_to_db()
                         EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
-                        if payment_action in [payment.PaymentActions.UPGRADE, payment.PaymentActions.REAPPLY]:
+                        if payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
                             change_flags = {
                                 'is_changed__request': True,
                                 'is_changed__previous_request': False,

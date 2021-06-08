@@ -29,10 +29,10 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 CONFIGURATION = {
-    'development': 'legal_api.config.DevConfig',
-    'testing': 'legal_api.config.TestConfig',
-    'production': 'legal_api.config.ProdConfig',
-    'default': 'legal_api.config.ProdConfig'
+    'development': 'namex_pay.config.DevConfig',
+    'testing': 'namex_pay.config.TestConfig',
+    'production': 'namex_pay.config.ProdConfig',
+    'default': 'namex_pay.config.ProdConfig'
 }
 
 
@@ -79,6 +79,14 @@ class _Config():  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME,
     )
+
+    # ORACLE - LEGACY NRO NAMESDB
+    NRO_USER = os.getenv('NRO_USER', '')
+    NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
+    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
+    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
+    NRO_HOST = os.getenv('NRO_HOST', '')
+    NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
 
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
