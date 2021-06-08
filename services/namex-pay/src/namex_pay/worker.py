@@ -219,7 +219,7 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
                             nr.json()
                         )
                         # try to update NRO otherwise send a sentry msg for OPS
-                        if payment.payment_action in [payment.PaymentActions.UPGRADE, payment.PaymentActions.REAPPLY]:
+                        if payment.payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
                             change_flags = {
                                 'is_changed__request': True,
                                 'is_changed__previous_request': False,
