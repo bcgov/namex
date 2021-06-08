@@ -164,7 +164,7 @@ def _update_request(oracle_cursor, nr, event_id, change_flags,priority):
             user_note, nuans_num, tilma_transaction_id, assumed_nuans_num, assumed_nuans_name, assumed_nuans_expiration_date,
             last_nuans_update_role, admin_comment, home_juris_num)
             VALUES (request_instance_seq.nextval, :request_id, :priority_cd, :request_type_cd, 
-                  TO_DATE(:expiration_date, 'yyyy-mm-dd hh:mi:ss'), :event_id, :tilma_ind, :xpro_jurisdiction, 
+                  :expiration_date, :event_id, :tilma_ind, :xpro_jurisdiction, 
                   :nuans_expiration_date, :queue_position, :additional_info, :nature_business_info,
                   :user_note, :nuans_num, :tilma_transaction_id, :assumed_nuans_num, 
                   :assumed_nuans_name, :assumed_nuans_expiration_date, :last_nuans_updated_role, 
