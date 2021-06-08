@@ -251,7 +251,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
         try:
             # Find the existing name request
             nr_model = RequestDAO.query.get(nr_id)
-            # only used for adding namerequest service user to event recording 
+            # only used for adding namerequest service user to event recording
             nr_svc = self.nr_service
 
             if not nr_model:
@@ -302,6 +302,11 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             headers = json_input.get('headers')
             auth = headers.get('Authorization')
             account_info = {}
+
+            if folio_number := headers.get('folioNumber'):
+                filing_info['folioNumber'] = folio_number
+                del headers['folioNumber']
+
             if auth and validate_roles(jwt, auth, [User.STAFF]):
                 if routing_slip_number := headers.get('routingSlipNumber'):
                     account_info['routingSlip'] = routing_slip_number
@@ -314,10 +319,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 if dat_number := headers.get('datNumber'):
                     account_info['datNumber'] = dat_number
                     del headers['datNumber']
-
-                if folio_number := headers.get('folioNumber'):
-                    filing_info['folioNumber'] = folio_number
-                    del headers['folioNumber']
 
                 waive_fees = headers.get('waiveFees', False)
                 filing_info.get('filingTypes')[0]['waiveFees'] = waive_fees
@@ -381,7 +382,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
                             nr_model.expirationDate = nr_model.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
                             payment.payment_completion_date = datetime.utcnow()
-                        
+
                         nr_model.save_to_db()
                         payment.save_to_db()
                         EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
@@ -404,7 +405,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                                 # log error for ops, but return success (namex is still up to date)
                                 msg = f'API Error: Unable to update NRO for {nr_model.nrNum} {payment_action}: {warnings}'
                                 current_app.logger.error(msg)
-                    
+
                     else:
                         # Record the event
                         EventRecorder.record(nr_svc.user, Event.POST + f' [payment created] { payment_action }', nr_model, nr_model.json())
