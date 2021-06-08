@@ -1,6 +1,7 @@
 """Request is the main business class that is the real top level object in the system
 """
 import sqlalchemy
+from sqlalchemy.sql.schema import Index
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # import traceback
 
@@ -11,6 +12,7 @@ from flask import current_app
 from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
+from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.dialects import postgresql
 from sqlalchemy import and_, func, Date
 from marshmallow import Schema, fields, post_load, post_dump
@@ -99,7 +101,7 @@ class Request(db.Model):
     _request_action_cd = db.Column('request_action_cd', db.String(10))
     _entity_type_cd = db.Column('entity_type_cd', db.String(10))
     consent_dt = db.Column('consent_dt', db.DateTime(timezone=True))
-    _source = db.Column('source', db.String(15), default=ValidSources.NRO)
+    _source = db.Column('source', db.String(15), default=ValidSources.NRO.value)
     tradeMark = db.Column('trade_mark', db.String(100))
 
     # Check-In / Check-Out (for INPROGRESS)
@@ -109,6 +111,10 @@ class Request(db.Model):
 
     # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(40))
+
+    ## Advanced Search fields
+    # all names stripped of '|' and divided by a '|<name choice>'
+    nameSearch = db.Column('name_search', db.String(3078), index=True)
 
     # End of table definitions
     REQUEST_FURNISHED = 'Y'
@@ -725,6 +731,7 @@ class RequestsSearchSchema(ma.SQLAlchemySchema):
             'submittedDate',
             'xproJurisdiction',
             'names',
+            'nameSearch',
             'activeUser',
             'applicants'
         )

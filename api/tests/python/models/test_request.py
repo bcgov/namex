@@ -58,3 +58,34 @@ def test_get_queued_empty_queue(client, app):
 
     with pytest.raises(BusinessException) as e_info:
         nr_oldest, new_req = RequestDAO.get_queued_oldest(user)
+
+def test_name_search_populated_by_name():
+    """Tests changing a name updates the nameSearch column."""
+    from namex.models import Name, Request as RequestDAO, State
+
+    name = Name()
+    name.choice = 1
+    name.name = 'TEST'
+    name.state = 'NE'
+
+    nr = RequestDAO()
+    nr.nrNum='NR 0000001'
+    nr.stateCd = State.DRAFT
+    nr.names.append(name)
+    nr.save_to_db()
+
+    test = RequestDAO.find_by_id(nr.id)
+    # sanity check
+    names = test.names.all()
+    assert len(names) == 1
+    assert names[0].name == 'TEST'
+
+    # check nameSearch
+    assert nr.nameSearch == '|1TEST'
+
+    # alter name
+    name.name = 'CHANGED'
+    name.save_to_db()
+
+    # check nameSearch
+    assert nr.nameSearch == '|1CHANGED'

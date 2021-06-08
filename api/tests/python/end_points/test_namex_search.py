@@ -216,7 +216,8 @@ def test_namex_search_compname(client, jwt, app, search_name):
         [{ 'name': 'test 1', 'state': 'NE', 'choice': 1 }],
         [{ 'name': 'test tester 1', 'state': 'NE', 'choice': 1 }],
         [{ 'name': 'testing tester 1', 'state': 'NE', 'choice': 1 }],
-        [{ 'name': 'test tester 1', 'state': 'NE', 'choice': 1 }]
+        [{ 'name': 'test tester 1', 'state': 'NE', 'choice': 1 }],
+        [{ 'name': 'tes', 'state': 'NE', 'choice': 1 }, { 'name': 'ting', 'state': 'NE', 'choice': 2 }]
     ]
     generate_nrs(len(names), [], names, [])
 
@@ -232,10 +233,8 @@ def test_namex_search_compname(client, jwt, app, search_name):
     for nr in resp['nameRequests'][0]:
         matching_name = False
         for name in nr['names']:
-            print(name)
             all_words_match = False
             for word in search_name.upper().split(' '):
-                print(word)
                 if word not in name['name']:
                     all_words_match = False
                     break
@@ -244,6 +243,7 @@ def test_namex_search_compname(client, jwt, app, search_name):
             if all_words_match:
                 matching_name = True
                 break
+        # assert at least one name in the NR contained all the search words
         assert matching_name
 
 @pytest.mark.parametrize('consent_option', [
@@ -257,6 +257,7 @@ def test_namex_search_consent(client, jwt, app, consent_option):
     base_nrs = generate_nrs(4, [], [], [])
     base_nrs[0].consentFlag = 'N'
     base_nrs[1].consentFlag = 'Y'
+    base_nrs[2].consentFlag = 'R'
     base_nrs[2].consent_dt = datetime.utcnow()
     for nr in base_nrs:
         nr.save_to_db()
@@ -281,7 +282,7 @@ def test_namex_search_consent(client, jwt, app, consent_option):
             elif consent_option == 'Yes':
                 assert nr['consentFlag'] == 'Y'
             else:
-                assert nr['consentFlag'] != 'Y'
+                assert nr['consentFlag'] in ['N', None]
 
 @pytest.mark.parametrize('search_name', [
     't',

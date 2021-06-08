@@ -1,12 +1,12 @@
 from flask import Flask, g, current_app
-from flask_marshmallow import Marshmallow
 from config import Config
 
 from namex import db
+from namex.models import Request, Event, State
 from namex.services import EventRecorder
 from namex.services.nro import NROServices
+from namex.services.nro.request_utils import get_nr_header, get_nr_submitter
 from namex.services.nro.utils import ora_row_to_dict
-from namex.models import Request, Event, State
 
 from extractor.utils.logging import setup_logging
 
@@ -138,28 +138,42 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 )
                 ora_con.commit()
                 continue
-            # for any NRs in a completed state or NRs that don't exist in NameX
+            # for any NRs in a completed state or new NRs not existing in NameX
             else:
                 try:
-                    nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num, name_request=nr)
-
-                    namex_db.session.add(nr)
-                    EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, nr.json(), save_to_session=True)
-                    current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
-
-                    success = update_feeder_row(ora_con
-                                                , id=row['id']
-                                                , status='C'
-                                                , send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
-                                                , error_message=None)
-
-                    if success:
+                    ora_cursor = ora_con.cursor()
+                    nr_header = get_nr_header(ora_cursor, nr_num)
+                    nr_submitter = get_nr_submitter(ora_cursor, nr_header['request_id'])
+                    # check if NR originated in namex (handles racetime condition for when it could be in the process of saving)
+                    if nr_submitter['submitter'] == 'namex':
+                        # NR will already be saving in namex so don't create a duplicate
+                        success = update_feeder_row(
+                            ora_con, id=row['id'],
+                            status='C',
+                            send_count=1 + 0 if (row['send_count'] is None) else row['send_count'],
+                            error_message='Ignored - Request: not processed'
+                        )
                         ora_con.commit()
-                        current_app.logger.debug('Oracle commit done')
-                        namex_db.session.commit()
-                        current_app.logger.debug('Postgresql commit done')
                     else:
-                        raise Exception()
+                        nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num, name_request=nr)
+
+                        namex_db.session.add(nr)
+                        EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, nr.json(), save_to_session=True)
+                        current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
+
+                        success = update_feeder_row(ora_con
+                                                    , id=row['id']
+                                                    , status='C'
+                                                    , send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
+                                                    , error_message=None)
+
+                        if success:
+                            ora_con.commit()
+                            current_app.logger.debug('Oracle commit done')
+                            namex_db.session.commit()
+                            current_app.logger.debug('Postgresql commit done')
+                        else:
+                            raise Exception()
 
                 except Exception as err:
                     current_app.logger.error(err.with_traceback(None))
