@@ -1037,6 +1037,8 @@ class Request(Resource):
 
                     # if any data has changed from an NR Details edit, update it in Oracle
                     if any(value is True for value in change_flags.values()):
+                        # save the nr before trying to hit oracle (will format dates same as namerequest.)
+                        nrd.save_to_db()
                         warnings = nro.change_nr(nrd, change_flags)
                         if warnings:
                             MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
