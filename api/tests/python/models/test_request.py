@@ -81,11 +81,11 @@ def test_name_search_populated_by_name():
     assert names[0].name == 'TEST'
 
     # check nameSearch
-    assert nr.nameSearch == '|1TEST'
+    assert nr.nameSearch == '|1TEST1|'
 
     # alter name
     name.name = 'CHANGED'
     name.save_to_db()
 
     # check nameSearch
-    assert nr.nameSearch == '|1CHANGED'
+    assert nr.nameSearch == '|1CHANGED1|'

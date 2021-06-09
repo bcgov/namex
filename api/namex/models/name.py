@@ -116,7 +116,7 @@ def update_nr_name_search(mapper, connection, target):
         names = [x[0] for x in names_q.all()]
         name_search = ''
         for item, index in zip(names, range(len(names))):
-            name_search += f'|{index + 1}{item}'
+            name_search += f'|{index + 1}{item}{index + 1}|'
         # update the name_search field of the nr with the formatted string
         connection.execute(
             f"""
