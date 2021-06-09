@@ -531,6 +531,9 @@ class Request(Resource):
                             new_comment.nrId = nrd.id
 
                 ### END comments ###
+            elif consume := json_input.get('consume', None):
+                corp_num = consume.get('corpNum', None)
+                nro.consume_nr(nrd, user, corp_num)
 
             ### PREVIOUS STATE ###
             # - None (null) is a valid value for Previous State

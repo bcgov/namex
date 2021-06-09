@@ -10,6 +10,7 @@ from namex.services.nro import NROServicesError
 from namex.services import EventRecorder
 from namex.services.nro.change_nr import update_nr, _get_event_id, _create_nro_transaction
 from namex.services.nro.add_nr import new_nr
+from namex.services.nro.consume_nr import consume_nr
 from namex.services.nro.checkin_checkout_nr import manage_nr_locks
 
 from .exceptions import NROServicesError
@@ -358,6 +359,31 @@ class NROServices(object):
         except Exception as err:
             warnings.append({'type': 'warn',
                              'code': 'unable_to_create_request in_NRO',
+                             'message': 'Unable to create the Request records in NRO,'
+                                        ' please manually verify record is up to date in NRO before'
+                                        ' continuing.'
+                             })
+            current_app.logger.error(err.with_traceback(None))
+
+        return warnings if len(warnings) > 0 else None
+
+    def consume_nr(self, nr, user, corp_num):
+        warnings = []
+        try:
+
+            con = self.connection
+            con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
+
+            cursor = con.cursor()
+            consume_nr(nr, user.username, corp_num, cursor)
+
+            con.commit()
+
+            return None
+
+        except Exception as err:
+            warnings.append({'type': 'warn',
+                             'code': 'unable_to_create_request_changes_in_NRO',
                              'message': 'Unable to create the Request records in NRO,'
                                         ' please manually verify record is up to date in NRO before'
                                         ' continuing.'
