@@ -13,7 +13,7 @@ class BaseConfig(object):
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    MAX_ROW_LIMIT = os.getenv('MAX_ROWS', 3000)
+    MAX_ROW_LIMIT = os.getenv('MAX_ROW_LIMIT', 3000)
     SECRET_KEY = 'a secret'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False

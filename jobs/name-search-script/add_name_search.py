@@ -29,7 +29,7 @@ def get_ops_params() -> int:
     return max_rows
 
 
-def add_names_to_name_search() -> tuple[int, bool]:
+def add_names_to_name_search(total_count):
     """Loop through all NRs with null nameSearch anf update them."""
     max_rows = get_ops_params()
     row_count = 0
@@ -42,13 +42,12 @@ def add_names_to_name_search() -> tuple[int, bool]:
 
         for nr in nrs_for_update:
             row_count += 1
-            current_app.logger.debug(f'processing: {nr.nrNum}, count: {row_count}')
+            current_app.logger.debug(f'processing: {nr.nrNum}, count: {row_count}, previous batch total {total_count}')
             names = nr.names.all()
             # format the names into a string like: |1<name1>|2<name2>|3<name3>
-            names = [x[0] for x in names]
             name_search = ''
-            for item, index in zip(names, range(len(names))):
-                name_search += f'|{index + 1}{item}'
+            for name, index in zip(names, range(len(names))):
+                name_search += f'|{index + 1}{name.name}{index + 1}|'
             # update the name_search field of the nr with the formatted string
             nr.nameSearch = name_search
             db.session.add(nr)
@@ -68,7 +67,7 @@ if __name__ == '__main__':
     count = -1
     success = True
     while count != 0 and success:
-        count, success = add_names_to_name_search()
+        count, success = add_names_to_name_search(total_count)
         if success:
             total_count += count
         current_app.logger.debug(f'batch processed {count} NRs. Total processed: {total_count}')
