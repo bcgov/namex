@@ -109,6 +109,7 @@ class PaymentInvoice(Serializable):
     lineItems: list = field(default_factory=list)
     receipts: list = field(default_factory=list)
     references: list = field(default_factory=list)
+    details: list = field(default_factory=list)
     _links: list = field(default_factory=list)
 
 
