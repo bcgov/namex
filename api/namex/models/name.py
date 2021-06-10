@@ -2,7 +2,7 @@
 """
 # from . import db, ma
 from marshmallow import fields
-from sqlalchemy import event, Text
+from sqlalchemy import event
 from sqlalchemy.orm import backref
 
 from namex.models import db, ma
