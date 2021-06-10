@@ -226,9 +226,9 @@ class Requests(Resource):
             compName = compName.strip().replace(' ', '%')
             ## nameSearch column is populated like: '|1<name 1>|2<name 2>|3<name 3>
             # to ensure we don't get a match that spans over a single name
-            compName1 = '|1%' + compName + '%1|%'
+            compName1 = '%|1%' + compName + '%1|%'
             compName2 = '%|2%' + compName + '%2|%'
-            compName3 = '%|3%' + compName + '%3|'
+            compName3 = '%|3%' + compName + '%3|%'
             q = q.filter(or_(
                     RequestDAO.nameSearch.ilike(compName1),
                     RequestDAO.nameSearch.ilike(compName2),
