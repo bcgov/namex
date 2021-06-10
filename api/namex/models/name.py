@@ -2,7 +2,7 @@
 """
 # from . import db, ma
 from marshmallow import fields
-from sqlalchemy import event
+from sqlalchemy import event, Text
 from sqlalchemy.orm import backref
 
 from namex.models import db, ma
@@ -119,11 +119,12 @@ def update_nr_name_search(mapper, connection, target):
             name_search += f'|{index + 1}{item}'
         # update the name_search field of the nr with the formatted string
         connection.execute(
-            f"""
-            UPDATE requests
-            SET name_search='{name_search}'
-            WHERE id={nr.id}
             """
+            UPDATE requests
+            SET name_search=%s
+            WHERE id=%s
+            """,
+            ('(' + name_search + ')', nr.id)
         )
 
 class NameSchema(ma.SQLAlchemySchema):
