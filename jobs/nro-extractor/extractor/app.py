@@ -2,6 +2,7 @@ from flask import Flask, g, current_app
 from config import Config
 
 from namex import db
+from namex.constants import PaymentStatusCode
 from namex.models import Request, Event, State
 from namex.services import EventRecorder
 from namex.services.nro import NROServices
@@ -112,7 +113,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 action
             ))
             # TODO: remove this 'if' -- left it in just in case (see below todo)
-            if nr and (nr.stateCd not in [State.DRAFT, State.PENDING_PAYMENT]):
+            if nr and (nr.stateCd not in [State.DRAFT]):
 
                 # do NOT ignore updates of completed NRs, since those are CONSUME transactions -
                 # the only kind that gets into the namex_feeder table for completed NRs
@@ -127,9 +128,9 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                                                 , error_message='Ignored - Request: not processed')
                     ora_con.commit()
                     continue
-            # ignore existing NRs not in completed state, update the feeder row to C
+            # ignore existing NRs not in completed state or draft, update the feeder row to C
             # TODO: check if this should check the 'action' for specific values like above 'if'
-            if nr and nr.stateCd not in State.COMPLETED_STATE:
+            if nr and nr.stateCd not in (State.COMPLETED_STATE + [State.DRAFT]):
                 success = update_feeder_row(
                     ora_con, id=row['id'],
                     status='C',
@@ -141,12 +142,16 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
             # for any NRs in a completed state or new NRs not existing in NameX
             else:
                 try:
+                    # get submitter
                     ora_cursor = ora_con.cursor()
                     nr_header = get_nr_header(ora_cursor, nr_num)
                     nr_submitter = get_nr_submitter(ora_cursor, nr_header['request_id'])
-                    # check if NR originated in namex (handles racetime condition for when it could be in the process of saving)
-                    if nr_submitter['submitter'] == 'namex':
-                        # NR will already be saving in namex so don't create a duplicate
+                    # get pending payments
+                    pending_payments = [x for x in nr.payments.all() if x.payment_status_code == PaymentStatusCode.CREATED.value]
+                    # ignore if:
+                    # - NR does not exist and NR originated in namex (handles racetime condition for when it is still in the process of saving)
+                    # - NR has a pending update from namex (pending payment)
+                    if (not nr and nr_submitter['submitter'] == 'namex') or (nr and len(pending_payments) > 0):
                         success = update_feeder_row(
                             ora_con, id=row['id'],
                             status='C',
