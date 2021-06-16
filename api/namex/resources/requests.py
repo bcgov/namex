@@ -644,11 +644,6 @@ class Request(Resource):
 
             # update request header
 
-            errors = request_header_schema.validate(json_input, partial=True)
-            if errors:
-                # return jsonify(errors), 400
-                MessageServices.add_message(MessageServices.ERROR, 'request_validation', errors)
-
             # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
             reset = False
             if nrd.furnished == RequestDAO.REQUEST_FURNISHED and json_input.get('furnished', None) == 'N':
