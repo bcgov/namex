@@ -117,7 +117,7 @@ def  _create_request_instance(oracle_cursor, nr, eid,priority):
                     INSERT INTO request_instance(request_instance_id, request_id,priority_cd, request_type_cd,
                     expiration_date, start_event_id, xpro_jurisdiction,additional_info, nature_business_info, home_juris_num)
                 VALUES (request_instance_seq.nextval, :request_id, :priority_cd, :request_type_cd, 
-                      :expiration_date, :start_event_id, :xpro_jurisdiction, :additional_info, :nature_business_info, :home_juris_num)
+                      :expiration_date, :start_event_id, upper(:xpro_jurisdiction), :additional_info, :nature_business_info, :home_juris_num)
                 """,
                           request_id=nr.requestId,
                           priority_cd=priority,
