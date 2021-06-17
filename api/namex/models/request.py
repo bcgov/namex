@@ -692,7 +692,7 @@ class RequestsHeaderSchema(ma.SQLAlchemySchema):
     nroLastUpdate = fields.Field(allow_none=True)
     nwpta = fields.Field(allow_none=True)
     previousNr = fields.String(allow_none=True)
-    previousRequestId = fields.String(allow_none=True)
+    previousRequestId = fields.Integer(allow_none=True)
     previousStateCd = fields.String(allow_none=True)
     priorityCd = fields.String(allow_none=True)
     priorityDate = fields.Field(allow_none=True)
