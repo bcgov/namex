@@ -1,11 +1,20 @@
-# Import DTOs
+"""Validation issue classes."""
+from namex.resources.auto_analyse.issues import CheckIsValidIssue
+
 from ....response_objects import NameAnalysisIssue
 
-from namex.resources.auto_analyse.issues import CheckIsValidIssue
+
+class BcCheckIsValidIssue(CheckIsValidIssue):
+    """BC validation issue."""
+
+    pass
 
 
 class XproCheckIsValidIssue(CheckIsValidIssue):
+    """XPRO validation issue."""
+
     def create_issue(self):
+        """Create XPRO validation issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
             line1=None,

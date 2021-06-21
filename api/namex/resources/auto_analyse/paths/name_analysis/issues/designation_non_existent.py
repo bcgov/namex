@@ -1,14 +1,23 @@
-# Import DTOs
+"""Designation non existent issue classes."""
+from namex.resources.auto_analyse.issues import DesignationNonExistentIssue
+
 from ....response_objects import NameAnalysisIssue
 
-from namex.resources.auto_analyse.issues import WordSpecialUseIssue
+
+class BcDesignationNonExistentIssue(DesignationNonExistentIssue):
+    """BC designation non existent issue."""
+
+    pass
 
 
-class XproWordSpecialUseIssue(WordSpecialUseIssue):
+class XproDesignationNonExistentIssue(DesignationNonExistentIssue):
+    """XPRO designation non existent issue."""
+
     def create_issue(self):
+        """Create XPRO designation non existent issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,

@@ -16,7 +16,8 @@ def handle_exception(err, msg, err_code):
 
 
 def get_query_param_str(param):
-    param_value = request.args.get(param)
+    """Get a string param value from a request object."""
+    param_value = request.args.get(param, None)
     return unquote_plus(param_value).strip() if param_value and isinstance(param_value, str) else None
 
 
