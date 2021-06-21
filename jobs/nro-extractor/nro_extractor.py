@@ -1,3 +1,4 @@
+""" NRO Extractor moves changes from the NamesDB to the new NameX system."""
 import sys
 from datetime import datetime
 
@@ -13,9 +14,10 @@ setup_logging() # important to do this first
 
 
 def get_ops_params():
+    """Return the maximum number of rows to process in this job run."""
     try:
-        max_rows = int(current_app.config.get('MAX_ROW_LIMIT', 100))
-    except:
+        max_rows = int(current_app.config.get('MAX_ROW_LIMIT', 100))  # pylint: disable=W0621
+    except:  # pylint: disable=W0702
         max_rows = 100
 
     return max_rows
@@ -44,8 +46,8 @@ if __name__ == "__main__":
     if processed < 0:
         print("nro-extractor: errored out: no rows process; completed in:{}".format(end_time - start_time)
               ,file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
     print("nro-extractor: finished - requests processed: {0} completed in:{1}".format(processed, end_time-start_time),
           file=sys.stderr)
-    exit(0)
+    sys.exit(0)
