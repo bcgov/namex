@@ -149,6 +149,12 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                                             ,error_message='Ignored - Request: not processed')
                 ora_con.commit()
                 # continue to next row
+                current_app.logger.info('skipping: {}, NameX state: {}, action: {}'
+                                        .format(
+                    nr_num,
+                    None if (not nr) else nr.stateCd,
+                    action
+                ))
                 continue
 
 
