@@ -1,2 +1,2 @@
-from .bc_name_analysis import *
-from .xpro_name_analysis import *
+"""Name Analysis exports."""
+from .name_analysis import NameAnalysis, name_analysis_api

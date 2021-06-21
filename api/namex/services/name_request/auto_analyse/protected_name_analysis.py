@@ -108,12 +108,12 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
 
             # TODO: Use the list_name array, don't use a string in the method!
             # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
-            check_words_requiring_consent = builder.check_words_requiring_consent(
-                self.name_tokens, self.processed_name
-            )
+            # check_words_requiring_consent = builder.check_words_requiring_consent(
+            #     self.name_tokens, self.processed_name
+            # )
 
-            if not check_words_requiring_consent.is_valid:
-                results.append(check_words_requiring_consent)
+            # if not check_words_requiring_consent.is_valid:
+            #     results.append(check_words_requiring_consent)
 
             check_designation_existence = builder.check_designation_existence(
                 self.get_original_name_tokenized(),
@@ -143,12 +143,12 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
                 if not check_designation_misplaced.is_valid:
                     results.append(check_designation_misplaced)
 
-            check_special_words = builder.check_word_special_use(
-                self.name_tokens,
-                self.get_processed_name()
-            )
+            # check_special_words = builder.check_word_special_use(
+            #     self.name_tokens,
+            #     self.get_processed_name()
+            # )
 
-            if not check_special_words.is_valid:
-                results.append(check_special_words)
+            # if not check_special_words.is_valid:
+            #     results.append(check_special_words)
 
         return results

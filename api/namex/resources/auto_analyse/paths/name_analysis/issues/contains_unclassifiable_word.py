@@ -1,15 +1,24 @@
-# Import DTOs
+"""Unclassifiable Word issue classes."""
+from namex.resources.auto_analyse.issues import ContainsUnclassifiableWordIssue
+
 from ....response_objects import NameAnalysisIssue
 
-from namex.resources.auto_analyse.issues import DesignationMisplacedIssue
+
+class BcContainsUnclassifiableWordIssue(ContainsUnclassifiableWordIssue):
+    """BC unclassifiable word."""
+
+    pass
 
 
-class XproDesignationMisplacedIssue(DesignationMisplacedIssue):
+class XproContainsUnclassifiableWordIssue(ContainsUnclassifiableWordIssue):
+    """XPRO unclassifiable word."""
+
     def create_issue(self):
+        """Create unclassifiable word issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
-            line2=None,
+            line1='',
+            line2='',
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
