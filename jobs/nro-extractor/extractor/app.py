@@ -157,27 +157,8 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 ))
                 continue
 
-
-            # TODO: remove this 'if' -- left it in just in case (see below todo)
-            if nr and (nr.stateCd not in [State.DRAFT]):
-
-                # do NOT ignore updates of completed NRs, since those are CONSUME transactions -
-                # the only kind that gets into the namex_feeder table for completed NRs
-                if nr.stateCd in State.COMPLETED_STATE and action == 'U':
-                    pass
-
-                elif action != 'X':
-                    success = update_feeder_row(ora_con
-                                                ,row_id=row['id']
-                                                ,status='C'
-                                                ,send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
-                                                , error_message='Ignored - Request: not processed')
-                    ora_con.commit()
-                    continue
-
-            # ignore existing NRs not in completed state or draft, update the feeder row to C
-            # TODO: check if this should check the 'action' for specific values like above 'if'
-            if nr and nr.stateCd not in State.COMPLETED_STATE + [State.DRAFT]:
+            # ignore existing NRs not in a completed state or draft, or in a completed state and not furnished
+            if nr and (nr.stateCd not in State.COMPLETED_STATE + [State.DRAFT] or (nr.stateCd in State.COMPLETED_STATE and nr.furnished == 'N')):
                 success = update_feeder_row(
                     ora_con,
                     row_id=row['id'],
