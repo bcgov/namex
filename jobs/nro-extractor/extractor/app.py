@@ -1,5 +1,10 @@
+"""The extractor functionality is managed in this module.
+
+The extractor ships changes from the NamesDB to the NameX services.
+"""
 from flask import Flask, g, current_app
-from config import Config
+
+from config import Config  # pylint: disable=C0411
 
 from namex import db
 from namex.constants import PaymentStatusCode
@@ -18,6 +23,7 @@ nro = NROServices()
 
 
 def create_app(config=Config):
+    """Return the Flask App, fully configured and ready to go."""
     app = Flask(__name__)
     app.config.from_object(config)
 
@@ -40,7 +46,7 @@ def create_app(config=Config):
 
 
 def job_result_set(ora_con, max_rows):
-
+    """Return the set of NRs from NamesDB that are of interest."""
     ora_cursor = ora_con.cursor()
 
     result_set = ora_cursor.execute("""
@@ -60,8 +66,8 @@ def job_result_set(ora_con, max_rows):
     return result_set, col_names
 
 
-def update_feeder_row(ora_con, id, status, send_count, error_message):
-
+def update_feeder_row(ora_con, row_id, status, send_count, error_message):
+    """Update the feeder tracking table."""
     try:
         ora_cursor = ora_con.cursor()
 
@@ -73,7 +79,7 @@ def update_feeder_row(ora_con, id, status, send_count, error_message):
             ,ERROR_MSG = :error_message
             where id = :id
             """
-                                        ,id=id
+                                        ,id=row_id
                                         ,status=status
                                         ,send_count=send_count
                                         ,error_message=error_message
@@ -89,11 +95,27 @@ def update_feeder_row(ora_con, id, status, send_count, error_message):
 
 
 def job(app, namex_db, nro_connection, user, max_rows=100):
+    """Process the NRs that have been updated in the NamesDB.
 
+    Most updates will go away as NRO (the legacy UI for the NamesDB) is decommissioned.
+
+    The following states allow the following changes:
+
+    - all changes allowed: DRAFT, PENDING_PAYMENT
+
+    - no changes allowed: INPROGRESS, REFUND_REQUESTED, REJECTED, EXPIRED, HISTORICAL, COMPLETED
+
+    - set cancelled state: CANCELLED
+
+    - all changes, except for state: HOLD
+
+    - consumed info only: RESERVED, COND_RESERVE, APPROVED, CONDITIONAL
+    """
     row_count = 0
 
     try:
         ora_con = nro_connection
+        # get the NRs from Oracle NamesDB of interest
         result, col_names = job_result_set(ora_con, max_rows)
 
         for r in result:
@@ -112,6 +134,30 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 None if (not nr) else nr.stateCd,
                 action
             ))
+
+            # NO CHANGES ALLOWED
+            if nr and (nr.stateCd in [State.INPROGRESS,
+                                      State.REFUND_REQUESTED,
+                                      State.REJECTED,
+                                      State.EXPIRED,
+                                      State.HISTORICAL,
+                                      State.COMPLETED]):
+                success = update_feeder_row(ora_con
+                                            ,row_id=row['id']
+                                            ,status='C'
+                                            ,send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
+                                            ,error_message='Ignored - Request: not processed')
+                ora_con.commit()
+                # continue to next row
+                current_app.logger.info('skipping: {}, NameX state: {}, action: {}'
+                                        .format(
+                    nr_num,
+                    None if (not nr) else nr.stateCd,
+                    action
+                ))
+                continue
+
+
             # TODO: remove this 'if' -- left it in just in case (see below todo)
             if nr and (nr.stateCd not in [State.DRAFT]):
 
@@ -122,17 +168,19 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
 
                 elif action != 'X':
                     success = update_feeder_row(ora_con
-                                                ,id=row['id']
+                                                ,row_id=row['id']
                                                 ,status='C'
                                                 ,send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
                                                 , error_message='Ignored - Request: not processed')
                     ora_con.commit()
                     continue
+
             # ignore existing NRs not in completed state or draft, update the feeder row to C
             # TODO: check if this should check the 'action' for specific values like above 'if'
-            if nr and nr.stateCd not in (State.COMPLETED_STATE + [State.DRAFT]):
+            if nr and nr.stateCd not in State.COMPLETED_STATE + [State.DRAFT]:
                 success = update_feeder_row(
-                    ora_con, id=row['id'],
+                    ora_con,
+                    row_id=row['id'],
                     status='C',
                     send_count=1 + 0 if (row['send_count'] is None) else row['send_count'],
                     error_message='Ignored - Request: not processed'
@@ -140,7 +188,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 ora_con.commit()
                 continue
             # for any NRs in a completed state or new NRs not existing in NameX
-            else:
+            else:  # pylint: disable=R1724: Unnecessary "else"
                 try:
                     # get submitter
                     ora_cursor = ora_con.cursor()
@@ -155,7 +203,8 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                     # - NR has a pending update from namex (pending payment)
                     if (not nr and nr_submitter and nr_submitter.get('submitter', '') == 'namex') or (nr and len(pending_payments) > 0):
                         success = update_feeder_row(
-                            ora_con, id=row['id'],
+                            ora_con,
+                            row_id=row['id'],
                             status='C',
                             send_count=1 + 0 if (row['send_count'] is None) else row['send_count'],
                             error_message='Ignored - Request: not processed'
@@ -168,7 +217,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                         EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, nr.json(), save_to_session=True)
                         current_app.logger.debug('EventRecorder should have been saved to by now, although not committed')
                         success = update_feeder_row(ora_con
-                                                    , id=row['id']
+                                                    , row_id=row['id']
                                                     , status='C'
                                                     , send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
                                                     , error_message=None)
@@ -184,7 +233,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 except Exception as err:
                     current_app.logger.error(err.with_traceback(None))
                     success = update_feeder_row(ora_con
-                                                , id=row['id']
+                                                , row_id=row['id']
                                                 , status=row['status']
                                                 , send_count=1 + 0 if (row['send_count'] is None) else row['send_count']
                                                 , error_message=err.with_traceback(None))
