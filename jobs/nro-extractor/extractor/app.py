@@ -188,7 +188,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                 ora_con.commit()
                 continue
             # for any NRs in a completed state or new NRs not existing in NameX
-            else:
+            else:  # pylint: disable=R1724: Unnecessary "else"
                 try:
                     # get submitter
                     ora_cursor = ora_con.cursor()
