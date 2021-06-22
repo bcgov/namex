@@ -16,7 +16,7 @@ to setup your local development environment.
 ## Running Notebook Report
 
 1. Run `. venv/bin/activate` to change to `venv` environment.
-2. Run notebook with `(python notebookreport.py)`
+2. Run notebook with `python notebookreport.py`
 
 ## Running Unit Tests
 
@@ -44,7 +44,7 @@ to setup your local development environment.
    #oc create imagestream notebook-report
    oc process -f openshift/templates/bc.yaml \
 	  -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
-	  -p GIT_REF=master \
+	  -p GIT_REF=main \
 	  -o yaml \
    | oc apply -f - -n f2b77c-tools     
    ```
