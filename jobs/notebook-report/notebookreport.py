@@ -58,8 +58,10 @@ def send_email(subject, filename, emailtype, errormessage):
     else:
         if subject.startswith("Daily"):
             recipients = os.getenv('DAILY_REPORT_RECIPIENTS', '')
-        if subject.startswith("Weekly"):
-            recipients = os.getenv('WEEKLY_REPORT_RECIPIENTS', '')    
+        if subject.startswith("Weekly NameX"):
+            recipients = os.getenv('WEEKLY_REPORT_NAMEX_RECIPIENTS', '')   
+        if subject.startswith("Weekly Restoration"):
+            recipients = os.getenv('WEEKLY_REPORT_RESTRORATION_RECIPIENTS', '')  
         # Add body to email
         message.attach(MIMEText("Please see attached.", "plain"))
 
@@ -133,9 +135,12 @@ def processnotebooks(notebookdirectory):
                     if nbfile == 'daily':
                         subject = "Daily NameX Stats for " + date + ext
                         filename = 'daily_totals_' + date + '.csv'
-                    elif nbfile == 'weekly':
+                    elif nbfile == 'weeklynamex':
                         subject = "Weekly NameX Stats till " + date + ext
                         filename = 'weekly_totals_till_' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') +'.csv'
+                    elif nbfile == 'weeklyrestoration':
+                        subject = "Weekly Restoration Expiry till " + date + ext
+                        filename = 'weekly_restoration_expiry_till_' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') +'.csv'
 
                     # send email to receivers and remove files/directories which we don't want to keep
                     send_email(subject, filename, "", "")
