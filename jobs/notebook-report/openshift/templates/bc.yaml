@@ -89,7 +89,7 @@ parameters:
   displayName: Git Reference
   name: GIT_REF
   required: true
-  value: master
+  value: main
 - description: The source context directory.
   displayName: Source Context Directory
   name: SOURCE_CONTEXT_DIR
