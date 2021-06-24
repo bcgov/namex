@@ -86,31 +86,32 @@ class Events(Resource):
             # - current process is to save payload given, but we need the nr info that was updated saved too
 
             # if data is a name, update nr_event_info with corresponding name choice
-            if all(key in event_json_data.keys() for key in ['choice', 'name']):
-                if len(nr_event_info['names']) > 0:
-                    update_index = 0
-                    for name, i in zip(nr_event_info['names'], range(len(nr_event_info['names']))):
-                        if name['choice'] == event_json_data['choice']:
-                            # save index so we can update it
-                            update_index = i
-                            break
-                    # paste new name info over the old one
-                    nr_event_info['names'][update_index] = event_json_data
-                else:
-                    nr_event_info['names'].append(event_json_data)
+            if event_json_data:
+                if all(key in event_json_data.keys() for key in ['choice', 'name']):
+                    if len(nr_event_info['names']) > 0:
+                        update_index = 0
+                        for name, i in zip(nr_event_info['names'], range(len(nr_event_info['names']))):
+                            if name['choice'] == event_json_data['choice']:
+                                # save index so we can update it
+                                update_index = i
+                                break
+                        # paste new name info over the old one
+                        nr_event_info['names'][update_index] = event_json_data
+                    else:
+                        nr_event_info['names'].append(event_json_data)
 
-            # else update nr_event_info with any changed event data (should be formatted same as an NR json)
-            else:
-                for key in nr_event_info.keys():
-                    if key in event_json_data.keys():
-                        # stateCd updated from e_dict already (not always accurate in event_json_data)
-                        if key == 'stateCd':
-                            continue
-                        # otherwise update nr_event_info
-                        nr_event_info[key] = event_json_data[key]
-                # entity_type_cd for namerequest is used to change requestTypeCd in namex (it is being mapped incorrectly)
-                if 'entity_type_cd' in event_json_data.keys() and 'requestTypeCd' not in event_json_data.keys():
-                    nr_event_info['requestTypeCd'] = event_json_data['entity_type_cd']
+                # else update nr_event_info with any changed event data (should be formatted same as an NR json)
+                else:
+                    for key in nr_event_info.keys():
+                        if key in event_json_data.keys():
+                            # stateCd updated from e_dict already (not always accurate in event_json_data)
+                            if key == 'stateCd':
+                                continue
+                            # otherwise update nr_event_info
+                            nr_event_info[key] = event_json_data[key]
+                    # entity_type_cd for namerequest is used to change requestTypeCd in namex (it is being mapped incorrectly)
+                    if 'entity_type_cd' in event_json_data.keys() and 'requestTypeCd' not in event_json_data.keys():
+                        nr_event_info['requestTypeCd'] = event_json_data['entity_type_cd']
 
             # update event date
             nr_event_info['eventDate'] = e_dict['eventDate']
