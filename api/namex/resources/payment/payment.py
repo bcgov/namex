@@ -303,9 +303,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             auth = headers.get('Authorization')
             account_info = {}
 
-            if folio_number := headers.get('folioNumber'):
+            if folio_number := headers.pop('folioNumber', None):
                 filing_info['folioNumber'] = folio_number
-                del headers['folioNumber']
 
             if auth and validate_roles(jwt, auth, [User.STAFF]):
                 if routing_slip_number := headers.get('routingSlipNumber'):
