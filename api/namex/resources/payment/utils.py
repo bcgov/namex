@@ -1,5 +1,4 @@
 from datetime import date
-import re
 
 
 def build_payment_request(nr_model):
@@ -162,30 +161,11 @@ def build_payment_details(nr_model):
             'value': ''
         }
     )
-    option1 = re.search('\|1(.*)1\|', nr_model.nameSearch)
-    option2 = re.search('\|2(.*)2\|', nr_model.nameSearch)
-    option3 = re.search('\|3(.*)3\|', nr_model.nameSearch)
-    if option1: 
+    for idx, name in enumerate(nr_model.names.all(), start=1):
         details.append(
             {
-                'label': '1.',
-                'value': option1.group(1)
-            }
-        )
-
-    if option2: 
-        details.append(
-            {
-                'label': '2.',
-                'value': option2.group(1)
-            }
-        )
-
-    if option3: 
-        details.append(
-            {
-                'label': '3.',
-                'value': option3.group(1)
+                'label': str(idx) + '.',
+                'value': name.name
             }
         )
 

@@ -1,13 +1,16 @@
 from .abstract import Serializable
 from dataclasses import dataclass, field
+from dataclasses_json import dataclass_json, Undefined
 from datetime import date
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class PaymentInfo(Serializable):
     methodOfPayment: str
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class FilingInfo(Serializable):
     corpType: str
@@ -15,6 +18,7 @@ class FilingInfo(Serializable):
     filingTypes: list
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class FilingType(Serializable):
     filingTypeCode: str
@@ -22,6 +26,7 @@ class FilingType(Serializable):
     filingTypeDescription: str
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class ContactInfo(Serializable):
     firstName: str
@@ -32,23 +37,27 @@ class ContactInfo(Serializable):
     postalCode: str
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class BusinessInfo(Serializable):
     businessIdentifier: str
     businessName: str
     contactInfo: ContactInfo
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class AccountInfo(Serializable):
     routingSlip: str
     bcolAccountNumber: str
     datNumber: str
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class PaymentDetailItem:
     label: str
     value: str
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class PaymentRequest(Serializable):
     """
@@ -112,6 +121,7 @@ class PaymentRequest(Serializable):
     details: list = field(default_factory=PaymentDetailItem)
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class PaymentInvoice(Serializable):
     id: int
@@ -141,6 +151,7 @@ class PaymentInvoice(Serializable):
     _links: list = field(default_factory=list)
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class ReceiptRequest(Serializable):
     corpName: str = ''
@@ -152,6 +163,7 @@ class ReceiptRequest(Serializable):
     fileName: str = ''
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class Receipt(Serializable):
     id: int
@@ -160,6 +172,7 @@ class Receipt(Serializable):
     receiptNumber: str = ''
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class ReceiptResponse(Serializable):
     bcOnlineAccountNumber: str = None
