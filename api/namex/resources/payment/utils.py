@@ -1,4 +1,5 @@
 from datetime import date
+import re
 
 
 def build_payment_request(nr_model):
@@ -41,7 +42,8 @@ def build_payment_request(nr_model):
                 'country': nr_applicant.countryTypeCd,
                 'postalCode': nr_applicant.postalCd
             }
-        }
+        },
+        'details': build_payment_details(nr_model)
     }
 
     return payment_request
@@ -139,7 +141,52 @@ def merge_payment_request(nr_model, config=None):
                 'country': country,
                 'postalCode': postal_code
             }
-        }
+        },
+        'details': build_payment_details(nr_model)
     }
 
     return payment_request
+
+def build_payment_details(nr_model):
+    """Build payment details."""
+    details = []
+    details.append(
+        {
+            'label': 'NR Number:',
+            'value': nr_model.nrNum
+        }
+    )
+    details.append(
+        {
+            'label': 'Name Choices:',
+            'value': ''
+        }
+    )
+    option1 = re.search('\|1(.*)1\|', nr_model.nameSearch)
+    option2 = re.search('\|2(.*)2\|', nr_model.nameSearch)
+    option3 = re.search('\|3(.*)3\|', nr_model.nameSearch)
+    if option1: 
+        details.append(
+            {
+                'label': '1.',
+                'value': option1.group(1)
+            }
+        )
+
+    if option2: 
+        details.append(
+            {
+                'label': '2.',
+                'value': option2.group(1)
+            }
+        )
+
+    if option3: 
+        details.append(
+            {
+                'label': '3.',
+                'value': option3.group(1)
+            }
+        )
+
+    return details

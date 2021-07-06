@@ -45,6 +45,11 @@ class AccountInfo(Serializable):
     datNumber: str
 
 @dataclass
+class PaymentDetailItem:
+    label: str
+    value: str
+
+@dataclass
 class PaymentRequest(Serializable):
     """
     Sample request:
@@ -75,13 +80,36 @@ class PaymentRequest(Serializable):
                     ...
                 }
             ]
-        }
+        },
+        "details": [
+            {
+                "label": 'NR Number:',
+                "value": 'NR 1234567'
+            },
+            {
+                "label": 'Name Choices:',
+                "value": ''
+            },
+            {
+                "label": '1.',
+                "value": 'CINEXTREME LEGAL SERVICES LIMITED'
+            },
+            {
+                "label": '2.',
+                "value": 'BRUNETTE HUNTING AND TRAPPING LIMITED'
+            },
+            {
+                "label": '3.',
+                "value": 'ALKEM CLOTHING STORES LIMITED'
+            }
+        ]
     }
     """
     paymentInfo: PaymentInfo
     filingInfo: FilingInfo
     businessInfo: BusinessInfo
     accountInfo: AccountInfo
+    details: list = field(default_factory=PaymentDetailItem)
 
 
 @dataclass
