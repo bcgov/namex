@@ -161,10 +161,11 @@ def build_payment_details(nr_model):
             'value': ''
         }
     )
-    for idx, name in enumerate(nr_model.names.all(), start=1):
+    name_choices = sorted(nr_model.names.all(), key=lambda x: x.choice)
+    for name in name_choices:
         details.append(
             {
-                'label': str(idx) + '.',
+                'label': str(name.choice) + '.',
                 'value': name.name
             }
         )
