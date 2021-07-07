@@ -81,7 +81,7 @@ def display_reapply_action(nr_model=None) -> Boolean:
                 expiry_date = nr_model.expirationDate.date()
 
                 delta = expiry_date - todays_date
-                if delta.days <= 5 and delta.days > 0:
+                if delta.days <= 14 and delta.days > 0:
                     return True
         return False
     except Exception as err:
