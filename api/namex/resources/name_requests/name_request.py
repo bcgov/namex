@@ -265,10 +265,7 @@ class NameRequestFields(BaseNameRequestResource):
                 return jsonify(response_data), 200
 
             # Add the list of valid Name Request actions for the given state to the response
-            if (nr_action == NameRequestPatchActions.REQUEST_REFUND.value):
-                response_data['actions'] = []
-            else:
-                response_data['actions'] = nr_svc.current_state_actions
+            response_data['actions'] = nr_svc.current_state_actions
             return jsonify(response_data), 200
 
         except NameRequestIsInProgressError as err:

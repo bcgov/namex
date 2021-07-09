@@ -11,7 +11,7 @@ from namex.constants import \
 from namex.constants import PaymentState
 from namex.models import State
 
-from .utils import has_active_payment, has_complete_payment
+from .utils import has_active_payment, has_complete_payment, has_completed_or_refunded_payment
 from .exceptions import NameRequestException, InvalidStateError, NameRequestIsConsumedError, NameRequestIsExpiredError, NameRequestActionError
 
 state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{next_state}]'
@@ -64,7 +64,7 @@ def display_refund_action(nr_model=None):
 
 def display_receipt_action(nr_model=None):
     try:
-        if nr_model and has_complete_payment(nr_model):
+        if nr_model and has_completed_or_refunded_payment(nr_model):
             return True
 
         return False

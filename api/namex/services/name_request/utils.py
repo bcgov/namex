@@ -62,6 +62,21 @@ def has_complete_payment(nr, payment_id=None):
         ))) > 0
 
 
+def has_completed_or_refunded_payment(nr, payment_id=None):
+    payments = nr.payments.all()
+    if payments and payment_id:
+        return len(list(filter(lambda p: p.id == payment_id, payments))) > 0
+    elif payments:
+        return len(list(filter(
+            lambda p: p.payment_status_code in [
+                PaymentState.COMPLETED.value,
+                PaymentState.APPROVED.value,
+                PaymentState.REFUND_REQUESTED.value,
+                PaymentState.CANCELLED.value
+            ], payments
+        ))) > 0
+
+
 def get_active_payment(nr, payment_id):
     payments = nr.payments.all()
     if payments:
