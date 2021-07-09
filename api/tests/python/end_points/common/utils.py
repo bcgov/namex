@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 from dateutil import tz
 
 from namex.constants import DATE_FORMAT_NAMEX_SEARCH
@@ -51,3 +51,18 @@ def get_utc_server_now():
     result = server_now.astimezone(tz.UTC)
     return result
 
+
+def create_utc_min_date_time(date_str: str):
+    """Create UTC datetime with min time from provided date string."""
+    utc_date_time = datetime.strptime(date_str, DATE_FORMAT_NAMEX_SEARCH)
+    min_time = time(hour=0, minute=0, second=0, microsecond=0)
+    utc_date_time = datetime.combine(utc_date_time, min_time, tzinfo=tz.UTC)
+    return utc_date_time
+
+
+def create_utc_date_time(date_str: str, hour: int, minute: int, second: int, microsecond: int):
+    """Create UTC datetime with date and time from provided input params."""
+    utc_date_time = datetime.strptime(date_str, DATE_FORMAT_NAMEX_SEARCH)
+    time_part = time(hour=hour, minute=minute, second=second, microsecond=microsecond)
+    utc_date_time = datetime.combine(utc_date_time, time_part, tzinfo=tz.UTC)
+    return utc_date_time
