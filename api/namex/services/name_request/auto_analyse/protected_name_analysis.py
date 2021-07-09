@@ -67,6 +67,7 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
 
             # Return any combination of these checks
             if not self.skip_search_conflicts and auto_analyze_config in ('EXACT_MATCH', 'SEARCH_CONFLICTS'):
+                print('do_analysis')
                 check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
                                                              self.compound_descriptive_name_tokens,
                                                              False, self.get_designation_end_list_all(),

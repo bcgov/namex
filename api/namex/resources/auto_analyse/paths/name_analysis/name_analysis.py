@@ -172,8 +172,8 @@ class NameAnalysis(Resource):
         entity_type = get_query_param_str('entity_type_cd')
         request_action = get_query_param_str('request_action_cd')
         designation_only = get_query_param_str('analysis_type') in ['designation', None]
+        # TODO: take out xpro flow entirely (not used in name analysis flow anymore)
         xpro = get_query_param_str('jurisdiction') not in ['BC', None]
-
         service = None
 
         errors = bc_validate_name_request(location, entity_type, request_action) \

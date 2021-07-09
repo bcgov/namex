@@ -312,10 +312,10 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 check_name_has_valid_number = builder.is_valid_year(self.name_original_tokens)
                 if not check_name_has_valid_number.is_valid:
                     analysis.append(check_name_has_valid_number)
-                    return analysis
+                    # return analysis
 
-                if analysis:
-                    return analysis
+                # if analysis:
+                #     return analysis
                 # check_word_limit = builder.check_word_limit(self.name_tokens)
                 # if not check_word_limit.is_valid:
                 #     analysis.append(check_word_limit)
@@ -329,25 +329,24 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 # eg. result.result_code = AnalysisIssueCodes.CONTAINS_UNCLASSIFIABLE_WORD
                 # don't return the result yet, the name is well formed, we just have an unclassified
                 # word in the result.
-                issues_that_must_be_fixed = [
-                    AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
-                    AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
-                    AnalysisIssueCodes.INCORRECT_YEAR,
-                    AnalysisIssueCodes.WORDS_TO_AVOID,
-                    AnalysisIssueCodes.TOO_MANY_WORDS
-                ]
+                # issues_that_must_be_fixed = [
+                #     AnalysisIssueCodes.ADD_DISTINCTIVE_WORD,
+                #     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD,
+                #     AnalysisIssueCodes.INCORRECT_YEAR,
+                #     AnalysisIssueCodes.WORDS_TO_AVOID,
+                #     AnalysisIssueCodes.TOO_MANY_WORDS
+                # ]
 
-                issue_must_be_fixed = False
-                result_codes = list(map(lambda r: r.result_code, analysis))
+                # issue_must_be_fixed = False
+                # result_codes = list(map(lambda r: r.result_code, analysis))
 
-                for code in result_codes:
-                    if code in issues_that_must_be_fixed:
-                        issue_must_be_fixed = True
-                        break
+                # for code in result_codes:
+                #     if code in issues_that_must_be_fixed:
+                #         issue_must_be_fixed = True
+                #         break
 
-                if issue_must_be_fixed:
-                    return analysis
-                    #  Name is not well formed - do not continue
+                # if issue_must_be_fixed:
+                #     return analysiss
 
                 # If the WORD_TO_AVOID check failed, the UNCLASSIFIED_WORD check
                 # will have failed too because words to avoid are never classified.
@@ -422,10 +421,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         for idx, issue in enumerate(analysis):
             if issue.result_code == issue_code:
                 word_issue_indexes.append(idx)
-
-        for idx in word_issue_indexes:
-            issue = analysis.pop(idx)
-            word_issues.append(issue)
+                word_issues.append(issue)
 
         return word_issues
 
