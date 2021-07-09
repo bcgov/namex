@@ -76,12 +76,12 @@ def display_reapply_action(nr_model=None) -> Boolean:
     """Logic for displaying the renew button."""
     try:
         if nr_model and nr_model.stateCd in (State.CONDITIONAL, State.APPROVED):
-            if nr_model.expirationDate and not nr_model.is_expired:
+            if nr_model.expirationDate and not nr_model.is_expired and not nr_model.has_consumed_name:
                 todays_date = datetime.utcnow().date()
                 expiry_date = nr_model.expirationDate.date()
 
                 delta = expiry_date - todays_date
-                if delta.days <= 5 and delta.days > 0:
+                if delta.days <= 14 and delta.days > 0:
                     return True
         return False
     except Exception as err:
