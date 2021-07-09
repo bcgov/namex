@@ -19,7 +19,6 @@ click==7.1.2
 cmudict==0.4.5
 cx-Oracle==8.1.0
 dataclasses==0.6
-dataclasses_json==0.5.4
 ecdsa==0.14.1
 flask-jwt-oidc==0.3.0
 flask-marshmallow==0.14.0
