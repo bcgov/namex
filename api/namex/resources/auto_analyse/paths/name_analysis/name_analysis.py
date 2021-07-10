@@ -14,7 +14,7 @@ from namex.constants import (  # noqa: I001
     ValidLocations,  # noqa: I001
     XproUnprotectedNameEntityTypes,  # noqa: I001
 )  # noqa: I001
-from namex.services.name_request.auto_analyse import AnalysisRequestActions  # noqa: I005
+from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisRequestActions  # noqa: I005
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.services.name_request.auto_analyse.unprotected_name_analysis import UnprotectedNameAnalysisService
 from namex.services.name_request.auto_analyse.xpro_name_analysis import XproNameAnalysisService
@@ -256,7 +256,27 @@ class NameAnalysis(Resource):
         # Build the appropriate response for the analysis result
         analysis_response = BcAnalysisResponse(service, analysis) \
             if not xpro else XproAnalysisResponse(service, analysis)
+        print('HERE!: ', analysis_response.issues)
+        # Remove issues for end designation more than once if they are not duplicates
+        valid_issues = []
+        for issue in analysis_response.issues:
+            if issue.issue_type == AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE:
+                valid_name_actions = []
+                seen_designations = []
+                for name_action in issue.name_actions:
+                    if name_action.word in seen_designations:
+                        valid_name_actions.append(name_action)
+                    else:
+                        seen_designations.append(name_action.word)
+                if len(valid_name_actions) > 0:
+                    issue.name_actions = valid_name_actions
+                    valid_issues.append(issue)
+                # else ^ this issue will not be added to the response
+            else:
+                valid_issues.append(issue)
 
+        analysis_response.issues = valid_issues
         payload = analysis_response.build_response().to_json()
+        print('HERE!!: ', payload)
         response = make_response(payload, HTTPStatus.OK)
         return response
