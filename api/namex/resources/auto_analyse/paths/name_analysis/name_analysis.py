@@ -256,7 +256,7 @@ class NameAnalysis(Resource):
         # Build the appropriate response for the analysis result
         analysis_response = BcAnalysisResponse(service, analysis) \
             if not xpro else XproAnalysisResponse(service, analysis)
-        print('HERE!: ', analysis_response.issues)
+
         # Remove issues for end designation more than once if they are not duplicates
         valid_issues = []
         for issue in analysis_response.issues:
@@ -277,6 +277,5 @@ class NameAnalysis(Resource):
 
         analysis_response.issues = valid_issues
         payload = analysis_response.build_response().to_json()
-        print('HERE!!: ', payload)
         response = make_response(payload, HTTPStatus.OK)
         return response
