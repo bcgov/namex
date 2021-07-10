@@ -47,15 +47,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         if first_classification == DataFrameFields.DISTINCTIVE.value:
             valid = self.check_descriptive(name_dict)
             if not valid:
-                if len(name_dict) > 0:
-                    result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name,
-                                                                      list_dist,
-                                                                      AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
-                    if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
-                        return result
-                else:
-                    result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist,
-                                                                     AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
+                # if len(name_dict) > 0:
+                #     result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name,
+                #                                                       list_dist,
+                #                                                       AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
+                #     if result.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
+                #         return result
+                # else:
+                result = self.check_name_is_well_formed_response(list_original_name, list_name, list_dist, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
         else:
             result = self.check_conflict_well_formed_response(processed_name, list_original_name, list_name, list_dist,
                                                               AnalysisIssueCodes.ADD_DISTINCTIVE_WORD)

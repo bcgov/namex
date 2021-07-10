@@ -1,19 +1,27 @@
-# Import DTOs
-from ....response_objects import NameAnalysisIssue
-from ....response_objects import ConsentingBody
-
+"""Name requires consent issue classes."""
 from namex.resources.auto_analyse.issues import NameRequiresConsentIssue
+
+from ....response_objects import ConsentingBody, NameAnalysisIssue
+
+
+class BcNameRequiresConsentIssue(NameRequiresConsentIssue):
+    """BC name requires consent issue."""
+
+    pass
 
 
 class XproNameRequiresConsentIssue(NameRequiresConsentIssue):
+    """XPRO name requires consent issue."""
+
     def create_issue(self):
+        """Create XPRO name requires consent issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
-            line2="",
+            line1='',
+            line2='',
             consenting_body=ConsentingBody(
-                name="",
-                email=""
+                name='',
+                email=''
             ),
             designations=None,
             show_reserve_button=None,

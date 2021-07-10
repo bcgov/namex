@@ -1,15 +1,24 @@
-# Import DTOs
+"""Designation misplace issue classes."""
+from namex.resources.auto_analyse.issues import DesignationMisplacedIssue
+
 from ....response_objects import NameAnalysisIssue
 
-from namex.resources.auto_analyse.issues import ContainsWordsToAvoidIssue
+
+class BcDesignationMisplacedIssue(DesignationMisplacedIssue):
+    """BC designation misplace issue."""
+
+    pass
 
 
-class XproContainsWordsToAvoidIssue(ContainsWordsToAvoidIssue):
+class XproDesignationMisplacedIssue(DesignationMisplacedIssue):
+    """XPRO designation misplace issue."""
+
     def create_issue(self):
+        """Create XPRO designation misplace issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
-            line2="",
+            line1='',
+            line2=None,
             consenting_body=None,
             designations=None,
             show_reserve_button=False,

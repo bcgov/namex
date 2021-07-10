@@ -1,15 +1,24 @@
-# Import DTOs
+"""Incorrect category issue classes."""
+from namex.resources.auto_analyse.issues import IncorrectCategoryIssue
+
 from ....response_objects import NameAnalysisIssue
 
-from namex.resources.auto_analyse.issues import ContainsUnclassifiableWordIssue
+
+class BcIncorrectCategoryIssue(IncorrectCategoryIssue):
+    """BC incorrect category issue."""
+
+    pass
 
 
-class XproContainsUnclassifiableWordIssue(ContainsUnclassifiableWordIssue):
+class XproIncorrectCategoryIssue(IncorrectCategoryIssue):
+    """XPRO incorrect category issue."""
+
     def create_issue(self):
+        """Create XPRO incorrect category issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
-            line2="",
+            line1='',
+            line2=None,
             consenting_body=None,
             designations=None,
             show_reserve_button=False,

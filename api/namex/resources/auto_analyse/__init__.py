@@ -1,6 +1,6 @@
-from .issues import *
-from .response_objects import *
+"""Auto Analyse exports."""
 from .analysis_options import *
 from .analysis_response import *
-
-from .paths import BcNameAnalysis, XproNameAnalysis
+from .issues import *
+from .paths import NameAnalysis
+from .response_objects import *
