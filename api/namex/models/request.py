@@ -9,6 +9,7 @@ from . import db, ma
 from flask import current_app
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # from flask_sqlalchemy import get_debug_queries
+from namex.services.lookup import nr_filing_actions
 from namex.exceptions import BusinessException
 from sqlalchemy import event
 from sqlalchemy.orm import backref
@@ -178,7 +179,7 @@ class Request(db.Model):
         except:
             previousNr = None
 
-        return {
+        nr_json = {
             'id': self.id,
             'submittedDate': self.submittedDate.isoformat() if self.submittedDate else None,
             'lastUpdate': self.lastUpdate.isoformat() if self.lastUpdate else None,
@@ -216,6 +217,16 @@ class Request(db.Model):
             'checkedOutBy': self.checkedOutBy,
             'checkedOutDt': self.checkedOutDt
         }
+        if nr_actions := nr_filing_actions(self.requestTypeCd):
+            nr_json['legalType'] = nr_actions.get('legalType')
+            nr_json['filingName'] = nr_actions.get('filingName')
+            nr_json['target'] = nr_actions.get('legalType')
+            nr_json['entitiesFilingName'] = nr_actions.get('entitiesFilingName')
+            nr_json['URL'] = nr_actions.get('URL')
+            nr_json['learTemplate'] = nr_actions.get('learTemplate')
+            nr_json['actions'] = nr_actions.get('actions')
+
+        return nr_json
 
     @classmethod
     def find_by_id(cls, internal_id: int):

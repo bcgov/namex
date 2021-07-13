@@ -16,6 +16,7 @@ from flask import Flask
 from flask_jwt_oidc import JwtManager
 jwt = JwtManager()
 
+from namex.services.lookup import nr_filing_actions
 from namex.services.nro import NROServices
 from namex.services.cache import cache
 nro = NROServices()
@@ -41,6 +42,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     nro.init_app(app)
     cache.init_app(app)
+    nr_filing_actions.init_app(app)
 
     @app.after_request
     def add_version(response):
