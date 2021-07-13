@@ -1,0 +1,41 @@
+**__pycache__
+*.py[cod]
+.Python
+env
+.env
+pip-log.txt
+pip-delete-this-directory.txt
+*.log
+*.so
+
+# git
+.git
+.gitignore
+.github
+docker-compose.yml
+.docker
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+.pytest_cache
+.mypy_cache
+.hypothesis
+*.cover
+
+# Virtual environment
+.env/
+.venv/
+venv/
+
+# Python mode for VIM
+.ropeproject
+**/.ropeproject
+
+# Vim swap files
+*.swp
+**/*.swp

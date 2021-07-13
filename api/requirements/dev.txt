@@ -1,10 +1,15 @@
 # Testing
+coverage
+freezegun
+hypothesis
+pyhamcrest
 pytest
 pytest-mock
 requests
-pyhamcrest
+requests-mock
 
 # Lint and code style
+autopep8
 flake8
 flake8-blind-except
 flake8-debugger
@@ -12,3 +17,8 @@ flake8-docstrings
 flake8-isort
 flake8-quotes
 pep8-naming
+pydocstyle<4
+pylint
+pylint-flask
+isort
+pytest-cov
