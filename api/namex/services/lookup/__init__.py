@@ -13,8 +13,6 @@
 # limitations under the License.
 """Holds all the lookup services."""
 
-from .nr_filing_actions import NameRequestFilingActions
-
-__all__ = ('NameRequestFilingActions',)
+from .name_request_filing_actions import NameRequestFilingActions
 
 nr_filing_actions = NameRequestFilingActions()
