@@ -219,11 +219,7 @@ class Request(db.Model):
         }
         if nr_actions := nr_filing_actions.get_actions(self.requestTypeCd):
             nr_json['legalType'] = nr_actions.get('legalType')
-            nr_json['filingName'] = nr_actions.get('filingName')
-            nr_json['target'] = nr_actions.get('legalType')
-            nr_json['entitiesFilingName'] = nr_actions.get('entitiesFilingName')
-            nr_json['URL'] = nr_actions.get('URL')
-            nr_json['learTemplate'] = nr_actions.get('learTemplate')
+            nr_json['target'] = nr_actions.get('target')
             nr_json['actions'] = nr_actions.get('actions')
 
         return nr_json
