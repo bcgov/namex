@@ -44,6 +44,7 @@ def test_get_queued_oldest_multirow(client, app):
 
     # Tests ####
     assert nr_first.nrNum == nr_oldest.nrNum
+    assert nr_oldest.json()
 
 
 def test_get_queued_empty_queue(client, app):

@@ -15,7 +15,7 @@ import logging
 
 from flask import Flask
 
-from namex.services.lookup import NameRequestFilingActions
+from namex.services.lookup import nr_filing_actions
 
 def test_nr_filing_actions(caplog):
     """Assert that the nr_filing_actions is created and cached."""
@@ -28,7 +28,6 @@ def test_nr_filing_actions(caplog):
     with app.app_context():
         with caplog.at_level(logging.DEBUG):
 
-            nr_filing_actions = NameRequestFilingActions()
             nr_filing_actions.get_actions(nr_type_cd)
             assert  nr_filing_actions_debug_msg in [rec.message for rec in caplog.records]
 

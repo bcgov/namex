@@ -217,7 +217,7 @@ class Request(db.Model):
             'checkedOutBy': self.checkedOutBy,
             'checkedOutDt': self.checkedOutDt
         }
-        if nr_actions := nr_filing_actions(self.requestTypeCd):
+        if nr_actions := nr_filing_actions.get_actions(self.requestTypeCd):
             nr_json['legalType'] = nr_actions.get('legalType')
             nr_json['filingName'] = nr_actions.get('filingName')
             nr_json['target'] = nr_actions.get('legalType')
