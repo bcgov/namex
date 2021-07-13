@@ -41,7 +41,8 @@ def build_payment_request(nr_model):
                 'country': nr_applicant.countryTypeCd,
                 'postalCode': nr_applicant.postalCd
             }
-        }
+        },
+        'details': build_payment_details(nr_model)
     }
 
     return payment_request
@@ -139,7 +140,34 @@ def merge_payment_request(nr_model, config=None):
                 'country': country,
                 'postalCode': postal_code
             }
-        }
+        },
+        'details': build_payment_details(nr_model)
     }
 
     return payment_request
+
+def build_payment_details(nr_model):
+    """Build payment details."""
+    details = []
+    details.append(
+        {
+            'label': 'NR Number:',
+            'value': nr_model.nrNum
+        }
+    )
+    details.append(
+        {
+            'label': 'Name Choices:',
+            'value': ''
+        }
+    )
+    name_choices = sorted(nr_model.names.all(), key=lambda x: x.choice)
+    for name in name_choices:
+        details.append(
+            {
+                'label': str(name.choice) + '.',
+                'value': name.name
+            }
+        )
+
+    return details

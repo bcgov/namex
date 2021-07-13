@@ -298,6 +298,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             payment_info = payment_request.get('paymentInfo', {})
             filing_info = payment_request.get('filingInfo')
             business_info = payment_request.get('businessInfo')
+            details = payment_request.get('details')
 
             headers = json_input.get('headers')
             auth = headers.get('Authorization')
@@ -333,7 +334,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 paymentInfo=payment_info,
                 filingInfo=filing_info,
                 businessInfo=business_info,
-                accountInfo=account_info
+                accountInfo=account_info,
+                details=details
             )
 
             payment_response = create_payment(req.as_dict(), headers)
