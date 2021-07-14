@@ -10,13 +10,14 @@ from namex.utils.api_resource import handle_exception
 from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
 from namex.models import Request, State, Event, User
 
-from namex.services import EventRecorder
+from namex.services import EventRecorder, CloudEventMessageService
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
 from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError, NameRequestIsInProgressError
 from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
+from namex.utils.api_resource import async_action
 
 from .api_namespace import api
 from .api_models import nr_request
@@ -69,7 +70,8 @@ class NameRequestResource(BaseNameRequestResource):
     # REST Method Handlers
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def put(self, nr_id):
+    @async_action
+    async def put(self, nr_id):
         """
         NOT used for Existing Name Request updates that only change the Name Request. Use 'patch' instead.
         State changes handled include state changes to [DRAFT, COND_RESERVE, RESERVED, COND_RESERVE to CONDITIONAL, RESERVED to APPROVED]
@@ -111,6 +113,7 @@ class NameRequestResource(BaseNameRequestResource):
 
                 # Record the event
                 EventRecorder.record(nr_svc.user, Event.PUT, nr_model, nr_svc.request_data)
+                await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
@@ -132,7 +135,8 @@ class NameRequestResource(BaseNameRequestResource):
 class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def patch(self, nr_id, nr_action: str):
+    @async_action
+    async def patch(self, nr_id, nr_action: str):
         """
         Update a specific set of fields and/or a provided action. Fields excluded from the payload will not be updated.
         The following data format is expected when providing a data payload:
@@ -238,7 +242,7 @@ class NameRequestFields(BaseNameRequestResource):
                 }.get(action)(model)
 
             # This handles updates if the NR state is 'patchable'
-            nr_model = handle_patch_actions(nr_action, nr_model)
+            nr_model = await handle_patch_actions(nr_action, nr_model)
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
@@ -276,7 +280,7 @@ class NameRequestFields(BaseNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_patch_checkout(self, nr_model: Request):
+    async def handle_patch_checkout(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -289,9 +293,11 @@ class NameRequestFields(BaseNameRequestResource):
             return self.on_nro_update_complete(nr_model, on_success, nro_warnings)
 
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, {})
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
+
         return nr_model
 
-    def handle_patch_checkin(self, nr_model: Request):
+    async def handle_patch_checkin(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -304,10 +310,11 @@ class NameRequestFields(BaseNameRequestResource):
             return self.on_nro_update_complete(nr_model, on_success, nro_warnings)
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkin]', nr_model, {})
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
 
         return nr_model
 
-    def handle_patch_edit(self, nr_model: Request):
+    async def handle_patch_edit(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -318,10 +325,11 @@ class NameRequestFields(BaseNameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [edit]', nr_model, nr_svc.request_data)
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
 
         return nr_model
 
-    def handle_patch_resend(self, nr_model: Request):
+    async def handle_patch_resend(self, nr_model: Request):
         nr_svc = self.nr_service
 
         # This handles updates if the NR state is 'patchable'
@@ -332,10 +340,11 @@ class NameRequestFields(BaseNameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-send]', nr_model, nr_svc.request_data)
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
 
         return nr_model
 
-    def handle_patch_cancel(self, nr_model: Request):
+    async def handle_patch_cancel(self, nr_model: Request):
         """
         Cancel the Name Request.
         :param nr_model:
@@ -351,10 +360,11 @@ class NameRequestFields(BaseNameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [cancel]', nr_model, nr_svc.request_data)
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
 
         return nr_model
 
-    def handle_patch_request_refund(self, nr_model: Request):
+    async def handle_patch_request_refund(self, nr_model: Request):
         """
         Can the NR and request a refund for ALL associated Name Request payments.
         :param nr_model:
@@ -385,6 +395,7 @@ class NameRequestFields(BaseNameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [request-refund]', nr_model, nr_model.json())
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
 
         return nr_model
 
@@ -462,7 +473,7 @@ class NameRequestRollback(BaseNameRequestResource):
         except Exception as err:
             return handle_exception(err, repr(err), 500)
 
-    def handle_patch_rollback(self, nr_model: Request, action: str):
+    async def handle_patch_rollback(self, nr_model: Request, action: str):
         """
         Roll back the Name Request.
         :param nr_model:
@@ -486,5 +497,6 @@ class NameRequestRollback(BaseNameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [rollback]', nr_model, nr_model.json())
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
 
         return nr_model

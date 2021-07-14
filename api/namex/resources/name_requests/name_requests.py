@@ -6,12 +6,12 @@ from flask_restx import cors
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight, full_access_to_name_request
-from namex.utils.api_resource import handle_exception, get_query_param_str
+from namex.utils.api_resource import handle_exception, async_action
 
 from namex.models import Request, Event, State, Applicant
 from namex.criteria.request import RequestQueryCriteria
 
-from namex.services import EventRecorder
+from namex.services import EventRecorder, CloudEventMessageService
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request.exceptions import \
@@ -131,7 +131,8 @@ class NameRequestsResource(BaseNameRequestResource):
 
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
-    def post(self):
+    @async_action
+    async def post(self):
         try:
             # Creates a new NameRequestService, validates the app config, and sets the request data to the NameRequestService instance
             self.initialize()
@@ -148,6 +149,7 @@ class NameRequestsResource(BaseNameRequestResource):
 
             # Record the event
             EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_model.json())
+            await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
 
             nr_model.stateCd = State.PENDING_PAYMENT
             nr_model.save_to_db()

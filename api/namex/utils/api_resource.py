@@ -1,5 +1,7 @@
 from flask import current_app, request, jsonify
 from urllib.parse import unquote_plus
+from functools import wraps
+import asyncio
 
 """
 General API resource utils.
@@ -22,3 +24,10 @@ def get_query_param_str(param):
 
 def clean_url_path_param(param):
     return unquote_plus(param.strip()) if param and isinstance(param, str) else None
+
+
+def async_action(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        return asyncio.run(f(*args, **kwargs))
+    return wrapped

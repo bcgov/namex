@@ -10,8 +10,8 @@ from flask_jwt_oidc import AuthError
 from namex import jwt, nro
 from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
 from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event, User
-from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
-from namex.services import EventRecorder
+from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource 
+from namex.services import EventRecorder, CloudEventMessageService
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.payments import get_payment, create_payment, refund_payment, cancel_payment
@@ -19,7 +19,7 @@ from namex.services.payment.models import PaymentRequest
 from namex.services.name_request.utils import has_active_payment, get_active_payment
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight, validate_roles
-from namex.utils.api_resource import clean_url_path_param, handle_exception
+from namex.utils.api_resource import clean_url_path_param, handle_exception, async_action
 
 from .api_namespace import api as payment_api
 from .utils import build_payment_request, merge_payment_request
@@ -237,7 +237,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
         'nr_id': 'Name Request number',
         'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY]'
     })
-    def post(self, nr_id, payment_action=NameRequestActions.CREATE.value):
+    @async_action
+    async def post(self, nr_id, payment_action=NameRequestActions.CREATE.value):
         """
         At this point, the Name Request will still be using a TEMPORARY NR number.
         Confirming the payment on the frontend triggers this endpoint. Here, we:
@@ -384,6 +385,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                         nr_model.save_to_db()
                         payment.save_to_db()
                         EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
+                        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd, payment.payment_token)
+
                         if payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
                             change_flags = {
                                 'is_changed__request': True,
@@ -407,6 +410,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     else:
                         # Record the event
                         EventRecorder.record(nr_svc.user, Event.POST + f' [payment created] { payment_action }', nr_model, nr_model.json())
+                        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd, payment.payment_token)
 
                     # Wrap the response, providing info from both the SBC Pay response and the payment we created
                     data = jsonify({
@@ -429,6 +433,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     # log actual status code
                     current_app.logger.debug('Error with status code. Actual status code: ' + payment_response.statusCode)
                     EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
+                    await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd)
+                    
                     # return generic error status to the front end
                     return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 402
             except Exception as err:
@@ -520,7 +526,8 @@ class NameRequestPayment(AbstractNameRequestResource):
             return handle_exception(err, err, 500)
 
     @cors.crossdomain(origin='*')
-    def delete(self, nr_id, payment_id):
+    @async_action
+    async def delete(self, nr_id, payment_id):
         try:
             # Find the existing name request
             nr_model = RequestDAO.query.get(nr_id)
@@ -545,6 +552,7 @@ class NameRequestPayment(AbstractNameRequestResource):
                 payment.save_to_db()
                 nr_svc = self.nr_service
                 EventRecorder.record(nr_svc.user, Event.DELETE + f' [payment cancelled] {payment.payment_action}', nr_model, nr_model.json())
+                await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd, payment.payment_token)
 
                 response_data = nr_model.json()
                 # Add the list of valid Name Request actions for the given state to the response
@@ -567,7 +575,8 @@ class NameRequestPayment(AbstractNameRequestResource):
 class NameRequestPaymentAction(AbstractNameRequestResource):
     # REST Method Handlers
     @cors.crossdomain(origin='*')
-    def patch(self, nr_id, payment_id, payment_action):
+    @async_action
+    async def patch(self, nr_id, payment_id, payment_action):
         """
         :param nr_id:
         :param payment_id:
@@ -617,7 +626,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 pass
             elif process_payment:
                 # This handles updates if the NR state is 'patchable'
-                nr_model = self.handle_payment_actions(payment_action, nr_model, payment_id)
+                nr_model = await self.handle_payment_actions(payment_action, nr_model, payment_id)
 
             current_app.logger.debug(nr_model.json())
             response_data = nr_model.json()
@@ -638,7 +647,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             NameRequestActions.CANCEL.value: self.cancel_payment
         }.get(action)(model, payment_id)
 
-    def complete_reservation_payment(self, nr_model: RequestDAO, payment_id: int):
+    async def complete_reservation_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when completing an in-progress Name Request reservation.
         :param nr_model:
@@ -677,13 +686,14 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
             # Record the event
             EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment completed] RESERVE', nr_model, nr_model.json())
+            await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd, payment.payment_token)
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
 
         return nr_model
 
-    def complete_upgrade_payment(self, nr_model: RequestDAO, payment_id: int):
+    async def complete_upgrade_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when upgrading an existing Name Request reservation to PRIORITY status.
         :param nr_model:
@@ -720,10 +730,11 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment completed] UPGRADE', nr_model, nr_model.json())
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd, payment.payment_token)
 
         return nr_model
 
-    def complete_reapply_payment(self, nr_model: RequestDAO, payment_id: int):
+    async def complete_reapply_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when re-applying for an existing Name Request reservation.
         Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
@@ -768,10 +779,11 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [payment completed] REAPPLY', nr_model, nr_model.json())
+        await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd, payment.payment_token)
 
         return nr_model
 
-    def request_refund(self, nr_model: RequestDAO, payment_id: int):
+    async def request_refund(self, nr_model: RequestDAO, payment_id: int):
         """
         Processes a SINGLE refund request.
         This is different from the 'refund' in the NameRequest resource PATCH namerequests/{nrId}/REQUEST_REFUND
@@ -797,10 +809,11 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 payment.save_to_db()
                 nr_svc = self.nr_service
                 EventRecorder.record(nr_svc.user, Event.PATCH + f' [payment refunded] {payment.payment_action}', nr_model, nr_model.json())
+                await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd, payment.payment_token)
 
         return nr_model
 
-    def cancel_payment(self, nr_model: RequestDAO, payment_id: int):
+    async def cancel_payment(self, nr_model: RequestDAO, payment_id: int):
         # Cancel payment with specified id.
         valid_states = [
             PaymentState.CREATED.value
@@ -816,4 +829,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 # record the event
                 nr_svc = self.nr_service
                 EventRecorder.record(nr_svc.user, Event.DELETE + f' [payment cancelled] {payment.payment_action}', nr_model, nr_model.json())
+                await CloudEventMessageService.sendNameRequestStateEvent(nr_model.nrNum, nr_model.stateCd, payment.payment_token)
+
         return nr_model

@@ -22,13 +22,14 @@ from namex.models import User, State, Comment, NameCommentSchema, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
-from namex.services import ServicesError, MessageServices, EventRecorder
+from namex.services import ServicesError, MessageServices, EventRecorder, CloudEventMessageService
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 
 from namex.utils.common import (convert_to_ascii,
                                 convert_to_utc_min_date_time,
                                 convert_to_utc_max_date_time)
 from namex.utils.auth import cors_preflight
+from namex.utils.api_resource import async_action
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
 
@@ -404,7 +405,8 @@ class Request(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.SYSTEM])
-    def patch(nr, *args, **kwargs):
+    @async_action
+    async def patch(nr, *args, **kwargs):
         """  Patches the NR. Currently only handles STATE (with optional comment) and Previous State.
 
         :param nr (str): NameRequest Number in the format of 'NR 000000000'
@@ -543,6 +545,7 @@ class Request(Resource):
             # save record
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
+            await CloudEventMessageService.sendNameRequestStateEvent(nrd.nrNum, nrd.stateCd)
 
         except Exception as err:
             current_app.logger.debug(err.with_traceback(None))
@@ -555,7 +558,8 @@ class Request(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
-    def put(nr, *args, **kwargs):
+    @async_action
+    async def put(nr, *args, **kwargs):
 
         # do the cheap check first before the more expensive ones
         json_input = request.get_json()
@@ -1060,6 +1064,7 @@ class Request(Resource):
             nrd.save_to_db()
 
             EventRecorder.record(user, Event.PUT, nrd, json_input)
+            await CloudEventMessageService.sendNameRequestStateEvent(nrd.nrNum, nrd.stateCd)
 
         except ValidationError as ve:
             return jsonify(ve.messages), 400
@@ -1227,7 +1232,8 @@ class NRNames(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    def put(nr, choice, *args, **kwargs):
+    @async_action
+    async def put(nr, choice, *args, **kwargs):
         json_data = request.get_json()
         if not json_data:
             return jsonify({'message': 'No input data provided'}), 400
@@ -1283,13 +1289,15 @@ class NRNames(Resource):
             return jsonify({"message": "Error on name update, saving to the db."}), 500
 
         EventRecorder.record(user, Event.PUT, nrd, json_data)
-
+        await CloudEventMessageService.sendNameRequestStateEvent(nrd.nrNum, nrd.stateCd)
+        
         return jsonify({"message": "Replace {nr} choice:{choice} with {json}".format(nr=nr, choice=choice, json=json_data)}), 200
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
-    def patch(nr, choice, *args, **kwargs):
+    @async_action
+    async def patch(nr, choice, *args, **kwargs):
 
         json_data = request.get_json()
         if not json_data:
@@ -1325,6 +1333,7 @@ class NRNames(Resource):
         nrd_name.save_to_db()
 
         EventRecorder.record(user, Event.PATCH, nrd, json_data)
+        await CloudEventMessageService.sendNameRequestStateEvent(nrd.nrNum, nrd.stateCd)
 
         return jsonify({"message": "Patched {nr} - {json}".format(nr=nr, json=json_data)}), 200
 
