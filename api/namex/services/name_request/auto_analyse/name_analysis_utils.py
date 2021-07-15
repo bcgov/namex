@@ -1,12 +1,14 @@
-import re
+"""Util functions for name analysis."""
 import collections
 import itertools
+import re
 
-from . import porter
+from flask.globals import current_app
 
 from namex.services.name_request.auto_analyse import DataFrameFields
-
 from namex.utils.common import parse_dict_of_lists
+
+from . import porter
 
 
 # TODO: Fix caps and stuff...
@@ -195,6 +197,7 @@ def get_classification_summary(list_dist, list_desc, list_name):
 
 
 def get_conflicts_same_classification(builder, name_tokens, processed_name, stand_alone_words, list_dist, list_desc):
+    print('get_conflicts_same_classification')
     list_dist, list_desc = \
         list_distinctive_descriptive(name_tokens, list_dist, list_desc)
     # Search conflicts coming from check_name_is_well_formed analysis
@@ -205,9 +208,9 @@ def get_conflicts_same_classification(builder, name_tokens, processed_name, stan
 
 
 def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token_svc, conflict=False):
+    """Classify each word in the name."""
     desc_compound_dict = get_compound_descriptives(service, syn_svc)
     service.set_compound_descriptive_name_tokens(update_compound_tokens(list(desc_compound_dict.keys()), match))
-
     service.token_classifier = wc_svc.classify_tokens(service.compound_descriptive_name_tokens)
     service._list_dist_words, service._list_desc_words, service._list_none_words = service.word_classification_tokens
 
@@ -232,6 +235,7 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
         if 2 < service.get_list_dist().__len__() == match.__len__():
             service._list_desc_words = [service.get_list_dist().pop()]
             dict_desc.update({service.get_list_desc()[0]: service.get_list_desc()})
+
         elif 2 < service.get_list_desc().__len__() == match.__len__():
             service._list_dist_words = [service.get_list_desc().pop(0)]
             dict_desc.pop(service.get_list_dist()[0], None)
@@ -242,9 +246,8 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
 
     service._dict_name_words = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
                                                           service.compound_descriptive_name_tokens)
-    # service.set_name_tokens(remove_spaces_list(service.name_tokens))
-    print("Original Classification:")
-    print(service.get_dict_name())
+
+    current_app.logger.debug(f'Original Classification: {service.get_dict_name()}')
 
     service.set_name_tokens_search_conflict(service.compound_descriptive_name_tokens)
     service._list_dist_words_search_conflicts = remove_misplaced_distinctive(list(service.get_list_dist()),
@@ -261,10 +264,11 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     service._dict_name_words_search_conflicts = get_classification_summary(service.get_list_dist_search_conflicts(),
                                                                            service.get_list_desc_search_conflicts(),
                                                                            service.name_tokens_search_conflict)
+
     service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 
-    print("Classification for searching conflicts in NameX DB:")
-    print(service.get_dict_name_search_conflicts())
+    current_app.logger.debug(
+        f'Classification for searching conflicts in NameX DB: {service.get_dict_name_search_conflicts()}')
 
 
 def subsequences(iterable, length):

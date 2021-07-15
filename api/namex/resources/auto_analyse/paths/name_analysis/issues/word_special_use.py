@@ -1,14 +1,23 @@
-# Import DTOs
+"""Word special use issue classes."""
+from namex.resources.auto_analyse.issues import WordSpecialUseIssue
+
 from ....response_objects import NameAnalysisIssue
 
-from namex.resources.auto_analyse.issues import AddDistinctiveWordIssue
+
+class BcWordSpecialUseIssue(WordSpecialUseIssue):
+    """BC word special use issue."""
+
+    pass
 
 
-class XproAddDistinctiveWordIssue(AddDistinctiveWordIssue):
+class XproWordSpecialUseIssue(WordSpecialUseIssue):
+    """XPRO word special use issue."""
+
     def create_issue(self):
+        """Create XPRO word special use issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,

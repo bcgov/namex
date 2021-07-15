@@ -1,6 +1,10 @@
 import re
 import warnings
 
+from datetime import datetime
+
+from flask.globals import current_app
+
 from . import LanguageCodes
 from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
 from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning
@@ -227,6 +231,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         return exception_stopword_designation
 
     def prepare_data(self):
+        """Prep the analysis."""
         syn_svc = self.synonym_service
 
         # Query database for word designations
@@ -249,12 +254,11 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         self._designated_all_words = list(set(self._designated_any_words + self._designated_end_words))
         self._designated_all_words.sort(key=len, reverse=True)
 
-    '''
-    Split a name string into classifiable tokens. Called whenever set_name is invoked.
-    @:param string:name
-    '''
-
     def _process_name(self, np_svc_prep_data):
+        """Split a name string into classifiable tokens.
+
+        Called whenever set_name is invoked.
+        """
         try:
             # Clean the provided name and tokenize the string
             self.name_tokens = self._clean_name_words(
@@ -270,8 +274,8 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
             # Store clean, processed name to instance
             clean_name = ' '.join(map(str, self.name_tokens))
             self.processed_name = clean_name
-            print('Processed name: ' + self.processed_name)
+            current_app.logger.debug('Processed name: ' + self.processed_name)
 
         except Exception as error:
-            print('Pre-processing name failed: ' + repr(error))
+            current_app.logger.error('Pre-processing name failed: ' + repr(error))
             raise

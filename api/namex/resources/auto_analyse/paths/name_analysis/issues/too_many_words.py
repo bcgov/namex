@@ -1,15 +1,24 @@
-# Import DTOs
+"""Too Many Words Issue classes."""
+from namex.resources.auto_analyse.issues import TooManyWordsIssue
+
 from ....response_objects import NameAnalysisIssue
 
-from namex.resources.auto_analyse.issues import TooManyWordsIssue
+
+class BcTooManyWordsIssue(TooManyWordsIssue):
+    """BC too many words issue."""
+
+    pass
 
 
 class XproTooManyWordsIssue(TooManyWordsIssue):
+    """XPRO too many words issue."""
+
     def create_issue(self):
+        """Create XPRO too many words issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
-            line2="",
+            line1='',
+            line2='',
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
