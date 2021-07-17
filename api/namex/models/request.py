@@ -2,6 +2,9 @@
 """
 import sqlalchemy
 from sqlalchemy.sql.schema import Index
+from sqlalchemy.event import listen
+from sqlalchemy.orm.attributes import get_history
+import asyncio
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # import traceback
 
@@ -31,6 +34,7 @@ import re
 from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
     request_type_mapping, RequestPriority, EventAction, EventState, EventUserId, DesignationPositionCodes
+from namex.services import CloudEventMessageService
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -622,6 +626,15 @@ class Request(db.Model):
                     r'\W*({0})?\W*({1})?$'.format(any_designation_alternators, end_designation_alternators)
         return full_name
 
+
+@event.listens_for(Request, 'after_insert')
+@event.listens_for(Request, 'after_update')
+def on_insert_or_update_nr(mapper, connection, request):
+    """Send a new cloud event message on changes for nrNum or stateCd in the Request model."""
+    if not len(get_history(request, 'stateCd').unchanged) or not len(get_history(request, 'nrNum').unchanged):
+        old_state_cd = get_history(request, 'stateCd').deleted[0] if len(get_history(request, 'stateCd').deleted) else ''
+        old_nr_num = get_history(request, 'nrNum').deleted[0] if len(get_history(request, 'nrNum').deleted) else ''
+        asyncio.run(CloudEventMessageService.sendNameRequestStateEvent(request.nrNum, old_nr_num, request.stateCd, old_state_cd))
 
 class RequestsSchema(ma.SQLAlchemySchema):
     class Meta:
