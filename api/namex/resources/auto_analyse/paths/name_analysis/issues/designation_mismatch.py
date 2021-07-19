@@ -1,14 +1,23 @@
-# Import DTOs
+"""Designation mismatch issue classes."""
+from namex.resources.auto_analyse.issues import DesignationMismatchIssue
+
 from ....response_objects import NameAnalysisIssue
 
-from namex.resources.auto_analyse.issues import IncorrectCategoryIssue
+
+class BcDesignationMismatchIssue(DesignationMismatchIssue):
+    """BC designation mismatch issue."""
+
+    pass
 
 
-class XproIncorrectCategoryIssue(IncorrectCategoryIssue):
+class XproDesignationMismatchIssue(DesignationMismatchIssue):
+    """XPRO designation mismatch issue."""
+
     def create_issue(self):
+        """Create XPRO designation mismatch issue."""
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,

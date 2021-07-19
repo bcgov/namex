@@ -11,8 +11,7 @@ from .name_requests.api_namespace import api as name_request_api
 from .payment.api_namespace import api as payment_api
 from .word_classification import api as word_classification_api
 
-from .auto_analyse.paths import bc_name_analysis_api, xpro_name_analysis_api
-from .auto_analyse_v2 import name_analysis_api
+from .auto_analyse.paths import name_analysis_api
 
 from .mras import mras_profile_api
 from .colin import colin_api
@@ -47,9 +46,7 @@ api.add_namespace(exact_match_api, path='/exact-match')
 api.add_namespace(events_api, path='/events')
 api.add_namespace(word_classification_api, path='/word-classification')
 api.add_namespace(name_request_api, path='/namerequests')
-api.add_namespace(bc_name_analysis_api, path='/name-analysis')
-api.add_namespace(name_analysis_api, path='/name-analysis-v2')
-api.add_namespace(xpro_name_analysis_api, path='/xpro-name-analysis')
+api.add_namespace(name_analysis_api, path='/name-analysis')
 api.add_namespace(payment_api, path='/payments')
 api.add_namespace(mras_profile_api, path='/mras-profile')
 api.add_namespace(colin_api, path='/colin')

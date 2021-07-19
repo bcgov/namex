@@ -167,8 +167,6 @@ class AnalysisResponse:
         self.issues = []
         self.executed_procedures = []
 
-        print(repr(analysis_result))
-
         is_valid_name_request = True
         issue_count = len(analysis_result)
         issue_idx = None

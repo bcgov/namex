@@ -129,7 +129,7 @@ class NameAnalysisResource(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     def get(identifier):
-        """Retrieves the status of a name analysis request from the name analyzer"""
+        """Retrieve the status of a name analysis request from the name analyzer."""
         if not identifier:
             return {'error': 'Invalid  name analysis request Identifier.'}, HTTPStatus.BAD_REQUEST
         try:
@@ -146,7 +146,7 @@ class NameAnalysisResource(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     def delete(identifier):
-        """Cancels the name analysis request corresponding to the given identifier"""
+        """Cancel the name analysis request corresponding to the given identifier."""
         if not identifier:
             return {'error': 'Invalid name analysis request identifier.'}, HTTPStatus.BAD_REQUEST
 
