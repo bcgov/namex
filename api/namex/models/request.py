@@ -117,6 +117,9 @@ class Request(db.Model):
     # all names stripped of '|' and divided by a '|<name choice>'
     nameSearch = db.Column('name_search', db.String(3078), index=True)
 
+    notifiedBeforeExpiry = db.Column('notified_before_expiry', db.Boolean, default=False)
+    notifiedExpiry = db.Column('notified_expiry', db.Boolean, default=False)
+
     # End of table definitions
     REQUEST_FURNISHED = 'Y'
 
@@ -215,7 +218,9 @@ class Request(db.Model):
             'comments': [comment.as_dict() for comment in self.comments.all()],
             'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()],
             'checkedOutBy': self.checkedOutBy,
-            'checkedOutDt': self.checkedOutDt
+            'checkedOutDt': self.checkedOutDt,
+            'notifiedBeforeExpiry': self.notifiedBeforeExpiry,
+            'notifiedExpiry': self.notifiedExpiry
         }
         if nr_actions := nr_filing_actions.get_actions(self.requestTypeCd):
             nr_json['legalType'] = nr_actions.get('legalType')
@@ -678,7 +683,9 @@ class RequestsHeaderSchema(ma.SQLAlchemySchema):
             'submitCount',
             'submittedDate',
             'userId',
-            'xproJurisdiction'
+            'xproJurisdiction',
+            'notifiedBeforeExpiry',
+            'notifiedExpiry'
         )
     additionalInfo = fields.String(allow_none=True)
     applicants = fields.Field(allow_none=True)
@@ -711,6 +718,8 @@ class RequestsHeaderSchema(ma.SQLAlchemySchema):
     submitter_userid = fields.String(allow_none=True)
     userId = fields.String(allow_none=True)
     xproJurisdiction = fields.String(allow_none=True)
+    notifiedBeforeExpiry = fields.Boolean(allow_none=True)
+    notifiedExpiry = fields.Boolean(allow_none=True)
 
 
 class RequestsSearchSchema(ma.SQLAlchemySchema):
