@@ -80,22 +80,8 @@ class Config(object):
     NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME')
     NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID')
     NATS_QUEUE = os.getenv('NATS_QUEUE')
-    NATS_SUBJECT = os.getenv('NATS_SUBJECT')
-    NATS_CONNECTION_OPTIONS = {
-        'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_CLIENT_NAME', 'namex.worker')
-    }
-    STAN_CONNECTION_OPTIONS = {
-        'cluster_id': os.getenv('NATS_CLUSTER_ID', 'test-cluster'),
-        'client_id': str(random.SystemRandom().getrandbits(0x58)),
-        'ping_interval': 1,
-        'ping_max_out': 5,
-    }
-    SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_SUBJECT', 'namerequest.state'),
-        'queue': os.getenv('NATS_QUEUE', 'namerequest-processor'),
-        'durable_name': os.getenv('NATS_QUEUE', 'namex.worker') + '_durable',
-    }
+    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namerequest.state')
+
 
 class DevConfig(Config):
     """Dev config used for development."""

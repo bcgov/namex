@@ -4,7 +4,6 @@ import sqlalchemy
 from sqlalchemy.sql.schema import Index
 from sqlalchemy.event import listen
 from sqlalchemy.orm.attributes import get_history
-import asyncio
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # import traceback
 
@@ -14,6 +13,7 @@ from flask import current_app
 # from flask_sqlalchemy import get_debug_queries
 from namex.services.lookup import nr_filing_actions
 from namex.exceptions import BusinessException
+from namex.utils import queue_util
 from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.orm.attributes import set_committed_value
@@ -34,7 +34,6 @@ import re
 from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
     request_type_mapping, RequestPriority, EventAction, EventState, EventUserId, DesignationPositionCodes
-from namex.services import CloudEventMessageService
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
@@ -630,11 +629,16 @@ class Request(db.Model):
 @event.listens_for(Request, 'after_insert')
 @event.listens_for(Request, 'after_update')
 def on_insert_or_update_nr(mapper, connection, request):
-    """Send a new cloud event message on changes for nrNum or stateCd in the Request model."""
-    if not len(get_history(request, 'stateCd').unchanged) or not len(get_history(request, 'nrNum').unchanged):
+    """Send a new cloud event message on changes for stateCd in the Request model.
+       
+       Temporary NRs (nrNum starting with 'NR L') are discarded.
+    """
+    if (len(get_history(request, 'nrNum').added) or 
+        len(get_history(request, 'stateCd').added)
+        ) and not request.nrNum.startswith('NR L'):
         old_state_cd = get_history(request, 'stateCd').deleted[0] if len(get_history(request, 'stateCd').deleted) else ''
-        old_nr_num = get_history(request, 'nrNum').deleted[0] if len(get_history(request, 'nrNum').deleted) else ''
-        asyncio.run(CloudEventMessageService.sendNameRequestStateEvent(request.nrNum, old_nr_num, request.stateCd, old_state_cd))
+        queue_util.send_name_request_state_msg(request.nrNum, request.stateCd, old_state_cd)
+
 
 class RequestsSchema(ma.SQLAlchemySchema):
     class Meta:
