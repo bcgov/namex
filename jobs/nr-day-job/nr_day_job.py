@@ -85,7 +85,7 @@ async def notify_nr_before_expiry(app: Flask, qsm: QueueService):  # pylint: dis
     """Send nr before expiry."""
     try:
         with app.app_context():
-            current_app.logger.debug('entering notify_nr_before_expiry')
+            app.logger.debug('entering notify_nr_before_expiry')
 
             where_clause = text(
                 "expiration_date - interval '14 day' <= CURRENT_DATE AND expiration_date > CURRENT_DATE")
@@ -97,14 +97,14 @@ async def notify_nr_before_expiry(app: Flask, qsm: QueueService):  # pylint: dis
             for request in requests:
                 await furnish_request_message(qsm, request, 'before-expiry')
     except Exception as err:  # noqa B902; pylint: disable=W0703;
-        current_app.logger.error(err)
+        app.logger.error(err)
 
 
 async def notify_nr_expired(app: Flask, qsm: QueueService):  # pylint: disable=redefined-outer-name
     """Send nr expired."""
     try:
         with app.app_context():
-            current_app.logger.debug('entering notify_nr_before_expiry')
+            app.logger.debug('entering notify_nr_expired')
 
             where_clause = text('expiration_date <= CURRENT_DATE')
             requests = db.session.query(Request).filter(
@@ -116,7 +116,7 @@ async def notify_nr_expired(app: Flask, qsm: QueueService):  # pylint: disable=r
             for request in requests:
                 await furnish_request_message(qsm, request, 'expired')
     except Exception as err:  # noqa B902; pylint: disable=W0703;
-        current_app.logger.error(err)
+        app.logger.error(err)
 
 
 if __name__ == '__main__':
