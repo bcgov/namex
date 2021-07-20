@@ -8,8 +8,7 @@
     {
         "vault": "namex",
         "application": [
-            "postgres-namex",
-            "nats-emailer"
+            "postgres-namex"
         ]
     }
 ]
