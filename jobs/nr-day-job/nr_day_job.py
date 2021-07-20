@@ -91,7 +91,7 @@ async def notify_nr_before_expiry(app: Flask, qsm: QueueService):  # pylint: dis
                 "expiration_date - interval '14 day' <= CURRENT_DATE AND expiration_date > CURRENT_DATE")
             requests = db.session.query(Request).filter(
                 Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
-                Request.notifiedBeforeExpiry == False,  # noqa E712;
+                Request.notifiedBeforeExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
                 where_clause
             ).all()
             for request in requests:
@@ -109,8 +109,8 @@ async def notify_nr_expired(app: Flask, qsm: QueueService):  # pylint: disable=r
             where_clause = text('expiration_date <= CURRENT_DATE')
             requests = db.session.query(Request).filter(
                 Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
-                Request.notifiedBeforeExpiry == True,  # noqa E712;
-                Request.notifiedExpiry == False,  # noqa E712;
+                Request.notifiedBeforeExpiry == True,  # noqa E712; pylint: disable=singleton-comparison
+                Request.notifiedExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
                 where_clause
             ).all()
             for request in requests:
