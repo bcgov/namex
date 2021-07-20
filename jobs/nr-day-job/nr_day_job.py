@@ -67,7 +67,8 @@ async def furnish_request_message(
         'email': {
             'nrNumber': request.nrNum,
             'type': 'namerequest',
-            'option': option
+            'option': option,
+            'submitCount': request.submitCount
         }
     }
 
