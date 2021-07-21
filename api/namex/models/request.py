@@ -34,6 +34,7 @@ import re
 from namex.constants import ValidSources, NameState, \
     EntityTypes, LegacyEntityTypes, \
     request_type_mapping, RequestPriority, EventAction, EventState, EventUserId, DesignationPositionCodes
+from namex.services import CloudEventMessageService
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
