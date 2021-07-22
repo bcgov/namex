@@ -33,43 +33,12 @@ setup_logging()  # It's important to do this first
 api = Namespace('nameAnalysis', description='API for Analysing BC Names')
 
 
-def bc_validate_name_request(location, entity_type, request_action):
+def bc_validate_name_request(location):
     """Validate the params for bc analysis."""
     errors = []
     # Check location is valid
     if location != ValidLocations.CA_BC.value:
         errors.append('Invalid location provided')
-
-    # Check request_action is valid
-    if request_action not in AnalysisRequestActions.list():
-        errors.append('Invalid request action provided')
-
-    is_protected = False
-    is_unprotected = False
-    valid_request_actions = []
-
-    if entity_type in BCProtectedNameEntityTypes.list():
-        is_protected = True
-        valid_request_actions = [
-            AnalysisRequestActions.NEW.value,
-            AnalysisRequestActions.CHG.value,
-            AnalysisRequestActions.MVE.value
-        ]
-    elif entity_type in BCUnprotectedNameEntityTypes.list():
-        is_unprotected = True
-        valid_request_actions = (AnalysisRequestActions.NEW.value, AnalysisRequestActions.DBA.value)
-
-    if is_protected and is_unprotected:
-        errors.append('An entity name cannot be both protected and unprotected')
-
-    if is_protected and entity_type not in BCProtectedNameEntityTypes.list():
-        errors.append('Invalid entity_type provided for a protected BC entity name')
-
-    if is_unprotected and entity_type not in BCUnprotectedNameEntityTypes.list():
-        errors.append('Invalid entity_type provided for an unprotected BC entity name')
-
-    if request_action not in valid_request_actions:
-        errors.append('Operation not currently supported')
 
     return errors
 
@@ -160,80 +129,85 @@ class NameAnalysis(Resource):
     @api.doc(params={
         'name': 'A company / organization name string',
         'location': 'A location code [ BC (only)]',
-        'entity_type_cd': 'An entity type code [ CR, UL, CC ]',
-        'request_action_cd': 'A request action code [ NEW ]',
+        'entity_type_cd': 'An entity type code [ CR, UL, CC, ... ]',  # anything not xpro
+        'request_action_cd': 'A request action code [ NEW ]',  # may not be needed
         'analysis_type': '[ designation, structure ]',
-        'jurisdiction': '[ BC, XPRO ]'
+        'jurisdiction': '[ BC, XPRO ]'  # now that xpro is invalid we may be able to remove this from UI/Api
     })
     def get():
         """Get structure analysis for a name."""
         name = get_query_param_str('name')
+        allowed_special_chars = ['/', '[', ']', '^', '*', '+', '-', '=', '&', '(', ')', ',', '”', '’', '#', '@', '!', '?', ';', ':']
+        for special_char in allowed_special_chars:
+            name = name.replace(special_char, ' ')
         location = get_query_param_str('location')
         entity_type = get_query_param_str('entity_type_cd')
-        request_action = get_query_param_str('request_action_cd')
+        # request_action = get_query_param_str('request_action_cd')
         designation_only = get_query_param_str('analysis_type') in ['designation', None]
         # TODO: take out xpro flow entirely (not used in name analysis flow anymore)
         xpro = get_query_param_str('jurisdiction') not in ['BC', None]
         service = None
+        
+        if xpro:
+            return jsonify(message=['Invalid location']), HTTPStatus.BAD_REQUEST
 
-        errors = bc_validate_name_request(location, entity_type, request_action) \
-            if not xpro else xpro_validate_name_request(location, entity_type, request_action)
+        errors = bc_validate_name_request(location)
         if errors:
             return jsonify(message=errors), HTTPStatus.BAD_REQUEST
 
         # used for BC
         valid_protected_entity_type = None
         valid_unprotected_entity_type = None
-        is_protected_action = None
-        is_unprotected_action = None
+        # is_protected_action = None
+        # is_unprotected_action = None
         # used for XPRO
-        valid_xpro_action = None
-        # used for both
-        valid_location = None
-        valid_entity_type = None
-        if xpro:
-            valid_location = location in [ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value]
-            valid_entity_type = entity_type in XproUnprotectedNameEntityTypes.list()
-            valid_xpro_action = request_action in [
-                AnalysisRequestActions.NEW.value,
-                AnalysisRequestActions.AML.value,
-                AnalysisRequestActions.CHG.value,
-                AnalysisRequestActions.ASSUMED.value,
-                AnalysisRequestActions.REN.value,
-                AnalysisRequestActions.REH.value,
-                AnalysisRequestActions.MVE.value
-            ]
-        else:
-            valid_location = location == ValidLocations.CA_BC.value
-            valid_protected_entity_type = entity_type in BCProtectedNameEntityTypes.list()
-            valid_unprotected_entity_type = entity_type in BCUnprotectedNameEntityTypes.list()
-            is_protected_action = request_action in [
-                AnalysisRequestActions.NEW.value,
-                AnalysisRequestActions.CHG.value,
-                AnalysisRequestActions.MVE.value
-            ]
-            is_unprotected_action = request_action in [AnalysisRequestActions.NEW.value]
+        # valid_xpro_action = None
+        # valid_entity_type = None
+        # valid_location = None
+        # if xpro:
+        #     valid_location = location in [ValidLocations.CA_NOT_BC.value, ValidLocations.INTL.value]
+        #     valid_entity_type = entity_type in XproUnprotectedNameEntityTypes.list()
+        #     valid_xpro_action = request_action in [
+        #         AnalysisRequestActions.NEW.value,
+        #         AnalysisRequestActions.AML.value,
+        #         AnalysisRequestActions.CHG.value,
+        #         AnalysisRequestActions.ASSUMED.value,
+        #         AnalysisRequestActions.REN.value,
+        #         AnalysisRequestActions.REH.value,
+        #         AnalysisRequestActions.MVE.value
+        #     ]
+        # else:
+        valid_location = location == ValidLocations.CA_BC.value
+        valid_protected_entity_type = entity_type in BCProtectedNameEntityTypes.list()
+        valid_unprotected_entity_type = entity_type in BCUnprotectedNameEntityTypes.list()
+        # is_protected_action = request_action in [
+        #     AnalysisRequestActions.NEW.value,
+        #     AnalysisRequestActions.CHG.value,
+        #     AnalysisRequestActions.MVE.value,
+        #     AnalysisRequestActions.AML.value
+        # ]
+        # is_unprotected_action = request_action in [AnalysisRequestActions.NEW.value, AnalysisRequestActions.AML.value]
 
         try:
-            if xpro:
-                if valid_location and valid_entity_type and valid_xpro_action:
-                    service = ProtectedNameAnalysisService() \
-                        if request_action == AnalysisRequestActions.MVE.value else XproNameAnalysisService()
-                    builder = NameAnalysisBuilder(service)
-                else:
-                    return jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
+            # if xpro:
+            #     if valid_location and valid_entity_type and valid_xpro_action:
+            #         service = ProtectedNameAnalysisService() \
+            #             if request_action == AnalysisRequestActions.MVE.value else XproNameAnalysisService()
+            #         builder = NameAnalysisBuilder(service)
+            #     else:
+            #         return jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
 
+            # else:
+            if valid_location and valid_protected_entity_type:  # and is_protected_action:
+                # Use ProtectedNameAnalysisService
+                service = ProtectedNameAnalysisService()
+                builder = NameAnalysisBuilder(service)
+            elif valid_location and valid_unprotected_entity_type:  # and is_unprotected_action:
+                # Use UnprotectedNameAnalysisService
+                service = UnprotectedNameAnalysisService()
+                builder = NameAnalysisBuilder(service)
             else:
-                if valid_location and valid_protected_entity_type and is_protected_action:
-                    # Use ProtectedNameAnalysisService
-                    service = ProtectedNameAnalysisService()
-                    builder = NameAnalysisBuilder(service)
-                elif valid_location and valid_unprotected_entity_type and is_unprotected_action:
-                    # Use UnprotectedNameAnalysisService
-                    service = UnprotectedNameAnalysisService()
-                    builder = NameAnalysisBuilder(service)
-                else:
-                    return jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
+                return jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
 
             if not service:
                 return jsonify(message=['Failed to initialize service']), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -254,8 +228,7 @@ class NameAnalysis(Resource):
         analysis = service.execute_analysis(designation_only)
 
         # Build the appropriate response for the analysis result
-        analysis_response = BcAnalysisResponse(service, analysis) \
-            if not xpro else XproAnalysisResponse(service, analysis)
+        analysis_response = BcAnalysisResponse(service, analysis)  # if not xpro else XproAnalysisResponse(service, analysis)
 
         # Remove issues for end designation more than once if they are not duplicates
         valid_issues = []
