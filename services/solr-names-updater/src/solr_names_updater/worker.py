@@ -1,0 +1,143 @@
+# Copyright © 2021 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""The unique worker functionality for this service is contained here.
+
+The entry-point is the **cb_subscription_handler**
+
+The design and flow leverage a few constraints that are placed upon it
+by NATS Streaming and using AWAIT on the default loop.
+- NATS streaming queues require one message to be processed at a time.
+- AWAIT on the default loop effectively runs synchronously
+
+If these constraints change, the use of Flask-SQLAlchemy would need to change.
+Flask-SQLAlchemy currently allows the base model to be changed, or reworking
+the model to a standalone SQLAlchemy usage with an async engine would need
+to be pursued.
+"""
+import json
+import os
+
+import nats
+from flask import Flask
+from namex.models import db
+from queue_common.service import QueueServiceManager
+from queue_common.service_utils import QueueException, logger
+from requests import RequestException
+from sentry_sdk import capture_message
+from sqlalchemy.exc import OperationalError
+from urllib3.exceptions import NewConnectionError
+
+from solr_names_updater import config
+from solr_names_updater.names_processors.names import (
+    process_add_to_solr as process_names_add,
+    process_delete_from_solr as process_names_delete)
+from solr_names_updater.names_processors.possible_conflicts \
+    import (process_add_to_solr as process_possible_conflicts_add,
+            process_delete_from_solr as process_possible_conflicts_delete)
+
+
+qsm = QueueServiceManager()  # pylint: disable=invalid-name
+APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
+FLASK_APP = Flask(__name__)
+FLASK_APP.config.from_object(APP_CONFIG)
+db.init_app(FLASK_APP)
+
+
+def is_nr_state_change_msg_type(msg: dict):
+    """Check message is of type nr state change."""
+    if msg and msg.get('type', '') == 'bc.registry.nr_state.changed':
+        return True
+
+    return False
+
+
+def is_nr_furnished_change_msg_type(msg: dict):
+    """Check message is of type nr furnished changed."""
+    if msg and msg.get('type', '') == 'bc.registry.nr_furnished.changed':
+        return True
+
+    return False
+
+
+def is_processable(msg: dict):
+    """Determine if message is processable using message type of msg."""
+    if msg and \
+        (is_nr_state_change_msg_type(msg)
+         or is_nr_furnished_change_msg_type(msg)):
+        return True
+
+    return False
+
+
+async def process_nr_event_message(msg: dict, flask_app: Flask):
+    """Update solr accordingly based on incoming nr state changes."""
+    if not flask_app or not msg:
+        raise QueueException('Flask App or msg not available.')
+
+    with flask_app.app_context():
+        logger.debug('entering processing of nr event msg: %s', msg)
+
+        if is_nr_state_change_msg_type(msg):
+            data = msg.get('data')
+            new_state = data.get('newState')
+            if new_state in ('APPROVED', 'CONDITIONAL'):
+                process_names_add(data)
+            elif new_state in ('CANCELLED', 'CONSUMED'):
+                process_names_delete(data)
+                process_possible_conflicts_delete(data)
+            else:
+                logger.debug('no names processing required message %s', msg)
+        # todo need to determine if need another msg type for handling possible conflicts
+        # elif is_nr_furnished_change_msg_type(msg):
+        #     data = msg.get('data')
+        #     nr_state = data.get('nrState')
+        #     is_furnished = data.get('isFurnished')
+        #     if is_furnished and nr_state in ('APPROVED', 'CONDITIONAL'):
+        #         process_possible_conflicts_add(data)
+        #     else:
+        #         logger.debug("no possible conflict processing required message %s", msg)
+
+
+async def cb_subscription_handler(msg: nats.aio.client.Msg):
+    """Use Callback to process Queue Msg objects.
+
+    This is the callback handler that gets called when a message is placed on the queue.
+    If an exception is thrown and not handled, the message is not marked as consumed
+    on the queue. It eventually times out and another worker can grab it.
+
+    In some cases we want to consume the message and capture our failure on Sentry
+    to be handled manually by staff.
+    """
+    try:
+        logger.info('Received raw message seq:%s, data=  %s', msg.sequence, msg.data.decode())
+        nr_event_msg = json.loads(msg.data.decode('utf-8'))
+        logger.debug('Extracted nr event msg: %s', nr_event_msg)
+
+        if is_processable(nr_event_msg):
+            logger.debug('Begin process_nr_state_change for nr_event_msg: %s', nr_event_msg)
+            await process_nr_event_message(nr_event_msg, FLASK_APP)
+            logger.debug('Completed process_nr_state_change for nr_event_msg: %s', nr_event_msg)
+        else:
+            # Skip processing of message as it isn't a message type this queue listener processes
+            logger.debug('Skipping processing of nr event message as message type is not supported: %s', nr_event_msg)
+    except OperationalError as err:  # message goes back on the queue
+        logger.error('Queue Blocked - Database Issue: %s', json.dumps(nr_event_msg), exc_info=True)
+        raise err  # We don't want to handle the error, as a DB down would drain the queue
+    except (RequestException, NewConnectionError) as err:  # message goes back on the queue
+        logger.error('Queue Blocked - HTTP Connection Issue: %s', json.dumps(nr_event_msg), exc_info=True)
+        raise err  # We don't want to handle the error, as a http connection error would drain the queue
+    except (QueueException, KeyError, Exception):  # pylint: disable=broad-except # noqa B902
+        # Catch Exception so that any error is still caught and the message is removed from the queue
+        capture_message('Queue Error:' + json.dumps(nr_event_msg), level='error')
+        logger.error('Queue Error: %s', json.dumps(nr_event_msg), exc_info=True)
