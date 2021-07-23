@@ -357,3 +357,36 @@ def test_edit_inprogress_event_history(client, jwt, app):
     assert rv.status_code == 200
 
     assert b'"user_action": "Edit NR Details (NameX)"' in rv.data
+
+
+def test_get_staff_comment_event_history(client, jwt, app):
+    from namex.models import Comment, Event, State, User
+    from namex.services import EventRecorder
+    from namex.utils.common import convert_to_ascii
+
+    # add a user for the comment
+    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+    user.save_to_db()
+
+    headers = create_header(jwt, [User.EDITOR])
+
+    nr = create_base_nr()
+    nr.stateCd = State.DRAFT
+    nr.save_to_db()
+    EventRecorder.record(user, Event.POST + ' [payment completed] CREATE', nr, nr.json())
+
+    comment_instance = Comment()
+    comment_instance.examinerId = user.id
+    comment_instance.nrId = nr.id
+    comment_instance.comment = convert_to_ascii('test staff comment')
+    comment_instance.save_to_db()
+
+    EventRecorder.record(user, Event.POST, nr, { 'comment': 'test staff comment' })
+
+    # get the resource (this is the test)
+    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    assert rv.status_code == 200
+
+    assert b'"user_action": "Staff Comment"' in rv.data
+    assert b'"comment": "test staff comment"' in rv.data

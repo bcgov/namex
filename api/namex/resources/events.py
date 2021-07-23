@@ -115,7 +115,7 @@ class Events(Resource):
 
             # update event date
             nr_event_info['eventDate'] = e_dict['eventDate']
-            
+
             # update username
             user = User.query.filter_by(id=e_dict['userId']).first().json()
             nr_event_info['user_name'] = user['username']
@@ -156,8 +156,9 @@ class Events(Resource):
                 user_action = "Undo Decision"
             if e_dict["action"] == "nro_update" and (e_dict["stateCd"] == State.APPROVED or e_dict["stateCd"] == State.REJECTED or e_dict["stateCd"] == State.CONDITIONAL):
                 user_action = "Updated NRO"
-            if e_dict["action"] == "post" and "comment" in e_dict["jsonData"]:
+            if e_dict["action"] == "post" and ((json_data := json.loads(e_dict["jsonData"])) and "comment" in json_data):
                 user_action = "Staff Comment"
+                nr_event_info['comment'] = json_data["comment"]
             if e_dict["stateCd"] == State.CANCELLED and (e_dict["action"] == "post" or e_dict["action"] == "update_from_nro"):
                 user_action = "Cancelled in NRO"
             if e_dict["stateCd"] == State.CANCELLED and (e_dict["action"] == "patch" or e_dict["action"] == "put"):
