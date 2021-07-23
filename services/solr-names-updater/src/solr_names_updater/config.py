@@ -82,7 +82,7 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_CLIENT_NAME', 'namex.names.updater.solr')
+        'name': os.getenv('NATS_CLIENT_NAME', 'namex.solr.names.updater')
 
     }
     STAN_CONNECTION_OPTIONS = {
@@ -93,9 +93,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     }
 
     SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_SUBJECT', 'nr.events'),
-        'queue': os.getenv('NATS_QUEUE', 'nr-events-worker'),
-        'durable_name': os.getenv('NATS_QUEUE', 'entity-filer-worker') + '_durable',
+        'subject': os.getenv('NATS_SUBJECT', 'namex.event'),
+        'queue': os.getenv('NATS_QUEUE', 'namex-events-worker'),
+        'durable_name': os.getenv('NATS_QUEUE', 'namex-events-worker') + '_durable',
     }
 
     ENVIRONMENT = os.getenv('ENVIRONMENT', 'prod')

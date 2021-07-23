@@ -58,7 +58,7 @@ db.init_app(FLASK_APP)
 
 def is_nr_state_change_msg_type(msg: dict):
     """Check message is of type nr state change."""
-    if msg and msg.get('type', '') == 'bc.registry.nr_state.changed':
+    if msg and msg.get('type', '') == 'bc.registry.names.events':
         return True
 
     return False
@@ -91,13 +91,13 @@ async def process_nr_event_message(msg: dict, flask_app: Flask):
         logger.debug('entering processing of nr event msg: %s', msg)
 
         if is_nr_state_change_msg_type(msg):
-            data = msg.get('data')
-            new_state = data.get('newState')
+            request = msg.get('data').get('request')
+            new_state = request.get('newState')
             if new_state in ('APPROVED', 'CONDITIONAL'):
-                process_names_add(data)
+                process_names_add(request)
             elif new_state in ('CANCELLED', 'CONSUMED'):
-                process_names_delete(data)
-                process_possible_conflicts_delete(data)
+                process_names_delete(request)
+                process_possible_conflicts_delete(request)
             else:
                 logger.debug('no names processing required message %s', msg)
         # todo need to determine if need another msg type for handling possible conflicts
