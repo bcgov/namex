@@ -11,7 +11,7 @@ from namex import jwt, nro
 from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
 from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event, User
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
-from namex.services import EventRecorder
+from namex.services import EventRecorder, queue
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
 from namex.services.payment.payments import get_payment, create_payment, refund_payment, cancel_payment
@@ -387,6 +387,17 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                         payment.save_to_db()
                         EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
                         if payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
+                            email_subject = current_app.config.get('NATS_EMAILER_SUBJECT')
+                            option = 'renewal' if payment_action == payment.PaymentActions.REAPPLY.value else 'upgrade'
+                            queue.publish_json({
+                                'email': {
+                                    'nrNumber': nr_model.nrNum,
+                                    'type': 'namerequest',
+                                    'option': option,
+                                    'submitCount': nr_model.submitCount
+                                }
+                            }, email_subject)
+
                             change_flags = {
                                 'is_changed__request': True,
                                 'is_changed__previous_request': False,
@@ -712,7 +723,15 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
             # Save the name request
             nr_model.save_to_db()
-
+            email_subject = current_app.config.get('NATS_EMAILER_SUBJECT')
+            queue.publish_json({
+                'email': {
+                    'nrNumber': nr_model.nrNum,
+                    'type': 'namerequest',
+                    'option': 'upgrade',
+                    'submitCount': nr_model.submitCount
+                }
+            }, email_subject)
         # This (optionally) handles the updates for NRO and Solr, if necessary
         update_solr = False
         nr_model = self.update_records_in_network_services(nr_model, update_solr)
@@ -757,6 +776,15 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                     nr_model = nr_svc.update_request_submit_count(nr_model)
 
                 nr_model.save_to_db()
+                email_subject = current_app.config.get('NATS_EMAILER_SUBJECT')
+                queue.publish_json({
+                    'email': {
+                        'nrNumber': nr_model.nrNum,
+                        'type': 'namerequest',
+                        'option': 'renewal',
+                        'submitCount': nr_model.submitCount
+                    }
+                }, email_subject)
             else:
                 # TODO: Make a custom exception for this?
                 raise PaymentServiceError(message='Submit count maximum of 3 retries has been reached!')

@@ -38,7 +38,6 @@ class QueueService():
         self.stan_options = {}
         self.loop = loop
         self.nats_servers = None
-        self.subject = None
 
         self.logger = logging.getLogger()
 
@@ -55,7 +54,6 @@ class QueueService():
         self.name = app.config.get('NATS_CLIENT_NAME')
         self.loop = loop or asyncio.get_event_loop()
         self.nats_servers = app.config.get('NATS_SERVERS').split(',')
-        self.subject = app.config.get('NATS_FILER_SUBJECT')
 
         default_nats_options = {
             'name': self.name,
@@ -117,10 +115,10 @@ class QueueService():
             await self.stan.close()
             await self.nats.close()
 
-    def publish_json(self, payload=None):
-        """Publish the json payload to the Queue Service."""
+    def publish_json(self, payload, subject):
+        """Publish the json payload to the specified subject."""
         try:
-            self.loop.run_until_complete(self.async_publish_json(payload, self.subject))
+            self.loop.run_until_complete(self.async_publish_json(payload, subject))
         except Exception as err:
             self.logger.error('Error: %s', err)
             raise err

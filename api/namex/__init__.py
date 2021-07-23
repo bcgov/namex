@@ -19,6 +19,7 @@ jwt = JwtManager()
 from namex.services.lookup import nr_filing_actions
 from namex.services.nro import NROServices
 from namex.services.cache import cache
+from namex.services import queue
 nro = NROServices()
 from namex.models import db, ma
 from namex.resources import api
@@ -33,6 +34,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Create app."""
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
+
+    queue.init_app(app)
 
     db.init_app(app)
     ma.init_app(app)

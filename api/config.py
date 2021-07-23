@@ -74,6 +74,13 @@ class Config(object):
     DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
+    # NATS
+    NATS_SERVERS = os.getenv('NATS_SERVERS')
+    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME')
+    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID')
+    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
+    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namerequest.state')
+
 
 class DevConfig(Config):
     """Dev config used for development."""
