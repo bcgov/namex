@@ -389,6 +389,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                         if payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
                             email_subject = current_app.config.get('NATS_EMAILER_SUBJECT')
                             option = 'renewal' if payment_action == payment.PaymentActions.REAPPLY.value else 'upgrade'
+                            current_app.logger.debug('About to publish email for %s nrNumber=%s', option, nr_model.nrNum)
                             queue.publish_json({
                                 'email': {
                                     'nrNumber': nr_model.nrNum,
@@ -724,6 +725,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             # Save the name request
             nr_model.save_to_db()
             email_subject = current_app.config.get('NATS_EMAILER_SUBJECT')
+            current_app.logger.debug('About to publish email for upgrade nrNumber=%s', nr_model.nrNum)
             queue.publish_json({
                 'email': {
                     'nrNumber': nr_model.nrNum,
@@ -777,6 +779,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
                 nr_model.save_to_db()
                 email_subject = current_app.config.get('NATS_EMAILER_SUBJECT')
+                current_app.logger.debug('About to publish email for renewal nrNumber=%s', nr_model.nrNum)
                 queue.publish_json({
                     'email': {
                         'nrNumber': nr_model.nrNum,

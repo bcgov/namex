@@ -220,6 +220,18 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
                         )
                         # try to update NRO otherwise send a sentry msg for OPS
                         if payment.payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
+                            option = 'renewal' if payment.payment_action == payment.PaymentActions.REAPPLY.value else 'upgrade'
+                            email_msg = {
+                                'email': {
+                                    'nrNumber': nr.nrNum,
+                                    'type': 'namerequest',
+                                    'option': option,
+                                    'submitCount': nr.submitCount
+                                }
+                            }
+                            logger.debug('About to publish email for %s nrNumber=%s', option, nr.nrNum)
+                            await publish_email_message(qsm, email_msg)
+
                             change_flags = {
                                 'is_changed__request': True,
                                 'is_changed__previous_request': False,
