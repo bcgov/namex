@@ -633,11 +633,12 @@ def on_insert_or_update_nr(mapper, connection, request):
        
        Temporary NRs (nrNum starting with 'NR L') are discarded.
     """
-    if (len(get_history(request, 'nrNum').added) or 
-        len(get_history(request, 'stateCd').added)
-        ) and not request.nrNum.startswith('NR L'):
-        old_state_cd = get_history(request, 'stateCd').deleted[0] if len(get_history(request, 'stateCd').deleted) else ''
-        queue_util.send_name_request_state_msg(request.nrNum, request.stateCd, old_state_cd)
+    if not request.nrNum.startswith('NR L'):
+        state_cd_history = get_history(request, 'stateCd')
+        nr_num_history = get_history(request, 'nrNum')
+        if len(nr_num_history.added) or len(state_cd_history.added):
+            old_state_cd = state_cd_history.deleted[0] if len(state_cd_history.deleted) else ''
+            queue_util.send_name_request_state_msg(request.nrNum, request.stateCd, old_state_cd)
 
 
 class RequestsSchema(ma.SQLAlchemySchema):

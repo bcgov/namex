@@ -80,7 +80,7 @@ class Config(object):
     NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME')
     NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID')
     NATS_QUEUE = os.getenv('NATS_QUEUE')
-    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namerequest.state')
+    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
 
 
 class DevConfig(Config):
