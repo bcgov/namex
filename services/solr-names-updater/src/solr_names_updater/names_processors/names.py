@@ -68,7 +68,7 @@ def send_to_solr_delete(nr: RequestDAO):
             'commit': {}
         }
     }
-    request_str = json.dumps(payload_dict['request'], indent=4)
+    request_str = json.dumps(payload_dict['request'])
     payload_dict['request'] = request_str
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
@@ -110,7 +110,7 @@ def construct_payload_dict(nr: RequestDAO, names, jur):
         }
 
     payload_request['commit'] = {}
-    request_str = json.dumps(payload_request, indent=4)
+    request_str = json.dumps(payload_request)
     request_str = convert_to_solr_conformant_json(request_str)
     payload_dict['request'] = request_str
     return payload_dict

@@ -39,12 +39,14 @@ from sqlalchemy.exc import OperationalError
 from urllib3.exceptions import NewConnectionError
 
 from solr_names_updater import config
-from solr_names_updater.names_processors.names import (
-    process_add_to_solr as process_names_add,
-    process_delete_from_solr as process_names_delete)
-from solr_names_updater.names_processors.possible_conflicts \
-    import (process_add_to_solr as process_possible_conflicts_add,
-            process_delete_from_solr as process_possible_conflicts_delete)
+from solr_names_updater.names_processors.names import (  # noqa: I001
+    process_add_to_solr as process_names_add,  # noqa: I001
+    process_delete_from_solr as process_names_delete  # noqa: I001
+)  # noqa: I001
+from solr_names_updater.names_processors.possible_conflicts import (  # noqa: I001
+    process_add_to_solr as process_possible_conflicts_add,  # noqa: I001
+    process_delete_from_solr as process_possible_conflicts_delete  # noqa: I001, I005
+)  # noqa: I001
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name

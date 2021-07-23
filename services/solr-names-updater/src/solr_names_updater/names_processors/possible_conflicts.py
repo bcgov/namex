@@ -69,7 +69,7 @@ def send_to_solr_delete(nr: RequestDAO):
         }
     }
 
-    request_str = json.dumps(payload_dict['request'], indent=4)
+    request_str = json.dumps(payload_dict['request'])
     payload_dict['request'] = request_str
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
@@ -91,13 +91,13 @@ def construct_payload_dict(nr: RequestDAO, name, jur):
             'id': nr.nrNum,
             'name': name.name,
             'state_type_cd': name.state,
-            'source': '',  # todo determine what value should be here
+            'source': nr.source,
             'start_date': start_date,
             'jurisdiction': jur
         }
     }
 
     payload_request['commit'] = {}
-    request_str = json.dumps(payload_request, indent=4)
+    request_str = json.dumps(payload_request)
     payload_dict['request'] = request_str
     return payload_dict
