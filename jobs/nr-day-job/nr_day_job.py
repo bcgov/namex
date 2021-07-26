@@ -14,11 +14,15 @@
 """s2i based launch script to run the service."""
 import asyncio
 import os
-
+import time
+import uuid
+from datetime import datetime, timezone
 from flask import Flask, current_app
+from sqlalchemy import text
+
 from namex.models import Request, State, db
 from namex.services.queue import QueueService
-from sqlalchemy import text
+from queue_common.messages import create_cloud_event_msg
 
 import config
 from utils.logging import setup_logging
@@ -62,17 +66,21 @@ async def furnish_request_message(
         option: str
 ):  # pylint: disable=redefined-outer-name
     """Send notification info to the mail queue."""
-    current_app.logger.debug('Start of the furnishing of request for %s nrNumber=%s', option, request.nrNum)
-    payload = {
-        'email': {
-            'nrNumber': request.nrNum,
-            'type': 'namerequest',
-            'option': option,
-            'submitCount': request.submitCount
+    current_app.logger.debug('Start of the furnishing of request for %s nrNum=%s', option, request.nrNum)
+    payload = create_cloud_event_msg(
+        msg_id=str(uuid.uuid4()),
+        msg_type='bc.registry.names.request',
+        source=f'/requests/{request.nrNum}',
+        time=datetime.utcfromtimestamp(time.time()).replace(tzinfo=timezone.utc).isoformat(),
+        identifier=request.nrNum,
+        json_data_body={
+            'request': {
+                'nrNum': request.nrNum,
+                'option': option
+            }
         }
-    }
-
-    current_app.logger.debug('About to publish email for %s nrNumber=%s', option, request.nrNum)
+    )
+    current_app.logger.debug('About to publish email for %s nrNum=%s', option, request.nrNum)
     await publish_email_message(qsm, payload)
 
     if option == 'before-expiry':
