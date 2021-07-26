@@ -17,12 +17,12 @@ import os
 import time
 import uuid
 from datetime import datetime, timezone
-from flask import Flask, current_app
-from sqlalchemy import text
 
+from flask import Flask, current_app
 from namex.models import Request, State, db
 from namex.services.queue import QueueService
 from queue_common.messages import create_cloud_event_msg
+from sqlalchemy import text
 
 import config
 from utils.logging import setup_logging
