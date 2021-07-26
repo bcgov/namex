@@ -19,9 +19,9 @@ Processors hold the business logic for how solr feeder is updated.
 import re
 
 import requests
-
 from flask import current_app
-from namex.models import db, Name
+from namex.models import db, Name  # noqa: 1001
+# noqa: 1005
 
 
 def convert_to_solr_conformant_json(request_str):

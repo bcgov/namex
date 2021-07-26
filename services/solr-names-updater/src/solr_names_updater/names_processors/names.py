@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Processing logic to process names updates via Solr feeder api."""
-from __future__ import annotations
-
 import json
 
 from namex.constants import NameState
 from namex.models import Request as RequestDAO
 from queue_common.service_utils import logger
 
-from solr_names_updater.names_processors import (convert_to_solr_conformant_datetime_str,
-                                                 convert_to_solr_conformant_json,
-                                                 find_name_by_name_states,
-                                                 post_to_solr_feeder)
+from solr_names_updater.names_processors import (  # noqa: I001
+    convert_to_solr_conformant_datetime_str,  # noqa: I001
+    convert_to_solr_conformant_json,  # noqa: I001
+    find_name_by_name_states,  # noqa: I001
+    post_to_solr_feeder  # noqa: I001
+)  # noqa: I001
+# noqa: I003, I005
 
 
 def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches

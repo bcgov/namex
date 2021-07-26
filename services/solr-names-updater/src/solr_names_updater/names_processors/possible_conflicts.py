@@ -20,9 +20,12 @@ from namex.constants import NameState
 from namex.models import Request as RequestDAO
 from queue_common.service_utils import logger
 
-from solr_names_updater.names_processors import (convert_to_solr_conformant_datetime_str,
-                                                 find_name_by_name_states,
-                                                 post_to_solr_feeder)
+from solr_names_updater.names_processors import (  # noqa: I001
+    convert_to_solr_conformant_datetime_str,  # noqa: I001
+    find_name_by_name_states,  # noqa: I001
+    post_to_solr_feeder  # noqa: I001
+)  # noqa: I001
+# noqa: I003, I005
 
 
 def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches

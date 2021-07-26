@@ -108,7 +108,7 @@ async def process_nr_event_message(msg: dict, flask_app: Flask):
         #     if is_furnished and nr_state in ('APPROVED', 'CONDITIONAL'):
         #         process_possible_conflicts_add(data)
         #     else:
-        #         logger.debug("no possible conflict processing required message %s", msg)
+        #         logger.debug('no possible conflict processing required message %s', msg)
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
