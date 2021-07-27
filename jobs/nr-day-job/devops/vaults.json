@@ -2,7 +2,8 @@
     {
         "vault": "nats",
         "application": [
-            "base"
+            "base",
+            "nats-emailer"
         ]
     },
     {
