@@ -45,7 +45,7 @@ def process_delete_from_solr(state_change_msg: dict):  # pylint: disable=too-man
 
 
 def send_to_solr_add(nr: RequestDAO):
-    """Send json payload to add possible conflict from solr for NR."""
+    """Send json payload to add possible conflict to solr for NR."""
     name_states = [NameState.APPROVED.value, NameState.CONDITION.value]  # pylint: disable=no-member
     names = find_name_by_name_states(nr.id, name_states)
     name = names[0]

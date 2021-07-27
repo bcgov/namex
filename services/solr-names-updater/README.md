@@ -1,6 +1,6 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![codecov](https://codecov.io/gh/bcgov/lear/branch/master/graph/badge.svg?flag=entityepay)](https://codecov.io/gh/bcgov/lear/tree/main/queue_services/solr-names-updater)
+[![codecov](https://codecov.io/gh/bcgov/lear/branch/master/graph/badge.svg?flag=solrnamesupdater)](https://codecov.io/gh/bcgov/lear/tree/main/queue_services/solr-names-updater)
 
 # Application Name
 
@@ -9,11 +9,12 @@ BC Registries Names Examination, research and approval system API
 ## Technology Stack Used
 * Python, Flask
 * Postgres -  SQLAlchemy, psycopg2-binary & alembic
+* NATS2
 
 ## Third-Party Products/Libraries used and the the License they are covert by
 
 ## Project Status
-As of 2018-02-22 in **ALPHA**
+As of 2021-07-26 in **ALPHA**
 
 ## Documnentation
 
@@ -59,7 +60,7 @@ By participating in this project you agree to abide by its terms.
 
 ## License
 
-    Copyright 2018 Province of British Columbia
+    Copyright 2021 Province of British Columbia
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

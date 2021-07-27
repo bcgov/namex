@@ -29,7 +29,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_message
         (
             create_message('APPROVED', 'DRAFT'),
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
-            ['APPROVED', 'CONDITION', 'REJECTED'],
+            ['APPROVED', 'CONDITION', 'APPROVED'],
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             []
         ),
@@ -51,8 +51,8 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_message
             create_message('APPROVED', 'DRAFT'),
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'NOT_EXAMINED', 'REJECTED'],
-            ['TEST NAME 1', 'TEST NAME 3'],
-            ['TEST NAME 2']
+            ['TEST NAME 1'],
+            ['TEST NAME 2', 'TEST NAME 3']
         ),
         (
             create_message('CANCELLED', 'DRAFT'),
