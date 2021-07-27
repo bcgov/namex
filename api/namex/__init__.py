@@ -5,7 +5,7 @@ This module is the API for the Names Examination system
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-import config
+from namex import config
 from namex.utils.logging import setup_logging
 setup_logging()  # important to do this first
 

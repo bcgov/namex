@@ -8,11 +8,27 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 CONFIGURATION = {
-    'development': 'config.DevConfig',
-    'testing': 'config.TestConfig',
-    'production': 'config.Config',
-    'default': 'config.Config'
+    'development': 'namex.config.DevConfig',
+    'testing': 'namex.config.TestConfig',
+    'production': 'namex.config.Config',
+    'default': 'namex.config.Config'
 }
+
+
+def get_named_config(config_name: str = 'production'):
+    """Return the configuration object based on the name.
+
+    :raise: KeyError: if an unknown configuration is requested
+    """
+    if config_name in ['production', 'staging', 'default']:
+        config = Config()
+    elif config_name == 'testing':
+        config = TestConfig()
+    elif config_name == 'development':
+        config = DevConfig()
+    else:
+        raise KeyError(f'Unknown configuration: {config_name}')
+    return config
 
 
 class Config(object):
