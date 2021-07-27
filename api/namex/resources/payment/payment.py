@@ -388,9 +388,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                         payment.save_to_db()
                         EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
                         if payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                            option = 'renewal' if payment_action == payment.PaymentActions.REAPPLY.value else 'upgrade'
-                            self.publish_email_message(nr_model, option)
-
                             change_flags = {
                                 'is_changed__request': True,
                                 'is_changed__previous_request': False,
@@ -716,7 +713,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
 
             # Save the name request
             nr_model.save_to_db()
-            self.publish_email_message(nr_model, 'upgrade')
 
         # This (optionally) handles the updates for NRO and Solr, if necessary
         update_solr = False
@@ -762,7 +758,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                     nr_model = nr_svc.update_request_submit_count(nr_model)
 
                 nr_model.save_to_db()
-                self.publish_email_message(nr_model, 'renewal')
             else:
                 # TODO: Make a custom exception for this?
                 raise PaymentServiceError(message='Submit count maximum of 3 retries has been reached!')

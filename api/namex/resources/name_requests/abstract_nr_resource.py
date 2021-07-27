@@ -1,13 +1,6 @@
-import time
-import uuid
-from datetime import datetime, timezone
 from typing import Callable
 
-from flask import current_app
-from queue_common.messages import create_cloud_event_msg
-
 from namex.models import Request, State
-from namex.services import queue
 from namex.utils.logging import setup_logging
 
 from .abstract_nro_resource import AbstractNROResource
@@ -197,26 +190,6 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
                 self.update_solr_service(nr_model, temp_nr_num)
 
         return nr_model
-
-    def publish_email_message(self, nr_model: Request, option: str):
-        """Send notification info to the mail queue."""
-        payload = create_cloud_event_msg(
-            msg_id=str(uuid.uuid4()),
-            msg_type='bc.registry.names.request',
-            source=f'/requests/{nr_model.nrNum}',
-            time=datetime.utcfromtimestamp(time.time()).replace(tzinfo=timezone.utc).isoformat(),
-            identifier=nr_model.nrNum,
-            json_data_body={
-                'request': {
-                    'nrNum': nr_model.nrNum,
-                    'option': option
-                }
-            }
-        )
-
-        email_subject = current_app.config.get('NATS_EMAILER_SUBJECT')
-        current_app.logger.debug('About to publish email for %s nrNum=%s', option, nr_model.nrNum)
-        queue.publish_json(payload, email_subject)
 
     @staticmethod
     def log_error(msg, err):

@@ -218,25 +218,8 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
                             nr,
                             nr.json()
                         )
+                        # try to update NRO otherwise send a sentry msg for OPS
                         if payment.payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                            option = 'renewal' if payment.payment_action == payment.PaymentActions.REAPPLY.value else 'upgrade'
-                            payload = create_cloud_event_msg(
-                                msg_id=str(uuid.uuid4()),
-                                msg_type='bc.registry.names.request',
-                                source=f'/requests/{nr.nrNum}',
-                                time=datetime.utcfromtimestamp(time.time()).replace(tzinfo=timezone.utc).isoformat(),
-                                identifier=nr.nrNum,
-                                json_data_body={
-                                    'request': {
-                                        'nrNum': nr.nrNum,
-                                        'option': option
-                                    }
-                                }
-                            )
-                            logger.debug('About to publish email for %s nrNum=%s', option, nr.nrNum)
-                            await publish_email_message(qsm, payload)
-
-                            # try to update NRO otherwise send a sentry msg for OPS
                             change_flags = {
                                 'is_changed__request': True,
                                 'is_changed__previous_request': False,
