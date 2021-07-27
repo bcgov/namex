@@ -26,6 +26,7 @@ import os
 import random
 import signal
 import sys
+import uuid
 
 from nats.aio.client import Client as NATS  # noqa N814; by convention the name is NATS
 from stan.aio.client import Client as STAN  # noqa N814; by convention the name is STAN
@@ -33,7 +34,7 @@ from stan.aio.client import Client as STAN  # noqa N814; by convention the name 
 from queue_common.service_utils import error_cb, logger, signal_handler
 
 
-async def run(loop, token):  # pylint: disable=too-many-locals
+async def run(loop, payload_values):  # pylint: disable=too-many-locals
     """Run the main application loop for the service.
 
     This runs the main top level service functions for working with the Queue.
@@ -53,7 +54,7 @@ async def run(loop, token):  # pylint: disable=too-many-locals
             'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
             'io_loop': loop,
             'error_cb': error_cb,
-            'name': os.getenv('NATS_CLIENT_NAME', 'entity.filing.tester')
+            'name': os.getenv('NATS_CLIENT_NAME', 'namex.solr.names.updater.tester')
         }
 
     def stan_connection_options():
@@ -65,9 +66,9 @@ async def run(loop, token):  # pylint: disable=too-many-locals
 
     def subscription_options():
         return {
-            'subject': os.getenv('NATS_SUBJECT', 'entity.filings'),
-            'queue': os.getenv('NATS_QUEUE', 'filing-worker'),
-            'durable_name': os.getenv('NATS_QUEUE', 'filing-worker') + '_durable'
+            'subject': os.getenv('NATS_SUBJECT', 'namex.event'),
+            'queue': os.getenv('NATS_QUEUE', 'namex-events-worker'),
+            'durable_name': os.getenv('NATS_QUEUE', 'namex-events-worker') + '_durable'
         }
 
     try:
@@ -81,7 +82,24 @@ async def run(loop, token):  # pylint: disable=too-many-locals
                                     functools.partial(signal_handler, sig_loop=loop, sig_nc=nc, task=close)
                                     )
 
-        payload = {'paymentToken': {'id': token, 'statusCode': 'COMPLETED'}}
+        msg_id = str(uuid.uuid4())
+
+        payload = {
+            'specversion': '1.0.1',
+            'type': 'bc.registry.names.events',
+            'source': '/requests/6724165',
+            'id': msg_id,
+            'time': '',
+            'datacontenttype': 'application/json',
+            'identifier': '781020202',
+            'data': {
+                'request': {
+                    'nrNum': payload_values.get('nr_num'),
+                    'newState': payload_values.get('new_state'),
+                    'previousState': payload_values.get('prev_state')
+                }
+            }
+        }
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
 
@@ -92,17 +110,28 @@ async def run(loop, token):  # pylint: disable=too-many-locals
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hp:", ["pid=", ])
+        opts, args = getopt.getopt(sys.argv[1:], 'i:n:p:', ['nrnum=', 'newstate=', 'prevstate='])
     except getopt.GetoptError:
-        print('q_cli.py -p <payment_invoice_id>')
+        print('q_cli.py -nr <nr_num> -ns <new_state> -ps <previous_state>')
+        print('e.g. q_cli.py -i "NR 5659951" -n APPROVED -p DRAFT')
         sys.exit(2)
+    nr_num, new_state, prev_state = None, None, None
     for opt, arg in opts:
-        if opt == '-h':
-            print('q_cli.py -p <payment_invoice_id>')
-            sys.exit()
-        elif opt in ("-p", "--pid"):
-            pid = arg
+        if opt in ('-i', '--nrnum'):
+            nr_num = arg
+        elif opt in ('-n', '--newstate'):
+            new_state = arg
+        elif opt in ('-p', '--prevstate'):
+            prev_state = arg
+    if not nr_num or not new_state or not prev_state:
+        print('q_cli.py -nr <nr_num> -ns <new_state> -ps <previous_state>')
+        print('e.g. q_cli.py -i "NR 5659951" -n APPROVED -p DRAFT')
+        sys.exit()
 
-    print('publish:', pid)
+    payload_values = {
+        'nr_num': nr_num,
+        'new_state': new_state,
+        'prev_state': prev_state
+    }
     event_loop = asyncio.get_event_loop()
-    event_loop.run_until_complete(run(event_loop, pid))
+    event_loop.run_until_complete(run(event_loop, payload_values))
