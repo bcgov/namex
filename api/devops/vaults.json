@@ -6,6 +6,13 @@
         ]
     },
     {
+        "vault": "nats",
+        "application": [
+            "base",
+            "nats-emailer"
+        ]
+    },
+    {
         "vault": "namex",
         "application": [
             "postgres-namex",
