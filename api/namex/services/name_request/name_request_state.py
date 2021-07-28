@@ -88,6 +88,16 @@ def display_reapply_action(nr_model=None) -> Boolean:
         raise NameRequestActionError(err)
 
 
+def display_resubmit_action(nr_model=None) -> Boolean:
+    """Logic for displaying the resubmit button."""
+    try:
+        if nr_model and nr_model.expirationDate and nr_model.is_expired and not nr_model.has_consumed_name:
+                return True
+        return False
+    except Exception as err:
+        raise NameRequestActionError(err)
+
+
 def display_resend_action(nr_model=None):
     return True
 
@@ -130,6 +140,7 @@ action_handlers = {
     NameRequestActions.REQUEST_REFUND.value: display_refund_action,
     NameRequestActions.RECEIPT.value: display_receipt_action,
     NameRequestActions.REAPPLY.value: display_reapply_action,
+    NameRequestActions.RESUBMIT.value: display_resubmit_action,
     NameRequestActions.RESEND.value: display_resend_action,
     NameRequestActions.INCORPORATE.value: display_incorporate_action,
     NameRequestActions.RETRY_PAYMENT.value: display_retry_payment_action,

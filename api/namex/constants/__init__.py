@@ -392,7 +392,8 @@ class NameRequestActions(AbstractEnum):
     INCORPORATE = 'INCORPORATE'
     # Payment related actions
     UPGRADE = 'UPGRADE'
-    REAPPLY = 'REAPPLY'
+    REAPPLY = 'REAPPLY' # FUTURE: replace by 'RENEW' - used when the NR is about to expire
+    RESUBMIT = 'RESUBMIT' # Used when the NR is already expired
     RECEIPT = 'RECEIPT'
     CREATE = 'CREATE'
     REQUEST_REFUND = 'REQUEST_REFUND'
@@ -411,6 +412,7 @@ class NameRequestPatchActions(AbstractEnum):
     CANCEL = NameRequestActions.CANCEL.value
     RESEND = NameRequestActions.RESEND.value
     REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestPaymentActions(AbstractEnum):
@@ -424,11 +426,13 @@ class NameRequestPaymentActions(AbstractEnum):
     COMPLETE = NameRequestActions.CREATE.value
     REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
     CANCEL = NameRequestActions.CANCEL.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestPendingPaymentActions(AbstractEnum):
     CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
     RETRY_PAYMENT = NameRequestActions.RETRY_PAYMENT.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestDraftActions(AbstractEnum):
@@ -436,6 +440,7 @@ class NameRequestDraftActions(AbstractEnum):
     UPGRADE = NameRequestActions.UPGRADE.value
     RECEIPT = NameRequestActions.RECEIPT.value
     REQUEST_REFUND = NameRequestActions.REQUEST_REFUND.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestActiveActions(AbstractEnum):
@@ -445,6 +450,7 @@ class NameRequestActiveActions(AbstractEnum):
     EDIT = NameRequestActions.EDIT.value
     CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
     REAPPLY = NameRequestActions.REAPPLY.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
     # RESEND = NameRequestActions.RESEND.value
@@ -456,6 +462,7 @@ class NameRequestReservedActions(AbstractEnum):
 
 class NameRequestHoldActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestInProgressActions(AbstractEnum):
@@ -464,6 +471,7 @@ class NameRequestInProgressActions(AbstractEnum):
     Define these separately.
     """
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestExpiredActions(AbstractEnum):
@@ -472,6 +480,7 @@ class NameRequestExpiredActions(AbstractEnum):
     """
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
+    RESUBMIT =  NameRequestActions.RESUBMIT.value
     # RESEND = NameRequestActions.RESEND.value
 
 
@@ -487,14 +496,17 @@ class NameRequestConsumedActions(AbstractEnum):
 class NameRequestHistoricalActions(AbstractEnum):
     # TODO: Check to make sure there is a valid payment ID before returning this action
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestCancelledActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestCompletedActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestActiveRejectedActions(AbstractEnum):
@@ -502,6 +514,7 @@ class NameRequestActiveRejectedActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
     # RESEND = NameRequestActions.RESEND.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestExpiredRejectedActions(AbstractEnum):
@@ -509,6 +522,7 @@ class NameRequestExpiredRejectedActions(AbstractEnum):
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
     # RESEND = NameRequestActions.RESEND.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
 
 
 class NameRequestRollbackActions(AbstractEnum):
