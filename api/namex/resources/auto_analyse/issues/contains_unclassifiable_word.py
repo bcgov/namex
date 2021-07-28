@@ -30,7 +30,7 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
         return issue
 
     def configure_issue(self, procedure_result):
-        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        # list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
         list_none = self._lc_list_items(procedure_result.values['list_none'])
 
         issue = self.create_issue()
@@ -38,18 +38,18 @@ class ContainsUnclassifiableWordIssue(AnalysisResponseIssue):
 
         issue.name_actions = []
         for word in list_none:
-            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                self.analysis_response.name_as_submitted,
-                self.analysis_response.name_original_tokens,
-                self.analysis_response.name_tokens,
-                list_name.index(word)
-            )
+            # offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+            #     self.analysis_response.name_as_submitted,
+            #     self.analysis_response.name_original_tokens,
+            #     self.analysis_response.name_tokens,
+            #     list_name.index(word)
+            # )
 
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
                     word=word,
-                    index=offset_idx
+                    index=0
                 )
             )
 
