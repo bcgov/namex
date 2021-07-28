@@ -30,32 +30,42 @@ class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
         return issue
 
     def configure_issue(self, procedure_result):
-        list_name_incl_designation = self.analysis_response.name_original_tokens
+        # list_name_incl_designation = self.analysis_response.name_original_tokens
         correct_end_designations = procedure_result.values['correct_end_designations']
 
         correct_end_designations_lc = self._lc_list_items(correct_end_designations, True)
-        list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
+        # list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = self.create_issue()
         issue.line1 = "You are including multiple corporate designations which will need to be examined. "
 
         # Loop over the list_name words, we need to decide to do with each word
-        for word in correct_end_designations_lc:
-            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                self.analysis_response.name_as_submitted,
-                self.analysis_response.name_original_tokens,
-                list_name_incl_designation_lc,
-                list_name_incl_designation_lc.index(word),
-                False
-            )
+        # for word in correct_end_designations_lc:
+        #     offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+        #         self.analysis_response.name_as_submitted,
+        #         self.analysis_response.name_original_tokens,
+        #         list_name_incl_designation_lc,
+        #         list_name_incl_designation_lc.index(word),
+        #         False
+        #     )
 
-            # Highlight the issues
-            if word in correct_end_designations_lc:
-                issue.name_actions.append(NameAction(
-                    word=word,
-                    index=offset_idx,
-                    type=NameActions.HIGHLIGHT
-                ))
+        #     # Highlight the issues
+        #     if word in correct_end_designations_lc:
+        #         issue.name_actions.append(NameAction(
+        #             word=word,
+        #             index=0,
+        #             type=NameActions.HIGHLIGHT
+        #         ))
+
+        # only need incorrect phrases, don't care about where they are in the name
+        for phrase in correct_end_designations_lc:
+            issue.name_actions.append(
+                NameAction(
+                    word=phrase,
+                    index=0,  # not used
+                    type=NameActions.HIGHLIGHT  # not used
+                )
+            )
 
         # Setup boxes
         issue.setup = self.setup_config

@@ -30,7 +30,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         return issue
 
     def configure_issue(self, procedure_result):
-        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        # list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
         list_avoid = self._lc_list_items(procedure_result.values['list_avoid'])
         list_avoid_compound = self._lc_list_items(procedure_result.values['list_avoid_compound'])
 
@@ -40,18 +40,18 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
         for word in list_avoid:
-            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                self.analysis_response.name_as_submitted,
-                self.analysis_response.name_original_tokens,
-                self.analysis_response.name_tokens,
-                list_name.index(word)
-            )
+            # offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+            #     self.analysis_response.name_as_submitted,
+            #     self.analysis_response.name_original_tokens,
+            #     self.analysis_response.name_tokens,
+            #     list_name.index(word)
+            # )
 
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.STRIKE,
                     word=word,
-                    index=offset_idx
+                    index=0
                 )
             )
 
