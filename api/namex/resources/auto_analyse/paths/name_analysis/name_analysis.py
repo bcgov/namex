@@ -47,7 +47,6 @@ def bc_validate_name_request(location, entity_type, request_action):
     is_protected = False
     is_unprotected = False
     valid_request_actions = []
-    print(request_action)
     if entity_type in BCProtectedNameEntityTypes.list():
         is_protected = True
         valid_request_actions = [

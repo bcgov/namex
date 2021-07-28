@@ -75,10 +75,12 @@ class SetDesignationsListsMixin(object):
         self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.ANY.value,
                                                                           lang=LanguageCodes.ENG.value).data
+        # Commented out because business seems unsure if we will need to put it in again
         # add ccc / Community Contribution Company to BC limited/benefit companies
-        entities_allowed_ccc_in_name = [ EntityTypes.CORPORATION.value, EntityTypes.BENEFIT_COMPANY.value ]
-        if entity_type in entities_allowed_ccc_in_name:
-            self._eng_designation_any_list_correct += ['ccc', 'community contribution company']
+        # entities_allowed_ccc_in_name = [ EntityTypes.CORPORATION.value, EntityTypes.BENEFIT_COMPANY.value ]
+        # if entity_type in entities_allowed_ccc_in_name:
+        #     self._eng_designation_any_list_correct += ['ccc', 'community contribution company']
+
         # add association to coops / societies
         entities_allowed_association_in_name = [ EntityTypes.COOPERATIVE.value, EntityTypes.SOCIETY.value ]
         if entity_type in entities_allowed_association_in_name:
