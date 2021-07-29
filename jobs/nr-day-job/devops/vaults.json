@@ -2,14 +2,14 @@
     {
         "vault": "nats",
         "application": [
-            "base",
-            "nats-emailer"
+            "base"
         ]
     },
     {
         "vault": "namex",
         "application": [
-            "postgres-namex"
+            "postgres-namex",
+            "nr-day-job"
         ]
     }
 ]
