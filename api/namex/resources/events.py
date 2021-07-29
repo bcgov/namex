@@ -19,7 +19,7 @@ api = Namespace('events', description='Audit trail of events for a Name Request'
 class Events(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
     def get(nr):
         nrd = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json()
         request_id = 0
