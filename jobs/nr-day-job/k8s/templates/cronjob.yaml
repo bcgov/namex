@@ -40,7 +40,7 @@ objects:
                 command:
                   - /bin/sh
                   - -c
-                  - cd /opt/app-root; ./run.sh
+                  - cd /opt/app-root; python nr_day_job.py
                 env:
                   - name: NATS_SERVERS
                     valueFrom:
