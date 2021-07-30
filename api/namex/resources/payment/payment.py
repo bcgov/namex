@@ -264,7 +264,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             valid_payment_action = payment_action in [
                 NameRequestActions.CREATE.value,
                 NameRequestActions.UPGRADE.value,
-                NameRequestActions.REAPPLY.value
+                NameRequestActions.REAPPLY.value,
+                NameRequestActions.RESUBMIT.value
             ]
 
             if not valid_payment_action:
@@ -278,7 +279,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 return jsonify(message='Invalid NR state'.format(action=payment_action)), 400
 
             if valid_payment_action and valid_nr_state:
-                if payment_action in [NameRequestActions.CREATE.value]:
+                if payment_action in [NameRequestActions.CREATE.value, NameRequestActions.RESUBMIT.value]:
                     # Save the record to NRO, which swaps the NR-L Number for a real NR
                     update_solr = True
                     nr_model = self.add_records_to_network_services(nr_model, update_solr)
@@ -634,6 +635,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
     def handle_payment_actions(self, action, model: RequestDAO, payment_id: int):
         return {
             NameRequestActions.CREATE.value: self.complete_reservation_payment,
+            NameRequestActions.RESUBMIT.value: self.complete_reservation_payment,
             NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
             NameRequestActions.REAPPLY.value: self.complete_reapply_payment,
             NameRequestActions.REQUEST_REFUND.value: self.request_refund,
