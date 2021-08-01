@@ -30,18 +30,15 @@ from utils.logging import setup_logging
 APP_CONFIG = config.get_named_config(os.getenv('FLASK_ENV', 'production'))
 
 
-async def run():
-    """Run the day job."""
+def create_app():
+    """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(APP_CONFIG)
     db.init_app(app)
 
     register_shellcontext(app)
 
-    qsm = QueueService(app=app, loop=event_loop)
-
-    await notify_nr_before_expiry(app, qsm)
-    await notify_nr_expired(app, qsm)
+    return app
 
 
 def register_shellcontext(app):
@@ -93,18 +90,17 @@ async def furnish_request_message(
 async def notify_nr_before_expiry(app: Flask, qsm: QueueService):  # pylint: disable=redefined-outer-name
     """Send nr before expiry."""
     try:
-        with app.app_context():
-            app.logger.debug('entering notify_nr_before_expiry')
+        app.logger.debug('entering notify_nr_before_expiry')
 
-            where_clause = text(
-                "expiration_date - interval '14 day' <= CURRENT_DATE AND expiration_date > CURRENT_DATE")
-            requests = db.session.query(Request).filter(
-                Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
-                Request.notifiedBeforeExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
-                where_clause
-            ).all()
-            for request in requests:
-                await furnish_request_message(qsm, request, 'before-expiry')
+        where_clause = text(
+            "expiration_date - interval '14 day' <= CURRENT_DATE AND expiration_date > CURRENT_DATE")
+        requests = db.session.query(Request).filter(
+            Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
+            Request.notifiedBeforeExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
+            where_clause
+        ).all()
+        for request in requests:
+            await furnish_request_message(qsm, request, 'before-expiry')
     except Exception as err:  # noqa B902; pylint: disable=W0703;
         app.logger.error(err)
 
@@ -112,18 +108,17 @@ async def notify_nr_before_expiry(app: Flask, qsm: QueueService):  # pylint: dis
 async def notify_nr_expired(app: Flask, qsm: QueueService):  # pylint: disable=redefined-outer-name
     """Send nr expired."""
     try:
-        with app.app_context():
-            app.logger.debug('entering notify_nr_expired')
+        app.logger.debug('entering notify_nr_expired')
 
-            where_clause = text('expiration_date <= CURRENT_DATE')
-            requests = db.session.query(Request).filter(
-                Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
-                Request.notifiedBeforeExpiry == True,  # noqa E712; pylint: disable=singleton-comparison
-                Request.notifiedExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
-                where_clause
-            ).all()
-            for request in requests:
-                await furnish_request_message(qsm, request, 'expired')
+        where_clause = text('expiration_date <= CURRENT_DATE')
+        requests = db.session.query(Request).filter(
+            Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
+            Request.notifiedBeforeExpiry == True,  # noqa E712; pylint: disable=singleton-comparison
+            Request.notifiedExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
+            where_clause
+        ).all()
+        for request in requests:
+            await furnish_request_message(qsm, request, 'expired')
     except Exception as err:  # noqa B902; pylint: disable=W0703;
         app.logger.error(err)
 
@@ -132,5 +127,10 @@ if __name__ == '__main__':
     setup_logging(
         os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))
 
-    event_loop = asyncio.get_event_loop()
-    event_loop.run_until_complete(run())
+    application = create_app()
+    with application.app_context():
+        event_loop = asyncio.get_event_loop()
+        qsm = QueueService(app=application, loop=event_loop)
+
+        event_loop.run_until_complete(notify_nr_before_expiry(application, qsm))
+        event_loop.run_until_complete(notify_nr_expired(application, qsm))
