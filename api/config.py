@@ -77,10 +77,10 @@ class Config(object):
     DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 0))
 
     # NATS
-    NATS_SERVERS = os.getenv('NATS_SERVERS')
-    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME')
-    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID')
-    NATS_QUEUE = os.getenv('NATS_QUEUE')
+    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://localhost:4222')
+    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', 'namex.worker')
+    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
+    NATS_QUEUE = os.getenv('NATS_QUEUE', 'namerequest-processor')
     NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
 
 
