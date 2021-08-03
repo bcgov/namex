@@ -1,4 +1,5 @@
 from namex.models import db, State, Request as RequestDAO, Name as NameDAO
+from namex.services.name_request import NameRequestService
 
 default_test_names = [
     {
@@ -68,12 +69,12 @@ def build_nr(nr_state, data=None, test_names=None, generate_id_seq=None):
 
 def build_draft(data=None, test_names=None, generate_id_seq=None):
     try:
-        nr = RequestDAO()
+        nr = nr_json()
 
         # Set defaults, if these exist in the provided data they will be overwritten
-        nr.stateCd = State.DRAFT
-        nr.requestId = 1460775
-        nr._source = 'NRO'
+        nr['stateCd'] = State.DRAFT
+        nr['requestId'] = 1460775
+        nr['_source'] = 'NRO'
 
         if not data:
             data = {}
@@ -84,9 +85,9 @@ def build_draft(data=None, test_names=None, generate_id_seq=None):
             if hasattr(nr, key) and not isinstance(data.get(key), list):
                 nr.__setattr__(key, value)
 
-        nr.names = []
+        nr['names'] = []
         for test_name in test_names:
-            nr.names.append(build_name(test_name, generate_id_seq))
+            nr['names'].append(test_name)
 
         return nr
     except Exception as err:
@@ -337,3 +338,49 @@ def build_rejected(data=None, test_names=None, generate_id_seq=None):
         nr.names.append(build_name(test_name, generate_id_seq))
 
     return nr
+
+
+def nr_json():
+    """Returns a json for a new NR."""
+    return {
+        'id': None,
+        'submittedDate': '2021-07-30T23:10:43.475817+00:00',
+        'lastUpdate': '2021-07-30T23:10:43.475835+00:00',
+        'userId': 'name_request_service_account',
+        'submitter_userid': 'name_request_service_account',
+        'stateCd': 'DRAFT', 
+        'state': 'DRAFT',
+        'previousStateCd': None,
+        'nrNum': 'NR 1234567',
+        'consentFlag': None,
+        'consent_dt': None,
+        'expirationDate': None,
+        'requestTypeCd': 'CR',
+        'entity_type_cd': 'CR',
+        'request_action_cd': 'NEW',
+        'source': 'NRO',
+        'priorityCd': 'N',
+        'priorityDate': None,
+        'xproJurisdiction': '',
+        'additionalInfo': '',
+        'natureBusinessInfo': 'Test',
+        'furnished': 'N',
+        'hasBeenReset': False,
+        'previousRequestId': None,
+        'previousNr': None,
+        'submitCount': 1,
+        'corpNum': '',
+        'tradeMark': None,
+        'homeJurisNum': None,
+        'names': [],
+        'applicants': '',
+        'comments': [],
+        'nwpta': [],
+        'checkedOutBy': None,
+        'checkedOutDt': None,
+        'notifiedBeforeExpiry': False,
+        'notifiedExpiry': False,
+        'legalType': 'BC',
+        'target': 'colin',
+        'actions': []
+    }

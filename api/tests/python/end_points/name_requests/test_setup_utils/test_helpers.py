@@ -208,9 +208,7 @@ def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
                 'conflict1_num': '0515211'
             }]
 
-        nr = build_nr(nr_state, nr_data, custom_names, False)
-
-        nr_data = nr.json()
+        nr_data = build_nr(nr_state, nr_data, custom_names, False)
 
         nr_data['applicants'] = [{
             'addrLine1': '1796 KINGS RD',
