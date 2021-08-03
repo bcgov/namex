@@ -2,6 +2,8 @@
 """
 import sqlalchemy
 from sqlalchemy.sql.schema import Index
+from sqlalchemy.event import listen
+from sqlalchemy.orm.attributes import get_history
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # import traceback
 
@@ -11,6 +13,7 @@ from flask import current_app
 # from flask_sqlalchemy import get_debug_queries
 from namex.services.lookup import nr_filing_actions
 from namex.exceptions import BusinessException
+from namex.utils import queue_util
 from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.orm.attributes import set_committed_value
@@ -621,6 +624,21 @@ class Request(db.Model):
         full_name = r'^\d*\W*({0})?\W*({1})?\W*'.format(any_designation_alternators, stop_words_alternators) + name + \
                     r'\W*({0})?\W*({1})?$'.format(any_designation_alternators, end_designation_alternators)
         return full_name
+
+
+@event.listens_for(Request, 'after_insert')
+@event.listens_for(Request, 'after_update')
+def on_insert_or_update_nr(mapper, connection, request):
+    """Send a new cloud event message on changes for stateCd in the Request model.
+       
+       Temporary NRs (nrNum starting with 'NR L') are discarded.
+    """
+    if not request.nrNum.startswith('NR L'):
+        state_cd_history = get_history(request, 'stateCd')
+        nr_num_history = get_history(request, 'nrNum')
+        if len(nr_num_history.added) or len(state_cd_history.added):
+            old_state_cd = state_cd_history.deleted[0] if len(state_cd_history.deleted) else ''
+            queue_util.send_name_request_state_msg(request.nrNum, request.stateCd, old_state_cd)
 
 
 class RequestsSchema(ma.SQLAlchemySchema):
