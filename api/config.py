@@ -1,5 +1,6 @@
 """Config for initializing the namex-api."""
 import os
+import random
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -78,6 +79,7 @@ class Config(object):
     NATS_SERVERS = os.getenv('NATS_SERVERS')
     NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME')
     NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID')
+    NATS_QUEUE = os.getenv('NATS_QUEUE')
     NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
     NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
 

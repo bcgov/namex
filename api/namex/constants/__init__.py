@@ -158,6 +158,10 @@ class BCProtectedNameEntityTypes(AbstractEnum):
     LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.LIMITED_LIABILITY_PARTNERSHIP.value
     COOPERATIVE = EntityTypes.COOPERATIVE.value
     COMMUNITY_CONTRIBUTION_COMPANY = EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value
+    FINANCIAL_INSTITUTION = EntityTypes.FINANCIAL_INSTITUTION.value
+    PRIVATE_ACT = EntityTypes.PRIVATE_ACT.value
+    PARISH = EntityTypes.PARISH.value
+    SOCIETY = EntityTypes.SOCIETY.value
 
 
 # TODO: Are these still valid for unprotected?

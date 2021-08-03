@@ -30,7 +30,7 @@ class IncorrectYear(AnalysisResponseIssue):
         return issue
 
     def configure_issue(self, procedure_result):
-        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        # list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
         list_years = self._lc_list_items(procedure_result.values['incorrect_years'])
 
         issue = self.create_issue()
@@ -38,18 +38,18 @@ class IncorrectYear(AnalysisResponseIssue):
 
         issue.name_actions = []
         for year in list_years:
-            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                self.analysis_response.name_as_submitted,
-                self.analysis_response.name_original_tokens,
-                self.analysis_response.name_tokens,
-                list_name.index(year)
-            )
+            # offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+            #     self.analysis_response.name_as_submitted,
+            #     self.analysis_response.name_original_tokens,
+            #     self.analysis_response.name_tokens,
+            #     list_name.index(year)
+            # )
 
             issue.name_actions.append(
                 NameAction(
                     type=NameActions.HIGHLIGHT,
                     word=year,
-                    index=offset_idx
+                    index=0
                 )
             )
 

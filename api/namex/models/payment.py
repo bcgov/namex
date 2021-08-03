@@ -6,8 +6,7 @@ from sqlalchemy.orm.attributes import get_history
 
 from namex.constants import PaymentState
 from namex.models import State, db
-from namex.utils.queue_util import publish_email_notification
-
+from namex.utils import queue_util
 
 class Payment(db.Model):
 
@@ -96,7 +95,7 @@ def update_nr_state(mapper, connection, target):
     if nr:
         # TODO: take this out since the queue does this
         if payment.payment_status_code != 'REFUND_REQUESTED':
-            if payment.payment_status_code in completed_payment_status and nr.stateCd == 'PENDING_PAYMENT':
+            if payment.payment_status_code in completed_payment_status and nr.stateCd == State.PENDING_PAYMENT:
                 connection.execute(
                     f"""
                     UPDATE requests
@@ -104,6 +103,8 @@ def update_nr_state(mapper, connection, target):
                     WHERE id={nr.id}
                     """
                 )
+                queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
+
 
 
 @event.listens_for(Payment, 'after_update')
@@ -116,4 +117,4 @@ def after_update_payment(mapper, connection, target):
     if target.payment_action in [Payment.PaymentActions.REAPPLY.value, Payment.PaymentActions.UPGRADE.value] \
             and len(payment_completion_date_history.added) > 0:
         option = 'renewal' if target.payment_action == Payment.PaymentActions.REAPPLY.value else 'upgrade'
-        publish_email_notification(nr.nrNum, option)
+        queue_util.publish_email_notification(nr.nrNum, option)

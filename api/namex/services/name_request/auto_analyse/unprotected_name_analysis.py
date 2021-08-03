@@ -1,3 +1,4 @@
+import os
 from datetime import (datetime)
 
 import collections
@@ -30,6 +31,7 @@ Notes:
 '''
 
 d = datetime.now()  # Was just used for perf analysis
+auto_analyze_config = os.getenv('AUTO_ANALYZE_CONFIG')
 
 
 class UnprotectedNameAnalysisService(NameAnalysisDirector):
@@ -160,61 +162,62 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
     '''
 
     def do_analysis(self):
-        builder = self.builder
-
-        list_name = self.name_tokens
         results = []
+        if auto_analyze_config in ('WELL_FORMED_NAME','EXACT_MATCH', 'SEARCH_CONFLICTS'):
+            builder = self.builder
 
-        check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
-        if not check_words_to_avoid.is_valid:
-            results.append(check_words_to_avoid)
-            return results
-            #  Do not continue
+            # list_name = self.name_tokens
 
-        # Return any combination of these checks
-        check_conflicts = builder.search_exact_match(self.processed_name, self.name_tokens)
+            # check_words_to_avoid = builder.check_words_to_avoid(list_name, self.processed_name)
+            # if not check_words_to_avoid.is_valid:
+            #     results.append(check_words_to_avoid)
+            #     return results
+                #  Do not continue
 
-        if not check_conflicts.is_valid:
-            results.append(check_conflicts)
+            # Return any combination of these checks
+            # check_conflicts = builder.search_exact_match(self.processed_name, self.name_tokens)
 
-        # TODO: Use the list_name array, don't use a string in the method!
-        # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
-        check_words_requiring_consent = builder.check_words_requiring_consent(
-            self.name_tokens, self.processed_name)  # This is incorrect
+            # if not check_conflicts.is_valid:
+            #     results.append(check_conflicts)
 
-        if not check_words_requiring_consent.is_valid:
-            results.append(check_words_requiring_consent)
+            # TODO: Use the list_name array, don't use a string in the method!
+            # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
+            # check_words_requiring_consent = builder.check_words_requiring_consent(
+            #     self.name_tokens, self.processed_name)  # This is incorrect
 
-        # Set designations and run our check
-        self._set_designations()
+            # if not check_words_requiring_consent.is_valid:
+            #     results.append(check_words_requiring_consent)
 
-        check_designation_mismatch = builder.check_designation_mismatch(
-            self.get_original_name_tokenized(),
-            self.entity_type,
-            self.get_all_designations(),
-            self.get_all_designations_user()
-        )
+            # Set designations and run our check
+            self._set_designations()
 
-        if not check_designation_mismatch.is_valid:
-            results.append(check_designation_mismatch)
+            check_designation_mismatch = builder.check_designation_mismatch(
+                self.get_original_name_tokenized(),
+                self.entity_type,
+                self.get_all_designations(),
+                self.get_all_designations_user()
+            )
 
-        check_designation_misplaced = builder.check_designation_misplaced(
-            self.get_original_name_tokenized(),
-            self.get_misplaced_designation_any(),
-            self.get_misplaced_designation_end(),
-            self.get_misplaced_designation_all()
-        )
+            if not check_designation_mismatch.is_valid:
+                results.append(check_designation_mismatch)
 
-        if not check_designation_misplaced.is_valid:
-            results.append(check_designation_misplaced)
+            check_designation_misplaced = builder.check_designation_misplaced(
+                self.get_original_name_tokenized(),
+                self.get_misplaced_designation_any(),
+                self.get_misplaced_designation_end(),
+                self.get_misplaced_designation_all()
+            )
 
-        check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
+            if not check_designation_misplaced.is_valid:
+                results.append(check_designation_misplaced)
 
-        if not check_special_words.is_valid:
-            results.append(check_special_words)
+            # check_special_words = builder.check_word_special_use(self.name_tokens, self.get_original_name())
 
-        # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
-        if not results.__len__() > 0:
-            results.append(ProcedureResult(is_valid=True))
+            # if not check_special_words.is_valid:
+            #     results.append(check_special_words)
+
+            # DO NOT GET RID OF THIS! WE EXPLICITLY NEED TO RETURN A VALID ProcedureResult!
+            if not results.__len__() > 0:
+                results.append(ProcedureResult(is_valid=True))
 
         return results
