@@ -370,7 +370,7 @@ create_payment_request = {
     },
     'businessInfo': {
         'corpType': 'NRO',
-        'businessIdentifier': 'NR 000001',
+        'businessIdentifier': 'NR L000001',
         'businessName': 'ABC PLUMBING LTD.',
         'contactInfo': {
             'addressLine1': '1796 KINGS RD',
