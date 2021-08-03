@@ -6,12 +6,6 @@
         ]
     },
     {
-        "vault": "nats",
-        "application": [
-            "base"
-        ]
-    },
-    {
         "vault": "namex",
         "application": [
             "postgres-namex",
