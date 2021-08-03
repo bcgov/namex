@@ -95,9 +95,12 @@ class AnalysisIssueCodes(str, Enum):
         return values
 
 
-request_types = {EntityTypes.CORPORATION.value: [DesignationPositionCodes.END.value],
-                 EntityTypes.UNLIMITED_LIABILITY_COMPANY.value: [DesignationPositionCodes.END.value],
-                 EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value: [DesignationPositionCodes.ANY.value,
-                                                                    DesignationPositionCodes.END.value],
-                 EntityTypes.COOPERATIVE.value: [DesignationPositionCodes.ANY.value],
-                 EntityTypes.SOCIETY.value: [DesignationPositionCodes.ANY.value]}
+request_types = {
+    EntityTypes.CORPORATION.value: [DesignationPositionCodes.END.value],
+    EntityTypes.UNLIMITED_LIABILITY_COMPANY.value: [DesignationPositionCodes.END.value],
+    EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value: [
+        DesignationPositionCodes.ANY.value,
+        DesignationPositionCodes.END.value
+    ],
+    EntityTypes.COOPERATIVE.value: [DesignationPositionCodes.ANY.value],
+    EntityTypes.SOCIETY.value: [DesignationPositionCodes.ANY.value]}

@@ -93,7 +93,7 @@ class QueueService():
     def teardown(self, exception):  # pylint: disable=unused-argument; flask method signature
         """Destroy all objects created by this extension."""
         try:
-            this_loop = asyncio.get_event_loop()
+            this_loop = self.loop or asyncio.get_event_loop()
             this_loop.run_until_complete(self.close())
         except RuntimeError as e:
             self.logger.error(e)
@@ -121,6 +121,14 @@ class QueueService():
         """Publish the json payload to the Queue Service."""
         try:
             self.loop.run_until_complete(self.async_publish_json(payload, self.subject))
+        except Exception as err:
+            self.logger.error('Error: %s', err)
+            raise err
+
+    def publish_json_to_subject_sync(self, payload=None, subject=None):
+        """Publish the json payload to the Queue Service synchronously."""
+        try:
+            self.loop.run_until_complete(self.async_publish_json(payload, subject))
         except Exception as err:
             self.logger.error('Error: %s', err)
             raise err

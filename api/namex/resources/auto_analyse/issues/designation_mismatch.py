@@ -33,14 +33,14 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
 
     def configure_issue(self, procedure_result):
         list_name = self.analysis_response.name_tokens
-        list_name_incl_designation = self.analysis_response.name_original_tokens
+        # list_name_incl_designation = self.analysis_response.name_original_tokens
 
         incorrect_designations = procedure_result.values['incorrect_designations']
         correct_designations = procedure_result.values['correct_designations']
 
         incorrect_designations_lc = self._lc_list_items(incorrect_designations, True)
         correct_designations_lc = self._lc_list_items(correct_designations, True)
-        list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
+        # list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         entity_type_description = get_entity_type_description(self.entity_type)
 
@@ -49,22 +49,32 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         issue.designations = correct_designations_lc
 
         # Loop over the list_name words, we need to decide to do with each word
-        for word in list_name_incl_designation_lc:
-            offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                self.analysis_response.name_as_submitted,
-                self.analysis_response.name_original_tokens,
-                list_name_incl_designation_lc,
-                list_name_incl_designation.index(word.lower()),
-                False
-            )
+        # for word in list_name_incl_designation_lc:
+        #     offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+        #         self.analysis_response.name_as_submitted,
+        #         self.analysis_response.name_original_tokens,
+        #         list_name_incl_designation_lc,
+        #         list_name_incl_designation.index(word.lower()),
+        #         False
+        #     )
 
-            # Highlight the issues
-            if word in incorrect_designations_lc:
-                issue.name_actions.append(NameAction(
-                    word=word,
-                    index=offset_idx,
-                    type=NameActions.HIGHLIGHT
-                ))
+        #     # Highlight the issues
+
+        #     if word in incorrect_designations_lc:
+        #         issue.name_actions.append(NameAction(
+        #             word=word,
+        #             index=0,
+        #             type=NameActions.HIGHLIGHT
+        #         ))
+        # only need incorrect phrases, don't care about where they are in the name
+        for phrase in incorrect_designations_lc:
+            issue.name_actions.append(
+                NameAction(
+                    word=phrase,
+                    index=0,  # not used
+                    type=NameActions.HIGHLIGHT  # not used
+                )
+            )
 
         # Setup boxes
         issue.setup = self.setup_config

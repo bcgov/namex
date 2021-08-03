@@ -1,5 +1,5 @@
 from namex.constants import \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
+    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, EntityTypes, XproUnprotectedNameEntityTypes, \
     DesignationPositionCodes, LanguageCodes
 
 from namex.utils.common import parse_dict_of_lists
@@ -62,19 +62,29 @@ class SetDesignationsListsMixin(object):
         entity_type = self.entity_type
 
         entity_type_code = None
-        if BCProtectedNameEntityTypes.has_value(entity_type) and BCProtectedNameEntityTypes(entity_type):
+        if BCProtectedNameEntityTypes.has_value(entity_type):
             entity_type_code = BCProtectedNameEntityTypes(entity_type)
-        elif BCUnprotectedNameEntityTypes.has_value(entity_type) and BCUnprotectedNameEntityTypes(entity_type):
-            entity_type_code = BCUnprotectedNameEntityTypes(entity_type)
-        elif XproUnprotectedNameEntityTypes.has_value(entity_type) and XproUnprotectedNameEntityTypes(entity_type):
-            entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
+        # elif BCUnprotectedNameEntityTypes.has_value(entity_type) and BCUnprotectedNameEntityTypes(entity_type):
+        #     entity_type_code = BCUnprotectedNameEntityTypes(entity_type)
+        # elif XproUnprotectedNameEntityTypes.has_value(entity_type) and XproUnprotectedNameEntityTypes(entity_type):
+        #     entity_type_code = XproUnprotectedNameEntityTypes(entity_type)
         else:
             raise Exception(
-                'Could not set entity type user designations - entity type [' + entity_type + '] was not found in BC or XPRO entity types!')
+                f"Could not set designations. Entity type '{entity_type}' was not found in BC entity types!")
 
         self._eng_designation_any_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.ANY.value,
                                                                           lang=LanguageCodes.ENG.value).data
+        # Commented out because business seems unsure if we will need to put it in again
+        # add ccc / Community Contribution Company to BC limited/benefit companies
+        # entities_allowed_ccc_in_name = [ EntityTypes.CORPORATION.value, EntityTypes.BENEFIT_COMPANY.value ]
+        # if entity_type in entities_allowed_ccc_in_name:
+        #     self._eng_designation_any_list_correct += ['ccc', 'community contribution company']
+
+        # add association to coops / societies
+        entities_allowed_association_in_name = [ EntityTypes.COOPERATIVE.value, EntityTypes.SOCIETY.value ]
+        if entity_type in entities_allowed_association_in_name:
+            self._eng_designation_any_list_correct += ['association']
 
         self._eng_designation_end_list_correct = syn_svc.get_designations(entity_type_code=entity_type_code.value,
                                                                           position_code=DesignationPositionCodes.END.value,
@@ -99,6 +109,17 @@ class SetDesignationsListsMixin(object):
 
         self._designation_end_list_correct = self._eng_designation_end_list_correct + self._fr_designation_end_list_correct
         self._designation_end_list_correct.sort(key=len, reverse=True)
+        # for entity types returning incorrect data clear the lists
+        clear_designation_reqs_for_these = [
+            EntityTypes.FINANCIAL_INSTITUTION.value,
+            EntityTypes.PARISH.value,
+            EntityTypes.PRIVATE_ACT.value
+        ]
+        if entity_type in clear_designation_reqs_for_these:
+            self._eng_designation_all_list_correct = []
+            self._fr_designation_all_list_correct = []
+            self._designation_any_list_correct = []
+            self._designation_end_list_correct = []
 
     '''
     Set designations in <any> and <end> positions regardless the entity type. 

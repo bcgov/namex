@@ -1,5 +1,6 @@
 """Config for initializing the namex-api."""
 import os
+import random
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -73,6 +74,13 @@ class Config(object):
     # You can disable NRO updates for Name Requests by setting the variable in your .env / OpenShift configuration
     DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
+
+    # NATS
+    NATS_SERVERS = os.getenv('NATS_SERVERS')
+    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME')
+    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID')
+    NATS_QUEUE = os.getenv('NATS_QUEUE')
+    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
 
 
 class DevConfig(Config):

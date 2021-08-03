@@ -30,7 +30,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
         return issue
 
     def configure_issue(self, procedure_result):
-        list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
+        # list_name = self._lc_list_items(self.analysis_response.name_tokens)  # procedure_result.values['list_name']
         list_dist = self._lc_list_items(procedure_result.values['list_dist'])
 
         issue = self.create_issue()
@@ -39,13 +39,13 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
         last_dist_word = list_dist[-1] if list_dist.__len__() > 0 else None
         # TODO: Why was this like this before?
         # dist_word_idx = list_name.index(last_dist_word) # if list_dist.__len__() > 0 else 0
-        dist_word_idx = list_name.index(last_dist_word) if list_dist.__len__() > 0 else 0
-        offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-            self.analysis_response.name_as_submitted,
-            self.analysis_response.name_original_tokens,
-            self.analysis_response.name_tokens,
-            dist_word_idx
-        )
+        # dist_word_idx = list_name.index(last_dist_word) if list_dist.__len__() > 0 else 0
+        # offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
+        #     self.analysis_response.name_as_submitted,
+        #     self.analysis_response.name_original_tokens,
+        #     self.analysis_response.name_tokens,
+        #     dist_word_idx
+        # )
 
         issue.name_actions = [
             NameAction(
@@ -53,7 +53,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
                 position=WordPositions.END,
                 message="Add a Descriptive Word Here",
                 word=last_dist_word,
-                index=offset_idx
+                index=0
             )
         ]
 

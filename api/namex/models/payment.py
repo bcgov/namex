@@ -4,7 +4,7 @@ from sqlalchemy import event
 
 from namex.constants import PaymentState
 from namex.models import State, db
-
+from namex.utils import queue_util
 
 class Payment(db.Model):
 
@@ -93,7 +93,7 @@ def update_nr_state(mapper, connection, target):
     if nr:
         # TODO: take this out since the queue does this
         if payment.payment_status_code != 'REFUND_REQUESTED':
-            if payment.payment_status_code in completed_payment_status and nr.stateCd == 'PENDING_PAYMENT':
+            if payment.payment_status_code in completed_payment_status and nr.stateCd == State.PENDING_PAYMENT:
                 connection.execute(
                     f"""
                     UPDATE requests
@@ -101,4 +101,6 @@ def update_nr_state(mapper, connection, target):
                     WHERE id={nr.id}
                     """
                 )
+                queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
+
 

@@ -1,0 +1,9 @@
+[
+    {
+        "vault": "namex",
+        "application": [
+            "postgres-namex",
+            "namex-api"
+        ]
+    }
+]
