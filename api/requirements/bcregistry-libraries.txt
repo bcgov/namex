@@ -1,1 +1,2 @@
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
+git+https://github.com/bcgov/namex.git#egg=queue_common&subdirectory=services/common

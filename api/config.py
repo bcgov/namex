@@ -81,6 +81,7 @@ class Config(object):
     NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID')
     NATS_QUEUE = os.getenv('NATS_QUEUE')
     NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
+    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
 
 
 class DevConfig(Config):

@@ -24,6 +24,7 @@ from namex.utils.api_resource import clean_url_path_param, handle_exception
 from .api_namespace import api as payment_api
 from .utils import build_payment_request, merge_payment_request
 
+
 setup_logging()  # It's important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
