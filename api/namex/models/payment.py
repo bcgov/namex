@@ -14,6 +14,7 @@ class Payment(db.Model):
         CREATE='CREATE'
         UPGRADE='UPGRADE'
         REAPPLY='REAPPLY'
+        RESUBMIT='RESUBMIT'
 
     __tablename__ = 'payments'
 

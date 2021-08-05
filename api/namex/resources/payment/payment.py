@@ -235,7 +235,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
     @payment_api.response(200, 'Success', '')
     @payment_api.doc(params={
         'nr_id': 'Name Request number',
-        'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY]'
+        'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, RESUBMIT]'
     })
     def post(self, nr_id, payment_action=NameRequestActions.CREATE.value):
         """
@@ -359,7 +359,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
                     # TODO: send email / furnish payment for these
                     if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
-                        if payment_action == PaymentDAO.PaymentActions.CREATE.value:  # pylint: disable=R1705
+                        if payment_action in [PaymentDAO.PaymentActions.CREATE.value, PaymentDAO.PaymentActions.RESUBMIT.value]:  # pylint: disable=R1705
                             if nr_model.stateCd == State.PENDING_PAYMENT:
                                 nr_model.stateCd = State.DRAFT
                             payment.payment_completion_date = datetime.utcnow()
