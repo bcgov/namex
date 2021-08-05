@@ -1,25 +1,36 @@
 """
 Test HTTP endpoints for Name Requests.
 """
-import pytest
-import json
 import datetime
+import json
 
-from .configuration import API_BASE_URI
+import pytest
+
+from namex.constants import EntityTypes, NameRequestActions
+from namex.models import State
+from tests.python.common.test_name_request_utils import (
+    assert_field_equals_value,
+    assert_field_is_lt_value,
+    assert_field_is_mapped,
+)
+from tests.python.end_points.common.http import get_test_headers
+from tests.python.end_points.name_requests.test_setup_utils.test_helpers import add_states_to_db, add_test_user_to_db
+from tests.python.end_points.services.utils import create_header
+from tests.python.unit.test_setup_utils import build_nr
+
 # Import token and claims if you need it
 # from ..common import token_header, claims
-from ..common.http import build_test_query, build_request_uri
+from ..common.http import build_request_uri, build_test_query
 from ..common.logging import log_request_path
-
-from tests.python.common.test_name_request_utils import \
-    assert_field_is_mapped, assert_field_equals_value, assert_field_is_lt_value
-
-from .test_setup_utils.test_helpers import \
-    assert_names_are_mapped_correctly, assert_applicant_is_mapped_correctly, \
-    create_draft_nr, create_approved_nr, create_cancelled_nr, patch_nr
-
-from namex.models import State
-from namex.constants import NameRequestActions
+from .configuration import API_BASE_URI
+from .test_setup_utils.test_helpers import (
+    assert_applicant_is_mapped_correctly,
+    assert_names_are_mapped_correctly,
+    create_approved_nr,
+    create_cancelled_nr,
+    create_draft_nr,
+    patch_nr,
+)
 
 
 # Define our data
@@ -782,3 +793,78 @@ def test_draft_patch_resend(client, jwt, app):
 
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+
+draft_input_fields = {
+	'applicants': [
+		{
+			'addrLine1': '123-1640 Electra Blvd',
+			'addrLine2': None,
+			'addrLine3': None,
+			'city': 'North Saanich',
+			'clientFirstName': None,
+			'clientLastName': None,
+			'contact': '',
+			'countryTypeCd': 'CA',
+			'declineNotificationInd': None,
+			'emailAddress': 'a@a.com',
+			'faxNumber': None,
+			'firstName': 'John',
+			'lastName': 'Doe',
+			'middleName': None,
+			'partyId': '', # must be empty
+			'phoneNumber': '1234567',
+			'postalCd': 'V8L 5V4',
+			'stateProvinceCd': 'BC'
+		}
+	],
+	'names': [
+		{
+			'choice': 1,
+			'consent_words': '',
+			'conflict1': '',
+			'conflict1_num': '',
+			'designation': 'CORP.',
+			'name': 'TESTING CORP.',
+			'name_type_cd': 'CO'
+		}
+	],
+	'additionalInfo': '*** Additional Info here ***',
+	'natureBusinessInfo': 'Tests',
+	'priorityCd': 'N',
+	'entity_type_cd': '',
+	'request_action_cd': '',
+	'stateCd': 'DRAFT',
+	'english': True,
+	'nameFlag': False,
+	'submit_count': 0,
+	'corpNum': '',
+	'homeJurisNum': ''
+}
+
+
+@pytest.mark.parametrize('test_name, request_action_cd, entity_type_cd', [
+    ('New CR', 'NEW', EntityTypes.CORPORATION.value),
+    ('New BC', 'NEW', EntityTypes.BENEFIT_COMPANY.value),
+    ('Resubmit CR', 'RESUBMIT', EntityTypes.CORPORATION.value),
+    ('Resubmit BC', 'RESUBMIT', EntityTypes.BENEFIT_COMPANY.value),
+])
+def test_temp_nr(client, test_name, request_action_cd, entity_type_cd):
+    """
+    Test temp NRs
+    """
+    draft_input_fields['request_action_cd'] = request_action_cd
+    draft_input_fields['entity_type_cd'] = entity_type_cd
+
+    add_test_user_to_db()
+
+    path = build_request_uri(API_BASE_URI, '')
+    headers = get_test_headers()
+    post_response = client.post(path, data=json.dumps(draft_input_fields), headers=headers)
+    draft_nr = json.loads(post_response.data)
+
+    assert draft_nr['id'] > 0
+    assert draft_nr['nrNum'].startswith('NR L')
+    assert draft_nr['request_action_cd'] == request_action_cd
+    assert draft_nr['entity_type_cd'] == entity_type_cd
+    assert draft_nr['applicants']['firstName'] == 'John'

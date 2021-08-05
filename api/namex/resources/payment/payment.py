@@ -236,7 +236,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
     @payment_api.response(200, 'Success', '')
     @payment_api.doc(params={
         'nr_id': 'Name Request number',
-        'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY]'
+        'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, RESUBMIT]'
     })
     def post(self, nr_id, payment_action=NameRequestActions.CREATE.value):
         """
@@ -265,7 +265,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             valid_payment_action = payment_action in [
                 NameRequestActions.CREATE.value,
                 NameRequestActions.UPGRADE.value,
-                NameRequestActions.REAPPLY.value
+                NameRequestActions.REAPPLY.value,
+                NameRequestActions.RESUBMIT.value
             ]
 
             if not valid_payment_action:
@@ -279,7 +280,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 return jsonify(message='Invalid NR state'.format(action=payment_action)), 400
 
             if valid_payment_action and valid_nr_state:
-                if payment_action in [NameRequestActions.CREATE.value]:
+                if payment_action in [NameRequestActions.CREATE.value, NameRequestActions.RESUBMIT.value]:
                     # Save the record to NRO, which swaps the NR-L Number for a real NR
                     update_solr = True
                     nr_model = self.add_records_to_network_services(nr_model, update_solr)
@@ -359,7 +360,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
                     # TODO: send email / furnish payment for these
                     if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
-                        if payment_action == PaymentDAO.PaymentActions.CREATE.value:  # pylint: disable=R1705
+                        if payment_action in [PaymentDAO.PaymentActions.CREATE.value, PaymentDAO.PaymentActions.RESUBMIT.value]:  # pylint: disable=R1705
                             if nr_model.stateCd == State.PENDING_PAYMENT:
                                 nr_model.stateCd = State.DRAFT
                             payment.payment_completion_date = datetime.utcnow()
@@ -635,6 +636,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
     def handle_payment_actions(self, action, model: RequestDAO, payment_id: int):
         return {
             NameRequestActions.CREATE.value: self.complete_reservation_payment,
+            NameRequestActions.RESUBMIT.value: self.complete_reservation_payment,
             NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
             NameRequestActions.REAPPLY.value: self.complete_reapply_payment,
             NameRequestActions.REQUEST_REFUND.value: self.request_refund,
