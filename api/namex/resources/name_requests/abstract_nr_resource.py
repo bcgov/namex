@@ -1,11 +1,11 @@
 from typing import Callable
 
+from namex.models import Request, State
 from namex.utils.logging import setup_logging
-
-from namex.models import State, Request
 
 from .abstract_nro_resource import AbstractNROResource
 from .abstract_solr_resource import AbstractSolrResource
+
 
 setup_logging()  # Important to do this first
 

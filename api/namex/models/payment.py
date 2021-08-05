@@ -1,7 +1,9 @@
 """Payments for a Request."""
 from enum import Enum
+
 from sqlalchemy import event
 from flask import current_app
+from sqlalchemy.orm.attributes import get_history
 
 from namex.constants import PaymentState
 from namex.models import State, db
@@ -107,3 +109,15 @@ def update_nr_state(mapper, connection, target):
                     queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
 
 
+
+@event.listens_for(Payment, 'after_update')
+def after_update_payment(mapper, connection, target):
+    """Publish email notification."""
+    from namex.models import Request
+
+    nr = Request.find_by_id(target.nrId)
+    payment_completion_date_history = get_history(target, '_payment_completion_date')
+    if target.payment_action in [Payment.PaymentActions.REAPPLY.value, Payment.PaymentActions.UPGRADE.value] \
+            and len(payment_completion_date_history.added) > 0:
+        option = 'renewal' if target.payment_action == Payment.PaymentActions.REAPPLY.value else 'upgrade'
+        queue_util.publish_email_notification(nr.nrNum, option)

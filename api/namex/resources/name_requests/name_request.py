@@ -17,6 +17,7 @@ from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError, NameRequestIsInProgressError
 from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
+from namex.utils.queue_util import publish_email_notification
 
 from .api_namespace import api
 from .api_models import nr_request
@@ -372,13 +373,18 @@ class NameRequestFields(BaseNameRequestResource):
             PaymentState.PARTIAL.value
         ]
         # Cancel any payments associated with the NR
+        refund_value = 0
         for payment in nr_model.payments.all():
             if payment.payment_status_code in valid_states:
-                if NameRequestFields._should_refund_sbc_payment(payment.payment_token):
+                payment_response = get_payment(payment.payment_token)
+                if NameRequestFields._should_refund_sbc_payment(payment_response):
                     # refund_payment(payment.payment_token, {'reason': 'Name Request user requested refund'})
                     refund_payment(payment.payment_token, {})
                 payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
                 payment.save_to_db()
+                refund_value += payment_response.receipts[0]['receiptAmount']
+
+        publish_email_notification(nr_model.nrNum, 'refund', '{:.2f}'.format(refund_value))
 
         # This handles the updates for NRO and Solr, if necessary
         nr_model = self.update_records_in_network_services(nr_model, update_solr=True)
@@ -389,9 +395,8 @@ class NameRequestFields(BaseNameRequestResource):
         return nr_model
 
     @staticmethod
-    def _should_refund_sbc_payment(payment_token) -> bool:
+    def _should_refund_sbc_payment(payment_response) -> bool:
         refund_sbc_payment = True
-        payment_response = get_payment(payment_token)
         if payment_response.routingSlip:
             refund_sbc_payment = False
         elif len(payment_response.lineItems) == 1 and payment_response.lineItems[0]['waivedBy']:
