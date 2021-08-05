@@ -9,7 +9,7 @@ from namex.models import Payment, Request, State, User
 from namex.services.payment.client import SBCPaymentClient
 from tests.python.end_points.common.http import get_test_headers
 from tests.python.end_points.name_requests.test_setup_utils.test_helpers import \
-    create_draft_nr
+    post_test_nr_json
 from tests.python.end_points.services.utils import create_header
 
 from ..common.http import build_request_uri, build_test_query
@@ -53,12 +53,56 @@ draft_input_fields = {
 def is_int_or_float(val):
     return isinstance(val, float) or isinstance(val, int)
 
+draft_nr_json = {
+	'applicants': [
+		{
+			'addrLine1': '123-1640 Electra Blvd',
+			'addrLine2': None,
+			'addrLine3': None,
+			'city': 'North Saanich',
+			'clientFirstName': None,
+			'clientLastName': None,
+			'contact': '',
+			'countryTypeCd': 'CA',
+			'declineNotificationInd': None,
+			'emailAddress': 'a@a.com',
+			'faxNumber': None,
+			'firstName': 'John',
+			'lastName': 'Doe',
+			'middleName': None,
+			'partyId': '',
+			'phoneNumber': '1234567',
+			'postalCd': 'V8L 5V4',
+			'stateProvinceCd': 'BC'
+		}
+	],
+	'names': [
+		{
+			'choice': 1,
+			'consent_words': '',
+			'conflict1': '',
+			'conflict1_num': '',
+			'designation': 'CORP.',
+			'name': 'TESTING CORP.',
+			'name_type_cd': 'CO'
+		}
+	],
+	'additionalInfo': '*** Additional Info here ***',
+	'natureBusinessInfo': 'Tests',
+	'priorityCd': 'N',
+	'entity_type_cd': 'CR',
+	'request_action_cd': 'NEW',
+	'stateCd': 'DRAFT',
+	'english': True,
+	'nameFlag': False,
+	'submit_count': 0,
+	'corpNum': '',
+	'homeJurisNum': ''
+}
 
 @pytest.mark.skip
 def setup_draft_nr(client):
-    # Define our data
-    input_fields = draft_input_fields
-    post_response = create_draft_nr(client, input_fields)
+    post_response = post_test_nr_json(client, draft_nr_json)
 
     # Assign the payload to new nr var
     return json.loads(post_response.data)

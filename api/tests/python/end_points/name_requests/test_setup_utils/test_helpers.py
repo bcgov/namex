@@ -208,7 +208,9 @@ def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
                 'conflict1_num': '0515211'
             }]
 
-        nr_data = build_nr(nr_state, nr_data, custom_names, False)
+        nr = build_nr(nr_state, nr_data, custom_names, False)
+
+        nr_data = nr.json()
 
         nr_data['applicants'] = [{
             'addrLine1': '1796 KINGS RD',
@@ -244,6 +246,27 @@ def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
 
         if not post_response or post_response.status_code != 201:
             raise Exception('NR POST operation failed, cannot continue with PATCH test')
+
+        return post_response
+    except Exception as err:
+        print(repr(err))
+
+
+@pytest.mark.skip
+def post_test_nr_json(client, nr_data=None):
+    """
+    Create a temp NR with nr data passed.
+    """
+    try:
+        add_states_to_db(state_data)
+        add_test_user_to_db()
+        request_uri = API_BASE_URI
+        path = build_request_uri(request_uri, '')
+        headers = get_test_headers()
+        post_response = client.post(path, data=json.dumps(nr_data), headers=headers)
+
+        if not post_response or post_response.status_code != 201:
+            raise Exception('Temp NR POST operation failed, cannot continue with test')
 
         return post_response
     except Exception as err:
