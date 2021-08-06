@@ -49,7 +49,7 @@ def test_extract_payment_token():
     'start_payment_date,end_payment_has_value,'
     'error', [
         ('draft',  # test name
-         Payment.PaymentActions.CREATE.value,  # payment action [CREATE|UPGRADE|REAPPLY]
+         Payment.PaymentActions.CREATE.value,  # payment action [CREATE|UPGRADE|REAPPLY|RESUBMIT]
          State.PENDING_PAYMENT,  # start state of NR
          State.DRAFT,           # end state of NR
          'N',  # start state of Priority
@@ -62,7 +62,7 @@ def test_extract_payment_token():
          'is not',  # end_payment_has_value
          None  # error
          ),
-        ('already draft', Payment.PaymentActions.CREATE.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is', None),
+        ('already draft', Payment.PaymentActions.CREATE.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not', None),
         ('upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'N', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
         ('re-upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'Y', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
         ('extend ', Payment.PaymentActions.REAPPLY.value, State.DRAFT, State.DRAFT, 'N', 'N',

@@ -26,6 +26,7 @@ from namex.models import db
 from nats.aio.client import Client as Nats
 from sqlalchemy import event, text
 from stan.aio.client import Client as Stan
+from namex.services import queue
 
 from . import FROZEN_DATETIME
 
@@ -62,6 +63,7 @@ def app():
     print(config)
     _app.config.from_object(get_named_config('testing'))
     db.init_app(_app)
+    queue.init_app(_app)
 
     return _app
 
