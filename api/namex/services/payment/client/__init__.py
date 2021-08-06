@@ -256,7 +256,15 @@ class BaseClient:
 
 
 class SBCPaymentClient(BaseClient):
-    def calculate_fees(self, corp_type, filing_type_code, jurisdiction=None, date=None, priority=None):
+    def calculate_fees(
+        self,
+        corp_type,
+        filing_type_code,
+        jurisdiction=None,
+        date=None,
+        priority=None,
+        headers=None
+    ):
         request_url = 'fees/{corp_type}/{filing_type_code}'
         request_url = request_url.format(
             corp_type=corp_type,
@@ -271,7 +279,7 @@ class SBCPaymentClient(BaseClient):
         if priority:
             params['priority'] = priority
 
-        return self.call_api(HttpVerbs.GET, request_url, params=params)
+        return self.call_api(HttpVerbs.GET, request_url, params=params, headers=headers)
 
     def create_payment(self, data, headers=None):
         request_url = 'payment-requests'
