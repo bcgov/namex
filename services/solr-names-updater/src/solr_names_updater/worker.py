@@ -56,7 +56,7 @@ FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
 
 
-def is_nr_state_change_msg_type(msg: dict):
+def is_names_event_msg_type(msg: dict):
     """Check message is of type nr state change."""
     if msg and msg.get('type', '') == 'bc.registry.names.events':
         return True
@@ -64,51 +64,43 @@ def is_nr_state_change_msg_type(msg: dict):
     return False
 
 
-def is_nr_furnished_change_msg_type(msg: dict):
-    """Check message is of type nr furnished changed."""
-    if msg and msg.get('type', '') == 'bc.registry.nr_furnished.changed':
-        return True
-
-    return False
-
-
 def is_processable(msg: dict):
     """Determine if message is processable using message type of msg."""
-    if msg and \
-        (is_nr_state_change_msg_type(msg)
-         or is_nr_furnished_change_msg_type(msg)):
+    if msg and is_names_event_msg_type(msg):
         return True
 
     return False
 
 
-async def process_nr_event_message(msg: dict, flask_app: Flask):
+async def process_names_event_message(msg: dict, flask_app: Flask):
     """Update solr accordingly based on incoming nr state changes."""
     if not flask_app or not msg:
         raise QueueException('Flask App or msg not available.')
 
     with flask_app.app_context():
         logger.debug('entering processing of nr event msg: %s', msg)
+        request_state_change = msg.get('data').get('request', None)
+        name_state_change = msg.get('data').get('name', None)
 
-        if is_nr_state_change_msg_type(msg):
-            request = msg.get('data').get('request')
-            new_state = request.get('newState')
+        if request_state_change:
+            new_state = request_state_change.get('newState')
             if new_state in ('APPROVED', 'CONDITIONAL'):
-                process_names_add(request)
-            elif new_state in ('CANCELLED', 'CONSUMED'):
-                process_names_delete(request)
-                process_possible_conflicts_delete(request)
+                process_names_add(request_state_change)
+                process_possible_conflicts_add(request_state_change)
+            elif new_state in ('CANCELLED', 'RESET'):
+                process_names_delete(request_state_change)
+                process_possible_conflicts_delete(request_state_change)
             else:
-                logger.debug('no names processing required message %s', msg)
-        # todo need to determine if need another msg type for handling possible conflicts
-        # elif is_nr_furnished_change_msg_type(msg):
-        #     data = msg.get('data')
-        #     nr_state = data.get('nrState')
-        #     is_furnished = data.get('isFurnished')
-        #     if is_furnished and nr_state in ('APPROVED', 'CONDITIONAL'):
-        #         process_possible_conflicts_add(data)
-        #     else:
-        #         logger.debug('no possible conflict processing required message %s', msg)
+                logger.debug('no names processing required for request state change message %s', msg)
+        elif name_state_change:
+            new_state = name_state_change.get('newState')
+            if new_state == 'CONSUMED':
+                process_names_delete(name_state_change)
+                process_possible_conflicts_delete(name_state_change)
+            else:
+                logger.debug('no names processing required for name state message %s', msg)
+        else:
+            logger.debug('skipping - no matching state change message %s', msg)
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
@@ -123,23 +115,24 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
     """
     try:
         logger.info('Received raw message seq:%s, data=  %s', msg.sequence, msg.data.decode())
-        nr_event_msg = json.loads(msg.data.decode('utf-8'))
-        logger.debug('Extracted nr event msg: %s', nr_event_msg)
+        nr_state_change_msg = json.loads(msg.data.decode('utf-8'))
+        logger.debug('Extracted nr event msg: %s', nr_state_change_msg)
 
-        if is_processable(nr_event_msg):
-            logger.debug('Begin process_nr_state_change for nr_event_msg: %s', nr_event_msg)
-            await process_nr_event_message(nr_event_msg, FLASK_APP)
-            logger.debug('Completed process_nr_state_change for nr_event_msg: %s', nr_event_msg)
+        if is_processable(nr_state_change_msg):
+            logger.debug('Begin process_nr_state_change for nr_event_msg: %s', nr_state_change_msg)
+            await process_names_event_message(nr_state_change_msg, FLASK_APP)
+            logger.debug('Completed process_nr_state_change for nr_event_msg: %s', nr_state_change_msg)
         else:
             # Skip processing of message as it isn't a message type this queue listener processes
-            logger.debug('Skipping processing of nr event message as message type is not supported: %s', nr_event_msg)
+            logger.debug('Skipping processing of nr event message as message type is not supported: %s',
+                         nr_state_change_msg)
     except OperationalError as err:  # message goes back on the queue
-        logger.error('Queue Blocked - Database Issue: %s', json.dumps(nr_event_msg), exc_info=True)
+        logger.error('Queue Blocked - Database Issue: %s', json.dumps(nr_state_change_msg), exc_info=True)
         raise err  # We don't want to handle the error, as a DB down would drain the queue
     except (RequestException, NewConnectionError) as err:  # message goes back on the queue
-        logger.error('Queue Blocked - HTTP Connection Issue: %s', json.dumps(nr_event_msg), exc_info=True)
+        logger.error('Queue Blocked - HTTP Connection Issue: %s', json.dumps(nr_state_change_msg), exc_info=True)
         raise err  # We don't want to handle the error, as a http connection error would drain the queue
     except (QueueException, KeyError, Exception):  # pylint: disable=broad-except # noqa B902
         # Catch Exception so that any error is still caught and the message is removed from the queue
-        capture_message('Queue Error:' + json.dumps(nr_event_msg), level='error')
-        logger.error('Queue Error: %s', json.dumps(nr_event_msg), exc_info=True)
+        capture_message('Queue Error:' + json.dumps(nr_state_change_msg), level='error')
+        logger.error('Queue Error: %s', json.dumps(nr_state_change_msg), exc_info=True)

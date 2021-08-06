@@ -66,9 +66,9 @@ async def run(loop, payload_values):  # pylint: disable=too-many-locals
 
     def subscription_options():
         return {
-            'subject': os.getenv('NATS_SUBJECT', 'namex.event'),
-            'queue': os.getenv('NATS_QUEUE', 'namex-events-worker'),
-            'durable_name': os.getenv('NATS_QUEUE', 'namex-events-worker') + '_durable'
+            'subject': os.getenv('NATS_SUBJECT', 'namerequest.state'),
+            'queue': os.getenv('NATS_QUEUE', 'namerequest-processor'),
+            'durable_name': os.getenv('NATS_QUEUE', 'namerequest-processor') + '_durable'
         }
 
     try:
@@ -83,18 +83,20 @@ async def run(loop, payload_values):  # pylint: disable=too-many-locals
                                     )
 
         msg_id = str(uuid.uuid4())
+        nr_num = payload_values.get('nr_num')
+        source = f'/requests/{nr_num}'
 
         payload = {
             'specversion': '1.0.1',
             'type': 'bc.registry.names.events',
-            'source': '/requests/6724165',
+            'source': source,
             'id': msg_id,
             'time': '',
             'datacontenttype': 'application/json',
-            'identifier': '781020202',
+            'identifier': nr_num,
             'data': {
                 'request': {
-                    'nrNum': payload_values.get('nr_num'),
+                    'nrNum': nr_num,
                     'newState': payload_values.get('new_state'),
                     'previousState': payload_values.get('prev_state')
                 }

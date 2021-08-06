@@ -95,19 +95,40 @@ def create_nr(nr_num: str, request_state: str, names: list, names_state: list):
         return name_request
 
 
-def create_message(new_state, prev_state):
+def create_request_state_change_message(new_state, prev_state):
 
     return {
         'specversion': '1.0.1',
         'type': 'bc.registry.names.events',
-        'source': '/requests/6724165',
+        'source': '/requests/NR 6724165',
         'id': '16fd2706-8baf-433b-82eb-8c7fada847aa',
         'time': '',
         'datacontenttype': 'application/json',
-        'identifier': '781020202',
+        'identifier': 'NR 6724165',
         'data': {
             'request': {
-                'nrNum': 'NR 1111111',
+                'nrNum': 'NR 6724165',
+                'newState': new_state,
+                'previousState': prev_state
+            }
+        }
+    }
+
+
+def create_name_state_change_message(new_state, prev_state):
+
+    return {
+        'specversion': '1.0.1',
+        'type': 'bc.registry.names.events',
+        'source': '/requests/NR 6724165/name/234234234',
+        'id': '16fd2706-8baf-433b-82eb-8c7fada847aa',
+        'time': '',
+        'datacontenttype': 'application/json',
+        'identifier': 'NR 6724165',
+        'data': {
+            'name': {
+                'nrId': '234234234',
+                'nrNum': 'NR 6724165',
                 'newState': new_state,
                 'previousState': prev_state
             }

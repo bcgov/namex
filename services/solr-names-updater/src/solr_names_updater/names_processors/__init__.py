@@ -58,5 +58,7 @@ def find_name_by_name_states(nr_id, name_states):
     names = db.session.query(Name) \
         .filter_by(nrId=nr_id) \
         .filter(Name.state.in_(name_states)) \
+        .order_by(Name.choice.asc()) \
         .all()
+
     return names

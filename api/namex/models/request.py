@@ -314,7 +314,7 @@ class Request(db.Model):
         """
         existing_nr = db.session.query(Request). \
             filter(
-                Request.userId == userObj.id, 
+                Request.userId == userObj.id,
                 Request.stateCd == State.INPROGRESS,
                 Request.nrNum.notlike('NR L%')). \
             one_or_none()
@@ -630,7 +630,7 @@ class Request(db.Model):
 @event.listens_for(Request, 'after_update')
 def on_insert_or_update_nr(mapper, connection, request):
     """Send a new cloud event message on changes for stateCd in the Request model.
-       
+
        Temporary NRs (nrNum starting with 'NR L') are discarded.
     """
     if current_app.config.get('DISABLE_NAMEREQUEST_NATS_UPDATES', 0) != 1 and not request.nrNum.startswith('NR L'):
@@ -638,7 +638,16 @@ def on_insert_or_update_nr(mapper, connection, request):
         nr_num_history = get_history(request, 'nrNum')
         if len(nr_num_history.added) or len(state_cd_history.added):
             old_state_cd = state_cd_history.deleted[0] if len(state_cd_history.deleted) else ''
+            if is_reset(request.stateCd, old_state_cd):
+                queue_util.send_name_request_state_msg(request.nrNum, 'RESET', old_state_cd)
             queue_util.send_name_request_state_msg(request.nrNum, request.stateCd, old_state_cd)
+
+def is_reset(new_state, previous_state):
+    """Determine whether NR state change is a reset based on current and previous state."""
+    if previous_state == State.APPROVED and (new_state == State.INPROGRESS or new_state == State.HOLD):
+        return True
+
+    return False
 
 
 class RequestsSchema(ma.SQLAlchemySchema):
