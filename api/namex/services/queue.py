@@ -74,12 +74,7 @@ class QueueService():
 
         default_stan_options = {
             'cluster_id': app.config.get('NATS_CLUSTER_ID'),
-            'client_id':
-            (self.name.
-             lower().
-             strip(string.whitespace)
-             ).translate({ord(c): '_' for c in string.punctuation})
-            + '_' + str(random.SystemRandom().getrandbits(0x58))
+            'client_id': self.get_client_id()
         }
         if not stan_options:
             stan_options = {}
@@ -107,7 +102,14 @@ class QueueService():
             if not ctx.nats.is_connected:
                 self.stan_options = {**self.stan_options, **{'nats': ctx.nats}}
                 await ctx.nats.connect(**self.nats_options)
+                # Update the client_id if nats is reconnecting
+                self.stan_options['client_id'] = self.get_client_id()
                 await ctx.stan.connect(**self.stan_options)
+
+    def get_client_id(self):
+        return (self.name.lower().strip(string.whitespace)).translate(
+                {ord(c): '_' for c in string.punctuation}
+               ) + '_' + str(random.SystemRandom().getrandbits(0x58))
 
     async def close(self):
         """Close the connections to the queue."""

@@ -15,6 +15,7 @@
 from datetime import timedelta
 from namex.models import Request, State, Payment
 import json
+import nest_asyncio
 
 import pytest
 from freezegun import freeze_time
@@ -23,7 +24,6 @@ import namex_pay
 
 from namex_pay.utils.datetime import datetime, timedelta
 from namex_pay.worker import NAME_REQUEST_LIFESPAN_DAYS
-
 
 def test_extract_payment_token():
     """Assert that the payment token can be extracted from the Queue delivered Msg."""
@@ -156,6 +156,7 @@ async def test_process_payment(app, session, mocker,
                                      ):
     from namex.models import Request, State, Payment
     from namex_pay.worker import process_payment, FLASK_APP
+    nest_asyncio.apply()
 
     # setup
     PAYMENT_TOKEN = 'dog'

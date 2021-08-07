@@ -29,7 +29,7 @@ from stan.aio.client import Client as Stan
 from namex.services import queue
 
 from . import FROZEN_DATETIME
-
+import nest_asyncio
 
 @contextmanager
 def not_raises(exception):
@@ -63,7 +63,7 @@ def app():
     print(config)
     _app.config.from_object(get_named_config('testing'))
     db.init_app(_app)
-    queue.init_app(_app)
+    queue.init_app(_app, asyncio.new_event_loop())
 
     return _app
 
@@ -185,6 +185,17 @@ async def entity_stan(app, event_loop, client_id):
 
     await sc.close()
     await nc.close()
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """
+    Don't close event loop at the end of every function decorated by
+    @pytest.mark.asyncio
+    """
+    loop = asyncio.get_event_loop()
+    nest_asyncio.apply(loop)
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope='function')
