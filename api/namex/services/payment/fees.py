@@ -12,6 +12,7 @@ class CalculateFeesRequest(Serializable):
         self.jurisdiction = kwargs.get('jurisdiction', None)
         self.date = kwargs.get('date', None)
         self.priority = kwargs.get('priority', None)
+        self.headers = kwargs.get('headers', None)
 
 
 def calculate_fees(req):
@@ -24,7 +25,8 @@ def calculate_fees(req):
             req.filing_type_code,
             jurisdiction=req.jurisdiction,
             date=req.date,
-            priority=req.priority
+            priority=req.priority,
+            headers=req.headers
         )
 
         current_app.logger.debug(api_response)
