@@ -142,6 +142,7 @@ class PaymentInvoice(Serializable):
     references: list = field(default_factory=list)
     details: list = field(default_factory=list)
     _links: list = field(default_factory=list)
+    paymentAccount: dict = field(default_factory=dict)
 
 
 @dataclass
