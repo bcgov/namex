@@ -93,6 +93,8 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
 
     payment_action = payment.payment_action
     nr = RequestDAO.find_by_id(payment.nrId)
+    
+    # As RESUBMIT is a new NR it should follow the same flow as CREATE
     if payment_action in [Payment.PaymentActions.CREATE.value, Payment.PaymentActions.RESUBMIT.value]:  # pylint: disable=R1705
         if nr.stateCd == State.PENDING_PAYMENT:
             nr.stateCd = State.DRAFT

@@ -63,6 +63,8 @@ def test_extract_payment_token():
          None  # error
          ),
         ('already draft', Payment.PaymentActions.CREATE.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not', None),
+        ('resubmit', Payment.PaymentActions.RESUBMIT.value, State.PENDING_PAYMENT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, None, 'COMPLETED', None, 'is not', None),
+        ('resubmit draft', Payment.PaymentActions.RESUBMIT.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not', None),
         ('upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'N', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
         ('re-upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'Y', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
         ('extend ', Payment.PaymentActions.REAPPLY.value, State.DRAFT, State.DRAFT, 'N', 'N',
