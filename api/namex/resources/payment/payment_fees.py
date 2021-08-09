@@ -62,6 +62,7 @@ class PaymentFees(Resource):
             jurisdiction = json_input.get('jurisdiction', None)  # TODO: Maybe throw an error if these don't exist, we can't really get fees without them
             date = json_input.get('date', None)
             priority = json_input.get('priority', None)
+            headers = json_input.get('headers', None)
 
             # Params are snake_case for this POST
             req = CalculateFeesRequest(
@@ -69,7 +70,8 @@ class PaymentFees(Resource):
                 filing_type_code=filing_type_code,
                 jurisdiction=jurisdiction,
                 date=date,
-                priority=priority
+                priority=priority,
+                headers=headers
             )
 
             fees = calculate_fees(req)
