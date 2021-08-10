@@ -26,6 +26,7 @@ the model to a standalone SQLAlchemy usage with an async engine would need
 to be pursued.
 """
 import asyncio
+import nest_asyncio
 import json
 import os
 import time
@@ -270,7 +271,7 @@ FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
 queue.init_app(FLASK_APP, asyncio.new_event_loop())
-
+nest_asyncio.apply()
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
     """Use Callback to process Queue Msg objects.
