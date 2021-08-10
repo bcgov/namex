@@ -160,13 +160,6 @@ class TestConfig(Config):
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
     DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 1))
 
-    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://localhost:4222')
-    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', 'namex.worker')
-    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
-    NATS_QUEUE = os.getenv('NATS_QUEUE', 'namerequest-processor')
-    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
-    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
-
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
     JWT_OIDC_TEST_MODE = True
