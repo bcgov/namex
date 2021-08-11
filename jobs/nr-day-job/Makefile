@@ -76,7 +76,7 @@ mac-cov: test ## Run the coverage report and display in a browser window (mac)
 	@open -a "Google Chrome" htmlcov/index.html
 
 #################################################################################
-# COMMANDS - CD
+# COMMANDS -- CD
 # expects the terminal to be openshift login
 # expects export OPENSHIFT_DOCKER_REGISTRY=""
 # expects export OPENSHIFT_SA_NAME="$(oc whoami)"
