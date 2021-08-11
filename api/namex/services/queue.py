@@ -105,6 +105,7 @@ class QueueService():
                 # Update the client_id if nats is reconnecting
                 self.stan_options['client_id'] = self.get_client_id()
                 await ctx.stan.connect(**self.stan_options)
+                self.logger.warning('NATS has been connected with STAN client_id: %s', self.stan_options['client_id'])
 
     def get_client_id(self):
         return (self.name.lower().strip(string.whitespace)).translate(
