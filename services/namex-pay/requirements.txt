@@ -7,6 +7,7 @@ asyncio-nats-client==0.11.4
 asyncio-nats-streaming==0.4.0
 pycountry==20.7.3
 Werkzeug==2.0.1
+nest_asyncio
 
 git+https://github.com/bcgov/business-schemas.git#egg=registry_schemas
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api

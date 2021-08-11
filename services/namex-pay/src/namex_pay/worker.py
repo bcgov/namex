@@ -25,6 +25,8 @@ Flask-SQLAlchemy currently allows the base model to be changed, or reworking
 the model to a standalone SQLAlchemy usage with an async engine would need
 to be pursued.
 """
+import asyncio
+import nest_asyncio
 import json
 import os
 import time
@@ -36,7 +38,7 @@ import nats
 from flask import Flask
 from namex import nro
 from namex.models import db, Event, Payment, Request as RequestDAO, State, User  # noqa:I001; import orders
-from namex.services import EventRecorder
+from namex.services import EventRecorder, queue
 from queue_common.messages import create_cloud_event_msg  # noqa:I005
 from queue_common.service import QueueServiceManager
 from queue_common.service_utils import QueueException, logger
@@ -92,7 +94,9 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
 
     payment_action = payment.payment_action
     nr = RequestDAO.find_by_id(payment.nrId)
-    if payment_action == Payment.PaymentActions.CREATE.value:  # pylint: disable=R1705
+    
+    # As RESUBMIT is a new NR it should follow the same flow as CREATE
+    if payment_action in [Payment.PaymentActions.CREATE.value, Payment.PaymentActions.RESUBMIT.value]:  # pylint: disable=R1705
         if nr.stateCd == State.PENDING_PAYMENT:
             nr.stateCd = State.DRAFT
             nr.save_to_db()
@@ -266,7 +270,8 @@ APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
-
+queue.init_app(FLASK_APP, asyncio.new_event_loop())
+nest_asyncio.apply()
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
     """Use Callback to process Queue Msg objects.

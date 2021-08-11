@@ -15,6 +15,7 @@
 from datetime import timedelta
 from namex.models import Request, State, Payment
 import json
+import nest_asyncio
 
 import pytest
 from freezegun import freeze_time
@@ -23,7 +24,6 @@ import namex_pay
 
 from namex_pay.utils.datetime import datetime, timedelta
 from namex_pay.worker import NAME_REQUEST_LIFESPAN_DAYS
-
 
 def test_extract_payment_token():
     """Assert that the payment token can be extracted from the Queue delivered Msg."""
@@ -49,7 +49,7 @@ def test_extract_payment_token():
     'start_payment_date,end_payment_has_value,'
     'error', [
         ('draft',  # test name
-         Payment.PaymentActions.CREATE.value,  # payment action [CREATE|UPGRADE|REAPPLY]
+         Payment.PaymentActions.CREATE.value,  # payment action [CREATE|UPGRADE|REAPPLY|RESUBMIT]
          State.PENDING_PAYMENT,  # start state of NR
          State.DRAFT,           # end state of NR
          'N',  # start state of Priority
@@ -62,7 +62,9 @@ def test_extract_payment_token():
          'is not',  # end_payment_has_value
          None  # error
          ),
-        ('already draft', Payment.PaymentActions.CREATE.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is', None),
+        ('already draft', Payment.PaymentActions.CREATE.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not', None),
+        ('resubmit', Payment.PaymentActions.RESUBMIT.value, State.PENDING_PAYMENT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, None, 'COMPLETED', None, 'is not', None),
+        ('resubmit draft', Payment.PaymentActions.RESUBMIT.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not', None),
         ('upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'N', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
         ('re-upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'Y', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
         ('extend ', Payment.PaymentActions.REAPPLY.value, State.DRAFT, State.DRAFT, 'N', 'N',
@@ -156,6 +158,7 @@ async def test_process_payment(app, session, mocker,
                                      ):
     from namex.models import Request, State, Payment
     from namex_pay.worker import process_payment, FLASK_APP
+    nest_asyncio.apply()
 
     # setup
     PAYMENT_TOKEN = 'dog'
