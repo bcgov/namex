@@ -183,7 +183,7 @@ class Events(Resource):
                 Payment.PaymentActions.CREATE.value: 'Created NR',
                 Payment.PaymentActions.REAPPLY.value: 'Reapplied NR',
                 Payment.PaymentActions.UPGRADE.value: 'Upgraded Priority',
-                Payment.PaymentActions.RESUBMIT.value: 'Resubmited NR'
+                Payment.PaymentActions.RESUBMIT.value: 'Resubmitted NR'
             }
             for action in Payment.PaymentActions:
                 if action.value in e_dict['action']:
