@@ -246,7 +246,7 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
                 else:
                     logger.debug('Queue Error: Unable to find payment record for :%s', pay_msg)
                     capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
-                    raise OperationalError('Queue Error: Unable to find payment record for :%s', pay_msg)
+                    raise RuntimeError(f'Queue Error: Unable to find payment record for : {pay_msg}')
             else:
                 logger.debug('Queue Error: Missing id :%s', pay_msg)
                 capture_message(f'Queue Error: Missing id :{pay_msg}', level='error')
