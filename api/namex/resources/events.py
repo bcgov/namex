@@ -182,7 +182,8 @@ class Events(Resource):
             payment_display = {
                 Payment.PaymentActions.CREATE.value: 'Created NR',
                 Payment.PaymentActions.REAPPLY.value: 'Reapplied NR',
-                Payment.PaymentActions.UPGRADE.value: 'Upgraded Priority'
+                Payment.PaymentActions.UPGRADE.value: 'Upgraded Priority',
+                Payment.PaymentActions.RESUBMIT.value: 'Resubmited NR'
             }
             for action in Payment.PaymentActions:
                 if action.value in e_dict['action']:
