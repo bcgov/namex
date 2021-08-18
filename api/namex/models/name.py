@@ -4,8 +4,10 @@
 from marshmallow import fields
 from sqlalchemy import event
 from sqlalchemy.orm import backref
+from sqlalchemy.orm.attributes import get_history
 
 from namex.models import db, ma
+from namex.utils import queue_util
 
 
 class Name(db.Model):
@@ -87,7 +89,7 @@ class Name(db.Model):
 
         db.session.add(self)
         db.session.commit()
-    
+
     def add_to_db(self):
         db.session.add(self)
 
@@ -98,12 +100,17 @@ class Name(db.Model):
 @event.listens_for(Name, 'after_insert')
 @event.listens_for(Name, 'after_update')
 def update_nr_name_search(mapper, connection, target):
-    """Add any changes to the name to the request.nameSearch column."""
+    """Add any changes to the name to the request.nameSearch column and publish name state changes where applicable."""
     from namex.models import Request
 
     name = target
     nr = Request.find_by_id(name.nrId)
     if nr:
+        # publish name state change message when name is consumed
+        name_consume_history = get_history(name, 'consumptionDate')
+        if len(name_consume_history.added):
+            queue_util.send_name_state_msg(nr.nrNum, name.id, 'CONSUMED', None)
+
         # get the names associated with the NR
         names_q = connection.execute(
             f"""
