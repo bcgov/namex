@@ -5,7 +5,7 @@ This module is the API for the Names Examination system
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from namex import config
+import config
 from namex.utils.logging import setup_logging
 setup_logging()  # important to do this first
 
@@ -39,7 +39,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     db.init_app(app)
     ma.init_app(app)
-    
+
     api.init_app(app)
     setup_jwt_manager(app, jwt)
 

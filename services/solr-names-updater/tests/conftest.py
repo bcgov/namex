@@ -23,7 +23,7 @@ import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy.sql.ddl import DropConstraint
 
-from solr_names_updater.config import get_named_config
+from config import get_named_config
 from flask import Flask
 from namex.models import db as _db
 from solr_names_updater import worker  # noqa: I001

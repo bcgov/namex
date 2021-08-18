@@ -38,7 +38,7 @@ from sentry_sdk import capture_message
 from sqlalchemy.exc import OperationalError
 from urllib3.exceptions import NewConnectionError
 
-from solr_names_updater import config
+from config import get_named_config
 from solr_names_updater.names_processors.names import (  # noqa: I001
     process_add_to_solr as process_names_add,  # noqa: I001
     process_delete_from_solr as process_names_delete  # noqa: I001
@@ -50,7 +50,7 @@ from solr_names_updater.names_processors.possible_conflicts import (  # noqa: I0
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
-APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
+APP_CONFIG = get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
