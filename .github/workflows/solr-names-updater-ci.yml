@@ -58,6 +58,7 @@ jobs:
       DATABASE_TEST_HOST: localhost
       DATABASE_HOST: localhost
       DATABASE_PASSWORD: postgres
+      SOLR_FEEDER_API_URL: "http://fakeurl:8111/api/v1"
 
     runs-on: ubuntu-20.04
 
