@@ -16,7 +16,7 @@ BC Registries Names Examination, research and approval system API
 ## Project Status
 As of 2021-07-26 in **ALPHA**
 
-## Documnentation
+## Documentation
 
 GitHub Pages (https://guides.github.com/features/pages/) are a neat way to document you application/project.
 
