@@ -16,8 +16,8 @@
 
 Test-Suite to ensure that the version utilities are working as expected.
 """
-from namex_pay import utils
-from namex_pay.version import __version__
+from solr_names_updater import utils
+from solr_names_updater.version import __version__
 
 
 def test_get_version():

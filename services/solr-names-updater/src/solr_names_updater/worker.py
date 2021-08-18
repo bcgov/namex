@@ -38,7 +38,7 @@ from sentry_sdk import capture_message
 from sqlalchemy.exc import OperationalError
 from urllib3.exceptions import NewConnectionError
 
-from config import get_named_config
+from config import get_named_config  # pylint: disable=import-error
 from solr_names_updater.names_processors.names import (  # noqa: I001
     process_add_to_solr as process_names_add,  # noqa: I001
     process_delete_from_solr as process_names_delete  # noqa: I001
