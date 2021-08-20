@@ -1,6 +1,8 @@
-from .abstract import Serializable
+import dataclasses
 from dataclasses import dataclass, field
 from datetime import date
+
+from .abstract import Serializable
 
 
 @dataclass
@@ -143,6 +145,13 @@ class PaymentInvoice(Serializable):
     details: list = field(default_factory=list)
     _links: list = field(default_factory=list)
     paymentAccount: dict = field(default_factory=dict)
+
+    def __init__(self, **kwargs):
+        """Set the attributes only if the field is defined."""
+        names = set([f.name for f in dataclasses.fields(self)])
+        for k, v in kwargs.items():
+            if k in names:
+                setattr(self, k, v)
 
 
 @dataclass
