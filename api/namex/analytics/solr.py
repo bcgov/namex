@@ -136,7 +136,7 @@ class SolrQueries:
         if name.find('*') != -1:
             list_name_split = name.split()
         else:
-            list_name_split,name = cls.combine_multi_word_synonyms(name, solr_base_url)
+            list_name_split, name = cls.combine_multi_word_synonyms(name, solr_base_url)
             list_name_split = [x.upper() for x in list_name_split]
         stemmed_words = cls.word_pre_processing(list_name_split, 'stems', solr_base_url)['stems']
         stemmed_name = ''
@@ -144,12 +144,25 @@ class SolrQueries:
             stemmed_name += ' ' + stem
         stemmed_name = stemmed_name.strip().upper()
 
-        name_tokens = {'full_words':list_name_split, 'stemmed_words':stemmed_words}
-        prox_search_strs,old_alg_search_strs,phon_search_strs = cls.build_solr_search_strs(name, stemmed_name, name_tokens)
+        name_tokens = {'full_words': list_name_split, 'stemmed_words': stemmed_words}
+        prox_search_strs, old_alg_search_strs, phon_search_strs = cls.build_solr_search_strs(
+            name,
+            stemmed_name,
+            name_tokens
+        )
 
         synonyms_for_word = cls.get_synonyms_for_words(name_tokens['stemmed_words'])
         if bucket == 'synonym':
-            connections = cls.get_synonym_results(solr_base_url, name, prox_search_strs, old_alg_search_strs, name_tokens, exact_phrase, start, rows)
+            connections = cls.get_synonym_results(
+                solr_base_url,
+                name,
+                prox_search_strs,
+                old_alg_search_strs,
+                name_tokens,
+                exact_phrase,
+                start,
+                rows
+            )
 
         elif bucket == 'cobrs_phonetic':
             connections = cls.get_cobrs_phonetic_results(solr_base_url, prox_search_strs, name_tokens, start, rows)
@@ -159,26 +172,37 @@ class SolrQueries:
             connections = cls.get_phonetic_results(solr_base_url, name, phon_search_strs, name_tokens)
 
         try:
-            solr = {'response':{'numFound': 0,
-                                'start': start,
-                                'rows': rows,
-                                'maxScore': 0.0,
-                                'docs': []},
-                    'highlighting': []}
+            solr = {
+                'response': {
+                    'numFound': 0,
+                    'start': start,
+                    'rows': rows,
+                    'maxScore': 0.0,
+                    'docs': []
+                },
+                'highlighting': []
+            }
 
-            seen_names = []
-            passed_names = []
+            seen_ids = []
+            # commented out here and below because it is updated but never used for anything
+            # passed_names = []
             previous_stack_title = ''
             stem_count = len(stemmed_words) * 2 + 1
             count = -1
+            if connections and connections[0] and connections[0][0]:
+                print(connections[0][1])
+                print(connections[0][0]['response']['docs'])
+            if connections and connections[1] and connections[1][0]:
+                print(connections[1][1])
+                print(connections[1][0]['response']['docs'])
             for connection in connections:
-                seen_ordered_names = seen_names.copy()
+                seen_ordered_ids = seen_ids.copy()
 
                 result = connection[0]
                 solr['response']['numFound'] += result['response']['numFound']
                 result_name = parse.unquote(connection[1])
-                if previous_stack_title.replace(' ','') != result_name.replace(' ',''):
-                    stack_title_info = {'name_info': {'name':result_name}, 'stems': stemmed_words[:int(stem_count/2)]}
+                if previous_stack_title.replace(' ', '') != result_name.replace(' ', ''):
+                    stack_title_info = {'name_info': {'name': result_name}, 'stems': stemmed_words[:int(stem_count/2)]}
                     for word in list_name_split[:int(stem_count/2)]:
                         for stem in stemmed_words[:int(stem_count/2)]:
                             if stem in word:
@@ -191,7 +215,7 @@ class SolrQueries:
 
                 if len(result['response']['docs']) > 0:
                     ordered_names = []
-                    missed_names = []
+                    missed_ids = []
                     # if there is a bracket in the stack title then there is a 'synonyms:(...)' clause
                     if 'synonyms:(' in result_name:
                         synonyms = result_name[result_name.find('(') + 1:result_name.find(')')]
@@ -201,51 +225,38 @@ class SolrQueries:
                                 for word in synonyms_for_word[synonym.upper()]:
                                     for item in result['response']['docs']:
                                         processed_name = cls.name_pre_processing(item['name']).upper()
-                                        if item['name'] not in seen_ordered_names and item['name'] not in missed_names:
-                                            missed_names.append(item['name'])
-                                        if item['name'] not in seen_ordered_names:
+                                        if item['id'] not in seen_ordered_ids and item['id'] not in missed_ids:
+                                            missed_ids.append(item['id'])
+                                        if item['id'] not in seen_ordered_ids:
 
                                             if word.upper() in processed_name.upper():
-                                                seen_ordered_names.append(item['name'])
+                                                seen_ordered_ids.append(item['id'])
                                                 ordered_names.append({'name_info': item, 'stems': [word.upper()]})
-                                                missed_names.remove(item['name'])
+                                                missed_ids.remove(item['id'])
 
                                             elif word.upper()[:-1] in processed_name.upper() and len(word) > 4:
-                                                seen_ordered_names.append(item['name'])
+                                                seen_ordered_ids.append(item['id'])
                                                 ordered_names.append({'name_info': item, 'stems': [word.upper()[:-1]]})
-                                                missed_names.remove(item['name'])
-
-                                    # # in case a name has more than one synonym in it
-                                    # for ordered in ordered_names:
-                                    #     if word.upper() in cls.name_pre_processing(ordered['name_info']['name'].upper()):
-                                    #         for stem in ordered['stems']:
-                                    #             # i.e. don't want to add 'dev' if 'develop' is added as a stem
-                                    #             if word not in stem:
-                                    #                 ordered['stems'].append(word.upper())
-                                    #     elif word.upper()[:-1] in cls.name_pre_processing(ordered['name_info']['name'].upper()) and len(word) > 4:
-                                    #         for stem in ordered['stems']:
-                                    #             # i.e. don't want to add 'dev' if 'develop' is added as a stem
-                                    #             if word not in stem:
-                                    #                 ordered['stems'].append(word.upper()[:-1])
+                                                missed_ids.remove(item['id'])
 
                     else:
                         for item in result['response']['docs']:
-                            if item['name'] not in seen_ordered_names:
-                                seen_ordered_names.append(item['name'])
+                            if item['id'] not in seen_ordered_ids:
+                                seen_ordered_ids.append(item['id'])
                                 ordered_names.append({'name_info': item, 'stems': []})
 
-                    if len(missed_names) > 0:
-                        current_app.logger.debug('In {} stack UNSORTED results: {}'.format(previous_stack_title, missed_names))
-                        for missed in missed_names.copy():
+                    if len(missed_ids) > 0:
+                        current_app.logger.debug(f'In {previous_stack_title} stack UNSORTED results: {missed_ids}')
+                        for missed in missed_ids.copy():
                             for item in result['response']['docs']:
-                                if missed == item['name']:
+                                if missed == item['id']:
                                     ordered_names.append({'name_info': item, 'stems': []})
-                                    missed_names.remove(missed)
+                                    missed_ids.remove(missed)
                                     break
 
-                        if len(missed_names) > 0:
+                        if len(missed_ids) > 0:
                             # should never get here
-                            current_app.logger.error('In {} stack MISSED results: {}'.format(previous_stack_title, missed_names))
+                            current_app.logger.error(f'In {previous_stack_title} stack MISSED results: {missed_ids}')
 
                     final_names_list = []
 
@@ -254,7 +265,7 @@ class SolrQueries:
 
                         pivot_list = []
                         for key in name_tokens['stemmed_words']:
-                            pivot_list.insert(0,key.upper())
+                            pivot_list.insert(0, key.upper())
                         seen_for_pivot = []
                         if '*' not in connection[1]:
                             count += 1
@@ -263,7 +274,7 @@ class SolrQueries:
                             if pivot in synonyms_for_word:
                                 for synonym in synonyms_for_word[pivot]:
                                     for name in ordered_names:
-                                        if name['name_info']['name'] in seen_for_pivot:
+                                        if name['name_info']['id'] in seen_for_pivot:
                                             pass
                                         else:
                                             processed_name = cls.name_pre_processing(name['name_info']['name'])
@@ -271,13 +282,19 @@ class SolrQueries:
                                             if ' ' + synonym.upper() in ' ' + processed_name.upper():
                                                 stem = [synonym.upper()]
                                                 if stem[0] not in name['stems']:
-                                                    sorted_names.append({'name_info': name['name_info'], 'stems': stem + name['stems'].copy()})
+                                                    sorted_names.append(
+                                                        {
+                                                            'name_info': name['name_info'],
+                                                            'stems': stem + name['stems'].copy()
+                                                        }
+                                                    )
                                                 else:
-                                                    sorted_names.append({'name_info': name['name_info'], 'stems': name['stems']})
+                                                    sorted_names.append(
+                                                        {'name_info': name['name_info'], 'stems': name['stems']})
 
-                                                seen_for_pivot.append(name['name_info']['name'])
-                                                if name['name_info']['name'] in passed_names:
-                                                    passed_names.remove(name['name_info']['name'])
+                                                seen_for_pivot.append(name['name_info']['id'])
+                                                # if name['name_info']['name'] in passed_names:
+                                                #     passed_names.remove(name['name_info']['name'])
 
                                             elif ' ' + synonym.upper()[:-1] in ' ' + processed_name.upper() and len(synonym) > 4:
                                                 stem = [synonym.upper()[:-1]]
@@ -291,12 +308,12 @@ class SolrQueries:
                                                         {'name_info': name['name_info'], 'stems': name['stems']})
                                                 solr['response']['docs'].append(stack_title_info)
 
-                                                seen_for_pivot.append(name['name_info']['name'])
-                                                if name['name_info']['name'] in passed_names:
-                                                    passed_names.remove(name['name_info']['name'])
+                                                seen_for_pivot.append(name['name_info']['id'])
+                                                # if name['name_info']['name'] in passed_names:
+                                                #     passed_names.remove(name['name_info']['name'])
 
-                                            elif name['name_info']['name'] not in passed_names:
-                                                passed_names.append(name['name_info']['name'])
+                                            # elif name['name_info']['name'] not in passed_names:
+                                            #     passed_names.append(name['name_info']['name'])
 
                             no_duplicates = []
                             for ordered in ordered_names:
@@ -310,8 +327,8 @@ class SolrQueries:
                             ordered_names = sorted_names.copy() + no_duplicates.copy()
 
                             for seen in seen_for_pivot:
-                                if seen not in seen_ordered_names:
-                                    seen_ordered_names.append(seen)
+                                if seen not in seen_ordered_ids:
+                                    seen_ordered_ids.append(seen)
 
                             seen_for_pivot.clear()
                             sorted_names.clear()
@@ -320,10 +337,10 @@ class SolrQueries:
                     else:
                         for item in ordered_names:
                             final_names_list.append(item)
-                            seen_ordered_names.append(item['name_info']['name'])
+                            seen_ordered_ids.append(item['name_info']['id'])
 
-                    seen_names += seen_ordered_names.copy()
-                    seen_ordered_names.clear()
+                    seen_ids += seen_ordered_ids.copy()
+                    seen_ordered_ids.clear()
 
                     solr['response']['docs'] += final_names_list
 
