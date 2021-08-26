@@ -35,4 +35,8 @@ def test_payment_invoice_model(session):
     invoice_model = PaymentInvoice(**sample_response)
     assert invoice_model.businessIdentifier == sample_response['businessIdentifier']
     assert not getattr(invoice_model, 'test_field_to_be_ignored', None)
+    assert invoice_model.lineItems == []
+    assert invoice_model.receipts == []
+    assert invoice_model.references == []
+    assert invoice_model._links == []
 

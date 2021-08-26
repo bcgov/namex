@@ -148,6 +148,12 @@ class PaymentInvoice(Serializable):
 
     def __init__(self, **kwargs):
         """Set the attributes only if the field is defined."""
+        self.lineItems = []
+        self.receipts = []
+        self.references = []
+        self.details = []
+        self._links = []
+        self.paymentAccount = {}
         names = set([f.name for f in dataclasses.fields(self)])
         for k, v in kwargs.items():
             if k in names:
