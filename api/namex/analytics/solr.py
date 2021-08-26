@@ -118,7 +118,8 @@ class SolrQueries:
             '&start={start}&rows={rows}'
             '&fl=application_number,name,status,description,score'
             '&bq=status:%22Registration%20published%22^5.0'
-            '&sort=score%20desc{synonyms_clause}{name_copy_clause}'
+            '&sort=score%20desc'
+            '{name_copy_clause}'
     }
 
     @classmethod
@@ -480,7 +481,6 @@ class SolrQueries:
                 rows=rows,
                 name=cls._get_parsed_name(name),
                 compressed_name=cls._compress_name(name),
-                synonyms_clause=cls._get_synonyms_clause(name, ''),
                 name_copy_clause=cls._get_name_copy_clause(name)
             )
             current_app.logger.debug('Query: ' + query)
