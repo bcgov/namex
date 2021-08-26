@@ -189,12 +189,7 @@ class SolrQueries:
             previous_stack_title = ''
             stem_count = len(stemmed_words) * 2 + 1
             count = -1
-            if connections and connections[0] and connections[0][0]:
-                print(connections[0][1])
-                print(connections[0][0]['response']['docs'])
-            if connections and connections[1] and connections[1][0]:
-                print(connections[1][1])
-                print(connections[1][0]['response']['docs'])
+
             for connection in connections:
                 seen_ordered_ids = seen_ids.copy()
 
