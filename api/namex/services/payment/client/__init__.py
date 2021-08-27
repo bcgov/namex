@@ -293,7 +293,13 @@ class SBCPaymentClient(BaseClient):
     def refund_payment(self, invoice_id, data):
         request_url = 'payment-requests/{invoice_id}/refunds'
         request_url = request_url.format(invoice_id=invoice_id)
-        return self.call_api(HttpVerbs.POST, request_url, data=data)
+        response = None
+        try:
+            response = self.call_api(HttpVerbs.POST, request_url, data=data)
+        except (ApiRequestError) as err: # ROUTING_SLIP_REFUND and NO_FEE_REFUND return http 400.
+            return response
+        
+        return response
 
     def generate_receipt(self, invoice_id, data):
         request_url = 'payment-requests/{invoice_id}/receipts'
