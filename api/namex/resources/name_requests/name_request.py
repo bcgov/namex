@@ -7,8 +7,8 @@ from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.api_resource import handle_exception
 
-from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
-from namex.models import Request, State, Event, User
+from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentAction, PaymentState
+from namex.models import Request, State, Event, User, Payment
 
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
@@ -372,17 +372,22 @@ class NameRequestFields(BaseNameRequestResource):
             PaymentState.COMPLETED.value,
             PaymentState.PARTIAL.value
         ]
-        # Try to refund all payments associated with the NR
+        
         refund_value = 0
-        for payment in nr_model.payments.all():
-            if payment.payment_status_code in valid_states:
-                # Some refunds may fail. Some payment methods are not refundable and return HTTP 400 at the refund.
-                # The refund status is checked from the payment_response and a appropriate message is displayed by the UI. 
-                refund_payment(payment.payment_token, {})
-                payment_response = get_payment(payment.payment_token)
-                payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
-                payment.save_to_db()
-                refund_value += payment_response.receipts[0]['receiptAmount'] if len(payment_response.receipts) else 0
+
+        # Check for NR that has been renewed - do not refund any payments. 
+        # UI should not order refund for an NR renewed/reapplied it.
+        if not any(payment.payment_action == Payment.PaymentActions.REAPPLY.value for payment in nr_model.payments.all()):
+            # Try to refund all payments associated with the NR
+            for payment in nr_model.payments.all():
+                if payment.payment_status_code in valid_states:
+                    # Some refunds may fail. Some payment methods are not refundable and return HTTP 400 at the refund.
+                    # The refund status is checked from the payment_response and a appropriate message is displayed by the UI. 
+                    refund_payment(payment.payment_token, {})
+                    payment_response = get_payment(payment.payment_token)
+                    payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
+                    payment.save_to_db()
+                    refund_value += payment_response.receipts[0]['receiptAmount'] if len(payment_response.receipts) else 0
 
         publish_email_notification(nr_model.nrNum, 'refund', '{:.2f}'.format(refund_value))
 
