@@ -129,16 +129,7 @@ class Request(db.Model):
     # properties
     @property
     def has_consumed_name(self):
-        names = self.names.all()
-
-        def is_not_consumed(name):
-            no_corp_num = name.corpNum is None
-            no_consumption_date = name.consumptionDate is None
-
-            return no_corp_num and no_consumption_date
-
-        results = [is_not_consumed(n) is False for n in names]
-        return True in results
+        return self.stateCd == State.CONSUMED
 
     @property
     def is_expired(self):
@@ -435,13 +426,11 @@ class Request(db.Model):
         ]
 
         not_consumed_filter = [
-            cls.expirationDate > func.current_Date(),
-            Name.corpNum.is_(None),
-            Name.consumptionDate.is_(None)
+            cls.stateCd.isnot(State.CONSUMED)
         ]
 
         consumed_filter = [
-            Name.corpNum.isnot(None),
+            cls.stateCd.is_(State.CONSUMED)
         ]
 
         if queue:

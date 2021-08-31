@@ -1,6 +1,7 @@
 """Name hold a name choice for a Request
 """
 # from . import db, ma
+from namex.models.state import State
 from marshmallow import fields
 from sqlalchemy import event
 from sqlalchemy.orm import backref
@@ -109,6 +110,8 @@ def update_nr_name_search(mapper, connection, target):
         # publish name state change message when name is consumed
         name_consume_history = get_history(name, 'consumptionDate')
         if len(name_consume_history.added):
+            nr.stateCd = State.CONSUMED
+            nr.save_to_db()
             queue_util.send_name_state_msg(nr.nrNum, name.id, 'CONSUMED', None)
 
         # get the names associated with the NR

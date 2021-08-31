@@ -35,7 +35,8 @@ class ReportResource(Resource):
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
 
-            if nr_model.stateCd not in [State.APPROVED, State.CONDITIONAL, State.EXPIRED, State.REJECTED]:
+            if nr_model.stateCd not in [State.APPROVED, State.CONDITIONAL,
+                                        State.CONSUMED, State.EXPIRED, State.REJECTED]:
                 return jsonify(message='Invalid NR state'.format(nr_id=nr_model.id)), HTTPStatus.BAD_REQUEST
 
             authenticated, token = ReportResource._get_service_client_token()
@@ -176,6 +177,7 @@ class ReportResource(Resource):
             'APPROVED': 'Approved',
             'CONDITIONAL': 'Conditional Approval',
             'REJECTED': 'Rejected',
+            'CONSUMED': 'Consumed',
             'EXPIRED': 'Expired'
         }
 

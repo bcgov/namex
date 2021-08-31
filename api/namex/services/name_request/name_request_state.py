@@ -170,6 +170,7 @@ def get_nr_state_actions(next_state, nr_model=None):
             # Not expired
             State.CONDITIONAL: build_actions(NameRequestActiveActions.list(), nr_model),
             State.APPROVED: build_actions(NameRequestActiveActions.list(), nr_model),
+            State.CONSUMED: build_actions(NameRequestActiveActions.list(), nr_model),
             State.INPROGRESS: build_actions(NameRequestInProgressActions.list(), nr_model),
             State.HOLD: build_actions(NameRequestHoldActions.list(), nr_model),
             State.HISTORICAL: build_actions(NameRequestHistoricalActions.list(), nr_model),

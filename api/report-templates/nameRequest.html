@@ -33,14 +33,14 @@
          </div>
       </div>
       [[name-request/nrDetails.html]]
-      {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' %}
+      {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' or stateCd == 'CONSUMED' %}
          <div class="section-header mt-5 pt-4">APPROVAL DETAILS</div>
       {% else %}
          <div class="section-header mt-5 pt-4">RESULT DETAILS</div>
       {% endif %}
       <div class="container pt-4">
          [[name-request/resultDetails.html]]
-         {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' %}
+         {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' or stateCd == 'CONSUMED' %}
             [[name-request/manageNameRequest.html]]
          {% endif %}
          [[name-request/nameChoices.html]]
