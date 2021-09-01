@@ -112,7 +112,6 @@ def update_nr_name_search(mapper, connection, target):
         if len(name_consume_history.added):
             nr.stateCd = State.CONSUMED
             nr.save_to_db()
-            queue_util.send_name_state_msg(nr.nrNum, name.id, 'CONSUMED', None)
 
         # get the names associated with the NR
         names_q = connection.execute(

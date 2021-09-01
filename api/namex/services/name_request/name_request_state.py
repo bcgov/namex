@@ -170,7 +170,7 @@ def get_nr_state_actions(next_state, nr_model=None):
             # Not expired
             State.CONDITIONAL: build_actions(NameRequestActiveActions.list(), nr_model),
             State.APPROVED: build_actions(NameRequestActiveActions.list(), nr_model),
-            State.CONSUMED: build_actions(NameRequestActiveActions.list(), nr_model),
+            State.CONSUMED: build_actions(NameRequestConsumedActions.list(), nr_model),
             State.INPROGRESS: build_actions(NameRequestInProgressActions.list(), nr_model),
             State.HOLD: build_actions(NameRequestHoldActions.list(), nr_model),
             State.HISTORICAL: build_actions(NameRequestHistoricalActions.list(), nr_model),
@@ -298,6 +298,21 @@ def to_rejected(resource, nr, on_success_cb):
     return nr
 
 
+def to_consumed(resource, nr, on_success_cb):
+    valid_states = [State.CONSUMED]
+    if nr.stateCd not in valid_states:
+        raise InvalidStateError(message=invalid_state_transition_msg.format(
+            current_state=nr.stateCd,
+            next_state=State.CONSUMED,
+            valid_states=', '.join(valid_states)
+        ))
+
+    resource.next_state_code = State.CONSUMED
+    if on_success_cb:
+        nr = on_success_cb(nr, resource)
+    return nr
+
+
 def to_pending_payment(resource, nr, on_success_cb):
     valid_states = [State.PENDING_PAYMENT]
     if nr.stateCd not in valid_states:
@@ -381,6 +396,7 @@ def apply_nr_state_change(self, name_request, next_state, on_success=None):
         State.CONDITIONAL: to_conditional,
         State.APPROVED: to_approved,
         State.REJECTED: to_rejected,
+        State.CONSUMED: to_consumed,
         State.CANCELLED: to_cancelled,
         State.REFUND_REQUESTED: to_refund_requested,
         State.PENDING_PAYMENT: to_pending_payment
