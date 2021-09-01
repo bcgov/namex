@@ -113,24 +113,3 @@ def create_request_state_change_message(new_state, prev_state):
             }
         }
     }
-
-
-def create_name_state_change_message(new_state, prev_state):
-
-    return {
-        'specversion': '1.0.1',
-        'type': 'bc.registry.names.events',
-        'source': '/requests/NR 6724165/name/234234234',
-        'id': '16fd2706-8baf-433b-82eb-8c7fada847aa',
-        'time': '',
-        'datacontenttype': 'application/json',
-        'identifier': 'NR 6724165',
-        'data': {
-            'name': {
-                'nrId': '234234234',
-                'nrNum': 'NR 6724165',
-                'newState': new_state,
-                'previousState': prev_state
-            }
-        }
-    }
