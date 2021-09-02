@@ -67,6 +67,11 @@ class User(db.Model):
         return cls.query.filter_by(username=username).order_by(User.creationDate.desc()).first()
 
     @classmethod
+    def get_service_account_user(cls):
+        """Get service account user."""
+        return cls.query.filter_by(username='nro_service_account').one_or_none()
+
+    @classmethod
     def find_by_sub(cls, sub):
         return cls.query.filter_by(sub=sub).one_or_none()
 

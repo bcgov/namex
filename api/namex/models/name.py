@@ -1,14 +1,12 @@
 """Name hold a name choice for a Request
 """
 # from . import db, ma
-from namex.models.state import State
 from marshmallow import fields
 from sqlalchemy import event
 from sqlalchemy.orm import backref
 from sqlalchemy.orm.attributes import get_history
 
 from namex.models import db, ma
-from namex.utils import queue_util
 
 
 class Name(db.Model):
@@ -102,16 +100,18 @@ class Name(db.Model):
 @event.listens_for(Name, 'after_update')
 def update_nr_name_search(mapper, connection, target):
     """Add any changes to the name to the request.nameSearch column and publish name state changes where applicable."""
-    from namex.models import Request
+    from namex.models import Event, Request, State
+    from namex.services.audit_trail.event_recorder import EventRecorder
 
     name = target
     nr = Request.find_by_id(name.nrId)
     if nr:
-        # publish name state change message when name is consumed
+        # set nr state to consumed
         name_consume_history = get_history(name, 'consumptionDate')
         if len(name_consume_history.added):
             nr.stateCd = State.CONSUMED
             nr.save_to_db()
+            EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, nr.json())
 
         # get the names associated with the NR
         names_q = connection.execute(
