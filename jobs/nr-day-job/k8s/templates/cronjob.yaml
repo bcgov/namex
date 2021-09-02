@@ -62,6 +62,11 @@ objects:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
                         key: NATS_EMAILER_SUBJECT
+                  - name: NATS_NR_STATE_SUBJECT
+                    valueFrom:
+                      secretKeyRef:
+                        name: ${NAME}-${TAG}-secret
+                        key: NATS_NR_STATE_SUBJECT
                   - name: DATABASE_USERNAME
                     valueFrom:
                       secretKeyRef:

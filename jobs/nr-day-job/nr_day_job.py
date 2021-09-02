@@ -84,6 +84,7 @@ async def furnish_request_message(
         request.notifiedBeforeExpiry = True
     elif option == 'expired':
         request.notifiedExpiry = True
+        request.stateCd = State.EXPIRED
     request.save_to_db()
 
 

@@ -62,6 +62,7 @@ class Config():  # pylint: disable=too-few-public-methods
     NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', None)
     NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', None)
     NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
+    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
