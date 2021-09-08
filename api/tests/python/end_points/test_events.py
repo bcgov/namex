@@ -390,3 +390,27 @@ def test_get_staff_comment_event_history(client, jwt, app):
 
     assert b'"user_action": "Staff Comment"' in rv.data
     assert b'"comment": "test staff comment"' in rv.data
+
+
+def test_consumed_event_history(client, jwt, app):
+    from namex.models import State, User, Event
+    from namex.services import EventRecorder
+
+    # add a user for the comment
+    user = User('nro_service_account', '', '', '8ca7d47a-024e-4c85-a367-57c9c93de1cd',
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+    user.save_to_db()
+
+    headers = create_header(jwt, [User.EDITOR])
+
+    nr = create_base_nr()
+    nr.stateCd = State.CONSUMED
+    nr.save_to_db()
+
+    EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, nr.json())
+
+    # get the resource (this is the test)
+    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    assert rv.status_code == 200
+
+    assert b'"user_action": "Get NR Details from NRO"' in rv.data
