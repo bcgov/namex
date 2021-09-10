@@ -21,8 +21,7 @@ from namex.utils import queue_util
 from solr_names_updater import worker  # noqa: I001
 from solr_names_updater.names_processors.names import get_nr_ids_to_delete_from_solr
 
-from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message, \
-    create_name_state_change_message # noqa: I003
+from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message # noqa: I003
 
 
 @pytest.mark.parametrize(
@@ -144,9 +143,9 @@ async def test_should_add_names_to_solr(
             ['APPROVED', 'CONDITION', 'REJECTED']
         ),
         (
-            'name',
-            create_name_state_change_message('CONSUMED', ''),
-            'APPROVED', 'DRAFT',
+            'request',
+            create_request_state_change_message('CONSUMED', 'APPROVED'),
+            'CONSUMED', 'APPROVED',
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'CONDITION', 'REJECTED']
         ),

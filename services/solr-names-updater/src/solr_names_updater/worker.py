@@ -80,25 +80,17 @@ async def process_names_event_message(msg: dict, flask_app: Flask):
     with flask_app.app_context():
         logger.debug('entering processing of nr event msg: %s', msg)
         request_state_change = msg.get('data').get('request', None)
-        name_state_change = msg.get('data').get('name', None)
 
         if request_state_change:
             new_state = request_state_change.get('newState')
             if new_state in ('APPROVED', 'CONDITIONAL'):
                 process_names_add(request_state_change)
                 process_possible_conflicts_add(request_state_change)
-            elif new_state in ('CANCELLED', 'RESET'):
+            elif new_state in ('CANCELLED', 'RESET', 'CONSUMED'):
                 process_names_delete(request_state_change)
                 process_possible_conflicts_delete(request_state_change)
             else:
                 logger.debug('no names processing required for request state change message %s', msg)
-        elif name_state_change:
-            new_state = name_state_change.get('newState')
-            if new_state == 'CONSUMED':
-                process_names_delete(name_state_change)
-                process_possible_conflicts_delete(name_state_change)
-            else:
-                logger.debug('no names processing required for name state message %s', msg)
         else:
             logger.debug('skipping - no matching state change message %s', msg)
 
