@@ -90,3 +90,37 @@ def test_name_search_populated_by_name():
 
     # check nameSearch
     assert nr.nameSearch == '|1CHANGED1|'
+
+def test_has_consumed_name():
+    """Assert has_consumed_name."""
+    from namex.models import Name, Request as RequestDAO, State
+    name = Name()
+    name.choice = 1
+    name.name = 'TEST'
+    name.state = 'APPROVED'
+
+    nr = RequestDAO()
+    nr.nrNum='NR 0000001'
+    nr.stateCd = State.CONSUMED
+    nr.names.append(name)
+    nr.save_to_db()
+
+    assert nr.has_consumed_name is True
+
+
+def test_is_expired():
+    """Assert is_expired."""
+    from namex.models import Name, Request as RequestDAO, State
+
+    name = Name()
+    name.choice = 1
+    name.name = 'TEST'
+    name.state = 'APPROVED'
+
+    nr = RequestDAO()
+    nr.nrNum='NR 0000001'
+    nr.stateCd = State.EXPIRED
+    nr.names.append(name)
+    nr.save_to_db()
+
+    assert nr.is_expired is True

@@ -14,5 +14,6 @@ contact_editable_states = [
     State.DRAFT,
     State.APPROVED,
     State.REJECTED,
-    State.CONDITIONAL
+    State.CONDITIONAL,
+    State.CONSUMED
 ]

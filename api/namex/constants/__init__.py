@@ -544,17 +544,16 @@ class NameRequestExpiredActions(AbstractEnum):
     """
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
-    RESUBMIT =  NameRequestActions.RESUBMIT.value
+    RESUBMIT = NameRequestActions.RESUBMIT.value
     # RESEND = NameRequestActions.RESEND.value
 
 
 class NameRequestConsumedActions(AbstractEnum):
-    """
-    Actions available when an NR is in an APPROVED or CONDITIONAL state, and consumed.
-    """
-    EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
+    """Actions available when an NR is in an CONSUMED state."""
+
+    EDIT = NameRequestActions.EDIT.value
     RECEIPT = NameRequestActions.RECEIPT.value
-    # RESEND = NameRequestActions.RESEND.value
+    RESULT = NameRequestActions.RESULT.value
 
 
 class NameRequestHistoricalActions(AbstractEnum):
