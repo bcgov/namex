@@ -17,7 +17,7 @@ lxml
 inflect
 werkzeug
 pysolr
-
-
-
-
+dataclasses
+pycountry
+asyncio-nats-client==0.11.4
+asyncio-nats-streaming==0.4.0
