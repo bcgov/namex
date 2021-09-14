@@ -100,6 +100,8 @@ class Name(db.Model):
 @event.listens_for(Name, 'after_update')
 def update_nr_name_search(mapper, connection, target):
     """Add any changes to the name to the request.nameSearch column and publish name state changes where applicable."""
+    from flask.globals import current_app
+    
     from namex.models import Event, Request, State
     from namex.services.audit_trail.event_recorder import EventRecorder
 
@@ -108,14 +110,17 @@ def update_nr_name_search(mapper, connection, target):
     if nr:
         # set nr state to consumed
         name_consume_history = get_history(name, 'corpNum')
+        current_app.logger.debug('name_consume_history.added {}'.format(nr.nrNum))
         if len(name_consume_history.added):
             nr.stateCd = State.CONSUMED
             nr.save_to_db()
+            current_app.logger.debug('moved to CONSUMED state {}'.format(nr.corpNum))
             EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, {
                 'id': nr.id,
                 'nrNum': nr.nrNum,
                 'stateCd': nr.stateCd
             })
+            current_app.logger.debug('moved to CONSUMED state event logged {}'.format(nr.nrNum))
 
         # get the names associated with the NR
         names_q = connection.execute(
