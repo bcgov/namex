@@ -111,7 +111,11 @@ def update_nr_name_search(mapper, connection, target):
         if len(name_consume_history.added):
             nr.stateCd = State.CONSUMED
             nr.save_to_db()
-            EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, nr.json())
+            EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, {
+                'id': nr.id,
+                'nrNum': nr.nrNum,
+                'stateCd': nr.stateCd
+            })
 
         # get the names associated with the NR
         names_q = connection.execute(
