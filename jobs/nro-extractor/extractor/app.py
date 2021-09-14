@@ -9,7 +9,7 @@ from config import Config  # pylint: disable=C0411
 from namex import db
 from namex.constants import PaymentStatusCode
 from namex.models import Request, Event, State
-from namex.services import EventRecorder
+from namex.services import EventRecorder, queue
 from namex.services.nro import NROServices
 from namex.services.nro.request_utils import get_nr_header, get_nr_submitter
 from namex.services.nro.utils import ora_row_to_dict
@@ -26,6 +26,8 @@ def create_app(config=Config):
     """Return the Flask App, fully configured and ready to go."""
     app = Flask(__name__)
     app.config.from_object(config)
+
+    queue.init_app(app)
 
     db.init_app(app)
     nro.init_app(app)
