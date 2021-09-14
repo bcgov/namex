@@ -107,7 +107,7 @@ def update_nr_name_search(mapper, connection, target):
     nr = Request.find_by_id(name.nrId)
     if nr:
         # set nr state to consumed
-        name_consume_history = get_history(name, 'consumptionDate')
+        name_consume_history = get_history(name, 'corpNum')
         if len(name_consume_history.added):
             nr.stateCd = State.CONSUMED
             nr.save_to_db()
