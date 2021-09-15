@@ -135,15 +135,21 @@ def update_nr_name_search(mapper, connection, target):
         name_consume_history = get_history(name, 'corpNum')
         current_app.logger.debug('name_consume_history.added {}'.format(nr.nrNum))
         if len(name_consume_history.added):
-            nr.stateCd = State.CONSUMED
-            nr.save_to_db()
-            current_app.logger.debug('moved to CONSUMED state {}'.format(name.corpNum))
-            EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, {
-                'id': nr.id,
-                'nrNum': nr.nrNum,
-                'stateCd': nr.stateCd
-            })
-            current_app.logger.debug('moved to CONSUMED state event logged {}'.format(nr.nrNum))
+            # Adding an after_flush_postexec to avoid connection and transaction closed issue's
+            # It registrars and executes only once, so its only for the current session
+            # corpNum sets from nro-extractor job
+            @event.listens_for(db.session, 'after_flush_postexec', once=True)
+            def receive_after_flush_postexec(session, flush_context):
+                nr = Request.find_by_id(name.nrId)
+                nr.stateCd = State.CONSUMED
+                nr.add_to_db()
+                current_app.logger.debug('moved to CONSUMED state {}'.format(name.corpNum))
+                EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, {
+                    'id': nr.id,
+                    'nrNum': nr.nrNum,
+                    'stateCd': nr.stateCd
+                }, True)
+                current_app.logger.debug('moved to CONSUMED state event logged {}'.format(nr.nrNum))
 
 
 class NameSchema(ma.SQLAlchemySchema):
