@@ -136,7 +136,7 @@ def update_nr_name_search(mapper, connection, target):
         current_app.logger.debug('name_consume_history.added {}'.format(nr.nrNum))
         if len(name_consume_history.added):
             # Adding an after_flush_postexec to avoid connection and transaction closed issue's
-            # It registrars and executes only once, so its only for the current session
+            # Creating one time execution event when ever corpNum is added to a name
             # corpNum sets from nro-extractor job
             @event.listens_for(db.session, 'after_flush_postexec', once=True)
             def receive_after_flush_postexec(session, flush_context):

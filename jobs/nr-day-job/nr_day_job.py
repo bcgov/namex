@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """s2i based launch script to run the service."""
-import asyncio
 import os
 import time
 import uuid
@@ -20,7 +19,7 @@ from datetime import datetime, timezone
 
 from flask import Flask, current_app
 from namex.models import Request, State, db
-from namex.services.queue import QueueService
+from namex.services import queue
 from queue_common.messages import create_cloud_event_msg
 from sqlalchemy import text
 
@@ -34,6 +33,8 @@ def create_app():
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(APP_CONFIG)
+
+    queue.init_app(app)
     db.init_app(app)
 
     register_shellcontext(app)
@@ -50,15 +51,14 @@ def register_shellcontext(app):
     app.shell_context_processor(shell_context)
 
 
-async def publish_email_message(qsm: QueueService, payload: dict):  # pylint: disable=redefined-outer-name
+def publish_email_message(payload: dict):
     """Publish the email message onto the NATS emailer subject."""
     subject = APP_CONFIG.NATS_EMAILER_SUBJECT
     current_app.logger.debug('publish to queue, subject:%s, event:%s', subject, payload)
-    await qsm.publish_json_to_subject(payload, subject)
+    queue.publish_json_to_subject_sync(payload, subject)
 
 
-async def furnish_request_message(
-        qsm: QueueService,
+def furnish_request_message(
         request: Request,
         option: str
 ):  # pylint: disable=redefined-outer-name
@@ -78,7 +78,7 @@ async def furnish_request_message(
         }
     )
     current_app.logger.debug('About to publish email for %s nrNum=%s', option, request.nrNum)
-    await publish_email_message(qsm, payload)
+    publish_email_message(payload)
 
     if option == 'before-expiry':
         request.notifiedBeforeExpiry = True
@@ -88,10 +88,10 @@ async def furnish_request_message(
     request.save_to_db()
 
 
-async def notify_nr_before_expiry(app: Flask, qsm: QueueService):  # pylint: disable=redefined-outer-name
+def notify_nr_before_expiry():
     """Send nr before expiry."""
     try:
-        app.logger.debug('entering notify_nr_before_expiry')
+        current_app.logger.debug('entering notify_nr_before_expiry')
 
         where_clause = text(
             "expiration_date - interval '14 day' <= CURRENT_DATE AND expiration_date > CURRENT_DATE")
@@ -101,15 +101,15 @@ async def notify_nr_before_expiry(app: Flask, qsm: QueueService):  # pylint: dis
             where_clause
         ).all()
         for request in requests:
-            await furnish_request_message(qsm, request, 'before-expiry')
+            furnish_request_message(request, 'before-expiry')
     except Exception as err:  # noqa B902; pylint: disable=W0703;
-        app.logger.error(err)
+        current_app.logger.error(err)
 
 
-async def notify_nr_expired(app: Flask, qsm: QueueService):  # pylint: disable=redefined-outer-name
+def notify_nr_expired():
     """Send nr expired."""
     try:
-        app.logger.debug('entering notify_nr_expired')
+        current_app.logger.debug('entering notify_nr_expired')
 
         where_clause = text('expiration_date <= CURRENT_DATE')
         requests = db.session.query(Request).filter(
@@ -119,9 +119,9 @@ async def notify_nr_expired(app: Flask, qsm: QueueService):  # pylint: disable=r
             where_clause
         ).all()
         for request in requests:
-            await furnish_request_message(qsm, request, 'expired')
+            furnish_request_message(request, 'expired')
     except Exception as err:  # noqa B902; pylint: disable=W0703;
-        app.logger.error(err)
+        current_app.logger.error(err)
 
 
 if __name__ == '__main__':
@@ -130,8 +130,5 @@ if __name__ == '__main__':
 
     application = create_app()
     with application.app_context():
-        event_loop = asyncio.get_event_loop()
-        qsm = QueueService(app=application, loop=event_loop)
-
-        event_loop.run_until_complete(notify_nr_before_expiry(application, qsm))
-        event_loop.run_until_complete(notify_nr_expired(application, qsm))
+        notify_nr_before_expiry()
+        notify_nr_expired()
