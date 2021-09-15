@@ -2,8 +2,6 @@
 
 The extractor ships changes from the NamesDB to the NameX services.
 """
-import time
-
 from flask import Flask, g, current_app
 
 from config import Config  # pylint: disable=C0411
@@ -224,7 +222,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                                                 , error_message=err.with_traceback(None))
                     namex_db.session.rollback()
                     ora_con.commit()
-        time.sleep(20)
+
         return row_count
 
     except Exception as err:
