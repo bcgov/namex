@@ -134,7 +134,7 @@ def update_nr_name_search(mapper, connection, target):
         # set nr state to consumed
         name_consume_history = get_history(name, 'corpNum')
         current_app.logger.debug('name_consume_history.added {}'.format(nr.nrNum))
-        if len(name_consume_history.added):
+        if len(name_consume_history.added) and name.corpNum:
             # Adding an after_flush_postexec to avoid connection and transaction closed issue's
             # Creating one time execution event when ever corpNum is added to a name
             # corpNum sets from nro-extractor job
