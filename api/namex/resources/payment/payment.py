@@ -377,8 +377,14 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
                         elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
                             # TODO: handle this (refund payment and prevent action?)
+
+                            # the `nr_model.expirationDate` is been set from nro with timezone info
+                            # and `datetime.utcnow()` does not return with timezone info `+00:00`
+                            # replacing timezone info to None in `nr_model.expirationDate` to avoid
+                            # this error: `can't compare offset-naive and offset-aware datetimes`
                             if nr_model.stateCd != State.APPROVED \
-                                    and nr_model.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
+                                    and nr_model.expirationDate.replace(tzinfo=None) + \
+                                    timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
                                 msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
                                 current_app.logger.debug(msg)
 
