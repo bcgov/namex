@@ -4,10 +4,7 @@ class PaymentException(Exception):
     """
     def __init__(self, wrapped_err=None, message="Payment exception.", status_code=500):
         self.err = wrapped_err
-        if wrapped_err:
-            self.message = '{msg}\r\n\r\n{desc}'.format(msg=message, desc=str(wrapped_err))
-        else:
-            self.message = message
+        self.message = message
         # Map HTTP status if the wrapped error has an HTTP status code
         self.status_code = wrapped_err.status if wrapped_err and hasattr(wrapped_err, 'status') else status_code
         super().__init__(self.message)
@@ -25,8 +22,8 @@ class SBCPaymentException(PaymentException):
     """
     Used for general / unknown Service BC Payment API exceptions when calling the Service BC Payment API.
     """
-    def __init__(self, wrapped_err=None, message="SBC Pay API exception."):
-        super().__init__(wrapped_err, message)
+    def __init__(self, wrapped_err=None, message="SBC Pay API exception.", status_code=500):
+        super().__init__(wrapped_err, message, status_code)
 
 
 class SBCPaymentError(PaymentException):
