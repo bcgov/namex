@@ -1,4 +1,5 @@
 from flask import current_app
+from http import HTTPStatus
 
 from .client import SBCPaymentClient
 from .models import PaymentInvoice
@@ -25,6 +26,9 @@ def create_payment(model, headers):
         return PaymentInvoice(**api_response)
 
     except Exception as err:
+        if err.status_code == HTTPStatus.BAD_REQUEST:
+            raise SBCPaymentException(err, err.detail, HTTPStatus.PAYMENT_REQUIRED)
+        
         raise SBCPaymentException(err)
 
 

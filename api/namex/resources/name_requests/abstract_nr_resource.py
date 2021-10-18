@@ -150,7 +150,12 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
 
     def add_records_to_network_services(self, nr_model: Request, update_solr=False) -> Request:
         temp_nr_num = None
-        if nr_model.stateCd in [State.PENDING_PAYMENT, State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED]:
+        if nr_model.stateCd in [State.PENDING_PAYMENT, 
+                                State.DRAFT, 
+                                State.COND_RESERVE, 
+                                State.RESERVED, 
+                                State.CONDITIONAL, 
+                                State.APPROVED] and nr_model.nrNum.startswith('NR L'):
             existing_nr_num = nr_model.nrNum
             # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the save_nr handler
             print('Adding request to NRO')
