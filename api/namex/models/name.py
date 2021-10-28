@@ -101,7 +101,7 @@ class Name(db.Model):
 def update_nr_name_search(mapper, connection, target):
     """Add any changes to the name to the request.nameSearch column and publish name state changes where applicable."""
     from flask.globals import current_app
-    
+
     from namex.models import Event, Request, State
     from namex.services.audit_trail.event_recorder import EventRecorder
 
@@ -132,9 +132,16 @@ def update_nr_name_search(mapper, connection, target):
         )
 
         # set nr state to consumed
-        name_consume_history = get_history(name, 'corpNum')
-        current_app.logger.debug('name_consume_history.added {}'.format(nr.nrNum))
-        if len(name_consume_history.added) and name.corpNum:
+        name_consume_history = get_history(name, 'consumptionDate')
+        current_app.logger\
+            .debug('name_consume_history check - nrNum: {}, consumptionDate: {}, corpNum: {}, state: {}'
+            .format(nr.nrNum, name.consumptionDate, name.corpNum, name.state))
+        # Note: we cannot just check for a corpNum addition due to some Society change of name NRs coming over from
+        #  NRO extractor providing a value for the corpNum field.
+        if len(name_consume_history.added) \
+                and name.consumptionDate \
+                and name.corpNum \
+                and name.state in ['APPROVED', 'CONDITION']:
             # Adding an after_flush_postexec to avoid connection and transaction closed issue's
             # Creating one time execution event when ever corpNum is added to a name
             # corpNum sets from nro-extractor job
