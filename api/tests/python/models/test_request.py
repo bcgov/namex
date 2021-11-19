@@ -1,9 +1,11 @@
-from flask import jsonify
 from unittest import mock
 from unittest.mock import patch
-from namex.utils import queue_util
-from flask import current_app
+
 import pytest
+from flask import current_app
+from flask import jsonify
+
+from namex.utils import queue_util
 
 
 def test_get_queued_oldest(client, app):
@@ -110,15 +112,15 @@ def test_has_consumed_name():
 
     assert nr.has_consumed_name is True
 
-@pytest.mark.parametrize(['compName', 'compState', 'nrNum','nrEntity','assertValue'], [
-    ('TEST1', 'APPROVED','NR 0000001', 'FR', False),
-    ('TEST2', 'APPROVED','NR 0000002', 'GP', False),
-    ('TEST3', 'APPROVED','NR 0000003', 'CR', True),
-    ('TEST4', 'CONDITION','NR 0000004', 'FR', False),
-    ('TEST5', 'CONDITION','NR 0000005', 'GP', False),
-    ('TEST6', 'CONDITION','NR 0000006', 'CR', True),
+@pytest.mark.parametrize(['testName','compName', 'compState', 'nrNum','nrEntity','assertValue'], [
+    ('Sole Prop Approved Company', 'TEST1', 'APPROVED','NR 0000001', 'FR', False),
+    ('Gen Partner Approved Company','TEST2', 'APPROVED','NR 0000002', 'GP', False),
+    ('CORPORATION Approved Company','TEST3', 'APPROVED','NR 0000003', 'CR', True),
+    ('Sole Prop Conditional Company','TEST4', 'CONDITION','NR 0000004', 'FR', False),
+    ('Gen Partner Conditional Company','TEST5', 'CONDITION','NR 0000005', 'GP', False),
+    ('CORPORATION Conditional Company','TEST6', 'CONDITION','NR 0000006', 'CR', True),
 ])
-def test_no_cloud_event_sent_for_sp_gp_nrs(compName, compState, nrNum, nrEntity, assertValue):
+def test_no_cloud_event_sent_for_sp_gp_nrs(testName, compName, compState, nrNum, nrEntity, assertValue):
     """func description"""
     from namex.models import Name, Request as RequestDAO, State
     
