@@ -619,7 +619,9 @@ def on_insert_or_update_nr(mapper, connection, request):
 
        Temporary NRs (nrNum starting with 'NR L') are discarded.
     """
-    if current_app.config.get('DISABLE_NAMEREQUEST_NATS_UPDATES', 0) != 1 and not request.nrNum.startswith('NR L'):
+
+    if current_app.config.get('DISABLE_NAMEREQUEST_NATS_UPDATES', 0) != 1 and not request.nrNum.startswith('NR L') \
+        and request.entity_type_cd != 'FR' and request.entity_type_cd != 'GP':
         state_cd_history = get_history(request, 'stateCd')
         nr_num_history = get_history(request, 'nrNum')
         if len(nr_num_history.added) or len(state_cd_history.added):
