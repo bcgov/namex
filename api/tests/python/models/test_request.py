@@ -110,103 +110,36 @@ def test_has_consumed_name():
 
     assert nr.has_consumed_name is True
 
-def test_no_cloud_event_sent_for_approved_sp_gp_nrs():
-    """func description"""
-    from namex.models import Name, Request as RequestDAO, State
-    
-
-    with patch.dict(current_app.config, {'DISABLE_NAMEREQUEST_NATS_UPDATES': 0}):
-        with patch.object(queue_util, 'send_name_request_state_msg', return_value=True) as mock_queue_util_send_msg_func:
-            name = Name()
-            name.choice = 1
-            name.name = 'TEST'
-            name.state = 'APPROVED'
-
-            nr = RequestDAO()
-            nr.nrNum='NR 0000001'
-            nr.stateCd = State.APPROVED
-            nr.names.append(name)
-            nr.entity_type_cd = 'FR'
-            nr.save_to_db()
-
-            assert mock_queue_util_send_msg_func.called == False
-
-            name = Name()
-            name.choice = 1
-            name.name = 'TEST 2'
-            name.state = 'APPROVED'
-
-            nr = RequestDAO()
-            nr.nrNum='NR 0000002'
-            nr.stateCd = State.APPROVED
-            nr.names.append(name)
-            nr.entity_type_cd = 'GP'
-            nr.save_to_db()
-
-            assert mock_queue_util_send_msg_func.called == False
-
-            name = Name()
-            name.choice = 1
-            name.name = 'TEST 3'
-            name.state = 'APPROVED'
-
-            nr = RequestDAO()
-            nr.nrNum='NR 0000003'
-            nr.stateCd = State.APPROVED
-            nr.names.append(name)
-            nr.entity_type_cd = 'CR'
-            nr.save_to_db()
-
-            assert mock_queue_util_send_msg_func.called == True
-
-def test_no_cloud_event_sent_for_conditional_sp_gp_nrs():
+@pytest.mark.parametrize(['compName', 'compState', 'nrNum','nrEntity','assertValue'], [
+    ('TEST1', 'APPROVED','NR 0000001', 'FR', False),
+    ('TEST2', 'APPROVED','NR 0000002', 'GP', False),
+    ('TEST3', 'APPROVED','NR 0000003', 'CR', True),
+    ('TEST4', 'CONDITION','NR 0000004', 'FR', False),
+    ('TEST5', 'CONDITION','NR 0000005', 'GP', False),
+    ('TEST6', 'CONDITION','NR 0000006', 'CR', True),
+])
+def test_no_cloud_event_sent_for_sp_gp_nrs(compName, compState, nrNum, nrEntity, assertValue):
     """func description"""
     from namex.models import Name, Request as RequestDAO, State
     
     with patch.dict(current_app.config, {'DISABLE_NAMEREQUEST_NATS_UPDATES': 0}):
         with patch.object(queue_util, 'send_name_request_state_msg', return_value=True) as mock_queue_util_send_msg_func:
-         
             name = Name()
             name.choice = 1
-            name.name = 'TEST'
-            name.state = 'CONDITION'
+            name.name = compName
+            name.state = compState
 
             nr = RequestDAO()
-            nr.nrNum='NR 0000001'
-            nr.stateCd = State.CONDITIONAL
+            nr.nrNum= nrNum
+            if compState == 'APPROVED':
+                nr.stateCd = State.APPROVED
+            else:
+                nr.stateCd = State.CONDITIONAL
             nr.names.append(name)
-            nr.entity_type_cd = 'FR'
+            nr.entity_type_cd = nrEntity
             nr.save_to_db()
 
-            assert mock_queue_util_send_msg_func.called == False
-
-            name = Name()
-            name.choice = 1
-            name.name = 'TEST 2'
-            name.state = 'CONDITION'
-
-            nr = RequestDAO()
-            nr.nrNum='NR 0000002'
-            nr.stateCd = State.CONDITIONAL
-            nr.names.append(name)
-            nr.entity_type_cd = 'GP'
-            nr.save_to_db()
-
-            assert mock_queue_util_send_msg_func.called == False
-
-            name = Name()
-            name.choice = 1
-            name.name = 'TEST 3'
-            name.state = 'CONDITION'
-
-            nr = RequestDAO()
-            nr.nrNum='NR 0000003'
-            nr.stateCd = State.CONDITIONAL
-            nr.names.append(name)
-            nr.entity_type_cd = 'CR'
-            nr.save_to_db()
-
-            assert mock_queue_util_send_msg_func.called == True    
+            assert mock_queue_util_send_msg_func.called == assertValue 
 
 def test_is_expired():
     """Assert is_expired."""
