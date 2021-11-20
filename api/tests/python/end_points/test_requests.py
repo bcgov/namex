@@ -260,6 +260,44 @@ def test_add_new_name_to_nr(client, jwt, app):
     assert 200 == rv.status_code
     assert len(data['names']) == 2
 
+@integration_oracle_namesdb
+def test_add_new_blank_name_to_nr(client, jwt, app):
+
+    # add NR to database
+    from namex.models import Request as RequestDAO, State, Name as NameDAO
+    nr = RequestDAO()
+    nr.nrNum = 'NR 0000002'
+    nr.stateCd = State.INPROGRESS
+    nr.requestId = 1460775
+    nr._source = 'NRO'
+    name1 = NameDAO()
+    name1.choice = 1
+    name1.name = 'ONE'
+    nr.names = [name1]
+    nr.save_to_db()
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    token = jwt.create_jwt(claims, token_header)
+    headers = {'Authorization': 'Bearer ' + token, 'content-type': 'application/json'}
+
+    # get the resource so we have a template for the request:
+    rv = client.get('/api/v1/requests/NR%200000002', headers=headers)
+    assert rv.status_code == 200
+    # assert we're starting with just one name:
+    data = json.loads(rv.data)
+    assert len(data['names']) == 1
+
+    new_name = data['names'][0].copy()
+    new_name['name'] = ''
+    new_name['choice'] = 2
+    data['names'].append(new_name)
+
+    # Update with a brand new name (this is the test)
+    rv = client.put('/api/v1/requests/NR%200000002', data=json.dumps(data), headers=headers)
+
+    data = json.loads(rv.data)
+    assert 200 == rv.status_code
+    assert len(data['names']) == 1
 
 @integration_oracle_namesdb
 def test_remove_name_from_nr(client, jwt, app):

@@ -142,7 +142,7 @@ run: db ## Run the project in local
 	. venv/bin/activate && python -m flask run -p 5000
 
 db: ## Update the local database
-	. venv/bin/activate && python -m manage.py db upgrade
+	. venv/bin/activate && python -m manage db upgrade
 
 #################################################################################
 # Self Documenting Commands                                                     #
