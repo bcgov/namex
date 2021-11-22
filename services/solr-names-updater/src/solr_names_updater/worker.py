@@ -31,6 +31,7 @@ import os
 import nats
 from flask import Flask
 from namex.models import db
+from namex.models import Request as RequestDAO
 from queue_common.service import QueueServiceManager
 from queue_common.service_utils import QueueException, logger
 from requests import RequestException
@@ -66,7 +67,9 @@ def is_names_event_msg_type(msg: dict):
 
 def is_processable(msg: dict):
     """Determine if message is processable using message type of msg."""
-    if msg and is_names_event_msg_type(msg):
+    nr_num = msg.get('nrNum', None)
+    nr = RequestDAO.find_by_nr(nr_num)
+    if msg and is_names_event_msg_type(msg) and nr.entity_type_cd not in ('FR', 'GP'):
         return True
 
     return False
