@@ -825,30 +825,32 @@ class Request(Resource):
                             MessageServices.add_message(MessageServices.ERROR, 'names_validation', errors)
                             # return jsonify(errors), 400
 
-                        new_name_choice = Name()
-                        new_name_choice.nrId = nrd.id
-                        new_name_choice.choice = in_name.get('choice')
-                        new_name_choice.conflict1 = in_name.get('conflict1')
-                        new_name_choice.conflict2 = in_name.get('conflict2')
-                        new_name_choice.conflict3 = in_name.get('conflict3')
-                        new_name_choice.conflict1_num = in_name.get('conflict1_num')
-                        new_name_choice.conflict2_num = in_name.get('conflict2_num')
-                        new_name_choice.conflict3_num = in_name.get('conflict3_num')
-                        new_name_choice.consumptionDate = in_name.get('consumptionDate')
-                        new_name_choice.corpNum = in_name.get('corpNum')
-                        new_name_choice.decision_text = in_name.get('decision_text')
-                        new_name_choice.designation = in_name.get('designation')
-                        new_name_choice.name_type_cd = in_name.get('name_type_cd')
-                        new_name_choice.name = in_name.get('name')
-                        new_name_choice.state = in_name.get('state')
-                        new_name_choice.name = convert_to_ascii(new_name_choice.name.upper())
+                        # don't save if the name is blank
+                        if in_name.get('name') and in_name.get('name') is not'':
+                            new_name_choice = Name()
+                            new_name_choice.nrId = nrd.id
+                            new_name_choice.choice = in_name.get('choice')
+                            new_name_choice.conflict1 = in_name.get('conflict1')
+                            new_name_choice.conflict2 = in_name.get('conflict2')
+                            new_name_choice.conflict3 = in_name.get('conflict3')
+                            new_name_choice.conflict1_num = in_name.get('conflict1_num')
+                            new_name_choice.conflict2_num = in_name.get('conflict2_num')
+                            new_name_choice.conflict3_num = in_name.get('conflict3_num')
+                            new_name_choice.consumptionDate = in_name.get('consumptionDate')
+                            new_name_choice.corpNum = in_name.get('corpNum')
+                            new_name_choice.decision_text = in_name.get('decision_text')
+                            new_name_choice.designation = in_name.get('designation')
+                            new_name_choice.name_type_cd = in_name.get('name_type_cd')
+                            new_name_choice.name = in_name.get('name')
+                            new_name_choice.state = in_name.get('state')
+                            new_name_choice.name = convert_to_ascii(new_name_choice.name.upper())
 
-                        nrd.names.append(new_name_choice)
+                            nrd.names.append(new_name_choice)
 
-                        if new_name_choice.choice == 2:
-                            is_changed__name2 = True
-                        if new_name_choice.choice == 3:
-                            is_changed__name3 = True
+                            if new_name_choice.choice == 2:
+                                is_changed__name2 = True
+                            if new_name_choice.choice == 3:
+                                is_changed__name3 = True
 
                     elif nrd_name.choice == in_name['choice']:
                         errors = names_schema.validate(in_name, partial=False)
@@ -1035,16 +1037,17 @@ class Request(Resource):
 
                     # if any data has changed from an NR Details edit, update it in Oracle
                     if any(value is True for value in change_flags.values()):
-                        # save the nr before trying to hit oracle (will format dates same as namerequest.)
+                        # Save the nr before trying to hit oracle (will format dates same as namerequest.)
                         nrd.save_to_db()
+
+                        # Delete any names that were blanked out
+                        for nrd_name in nrd.names:
+                            if deleted_names[nrd_name.choice - 1]:
+                                nrd_name.delete_from_db()
+
                         warnings = nro.change_nr(nrd, change_flags)
                         if warnings:
                             MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
-                        else:
-                            # now it's safe to delete any names that were blanked out
-                            for nrd_name in nrd.names:
-                                if deleted_names[nrd_name.choice - 1]:
-                                    nrd_name.delete_from_db()
 
                 except (NROServicesError, Exception) as err:
                     MessageServices.add_message('error', 'change_request_in_NRO', err)
