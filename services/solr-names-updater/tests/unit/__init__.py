@@ -77,6 +77,7 @@ def create_nr(nr_num: str, request_state: str, names: list, names_state: list):
         name_request.stateCd = request_state
         name_request._source = 'NRO'
         name_request.expirationDate = add_years(now, 1)
+        name_request.entity_type_cd = 'CR'
         # name_request.priorityCd = start_priority
         name_request.save_to_db()
 

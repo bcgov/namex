@@ -30,8 +30,8 @@ import os
 
 import nats
 from flask import Flask
-from namex.models import db
 from namex.models import Request as RequestDAO
+from namex.models import db
 from queue_common.service import QueueServiceManager
 from queue_common.service_utils import QueueException, logger
 from requests import RequestException

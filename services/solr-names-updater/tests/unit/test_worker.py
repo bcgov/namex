@@ -23,7 +23,7 @@ from freezegun import freeze_time
 from namex.models import Request as RequestDAO
 from namex.utils import queue_util
 from queue_common.service_utils import QueueException
-from solr_names_updater import worker
+from solr_names_updater import worker # noqa: I001
 from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message # noqa: I003
 
 @pytest.mark.parametrize(
@@ -56,7 +56,9 @@ async def test_sp_gp_names_not_processed_to_solr(
     mock_nr = mock.Mock()
     mock_nr.entity_type_cd = nr_entity
 
+    # mock process_names_event_message to do nothing in order to isolate testing relevant to this test
     with patch.object(worker, 'process_names_event_message', return_value=True) as mock_process_names_evt_func:
+        # mock find_by_nr to do nothing in order to isolate testing relevant to this test
         with patch.object(RequestDAO, 'find_by_nr', return_value=mock_nr):
             await worker.cb_subscription_handler(mock_msg)
 
