@@ -69,7 +69,9 @@ def is_processable(msg: dict):
     """Determine if message is processable using message type of msg."""
     nr_num = msg.get('nrNum', None)
     nr = RequestDAO.find_by_nr(nr_num)
-    if msg and is_names_event_msg_type(msg) and nr.entity_type_cd not in ('FR', 'GP'):
+    if msg and is_names_event_msg_type(msg) \
+       and (nr := RequestDAO.find_by_nr(nr_num)) \
+       and nr.entity_type_cd not in ('FR', 'GP'):
         return True
 
     return False
