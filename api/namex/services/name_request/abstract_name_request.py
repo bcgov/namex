@@ -152,7 +152,7 @@ class AbstractNameRequestMixin(object):
 
     @classmethod
     def create_expiry_date(cls, start: datetime, expires_in_days: int):
-        """Create an expiry date in given days and at 11:59pm.
+        """Create an expiry date in given days and at 11:59pm Pacific time.
 
         In order to add days without having 1 hour difference between the two dates in summer time changes 
         we need to calculate the new date using naive dates (not aware of timezone) and after that we can add the timezone.
