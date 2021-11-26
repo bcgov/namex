@@ -161,13 +161,13 @@ class AbstractNameRequestMixin(object):
         expiry_hour = 23
         expiry_min = 59
 
-        # convert the input date to PST and removes tzinfo:
+        # convert the input date to Pacific time and removes tzinfo:
         naive_date_pst = start.astimezone(pacific_tz).replace(tzinfo=None)
-        # calculate the new day in PST
+        # calculate the new day in Pacific time
         expiry_date_pst = (naive_date_pst + timedelta(days=expires_in_days))
-        # make it localized back to PST 
+        # make it localized back to Pacific time 
         expiry_date_pst_localized = pacific_tz.localize(expiry_date_pst)
-        # set the time to 11:59pm in PST
+        # set the time to 11:59pm in Pacific time
         expiry_date_pst_with_adjusted_time = expiry_date_pst_localized.replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
 
         return expiry_date_pst_with_adjusted_time
