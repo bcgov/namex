@@ -144,7 +144,7 @@ class NameRequestService(AbstractNameRequestMixin):
         """
         Extends/sets the expiry date of an NR.
 
-        Default: extends the expiry date to 56 days from tomorrow's date at 00:01am.
+        Default: extends the expiry date to 56 days date at 11:59pm.
         """
         start_datetime = start_date if start_date else datetime.utcnow()
         try:
