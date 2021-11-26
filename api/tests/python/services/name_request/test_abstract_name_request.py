@@ -53,7 +53,7 @@ def test_create_expiry_date(input_datetime_utc, expected_date_utc, time_offset):
     """
     Test that create_expiry_date method returns a datetime at added X days and at 11:59pm Pacific time.
 
-    It should not change the time (hour and minute in PST) because of TimeZone offset changes through the year.
+    It should not change the time (hour and minute in Pacific time) because of timezone offset changes through the year.
 
     Dates in 2021 between 2:00 a.m. on Sunday, March 14 to 2:00 a.m. on Sunday, November 7 should have their time
     at 6:59am next day in UTC. Other dates should have their time at 7:59am next day in UTC.
