@@ -153,11 +153,23 @@ class AbstractNameRequestMixin(object):
     @classmethod
     def create_expiry_date(cls, start: datetime, expires_in_days: int, expiry_hour: int = 23, expiry_min: int = 59,
                            tz: timezone = timezone('US/Pacific')) -> datetime:
-        """Create an expiry date in given days and at 11:59pm."""
-        date = (start.astimezone(tz) + timedelta(days=expires_in_days)) \
-            .replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
+        """Create an expiry date in given days and at 11:59pm.
 
-        return date
+        In order to add days without having 1 hour difference between the two dates in summer time changes 
+        we need to calculate the new date using naive dates (not aware of timezone) and after that we can add the timezone.
+        """
+        utc_tz = timezone('UTC')
+
+        # converts the input date to UTC and removes tzinfo:
+        naive_date_utc = start.astimezone(utc_tz).replace(tzinfo=None)
+        # calculates the new day in UTC
+        future_date_utc = (naive_date_utc + timedelta(days=expires_in_days))
+        # make it localized back to UTC and convert it to PST
+        expiry_date_pst = utc_tz.localize(future_date_utc).astimezone(tz)
+        # set the time to 11:59pm in PST
+        expiry_date_pst_with_adjusted_time = expiry_date_pst.replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
+
+        return expiry_date_pst_with_adjusted_time
 
     def generate_nr_keys(self):
         try:
