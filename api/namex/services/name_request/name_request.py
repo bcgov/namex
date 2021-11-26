@@ -150,8 +150,7 @@ class NameRequestService(AbstractNameRequestMixin):
         try:
             name_request.expirationDate = cls.create_expiry_date(
                 start=start_datetime,
-                expires_in_days=days,
-                tz=timezone('US/Pacific')
+                expires_in_days=days
             )
         except Exception as err:
             raise ExtendExpiryDateError(err)
@@ -203,8 +202,7 @@ class NameRequestService(AbstractNameRequestMixin):
             if self.new_state_code in [State.RESERVED, State.COND_RESERVE]:
                 name_request.expirationDate = self.create_expiry_date(
                     start=name_request.submittedDate,
-                    expires_in_days=56,
-                    tz=timezone('US/Pacific')
+                    expires_in_days=56
                 )
         except Exception as err:
             raise MapRequestDataError(err)

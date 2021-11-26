@@ -151,23 +151,24 @@ class AbstractNameRequestMixin(object):
         return nr_num
 
     @classmethod
-    def create_expiry_date(cls, start: datetime, expires_in_days: int, expiry_hour: int = 23, expiry_min: int = 59,
-                           tz: timezone = timezone('US/Pacific')) -> datetime:
+    def create_expiry_date(cls, start: datetime, expires_in_days: int):
         """Create an expiry date in given days and at 11:59pm.
 
         In order to add days without having 1 hour difference between the two dates in summer time changes 
         we need to calculate the new date using naive dates (not aware of timezone) and after that we can add the timezone.
         """
-        utc_tz = timezone('UTC')
+        pacific_tz = timezone('US/Pacific')
+        expiry_hour = 23
+        expiry_min = 59
 
-        # converts the input date to UTC and removes tzinfo:
-        naive_date_utc = start.astimezone(utc_tz).replace(tzinfo=None)
-        # calculates the new day in UTC
-        future_date_utc = (naive_date_utc + timedelta(days=expires_in_days))
-        # make it localized back to UTC and convert it to PST
-        expiry_date_pst = utc_tz.localize(future_date_utc).astimezone(tz)
+        # convert the input date to PST and removes tzinfo:
+        naive_date_pst = start.astimezone(pacific_tz).replace(tzinfo=None)
+        # calculate the new day in PST
+        expiry_date_pst = (naive_date_pst + timedelta(days=expires_in_days))
+        # make it localized back to PST 
+        expiry_date_pst_localized = pacific_tz.localize(expiry_date_pst)
         # set the time to 11:59pm in PST
-        expiry_date_pst_with_adjusted_time = expiry_date_pst.replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
+        expiry_date_pst_with_adjusted_time = expiry_date_pst_localized.replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
 
         return expiry_date_pst_with_adjusted_time
 
