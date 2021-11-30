@@ -133,8 +133,7 @@ class Request(db.Model):
 
     @property
     def is_expired(self):
-        return self.stateCd == State.EXPIRED or \
-            (self.expirationDate and datetime.utcnow().date() > self.expirationDate.date())
+        return self.stateCd == State.EXPIRED
 
     @property
     def source(self):
