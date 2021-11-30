@@ -67,7 +67,6 @@ def is_names_event_msg_type(msg: dict):
 
 def is_processable(msg: dict):
     """Determine if message is processable using message type of msg."""
-
     with FLASK_APP.app_context():
         if msg and is_names_event_msg_type(msg) \
            and (nr_num := msg.get('data', {})
