@@ -98,27 +98,25 @@ async def test_should_add_names_to_solr(
             with patch.object(worker, 'process_possible_conflicts_add', return_value=True):
                 # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
                 with patch.object(worker, 'process_possible_conflicts_delete', return_value=True):
-                    # mock find_by_nr to do nothing in order to isolate testing relevant to this test
-                    with patch.object(RequestDAO, 'find_by_nr', return_value=mock_nr):
-                        await worker.cb_subscription_handler(mock_msg)
+                    await worker.cb_subscription_handler(mock_msg)
 
-                        if len(expected_names_to_add_to_solr) > 0:
-                            assert mock_solr_feeder_api_post.called == True
-                            assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]
+                    if len(expected_names_to_add_to_solr) > 0:
+                        assert mock_solr_feeder_api_post.called == True
+                        assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]
 
-                            post_json = mock_solr_feeder_api_post.call_args[1]['json']
-                            assert post_json['solr_core']
-                            assert post_json['solr_core'] == 'names'
+                        post_json = mock_solr_feeder_api_post.call_args[1]['json']
+                        assert post_json['solr_core']
+                        assert post_json['solr_core'] == 'names'
 
-                            request_json = post_json['request']
+                        request_json = post_json['request']
 
-                            for index, expect_name in enumerate(expected_names_to_add_to_solr):
-                                assert expect_name in request_json
+                        for index, expect_name in enumerate(expected_names_to_add_to_solr):
+                            assert expect_name in request_json
 
-                            for index, not_expect_name in enumerate(not_expected_names_to_add_to_solr):
-                                assert not_expect_name not in request_json
-                        else:
-                            assert mock_solr_feeder_api_post.called == False
+                        for index, not_expect_name in enumerate(not_expected_names_to_add_to_solr):
+                            assert not_expect_name not in request_json
+                    else:
+                        assert mock_solr_feeder_api_post.called == False
 
 
 @pytest.mark.parametrize(
@@ -179,21 +177,19 @@ async def test_should_delete_names_from_solr(
     with patch.object(requests, 'post', return_value=mock_response) as mock_solr_feeder_api_post:
         # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
         with patch.object(worker, 'process_possible_conflicts_delete', return_value=True):
-            # mock find_by_nr to do nothing in order to isolate testing relevant to this test
-            with patch.object(RequestDAO, 'find_by_nr', return_value=mock_nr):
-                await worker.cb_subscription_handler(mock_msg)
+            await worker.cb_subscription_handler(mock_msg)
 
-                assert mock_solr_feeder_api_post.called == True
-                assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]
+            assert mock_solr_feeder_api_post.called == True
+            assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]
 
-                post_json = mock_solr_feeder_api_post.call_args[1]['json']
-                assert post_json['solr_core']
-                assert post_json['solr_core'] == 'names'
+            post_json = mock_solr_feeder_api_post.call_args[1]['json']
+            assert post_json['solr_core']
+            assert post_json['solr_core'] == 'names'
 
-                request_json = post_json['request']
+            request_json = post_json['request']
 
-                assert 'delete' in request_json
-                assert len(nr_ids_to_delete_from_solr) > 0
-                request_json = post_json['request']
-                for nr_id in nr_ids_to_delete_from_solr:
-                    assert nr_id in request_json
+            assert 'delete' in request_json
+            assert len(nr_ids_to_delete_from_solr) > 0
+            request_json = post_json['request']
+            for nr_id in nr_ids_to_delete_from_solr:
+                assert nr_id in request_json
