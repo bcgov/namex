@@ -67,11 +67,14 @@ def is_names_event_msg_type(msg: dict):
 
 def is_processable(msg: dict):
     """Determine if message is processable using message type of msg."""
-    nr_num = msg.get('nrNum', None)
-    if msg and is_names_event_msg_type(msg) \
-       and (nr := RequestDAO.find_by_nr(nr_num)) \
-       and nr.entity_type_cd not in ('FR', 'GP'):
-        return True
+    with FLASK_APP.app_context():
+        if msg and is_names_event_msg_type(msg) \
+           and (nr_num := msg.get('data', {})
+                             .get('request', {})
+                             .get('nrNum', None)) \
+           and (nr := RequestDAO.find_by_nr(nr_num)) \
+           and nr.entity_type_cd not in ('FR', 'GP'):
+            return True
 
     return False
 
