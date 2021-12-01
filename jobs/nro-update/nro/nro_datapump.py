@@ -4,23 +4,15 @@ from pytz import timezone
 import pytz
 
 from namex.models import Name, State
+from namex.services.name_request import NameRequestService
 from namex.services.nro.utils import nro_examiner_name
 
 
-def create_expiry_date(start: datetime, expires_in_days: int, expiry_hour: int = 0, expiry_min: int = 1, tz: timezone = timezone('US/Pacific')) -> datetime:
-    """Return an expiry date in given days starting tomorrow."""
-    date = (start.astimezone(tz) + timedelta(days=expires_in_days+1))\
-        .replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
-
-    return date
-
-
 def nro_data_pump_update(nr, ora_cursor, expires_days=56):
-
-    expiry_date = create_expiry_date(
+    nr_service = NameRequestService()
+    expiry_date = nr_service.create_expiry_date(
         start=nr.lastUpdate,
-        expires_in_days=expires_days,
-        tz=timezone('US/Pacific')
+        expires_in_days=expires_days
     )
 
     current_app.logger.debug(f'Setting expiry date to: { expiry_date }')

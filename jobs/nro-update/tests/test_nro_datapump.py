@@ -3,28 +3,27 @@ from datetime import datetime
 import pytest
 from pytz import timezone
 
-from nro.nro_datapump import nro_data_pump_update, create_expiry_date
+from nro.nro_datapump import nro_data_pump_update
 from namex.models import Request, Name, State, User
+from namex.services.name_request import NameRequestService
 
 
 expiry_date_test_data = [
     ('using epoch utc',            # test descriptive name
      datetime(1970, 1, 1, 00, 00, tzinfo=timezone('US/Pacific', )), # start date - time
      20,                           # days to add
-     23,                           # hour to set the final date time to
-     59,                           # minute to set the final date time to
      'US/Pacific',                 # timezone that should be used
      datetime(1970, 1, 21, 23, 59)), # expected outcome
     ('using a time after 4pm',
-     datetime(2001, 8, 5, 19, 00, tzinfo=timezone('US/Pacific',)), 20, 23, 59, 'US/Pacific', datetime(2001, 8, 25, 23, 59)),
+     datetime(2001, 8, 5, 19, 00, tzinfo=timezone('US/Pacific',)), 20, 'US/Pacific', datetime(2001, 8, 25, 23, 59)),
     ('using a time before 4pm',
-     datetime(2001, 8, 5, 9, 00, tzinfo=timezone('US/Pacific',)), 20, 23, 59, 'US/Pacific', datetime(2001, 8, 25, 23, 59)),
+     datetime(2001, 8, 5, 9, 00, tzinfo=timezone('US/Pacific',)), 20, 'US/Pacific', datetime(2001, 8, 25, 23, 59)),
 ]
 
-@pytest.mark.parametrize("test_name, start_date, days, hours, mins, tz, ,expected_date", expiry_date_test_data)
-def test_create_expiry_date(test_name, start_date, days, hours, mins, tz, expected_date):
-
-    ced = create_expiry_date(start_date, expires_in_days=days, expiry_hour=hours, expiry_min=mins, tz=timezone(tz))
+@pytest.mark.parametrize("test_name, start_date, days, tz, expected_date", expiry_date_test_data)
+def test_create_expiry_date(test_name, start_date, days, tz, expected_date):
+    nr_service = NameRequestService()
+    ced = nr_service.create_expiry_date(start_date, expires_in_days=days)
 
     assert ced.replace(tzinfo=None) == expected_date
     assert ced.tzinfo.zone == tz
