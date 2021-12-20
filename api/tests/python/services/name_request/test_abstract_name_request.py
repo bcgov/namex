@@ -1,5 +1,4 @@
 """Tests for AbstractNameRequestMixin."""
-import json
 import datetime
 
 import pytest
@@ -8,61 +7,10 @@ from dateutil.tz import gettz
 from namex.services.name_request import NameRequestService
 from namex.models import State, Request as RequestDAO
 from namex.constants import RequestAction
-from tests.python.end_points.name_requests.test_setup_utils.test_helpers import create_draft_nr
 
 nr_svc = NameRequestService()
 pacific_tz = gettz('US/Pacific')
 utc_tz = gettz('UTC')
-
-draft_nr_json = {
-	'applicants': [
-		{
-			'addrLine1': '123-1640 Electra Blvd',
-			'addrLine2': None,
-			'addrLine3': None,
-			'city': 'North Saanich',
-			'clientFirstName': None,
-			'clientLastName': None,
-			'contact': '',
-			'countryTypeCd': 'CA',
-			'declineNotificationInd': None,
-			'emailAddress': 'a@a.com',
-			'faxNumber': None,
-			'firstName': 'John',
-			'lastName': 'Doe',
-			'middleName': None,
-			'partyId': '',
-			'phoneNumber': '1234567',
-			'postalCd': 'V8L 5V4',
-			'stateProvinceCd': 'BC'
-		}
-	],
-	'names': [
-		{
-			'choice': 1,
-			'consent_words': '',
-			'conflict1': '',
-			'conflict1_num': '',
-			'designation': 'CORP.',
-			'name': 'TESTING CORP.',
-			'name_type_cd': 'CO'
-		}
-	],
-	'additionalInfo': '*** Additional Info here ***',
-	'natureBusinessInfo': 'Tests',
-	'priorityCd': 'N',
-	'entity_type_cd': 'CR',
-	'request_action_cd': 'NEW',
-    'expirationDate': None,
-	'stateCd': 'DRAFT',
-	'english': True,
-	'nameFlag': False,
-	'submit_count': 0,
-	'corpNum': '',
-	'homeJurisNum': ''
-}
-
-
 
 @pytest.mark.parametrize('input_datetime_utc,expected_date_utc,time_offset', [
     (datetime.datetime(2021, 1, 28, 8, 0, 0, tzinfo=utc_tz), datetime.datetime(2021, 3, 26, 6, 59, 0, tzinfo=utc_tz), '-0700'),
@@ -134,7 +82,7 @@ def test_create_expiry_date(input_datetime_utc, expected_date_utc, time_offset):
 ])
 def test_get_expiry_days(client, test_name, days, action_cd):
     """
-    Test that extend_expiry_date method returns a datetime at added X days and at 11:59pm Pacific time.
+    Test that get_expiry_date method returns a either 56 or 421 days
     """
     mock_nr = RequestDAO()
 

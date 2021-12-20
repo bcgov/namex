@@ -152,7 +152,7 @@ class NameRequestService(AbstractNameRequestMixin):
         return expires_days
 
     @classmethod
-    def extend_expiry_date(cls, name_request, start_date=None, days=56):
+    def extend_expiry_date(cls, name_request, start_date=None):
         """
         Extends/sets the expiry date of an NR.
 
@@ -171,7 +171,7 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return name_request
 
-    def map_request_data(self, name_request, map_attrs=False):
+    def map_request_data(cls, self, name_request, map_attrs=False):
         """
         This method maps data from the HTTP request data over to the name request.
         We use this to set draft attributes, header attributes, and comments...
@@ -214,9 +214,10 @@ class NameRequestService(AbstractNameRequestMixin):
                 name_request.consentFlag = 'Y'
 
             if self.new_state_code in [State.RESERVED, State.COND_RESERVE]:
+                expiry_days = cls.get_expiry_days(name_request)
                 name_request.expirationDate = self.create_expiry_date(
                     start=name_request.submittedDate,
-                    expires_in_days=56
+                    expires_in_days=expiry_days
                 )
         except Exception as err:
             raise MapRequestDataError(err)

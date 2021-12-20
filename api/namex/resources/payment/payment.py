@@ -757,8 +757,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             payment.save_to_db()
 
             if nr_model.submitCount < 3:
-                expiry_days = nr_svc.get_expiry_days(nr_model)
-                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow(), days=expiry_days)
+                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow())
                 nr_model = nr_svc.update_request_submit_count(nr_model)
                 nr_model.save_to_db()
             else:
