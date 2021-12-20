@@ -8,7 +8,7 @@ from flask_restx import cors, fields
 from flask_jwt_oidc import AuthError
 
 from namex import jwt, nro
-from namex.constants import PaymentState, PaymentStatusCode, RequestAction, NameRequestActions
+from namex.constants import PaymentState, PaymentStatusCode, NameRequestActions
 from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event, User
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from namex.services import EventRecorder
@@ -30,7 +30,6 @@ setup_logging()  # It's important to do this first
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 
-NAME_REQUEST_LIFESPAN_DAYS = 56  # TODO this should be defined as a lookup from somewhere
 NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup from somewhere
 
 
@@ -387,8 +386,8 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                                     timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
                                 msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
                                 current_app.logger.debug(msg)
-
-                            nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, NAME_REQUEST_LIFESPAN_DAYS)
+                            expiry_days = nr_svc.get_expiry_days(nr_model)
+                            nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
                             payment.payment_completion_date = datetime.utcnow()
 
                         nr_model.save_to_db()
@@ -758,15 +757,9 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             payment.save_to_db()
 
             if nr_model.submitCount < 3:
-                if nr_model.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
-                    # If request action is REH or REST extend by 1 year (+ 56 default) days, starting tomorrow
-                    nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow(), days=421)
-                    nr_model = nr_svc.update_request_submit_count(nr_model)
-                else:
-                    # Extend expiry date by (default) 56 days, starting tomorrow
-                    nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow(), days=56)
-                    nr_model = nr_svc.update_request_submit_count(nr_model)
-
+                expiry_days = nr_svc.get_expiry_days(nr_model)
+                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow(), days=expiry_days)
+                nr_model = nr_svc.update_request_submit_count(nr_model)
                 nr_model.save_to_db()
             else:
                 # TODO: Make a custom exception for this?

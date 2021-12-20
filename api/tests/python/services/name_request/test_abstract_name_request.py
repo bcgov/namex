@@ -1,15 +1,67 @@
 """Tests for AbstractNameRequestMixin."""
+import json
 import datetime
 
 import pytest
 from dateutil.tz import gettz
 
 from namex.services.name_request import NameRequestService
-from namex.models import Request as RequestDAO
+from namex.models import State, Request as RequestDAO
+from namex.constants import RequestAction
+from tests.python.end_points.name_requests.test_setup_utils.test_helpers import create_draft_nr
 
 nr_svc = NameRequestService()
 pacific_tz = gettz('US/Pacific')
 utc_tz = gettz('UTC')
+
+draft_nr_json = {
+	'applicants': [
+		{
+			'addrLine1': '123-1640 Electra Blvd',
+			'addrLine2': None,
+			'addrLine3': None,
+			'city': 'North Saanich',
+			'clientFirstName': None,
+			'clientLastName': None,
+			'contact': '',
+			'countryTypeCd': 'CA',
+			'declineNotificationInd': None,
+			'emailAddress': 'a@a.com',
+			'faxNumber': None,
+			'firstName': 'John',
+			'lastName': 'Doe',
+			'middleName': None,
+			'partyId': '',
+			'phoneNumber': '1234567',
+			'postalCd': 'V8L 5V4',
+			'stateProvinceCd': 'BC'
+		}
+	],
+	'names': [
+		{
+			'choice': 1,
+			'consent_words': '',
+			'conflict1': '',
+			'conflict1_num': '',
+			'designation': 'CORP.',
+			'name': 'TESTING CORP.',
+			'name_type_cd': 'CO'
+		}
+	],
+	'additionalInfo': '*** Additional Info here ***',
+	'natureBusinessInfo': 'Tests',
+	'priorityCd': 'N',
+	'entity_type_cd': 'CR',
+	'request_action_cd': 'NEW',
+    'expirationDate': None,
+	'stateCd': 'DRAFT',
+	'english': True,
+	'nameFlag': False,
+	'submit_count': 0,
+	'corpNum': '',
+	'homeJurisNum': ''
+}
+
 
 
 @pytest.mark.parametrize('input_datetime_utc,expected_date_utc,time_offset', [
@@ -74,3 +126,24 @@ def test_create_expiry_date(input_datetime_utc, expected_date_utc, time_offset):
     assert expiry_date_in_utc.hour == expected_date_utc.hour
     assert expiry_date_in_utc.minute == expected_date_utc.minute
     assert expiry_date_in_utc.second == expected_date_utc.second
+
+@pytest.mark.parametrize('test_name, action_cd, days', [
+    ('Testing an NR restoration', RequestAction.REH.value, 421),
+    ('Testing an NR reinstatement', RequestAction.REN.value, 421),
+    ('Testing an NR (new)', RequestAction.NEW.value, 56)
+])
+def test_get_expiry_days(client, test_name, days, action_cd):
+    """
+    Test that extend_expiry_date method returns a datetime at added X days and at 11:59pm Pacific time.
+    """
+    mock_nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    mock_nr.stateCd = State.APPROVED
+    mock_nr.request_action_cd = action_cd
+    mock_nr.expirationDate = None
+    mock_expiry_days = nr_svc.get_expiry_days(mock_nr)
+
+    assert mock_expiry_days == days
+
+
