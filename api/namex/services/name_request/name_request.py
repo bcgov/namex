@@ -171,6 +171,7 @@ class NameRequestService(AbstractNameRequestMixin):
 
         return name_request
 
+    @classmethod
     def map_request_data(cls, self, name_request, map_attrs=False):
         """
         This method maps data from the HTTP request data over to the name request.
