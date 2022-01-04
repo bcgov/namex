@@ -9,6 +9,7 @@ from flask import Flask, g, current_app
 from namex.utils.logging import setup_logging
 from namex.models import Request, State, User, Event
 from namex.services import EventRecorder
+from namex.services.name_request import NameRequestService
 
 from config import Config
 from nro.nro_datapump import nro_data_pump_update
@@ -85,8 +86,9 @@ try:
         current_app.logger.debug('processing: {}'.format(r.nrNum))
 
         try:
-
-            nro_data_pump_update(r, ora_cursor, expires_days)
+            nr_service = NameRequestService()
+            expiry_days = nr_service.get_expiry_days(r)
+            nro_data_pump_update(r, ora_cursor, expiry_days)
             db.session.add(r)
             EventRecorder.record(user, Event.NRO_UPDATE, r, r.json(), save_to_session=True)
 

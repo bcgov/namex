@@ -5,12 +5,12 @@ import pytest
 from dateutil.tz import gettz
 
 from namex.services.name_request import NameRequestService
-from namex.models import Request as RequestDAO
+from namex.models import State, Request as RequestDAO
+from namex.constants import RequestAction
 
 nr_svc = NameRequestService()
 pacific_tz = gettz('US/Pacific')
 utc_tz = gettz('UTC')
-
 
 @pytest.mark.parametrize('input_datetime_utc,expected_date_utc,time_offset', [
     (datetime.datetime(2021, 1, 28, 8, 0, 0, tzinfo=utc_tz), datetime.datetime(2021, 3, 26, 6, 59, 0, tzinfo=utc_tz), '-0700'),
@@ -74,3 +74,24 @@ def test_create_expiry_date(input_datetime_utc, expected_date_utc, time_offset):
     assert expiry_date_in_utc.hour == expected_date_utc.hour
     assert expiry_date_in_utc.minute == expected_date_utc.minute
     assert expiry_date_in_utc.second == expected_date_utc.second
+
+@pytest.mark.parametrize('test_name, action_cd, days', [
+    ('Testing an NR restoration', RequestAction.REH.value, 421),
+    ('Testing an NR reinstatement', RequestAction.REN.value, 421),
+    ('Testing an NR (new)', RequestAction.NEW.value, 56)
+])
+def test_get_expiry_days(client, test_name, days, action_cd):
+    """
+    Test that get_expiry_date method returns a either 56 or 421 days
+    """
+    mock_nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    mock_nr.stateCd = State.APPROVED
+    mock_nr.request_action_cd = action_cd
+    mock_nr.expirationDate = None
+    mock_expiry_days = nr_svc.get_expiry_days(mock_nr)
+
+    assert mock_expiry_days == days
+
+

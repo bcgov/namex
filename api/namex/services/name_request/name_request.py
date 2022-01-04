@@ -3,7 +3,7 @@ from pytz import timezone
 
 from namex.utils.logging import setup_logging
 
-from namex.constants import NameState
+from namex.constants import NameState, RequestAction, ExpiryDays
 
 from namex.models import Request, Name, State, Applicant
 
@@ -140,7 +140,19 @@ class NameRequestService(AbstractNameRequestMixin):
         return name_request
 
     @classmethod
-    def extend_expiry_date(cls, name_request, start_date=None, days=56):
+    def get_expiry_days(cls, name_request):
+        """
+        returns expiry days of an NR.
+        """
+        if name_request.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
+            expires_days = ExpiryDays.NAME_REQUEST_REH_REN_LIFESPAN_DAYS.value
+        else:
+            expires_days = ExpiryDays.NAME_REQUEST_LIFESPAN_DAYS.value
+
+        return expires_days
+
+    @classmethod
+    def extend_expiry_date(cls, name_request, start_date=None):
         """
         Extends/sets the expiry date of an NR.
 
@@ -148,16 +160,19 @@ class NameRequestService(AbstractNameRequestMixin):
         """
         start_datetime = start_date if start_date else datetime.utcnow()
         try:
+            expiry_days = cls.get_expiry_days(name_request)
+           
             name_request.expirationDate = cls.create_expiry_date(
                 start=start_datetime,
-                expires_in_days=days
+                expires_in_days=expiry_days
             )
         except Exception as err:
             raise ExtendExpiryDateError(err)
 
         return name_request
 
-    def map_request_data(self, name_request, map_attrs=False):
+    @classmethod
+    def map_request_data(cls, self, name_request, map_attrs=False):
         """
         This method maps data from the HTTP request data over to the name request.
         We use this to set draft attributes, header attributes, and comments...
@@ -200,9 +215,10 @@ class NameRequestService(AbstractNameRequestMixin):
                 name_request.consentFlag = 'Y'
 
             if self.new_state_code in [State.RESERVED, State.COND_RESERVE]:
+                expiry_days = cls.get_expiry_days(name_request)
                 name_request.expirationDate = self.create_expiry_date(
                     start=name_request.submittedDate,
-                    expires_in_days=56
+                    expires_in_days=expiry_days
                 )
         except Exception as err:
             raise MapRequestDataError(err)
