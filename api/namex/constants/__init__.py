@@ -670,6 +670,6 @@ class RequestPriority(AbstractEnum):
     Y = 'Y'
     N = 'N'
 
-class ExpiryDays(AbstractEnum):
+class ExpiryDays(str, AbstractEnum):
     NAME_REQUEST_LIFESPAN_DAYS = 56
     NAME_REQUEST_REH_REN_LIFESPAN_DAYS = 421
