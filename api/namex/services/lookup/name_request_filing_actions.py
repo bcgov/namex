@@ -64,7 +64,7 @@ class NameRequestFilingActions:
         ('RLC', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Reinstatement', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('AL', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Assumed Name', 'static', None, 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-forms/form_37_xco_-_name_change.pdf', None),
         ('FR', 'GP', 'General Partnership/Sole Proprietorship/DBA', 'Registration', 'lear', None, None, None),
-        ('CFR', 'GP', 'General Partnership/Sole Proprietorship/DBA', 'Change of Name', 'onestop', None, None, None),
+        ('CFR', 'GP', 'General Partnership/Sole Proprietorship/DBA', 'Change of Name', 'lear', None, None, None),
         ('LL', 'LL', 'Limited Liability Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('CLL', 'LL', 'Limited Liability Partnership', 'Change of Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('XLL', 'XP', 'Extraprovincial Limited Liability Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
