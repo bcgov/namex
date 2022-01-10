@@ -38,7 +38,9 @@ class NameRequestsResource(BaseNameRequestResource):
 
             filters = []
 
-            nr_num_query_str = request.headers['Bcreg-Nr'] or request.headers['Bcreg-Nrl']
+            bcreg_nr = None if request.headers['Bcreg-Nr'] == 'null' else request.headers['Bcreg-Nr']
+            bcreg_nrl = None if request.headers['Bcreg-Nrl'] == 'null' else request.headers['Bcreg-Nrl']
+            nr_num_query_str = bcreg_nr or bcreg_nrl
             email_address_query_str = request.headers['Bcreg-User-Email']
             phone_number_query_str = request.headers['Bcreg-User-Phone']
 
