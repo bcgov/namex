@@ -86,10 +86,15 @@ try:
         current_app.logger.debug('processing: {}'.format(r.nrNum))
 
         try:
+            current_app.logger.debug('nro update - 1 - after try: {}'.format(r.nrNum))
             nr_service = NameRequestService()
+            current_app.logger.debug('nro update - 2 - after nr_service')
             expiry_days = nr_service.get_expiry_days(r)
+            current_app.logger.debug(f'nro update - 3 - after expiry_days {expiry_days}')
             nro_data_pump_update(r, ora_cursor, expiry_days)
+            current_app.logger.debug('nro update - 6 - after nro_data_pump_update')
             db.session.add(r)
+            current_app.logger.debug('nro update - 7 - after db.session.add')
             EventRecorder.record(user, Event.NRO_UPDATE, r, r.json(), save_to_session=True)
 
             ora_con.commit()
