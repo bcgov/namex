@@ -63,10 +63,12 @@ class NameRequestFilingActions:
         ('CLC', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Change of Name', 'static', None, 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-forms/form_37_xco_-_name_change.pdf', None),
         ('RLC', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Reinstatement', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('AL', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Assumed Name', 'static', None, 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-forms/form_37_xco_-_name_change.pdf', None),
-        ('SP', 'SP', 'Sole Proprietorship/DBA', 'Registration', 'lear', None, None, None),
-        ('GP', 'GP', 'General Partnership', 'Registration', 'lear', None, None, None),
-        ('CSP', 'CSP', 'Sole Proprietorship/DBA', 'Change of Name', 'lear', None, None, None),
-        ('CGP', 'CGP', 'General Partnership', 'Change of Name', 'lear', None, None, None),
+        ('FR_FR', 'SP', 'Sole Proprietorship', 'Registration', 'lear', None, None, None),
+        ('FR_DBA', 'SP', 'Sole Proprietorship (DBA)', 'Registration', 'lear', None, None, None),
+        ('FR_GP', 'GP', 'General Partnership', 'Registration', 'lear', None, None, None),
+        ('CFR_FR', 'CSP', 'Sole Proprietorship', 'Change of Name', 'lear', None, None, None),
+        ('CFR_DBA', 'CSP', 'Sole Proprietorship (DBA)', 'Change of Name', 'lear', None, None, None),
+        ('CFR_GP', 'CGP', 'General Partnership', 'Change of Name', 'lear', None, None, None),
         ('LL', 'LL', 'Limited Liability Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('CLL', 'LL', 'Limited Liability Partnership', 'Change of Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('XLL', 'XP', 'Extraprovincial Limited Liability Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
@@ -129,10 +131,10 @@ class NameRequestFilingActions:
             actions.append({'filingName': filingName, 'entitiesFilingName': entitiesFilingName, 'URL': URL, 'learTemplate': learTemplate})
             d[nr_type]['actions'] = actions
 
-        current_app.logger.debug ('completed creating nr_filing_actions')
+        current_app.logger.debug('completed creating nr_filing_actions')
         return d
 
-    def get_actions(self, nr_type: str) -> Optional[dict]:
+    def get_actions(self, nr_type: str, entity_type_cd: str) -> Optional[dict]:
         """Return the target system and filing actions that a nr_type can be used for.
 
         Returns a dict with the following values:
@@ -145,4 +147,7 @@ class NameRequestFilingActions:
             URL: the location of the service
             learTemplate: the templat that can be used to create a draft filing.
         """
+        if nr_type in ['FR', 'CFR'] and entity_type_cd in ['FR', 'DBA', 'GP']:
+            nr_type = nr_type + '_' + entity_type_cd
+
         return self.get_dict.get(nr_type)
