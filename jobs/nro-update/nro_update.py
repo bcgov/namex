@@ -87,7 +87,7 @@ try:
 
         try:
             nr_service = NameRequestService()
-            expiry_days = nr_service.get_expiry_days(r)
+            expiry_days = int(nr_service.get_expiry_days(r))
             nro_data_pump_update(r, ora_cursor, expiry_days)
             db.session.add(r)
             EventRecorder.record(user, Event.NRO_UPDATE, r, r.json(), save_to_session=True)

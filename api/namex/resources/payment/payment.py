@@ -386,7 +386,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                                     timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
                                 msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
                                 current_app.logger.debug(msg)
-                            expiry_days = nr_svc.get_expiry_days(nr_model)
+                            expiry_days = int(nr_svc.get_expiry_days(nr_model))
                             nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
                             payment.payment_completion_date = datetime.utcnow()
 

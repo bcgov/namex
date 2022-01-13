@@ -160,7 +160,7 @@ class NameRequestService(AbstractNameRequestMixin):
         """
         start_datetime = start_date if start_date else datetime.utcnow()
         try:
-            expiry_days = cls.get_expiry_days(name_request)
+            expiry_days = int(cls.get_expiry_days(name_request))
            
             name_request.expirationDate = cls.create_expiry_date(
                 start=start_datetime,
@@ -214,7 +214,7 @@ class NameRequestService(AbstractNameRequestMixin):
                 name_request.consentFlag = 'Y'
 
             if self.new_state_code in [State.RESERVED, State.COND_RESERVE]:
-                expiry_days = self.get_expiry_days(name_request)
+                expiry_days = int(self.get_expiry_days(name_request))
                 name_request.expirationDate = self.create_expiry_date(
                     start=name_request.submittedDate,
                     expires_in_days=expiry_days
