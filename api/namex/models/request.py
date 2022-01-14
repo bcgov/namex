@@ -212,7 +212,7 @@ class Request(db.Model):
             'notifiedBeforeExpiry': self.notifiedBeforeExpiry,
             'notifiedExpiry': self.notifiedExpiry
         }
-        if nr_actions := nr_filing_actions.get_actions(self.requestTypeCd):
+        if nr_actions := nr_filing_actions.get_actions(self.requestTypeCd, self.entity_type_cd):
             nr_json['legalType'] = nr_actions.get('legalType')
             nr_json['target'] = nr_actions.get('target')
             nr_json['actions'] = nr_actions.get('actions')
