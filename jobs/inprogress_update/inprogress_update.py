@@ -95,6 +95,24 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             db.session.add(r)
             EventRecorder.record(user, event, r, r.json(), save_to_session=True)
 
+        # for NRs showing in NRO_UPDATING status need to be set to DRAFT
+        nro_updating_reqs = db.session.query(Request). \
+            filter(Request.stateCd == State.NRO_UPDATING). \
+            order_by(Request.lastUpdate.asc()). \
+            limit(max_rows). \
+            with_for_update().all()
+
+        for r in nro_updating_reqs:
+            row_count += 1
+
+            current_app.logger.debug(f'processing: {r.nrNum}')
+            current_app.logger.debug(f'nr {r.nrNum}, state: {r.stateCd} last_update:{r.lastUpdate}')            
+            
+            r.stateCd = State.DRAFT
+            event = Event.SET_TO_DRAFT
+            
+            db.session.add(r)
+            EventRecorder.record(user, event, r, r.json(), save_to_session=True)
         db.session.commit()
         return row_count, True
 
@@ -118,10 +136,8 @@ if __name__ == '__main__':
         exit(1)
 
     row_count, success = inprogress_update(user, max_rows, client_delay, examine_delay)
-
     app.do_teardown_appcontext()
     end_time = datetime.utcnow()
-
     if success:
         current_app.logger.debug(f'Requests processed: {row_count} completed in:{end_time-start_time}')
     else:
