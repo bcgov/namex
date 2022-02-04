@@ -93,6 +93,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
                 event = Event.MARKED_ON_HOLD
 
             db.session.add(r)
+            db.session.commit()
             EventRecorder.record(user, event, r, r.json(), save_to_session=True)
 
         # for NRs showing in NRO_UPDATING status need to be set to DRAFT
@@ -104,16 +105,18 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
 
         for r in nro_updating_reqs:
             row_count += 1
-
-            current_app.logger.debug(f'processing: {r.nrNum}')
-            current_app.logger.debug(f'nr {r.nrNum}, state: {r.stateCd} last_update:{r.lastUpdate}')            
             
-            r.stateCd = State.DRAFT
-            event = Event.SET_TO_DRAFT
+            current_app.logger.debug(f'processing nr: {r.nrNum}, state: {r.stateCd}, previous state: {r.previousStateCd}, last_update: {r.lastUpdate}')    
             
+            if r.previousStateCd == None:
+                r.stateCd = State.DRAFT
+            # otherwise put it to previous status
+            else:
+                r.stateCd = r.previousStateCd
+                            
             db.session.add(r)
-            EventRecorder.record(user, event, r, r.json(), save_to_session=True)
-        db.session.commit()
+            db.session.commit()
+            EventRecorder.record(user, Event.SET_TO_DRAFT, r, r.json(), save_to_session=True)
         return row_count, True
 
     except Exception as err:
