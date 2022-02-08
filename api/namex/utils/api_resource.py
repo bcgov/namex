@@ -11,7 +11,7 @@ def log_error(msg, err):
 
 
 def handle_exception(err, msg, err_code):
-    current_app.logger.debug('Error: ' + repr(err))
+    current_app.logger.error('Error: ' + repr(err))
     return jsonify(message=msg), err_code
 
 

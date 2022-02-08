@@ -436,12 +436,13 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 # something went wrong with status code above
                 else:
                     # log actual status code
-                    current_app.logger.debug('Error with status code. Actual status code: ' + payment_response.statusCode)
+                    current_app.logger.error('Error with status code. Actual status code: ' + payment_response.statusCode)
                     EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
                     # return generic error status to the front end
                     return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 402
             except Exception as err:
                 current_app.logger.error(err.with_traceback(None))
+                EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
                 return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 500
 
         except PaymentServiceError as err:
