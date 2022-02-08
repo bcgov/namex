@@ -339,6 +339,12 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 details=details
             )
 
+            # Save the payment info to Postgres
+            payment = PaymentDAO()
+            payment.nrId = nr_model.id
+            payment.payment_action = payment_action
+            payment.save_to_db()
+
             payment_response = create_payment(req.as_dict(), headers)
             try:
                 successful_status_list = [
@@ -347,13 +353,10 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     PaymentStatusCode.COMPLETED.value
                 ]
                 if payment_response.statusCode in successful_status_list:
-                    # Save the payment info to Postgres
-                    payment = PaymentDAO()
-                    payment.nrId = nr_model.id
+                    # Update the payment info to Postgres
                     payment.payment_token = str(payment_response.id)
                     # namex-pay will set payment_status_code to completed state after actioning it on the queue
                     payment.payment_status_code = payment_response.statusCode
-                    payment.payment_action = payment_action
                     payment.save_to_db()
 
                     # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
