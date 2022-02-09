@@ -1,31 +1,33 @@
 """Script used to regularly update INPROGRESS NRs."""
-from datetime import datetime
+import time
+import os
+import uuid
+from datetime import datetime, timezone
 
 from flask import Flask, current_app
 from namex import db, nro
 from namex.models import Event, Request, State, User
-from namex.services import EventRecorder
+from namex.services import EventRecorder, queue
+from queue_common.messages import create_cloud_event_msg
 from namex.utils.logging import setup_logging
 from sqlalchemy import text
-
 from config import Config
 
 
 setup_logging()  # important to do this first
 
-
 def create_app(config=Config):
     """Create instance of app."""
     app = Flask(__name__)
     app.config.from_object(config)
+    queue.init_app(app)
     db.init_app(app)
     nro.init_app(app)
-    app.app_context().push()
+    app.app_context().push()    
     current_app.logger.debug('created the Flask App and pushed the App Context')
 
     return app
-
-
+    
 def get_ops_params():
     """Get params for job."""
     client_delay = int(current_app.config.get('MIN_CLIENT_DELAY_SECONDS', 900))
@@ -33,6 +35,36 @@ def get_ops_params():
     max_rows = int(current_app.config.get('MAX_ROW_LIMIT', 100))
 
     return client_delay, examine_delay, max_rows
+
+
+def publish_email_message(payload: dict):
+    """Publish the email message onto the NATS emailer subject."""        
+    subject = current_app.config.get('NATS_EMAILER_SUBJECT', 'entity.email')    
+    queue.publish_json_to_subject_sync(payload, subject)
+    current_app.logger.debug('publish to queue successfully, subject: %s, event:%s', subject, payload)
+
+
+def furnish_request_message(
+        request: Request,
+        option: str
+):  # pylint: disable=redefined-outer-name
+    """Send notification info to the mail queue."""
+    current_app.logger.debug('Start of the furnishing of request for %s nrNum=%s', option, request.nrNum)
+    payload = create_cloud_event_msg(
+        msg_id=str(uuid.uuid4()),
+        msg_type='bc.registry.names.request',
+        source=f'/requests/{request.nrNum}',
+        time=datetime.utcfromtimestamp(time.time()).replace(tzinfo=timezone.utc).isoformat(),
+        identifier=request.nrNum,
+        json_data_body={
+            'request': {
+                'nrNum': request.nrNum,
+                'option': option
+            }
+        }
+    )
+    current_app.logger.debug('About to publish email for %s nrNum=%s', option, request.nrNum)
+    publish_email_message(payload)
 
 
 def inprogress_update(user: User, max_rows: int, client_delay: int, examine_delay: int) -> (int, bool):
@@ -54,15 +86,17 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             current_app.logger.debug(f'processing: {r.nrNum}')
             current_app.logger.debug(f'nr {r.nrNum}, state: {r.stateCd} last_update:{r.lastUpdate}')
 
+            furnish_request_message(r, 'clients-edit-inprogress')
+
             r.stateCd = State.DRAFT
             r.checkedOutBy = None
-            db.session.add(r)
-            errors = nro.checkin_checkout_nr(r, 'UNLOCK')
-            if errors:
-                raise RuntimeError('Failed to update nro.')
-            # commit here to keep this entry in sync with NRO (in case errors happen later)
-            db.session.commit()
-
+            # db.session.add(r)
+            # errors = nro.checkin_checkout_nr(r, 'UNLOCK')
+            # if errors:
+            #     raise RuntimeError('Failed to update nro.')
+            # # commit here to keep this entry in sync with NRO (in case errors happen later)
+            # db.session.commit()
+            r.save_to_db()
             EventRecorder.record(user, Event.SET_TO_DRAFT, r, r.json(), save_to_session=True)
 
         # for nrs edited by examiners
@@ -80,6 +114,8 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             current_app.logger.debug(f'processing: {r.nrNum}')
             current_app.logger.debug(f'nr {r.nrNum}, state: {r.stateCd} last_update:{r.lastUpdate}')
 
+            furnish_request_message(r, 'examiners-edit-inprogress')
+
             # if this NR was previously in DRAFT, reset it to that state
             # (ie: the user walked away from an open edit window)
             event = None
@@ -92,8 +128,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
                 r.stateCd = State.HOLD
                 event = Event.MARKED_ON_HOLD
 
-            db.session.add(r)
-            db.session.commit()
+            r.save_to_db()
             EventRecorder.record(user, event, r, r.json(), save_to_session=True)
 
         # for NRs showing in NRO_UPDATING status need to be set to DRAFT
@@ -108,14 +143,16 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             
             current_app.logger.debug(f'processing nr: {r.nrNum}, state: {r.stateCd}, previous state: {r.previousStateCd}, last_update: {r.lastUpdate}')    
             
+            furnish_request_message(r, 'nro-updating')
+            
             if r.previousStateCd == None:
                 r.stateCd = State.DRAFT
             # otherwise put it to previous status
             else:
                 r.stateCd = r.previousStateCd
+                r.previousStateCd = None
                             
-            db.session.add(r)
-            db.session.commit()
+            r.save_to_db()
             EventRecorder.record(user, Event.SET_TO_DRAFT, r, r.json(), save_to_session=True)
         return row_count, True
 
