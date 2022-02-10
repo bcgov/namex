@@ -7,6 +7,7 @@ from dotenv import find_dotenv, load_dotenv
 # this will load all the envars from a .env file
 load_dotenv(find_dotenv())
 
+
 class BaseConfig(object):
     """Base config."""
 
@@ -55,6 +56,7 @@ class Config(BaseConfig):
 
     DEBUG = False
     TESTING = False
+
 
 class TestConfig(BaseConfig):
     """Test config."""

@@ -1,6 +1,5 @@
 """Script used to regularly update INPROGRESS NRs."""
 import time
-import os
 import uuid
 from datetime import datetime, timezone
 
@@ -8,13 +7,15 @@ from flask import Flask, current_app
 from namex import db, nro
 from namex.models import Event, Request, State, User
 from namex.services import EventRecorder, queue
-from queue_common.messages import create_cloud_event_msg
 from namex.utils.logging import setup_logging
+from queue_common.messages import create_cloud_event_msg
 from sqlalchemy import text
+
 from config import Config
 
 
 setup_logging()  # important to do this first
+
 
 def create_app(config=Config):
     """Create instance of app."""
@@ -23,11 +24,12 @@ def create_app(config=Config):
     queue.init_app(app)
     db.init_app(app)
     nro.init_app(app)
-    app.app_context().push()    
+    app.app_context().push()
     current_app.logger.debug('created the Flask App and pushed the App Context')
 
     return app
-    
+
+
 def get_ops_params():
     """Get params for job."""
     client_delay = int(current_app.config.get('MIN_CLIENT_DELAY_SECONDS', 900))
@@ -38,8 +40,8 @@ def get_ops_params():
 
 
 def publish_email_message(payload: dict):
-    """Publish the email message onto the NATS emailer subject."""        
-    subject = current_app.config.get('NATS_EMAILER_SUBJECT', 'entity.email')    
+    """Publish the email message onto the NATS emailer subject."""
+    subject = current_app.config.get('NATS_EMAILER_SUBJECT', 'entity.email')
     queue.publish_json_to_subject_sync(payload, subject)
     current_app.logger.debug('publish to queue successfully, subject: %s, event:%s', subject, payload)
 
@@ -140,18 +142,18 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
 
         for r in nro_updating_reqs:
             row_count += 1
-            
-            current_app.logger.debug(f'processing nr: {r.nrNum}, state: {r.stateCd}, previous state: {r.previousStateCd}, last_update: {r.lastUpdate}')    
-            
+            current_app.logger.debug(f'processing nr: {r.nrNum}, state: {r.stateCd}, \
+                previous state: {r.previousStateCd}, last_update: {r.lastUpdate}')
+
             furnish_request_message(r, 'nro-updating')
-            
+
             if r.previousStateCd == None:
                 r.stateCd = State.DRAFT
             # otherwise put it to previous status
             else:
                 r.stateCd = r.previousStateCd
                 r.previousStateCd = None
-                            
+
             r.save_to_db()
             EventRecorder.record(user, Event.SET_TO_DRAFT, r, r.json(), save_to_session=True)
         return row_count, True
