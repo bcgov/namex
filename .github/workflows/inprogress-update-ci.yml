@@ -39,7 +39,7 @@ jobs:
         run: |
           make flake8
 
-  testing:
+ testing:
     needs: setup-job
     env:
       DATABASE_TEST_USERNAME: postgres
