@@ -21,7 +21,7 @@ marshmallow-sqlalchemy==0.19.0
 pronouncing
 requests
 toolz
-nltk==3.4.5
+nltk==3.6.6
 lxml
 inflect
 werkzeug==0.16.1
