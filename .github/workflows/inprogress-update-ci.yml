@@ -45,7 +45,7 @@ jobs:
       - name: Lint with flake8
         id: flake8
         run: |
-          make flake8
+        #  make flake8
 
   testing:
     needs: setup-job

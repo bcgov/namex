@@ -57,6 +57,14 @@ job_test_data = [
      ],
      0,
      ),
+    ('update_2_rows',
+     [
+         {'nr_num': 'NR 1000009', 'state': State.NRO_UPDATING, 'last_update': EPOCH_DATETIME},
+         {'nr_num': 'NR 1000010', 'state': State.NRO_UPDATING, \
+             'last_update': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')},
+     ],
+     2,
+     ),
 ]
 
 
