@@ -54,6 +54,11 @@ jobs:
       DATABASE_TEST_PASSWORD: postgres
       DATABASE_TEST_NAME: postgres
       DATABASE_TEST_HOST: localhost
+      NATS_SERVERS: "nats://nats:4222"
+      NATS_CLIENT_NAME: entity.email.tester
+      NATS_CLUSTER_ID: test-cluster
+      NATS_FILER_SUBJECT: entity.email
+      NATS_QUEUE: entity-email-worker
 
     runs-on: ubuntu-20.04
 
