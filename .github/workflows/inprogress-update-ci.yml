@@ -1,7 +1,5 @@
 name: Inprogress Update Job CI
 
-on:
-
 defaults:
   run:
     shell: bash
