@@ -82,7 +82,7 @@ jobs:
           make setup
       - name: Test with pytest
         id: test
-        #  run: |
+        run: |
         #  make test
       #- name: Upload coverage to Codecov
       #  uses: codecov/codecov-action@v1
