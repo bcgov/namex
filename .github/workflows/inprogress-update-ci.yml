@@ -1,10 +1,7 @@
 name: Inprogress Update Job CI
 
 on:
-  pull_request:
-    types: [assigned, synchronize]
-    paths:
-      - "jobs/inprogress_update/**"
+  push:
 
 defaults:
   run:
