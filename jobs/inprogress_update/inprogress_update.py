@@ -1,4 +1,5 @@
 """Script used to regularly update INPROGRESS NRs."""
+import sys
 import time
 import uuid
 from datetime import datetime, timezone
@@ -7,6 +8,7 @@ from flask import Flask, current_app
 from namex import db, nro
 from namex.models import Event, Request, State, User
 from namex.services import EventRecorder, queue
+from namex.services.name_request.exceptions import InvalidInputError
 from namex.utils.logging import setup_logging
 from queue_common.messages import create_cloud_event_msg
 from sqlalchemy import text
@@ -77,61 +79,61 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
         # for nrs edited by clients
         client_edit_reqs = db.session.query(Request). \
             filter(Request.stateCd == State.INPROGRESS). \
-            filter(Request.lastUpdate <= text(f'(now() at time zone \'utc\') - INTERVAL \'{client_delay} SECONDS\'')). \
-            filter(Request.checkedOutBy != None). \
+            filter(Request.lastUpdate <= text(f"(now() at time zone 'utc') - INTERVAL '{client_delay} SECONDS'")). \
+            filter(Request.checkedOutBy is not None). \
             order_by(Request.lastUpdate.asc()). \
             limit(max_rows). \
             with_for_update().all()
-        for r in client_edit_reqs:
+        for request in client_edit_reqs:
             row_count += 1
 
-            current_app.logger.debug(f'processing: {r.nrNum}')
-            current_app.logger.debug(f'nr {r.nrNum}, state: {r.stateCd} last_update:{r.lastUpdate}')
+            current_app.logger.debug(f'processing: {request.nrNum}')
+            current_app.logger.debug(f'nr {request.nrNum}, state: {request.stateCd} last_update:{request.lastUpdate}')
 
-            furnish_request_message(r, 'clients-edit-inprogress')
+            furnish_request_message(request, 'clients-edit-inprogress')
 
-            r.stateCd = State.DRAFT
-            r.checkedOutBy = None
+            request.stateCd = State.DRAFT
+            request.checkedOutBy = None
             # db.session.add(r)
             # errors = nro.checkin_checkout_nr(r, 'UNLOCK')
             # if errors:
             #     raise RuntimeError('Failed to update nro.')
             # # commit here to keep this entry in sync with NRO (in case errors happen later)
             # db.session.commit()
-            r.save_to_db()
-            EventRecorder.record(user, Event.SET_TO_DRAFT, r, r.json(), save_to_session=True)
+            request.save_to_db()
+            EventRecorder.record(user, Event.SET_TO_DRAFT, request, request.json(), save_to_session=True)
 
         # for nrs edited by examiners
         examine_reqs = db.session.query(Request). \
             filter(Request.stateCd == State.INPROGRESS). \
             filter(Request.lastUpdate <= text(f"(now() at time zone 'utc') - INTERVAL '{examine_delay} SECONDS'")). \
-            filter(Request.checkedOutBy == None). \
+            filter(Request.checkedOutBy is None). \
             order_by(Request.lastUpdate.asc()). \
             limit(max_rows). \
             with_for_update().all()
 
-        for r in examine_reqs:
+        for request in examine_reqs:
             row_count += 1
 
-            current_app.logger.debug(f'processing: {r.nrNum}')
-            current_app.logger.debug(f'nr {r.nrNum}, state: {r.stateCd} last_update:{r.lastUpdate}')
+            current_app.logger.debug(f'processing: {request.nrNum}')
+            current_app.logger.debug(f'nr {request.nrNum}, state: {request.stateCd} last_update:{request.lastUpdate}')
 
-            furnish_request_message(r, 'examiners-edit-inprogress')
+            furnish_request_message(request, 'examiners-edit-inprogress')
 
             # if this NR was previously in DRAFT, reset it to that state
             # (ie: the user walked away from an open edit window)
             event = None
-            if r.previousStateCd == State.DRAFT:
-                r.stateCd = State.DRAFT
-                r.previousStateCd = None
+            if request.previousStateCd == State.DRAFT:
+                request.stateCd = State.DRAFT
+                request.previousStateCd = None
                 event = Event.SET_TO_DRAFT
             # otherwise put it on hold
             else:
-                r.stateCd = State.HOLD
+                request.stateCd = State.HOLD
                 event = Event.MARKED_ON_HOLD
 
-            r.save_to_db()
-            EventRecorder.record(user, event, r, r.json(), save_to_session=True)
+            request.save_to_db()
+            EventRecorder.record(user, event, request, request.json(), save_to_session=True)
 
         # for NRs showing in NRO_UPDATING status need to be set to DRAFT
         nro_updating_reqs = db.session.query(Request). \
@@ -140,48 +142,55 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             limit(max_rows). \
             with_for_update().all()
 
-        for r in nro_updating_reqs:
+        for request in nro_updating_reqs:
             row_count += 1
-            current_app.logger.debug(f'processing nr: {r.nrNum}, state: {r.stateCd}, \
-                previous state: {r.previousStateCd}, last_update: {r.lastUpdate}')
+            current_app.logger.debug(f'processing nr: {request.nrNum}, state: {request.stateCd}, \
+                previous state: {request.previousStateCd}, last_update: {request.lastUpdate}')
 
-            furnish_request_message(r, 'nro-updating')
+            furnish_request_message(request, 'nro-updating')
 
-            if r.previousStateCd == None:
-                r.stateCd = State.DRAFT
+            if request.previousStateCd is None:
+                request.stateCd = State.DRAFT
             # otherwise put it to previous status
             else:
-                r.stateCd = r.previousStateCd
-                r.previousStateCd = None
+                request.stateCd = request.previousStateCd
+                request.previousStateCd = None
 
-            r.save_to_db()
-            EventRecorder.record(user, Event.SET_TO_DRAFT, r, r.json(), save_to_session=True)
+            request.save_to_db()
+            EventRecorder.record(user, Event.SET_TO_DRAFT, request, request.json(), save_to_session=True)
         return row_count, True
 
-    except Exception as err:
+    except InvalidInputError as err:
         current_app.logger.error(err)
         db.session.rollback()
         return -1, False
+    # except Exception as err:
+    #     current_app.logger.error(err)
+    #     db.session.rollback()
+    #     return -1, False
+    # except Exception as err:  # pylint: disable=broad-except
+    #     current_app.logger.error(err)
+    #     db.session.rollback()
+    #     return -1, False
 
 
 if __name__ == '__main__':
-    # TODO: make service account for inporgress updater
     NRO_SERVICE_ACCOUNT = 'NRO_SERVICE_ACCOUNT'
-    app = create_app(Config)
-    client_delay, examine_delay, max_rows = get_ops_params()
+    _app = create_app(Config)
+    _client_delay, _examine_delay, _max_rows = get_ops_params()
 
     start_time = datetime.utcnow()
 
-    user = User.find_by_username(current_app.config[NRO_SERVICE_ACCOUNT])
-    if not user:
+    _user = User.find_by_username(current_app.config[NRO_SERVICE_ACCOUNT])
+    if not _user:
         current_app.logger.error(f'Setup error: unable to load {NRO_SERVICE_ACCOUNT}.')
-        exit(1)
+        sys.exit()
 
-    row_count, success = inprogress_update(user, max_rows, client_delay, examine_delay)
-    app.do_teardown_appcontext()
+    _row_count, success = inprogress_update(_user, _max_rows, _client_delay, _examine_delay)
+    _app.do_teardown_appcontext()
     end_time = datetime.utcnow()
     if success:
-        current_app.logger.debug(f'Requests processed: {row_count} completed in:{end_time-start_time}')
+        current_app.logger.debug(f'Requests processed: {_row_count} completed in:{end_time-start_time}')
     else:
         current_app.logger.error('Failed to move timed out INPROGRESS NRs')
-        exit(1)
+        sys.exit()
