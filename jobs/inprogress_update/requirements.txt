@@ -10,5 +10,6 @@ greenlet==1.1.0
 itsdangerous==2.0.1
 python-dotenv==0.17.1
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
+git+https://github.com/bcgov/namex.git#egg=queue_common&subdirectory=services/common
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
 git+https://github.com/bcgov/namex-payment-api-py-client.git@dev#egg=openapi_client
