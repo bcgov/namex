@@ -13,6 +13,13 @@ class BaseConfig(object):
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://localhost:4222')
+    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', 'namex.worker')
+    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
+    NATS_QUEUE = os.getenv('NATS_QUEUE', 'namerequest-processor')
+    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
+    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
+
     MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '100')
     MIN_DELAY_SECONDS = os.getenv('MIN_DELAY_SECONDS', '600')
     SECRET_KEY = 'a secret'
@@ -20,8 +27,6 @@ class BaseConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
-
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     SQLALCHEMY_MAX_OVERFLOW = 10
 

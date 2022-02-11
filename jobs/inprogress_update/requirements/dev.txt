@@ -11,3 +11,7 @@ flake8-docstrings
 flake8-isort
 flake8-quotes
 pep8-naming
+coverage
+autopep8
+pylint
+pylint-flask
