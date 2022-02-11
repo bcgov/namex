@@ -13,6 +13,13 @@ class BaseConfig(object):
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://localhost:4222')
+    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', 'namex.worker')
+    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
+    NATS_QUEUE = os.getenv('NATS_QUEUE', 'namerequest-processor')
+    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
+    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
+
     MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '100')
     MIN_DELAY_SECONDS = os.getenv('MIN_DELAY_SECONDS', '600')
     SECRET_KEY = 'a secret'
@@ -20,8 +27,6 @@ class BaseConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
-
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     SQLALCHEMY_MAX_OVERFLOW = 10
 
@@ -60,11 +65,11 @@ class TestConfig(BaseConfig):
     TESTING = True
 
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_NAME_TEST', '')
-    DB_HOST = os.getenv('DATABASE_HOST', '')
-    DB_PORT = os.getenv('DATABASE_PORT', '5432')
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
+    DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
          user=DB_USER,
          password=DB_PASSWORD,

@@ -1,23 +1,17 @@
-import os
-import logging
-import json
+"""This is test config."""
 import datetime
-
+import logging
 import pytest
-from flask import Flask, Blueprint
-from flask.testing import FlaskClient
-from sqlalchemy import event, text
-
-from inprogress_update import create_app, db as _db
 from config import TestConfig
-
-from . import FROZEN_DATETIME, EPOCH_DATETIME
+from sqlalchemy import event, text
+from inprogress_update import create_app, db as _db
+from . import FROZEN_DATETIME
 
 
 # fixture to freeze utcnow to a fixed date-time
 @pytest.fixture
 def patch_datetime_utcnow(monkeypatch):
-
+    """Return the FROZEN_DATETIME."""
     class _Datetime:
         @classmethod
         def utcnow(cls):
@@ -26,11 +20,9 @@ def patch_datetime_utcnow(monkeypatch):
     monkeypatch.setattr(datetime, 'datetime', _Datetime)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def app(request):
-    """
-    Returns session-wide application.
-    """
+    """Returns session-wide application."""
     logging.log(logging.INFO, TestConfig().SQLALCHEMY_DATABASE_URI)
     app = create_app(TestConfig())
 
@@ -39,7 +31,7 @@ def app(request):
 
 @pytest.fixture
 def client(app):
-
+    """Returns client."""
     client = app.test_client()
 
     return client

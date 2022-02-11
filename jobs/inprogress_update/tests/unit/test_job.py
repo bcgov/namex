@@ -1,14 +1,10 @@
-from datetime import datetime
-from flask import current_app
+"""This is test job."""
 import pytest
-from functools import reduce
-from operator import mul
+import inprogress_update
 
-from namex.models import User, State, Request
-
-from inprogress_update import db, job
-
-from . import EPOCH_DATETIME, FROZEN_DATETIME
+from . import EPOCH_DATETIME
+from datetime import datetime
+from namex.models import Request, State, User
 
 
 def helper_create_requests(row_data):
@@ -27,36 +23,47 @@ def helper_create_requests(row_data):
             nr.save_to_db()
 
 
-job_test_data=[
+job_test_data = [
     ('update_0_row',
      [
-         {'nr_num': 'NR 0000001', # NR Number of the Request to be create, or None if no prior NR is needed for the test
+         {'nr_num': 'NR 1000002',
+          # NR Number of the Request to be create, or None if no prior NR is needed for the test
           'state': State.DRAFT,  # state if the existing NR
           'last_update': EPOCH_DATETIME,
           },
      ],
-     0, # expected_row_count
+     0,  # expected_row_count
      ),
     ('update_1_row',
      [
-         {'nr_num': 'NR 6144860', 'state': State.INPROGRESS, 'last_update': EPOCH_DATETIME},
+         {'nr_num': 'NR 1000003', 'state': State.INPROGRESS, 'last_update': EPOCH_DATETIME},
      ],
      1,
      ),
     ('update_row_2_leave_row_1_and_3',
      [
-        {'nr_num': 'NR 0000001', 'state': State.DRAFT, 'last_update': EPOCH_DATETIME},
-        {'nr_num': 'NR 0000002', 'state': State.INPROGRESS, 'last_update': EPOCH_DATETIME},
-        {'nr_num': 'NR 0000003', 'state': State.INPROGRESS, 'last_update': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')},
+        {'nr_num': 'NR 1000004', 'state': State.DRAFT, 'last_update': EPOCH_DATETIME},
+        {'nr_num': 'NR 1000005', 'state': State.INPROGRESS, 'last_update': EPOCH_DATETIME},
+        {'nr_num': 'NR 1000006', 'state': State.INPROGRESS, 'last_update': \
+            datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')},
      ],
      1,
-    ),
+     ),
     ('update_no_rows_leave_row_1_and_2',
      [
-         {'nr_num': 'NR 0000001', 'state': State.DRAFT, 'last_update': EPOCH_DATETIME},
-         {'nr_num': 'NR 0000002', 'state': State.INPROGRESS, 'last_update': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')},
+         {'nr_num': 'NR 1000007', 'state': State.DRAFT, 'last_update': EPOCH_DATETIME},
+         {'nr_num': 'NR 1000008', 'state': State.INPROGRESS, \
+             'last_update': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')},
      ],
      0,
+     ),
+    ('update_2_rows',
+     [
+         {'nr_num': 'NR 1000009', 'state': State.NRO_UPDATING, 'last_update': EPOCH_DATETIME},
+         {'nr_num': 'NR 1000010', 'state': State.NRO_UPDATING, \
+             'last_update': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')},
+     ],
+     2,
      ),
 ]
 
@@ -69,7 +76,7 @@ def test_run_job(app, session, test_name, request_data, expected_row_count):
     helper_create_requests(request_data)
 
     # Run Test
-    processed, success = job(user, max_rows=100, delay=1800)
+    processed, success = inprogress_update.inprogress_update(user, max_rows=100, client_delay=1800, examine_delay=1800)
 
     # check expected rows processed by job
     assert processed == expected_row_count
@@ -91,4 +98,3 @@ def test_run_job(app, session, test_name, request_data, expected_row_count):
     #         errors += 1
     #         print('error', row[7])
     # assert errors == expected_errors
-
