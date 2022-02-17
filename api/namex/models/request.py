@@ -208,7 +208,7 @@ class Request(db.Model):
             'comments': [comment.as_dict() for comment in self.comments.all()],
             'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()],
             'checkedOutBy': self.checkedOutBy,
-            'checkedOutDt': self.checkedOutDt,
+            'checkedOutDt': self.checkedOutDt.isoformat() if self.checkedOutDt else None,
             'notifiedBeforeExpiry': self.notifiedBeforeExpiry,
             'notifiedExpiry': self.notifiedExpiry
         }
