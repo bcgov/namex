@@ -738,7 +738,9 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
     def complete_reapply_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when re-applying for an existing Name Request reservation.
-        Extend the Name Request's expiration date by 56 days. If the request action is set to REH or REST,
+        Extend the Name Request's expiration date by 56 days. 
+        If the request action is set to REH, REN or REST, OR request type is 
+        'RCR', 'RUL', 'BERE', 'RCC', 'RCP', 'RFI', 'XRCR', 'RLC', 'XRCP','RSO','XRSO'
         extend the expiration by an additional year (plus the default 56 days).
         :param nr_model:
         :param payment_id:

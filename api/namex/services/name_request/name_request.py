@@ -144,10 +144,13 @@ class NameRequestService(AbstractNameRequestMixin):
         """
         returns expiry days of an NR.
         """
-        if name_request.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value]:
+        if name_request.request_action_cd in [RequestAction.REH.value, RequestAction.REN.value, RequestAction.REST.value]:
             expires_days = ExpiryDays.NAME_REQUEST_REH_REN_LIFESPAN_DAYS.value
         else:
-            expires_days = ExpiryDays.NAME_REQUEST_LIFESPAN_DAYS.value
+            if name_request.request_type_cd in ['RCR', 'RUL', 'BERE', 'RCC', 'RCP', 'RFI', 'XRCR', 'RLC', 'XRCP','RSO','XRSO']:
+                expires_days = ExpiryDays.NAME_REQUEST_REH_REN_LIFESPAN_DAYS.value
+            else:
+                expires_days = ExpiryDays.NAME_REQUEST_LIFESPAN_DAYS.value
 
         return expires_days
 
