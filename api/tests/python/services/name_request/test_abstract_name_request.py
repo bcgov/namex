@@ -75,12 +75,16 @@ def test_create_expiry_date(input_datetime_utc, expected_date_utc, time_offset):
     assert expiry_date_in_utc.minute == expected_date_utc.minute
     assert expiry_date_in_utc.second == expected_date_utc.second
 
-@pytest.mark.parametrize('test_name, action_cd, days', [
-    ('Testing an NR restoration', RequestAction.REH.value, 421),
-    ('Testing an NR reinstatement', RequestAction.REN.value, 421),
-    ('Testing an NR (new)', RequestAction.NEW.value, 56)
+@pytest.mark.parametrize('test_name, action_cd, request_type, days', [
+    ('Testing an NR restoration', RequestAction.REH.value, 'RCR', 421),
+    ('Testing an NR reinstatement', RequestAction.REN.value, 'RCR', 421),
+    ('Testing an NR NRO restoration', RequestAction.REST.value, 'RCR', 421),
+    ('Testing an NR RequestAction is new, Benefit Restore_Reinstate', RequestAction.NEW.value, 'BERE', 421),
+    ('Testing an NR RequestAction is null, BC Comp Restore_Reinstate', None, 'RCR', 421),
+    ('Testing an NR RequestAction is null, BC Company', None, 'CR', 56),
+    ('Testing an NR RequestAction is new, BC Company', RequestAction.NEW.value, 'CR', 56)
 ])
-def test_get_expiry_days(client, test_name, days, action_cd):
+def test_get_expiry_days(client, test_name, days, action_cd, request_type):
     """
     Test that get_expiry_date method returns a either 56 or 421 days
     """
@@ -89,8 +93,9 @@ def test_get_expiry_days(client, test_name, days, action_cd):
     # Set defaults, if these exist in the provided data they will be overwritten
     mock_nr.stateCd = State.APPROVED
     mock_nr.request_action_cd = action_cd
+    mock_nr.request_type_cd = request_type
     mock_nr.expirationDate = None
-    mock_expiry_days = nr_svc.get_expiry_days(mock_nr)
+    mock_expiry_days = int(nr_svc.get_expiry_days(mock_nr))
 
     assert mock_expiry_days == days
 
