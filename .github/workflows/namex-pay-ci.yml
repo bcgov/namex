@@ -1,9 +1,8 @@
 name: Namex Pay CI
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [assigned, synchronize]
     paths:
       - "services/namex-pay/**"
 
