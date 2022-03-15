@@ -1,8 +1,9 @@
 name: Namex API CI
 
 on:
-  pull_request:
-    types: [assigned, synchronize]
+  push:
+    branches:
+      - main
     paths:
       - "services/namex-pay/**"
 
@@ -58,6 +59,8 @@ jobs:
       DATABASE_TEST_HOST: localhost
       DATABASE_HOST: localhost
       DATABASE_PASSWORD: postgres
+      
+      TEST_NATS_DOCKER: True
 
     runs-on: ubuntu-20.04
 

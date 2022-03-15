@@ -5,7 +5,7 @@ freezegun
 pytest-aiohttp
 pytest-asyncio
 pytest-mock
-requests
+requests==2.25.1
 pyhamcrest
 dpath
 
