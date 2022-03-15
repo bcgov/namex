@@ -27,7 +27,7 @@ class Event(db.Model):
     # relationships
     stateCd = db.Column('state_cd', db.String(20), db.ForeignKey('states.cd'))
     state = db.relationship('State', backref=backref('state_events', uselist=False), foreign_keys=[stateCd])
-    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'))
+    nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
     userId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('User', backref=backref('user_events', uselist=False), foreign_keys=[userId])
 
