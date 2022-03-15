@@ -1,4 +1,4 @@
-name: Namex API CI
+name: Namex Pay CI
 
 on:
   push:
