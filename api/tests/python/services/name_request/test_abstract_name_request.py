@@ -93,7 +93,7 @@ def test_get_expiry_days(client, test_name, days, action_cd, request_type):
     # Set defaults, if these exist in the provided data they will be overwritten
     mock_nr.stateCd = State.APPROVED
     mock_nr.request_action_cd = action_cd
-    mock_nr.request_type_cd = request_type
+    mock_nr.requestTypeCd = request_type
     mock_nr.expirationDate = None
     mock_expiry_days = int(nr_svc.get_expiry_days(mock_nr))
 
