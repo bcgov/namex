@@ -64,7 +64,7 @@ def app():
     print(config)
     _app.config.from_object(get_named_config('testing'))
     _db.init_app(_app)
-    # queue.init_app(_app, asyncio.new_event_loop())
+    queue.init_app(_app, asyncio.new_event_loop())
 
     return _app
 
