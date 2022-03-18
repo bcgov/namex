@@ -15,13 +15,13 @@ utc_tz = gettz('UTC')
 @pytest.mark.parametrize('input_datetime_utc,expected_date_utc,time_offset', [
     (datetime.datetime(2021, 1, 28, 8, 0, 0, tzinfo=utc_tz), datetime.datetime(2021, 3, 26, 6, 59, 0, tzinfo=utc_tz), '-0700'),
     (datetime.datetime(2021, 1, 28, 7, 59, 59, tzinfo=utc_tz), datetime.datetime(2021, 3, 25, 6, 59, 0, tzinfo=utc_tz), '-0700'),
-    
+
     (datetime.datetime(2021, 2, 28, 8, 0, 0, tzinfo=utc_tz), datetime.datetime(2021, 4, 26, 6, 59, 0, tzinfo=utc_tz), '-0700'),
     (datetime.datetime(2021, 2, 28, 7, 59, 59, tzinfo=utc_tz), datetime.datetime(2021, 4, 25, 6, 59, 0, tzinfo=utc_tz), '-0700'),
 
     (datetime.datetime(2021, 3, 28, 7, 0, 0, tzinfo=utc_tz), datetime.datetime(2021, 5, 24, 6, 59, 0, tzinfo=utc_tz), '-0700'),
     (datetime.datetime(2021, 3, 28, 6, 59, 59, tzinfo=utc_tz), datetime.datetime(2021, 5, 23, 6, 59, 0, tzinfo=utc_tz), '-0700'),
-    
+
     (datetime.datetime(2021, 4, 28, 7, 0, 0, tzinfo=utc_tz), datetime.datetime(2021, 6, 24, 6, 59, 0, tzinfo=utc_tz), '-0700'),
     (datetime.datetime(2021, 4, 28, 6, 59, 59, tzinfo=utc_tz), datetime.datetime(2021, 6, 23, 6, 59, 0, tzinfo=utc_tz), '-0700'),
 
@@ -93,7 +93,7 @@ def test_get_expiry_days(client, test_name, days, action_cd, request_type):
     # Set defaults, if these exist in the provided data they will be overwritten
     mock_nr.stateCd = State.APPROVED
     mock_nr.request_action_cd = action_cd
-    mock_nr.request_type_cd = request_type
+    mock_nr.requestTypeCd = request_type
     mock_nr.expirationDate = None
     mock_expiry_days = int(nr_svc.get_expiry_days(mock_nr))
 
