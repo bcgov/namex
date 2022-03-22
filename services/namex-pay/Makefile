@@ -81,7 +81,7 @@ mac-cov: test ## Run the coverage report and display in a browser window (mac)
 # expects export OPENSHIFT_SA_TOKEN="$(oc whoami -t)"
 # expects export OPENSHIFT_REPOSITORY=""
 # expects export TAG_NAME="dev/test/prod"
-# expects export OPS_REPOSITORY=""                                                        #
+# expects export OPS_REPOSITORY=""                                                        
 #################################################################################
 cd: ## CD flow
 ifeq ($(TAG_NAME), test)
