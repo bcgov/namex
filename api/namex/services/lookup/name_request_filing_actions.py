@@ -48,7 +48,7 @@ class NameRequestFilingActions:
     # multiple target systems is not supported
     # multiple filing actions per nr_type is supported
     # NR Type', 'LegalTypeCd', 'LegalTypeName', 'Filing Name', 'Target', 'entitiesFilingName', 'URL', 'learTemplate
-    raw_nr_to_action_mapping =[
+    raw_nr_to_action_mapping = [
         ('CR', 'BC', 'B.C. Company', 'Incorporation', 'colin', None, None, None),
         ('CR', 'BC', 'B.C. Company', 'Amalgamation', 'colin', None, None, None),
         ('CCR', 'BC', 'B.C. Company', 'Change of Name', 'colin', None, None, None),
@@ -66,9 +66,9 @@ class NameRequestFilingActions:
         ('FR_FR', 'SP', 'Sole Proprietorship', 'Registration', 'lear', None, None, None),
         ('FR_DBA', 'SP', 'Sole Proprietorship (DBA)', 'Registration', 'lear', None, None, None),
         ('FR_GP', 'GP', 'General Partnership', 'Registration', 'lear', None, None, None),
-        ('CFR_FR', 'CSP', 'Sole Proprietorship', 'Change of Name', 'lear', None, None, None),
-        ('CFR_DBA', 'CSP', 'Sole Proprietorship (DBA)', 'Change of Name', 'lear', None, None, None),
-        ('CFR_GP', 'CGP', 'General Partnership', 'Change of Name', 'lear', None, None, None),
+        ('CFR_FR', 'SP', 'Sole Proprietorship', 'Change of Name', 'lear', None, None, None),
+        ('CFR_DBA', 'SP', 'Sole Proprietorship (DBA)', 'Change of Name', 'lear', None, None, None),
+        ('CFR_GP', 'GP', 'General Partnership', 'Change of Name', 'lear', None, None, None),
         ('LL', 'LL', 'Limited Liability Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('CLL', 'LL', 'Limited Liability Partnership', 'Change of Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('XLL', 'XP', 'Extraprovincial Limited Liability Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
