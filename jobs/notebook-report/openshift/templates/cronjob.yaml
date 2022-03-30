@@ -97,11 +97,6 @@ objects:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
                         key: WEEKLY_REPORT_NAMEX_RECIPIENTS
-                  - name: WEEKLY_REPORT_RESTRORATION_RECIPIENTS
-                    valueFrom:
-                      secretKeyRef:
-                        name: ${NAME}-${TAG}-secret
-                        key: WEEKLY_REPORT_RESTRORATION_RECIPIENTS
                   - name: EMAIL_SMTP
                     valueFrom:
                       secretKeyRef:

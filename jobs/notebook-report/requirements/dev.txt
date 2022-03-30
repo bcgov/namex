@@ -3,8 +3,16 @@
 
 # Testing
 pytest
+freezegun
+pytest-aiohttp
+pytest-asyncio
+pytest-mock
+requests==2.25.1
+pyhamcrest
+dpath
 
 # Lint and code style
+pydocstyle
 flake8
 flake8-blind-except
 flake8-debugger
@@ -12,3 +20,13 @@ flake8-docstrings
 flake8-isort
 flake8-quotes
 pep8-naming
+
+autopep8
+coverage
+pylint
+pylint-flask
+isort
+pytest-cov
+
+# docker
+lovely-pytest-docker

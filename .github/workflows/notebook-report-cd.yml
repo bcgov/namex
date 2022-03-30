@@ -1,4 +1,4 @@
-name: Notebook Report Job CD
+name: Namex Notebook Report Job CD
 
 on:
   push:
