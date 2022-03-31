@@ -88,7 +88,7 @@ def send_email(subject, filename, emailtype, errormessage):
     email_list = recipients.strip('][').split(', ')
     logging.info('Email recipients list is: %s', email_list)
     server.sendmail(sender_email, email_list, message.as_string())
-    logging.info('Email with subject %s has been sent successfully!', email_list)
+    logging.info('Email with subject %s has been sent successfully!', subject)
     server.quit()
     os.remove(os.getenv('DATA_DIR', '')+filename)
 
