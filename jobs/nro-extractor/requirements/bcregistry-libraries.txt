@@ -1,4 +1,4 @@
-git+https://github.com/ozamani9/namex.git#egg=namex&subdirectory=api
+git+https://github.com/ozamani9/namex.git@10280_expiration_date_bugfix#egg=namex&subdirectory=api
 git+https://github.com/bcgov/namex-payment-api-py-client.git@dev#egg=openapi_client
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
-git+https://github.com/ozamani9/namex.git#egg=queue_common&subdirectory=services/common
+git+https://github.com/ozamani9/namex.git@10280_expiration_date_bugfix#egg=queue_common&subdirectory=services/common
