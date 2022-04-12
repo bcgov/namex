@@ -267,8 +267,8 @@ def get_nr_header(session, nr_num):
 
             current_app.logger.debug(nr)
             current_app.logger.debug('*** TESTING EXPIRATION DATE CHANGE')
-            current_app.logger.debug('BEFORE display nr.expiration_date : {}'.format(nr.nr_expiration))
-            nr.expiration_date = correct_expiration_date(nr.nr_expiration)
+            current_app.logger.debug('BEFORE display nr.expiration_date : {}'.format(nr.expiration_date))
+            nr.expiration_date = correct_expiration_date(nr.expiration_date)
             current_app.logger.debug('AFTER display nr.expiration_date : {}'.format(nr.expiration_date))
 
         return nr
