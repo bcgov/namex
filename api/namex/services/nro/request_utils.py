@@ -215,13 +215,11 @@ def correct_expiration_date(ora_expiration_dt):
     return expiry_date_pst_with_adjusted_time
 
 def get_nr_header(session, nr_num):
-    current_app.logger.debug('*** ENTERING NR HEADER 1 ******')
-    current_app.logger.debug('*** ENTERING NR HEADER 2 ******')
-    current_app.logger.debug('*** ENTERING NR HEADER 3 ******')
     current_app.logger.debug(nr_num)
     # get the NR Header
     #############################
     sql_nr = (
+
         'select  request_id,'
         'nr_num,'
         'previous_request_id,'
@@ -270,11 +268,11 @@ def get_nr_header(session, nr_num):
             nr = {**nr, **(ora_row_to_dict(col_names, row))}
 
             current_app.logger.debug(nr)
-            current_app.logger.debug('*** TESTING EXPIRATION DATE CHANGE')
-            current_app.logger.debug('BEFORE display nr.expiration_date : {}'.format(nr.expiration_date))
-            nr.expiration_date = correct_expiration_date(nr.expiration_date)
-            current_app.logger.debug('AFTER display nr.expiration_date : {}'.format(nr.expiration_date))
-
+            current_app.logger.debug('BEFORE NRO EXPIRATION DATE SET')
+            current_app.logger.debug(nr['expiration_date'])
+            nr['expiration_date'] = correct_expiration_date(nr['expiration_date'])
+            current_app.logger.debug('AFTER CORRECT_EXPIRATION EXPIRATION DATE SET')
+            current_app.logger.debug(nr['expiration_date'])
         return nr
 
     return None
