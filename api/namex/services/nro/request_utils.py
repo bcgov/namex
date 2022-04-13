@@ -200,6 +200,7 @@ def add_applicant(nr, nr_applicant):
 
 def get_nr_header(session, nr_num):
     # get the NR Header
+    # add comment
     #############################
     sql_nr = (
         'select  request_id,'
