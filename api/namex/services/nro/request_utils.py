@@ -2,6 +2,7 @@ import datetime
 import re
 
 from flask import current_app
+from pytz import timezone
 from namex.models import User, State, Comment, PartnerNameSystem, Name, Applicant
 
 from namex.services.nro.utils import ora_row_to_dict
@@ -197,8 +198,27 @@ def add_applicant(nr, nr_applicant):
     applicant.stateProvinceCd = nr_applicant['state_province_cd']
     applicant.countryTypeCd = nr_applicant['country_type_cd']
 
+def correct_expiration_date(ora_expiration_dt):
+    """Correct an expiry date set to 11:59pm Pacific time."""
+
+    if ora_expiration_dt is not None:
+        pacific_tz = timezone('US/Pacific')
+        expiry_hour = 23
+        expiry_min = 59
+        # make it localized back to Pacific time
+        expiry_date_pst_localized = pacific_tz.localize(ora_expiration_dt)
+        # set the time to 11:59pm in Pacific time
+        expiry_date_pst_with_adjusted_time = expiry_date_pst_localized.replace(hour=expiry_hour, minute=expiry_min, second=0, microsecond=0)
+    else:
+        expiry_date_pst_with_adjusted_time = None
+
+    return expiry_date_pst_with_adjusted_time
 
 def get_nr_header(session, nr_num):
+    current_app.logger.debug('*** ENTERING NR HEADER 1 ******')
+    current_app.logger.debug('*** ENTERING NR HEADER 2 ******')
+    current_app.logger.debug('*** ENTERING NR HEADER 3 ******')
+    current_app.logger.debug(nr_num)
     # get the NR Header
     # add comment
     #############################
@@ -251,6 +271,10 @@ def get_nr_header(session, nr_num):
             nr = {**nr, **(ora_row_to_dict(col_names, row))}
 
             current_app.logger.debug(nr)
+            current_app.logger.debug('*** TESTING EXPIRATION DATE CHANGE')
+            current_app.logger.debug('BEFORE display nr.expiration_date : {}'.format(nr.expiration_date))
+            nr.expiration_date = correct_expiration_date(nr.expiration_date)
+            current_app.logger.debug('AFTER display nr.expiration_date : {}'.format(nr.expiration_date))
 
         return nr
 
