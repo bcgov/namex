@@ -1,3 +1,16 @@
+# Copyright © c2021 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import re
 from sqlalchemy import func
 
@@ -6,12 +19,13 @@ from flask_restx import cors
 
 from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight, full_access_to_name_request
-from namex.utils.api_resource import handle_exception, get_query_param_str
+from namex.utils.api_resource import handle_exception
 
 from namex.models import Request, Event, State, Applicant
 from namex.criteria.request import RequestQueryCriteria
 
 from namex.services import EventRecorder
+from namex.services.audit_trail.hotjar_tracking import HotjarTracking
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request.exceptions import \
@@ -26,12 +40,13 @@ from .utils import parse_nr_num
 
 setup_logging()  # Important to do this first
 
-
 @cors_preflight('GET, POST')
 @api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
 class NameRequestsResource(BaseNameRequestResource):
+    """Class to handle all name requests."""
     @cors.crossdomain(origin='*')
     def get(self):
+        """Name request search."""
         try:
             if not full_access_to_name_request(request):
                 return {"message": "You do not have access to this NameRequest."}, 403
@@ -74,15 +89,6 @@ class NameRequestsResource(BaseNameRequestResource):
                     )
                 )
 
-            '''
-            Filter on addresses
-            if address_line:
-                filters.append(
-                    Request.applicants.any(
-                        func.lower(Applicant.addrLine1).startswith(address_line.lower())
-                    )
-                )
-            '''
 
             criteria = RequestQueryCriteria(
                 nr_num=nr_num,
@@ -96,7 +102,7 @@ class NameRequestsResource(BaseNameRequestResource):
 
         except InvalidInputError as err:
             return handle_exception(err, err.message, 400)
-        except Exception as err:
+        except Exception as err: # pylint: disable=broad-except
             return handle_exception(err, 'Error retrieving the NR from the db.', 500)
 
         if nr_num and len(results) == 1:
@@ -134,6 +140,7 @@ class NameRequestsResource(BaseNameRequestResource):
     @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     def post(self):
+        """Create a new name request."""
         try:
             # Creates a new NameRequestService, validates the app config, and sets the request data to the NameRequestService instance
             self.initialize()
@@ -151,6 +158,10 @@ class NameRequestsResource(BaseNameRequestResource):
             # Record the event
             EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_model.json())
 
+            # Record the hotjar user id
+            if self.request_data.get('hotjarUserId'):
+                HotjarTracking.record(nr_model, self.request_data.get('hotjarUserId'))
+
             nr_model.stateCd = State.PENDING_PAYMENT
             nr_model.save_to_db()
 
@@ -167,5 +178,5 @@ class NameRequestsResource(BaseNameRequestResource):
             return jsonify(response_data), 201
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
-        except Exception as err:
+        except Exception as err: # pylint: disable=broad-except
             return handle_exception(err, repr(err), 500)

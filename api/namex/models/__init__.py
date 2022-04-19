@@ -26,3 +26,4 @@ from .word_classification import WordClassification, WordClassificationSchema
 from .virtual_word_condition import VirtualWordCondition
 from .nr_number import NRNumber
 from .payment import Payment
+from .hotjar_tracking import HotjarTracking
