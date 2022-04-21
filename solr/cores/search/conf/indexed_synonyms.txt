@@ -1,0 +1,339 @@
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#-----------------------------------------------------------------------
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Synonym mappings for indexed number variations
+1 st, first=>1st,first
+2 nd, second=>2nd, second
+3 rd,third=>3rd,third
+4 th, fourth=>4th, fourth
+5 th, fifth=>5th, fifth
+6 th, sixth=>6th, sixth
+7 th, seventh, 7th, seventh
+8 th, eighth, 8th, eighth
+9 th, nineth, 9th, nineth
+
+#WORDFRAS FOR RESTRICTED WORDS THAT MUST BE CONVERTED TO SINGLE WORDS
+211 bc=>211bc
+211 services=>211services
+211 society=>211society
+4 h=>4h
+alfa romeo=>alfaromeo
+amyotrophic lateral sclerosis=>amyotrophiclateralsclerosis
+animal clinic=>animalclinic
+animal cruelty=>animalcruelty
+animal hospital=>animalhospital
+b c=>bc
+b c s=>bcs
+ballet company=>balletcompany
+bc 211=>bc211
+bc bar=>bcbar
+bc getaways=>bcgetaways
+bc hydro=>bchydro
+bc online=>bconline
+bc royal=>bcroyal
+bc s=>bcs
+bc tech=>bctech
+bc tec=>bctek
+better business bureau=>betterbusinessbureau
+big bros=>bigbros
+big brothers=>bigbrothers
+bigsisters=>bigsisters
+bishopalexandercartercharitablefund=>bishopalexandercartercharitablefund
+british columbia=>britishcolumbia
+british columbia bar=>britishcolumbiabar
+british columbia bar association=>britishcolumbiabarassociation
+build bc=>buildbc
+c c i=>cci
+c n r=>cnr
+c p=>cp
+c p r=>cpr
+c t=>ct
+c term=>cterm
+canada standard=>canadastandard
+canadas west=>canadaswest
+canadian institute for the blind=>canadianinstitutefortheblind
+canadian national=>canadiannational
+canadian pacific=>canadianpacific
+carlson wagonlit=>carlsonwagonlit
+caterplan services=>caterplanservices
+cdn pacific=>cdnpacific
+century 21=>century21
+century xxi=>centuryxxi
+certified conference interpreter=>certifiedconferenceinterpreter
+certified dental assistant=>certifieddentalassistant
+certified financial planner=>certifiedfinancialplanner
+certified general accountant=>certifiedgeneralaccountant
+certified management accountant=>certifiedmanagementaccountant
+certified management consultant=>certifiedmanagementconsultant
+certified property inspector=>certifiedpropertyinspector
+certified terminologist=>certifiedterminologist
+certified translator=>certifiedtranslator
+chartered accountant=>charteredaccountant
+chartered accountants=>charteredaccountants
+chartered professional accountant=>charteredprofessionalaccountant
+chartered professional accountants=charteredprofessionalaccountants
+chinese medicine=>chinesemedicine
+citizens advocacy=>citizensadvocacy
+cop op=>coop
+co operative=>cooperative
+co operatives=>cooperatives
+coldwell banker=>coldwellbanker
+colin liam beechinor=>colinliambeechinor
+colin smile=>colin smile
+colins smile=>colinssmile
+commonwealth society=>commonwealthsociety
+community chest=>communitychest
+community contribution company=>communitycontributioncompany
+consulting engineer=>consultingengineer
+contact lens fitter=>contactlensfitter
+contact lens fitters=>contactlensfitters
+coquihalla highway=>coquihallahighway
+country wide=>countrywide
+county court=>countycourt
+credit union=>creditunion
+cruelty to animals=>crueltytoanimals
+d v m=>dvm
+de fiducie=>defiducie
+dental clinic=>dentalclinic
+dental hygiene=>dentalhygiene
+dental hygienist=>dentalhygienist
+dental lab=>dentallab
+dental laboratory=>dentallaboratory
+dental mechanic=>dentalmechanic
+dental studio=>dentalstudio
+dental tech=>dentaltech
+dental technician=>dentaltechnician
+dispensing optician=>dispensingoptician
+doctor of podiatric medicine=>doctorofpodiatricmedicine
+doctor of traditional chinese medicine=>doctoroftraditionalchinesemedicine
+dominion lending centre=>dominionlendingcentre
+drugless healer=>druglesshealer
+drugless physician=>druglessphysician
+e bank=>ebank
+e comm or emergency communications=>ecommoremergencycommunications
+earth science=>earthscience
+emergency medical assistant=>emergencymedicalassistant
+emily carr=>emilycarr
+environmental geology=>environmentalgeology
+environmental geoscience=>environmentalgeoscience
+european common market=>europeancommonmarket
+exploration geosciene=>explorationgeosciene
+farmers institute=>farmersinstitute
+follow the birds to victoria=>followthebirdstovictoria
+forester in training=>foresterintraining
+general practitioner=>generalpractitioner
+grand trunk=>grandtrunk
+hearing aid=>hearingaid
+hearing instrument practitioner=>hearinginstrumentpractitioner
+homelife benchmark=>homelifebenchmark
+hudsons bay company=>hudsonsbaycompany
+imperial oil=>imperialoil
+informaticien professionnel agree du canada=>informaticienprofessionnelagreeducanada
+information systems professional of canada=>informationsystemsprofessionalofcanada
+ingenieur consiel=>ingenieurconsiel
+institute for the blind=>institutefortheblind
+intermediate care=>intermediatecare
+klu klux klan=>klukluxklan
+knights of malta=>knightsofmalta
+l imperiale=>limperiale
+land survey=>landsurvey
+land surveying=>landsurveying
+land surveyor=>landsurveyor
+landscape architect=>landscapearchitect
+landscape architecture=>landscapearchitecture
+law corporation=>lawcorporation
+law enforcement=>lawenforcement
+legal ease=>legalease
+legal service=>legalservice
+licensed graduate nurse=>licensedgraduatenurse
+licensed graduate psychiatric nurse=>licensedgraduatepsychiatricnurse
+licensed practical nurse=>licensedpracticalnurse
+limited liability corporation=>limitedliabilitycorporation
+lions club=>lionsclub
+lou gehrigs disease=>lougehrigsdisease
+macdonald realt=>macdonaldrealt
+mack truck=>macktruck
+massage practitioner=>massagepractitioner
+massage therapist=>massagetherapist
+massage therapy=>massagetherapy
+multiple listing service=>multiplelistingservice
+national institute for the blind=>nationalinstitutefortheblind
+national real estate service=>national realestateservice
+national realestate service=>nationalrealestateservice
+nationalist party of canada=>nationalistpartyofcanada
+natural medicine=>naturalmedicine
+naturopathic medicine=>naturopathicmedicine
+naturopathic physician=>naturopathicphysician
+neighborhood watch=>neighborhoodwatch
+neighbourhood watch=>neighbourhoodwatch
+new brunswick=>newbrunswick
+new democratic=>newdemocratic
+northwest territorities=>northwestterritorities
+notaries public=>notariespublic
+notary public=>notarypublic
+nova scotia=>novascotia
+occupational therapist=>occupationaltherapist
+occupational therapy=>occupationaltherapy
+od fellow=>odfellow
+odd fellow=>oddfellow
+odd felow=>oddfelow
+optometric corporation=>optometriccorporation
+orange lodge=>orangelodge
+order of malta=>orderofmalta
+p eng=>peng
+pacific place=>pacificplace
+pci realty=>pcirealty
+personal law=>personallaw
+pet clinic=>petclinic
+pet hospital=>pethospital
+petroleum geoscience=>petroleumgeoscience
+petroliere imperiale=>petroliereimperiale
+physical therapist=>physicaltherapist
+pic a flic=>picaflic
+pick a flic=>pickaflic
+pick a flick=>pickaflick
+pik a flic=>pikaflic
+please note format brackets must be around vcc sbvcc=>pleasenoteformatbracketsmustbearoundvccsbvcc
+podiatric doctor=>podiatricdoctor
+podiatric dr=>podiatricdr
+port of prince rupert=>portofprincerupert
+port of vancouver=>portofvancouver
+post office=>postoffice
+prince edward island=>princeedwardisland
+professional accountant=>professionalaccountant
+professional agriculturist=>professionalagriculturist
+professional engineer=>professionalengineer
+professional forester=>professionalforester
+provincial court=>provincialcourt
+psychological associate=>psychologicalassociate
+quaternary geology=>quaternarygeology
+r pharm=>rpharm
+r c m p=>rcmp
+r h i=>rhi
+r ph=>rph
+rd star=>rdstar
+realty executives=>realtyexecutives
+realty world=>realtyworld
+reg ot bc=>regotbc
+regional board=>regionalboard
+regional district=>regionaldistrict
+registered aromatherapist=>registeredaromatherapist
+registered audiologist=>registeredaudiologist
+registered cardiology technician=>registeredcardiologytechnician
+registered cardiology technologist=>registeredcardiologytechnologist
+registered certified professional purchaser=>registeredcertifiedprofessionalpurchaser
+registered certified professional purchaser rcpp=>registered ertifiedprofessionalpurchaserrcpp
+registered certified professional residential property manag=>registeredcertifiedprofessionalresidentialpropertymanag
+registered communication disorders specialist=>registeredcommunicationdisordersspecialist
+registered dental technician=>registereddentaltechnician
+registered dietitian=>registereddietitian
+registered dietitian nutritionists=>registereddietitiannutritionists
+registered electrologist=>registeredelectrologist
+registered environmental health officer=>registeredenvironmentalhealthofficer
+registered home inspector=>registeredhomeinspector
+registered industrial accountant=>registeredindustrialaccountant
+registered interior designer=>registeredinteriordesigner
+registered massage practice=>registeredmassagepractice
+registered massage practitioner=>registeredmassagepractitioner
+registered massage therapist=>registeredmassagetherapist
+registered massage therapy=>registeredmassagetherapy
+registered medical office assistant=>registeredmedicalofficeassistant
+registered music teacher=>registeredmusicteacher
+registered nurse=>registerednurse
+registered nurse practitioner=>registerednursepractitioner
+registered nutritionist=>registerednutritionist
+registered occupational therapists bc=>registeredoccupationaltherapistsbc
+registered physiotherapist=>registeredphysiotherapist
+registered planner=>registeredplanner
+registered professional biologist=>registeredprofessionalbiologist
+registered professional consulting archaeologist=>registeredprofessionalconsultingarchaeologist
+registered psychiatric nurse=>registeredpsychiatricnurse
+registered psychological associate=>registeredpsychologicalassociate
+registered psychologist=>registeredpsychologist
+registered public health inspector=>registeredpublichealthinspector
+registered remedial gymnast=>registeredremedialgymnast
+registered respiratory technologist=>registeredrespiratorytechnologist
+registered respiratory technologist rrt=>registeredrespiratorytechnologistrrt
+registered respiratory therapists rrt=>registeredrespiratorytherapistsrrt
+registered respiratory therpists=>registeredrespiratorytherpists
+registered shiatsu therapist=>registeredshiatsutherapist
+registered social worker=>registeredsocialworker
+registered speech language pathologist=>registeredspeechlanguagepathologist
+registered speech language therapist=>registeredspeechlanguagetherapist
+registered speech pathologist=>registeredspeechpathologist
+registered speech therapist=>registeredspeechtherapist
+registered voice therapist=>registeredvoicetherapist
+remedial gymnast=>remedialgymnast
+richmond asia=>richmondasia
+richmond asia pacific=>richmondasiapacific
+rid charter=>ridcharter
+rid fellow=>ridfellow
+roberts bank=>robertsbank
+royal bc=>royalbc
+royal canadian=>royalcanadian
+royal canadian institute for the blind=>royalcanadianinstitutefortheblind
+royal canadian legion=>royalcanadianlegion
+royal canadian mounted police=>royalcanadianmountedpolice
+royal lepage=>royallepage
+rp bio=>rpbio
+savings and loan=>savingsandloan
+shining light=>shininglight
+slave labour=>slavelabour
+social credit=>socialcredit
+social worker=>socialworker
+speech language=>speechlanguage
+summer games=>summergames
+super natural=>supernatural
+supreme court=>supremecourt
+sussex group=>sussexgroup
+sutton group=>suttongroup
+the blind=>theblind
+the blind institute=>theblindinstitute
+the body shop=>thebodyshop
+the british columbia bar association=>thebritishcolumbiabarassociation
+the mortgage centre=>themortgagecentre
+the shining light=>theshininglight
+theatre company=>theatrecompany
+therapeutic massage=>therapeuticmassage
+traditional chinese medicine herbalist=>traditionalchinesemedicineherbalist
+traditional chinese medicine practitioner=>traditionalchinesemedicinepractitioner
+tsawwassen homeowners=>tsawwassenhomeowners
+tsawwassen homeowners association=>tsawwassenhomeownersassociation
+u of=>uof
+uniglobe travel=>uniglobetravel
+united way=>unitedway
+university college=>universitycollege
+university of northern british columbia=>universityofnorthernbritishcolumbia
+university of victoria=>universityofvictoria
+unlimited liability company=>unlimitedliabilitycompany
+vancouver port=>vancouverport
+western command=>westerncommand
+white cane=>whitecane
+winter games=>wintergames
+wise mart=>wisemart
+wise store=>wisestore
+
+
+
