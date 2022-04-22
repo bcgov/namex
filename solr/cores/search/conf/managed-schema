@@ -45,7 +45,7 @@
     that avoids logging every request
 -->
 
-<schema name="example-basic" version="1.6">
+<schema name="search" version="1.6">
     <!-- attribute "name" is the name of this schema and is only used for display purposes.
        version="x.y" is Solr's version number for the schema syntax and 
        semantics.  It should not normally be changed by applications.
@@ -124,8 +124,9 @@
 	
     <field name="identifier" type="string" stored="true" required="true" indexed="true" multiValued="false" />
     <field name="legal_name" type="text_en_splitting" stored="true" required="true" indexed="true" multiValued="false" termVectors="true" />
-    <field name="legal_type" type="string" stored="true" required="true" indexed="false" multiValued="false" />
-    <field name="state" type="string" stored="true" required="true" indexed="false" multiValued="false" />
+    <field name="legal_type" type="string" stored="true" required="true" indexed="true" multiValued="false" docValues="true" />
+    <field name="state" type="string" stored="true" required="true" indexed="true" multiValued="false" docValues="true" />
+    <field name="tax_id" type="string" stored="true" indexed="false" multiValued="false" />
 
     <!-- fields created for namex (reused and edited) -->
     <field name="name_copy" type="text_name_copy" multiValued="false" indexed="true" stored="true"/>
