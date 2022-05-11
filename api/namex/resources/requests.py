@@ -367,11 +367,16 @@ class Requests(Resource):
     # noinspection PyUnusedLocal,PyUnusedLocal
     @api.expect(a_request)
     @cors.crossdomain(origin='*')
-    @jwt.requires_auth
+    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
     def post(self, *args, **kwargs):
+        json_input = request.get_json()
+        if not json_input or json_input:
+            return jsonify({'message': 'No input data provided'}), 400
 
-        current_app.logger.info('Someone is trying to post a new request')
-        return jsonify({'message': 'Not Implemented'}), 501
+        nr_numbers = [nr_number.upper() for nr_number in json_input]
+        requests = RequestDAO.query.filter(RequestDAO.nrNum.in_(nr_numbers)).all()
+        requests = [request.json() for request in requests]
+        return jsonify(requests)
 
 
 # noinspection PyUnresolvedReferences
