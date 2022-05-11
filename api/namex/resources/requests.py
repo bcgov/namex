@@ -370,7 +370,7 @@ class Requests(Resource):
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
     def post(self, *args, **kwargs):
         json_input = request.get_json()
-        if not json_input or json_input:
+        if not json_input:
             return jsonify({'message': 'No input data provided'}), 400
 
         nr_numbers = [nr_number.upper() for nr_number in json_input]
