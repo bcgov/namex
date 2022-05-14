@@ -1,11 +1,11 @@
-name: Namex API CD
+name: SOLR CD
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "solr/**"
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - "solr/**"
   workflow_dispatch:
     inputs:
       environment:
