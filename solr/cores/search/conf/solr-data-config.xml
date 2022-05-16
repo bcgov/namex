@@ -10,7 +10,7 @@
             name="lear"
             dataSource="lear-ds"
             pk="id"
-            query="SELECT identifier,legal_name,legal_type,state,tax_id FROM businesses"
+            query="SELECT identifier,legal_name as name,legal_type as legalType,state as status,tax_id as bn FROM businesses"
         />
     </document>
 </dataConfig>

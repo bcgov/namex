@@ -123,11 +123,11 @@
     <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
 	
     <!-- base fields for search -->
-    <field name="identifier" type="string" stored="true" required="true" indexed="true" />
-    <field name="legal_name" type="string" stored="true" required="true" indexed="true" />
-    <field name="legal_type" type="string" stored="true" required="true" indexed="true" docValues="true" />
-    <field name="state" type="string" stored="true" required="true" indexed="true" docValues="true" />
-    <field name="tax_id" type="string" stored="true" indexed="true" />
+    <field name="identifier" type="text_basic" stored="true" required="true" indexed="true" />
+    <field name="name" type="text_basic" stored="true" required="true" indexed="true" />
+    <field name="legalType" type="string" stored="true" required="true" indexed="true" docValues="true" />
+    <field name="status" type="string" stored="true" required="true" indexed="true" docValues="true" />
+    <field name="bn" type="text_basic" stored="true" indexed="true" />
 
     <!-- fields for suggestions/selects -->
     <field name="name_suggest" type="phrase_basic" indexed="true" stored="true" />
@@ -138,7 +138,7 @@
 
     <field name="identifier_select" type="phrase_ngram" indexed="true" stored="true" />
 
-    <field name="tax_id_select" type="phrase_ngram" indexed="true" stored="true" />
+    <field name="bn_select" type="phrase_ngram" indexed="true" stored="true" />
 
     <field name="weight" type="float" indexed="true" stored="true" />
 
@@ -155,19 +155,37 @@
     </fieldType>
 
     <fieldType class="solr.TextField" name="text_stemmed" positionIncrementGap="100">
-      <analyzer>
+      <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory" />
         <filter class="solr.StandardFilterFactory" />
         <filter class="solr.LowerCaseFilterFactory" />
-        <filter class="solr.EnglishMinimalStemFilterFactory"/>
+        <filter class="solr.WordDelimiterGraphFilterFactory" catenateAll="1" splitOnNumerics="0" generateWordParts="0" generateNumberParts="0" />
+        <filter class="solr.FlattenGraphFilterFactory" />
+        <filter class="solr.EnglishMinimalStemFilterFactory" />
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <filter class="solr.StandardFilterFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.WordDelimiterGraphFilterFactory" catenateAll="1" splitOnNumerics="0" generateWordParts="0" generateNumberParts="0" />
+        <filter class="solr.EnglishMinimalStemFilterFactory" />
       </analyzer>
     </fieldType>
 
     <fieldType class="solr.TextField" name="text_stemmed_agro" positionIncrementGap="100">
-      <analyzer>
+      <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory" />
         <filter class="solr.StandardFilterFactory" />
         <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.WordDelimiterGraphFilterFactory" catenateAll="1" splitOnNumerics="0" generateWordParts="0" generateNumberParts="0" />
+        <filter class="solr.FlattenGraphFilterFactory" />
+        <filter class="solr.PorterStemFilterFactory" />
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <filter class="solr.StandardFilterFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.WordDelimiterGraphFilterFactory" catenateAll="1" splitOnNumerics="0" generateWordParts="0" generateNumberParts="0" />
         <filter class="solr.PorterStemFilterFactory" />
       </analyzer>
     </fieldType>
@@ -176,11 +194,14 @@
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.WordDelimiterGraphFilterFactory" catenateAll="1" splitOnNumerics="0" generateWordParts="0" generateNumberParts="0" />
+        <filter class="solr.FlattenGraphFilterFactory" />
         <filter class="solr.NGramFilterFactory" minGramSize="1" maxGramSize="15" />
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.WordDelimiterGraphFilterFactory" catenateAll="1" splitOnNumerics="0" generateWordParts="0" generateNumberParts="0" />
       </analyzer>
     </fieldType>
 
@@ -205,7 +226,12 @@
     </fieldType>
 
     <fieldType class="solr.TextField" name="phrase_basic" positionIncrementGap="100">
-      <analyzer>
+      <analyzer type="index">
+        <tokenizer class="solr.KeywordTokenizerFactory" />
+        <filter class="solr.StandardFilterFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+      </analyzer>
+      <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory" />
         <filter class="solr.StandardFilterFactory" />
         <filter class="solr.LowerCaseFilterFactory" />
@@ -216,11 +242,14 @@
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.WordDelimiterGraphFilterFactory" catenateAll="1" splitOnNumerics="0" generateWordParts="0" generateNumberParts="0" />
+        <filter class="solr.FlattenGraphFilterFactory" />
         <filter class="solr.NGramFilterFactory" minGramSize="3" maxGramSize="15" />
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.WordDelimiterGraphFilterFactory" catenateAll="1" splitOnNumerics="0" generateWordParts="0" generateNumberParts="0" />
       </analyzer>
     </fieldType>
 
@@ -230,13 +259,13 @@
 
     <copyField source="sourceFieldName" dest="destinationFieldName"/>
     -->
-    <copyField source="legal_name" dest="name_suggest"/>
-    <copyField source="legal_name" dest="name_select"/>
-    <copyField source="legal_name" dest="name_single_term"/>
-    <copyField source="legal_name" dest="name_stem_agro"/>
-    <copyField source="legal_name" dest="name_synonym"/>
+    <copyField source="name" dest="name_suggest"/>
+    <copyField source="name" dest="name_select"/>
+    <copyField source="name" dest="name_single_term"/>
+    <copyField source="name" dest="name_stem_agro"/>
+    <copyField source="name" dest="name_synonym"/>
     <copyField source="identifier" dest="identifier_select"/>
-    <copyField source="tax_id" dest="tax_id_select"/>
+    <copyField source="bn" dest="bn_select"/>
 
     <!-- field type definitions. The "name" attribute is
        just a label to be used by field definitions.  The "class"
