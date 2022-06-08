@@ -1,16 +1,41 @@
 <dataConfig>
-    <dataSource
-        name="lear-ds"
-        type="com.s24.search.solr.analysis.jdbc.DataImportJdbcDataSource"
-        dataSource="jdbc/lear"
-    />
+  <dataSource
+    name="lear-ds"
+    type="com.s24.search.solr.analysis.jdbc.DataImportJdbcDataSource"
+    dataSource="jdbc/lear"
+  />
 
-    <document>
-        <entity
-            name="lear"
-            dataSource="lear-ds"
-            pk="id"
-            query="SELECT identifier,legal_name as name,legal_type as legalType,state as status,tax_id as bn FROM businesses"
-        />
-    </document>
+  <dataSource
+    name="colin-ds"
+    type="com.s24.search.solr.analysis.jdbc.DataImportJdbcDataSource"
+    dataSource="jdbc/colin"
+  />
+
+  <document>
+    <entity
+      name="lear"
+      dataSource="lear-ds"
+      pk="id"
+      query="SELECT identifier,legal_name as name,legal_type as legalType,state as status,tax_id as bn
+        FROM businesses
+        WHERE legal_type in ('BEN', 'CP', 'SP', 'GP')"
+    />
+    <entity
+      name="colin"
+      dataSource="colin-ds"
+      query="SELECT c.corp_num as identifier,c.corp_typ_cd as legalType,c.bn_15 as bn,
+          CASE cs.state_typ_cd
+            when 'ACT' then 'ACTIVE' when 'HIS' then 'HISTORICAL' when 'HLD' then 'LIQUIDATION'
+            else cs.state_typ_cd END as status,
+          cn.corp_nme as name
+        FROM corporation c
+          join corp_state cs on cs.corp_num = c.corp_num
+          join corp_name cn on cn.corp_num = c.corp_num
+        WHERE c.corp_typ_cd not in ('BEN','CP','GP','SP')
+          and cs.end_event_id is null
+          and cn.end_event_id is null
+          and cn.corp_name_typ_cd in ('CO', 'NB')"
+    >
+    </entity>
+  </document>
 </dataConfig>
