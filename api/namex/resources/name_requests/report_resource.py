@@ -242,10 +242,10 @@ class ReportResource(Resource):
             },
             'GP': {
                'NEW': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business">'
-                        'BC Registeries and Online Services'
+                        'BC Registries and Online Services'
                      '</a> for more information',
-               'DEFAULT': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business>'
-                          'BC Registeries and Online Services</a> for more information. To learn more, visit '
+               'DEFAULT': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business">'
+                          'BC Registries and Online Services</a> for more information. To learn more, visit '
                           '<a href="https://www2.gov.bc.ca/gov/content/employment-business/business/'
                           'managing-a-business/permits-licences/businesses-incorporated-companies/'
                           'proprietorships-partnerships/making-changes">Making Changes to your Proprietorship or'
