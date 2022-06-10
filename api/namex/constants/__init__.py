@@ -498,7 +498,7 @@ class NameRequestPaymentActions(AbstractEnum):
 
 
 class NameRequestPendingPaymentActions(AbstractEnum):
-    CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
+    # CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
     RETRY_PAYMENT = NameRequestActions.RETRY_PAYMENT.value
 
 

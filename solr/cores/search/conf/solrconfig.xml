@@ -737,7 +737,8 @@
     <lst name="defaults">
       <str name="echoParams">explicit</str>
       <int name="rows">10</int>
-      <!-- <str name="df">text</str> -->
+      <str name="wt">json</str>
+      <str name="indent">true</str>
     </lst>
     <!-- In addition to defaults, "appends" params can be specified
          to identify values which should be appended to the list of
@@ -1151,6 +1152,32 @@
     </highlighting>
   </searchComponent>
 
+  <searchComponent name="suggest" class="solr.SuggestComponent">
+    <lst name="suggester">
+      <str name="name">name</str>
+      <str name="field">name_suggest</str>
+      <str name="lookupImpl">BlendedInfixLookupFactory</str>
+      <str name="blenderType">position_linear</str>
+      <str name="weightFieldValue">weight</str>
+      <str name="suggestAnalyzerFieldType">text_stemmed</str>
+      <str name="highlight">false</str>
+      <str name="buildOnCommit">false</str>
+      <str name="buildOnStartup">false</str>
+    </lst>
+  </searchComponent>
+
+  <requestHandler name="/suggest" class="solr.SearchHandler" startup="lazy">
+    <lst name="defaults">
+      <str name="wt">json</str>
+      <str name="indent">true</str>
+      <str name="suggest">true</str>
+      <str name="suggest.dictionary">name</str>
+      <str name="suggest.count">10</str>
+    </lst>
+    <arr name="components">
+      <str>suggest</str>
+    </arr>
+  </requestHandler>
   <!-- Update Processors
 
        Chains of Update Processor Factories for dealing with Update
