@@ -1,7 +1,10 @@
 name: Inprogress Update Job CI
 
 on:
-  push:
+  pull_request:
+    types: [assigned, synchronize]
+    paths:
+      - "jobs/inprogress_update/**"
 
 defaults:
   run:
@@ -11,9 +14,9 @@ defaults:
 jobs:
   setup-job:
     runs-on: ubuntu-20.04
-    
+
     if: github.repository == 'bcgov/namex'
-    
+
     steps:
       - uses: actions/checkout@v2
       - run: "true"
@@ -75,7 +78,7 @@ jobs:
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
-    steps:    
+    steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
@@ -106,4 +109,3 @@ jobs:
         id: build
         run: |
           make build-nc
-
