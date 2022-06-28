@@ -1,25 +1,27 @@
 import json
-
 from datetime import datetime, timedelta
-from dateutil import parser as dateutil_parser
 
-from flask import current_app, request, make_response, jsonify
-from flask_restx import cors, fields
+from dateutil import parser as dateutil_parser
+from flask import current_app, jsonify, make_response, request
 from flask_jwt_oidc import AuthError
+from flask_restx import cors, fields
 
 from namex import jwt, nro
-from namex.constants import PaymentState, PaymentStatusCode, NameRequestActions
-from namex.models import Request as RequestDAO, Payment as PaymentDAO, State, Event, User
+from namex.constants import NameRequestActions, PaymentState, PaymentStatusCode
+from namex.models import Event
+from namex.models import Payment as PaymentDAO
+from namex.models import Request as RequestDAO
+from namex.models import State, User
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions
-from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-from namex.services.payment.payments import get_payment, create_payment, refund_payment, cancel_payment
+from namex.services.name_request.utils import get_active_payment, has_active_payment
+from namex.services.payment.exceptions import PaymentServiceError, SBCPaymentError, SBCPaymentException
 from namex.services.payment.models import PaymentRequest
-from namex.services.name_request.utils import has_active_payment, get_active_payment
-from namex.utils.logging import setup_logging
-from namex.utils.auth import cors_preflight, validate_roles
+from namex.services.payment.payments import cancel_payment, create_payment, get_payment, refund_payment
 from namex.utils.api_resource import clean_url_path_param, handle_exception
+from namex.utils.auth import cors_preflight, validate_roles
+from namex.utils.logging import setup_logging
 
 from .api_namespace import api as payment_api
 from .utils import build_payment_request, merge_payment_request
@@ -120,31 +122,141 @@ payment_request_schema = payment_api.model('PaymentRequest', {
 
 @payment_api.errorhandler(AuthError)
 def handle_auth_error(ex):
+    """Handle auth error."""
     response = jsonify(ex.error)
     response.status_code = ex.status_code
     return response
 
 
 def custom_strftime_suffix(d):
+    """Custom time with suffix."""
     return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
 
 
 def custom_strftime(dt_format, t):
+    """Custom time."""
     return t.strftime(dt_format).replace('{S}', str(t.day) + custom_strftime_suffix(t.day))
 
 
 def format_payment_time(dt):
+    """Format payment time."""
     return dt.strftime('%b %d, %Y')
 
 
 def map_receipt(receipt):
+    """Map receipt."""
     if isinstance(receipt['receiptDate'], str):
         receipt['receiptDate'] = format_payment_time(dateutil_parser.parse(receipt['receiptDate']))
 
     return receipt
 
 
+def handle_payment_response(payment_action, payment_response, payment, nr_id, nr_model, nr_svc):
+    """Handle payment response."""
+    try:
+        successful_status_list = [
+            PaymentStatusCode.APPROVED.value,
+            PaymentStatusCode.CREATED.value,
+            PaymentStatusCode.COMPLETED.value
+        ]
+        if payment_response.statusCode in successful_status_list:
+            # Update the payment info to Postgres
+            payment.payment_token = str(payment_response.id)
+            # namex-pay will set payment_status_code to completed state after actioning it on the queue
+            payment.payment_status_code = payment_response.statusCode
+            payment.save_to_db()
+
+            # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
+            # TODO: send email / furnish payment for these
+            if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
+                if payment_action in [PaymentDAO.PaymentActions.CREATE.value, PaymentDAO.PaymentActions.RESUBMIT.value]:  # pylint: disable=R1705
+                    if nr_model.stateCd == State.PENDING_PAYMENT:
+                        nr_model.stateCd = State.DRAFT
+                    payment.payment_completion_date = datetime.utcnow()
+
+                elif payment_action == PaymentDAO.PaymentActions.UPGRADE.value:
+                    # TODO: handle this (refund payment and prevent action?)
+                    if nr_model.stateCd == State.PENDING_PAYMENT:
+                        msg = f'Upgrading a non-DRAFT NR for payment.id={payment.id}'
+                        current_app.logger.debug(msg)
+
+                    nr_model.priorityCd = 'Y'
+                    nr_model.priorityDate = datetime.utcnow()
+                    payment.payment_completion_date = datetime.utcnow()
+
+                elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
+                    # TODO: handle this (refund payment and prevent action?)
+
+                    # the `nr_model.expirationDate` is been set from nro with timezone info
+                    # and `datetime.utcnow()` does not return with timezone info `+00:00`
+                    # replacing timezone info to None in `nr_model.expirationDate` to avoid
+                    # this error: `can't compare offset-naive and offset-aware datetimes`
+                    if nr_model.stateCd != State.APPROVED \
+                            and nr_model.expirationDate.replace(tzinfo=None) + \
+                            timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
+                        msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
+                        current_app.logger.debug(msg)
+                    expiry_days = int(nr_svc.get_expiry_days(nr_model))
+                    nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
+                    payment.payment_completion_date = datetime.utcnow()
+
+                nr_model.save_to_db()
+                payment.save_to_db()
+                EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
+                if payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
+                    change_flags = {
+                        'is_changed__request': True,
+                        'is_changed__previous_request': False,
+                        'is_changed__applicant': False,
+                        'is_changed__address': False,
+                        'is_changed__name1': False,
+                        'is_changed__name2': False,
+                        'is_changed__name3': False,
+                        'is_changed__nwpta_ab': False,
+                        'is_changed__nwpta_sk': False,
+                        'is_changed__request_state': False,
+                        'is_changed_consent': False
+                    }
+                    warnings = nro.change_nr(nr_model, change_flags)
+                    if warnings:
+                        # log error for ops, but return success (namex is still up to date)
+                        msg = f'API Error: Unable to update NRO for {nr_model.nrNum} {payment_action}: {warnings}'
+                        current_app.logger.error(msg)
+
+            else:
+                # Record the event
+                EventRecorder.record(nr_svc.user, Event.POST + f' [payment created] { payment_action }', nr_model, nr_model.json())
+
+            # Wrap the response, providing info from both the SBC Pay response and the payment we created
+            data = jsonify({
+                'id': payment.id,
+                'nrId': payment.nrId,
+                'nrNum': nr_model.nrNum,
+                'token': payment.payment_token,
+                'statusCode': payment.payment_status_code,
+                'action': payment.payment_action,
+                'completionDate': payment.payment_completion_date,
+                'payment': payment.as_dict(),
+                'sbcPayment': payment_response.as_dict(),
+                'isPaymentActionRequired': payment_response.isPaymentActionRequired
+            })
+
+            response = make_response(data, 201)
+            return response
+        # something went wrong with status code above
+        else:
+            # log actual status code
+            current_app.logger.error('Error with status code. Actual status code: ' + payment_response.statusCode)
+            EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
+            # return generic error status to the front end
+            return jsonify(message=f'Name Request {nr_id} encountered an error'), 402
+    except Exception as err:
+        current_app.logger.error(err.with_traceback(None))
+        EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
+        return jsonify(message=f'Name Request {nr_id} encountered an error'), 500
+
 class PaymentNameRequestResource(AbstractNameRequestResource):
+    """Name request payment resoure endpoint."""
     @staticmethod
     def approve_nr(nr, svc):
         """
@@ -165,9 +277,12 @@ class PaymentNameRequestResource(AbstractNameRequestResource):
 @payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @payment_api.doc(params={
 })
+
 class FindNameRequestPayments(PaymentNameRequestResource):
+    """Find name request payments endpoints."""
     @cors.crossdomain(origin='*')
     def get(self, nr_id):
+        """Get endpoint."""
         try:
             nr_model = RequestDAO.query.get(nr_id)
             nr_payments = nr_model.payments.all()
@@ -229,7 +344,9 @@ class FindNameRequestPayments(PaymentNameRequestResource):
 @payment_api.route('/<int:nr_id>/<string:payment_action>', strict_slashes=False, methods=['POST', 'OPTIONS'])
 @payment_api.doc(params={
 })
+
 class CreateNameRequestPayment(AbstractNameRequestResource):
+    """Create name request payment endpoints."""
     @cors.crossdomain(origin='*')
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
@@ -256,10 +373,10 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return jsonify(message='Name Request {nr_id} not found'.format(nr_id=nr_id)), 400
+                return jsonify(message=f'Name Request {nr_id} not found'), 400
 
             if not payment_action:
-                return jsonify(message='Invalid payment action, {action} not found'.format(action=payment_action)), 400
+                return jsonify(message=f'Invalid payment action, {payment_action} not found'), 400
 
             valid_payment_action = payment_action in [
                 NameRequestActions.CREATE.value,
@@ -269,20 +386,32 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             ]
 
             if not valid_payment_action:
-                return jsonify(message='Invalid payment action [{action}]'.format(action=payment_action)), 400
+                return jsonify(message=f'Invalid payment action [{payment_action}]'), 400
 
             # We only handle payments if the NR is in the following states
             valid_payment_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED,
                                     State.PENDING_PAYMENT]
             valid_nr_state = nr_model.stateCd in valid_payment_states
             if not valid_nr_state:
-                return jsonify(message='Invalid NR state'.format(action=payment_action)), 400
+                return jsonify(message=f'Invalid NR state [{payment_action}]'), 400
 
             if valid_payment_action and valid_nr_state:
                 if payment_action in [NameRequestActions.CREATE.value, NameRequestActions.RESUBMIT.value]:
                     # Save the record to NRO, which swaps the NR-L Number for a real NR
                     update_solr = True
                     nr_model = self.add_records_to_network_services(nr_model, update_solr)
+
+            existing_payment = PaymentDAO.find_by_existing_nr_id(nr_id, payment_action)
+            if existing_payment :
+                # if we already have a payment record, we can request existing payment status and return it
+                # get the payment status from Pay API
+                payment_response = get_payment(existing_payment.payment_token)
+                return handle_payment_response(payment_action,
+                                               payment_response,
+                                               existing_payment,
+                                               nr_id,
+                                               nr_model,
+                                               nr_svc)
 
             json_input = request.get_json()
             payment_request = {}
@@ -346,107 +475,12 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             payment.save_to_db()
 
             payment_response = create_payment(req.as_dict(), headers)
-            try:
-                successful_status_list = [
-                    PaymentStatusCode.APPROVED.value,
-                    PaymentStatusCode.CREATED.value,
-                    PaymentStatusCode.COMPLETED.value
-                ]
-                if payment_response.statusCode in successful_status_list:
-                    # Update the payment info to Postgres
-                    payment.payment_token = str(payment_response.id)
-                    # namex-pay will set payment_status_code to completed state after actioning it on the queue
-                    payment.payment_status_code = payment_response.statusCode
-                    payment.save_to_db()
-
-                    # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
-                    # TODO: send email / furnish payment for these
-                    if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
-                        if payment_action in [PaymentDAO.PaymentActions.CREATE.value, PaymentDAO.PaymentActions.RESUBMIT.value]:  # pylint: disable=R1705
-                            if nr_model.stateCd == State.PENDING_PAYMENT:
-                                nr_model.stateCd = State.DRAFT
-                            payment.payment_completion_date = datetime.utcnow()
-
-                        elif payment_action == PaymentDAO.PaymentActions.UPGRADE.value:
-                            # TODO: handle this (refund payment and prevent action?)
-                            if nr_model.stateCd == State.PENDING_PAYMENT:
-                                msg = f'Upgrading a non-DRAFT NR for payment.id={payment.id}'
-                                current_app.logger.debug(msg)
-
-                            nr_model.priorityCd = 'Y'
-                            nr_model.priorityDate = datetime.utcnow()
-                            payment.payment_completion_date = datetime.utcnow()
-
-                        elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
-                            # TODO: handle this (refund payment and prevent action?)
-
-                            # the `nr_model.expirationDate` is been set from nro with timezone info
-                            # and `datetime.utcnow()` does not return with timezone info `+00:00`
-                            # replacing timezone info to None in `nr_model.expirationDate` to avoid
-                            # this error: `can't compare offset-naive and offset-aware datetimes`
-                            if nr_model.stateCd != State.APPROVED \
-                                    and nr_model.expirationDate.replace(tzinfo=None) + \
-                                    timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
-                                msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
-                                current_app.logger.debug(msg)
-                            expiry_days = int(nr_svc.get_expiry_days(nr_model))
-                            nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
-                            payment.payment_completion_date = datetime.utcnow()
-
-                        nr_model.save_to_db()
-                        payment.save_to_db()
-                        EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
-                        if payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                            change_flags = {
-                                'is_changed__request': True,
-                                'is_changed__previous_request': False,
-                                'is_changed__applicant': False,
-                                'is_changed__address': False,
-                                'is_changed__name1': False,
-                                'is_changed__name2': False,
-                                'is_changed__name3': False,
-                                'is_changed__nwpta_ab': False,
-                                'is_changed__nwpta_sk': False,
-                                'is_changed__request_state': False,
-                                'is_changed_consent': False
-                            }
-                            warnings = nro.change_nr(nr_model, change_flags)
-                            if warnings:
-                                # log error for ops, but return success (namex is still up to date)
-                                msg = f'API Error: Unable to update NRO for {nr_model.nrNum} {payment_action}: {warnings}'
-                                current_app.logger.error(msg)
-
-                    else:
-                        # Record the event
-                        EventRecorder.record(nr_svc.user, Event.POST + f' [payment created] { payment_action }', nr_model, nr_model.json())
-
-                    # Wrap the response, providing info from both the SBC Pay response and the payment we created
-                    data = jsonify({
-                        'id': payment.id,
-                        'nrId': payment.nrId,
-                        'nrNum': nr_model.nrNum,
-                        'token': payment.payment_token,
-                        'statusCode': payment.payment_status_code,
-                        'action': payment.payment_action,
-                        'completionDate': payment.payment_completion_date,
-                        'payment': payment.as_dict(),
-                        'sbcPayment': payment_response.as_dict(),
-                        'isPaymentActionRequired': payment_response.isPaymentActionRequired
-                    })
-
-                    response = make_response(data, 201)
-                    return response
-                # something went wrong with status code above
-                else:
-                    # log actual status code
-                    current_app.logger.error('Error with status code. Actual status code: ' + payment_response.statusCode)
-                    EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
-                    # return generic error status to the front end
-                    return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 402
-            except Exception as err:
-                current_app.logger.error(err.with_traceback(None))
-                EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
-                return jsonify(message='Name Request {nr_id} encountered an error'.format(nr_id=nr_id)), 500
+            return handle_payment_response(payment_action,
+                                           payment_response,
+                                           payment,
+                                           nr_id,
+                                           nr_model,
+                                           nr_svc)
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
@@ -466,19 +500,23 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
     'nr_id': '',
     'payment_id': ''
 })
+
+
 class NameRequestPayment(AbstractNameRequestResource):
+    """Name request payment endpoints."""
     @cors.crossdomain(origin='*')
     @payment_api.response(200, 'Success', '')
     # TODO: Update schema and marshal
     # @marshal_with(payment_response_schema)
     def get(self, nr_id, payment_id):
+        """Get endpoint."""
         try:
             # Find the existing name request
             nr_model = RequestDAO.query.get(nr_id)
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return jsonify(message='{nr_id} not found'.format(nr_id=nr_id)), 400
+                return jsonify(message=f'{nr_id} not found'), 400
 
             payment_id = int(clean_url_path_param(payment_id))
             payment = PaymentDAO.query.get(payment_id)
@@ -536,6 +574,7 @@ class NameRequestPayment(AbstractNameRequestResource):
 
     @cors.crossdomain(origin='*')
     def delete(self, nr_id, payment_id):
+        """Delete endpoint."""
         try:
             # Find the existing name request
             nr_model = RequestDAO.query.get(nr_id)
@@ -579,7 +618,9 @@ class NameRequestPayment(AbstractNameRequestResource):
     'nr_id': 'NR Number - This field is required',
     'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, REFUND]'
 })
+
 class NameRequestPaymentAction(AbstractNameRequestResource):
+    """Name request payment action endpoints."""
     # REST Method Handlers
     @cors.crossdomain(origin='*')
     def patch(self, nr_id, payment_id, payment_action):
@@ -645,6 +686,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             return handle_exception(err, repr(err), 500)
 
     def handle_payment_actions(self, action, model: RequestDAO, payment_id: int):
+        """Handle payment actions."""
         return {
             NameRequestActions.CREATE.value: self.complete_reservation_payment,
             NameRequestActions.RESUBMIT.value: self.complete_reservation_payment,
@@ -742,8 +784,8 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
     def complete_reapply_payment(self, nr_model: RequestDAO, payment_id: int):
         """
         Invoked when re-applying for an existing Name Request reservation.
-        Extend the Name Request's expiration date by 56 days. 
-        If the request action is set to REH, REN or REST, OR request type is 
+        Extend the Name Request's expiration date by 56 days.
+        If the request action is set to REH, REN or REST, OR request type is
         'RCR', 'RUL', 'BERE', 'RCC', 'RCP', 'RFI', 'XRCR', 'RLC', 'XRCP','RSO','XRSO'
         extend the expiration by an additional year (plus the default 56 days).
         :param nr_model:
@@ -812,7 +854,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         return nr_model
 
     def cancel_payment(self, nr_model: RequestDAO, payment_id: int):
-        # Cancel payment with specified id.
+        """Cancel payment with specified id."""
         valid_states = [
             PaymentState.CREATED.value
         ]
