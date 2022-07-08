@@ -141,6 +141,10 @@ class Request(db.Model):
         return self._source
 
     @property
+    def requestTypeCd(self):
+        return self.requestTypeCd
+
+    @property
     def request_action_cd(self):
         """Property containing the request action from name request."""
         return self._request_action_cd
