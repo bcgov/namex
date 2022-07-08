@@ -1,25 +1,19 @@
-import os
 import json
-import requests
 
+import requests
 from flask import current_app, jsonify
 from flask_restx import Namespace, Resource, cors
 
-from namex.utils.auth import cors_preflight, get_client_credentials, MSG_CLIENT_CREDENTIALS_REQ_FAILED
 from namex.utils.api_resource import handle_exception
+from namex.utils.auth import MSG_CLIENT_CREDENTIALS_REQ_FAILED, cors_preflight, get_client_credentials
 from namex.utils.logging import setup_logging
+
 
 setup_logging()  # Important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
-
-SBC_SVC_AUTH_URL = os.getenv('SBC_SVC_AUTH_URL', '')
-SBC_SVC_AUTH_CLIENT_ID = os.getenv('SBC_SVC_AUTH_CLIENT_ID', '')
-SBC_SVC_CLIENT_SECRET = os.getenv('SBC_SVC_CLIENT_SECRET', '')
-COLIN_SVC_URL = os.getenv('COLIN_SVC_URL', '') + '/corporations/{corp_num}'
-
 
 class ColinServiceException(Exception):
     def __init__(self, wrapped_err=None, message="COLIN API exception.", status_code=500):
@@ -62,13 +56,16 @@ class ColinApi(Resource):
     @cors.crossdomain(origin='*')
     def post(self, corp_num):
         try:
+            SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')
+            SBC_SVC_AUTH_CLIENT_ID = current_app.config.get('SBC_SVC_AUTH_CLIENT_ID', '')
+            SBC_SVC_CLIENT_SECRET = current_app.config.get('SBC_SVC_CLIENT_SECRET', '')
             authenticated, token = get_client_credentials(SBC_SVC_AUTH_URL, SBC_SVC_AUTH_CLIENT_ID, SBC_SVC_CLIENT_SECRET)
             if not authenticated:
                 raise ColinServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
 
             # Get the profile
-            print('\nCalling COLIN API using [corp_num: {corp_num}]'.format(corp_num=corp_num))
-            colin_url = COLIN_SVC_URL.format(corp_num=corp_num)
+            print(f'\nCalling COLIN API using [corp_num: {corp_num}]')
+            colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/{corp_num}'
             headers = {
                 # 'x-api-key': COLIN_SVC_API_KEY,
                 # 'Accept': 'application/xml'

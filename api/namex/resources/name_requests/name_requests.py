@@ -32,7 +32,6 @@ from namex.services.name_request.exceptions import \
     NameRequestException, InvalidInputError
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 
-from namex.resources.configuration import SOLR_CORE
 from .api_namespace import api
 from .api_models import nr_request
 from .base_nr_resource import BaseNameRequestResource
@@ -169,6 +168,7 @@ class NameRequestsResource(BaseNameRequestResource):
             if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED] and \
                     nr_model.entity_type_cd in \
                     ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
+                SOLR_CORE = 'possible.conflicts'
                 self.create_solr_nr_doc(SOLR_CORE, nr_model)
 
             current_app.logger.debug(nr_model.json())

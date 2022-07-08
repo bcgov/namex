@@ -135,9 +135,9 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_service_client_token():
-        auth_url = os.getenv('PAYMENT_SVC_AUTH_URL')
-        client_id = os.getenv('PAYMENT_SVC_AUTH_CLIENT_ID')
-        secret = os.getenv('PAYMENT_SVC_CLIENT_SECRET')
+        auth_url = current_app.config.get('PAYMENT_SVC_AUTH_URL')
+        client_id = current_app.config.get('PAYMENT_SVC_AUTH_CLIENT_ID')
+        secret = current_app.config.get('PAYMENT_SVC_CLIENT_SECRET')
         auth = requests.post(
             auth_url,
             auth=(client_id, secret),
@@ -327,11 +327,3 @@ class ReportResource(Resource):
             'FIRM': 'FIRM (Legacy Oracle)'
         }
         return next_action_text.get(entity_type_cd, None)
-
-
-
-
-
-
-
-
