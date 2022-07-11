@@ -7,7 +7,6 @@ from namex.utils.logging import setup_logging
 from namex.models import State
 
 from namex.services.name_request.exceptions import SolrUpdateError
-from namex.resources.configuration import SOLR_CORE, SOLR_API_URL
 
 setup_logging()  # Important to do this first
 
@@ -39,6 +38,7 @@ class AbstractSolrResource(Resource):
     @classmethod
     def add_solr_doc(cls, solr_core, solr_docs):
         try:
+            SOLR_API_URL = f'{current_app.config.get("SOLR_BASE_URL")}/solr/'
             solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
             result = solr.add(solr_docs, commit=True)
         except Exception as err:
@@ -49,6 +49,7 @@ class AbstractSolrResource(Resource):
     @classmethod
     def delete_solr_doc(cls, solr_core, doc_id):
         try:
+            SOLR_API_URL = f'{current_app.config.get("SOLR_BASE_URL")}/solr/'
             solr = pysolr.Solr(SOLR_API_URL + solr_core + '/', timeout=10)
             result = solr.delete(id=doc_id, commit=True)
 
@@ -59,6 +60,8 @@ class AbstractSolrResource(Resource):
 
     @classmethod
     def update_solr_service(cls, nr_model, temp_nr_num=None):
+        SOLR_CORE = 'possible.conflicts'
+
         if current_app.config.get('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0) == 1:
             # Ignore update to SOLR if SOLR updates [DISABLE_NAMEREQUEST_SOLR_UPDATES] are explicitly disabled in your .env
             return

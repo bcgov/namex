@@ -1,12 +1,13 @@
 import os
-from datetime import (datetime)
+from datetime import datetime
 
-from .name_analysis_director import NameAnalysisDirector
-
-from .mixins.set_designation_lists import SetDesignationsListsMixin
+from flask import current_app
 
 from . import AnalysisIssueCodes, request_types
+from .mixins.set_designation_lists import SetDesignationsListsMixin
+from .name_analysis_director import NameAnalysisDirector
 from .name_analysis_utils import get_classification
+
 
 '''
 The XproNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -26,8 +27,6 @@ Notes:
 '''
 
 d = datetime.now()  # Was just used for perf analysis
-auto_analyze_config = os.getenv('AUTO_ANALYZE_CONFIG')
-
 
 class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
     _d = d  # Just used for perf
@@ -36,8 +35,8 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
         super(XproNameAnalysisService, self).__init__()
 
     '''
-    This is the main execution call that wraps name analysis checks. 
-    - Perform checks to ensure the name is well formed. 
+    This is the main execution call that wraps name analysis checks.
+    - Perform checks to ensure the name is well formed.
     - If the name is well formed, proceed with our analysis by calling do_analysis.
     - If you don't want to check to see if a name is well formed first, override check_name_is_well_formed in the supplied builder.
     @:return ProcedureResult[]
@@ -56,6 +55,8 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
             # Configure the analysis for the supplied builder
             get_classification(self, stand_alone_words, syn_svc, self.name_tokens, wc_svc, token_svc)
+
+            auto_analyze_config = current_app.config.get('AUTO_ANALYZE_CONFIG')
 
             if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
                 check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
@@ -152,6 +153,8 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
     def do_analysis(self):
         results = []
+        auto_analyze_config = current_app.config.get('AUTO_ANALYZE_CONFIG')
+
         if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
             builder = self.builder
             np_svc = self._name_processing_service

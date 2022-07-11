@@ -1,14 +1,14 @@
-import os
-from flask import jsonify, request
-from flask_restx import Resource, Namespace, cors
-from namex.utils.auth import cors_preflight
 import json
-from namex import jwt
 import urllib
-from flask import current_app
+
+from flask import current_app, jsonify, request
+from flask_restx import Namespace, Resource, cors
+
+from namex import jwt
+from namex.utils.auth import cors_preflight
+
 
 api = Namespace('exactMatchMeta', description='Exact Match System - Metadata')
-SOLR_URL = os.getenv('SOLR_BASE_URL')
 
 
 @cors_preflight("GET")
@@ -21,7 +21,7 @@ class ExactMatch(Resource):
     def get():
         query = request.args.get('query')
         query = query.lower().replace('*', '')
-        url = SOLR_URL + '/solr/possible.conflicts' + \
+        url = current_app.config.get('SOLR_BASE_URL') + '/solr/possible.conflicts' + \
             '/select?' + \
             'sow=false' + \
             '&df=name_exact_match' + \

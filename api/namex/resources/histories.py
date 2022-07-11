@@ -1,14 +1,15 @@
-import os
-from flask import jsonify, request
-from flask_restx import Resource, Namespace, cors
-from namex.utils.auth import cors_preflight
 import json
-from namex import jwt
 import urllib
-from flask import current_app
+
+from flask import current_app, jsonify, request
+from flask_restx import Namespace, Resource, cors
+
+from namex import jwt
+from namex.utils.auth import cors_preflight
+
 
 api = Namespace('historiesMeta', description='Histories Match - Metadata')
-SOLR_URL = os.getenv('SOLR_BASE_URL')
+SOLR_URL = current_app.config.get('SOLR_BASE_URL')
 MAX_RESULTS = '50'
 
 

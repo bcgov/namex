@@ -1,36 +1,31 @@
-from datetime import datetime
 import os
+from datetime import datetime
+
+from flask import current_app
+from swagger_client import SynonymsApi as SynonymService
 
 from namex.constants import BCUnprotectedNameEntityTypes
-from .mixins.get_synonyms_lists import GetSynonymsListsMixin
+from namex.services.name_processing.name_processing import NameProcessingService
+from namex.services.virtual_word_condition.virtual_word_condition import VirtualWordConditionService
+from namex.services.word_classification.token_classifier import TokenClassifier
+from namex.services.word_classification.word_classification import WordClassificationService
+
+from ..auto_analyse.name_analysis_utils import (
+    change_descriptive,
+    check_synonyms,
+    get_classification,
+    get_classification_summary,
+    update_none_list,
+)
+from . import AnalysisIssueCodes
 from .mixins.get_designations_lists import GetDesignationsListsMixin
+from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
-from . import AnalysisIssueCodes
-
-from ..auto_analyse.name_analysis_utils import check_synonyms, get_classification_summary, change_descriptive, \
-    get_classification, update_none_list
-
-from namex.services.name_processing.name_processing \
-    import NameProcessingService
-
-from namex.services.word_classification.word_classification \
-    import WordClassificationService
-
-from namex.services.word_classification.token_classifier \
-    import TokenClassifier
-
-from namex.services.virtual_word_condition.virtual_word_condition \
-    import VirtualWordConditionService
-
-from swagger_client import SynonymsApi as SynonymService
 
 '''
 This is the director for AutoAnalyseService.
 '''
-
-auto_analyze_config = os.getenv('AUTO_ANALYZE_CONFIG')
-
 
 class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
     @property
@@ -282,6 +277,8 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             if not designation_only:
                 # Configure the analysis for the supplied builder
                 get_classification(self, stand_alone_words, syn_svc, self.name_tokens, wc_svc, token_svc)
+
+            auto_analyze_config = current_app.config.get('AUTO_ANALYZE_CONFIG')
 
             if auto_analyze_config in ('WELL_FORMED_NAME', 'EXACT_MATCH', 'SEARCH_CONFLICTS'):
                 # check_words_to_avoid = builder.check_words_to_avoid(self.name_tokens, self.processed_name)
