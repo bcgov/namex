@@ -52,7 +52,7 @@ class QueueService():
         :return: naked
         """
         self.name = app.config.get('NATS_CLIENT_NAME')
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = loop or asyncio.new_event_loop()
         self.nats_servers = app.config.get('NATS_SERVERS').split(',')
 
         default_nats_options = {
@@ -86,7 +86,7 @@ class QueueService():
     def teardown(self, exception):  # pylint: disable=unused-argument; flask method signature
         """Destroy all objects created by this extension."""
         try:
-            this_loop = self.loop or asyncio.get_event_loop()
+            this_loop = self.loop or asyncio.get_running_loop()
             this_loop.run_until_complete(self.close())
         except RuntimeError as e:
             self.logger.error(e)

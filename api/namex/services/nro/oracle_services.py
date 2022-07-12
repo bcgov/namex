@@ -1,22 +1,33 @@
 import json
 import urllib
-
-from flask import current_app, _app_ctx_stack
 from datetime import datetime
-import cx_Oracle
 
-from namex.models import State, Request, User, Event
-from namex.services.nro import NROServicesError
+import cx_Oracle
+from flask import _app_ctx_stack, current_app
+
+from namex.models import Event, Request, State, User
 from namex.services import EventRecorder
-from namex.services.nro.change_nr import update_nr, _get_event_id, _create_nro_transaction
+from namex.services.nro import NROServicesError
 from namex.services.nro.add_nr import new_nr
-from namex.services.nro.consume_nr import consume_nr
+from namex.services.nro.change_nr import _create_nro_transaction, _get_event_id, update_nr
 from namex.services.nro.checkin_checkout_nr import manage_nr_locks
+from namex.services.nro.consume_nr import consume_nr
 
 from .exceptions import NROServicesError
+from .request_utils import (
+    add_applicant,
+    add_comments,
+    add_names,
+    add_nr_header,
+    add_nwpta,
+    get_exam_comments,
+    get_names,
+    get_nr_header,
+    get_nr_requester,
+    get_nr_submitter,
+    get_nwpta,
+)
 from .utils import nro_examiner_name
-from .request_utils import add_nr_header, add_comments, add_nwpta, add_names, add_applicant, \
-    get_nr_header, get_nr_submitter, get_nr_requester, get_exam_comments, get_nwpta, get_names
 
 
 class NROServices(object):
@@ -58,11 +69,14 @@ class NROServices(object):
             cursor = conn.cursor()
             cursor.execute("alter session set TIME_ZONE = 'America/Vancouver'")
 
-        return cx_Oracle.SessionPool(user=current_app.config.get('NRO_USER'),
-                                     password=current_app.config.get('NRO_PASSWORD'),
-                                     dsn='{0}:{1}/{2}'.format(current_app.config.get('NRO_HOST'),
-                                                              current_app.config.get('NRO_PORT'),
-                                                              current_app.config.get('NRO_DB_NAME')),
+        user = current_app.config.get('NRO_USER')
+        password = current_app.config.get('NRO_PASSWORD')
+        host = current_app.config.get('NRO_HOST')
+        port = current_app.config.get('NRO_PORT')
+        db_name = current_app.config.get('NRO_DB_NAME')
+        return cx_Oracle.SessionPool(user=user,
+                                     password=password,
+                                     dsn=f'{host}:{port}/{db_name}',
                                      min=1,
                                      max=10,
                                      increment=1,
@@ -267,7 +281,7 @@ class NROServices(object):
             except (NROServicesError, Exception) as err:
                 nro_req_state = None
 
-            if nro_req_state is not 'H':
+            if nro_req_state != 'H':
                 warnings.append({'type': 'warn',
                                  'code': 'unable_to_verify_NR_state_of_H',
                                  'message': 'Unable to get the current state of the NRO Request'
@@ -462,10 +476,10 @@ class NROServices(object):
 
                 # create new request_state record
                 cursor.execute("""
-                INSERT INTO request_state (request_state_id, request_id, state_type_cd, 
-                    start_event_id, end_event_id, examiner_idir, examiner_comment, state_comment, 
+                INSERT INTO request_state (request_state_id, request_id, state_type_cd,
+                    start_event_id, end_event_id, examiner_idir, examiner_comment, state_comment,
                     batch_id)
-                VALUES (request_state_seq.nextval, :request_id, :state, :event_id, NULL, 
+                VALUES (request_state_seq.nextval, :request_id, :state, :event_id, NULL,
                           :examiner_id, NULL, NULL, NULL)
                 """,
                                       request_id=nr.requestId,
@@ -556,4 +570,3 @@ class NROServices(object):
             current_app.logger.debug('completed names for {}'.format(nr.nrNum))
 
         return nr
-

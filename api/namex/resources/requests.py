@@ -592,7 +592,7 @@ class Request(Resource):
 
         name_choice_exists = {1: False, 2: False, 3: False}
         for name in json_input.get('names', None):
-            if name['name'] and name['name'] is not '':
+            if name['name'] and name['name'] != '':
                 name_choice_exists[name['choice']] = True
         if not name_choice_exists[1]:
             return jsonify(message='Data does not include a name choice 1'), 400
@@ -826,7 +826,7 @@ class Request(Resource):
                             # return jsonify(errors), 400
 
                         # don't save if the name is blank
-                        if in_name.get('name') and in_name.get('name') is not'':
+                        if in_name.get('name') and in_name.get('name') != '':
                             new_name_choice = Name()
                             new_name_choice.nrId = nrd.id
                             new_name_choice.choice = in_name.get('choice')
