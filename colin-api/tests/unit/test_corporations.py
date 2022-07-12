@@ -6,12 +6,12 @@ xpro_corp_nums = ['A0003650']
 bc_corp_nums = ['0022258']
 
 def test_readyz(client):
-    url = 'api/v1/corporations/readyz'
+    url = 'api/v1/ops/readyz'
     response = client.get(url)
     assert response.status_code == 200
 
 def test_healthz(client):
-    url = 'api/v1/corporations/healthz'
+    url = 'api/v1/ops/healthz'
     response = client.get(url)
     assert response.status_code == 200
     assert response.json['message'] == 'api is healthy'

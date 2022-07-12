@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2021 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application."""
-from colin_api import create_app
+"""Constants used in managing the end-points."""
+from __future__ import annotations
+
+from enum import Enum
 
 
-# Openshift s2i expects a lower case name of application
-application = create_app()  # pylint: disable=invalid-name
+class EndpointVersionPath(str, Enum):
+    """Enumerate the endpoint mounts used in the system."""
 
-if __name__ == '__main__':
-    application.run()
+    API_V1 = '/api/v1'

@@ -11,18 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Centralized setup of logging for the service."""
-import logging.config
-import sys
-from os import path
-
-
-def setup_logging(conf):
-    """Create the services logger."""
-    # log_file_path = path.join(path.abspath(path.dirname(__file__)), conf)
-
-    if conf and path.isfile(conf):
-        logging.config.fileConfig(conf)
-        print('Configure logging, from conf:{}'.format(conf), file=sys.stdout)
-    else:
-        print('Unable to configure logging, attempted conf:{}'.format(conf), file=sys.stderr)
+"""Exposes all of the resource endpoints mounted in Flask-Blueprints."""
+from .corporations import bp as corporations_bp
+from .meta import bp as meta_bp
+from .ops import bp as ops_bp

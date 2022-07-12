@@ -1,0 +1,12 @@
+Flask
+Flask-Cors
+flask-jwt-oidc
+Flask-SQLAlchemy
+gunicorn
+launchdarkly-server-sdk
+psycopg2-binary
+python-dotenv
+sqlalchemy
+SQLAlchemy-Continuum
+sentry-sdk[flask]
+Werkzeug

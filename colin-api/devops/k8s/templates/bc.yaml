@@ -36,13 +36,16 @@ objects:
         ref: ${GIT_REF}
         uri: ${GIT_REPO_URL}
       dockerfile: |
-        FROM docker-remote.artifacts.developer.gov.bc.ca/python:3.8.6-buster
+        FROM docker-remote.artifacts.developer.gov.bc.ca/python:3.10.4-bullseye
 
-        ARG BUILD_DATE
-        ARG VCS_REF
+        ARG VCS_REF="missing"
+        ARG BUILD_DATE="missing"
 
-        LABEL build_date=$BUILD_DATE
-        LABEL vcs_ref=$VCS_REF
+        ENV VCS_REF=${VCS_REF}
+        ENV BUILD_DATE=${BUILD_DATE}
+
+        LABEL org.label-schema.vcs-ref=${VCS_REF} \
+            org.label-schema.build-date=${BUILD_DATE}
 
         USER root
 
@@ -66,6 +69,7 @@ objects:
         ENV PYTHONPATH=/opt/app-root
 
         CMD ["gunicorn", "--bind", "0.0.0.0:8080",  "--config", "/opt/app-root/gunicorn_config.py", "wsgi:application"]
+
       type: Git
     strategy:
       type: Docker
