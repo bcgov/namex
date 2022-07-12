@@ -11,12 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application."""
-from colin_api import create_app
 
+"""Version of this service in PEP440.
 
-# Openshift s2i expects a lower case name of application
-application = create_app()  # pylint: disable=invalid-name
+[N!]N(.N)*[{a|b|rc}N][.postN][.devN]
+Epoch segment: N!
+Release segment: N(.N)*
+Pre-release segment: {a|b|rc}N
+Post-release segment: .postN
+Development release segment: .devN
+"""
 
-if __name__ == '__main__':
-    application.run()
+__version__ = '1.0.0'  # pylint: disable=invalid-name

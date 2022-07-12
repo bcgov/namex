@@ -1,15 +1,23 @@
 [
     {
-        "vault": "keycloak",
+        "vault": "database",
         "application": [
-            "jwt-base"
+            "fdw-registries-db",
+            "fdw-names-db"
         ]
     },
     {
-        "vault": "namex",
+        "vault": "keycloak",
         "application": [
-            "colin-api",
-            "jwt"
+            "jwt-base",
+            "namex"
+        ]
+    },
+
+    {
+        "vault": "sentry",
+        "application": [
+            "examination"
         ]
     }
 ]

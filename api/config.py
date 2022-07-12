@@ -47,11 +47,11 @@ class Config(object):
     NRO_EXTRACTOR_URI = f'{os.getenv("NAMEX_API_URL", None)}{os.getenv("NAMEX_API_VERSION", None)}/nro-extract/nro-requests'
 
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_NAME', '')
-    DB_HOST = os.getenv('DATABASE_HOST', '')
-    DB_PORT = os.getenv('DATABASE_PORT', '5432')
+    DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
+    DB_PASSWORD = os.getenv('NAMEX_DATABASE_PASSWORD', '')
+    DB_NAME = os.getenv('NAMEX_DATABASE_NAME', '')
+    DB_HOST = os.getenv('NAMEX_DATABASE_HOST', '')
+    DB_PORT = os.getenv('NAMEX_DATABASE_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
     # ORACLE - LEGACY NRO NAMESDB
