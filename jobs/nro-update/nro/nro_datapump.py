@@ -14,8 +14,6 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
         start=nr.lastUpdate,
         expires_in_days=expires_days
     )
-    current_app.logger.debug('nr.requestTypeCd = ' + nr.requestTypeCd)
-    current_app.logger.debug(f'Setting expiry days: { expires_days }')
     current_app.logger.debug(f'Setting expiry date to: { expiry_date }')
     # init dict for examiner comment data, populated below in loop through names
     examiner_comment = {
