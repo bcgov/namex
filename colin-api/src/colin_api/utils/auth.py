@@ -11,12 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application."""
-from colin_api import create_app
+"""Bring in the common JWT Manager."""
+from flask_jwt_oidc import JwtManager
 
 
-# Openshift s2i expects a lower case name of application
-application = create_app()  # pylint: disable=invalid-name
-
-if __name__ == '__main__':
-    application.run()
+jwt = JwtManager()  # pylint: disable=invalid-name; lower case name as used by convention in most Flask apps

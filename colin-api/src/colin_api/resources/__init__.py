@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application."""
-from colin_api import create_app
+"""Exposes all of the resource endpoints mounted in Flask-Blueprint style."""
+from .constants import EndpointVersionPath
+from .v1 import corporations_bp, meta_bp, ops_bp
+from .version_endpoint import VersionEndpoint
 
 
-# Openshift s2i expects a lower case name of application
-application = create_app()  # pylint: disable=invalid-name
-
-if __name__ == '__main__':
-    application.run()
+v1_endpoint = VersionEndpoint(  # pylint: disable=invalid-name
+    name='API_V1',
+    path=EndpointVersionPath.API_V1,
+    bps=[meta_bp, corporations_bp, ops_bp])

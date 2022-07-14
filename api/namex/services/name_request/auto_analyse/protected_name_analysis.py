@@ -1,11 +1,14 @@
 import os
-from datetime import (datetime)
+from datetime import datetime
+
+from flask import current_app
 
 from namex.constants import DesignationPositionCodes
+
 from . import request_types
+from .mixins.set_designation_lists import SetDesignationsListsMixin
 from .name_analysis_director import NameAnalysisDirector
 
-from .mixins.set_designation_lists import SetDesignationsListsMixin
 
 '''
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -27,7 +30,6 @@ Notes:
 '''
 
 d = datetime.now()  # Was just used for perf analysis
-auto_analyze_config = os.getenv('AUTO_ANALYZE_CONFIG')
 
 class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
     _d = d  # Just used for perf
@@ -43,6 +45,9 @@ class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMix
 
     def do_analysis(self):
         results = []
+
+        auto_analyze_config = current_app.config.get('AUTO_ANALYZE_CONFIG')
+
         if auto_analyze_config in ('WELL_FORMED_NAME','EXACT_MATCH', 'SEARCH_CONFLICTS'):
             builder = self.builder
 

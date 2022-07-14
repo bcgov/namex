@@ -1,26 +1,20 @@
-import os
 from http import HTTPStatus
-from lxml import etree  # Don't worry about this it exists... the module is dynamically loaded
 
 import requests
-
-from flask import jsonify
+from flask import current_app, jsonify
 from flask_restx import Namespace, Resource, cors
+from lxml import etree  # Don't worry about this it exists... the module is dynamically loaded
 
-from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
+from namex.utils.auth import cors_preflight
 from namex.utils.logging import setup_logging
+
 
 setup_logging()  # Important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
-
-MRAS_SVC_PROFILE_URL = os.getenv('MRAS_SVC_URL', '') + '/api/v1/xpr/GetProfile/{profile_id}/{source_jurisdiction_id}'
-MRAS_SVC_PROFILE_JUR_URL = os.getenv('MRAS_SVC_URL', '') + '/api/v1/xpr/jurisdictions/{profile_id}'
-MRAS_SVC_API_KEY = os.getenv('MRAS_SVC_API_KEY', '')
-
 
 class MrasServiceException(Exception):
     def __init__(self, mras_error=None, message=None):
@@ -39,7 +33,7 @@ mras_profile_api = Namespace('mras', description='MRAS API')
 def load_xml_response_content(response, xpath_query=None):
     """
     Loads the response
-    :param response: 
+    :param response:
     :param xpath_query:
     :return:
     """
@@ -64,9 +58,9 @@ class MrasProfile(Resource):
         try:
             # Get the jurisdiction
             print('Calling MRAS Jurisdictions API using [corp_num: {corp_num}]'.format(corp_num=corp_num))
-            mras_url = MRAS_SVC_PROFILE_JUR_URL.format(profile_id=corp_num)
+            mras_url = f'{current_app.config.get("MRAS_SVC_URL")}/api/v1/xpr/jurisdictions/{corp_num}'
             headers = {
-                'x-api-key': MRAS_SVC_API_KEY,
+                'x-api-key': current_app.config.get('MRAS_SVC_API_KEY'),
                 'Accept': 'application/xml'
             }
 
@@ -98,13 +92,13 @@ class MrasProfile(Resource):
 
             # Get the profile
             print('\nCalling MRAS Profile API using [corp_num: {corp_num}], [province: {province}]'.format(corp_num=corp_num, province=province))
-            mras_url = MRAS_SVC_PROFILE_URL.format(profile_id=corp_num, source_jurisdiction_id=province)
+            mras_url =  f'{current_app.config.get("MRAS_SVC_URL")}/api/v1/xpr/GetProfile/{corp_num}/{province}'
             # headers = {
             #     'x-api-key': MRAS_SVC_API_KEY,
             #     'Accept': 'application/xml'
             # }
             headers = {
-                'x-api-key': MRAS_SVC_API_KEY,
+                'x-api-key': current_app.config.get('MRAS_SVC_API_KEY'),
                 'Accept': 'application/json'
             }
 

@@ -1,6 +1,5 @@
-import os
+#from flask import current_app
 
-SOLR_CORE = 'possible.conflicts'
+#SOLR_CORE = 'possible.conflicts'
 
-SOLR_URL = os.getenv('SOLR_BASE_URL', 'http://localhost:8983')
-SOLR_API_URL = SOLR_URL + '/solr/'
+#SOLR_API_URL = f'{current_app.config.get("SOLR_BASE_URL")}/solr/'

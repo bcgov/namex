@@ -1,16 +1,12 @@
+import json
+import os
+import tempfile
 from enum import Enum
 from functools import wraps
+
 import requests
-import json
-import tempfile
-import os
+from flask import current_app
 
-
-PAYMENT_SVC_URL = os.getenv('PAYMENT_SVC_URL')
-PAYMENT_SVC_PREFIX = os.getenv('PAYMENT_SVC_PREFIX', 'api/v1/')
-PAYMENT_SVC_AUTH_URL = os.getenv('PAYMENT_SVC_AUTH_URL')
-PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('PAYMENT_SVC_AUTH_CLIENT_ID')
-PAYMENT_SVC_CLIENT_SECRET = os.getenv('PAYMENT_SVC_CLIENT_SECRET')
 
 MSG_CLIENT_CREDENTIALS_REQ_FAILED = 'Client credentials request failed'
 MSG_INVALID_HTTP_VERB = 'Invalid HTTP verb'
@@ -61,12 +57,16 @@ class ApiAuthError(Exception):
 def with_authentication(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
+        PAYMENT_SVC_AUTH_URL = current_app.config.get('PAYMENT_SVC_AUTH_URL')
+        PAYMENT_SVC_AUTH_CLIENT_ID = current_app.config.get('PAYMENT_SVC_AUTH_CLIENT_ID')
+        PAYMENT_SVC_CLIENT_SECRET = current_app.config.get('PAYMENT_SVC_CLIENT_SECRET')
+
         authenticated, token = self.get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
         if not authenticated:
             raise ApiAuthError(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
         self.set_api_client_auth_header(token)
         # Set API host URI
-        self.set_api_client_request_host(PAYMENT_SVC_URL)
+        self.set_api_client_request_host(current_app.config.get('PAYMENT_SVC_URL'))
         return func(self, *args, **kwargs)
 
     return wrapper
@@ -134,8 +134,8 @@ class ClientConfig:
 class BaseClient:
     def __init__(self, **kwargs):
         self.configuration = kwargs.get('configuration', ClientConfig({
-            'host': PAYMENT_SVC_URL + '/' if PAYMENT_SVC_URL[-1] != '/' else PAYMENT_SVC_URL,
-            'prefix': PAYMENT_SVC_PREFIX + '/' if PAYMENT_SVC_PREFIX[-1] != '/' else PAYMENT_SVC_PREFIX,
+            'host': current_app.config.get('PAYMENT_SVC_URL'),
+            'prefix': current_app.config.get('PAYMENT_SVC_VERSION', '/api/v1'),
             'temp_path': None
         }))
         self.headers = {}
@@ -187,7 +187,7 @@ class BaseClient:
 
     def build_url(self, path):
         if self.configuration.prefix:
-            return self.configuration.host + self.configuration.prefix + path
+            return self.configuration.host + self.configuration.prefix + '/' + path
         return self.configuration.host + '/' + path
 
     def call_api(self, method, url, params=None, data=None, headers=None):
@@ -195,6 +195,9 @@ class BaseClient:
             if method not in HttpVerbs:
                 raise ApiClientError(message=MSG_INVALID_HTTP_VERB)
             if not headers or 'Authorization' not in headers:
+                PAYMENT_SVC_AUTH_URL = current_app.config.get('PAYMENT_SVC_AUTH_URL')
+                PAYMENT_SVC_AUTH_CLIENT_ID = current_app.config.get('PAYMENT_SVC_AUTH_CLIENT_ID')
+                PAYMENT_SVC_CLIENT_SECRET = current_app.config.get('PAYMENT_SVC_CLIENT_SECRET')
                 authenticated, token = self.get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
                 if not authenticated:
                     raise ApiAuthError(token, message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
@@ -298,7 +301,7 @@ class SBCPaymentClient(BaseClient):
             response = self.call_api(HttpVerbs.POST, request_url, data=data)
         except (ApiRequestError) as err: # ROUTING_SLIP_REFUND and NO_FEE_REFUND return http 400.
             return response
-        
+
         return response
 
     def generate_receipt(self, invoice_id, data):

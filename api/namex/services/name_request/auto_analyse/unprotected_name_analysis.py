@@ -1,16 +1,21 @@
-import os
-from datetime import (datetime)
-
 import collections
+import os
+from datetime import datetime
 
-from .name_analysis_director import NameAnalysisDirector
-from . import ProcedureResult
+from flask import current_app
 
-from namex.constants import \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
-    DesignationPositionCodes, LanguageCodes
-
+from namex.constants import (
+    BCProtectedNameEntityTypes,
+    BCUnprotectedNameEntityTypes,
+    DesignationPositionCodes,
+    LanguageCodes,
+    XproUnprotectedNameEntityTypes,
+)
 from namex.utils.common import parse_dict_of_lists
+
+from . import ProcedureResult
+from .name_analysis_director import NameAnalysisDirector
+
 
 '''
 The UnprotectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
@@ -31,8 +36,6 @@ Notes:
 '''
 
 d = datetime.now()  # Was just used for perf analysis
-auto_analyze_config = os.getenv('AUTO_ANALYZE_CONFIG')
-
 
 class UnprotectedNameAnalysisService(NameAnalysisDirector):
     # _builder = None  # TODO: Is there a way to 'duck-type' this, or IoC this?
@@ -163,6 +166,8 @@ class UnprotectedNameAnalysisService(NameAnalysisDirector):
 
     def do_analysis(self):
         results = []
+        auto_analyze_config = current_app.config.get('AUTO_ANALYZE_CONFIG')
+
         if auto_analyze_config in ('WELL_FORMED_NAME','EXACT_MATCH', 'SEARCH_CONFLICTS'):
             builder = self.builder
 

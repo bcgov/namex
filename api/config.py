@@ -20,56 +20,66 @@ class Config(object):
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+    TESTING = False,
+    DEBUG = False
+
+    ALEMBIC_INI = 'migrations/alembic.ini'
+
     SECRET_KEY = 'a secret'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    NRO_SERVICE_ACCOUNT = os.getenv('NRO_SERVICE_ACCOUNT', 'nro_service_account')
-
     SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
-    SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
-    NRO_EXTRACTOR_URI = os.getenv('NRO_EXTRACTOR_URI', None)
+
+    SOLR_SYNONYMS_API_URL = f'{os.getenv("SOLR_SYNONYMS_API_URL", None)}{os.getenv("SOLR_SYNONYMS_API_VERSION", None)}'
+
     AUTO_ANALYZE_URL = os.getenv('AUTO_ANALYZE_URL', None)
     AUTO_ANALYZE_CONFIG = os.getenv('AUTO_ANALYZE_CONFIG', None)
-    REPORT_SVC_URL = os.getenv('REPORT_SVC_URL', None)
+
+    REPORT_SVC_URL = f'{os.getenv("REPORT_API_URL", None)}{os.getenv("REPORT_API_VERSION", None)}/reports'
     REPORT_TEMPLATE_PATH = os.getenv('REPORT_PATH', 'report-templates')
 
-    ALEMBIC_INI = 'migrations/alembic.ini'
+    PAYMENT_SVC_URL = os.getenv('PAY_API_URL', None)
+    PAYMENT_SVC_VERSION = os.getenv('PAY_API_VERSION', None)
+
+    COLIN_SVC_URL = f'{os.getenv("COLIN_SVC_URL", None)}{os.getenv("COLIN_SVC_VERSION", None)}'
+
+    NRO_EXTRACTOR_URI = f'{os.getenv("NAMEX_API_URL", None)}{os.getenv("NAMEX_API_VERSION", None)}/nro-extract/nro-requests'
 
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_NAME', '')
-    DB_HOST = os.getenv('DATABASE_HOST', '')
-    DB_PORT = os.getenv('DATABASE_PORT', '5432')
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=int(DB_PORT),
-        name=DB_NAME
-    )
+    DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
+    DB_PASSWORD = os.getenv('NAMEX_DATABASE_PASSWORD', '')
+    DB_NAME = os.getenv('NAMEX_DATABASE_NAME', '')
+    DB_HOST = os.getenv('NAMEX_DATABASE_HOST', '')
+    DB_PORT = os.getenv('NAMEX_DATABASE_PORT', '5432')
+    SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+
     # ORACLE - LEGACY NRO NAMESDB
     NRO_USER = os.getenv('NRO_USER', '')
     NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
     NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
     NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
-    NRO_HOST = os.getenv('NRO_HOST', '')
-    NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
+    NRO_HOST = os.getenv('ORACLE_HOST', '')
+    NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
 
-    # JWT_OIDC Settings
+    # KEYCLOAK & JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
     JWT_OIDC_ALGORITHMS = os.getenv('JWT_OIDC_ALGORITHMS')
     JWT_OIDC_JWKS_URI = os.getenv('JWT_OIDC_JWKS_URI')
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
-    JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
-    JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
     JWT_OIDC_CACHING_ENABLED = os.getenv('JWT_OIDC_CACHING_ENABLED')
-
     JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT', '300'))
 
-    TESTING = False,
-    DEBUG = False
+    JWT_OIDC_AUDIENCE = os.getenv('NAMEX_SERVICE_ACCOUNT_CLIENT_ID')
+    JWT_OIDC_CLIENT_SECRET = os.getenv('NAMEX_SERVICE_ACCOUNT_CLIENT_SECRET')
+
+    SBC_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
+    SBC_SVC_AUTH_CLIENT_ID = os.getenv('NAMEX_SBC_SERVICE_ACCOUNT_CLIENT_ID', '')
+    SBC_SVC_CLIENT_SECRET = os.getenv('NAMEX_SBC_SERVICE_ACCOUNT_CLIENT_SECRET', '')
+
+    PAYMENT_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
+    PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_ID', '')
+    PAYMENT_SVC_CLIENT_SECRET = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_SECRET', '')
 
     # You can disable NRO updates for Name Requests by setting the variable in your .env / OpenShift configuration
     DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
@@ -84,6 +94,9 @@ class Config(object):
     NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
     NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
 
+    # MRAS
+    MRAS_SVC_URL = os.getenv('MRAS_SVC_URL', '')
+    MRAS_SVC_API_KEY = os.getenv('MRAS_SVC_API_KEY', '')
 
 class DevConfig(Config):
     """Dev config used for development."""

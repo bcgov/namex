@@ -34,18 +34,12 @@ def client_ctx(app):
 
 @pytest.fixture(scope="session")
 def fake_names_db(app):
-    user = os.getenv('FAKE_NAMES_DATABASE_USERNAME', '')
-    password = os.getenv('FAKE_NAMES_DATABASE_PASSWORD', '')
-    name = os.getenv('FAKE_NAMES_DATABASE_NAME', '')
-    host = os.getenv('FAKE_NAMES_DATABASE_HOST', '')
-    port = os.getenv('FAKE_NAMES_DATABASE_PORT', '5432')
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=user,
-        password=password,
-        host=host,
-        port=port,
-        name=name,
-    )
+    user = os.getenv('FDW_NAMES_DATABASE_TEST_USERNAME', '')
+    password = os.getenv('FDW_NAMES_DATABASE_TEST_PASSWORD', '')
+    name = os.getenv('FDW_NAMES_DATABASE_TEST_NAME', '')
+    host = os.getenv('FDW_NAMES_DATABASE_TEST_HOST', '')
+    port = os.getenv('FDW_NAMES_DATABASE_TEST_PORT', '5432')
+    SQLALCHEMY_DATABASE_URI = f'postgresql://{user}:{password}@{host}:{port}/{name}'
     db = SQLAlchemy()
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 
