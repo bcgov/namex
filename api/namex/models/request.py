@@ -140,9 +140,9 @@ class Request(db.Model):
         """Property containing the source app."""
         return self._source
 
-    @property
-    def requestTypeCd(self):
-        return self.requestTypeCd
+    #@property
+    #def requestTypeCd(self):
+    #    return self.requestTypeCd
 
     @property
     def request_action_cd(self):
