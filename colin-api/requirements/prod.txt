@@ -10,3 +10,4 @@ sqlalchemy
 SQLAlchemy-Continuum
 sentry-sdk[flask]
 Werkzeug
+gevent
