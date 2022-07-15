@@ -84,7 +84,7 @@ try:
         row_count += 1
 
         current_app.logger.debug('processing: {}'.format(r.nrNum))
-        current_app.logger.debug('r.requestTypeCd = ' + r.requestTypeCd)
+        # current_app.logger.debug('r.requestTypeCd = ' + r.requestTypeCd)
 
         try:
             nr_service = NameRequestService()
