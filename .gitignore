@@ -69,10 +69,11 @@ __pycache__
 *.njsproj
 *.sln
 .history
+.python-version
 
 # Convenience Files
 # ######################
-/**/.env*
+/**/.env
 /**/.envrc
 /**/*.temp
 /**/*.last
