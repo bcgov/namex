@@ -84,13 +84,13 @@ try:
         row_count += 1
 
         current_app.logger.debug('processing: {}'.format(r.nrNum))
+        current_app.logger.debug('r.requestTypeCd = ' + r.requestTypeCd)
 
         try:
             nr_service = NameRequestService()
             expiry_days = int(nr_service.get_expiry_days(r))
 
-            current_app.logger.debug('r.requestTypeCd = ' + r.requestTypeCd)
-            current_app.logger.debug(f'expiry days: { expires_days }')
+            current_app.logger.debug('expiry days={}'.format(expiry_days))
 
             nro_data_pump_update(r, ora_cursor, expiry_days)
             db.session.add(r)
