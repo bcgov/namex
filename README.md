@@ -17,6 +17,7 @@ BC Registries Names Examination, research and approval system API
 ## Project Status
 2018-11-01 * changes to solr synonyms
 2018-10-19 **Release**
+2022-05-04 **DEMO NAMEX TO COOP STUDENTS
 
 ## Documentation
 
