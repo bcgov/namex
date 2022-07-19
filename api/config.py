@@ -98,6 +98,9 @@ class Config(object):
     MRAS_SVC_URL = os.getenv('MRAS_SVC_URL', '')
     MRAS_SVC_API_KEY = os.getenv('MRAS_SVC_API_KEY', '')
 
+    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
+    SENTRY_DSN = os.getenv('SENTRY_DSN', None)
+
 class DevConfig(Config):
     """Dev config used for development."""
 
