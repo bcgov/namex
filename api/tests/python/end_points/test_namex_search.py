@@ -589,3 +589,30 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
     elif(valid_start_date and not valid_end_date):
         assert 'Invalid submittedEndDate: ' in msg
         assert 'Must be of date format %Y-%m-%d' in msg
+
+
+def test_namex_search_direct_nrs_bad_roles(client, jwt, app):
+    """Test searching directly using name request numbers with bad roles."""
+    base_nrs = generate_nrs(5, [], [], [])
+    rv = client.get(
+        f'api/v1/requests?nrNumbers={",".join([nr.nrNum for nr in base_nrs])}',
+        headers=create_header(jwt, [])
+    )
+    assert rv
+    assert rv.status_code == 403
+
+
+def test_namex_search_direct_nrs(client, jwt, app):
+    """Test searching directly using name requests."""
+    base_nrs = generate_nrs(5, [], [], [])
+    rv = client.get(
+        f'api/v1/requests?nrNumbers={",".join([nr.nrNum for nr in base_nrs])}',
+        headers=create_header(jwt, [User.APPROVER, User.EDITOR, User.VIEWONLY])
+    )
+
+    assert rv
+    assert rv.status_code
+    assert rv.status_code == 200
+    assert rv.data
+    resp = json.loads(rv.data.decode('utf-8'))
+    assert len(resp) == 5

@@ -2,6 +2,7 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
+from http import HTTPStatus
 from flask import request, jsonify, g, current_app, get_flashed_messages
 from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
@@ -191,6 +192,7 @@ class Requests(Resource):
                 order_list = order_list + '{attribute} {direction} NULLS LAST'.format(attribute=k, direction=vl)
 
         # Assemble the query
+        nr_numbers = request.args.getlist('nrNumbers', None)
         nrNum = request.args.get('nrNum', None)
         activeUser = request.args.get('activeUser', None)
         compName = request.args.get('compName', None)
@@ -210,6 +212,14 @@ class Requests(Resource):
             q = q.filter(RequestDAO.stateCd.in_(queue))
 
         q = q.filter(RequestDAO.nrNum.notlike('NR L%'))
+        # For sbc-auth - My Business Registry page.
+        if nr_numbers:
+            if not jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY]):
+                return HTTPStatus.FORBIDDEN.value
+            nr_numbers = [nr_number.upper() for nr_number in nr_numbers]
+            requests = RequestDAO.query.filter(RequestDAO.nrNum.in_(nr_numbers)).all()
+            requests = [request.json() for request in requests]
+            return jsonify(requests)
         if nrNum:
             # set any variation of mixed case 'nr' to 'NR'
             nrNum = nrNum.upper().strip()
@@ -367,16 +377,10 @@ class Requests(Resource):
     # noinspection PyUnusedLocal,PyUnusedLocal
     @api.expect(a_request)
     @cors.crossdomain(origin='*')
-    @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
+    @jwt.requires_auth
     def post(self, *args, **kwargs):
-        json_input = request.get_json()
-        if not json_input:
-            return jsonify({'message': 'No input data provided'}), 400
-
-        nr_numbers = [nr_number.upper() for nr_number in json_input]
-        requests = RequestDAO.query.filter(RequestDAO.nrNum.in_(nr_numbers)).all()
-        requests = [request.json() for request in requests]
-        return jsonify(requests)
+        current_app.logger.info('Someone is trying to post a new request')
+        return jsonify({'message': 'Not Implemented'}), 501
 
 
 # noinspection PyUnresolvedReferences
