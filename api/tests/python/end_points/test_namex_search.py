@@ -594,8 +594,11 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
 def test_namex_search_direct_nrs_bad_roles(client, jwt, app):
     """Test searching directly using name request numbers with bad roles."""
     base_nrs = generate_nrs(5, [], [], [])
+    for nr in base_nrs:
+        nr.save_to_db()
+    qs = "&".join(["nrNumbers="+nr.nrNum for nr in base_nrs])
     rv = client.get(
-        f'api/v1/requests?nrNumbers={",".join([nr.nrNum for nr in base_nrs])}',
+        f'api/v1/requests?{qs}',
         headers=create_header(jwt, [])
     )
     assert rv
@@ -605,8 +608,12 @@ def test_namex_search_direct_nrs_bad_roles(client, jwt, app):
 def test_namex_search_direct_nrs(client, jwt, app):
     """Test searching directly using name requests."""
     base_nrs = generate_nrs(5, [], [], [])
+    for nr in base_nrs:
+        nr.save_to_db()
+
+    qs = "&".join(["nrNumbers="+nr.nrNum for nr in base_nrs])
     rv = client.get(
-        f'api/v1/requests?nrNumbers={",".join([nr.nrNum for nr in base_nrs])}',
+        f'api/v1/requests?{qs}',
         headers=create_header(jwt, [User.APPROVER, User.EDITOR, User.VIEWONLY])
     )
 

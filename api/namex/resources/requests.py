@@ -214,8 +214,9 @@ class Requests(Resource):
         q = q.filter(RequestDAO.nrNum.notlike('NR L%'))
         # For sbc-auth - My Business Registry page.
         if nr_numbers:
-            if not jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY]):
-                return HTTPStatus.FORBIDDEN.value
+            if not jwt.validate_roles([User.EDITOR]) and not jwt.validate_roles([User.APPROVER]) \
+                    and not jwt.validate_roles([User.VIEWONLY]):
+                return {}, HTTPStatus.FORBIDDEN.value
             nr_numbers = [nr_number.upper() for nr_number in nr_numbers]
             requests = RequestDAO.query.filter(RequestDAO.nrNum.in_(nr_numbers)).all()
             requests = [request.json() for request in requests]
