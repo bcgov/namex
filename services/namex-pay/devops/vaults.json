@@ -11,8 +11,13 @@
         "application": [
             "postgres-namex",
             "namex-pay",
-            "nro-service",
-            "sentry"
+            "nro-service"
+        ]
+    },
+	{
+        "vault": "sentry",
+        "application": [
+            "examination"
         ]
     }
 ]

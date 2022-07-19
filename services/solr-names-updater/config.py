@@ -62,6 +62,8 @@ class Config():  # pylint: disable=too-few-public-methods
 
     SECRET_KEY = 'a secret'
 
+    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
+
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False

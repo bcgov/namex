@@ -9,8 +9,13 @@
         "vault": "namex",
         "application": [
             "postgres-namex",
-            "solr-updater",
-            "sentry"
+            "solr-updater"
+        ]
+    },
+	{
+        "vault": "sentry",
+        "application": [
+            "examination"
         ]
     }
 ]
