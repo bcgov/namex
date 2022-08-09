@@ -131,15 +131,15 @@ class Methods:
     @staticmethod
     def build_directors_sql(corp_num_sql):
         """Build directors sql."""
-        return f'select \
+        return f"select \
                     CASE \
                         WHEN cp.middle_nme IS NOT NULL \
-                            THEN cp.first_nme || " "||cp.middle_nme|| " "||cp.last_nme \
+                            THEN cp.first_nme || ' ' ||cp.middle_nme|| ' ' ||cp.last_nme \
                         ELSE \
-                            cp.first_nme || " " || cp.last_nme \
+                            cp.first_nme || ' ' || cp.last_nme \
                         END director_name \
                 from bc_registries.corp_party_vw cp \
-                where cp.corp_num = {corp_num_sql} and cp.end_event_id IS NULL and cp.party_typ_cd = "DIR";'
+                where cp.corp_num = {corp_num_sql} and cp.end_event_id IS NULL and cp.party_typ_cd = 'DIR';"
 
     @staticmethod
     def build_addr_id_sql(corp_num_sql):
@@ -160,15 +160,15 @@ class Methods:
     @staticmethod
     def build_attorneys_sql(corp_num_sql):
         """Build attorneys sql."""
-        return f'select \
+        return f"select \
                     CASE \
                       WHEN cp.middle_nme IS NOT NULL \
-                        THEN cp.first_nme || " " ||cp.middle_nme|| " " ||cp.last_nme \
+                        THEN cp.first_nme || ' ' ||cp.middle_nme|| ' ' ||cp.last_nme \
                       ELSE \
-                        cp.first_nme || " " || cp.last_nme \
+                        cp.first_nme || ' ' || cp.last_nme \
                     END attorney_name \
                    from bc_registries.corp_party_vw cp\
-                   where cp.corp_num = {corp_num_sql} and cp.end_event_id IS NULL and cp.party_typ_cd = "ATT";'
+                   where cp.corp_num = {corp_num_sql} and cp.end_event_id IS NULL and cp.party_typ_cd = 'ATT';"
 
     @staticmethod
     def build_nr_sql(corp_num_sql):
