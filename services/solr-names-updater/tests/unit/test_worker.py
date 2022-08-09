@@ -33,16 +33,19 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
      ('Sole Prop Cancelled', create_request_state_change_message('CANCELLED', 'DRAFT'), 'FR', False),
      ('Sole Prop Reset', create_request_state_change_message('RESET', 'DRAFT'), 'FR', False),
      ('Sole Prop Consumed', create_request_state_change_message('CONSUMED', 'DRAFT'), 'FR', False),
+     ('Sole Prop Expired', create_request_state_change_message('EXPIRED', 'DRAFT'), 'FR', False),
      ('Gen Part Approved', create_request_state_change_message('APPROVED', 'DRAFT'),   'GP', False),
      ('Gen Part Conditional', create_request_state_change_message('CONDITIONAL', 'DRAFT'), 'GP', False),
      ('Gen Part Cancelled', create_request_state_change_message('CANCELLED', 'DRAFT'), 'GP', False),
      ('Gen Part Reset', create_request_state_change_message('RESET', 'DRAFT'), 'GP', False),
      ('Gen Part Consumed', create_request_state_change_message('CONSUMED', 'DRAFT'), 'GP', False),
+     ('Gen Part Expired', create_request_state_change_message('EXPIRED', 'DRAFT'), 'GP', False),
      ('CORPORATION Approved', create_request_state_change_message('APPROVED', 'DRAFT'), 'CR', True),
      ('CORPORATION Conditional', create_request_state_change_message('CONDITIONAL', 'DRAFT'), 'CR', True),
      ('CORPORATION Cancelled', create_request_state_change_message('CANCELLED', 'DRAFT'), 'CR', True),
      ('CORPORATION Reset', create_request_state_change_message('RESET', 'DRAFT'), 'CR', True),
-     ('CORPORATION Consumed', create_request_state_change_message('CONSUMED', 'DRAFT'), 'CR', True)
+     ('CORPORATION Consumed', create_request_state_change_message('CONSUMED', 'DRAFT'), 'CR', True),
+     ('CORPORATION Expired', create_request_state_change_message('EXPIRED', 'DRAFT'), 'CR', True)
     ])
 async def test_sp_gp_names_not_processed_to_solr(
         testname,

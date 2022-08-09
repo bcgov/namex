@@ -93,7 +93,7 @@ async def process_names_event_message(msg: dict, flask_app: Flask):
             if new_state in ('APPROVED', 'CONDITIONAL'):
                 process_names_add(request_state_change)
                 process_possible_conflicts_add(request_state_change)
-            elif new_state in ('CANCELLED', 'RESET', 'CONSUMED'):
+            elif new_state in ('CANCELLED', 'RESET', 'EXPIRED'):
                 process_names_delete(request_state_change)
                 process_possible_conflicts_delete(request_state_change)
             else:
