@@ -72,8 +72,8 @@ def is_processable(msg: dict):
            and (nr_num := msg.get('data', {})
                              .get('request', {})
                              .get('nrNum', None)) \
-           and (nr := RequestDAO.find_by_nr(nr_num)) \
-           and nr.entity_type_cd not in ('FR', 'GP'):
+           and (nr_obj := RequestDAO.find_by_nr(nr_num)) \
+           and nr_obj.entity_type_cd not in ('FR', 'GP'):
             return True
 
     return False
