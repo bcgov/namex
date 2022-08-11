@@ -24,7 +24,7 @@ from solr_names_updater.names_processors.names import get_nr_ids_to_delete_from_
 
 from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message # noqa: I003
 
-
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['message_payload', 'names', 'names_state', 'expected_names_to_add_to_solr', 'not_expected_names_to_add_to_solr'],
     [
@@ -118,7 +118,7 @@ async def test_should_add_names_to_solr(
                     else:
                         assert mock_solr_feeder_api_post.called == False
 
-
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['state_change_type', 'message_payload', 'new_nr_state', 'previous_nr_state', 'names', 'name_states'],
     [

@@ -26,6 +26,7 @@ from queue_common.service_utils import QueueException
 from solr_names_updater import worker # noqa: I001
 from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message # noqa: I003
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['testname','message_payload','nr_entity','assert_value'],[
      ('Sole Prop Approved', create_request_state_change_message('APPROVED', 'DRAFT'), 'FR', False),

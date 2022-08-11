@@ -24,7 +24,7 @@ from solr_names_updater import worker  # noqa: I001
 
 from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message  # noqa: I003
 
-
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['message_payload',
      'new_nr_state',
@@ -148,6 +148,7 @@ async def test_should_add_possible_conflicts_to_solr(
                         assert mock_solr_feeder_api_post.called == False
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['state_change_type', 'message_payload', 'new_nr_state', 'previous_nr_state', 'names', 'name_states'],
     [
