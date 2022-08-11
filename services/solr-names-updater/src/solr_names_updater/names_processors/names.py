@@ -31,37 +31,37 @@ def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-loc
     """Process names update via Solr feeder api."""
     logger.debug('names processing: %s', state_change_msg)
     nr_num = state_change_msg.get('nrNum', None)
-    nr = RequestDAO.find_by_nr(nr_num)
-    send_to_solr_add(nr)
+    nr_obj = RequestDAO.find_by_nr(nr_num)
+    send_to_solr_add(nr_obj)
 
 
 def process_delete_from_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches
     """Process names update via Solr feeder api."""
     logger.debug('names processing: %s', state_change_msg)
     nr_num = state_change_msg.get('nrNum', None)
-    nr = RequestDAO.find_by_nr(nr_num)
-    send_to_solr_delete(nr)
+    nr_obj = RequestDAO.find_by_nr(nr_num)
+    send_to_solr_delete(nr_obj)
 
 
-def send_to_solr_add(nr: RequestDAO):
+def send_to_solr_add(nr_obj: RequestDAO):
     """Send json payload to add names to solr for NR."""
     # pylint: disable=no-member
     name_states = [NameState.APPROVED.value, NameState.CONDITION.value]
-    names = find_name_by_name_states(nr.id, name_states)
-    jur = nr.xproJurisdiction if nr.xproJurisdiction else 'BC'
-    payload_dict = construct_payload_dict(nr, names, jur)
+    names = find_name_by_name_states(nr_obj.id, name_states)
+    jur = nr_obj.xproJurisdiction if nr_obj.xproJurisdiction else 'BC'
+    payload_dict = construct_payload_dict(nr_obj, names, jur)
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
         logger.error('failed to add names to solr for %s, status code: %i, error reason: %s, error details: %s',
-                     nr.nrNum,
+                     nr_obj.nrNum,
                      resp.status_code,
                      resp.reason,
                      resp.text)
 
 
-def send_to_solr_delete(nr: RequestDAO):
+def send_to_solr_delete(nr_obj: RequestDAO):
     """Send json payload to delete names from solr for NR."""
-    delete_ids = get_nr_ids_to_delete_from_solr(nr)
+    delete_ids = get_nr_ids_to_delete_from_solr(nr_obj)
     payload_dict = {
         'solr_core': 'names',
         'request': {
@@ -74,36 +74,36 @@ def send_to_solr_delete(nr: RequestDAO):
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
         logger.error('failed to delete names from solr for %s, status code: %i, error reason: %s, error details: %s',
-                     nr.nrNum,
+                     nr_obj.nrNum,
                      resp.status_code,
                      resp.reason,
                      resp.text)
 
 
-def get_nr_ids_to_delete_from_solr(nr: RequestDAO):
+def get_nr_ids_to_delete_from_solr(nr_obj: RequestDAO):
     """Generate NR ids to be used to delete names from solr for a NR."""
-    nr_num_1 = f'{nr.nrNum}-1'
-    nr_num_2 = f'{nr.nrNum}-2'
-    nr_num_3 = f'{nr.nrNum}-3'
+    nr_num_1 = f'{nr_obj.nrNum}-1'
+    nr_num_2 = f'{nr_obj.nrNum}-2'
+    nr_num_3 = f'{nr_obj.nrNum}-3'
     keys = [nr_num_1, nr_num_2, nr_num_3]
     return keys
 
 
-def construct_payload_dict(nr: RequestDAO, names, jur):
+def construct_payload_dict(nr_obj: RequestDAO, names, jur):
     """Construct json payload used to invoke solr feeder endpoint for adding names for a given NR."""
     payload_dict = {'solr_core': 'names'}
     payload_request = {}
 
     for index, name in enumerate(names):
         key = f'add{index + 1}'
-        doc_id = f'{nr.nrNum}-{name.choice}'
-        start_date = convert_to_solr_conformant_datetime_str(nr.submittedDate)
+        doc_id = f'{nr_obj.nrNum}-{name.choice}'
+        start_date = convert_to_solr_conformant_datetime_str(nr_obj.submittedDate)
         payload_request[key] = {
             'doc': {
                 'id': doc_id,
                 'name': name.name,
-                'nr_num': nr.nrNum,
-                'submit_count': nr.submitCount,
+                'nr_num': nr_obj.nrNum,
+                'submit_count': nr_obj.submitCount,
                 'name_state_type_cd': name.state,
                 'start_date': start_date,
                 'jurisdiction': jur

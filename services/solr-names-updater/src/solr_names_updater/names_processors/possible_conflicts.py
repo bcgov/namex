@@ -32,42 +32,42 @@ def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-loc
     """Process possible conflicts update via Solr feeder api."""
     logger.debug('names processing: %s', state_change_msg)
     nr_num = state_change_msg.get('nrNum')
-    nr = RequestDAO.find_by_nr(nr_num)
-    send_to_solr_add(nr)
+    nr_obj = RequestDAO.find_by_nr(nr_num)
+    send_to_solr_add(nr_obj)
 
 
 def process_delete_from_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches
     """Process possible conflicts update via Solr feeder api."""
     logger.debug('names processing: %s', state_change_msg)
     nr_num = state_change_msg.get('nrNum')
-    nr = RequestDAO.find_by_nr(nr_num)
-    send_to_solr_delete(nr)
+    nr_obj = RequestDAO.find_by_nr(nr_num)
+    send_to_solr_delete(nr_obj)
 
 
-def send_to_solr_add(nr: RequestDAO):
+def send_to_solr_add(nr_obj: RequestDAO):
     """Send json payload to add possible conflict to solr for NR."""
     name_states = [NameState.APPROVED.value, NameState.CONDITION.value]  # pylint: disable=no-member
-    names = find_name_by_name_states(nr.id, name_states)
+    names = find_name_by_name_states(nr_obj.id, name_states)
     name = names[0]
-    jur = nr.xproJurisdiction if nr.xproJurisdiction else 'BC'
-    payload_dict = construct_payload_dict(nr, name, jur)
+    jur = nr_obj.xproJurisdiction if nr_obj.xproJurisdiction else 'BC'
+    payload_dict = construct_payload_dict(nr_obj, name, jur)
 
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
         logger.error("""failed to add possible conflict to solr for %s,
                     status code: %i, error reason: %s, error details: %s""",
-                     nr.nrNum,
+                     nr_obj.nrNum,
                      resp.status_code,
                      resp.reason,
                      resp.text)
 
 
-def send_to_solr_delete(nr: RequestDAO):
+def send_to_solr_delete(nr_obj: RequestDAO):
     """Send json payload to delete possible conflict from solr for NR."""
     payload_dict = {
         'solr_core': 'possible.conflicts',
         'request': {
-            'delete': [nr.nrNum],
+            'delete': [nr_obj.nrNum],
             'commit': {}
         }
     }
@@ -78,23 +78,23 @@ def send_to_solr_delete(nr: RequestDAO):
     if resp.status_code != 200:
         logger.error("""failed to delete possible conflict from solr for %s,
                      status code: %i, error reason: %s, error details: %s""",
-                     nr.nrNum,
+                     nr_obj.nrNum,
                      resp.status_code,
                      resp.reason,
                      resp.text)
 
 
-def construct_payload_dict(nr: RequestDAO, name, jur):
+def construct_payload_dict(nr_obj: RequestDAO, name, jur):
     """Construct json payload used to invoke solr feeder endpoint for adding possible conflicts for a given NR."""
     payload_dict = {'solr_core': 'possible.conflicts'}
     payload_request = {}
-    start_date = convert_to_solr_conformant_datetime_str(nr.submittedDate)
+    start_date = convert_to_solr_conformant_datetime_str(nr_obj.submittedDate)
     payload_request['add'] = {
         'doc': {
-            'id': nr.nrNum,
+            'id': nr_obj.nrNum,
             'name': name.name,
             'state_type_cd': name.state,
-            'source': nr.source,
+            'source': nr_obj.source,
             'start_date': start_date,
             'jurisdiction': jur
         }

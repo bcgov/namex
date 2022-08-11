@@ -72,8 +72,8 @@ def is_processable(msg: dict):
            and (nr_num := msg.get('data', {})
                              .get('request', {})
                              .get('nrNum', None)) \
-           and (nr := RequestDAO.find_by_nr(nr_num)) \
-           and nr.entity_type_cd not in ('FR', 'GP'):
+           and (nr_obj := RequestDAO.find_by_nr(nr_num)) \
+           and nr_obj.entity_type_cd not in ('FR', 'GP'):
             return True
 
     return False
@@ -93,7 +93,7 @@ async def process_names_event_message(msg: dict, flask_app: Flask):
             if new_state in ('APPROVED', 'CONDITIONAL'):
                 process_names_add(request_state_change)
                 process_possible_conflicts_add(request_state_change)
-            elif new_state in ('CANCELLED', 'RESET', 'CONSUMED'):
+            elif new_state in ('CANCELLED', 'RESET', 'EXPIRED'):
                 process_names_delete(request_state_change)
                 process_possible_conflicts_delete(request_state_change)
             else:
