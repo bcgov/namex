@@ -478,7 +478,6 @@ class NameRequestPatchActions(AbstractEnum):
     """
     CHECKOUT = NameRequestActions.CHECKOUT.value
     CHECKIN = NameRequestActions.CHECKIN.value
-    print('Adding EDIT - NameRequestPatchActions to Action')
     EDIT = NameRequestActions.EDIT.value
     CANCEL = NameRequestActions.CANCEL.value
     RESEND = NameRequestActions.RESEND.value
@@ -504,7 +503,6 @@ class NameRequestPendingPaymentActions(AbstractEnum):
 
 
 class NameRequestDraftActions(AbstractEnum):
-    print('Adding EDIT TO NameRequestDraftActions to Action')
     EDIT = NameRequestActions.EDIT.value
     UPGRADE = NameRequestActions.UPGRADE.value
     RECEIPT = NameRequestActions.RECEIPT.value
@@ -515,9 +513,7 @@ class NameRequestActiveActions(AbstractEnum):
     """
     Actions available when an NR is 'active' eg. in an APPROVED or CONDITIONAL state, NOT expired, and NOT consumed.
     """
-    print('Remove EDIT From NameRequestActiveActions to Action')
     #EDIT = NameRequestActions.EDIT.value
-    #OMID ZAMANI
     CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
     REAPPLY = NameRequestActions.REAPPLY.value
     RESUBMIT = NameRequestActions.RESUBMIT.value
@@ -554,8 +550,6 @@ class NameRequestExpiredActions(AbstractEnum):
 
 class NameRequestConsumedActions(AbstractEnum):
     """Actions available when an NR is in an CONSUMED state."""
-
-    print('Remove EDIT From NameRequestConsumedActions to Action')
     #EDIT = NameRequestActions.EDIT.value
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
@@ -575,7 +569,6 @@ class NameRequestCompletedActions(AbstractEnum):
 
 
 class NameRequestActiveRejectedActions(AbstractEnum):
-    print('Remove EDIT From NameRequestActiveRejectedActions to Action')
     #EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
@@ -583,7 +576,6 @@ class NameRequestActiveRejectedActions(AbstractEnum):
 
 
 class NameRequestExpiredRejectedActions(AbstractEnum):
-    print('Adding NameRequestExpiredRejectedAction to Action')
     #EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
