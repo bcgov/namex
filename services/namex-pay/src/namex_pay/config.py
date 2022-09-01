@@ -29,10 +29,10 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 CONFIGURATION = {
-    'development': 'namex_pay.config.DevConfig',
-    'testing': 'namex_pay.config.TestConfig',
-    'production': 'namex_pay.config.ProdConfig',
-    'default': 'namex_pay.config.ProdConfig'
+    'development': 'config.DevConfig',
+    'testing': 'config.TestConfig',
+    'production': 'config.ProdConfig',
+    'default': 'config.ProdConfig'
 }
 
 
@@ -52,7 +52,7 @@ def get_named_config(config_name: str = 'production'):
     return app_config
 
 
-class _Config():  # pylint: disable=too-few-public-methods
+class Config():  # pylint: disable=too-few-public-methods
     """Base class configuration that should set reasonable defaults.
 
     Used as the base for all the other configurations.
@@ -60,20 +60,20 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    PAYMENT_SVC_URL = os.getenv('PAYMENT_SVC_URL', '')
-
-    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
-
+    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', None)
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    PAYMENT_SVC_URL = os.getenv('PAY_API_URL', None)
+    PAYMENT_SVC_VERSION = os.getenv('PAY_API_VERSION', None)
+
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_NAME', '')
-    DB_HOST = os.getenv('DATABASE_HOST', '')
-    DB_PORT = os.getenv('DATABASE_PORT', '5432')
+    DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
+    DB_PASSWORD = os.getenv('NAMEX_DATABASE_PASSWORD', '')
+    DB_NAME = os.getenv('NAMEX_DATABASE_NAME', '')
+    DB_HOST = os.getenv('NAMEX_DATABASE_HOST', '')
+    DB_PORT = os.getenv('NAMEX_DATABASE_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
     # ORACLE - LEGACY NRO NAMESDB
@@ -81,9 +81,10 @@ class _Config():  # pylint: disable=too-few-public-methods
     NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
     NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
     NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
-    NRO_HOST = os.getenv('NRO_HOST', '')
-    NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
+    NRO_HOST = os.getenv('ORACLE_HOST', '')
+    NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
 
+    # NATS
     NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://localhost:4222')
     NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', 'namex.worker')
     NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
@@ -120,14 +121,14 @@ class _Config():  # pylint: disable=too-few-public-methods
     ENVIRONMENT = os.getenv('ENVIRONMENT', 'prod')
 
 
-class DevConfig(_Config):  # pylint: disable=too-few-public-methods
+class DevConfig(Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
 
     TESTING = False
     DEBUG = True
 
 
-class TestConfig(_Config):  # pylint: disable=too-few-public-methods
+class TestConfig(Config):  # pylint: disable=too-few-public-methods
     """In support of testing only.
 
     Used by the py.test suite
@@ -144,7 +145,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
 
-class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
+class ProdConfig(Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""
 
     TESTING = False

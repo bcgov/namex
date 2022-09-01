@@ -7,17 +7,23 @@
         ]
     },
     {
-        "vault": "namex",
-        "application": [
-            "postgres-namex",
-            "namex-pay",
-            "nro-service"
-        ]
-    },
-	{
         "vault": "sentry",
         "application": [
             "examination"
+        ]
+    },
+    {
+        "vault": "database",
+        "application": [
+            "namex-db",
+            "oracle-base",
+            "oracle-namex-db"
+        ]
+    },
+    {
+        "vault": "API",
+        "application": [
+            "pay-api"
         ]
     }
 ]
