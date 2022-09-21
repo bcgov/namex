@@ -147,7 +147,7 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
 
 async def furnish_receipt_message(qsm: QueueServiceManager, payment: Payment):  # pylint: disable=redefined-outer-name
     """Send receipt info to the mail queue if it hasn't yet been done."""
-    if payment.furnished == 'Y':
+    if payment.furnished is True:
         logger.debug('Queue Issue: Duplicate, already furnished receipt for payment.id=%s', payment.id)
         capture_message(f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}')
         return
