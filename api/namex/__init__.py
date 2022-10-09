@@ -14,7 +14,11 @@ import os
 from .VERSION import __version__  # noqa: F401; imported from here
 from flask import Flask
 from flask_jwt_oidc import JwtManager
+
 jwt = JwtManager()
+
+import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
+from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
 from namex.services.lookup import nr_filing_actions
 from namex.services.nro import NROServices

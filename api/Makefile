@@ -48,6 +48,7 @@ build-req: clean ## Upgrade requirements
 	test -f venv/bin/activate || python3.8 -m venv  $(CURRENT_ABS_DIR)/venv ;\
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;\
+	pip install -U setuptools; \
 	pip install -Ur requirements/prod.txt ;\
 	pip freeze | sort > requirements.txt ;\
 	cat requirements/bcregistry-libraries.txt >> requirements.txt ;\
@@ -57,6 +58,7 @@ install: clean ## Install python virtrual environment
 	test -f venv/bin/activate || python3.8 -m venv  $(CURRENT_ABS_DIR)/venv ;\
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;\
+	pip install -U setuptools; \
 	pip install -Ur requirements.txt
 
 install-dev: ## Install local application
