@@ -20,7 +20,7 @@ hyperframe==6.0.1
 idna==2.10
 inflect==5.3.0
 itsdangerous==1.1.0
-joblib==1.0.1
+joblib==1.2.0
 jsonpickle==2.0.0
 lxml==4.6.3
 marshmallow-sqlalchemy==0.24.3
