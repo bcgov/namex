@@ -3,7 +3,7 @@
 from flask import current_app, Blueprint
 
 
-bp = Blueprint('PROBES', __name__, url_prefix='')  # pylint: disable=invalid-name
+bp = Blueprint('PROBES', __name__, url_prefix='/probes')  # pylint: disable=invalid-name
 
 
 # If we are reachable, we consider ourselves to be live.

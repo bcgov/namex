@@ -8,7 +8,7 @@ from solr_feeder import solr
 from solr_feeder.services import get_business_info, get_owners, update_search
 
 
-bp = Blueprint('FEEDER', __name__, url_prefix='')  # pylint: disable=invalid-name
+bp = Blueprint('FEEDER', __name__, url_prefix='/feeds')  # pylint: disable=invalid-name
 
 
 # Feed the specified core with the given data.
