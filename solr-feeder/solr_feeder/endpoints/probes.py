@@ -1,24 +1,18 @@
 
-import flask_restplus
+"""Endpoints to check and manage the health of the service."""
+from flask import current_app, Blueprint
 
 
-__all__ = ['api']
-
-
-api = flask_restplus.Namespace('Probes', description='Operations probes to determine liveness and readiness')
+bp = Blueprint('PROBES', __name__, url_prefix='')  # pylint: disable=invalid-name
 
 
 # If we are reachable, we consider ourselves to be live.
-@api.route('/liveness')
-class _Liveness(flask_restplus.Resource):
-    @staticmethod
-    def get():
-        return {'message': 'Liveness checks passed'}, 200
+@bp.get('/liveness')
+def liveness():
+    return {'message': 'Liveness checks passed'}, 200
 
 
 # If we are reachable, we consider ourselves to be ready.
-@api.route('/readiness')
-class _Readiness(flask_restplus.Resource):
-    @staticmethod
-    def get():
-        return {'message': 'Readiness checks passed'}, 200
+@bp.get('/readiness')
+def readiness():
+    return {'message': 'Readiness checks passed'}, 200
