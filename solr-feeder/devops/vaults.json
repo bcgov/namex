@@ -4,5 +4,19 @@
         "application": [
             "solr-feeder"
         ]
+    },
+    {
+        "vault": "keycloak",
+        "application": [
+            "base",
+            "business-search-service-account"
+        ]
+    },
+    {
+        "vault": "API",
+        "application": [
+            "colin-api-entity",
+            "registries-search-api"
+        ]
     }
 ]
