@@ -23,7 +23,7 @@ class Endpoint:  # pylint: disable=too-few-public-methods
     def __init__(self, name: str, bps: List, app: Flask = None):
         """Initialize the endpoint and mount the blueprints to it."""
         self.app = None
-        self.bp = Blueprint(name, __name__, url_prefix='')
+        self.bp = Blueprint(name, __name__, url_prefix='/api/v1')
 
         for bp in bps:  # pylint: disable=invalid-name
             self.bp.register_blueprint(bp)
