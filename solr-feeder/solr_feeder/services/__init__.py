@@ -11,10 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes the endpoints."""
-from .feeds import bp as feeder_bp
-from .probes import bp as probes_bp
-from .endpoint import Endpoint
-
-
-endpoint = Endpoint(name='SOLR_FEEDER', bps=[feeder_bp, probes_bp])
+"""This module wraps the calls to external services used by the Solr Feeder."""
+from .auth import get_bearer_token
+from .colin import get_business_info, get_owners
+from .search import update_search

@@ -1,45 +1,80 @@
-
 import logging
+from http import HTTPStatus
 
 import flask
-import flask_restplus
+from flask import Blueprint
 
 from solr_feeder import solr
+from solr_feeder.services import get_business_info, get_owners, update_search
 
 
-__all__ = ['api']
-
-
-api = flask_restplus.Namespace('Feeds', description='Feed updates from legacy databases')
+bp = Blueprint('FEEDER', __name__, url_prefix='')  # pylint: disable=invalid-name
 
 
 # Feed the specified core with the given data.
-@api.route('')
-class _Names(flask_restplus.Resource):
-    solr_request_model = api.model(
-        'Solr Request', {
-            'solr_core': flask_restplus.fields.String(),
-            'request': flask_restplus.fields.String()
+@bp.post('')
+def feed_solr():
+    """Updates the solr cores for namex and search.
+
+    Expected payload for updating namex core:
+        {
+            solr_core: str,
+            request: <raw str representation of solr update/delete object for request>
         }
-    )
 
-    @api.expect(solr_request_model)
-    def post(self):
-        logging.debug('request raw data: {}'.format(flask.request.data))
-        json_data = flask.request.get_json()
+    Expected payload for updating registries search core:
+        {
+            solr_core: str,
+            identifier: str,
+            legalType: str
+        }
+    """
+    logging.debug('request raw data: {}'.format(flask.request.data))
+    json_data = flask.request.get_json()
 
-        if 'solr_core' not in json_data:
-            return {'message': 'Required parameter "solr_core" not defined'}, 400
+    solr_core = json_data.get('solr_core')
+    if not solr_core:
+        return {'message': 'Required parameter "solr_core" not defined'}, HTTPStatus.BAD_REQUEST
 
-        solr_core = json_data['solr_core']
-        if solr_core not in ('names', 'possible.conflicts'):
-            return {'message': 'Parameter "solr_core" only has valid values of "names" or "possible.conflicts"'}, 400
+    if solr_core not in ('names', 'possible.conflicts', 'search'):
+        return {'message': 'Parameter "solr_core" only has valid values of "names", "possible.conflicts" or "search"'}, 400
 
+    if solr_core == 'search':
+        identifier = json_data.get('identifier')
+        legal_type = json_data.get('legalType')
+        if not identifier:
+            return {'message': 'Required parameter "identifier" not defined'}, HTTPStatus.BAD_REQUEST
+        if not legal_type:
+            return {'message': 'Required parameter "legalType" not defined'}, HTTPStatus.BAD_REQUEST
+        logging.debug('Updating search core record for %s...', identifier)
+        # get business data
+        business, error_response = get_business_info(legal_type, identifier)
+        if error_response:
+            logging.error('Error getting COLIN business data: %s', error_response)
+            return {'message': error_response['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
+        
+        owners, error_response = get_owners(legal_type, identifier)
+        if error_response:
+            logging.error('Error getting COLIN owners data: %s', error_response)
+            return {'message': error_response['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
+        # send data to search core via search-api
+        error_response = update_search({**business, **owners})
+        if error_response:
+            logging.error('Error updating search core: %s', error_response)
+            return {'message': error_response['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+        logging.debug('Search core updated.')
+
+    else:
         if 'request' not in json_data:
-            return {'message': 'Required parameter "request" not defined'}, 400
+            return {'message': 'Required parameter "request" not defined'}, HTTPStatus.BAD_REQUEST
 
+        logging.debug('Updating namex core record...')
         error_response = solr.update_core(solr_core, json_data['request'])
         if error_response:
+            logging.error('Error updating namex core: %s', error_response)
             return {'message': error_response['message']}, error_response['status_code']
 
-        return {'message': 'Solr core updated'}, 200
+        logging.debug('Namex core updated.')
+
+    return {'message': 'Solr core updated'}, HTTPStatus.OK
