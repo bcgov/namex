@@ -34,7 +34,8 @@ def get_business_info(legal_type: str, identifier: str) -> Tuple[dict, dict]:
 
         res_json = res.json()
         business = {
-            'identifier': identifier,
+            # add BC prefix to payload if its a BC limited company
+            'identifier': f'BC{identifier}' if legal_type == 'BC' else identifier,
             'legalName': res_json['business']['legalName'],
             'legalType': legal_type,
             'state': 'HISTRICAL' if res_json['business']['corpState'] == 'HIS' else 'ACTIVE',
