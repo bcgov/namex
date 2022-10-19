@@ -38,7 +38,7 @@ def get_business_info(legal_type: str, identifier: str) -> Tuple[dict, dict]:
             'identifier': f'BC{identifier}' if legal_type == 'BC' else identifier,
             'legalName': res_json['business']['legalName'],
             'legalType': legal_type,
-            'state': 'HISTRICAL' if res_json['business']['corpState'] == 'HIS' else 'ACTIVE',
+            'state': 'HISTORICAL' if res_json['business']['corpStateClass'] == 'HIS' else 'ACTIVE',
             'taxId': res_json['business']['businessNumber']
         }
 
