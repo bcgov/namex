@@ -4,6 +4,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     -- Action Types
     ACTION_UPDATE CONSTANT VARCHAR2(1) := 'U';
     ACTION_DELETE CONSTANT VARCHAR2(1) := 'D';
+    ACTION_SYNC CONSTANT VARCHAR2(1) := 'S';
 
     -- Status Types
     STATUS_PENDING CONSTANT VARCHAR2(1) := 'P';
@@ -63,6 +64,8 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         content VARCHAR2(4000);
         buffer VARCHAR2(4000);
 
+        corp_typ_cd corp_type.corp_typ_cd%TYPE;
+
         error_code INTEGER;
         error_message VARCHAR2(4000);
     BEGIN
@@ -72,8 +75,20 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         SELECT value INTO oracle_wallet FROM configuration WHERE application = 'GLOBAL' AND name = 'oracle_wallet';
         SELECT value INTO destination_url FROM configuration WHERE application = 'SOLR_FEEDER' AND name =
                 'destination_url';
-
-        content := generate_json_conflicts(nr_number, action);
+        
+        IF action = ACTION_SYNC THEN
+            -- NOTE: nr_number == corp_num in this case
+            SELECT corp_typ_cd INTO corp_typ_cd FROM corp_type NATURAL JOIN corporation WHERE corp_num = nr_number;
+            -- NOTE: CPs/BENs are only updated in CPRD via LEAR which already triggers a search update and the CPRD data can be out of date so skip.
+            -- SP/GPs are in LEAR but can still get updates in CPRD via a backdoor flow so they are still enabled here.
+            IF corp_typ_cd NOT IN ('CP','BEN') THEN
+                content := '{ "solr_core": "search", "identifier": "' || nr_number || '", "legalType": "' || corp_typ_cd || '"}';
+            ELSE
+                RETURN NULL;
+            END IF;
+        ELSE
+            content := generate_json_conflicts(nr_number, action);
+        END IF;
 
         -- At some point it would make sense to move the ReST stuff out of here and into somewhere re-usable.
         utl_http.set_wallet(oracle_wallet);
@@ -198,7 +213,32 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     EXCEPTION
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
-            application_log_insert('solr.load_name_data', SYSDATE(), -1, SQLERRM);
+            application_log_insert('solr.load_state_data', SYSDATE(), -1, SQLERRM);
+    END;
+
+
+    --
+    -- Called from a trigger to queue corporation data that needs to be sent to Search Solr.
+    --
+    PROCEDURE load_corporation_data IS
+        CURSOR pending_rows IS SELECT * FROM triggered_corporation WHERE status_solr = STATUS_PENDING ORDER BY id;
+        triggered_corp triggered_corporation%ROWTYPE;
+    BEGIN
+        OPEN pending_rows;
+        LOOP
+            FETCH pending_rows INTO triggered_corp;
+            EXIT WHEN pending_rows%NOTFOUND;
+
+            INSERT INTO solr_feeder (id, transaction_id, corp_num, action) VALUES (solr_feeder_id_seq.NEXTVAL,
+                    triggered_corp.id, triggered_corp.corp_num, ACTION_SYNC);
+
+            UPDATE triggered_corporation SET status_solr = STATUS_COMPLETE WHERE id = triggered_corporation.id;
+        END LOOP;
+        CLOSE pending_rows;
+    EXCEPTION
+        WHEN OTHERS THEN
+            dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
+            application_log_insert('solr.load_corporation_data', SYSDATE(), -1, SQLERRM);
     END;
 
 
@@ -215,6 +255,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         -- Load any data needed for the rows inserted by the trigger.
         load_name_data();
         load_state_data();
+        load_corporation_data();  -- for business search sync
 
         OPEN solr_feeder;
         LOOP

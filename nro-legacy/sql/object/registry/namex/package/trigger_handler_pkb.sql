@@ -28,5 +28,17 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.trigger_handler AS
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
             application_log_insert('enqueue_corp_state', SYSDATE(), -1, SQLERRM);
     END;
+
+    --
+    -- Called from a trigger in COLIN_MGR_XXX to queue corp data that needs to be sent to the business search application.
+    --
+    PROCEDURE enqueue_corporation(p_corp_num VARCHAR2) IS
+    BEGIN
+        INSERT INTO triggered_corporation (id, corp_num) VALUES (triggered_corporation_seq.NEXTVAL, p_corp_num);
+    EXCEPTION
+        WHEN OTHERS THEN
+            dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
+            application_log_insert('enqueue_corporation', SYSDATE(), -1, SQLERRM);
+    END;
 END trigger_handler;
 /
