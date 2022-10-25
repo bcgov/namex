@@ -8,6 +8,7 @@ from pathlib import Path
 import requests
 from flask import current_app, jsonify, request
 from flask_restx import Resource, cors
+from pytz import timezone
 
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
@@ -118,7 +119,9 @@ class ReportResource(Resource):
         if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
-            nr_report_json['expirationDate'] = nr_model.expirationDate.strftime('%B %-d, %Y')
+            tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
+            localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
+            nr_report_json['expirationDate'] = localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %P Pacific time')
         if nr_report_json['submittedDate']:
             nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
         if nr_report_json['applicants']['countryTypeCd']:
