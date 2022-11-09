@@ -17,13 +17,14 @@ from typing import Optional
 from flask import Flask, current_app
 from werkzeug.utils import cached_property
 
+
 class NameRequestFilingActions:
     """Manages the mapping between NR types and the actions allowed in the target systems.
 
     This support the service signatures for Flask, but doesn't do anything special with it.
     """
 
-    def __init__(self, app:Flask =None):
+    def __init__(self, app: Flask = None):
         """Initializer, supports setting the app context on instantiation."""
         if app is not None:
             self.init_app(app)
@@ -42,16 +43,15 @@ class NameRequestFilingActions:
         # ctx = _app_ctx_stack.top
         # if hasattr(ctx, 'nro_oracle_pool'):
 
-
     # This is the raw mapping data.
     # This list will be collapsed to a dict type
     # multiple target systems is not supported
     # multiple filing actions per nr_type is supported
     # NR Type', 'LegalTypeCd', 'LegalTypeName', 'Filing Name', 'Target', 'entitiesFilingName', 'URL', 'learTemplate
     raw_nr_to_action_mapping = [
-        ('CR', 'BC', 'B.C. Company', 'Incorporation', 'colin', None, None, None),
+        ('CR', 'BC', 'B.C. Company', 'Incorporation', 'lear', None, None, None),
         ('CR', 'BC', 'B.C. Company', 'Amalgamation', 'colin', None, None, None),
-        ('CCR', 'BC', 'B.C. Company', 'Change of Name', 'colin', None, None, None),
+        ('CCR', 'BC', 'B.C. Company', 'Change of Name', 'lear', None, None, None),
         ('CT', 'BC', 'B.C. Company', 'Continuation In', 'colin', None, None, None),
         ('RCR', 'BC', 'B.C. Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('XCR', 'XP', 'Corporation (Foreign)', 'Extraprovincial Registration', 'colin', None, None, None),
@@ -86,16 +86,16 @@ class NameRequestFilingActions:
         ('XCP', 'XCP', 'Extraprovincial Cooperative', 'Amalgamation', 'lear', 'manual', None, None),
         ('XCCP', 'XCP', 'Extraprovincial Cooperative', 'Change of Name', 'lear', 'manual', None, None),
         ('XRCP', 'XCP', 'Extraprovincial Cooperative', 'Restoration', 'lear', 'manual', None, None),
-        ('CC', 'CCC', 'Community Contribution Co.', 'Incorporation', 'colin', None, None, None),
+        ('CC', 'CC', 'Community Contribution Co.', 'Incorporation', 'lear', None, None, None),
         ('CC', 'CCC', 'Community Contribution Co.', 'Amalgamation', 'colin', None, None, None),
         ('CCV', 'CCC', 'Community Contribution Co.', 'BC to CCC Conversion', 'colin', None, None, None),
-        ('CCC', 'CCC', 'Community Contribution Co.', 'Change of Name', 'colin', None, None, None),
+        ('CCC', 'CC', 'Community Contribution Co.', 'Change of Name', 'lear', None, None, None),
         ('CCCT', 'CCC', 'Community Contribution Co.', 'Continuation In', 'colin', None, None, None),
         ('RCC', 'CCC', 'Community Contribution Co.', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
-        ('UL', 'ULC', 'Unlimited Liability Co.', 'Incorporation', 'colin', None, None, None),
+        ('UL', 'ULC', 'Unlimited Liability Co.', 'Incorporation', 'lear', None, None, None),
         ('UL', 'ULC', 'Unlimited Liability Co.', 'Amalgamation', 'colin', None, None, None),
         ('UC', 'ULC', 'Unlimited Liability Co.', 'BC to ULC Conversion', 'colin', None, None, None),
-        ('CUL', 'ULC', 'Unlimited Liability Co.', 'Change of Name', 'colin', None, None, None),
+        ('CUL', 'ULC', 'Unlimited Liability Co.', 'Change of Name', 'lear', None, None, None),
         ('ULCT', 'ULC', 'Unlimited Liability Co.', 'Continuation In', 'colin', None, None, None),
         ('RUL', 'ULC', 'Unlimited Liability Co.', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('UA', 'A', 'Extraprovincial Unlimited Liability Company', 'Assumed', 'colin', None, None, None),
@@ -114,16 +114,16 @@ class NameRequestFilingActions:
         ('BERE', 'BEN', 'BC Benefit Company Incorporation', 'Restoration', 'lear', None, None, None),
         ('BECV', 'BEN', 'BC Benefit Company Incorporation', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('BECR', 'BEN', 'BC Benefit Company Incorporation', 'Convert to BC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ]
+    ]
 
     @cached_property
     def get_dict(self) -> dict:
         """Return a dict of nr types to the target and filing actions.
 
         This takes the raw filing data and creates a dict."""
-        current_app.logger.debug ('creating nr_filing_actions')
-        d={}
-        for (nr_type, legalType, legalTypeName, filingName, target, entitiesFilingName, URL, learTemplate) in self.raw_nr_to_action_mapping: # pylint: disable=W0612
+        current_app.logger.debug('creating nr_filing_actions')
+        d = {}
+        for (nr_type, legalType, legalTypeName, filingName, target, entitiesFilingName, URL, learTemplate) in self.raw_nr_to_action_mapping:  # pylint: disable=W0612
             if nr_type not in d:
                 d[nr_type] = {'legalType': legalType, 'target': target}
 
