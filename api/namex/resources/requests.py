@@ -166,7 +166,7 @@ class Requests(Resource):
         queue = request.args.get('queue', None)
         if queue:
             if queue == 'COMPLETED':
-                queue = 'APPROVED,CONDITIONAL,REJECTED'
+                queue = 'COMPLETED'
             queue = queue.upper().split(',')
             for q in queue:
                 if q not in State.VALID_STATES:
@@ -426,7 +426,7 @@ class Request(Resource):
         :JWT Scopes: - USER.APPROVER, USER.EDITOR
 
         APPROVERS: Can change from almost any state, other than CANCELLED, EXPIRED and ( COMPLETED not yet furnished )
-        EDITOR: Can't change to a COMPLETED state (ACCEPTED, REJECTED, CONDITION)
+        EDITOR: Can't change to a COMPLETED state (COMPLETED)
         """
 
         # do the cheap check first before the more expensive ones
