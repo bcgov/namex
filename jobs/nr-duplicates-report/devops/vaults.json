@@ -1,0 +1,10 @@
+[
+    {
+        "vault": "namex",
+        "application": [
+            "postgres-namex",
+            "postgres-pay",
+            "nr-duplicates-report"
+        ]
+    }
+]
