@@ -13,6 +13,8 @@ class User(db.Model):
     lastname = db.Column(db.String(1000))
     sub = db.Column(db.String(36), unique=True)
     iss = db.Column(db.String(1024))
+    idp_userid = db.Column(db.String(36), unique=True)
+    login_source = db.Column(db.String(36))
     creationDate = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     # for name examination
     searchColumns = db.Column(
