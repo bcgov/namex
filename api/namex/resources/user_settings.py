@@ -34,7 +34,7 @@ class UserSettings(Resource):
     def put():
         try:
             # GET existing or CREATE new user based on the JWT info
-            user = User.find_by_jwtToken(g.jwt_oidc_token_info)
+            user = User.find_by_jwt_idp_userid(g.jwt_oidc_token_info)
             if not user:
                 return jsonify({'message': 'Could not find existing user to update settings for.'}), 400
             json_input = request.get_json()

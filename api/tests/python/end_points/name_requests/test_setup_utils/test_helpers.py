@@ -104,7 +104,7 @@ def add_states_to_db(states):
 
 @pytest.mark.skip
 def add_test_user_to_db():
-    user = User(username='name_request_service_account', firstname='Test', lastname='User', sub='idir/name_request_service_account', iss='keycloak')
+    user = User(username='name_request_service_account', firstname='Test', lastname='User', sub='idir/name_request_service_account', iss='keycloak', idp_userid = '123', login_source = 'IDIR')
     user.save_to_db()
 
     return user
