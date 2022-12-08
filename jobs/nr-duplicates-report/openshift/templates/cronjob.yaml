@@ -66,8 +66,7 @@ objects:
                     valueFrom:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
-                        key: DATABASE_PORT
-                                    - name: PG_USER
+                        key: DATABASE_PORT                  
                   - name: PAY_USER  
                     valueFrom:
                       secretKeyRef:

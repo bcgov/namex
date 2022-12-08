@@ -1,4 +1,4 @@
-FROM python:3.8.5-buster
+FROM python:3.8.6-buster
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
@@ -8,7 +8,7 @@ ENV BUILD_DATE=${BUILD_DATE}
 
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE}
-    
+
 USER root
 
 # Create working directory
@@ -20,7 +20,7 @@ WORKDIR /opt/app-root
 COPY ./requirements.txt .
 
 #RUN pip install --upgrade pip
-RUN pip install pip==20.3.3
+RUN pip install pip==21.1.2
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
