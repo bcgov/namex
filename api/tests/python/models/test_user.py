@@ -4,7 +4,7 @@ from namex.models import User
 def test_user(session, client):
     """Start with a blank database."""
 
-    user1 = User(username = 'thor', firstname = 'thor', lastname = 'g', sub = 'abcdefg', iss='http://nowhere.localdomain'. idp_userid = '123', login_source = 'IDIR')
+    user1 = User(username = 'thor', firstname = 'thor', lastname = 'g', sub = 'abcdefg', iss='http://nowhere.localdomain', idp_userid = '123', login_source = 'IDIR')
 
     session.add(user1)
     session.commit()
