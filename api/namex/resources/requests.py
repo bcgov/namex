@@ -1258,7 +1258,7 @@ class NRNames(Resource):
         if not nrd:
             return msg, code
 
-        user = User.find_by_jwt_idp_userid(g.jwt_oidc_token_info)
+        user = User.find_by_jwtToken(g.jwt_oidc_token_info)
         if not check_ownership(nrd, user):
             return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
 
@@ -1316,7 +1316,7 @@ class NRNames(Resource):
         if not nrd:
             return msg, code
 
-        user = User.find_by_jwt_idp_userid(g.jwt_oidc_token_info)
+        user = User.find_by_jwtToken(g.jwt_oidc_token_info)
         if not check_ownership(nrd, user):
             return jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403
 
@@ -1481,7 +1481,7 @@ class NRComment(Resource):
             return jsonify({"message": "NR had an internal error"}), 404
 
         nr_id = nrd.id
-        user = User.find_by_jwt_idp_userid(g.jwt_oidc_token_info)
+        user = User.find_by_jwtToken(g.jwt_oidc_token_info)
         if user is None:
             return jsonify({'message': 'No User'}), 404
 

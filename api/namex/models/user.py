@@ -44,10 +44,6 @@ class User(db.Model):
 
     @classmethod
     def find_by_jwtToken(cls, token):
-        return cls.query.filter_by(sub=token['sub']).one_or_none()
-
-    @classmethod
-    def find_by_jwt_idp_userid(cls, token):
         return cls.query.filter_by(sub=token['idp_userid']).one_or_none()
 
     @classmethod

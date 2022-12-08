@@ -123,7 +123,7 @@ def check_ownership(nrd, user):
 def get_or_create_user_by_jwt(jwt_oidc_token):
     # GET existing or CREATE new user based on the JWT info
     try:
-        user = User.find_by_jwt_idp_userid(jwt_oidc_token)
+        user = User.find_by_jwtToken(jwt_oidc_token)
         current_app.logger.debug('finding user: {}'.format(jwt_oidc_token))
         if not user:
             current_app.logger.debug(
