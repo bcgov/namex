@@ -27,20 +27,26 @@ class User(db.Model):
     EDITOR = 'names_editor'
     VIEWONLY = 'names_viewer'
 
-    def __init__(self, username, firstname, lastname, sub, iss):
+    def __init__(self, username, firstname, lastname, sub, iss, idp_userid, login_source):
         self.username = username
         self.firstname = firstname
         self.lastname = lastname
         self.sub = sub
         self.iss = iss
+        self.idp_userid = idp_userid
+        self.login_source = login_source
 
     def json(self):
         return {"username": self.username, "firstname": self.firstname, "lastname": self.lastname,
-                "sub": self.sub, "iss": self.iss}
+                "sub": self.sub, "iss": self.iss, "idp_userid": self.idp_userid, "login_source": self.login_source}
 
     @classmethod
     def find_by_jwtToken(cls, token):
         return cls.query.filter_by(sub=token['sub']).one_or_none()
+
+    @classmethod
+    def find_by_jwt_idp_userid(cls, token):
+        return cls.query.filter_by(sub=token['idp_userid']).one_or_none()
 
     @classmethod
     def create_from_jwtToken(cls, token):
@@ -54,7 +60,9 @@ class User(db.Model):
                 firstname=token.get('given_name', None),
                 lastname=token.get('family_name', None),
                 iss=token['iss'],
-                sub=token['sub']
+                sub=token['sub'],
+                idp_userid=token['idp_userid'],
+                login_source=token['loginSource']
             )
             current_app.logger.debug('Creating user from JWT:{}; User:{}'.format(token, user))
             db.session.add(user)
@@ -96,7 +104,9 @@ class UserSchema(ma.SQLAlchemySchema):
             'lastname',
             'sub',
             'iss',
-            'creationDate'
+            'creationDate',
+            'idp_userid',
+            'login_source'
         )
 
     # id = fields.Int(dump_only=False)
