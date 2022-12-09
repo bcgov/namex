@@ -40,7 +40,7 @@ objects:
                 command:
                   - /bin/sh
                   - -c
-                  - cd /opt/app-root; ./run.sh
+                  - cd /opt/app-root; python notebookreport.py
                 env:
                   - name: PG_USER
                     valueFrom:
