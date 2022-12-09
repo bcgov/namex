@@ -38,11 +38,11 @@ def test_get_existing_user_settings(client, jwt, app):
     """Test getting user settings for an existing user."""
     user = User(
         username='test-settings',
-        sub='43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',  # this needs to match the sub in create_header
+        sub='43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
         firstname='',
         lastname='',
         iss='',
-        idp_userid='123',
+        idp_userid='123', # this needs to match the sub in create_header
         login_source='IDIR'
     )
     user.searchColumns = 'Status'

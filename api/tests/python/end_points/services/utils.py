@@ -26,6 +26,8 @@ def helper_create_jwt(jwt_manager, roles: List[str] = [], username: str = 'test-
         'kid': 'flask-jwt-oidc-test-client'
     }
     claims = {
+        'idp_userid': '123',
+        'loginSource': 'IDIR',
         'iss': 'https://example.localdomain/auth/realms/example',
         'sub': '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
         'aud': 'example',
