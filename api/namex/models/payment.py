@@ -5,7 +5,7 @@ from sqlalchemy import event
 from flask import current_app
 from sqlalchemy.orm.attributes import get_history
 
-from namex.constants import PaymentState
+from namex.constants import PaymentState, PaymentStatusCode
 from namex.models import State, db
 from namex.utils import queue_util
 
@@ -69,7 +69,9 @@ class Payment(db.Model):
     def find_by_existing_nr_id(cls, nr_id, payment_action):
         """Find existing payment by nr_id and payment_action."""
         return cls.query.filter_by(nrId=nr_id).\
-            filter_by(payment_action=payment_action).order_by(Payment.id.desc()).first()
+                filter_by(payment_action=payment_action).\
+                exclude(payment_status_code = PaymentStatusCode.CANCELLED).\
+                order_by(Payment.id.desc()).first()
 
     def as_dict(self):
         return {
