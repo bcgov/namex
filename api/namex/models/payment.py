@@ -24,7 +24,7 @@ class Payment(db.Model):
 
     _payment_token = db.Column('payment_id', db.String(4096))
     _payment_completion_date = db.Column('payment_completion_date', db.DateTime(timezone=True))
-    _payment_status_code = db.Column('payment_status_code', db.String(50))
+    payment_status_code = db.Column('payment_status_code', db.String(50))
     payment_note = db.Column('payment_note', db.String(100))
     payment_action = db.Column('payment_action', db.String(50))
     furnished = db.Column('furnished',db.Boolean, default=False)
@@ -55,11 +55,11 @@ class Payment(db.Model):
     @property
     def payment_status_code(self):
         """Property containing the payment token."""
-        return self._payment_status_code
+        return self.payment_status_code
 
     @payment_status_code.setter
     def payment_status_code(self, str):
-        self._payment_status_code = str
+        self.payment_status_code = str
 
     @classmethod
     def find_by_payment_token(cls, token: str):
