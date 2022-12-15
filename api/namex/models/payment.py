@@ -68,9 +68,9 @@ class Payment(db.Model):
     @classmethod
     def find_by_existing_nr_id(cls, nr_id, payment_action):
         """Find existing payment by nr_id and payment_action."""
-        return cls.query.filter_by(nrId=nr_id).\
-                filter_by(payment_action=payment_action).\
-                exclude(payment_status_code = PaymentStatusCode.CANCELLED).\
+        return cls.query.filter_by(nrId = nr_id).\
+                filter_by(payment_action = payment_action).\
+                filter_by(payment_status_code != PaymentStatusCode.CANCELLED).\
                 order_by(Payment.id.desc()).first()
 
     def as_dict(self):
