@@ -70,7 +70,7 @@ class Payment(db.Model):
         """Find existing payment by nr_id and payment_action."""
         return cls.query.filter_by(nrId = nr_id).\
                 filter_by(payment_action = payment_action).\
-                filter(Payment._payment_status_code != PaymentStatusCode.CANCELLED).\
+                filter(Payment._payment_status_code != PaymentStatusCode.CANCELLED.value).\
                 order_by(Payment.id.desc()).first()
 
     def as_dict(self):
