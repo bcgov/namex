@@ -195,7 +195,3 @@ def get_item_from_list(items, item_id, item_prop='id'):
         return matches[0]
     if len(matches) > 1:
         raise Exception('More than one match found for a given ID!')
-
-
-
-

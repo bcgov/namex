@@ -33,7 +33,7 @@ def save_auto_approved_names(approved_number_records):
     global num_records
 
     username = 'name_request_service_account'
-    usr = UserDAO(username, '', '', '', '')
+    usr = UserDAO(username, '', '', '', '', '', '')
     usr.id = 86
 
     usr.save_to_db()

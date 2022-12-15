@@ -346,7 +346,7 @@ def test_add_new_comment_to_nr(client, jwt, app):
     from sqlalchemy import desc
 
     #add a user for the comment
-    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     nr = RequestDAO()
@@ -395,7 +395,7 @@ def test_add_new_comment_to_nr(client, jwt, app):
 def test_comment_where_no_nr(client, jwt, app):
     from namex.models import User
     #add a user for the comment
-    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT

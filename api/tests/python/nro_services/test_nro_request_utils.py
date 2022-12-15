@@ -94,7 +94,7 @@ def test_request_add_applicant_existing(app, request, session, applicant1, appli
     # SETUP
     # create an NR and add an applicant
     nr = Request()
-    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     nr.applicants.append(Applicant(**applicant1))
 
     session.add(nr)
@@ -127,7 +127,7 @@ def test_request_add_applicant_not_existing(app, request, session, applicant1, a
     # SETUP
     # create an NR
     nr = Request()
-    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     session.add(nr)
     session.commit()
@@ -179,7 +179,7 @@ def test_add_comments(app, request, session, test_comments, test_size, should_ha
     # SETUP
     # create an NR
     nr = Request()
-    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     if should_have_existing_comments:
         add_comments(nr, test_comments)
@@ -242,7 +242,7 @@ def test_add_nwpta(app, request, session, pns):
     # SETUP
     # create an NR
     nr = Request()
-    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     session.add(nr)
     session.commit()
@@ -316,7 +316,7 @@ def test_add_names(app, request, session, test_names, previous_names):
     # SETUP
     # create an NR
     nr = Request()
-    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     if previous_names:
         add_names(nr, test_names)
@@ -376,7 +376,7 @@ def test_add_names_after_reset(app, request, session, previous_names, test_names
     # SETUP
     # create an NR
     nr = Request()
-    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     if previous_names:
         add_names(nr, previous_names)
@@ -449,7 +449,7 @@ def test_add_names_with_changes(app, request, session, previous_names, test_name
     # SETUP
     # create an NR
     nr = Request()
-    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    nr.activeUser = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     if previous_names:
         add_names(nr, previous_names)
@@ -493,7 +493,7 @@ def test_add_nr_header_with_priority(priority_cd, expected):
     from namex.services.nro.request_utils import add_nr_header
 
     nr = Request()
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     nr_submitter = None
 
     nr_header = {
@@ -537,7 +537,7 @@ def test_update_nr_header_with_mutating_priority(freeze_datetime_utcnow, test_na
     from namex.services.nro.request_utils import add_nr_header
 
     nr = Request()
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     nr_submitter = {'submitted_date': EPOCH_DATETIME, 'submitter': 'doesnt matter'}
 
     nr_header = {
@@ -673,7 +673,7 @@ def test_add_nr_header_set_state(state_type_cd, nr_names, expected):
     # the correct state for a Request that is completed in NRO is determined by the Name states
 
     nr = Request()
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     nr_submitter = None
 
     nr_header = {

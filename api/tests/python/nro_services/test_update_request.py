@@ -132,7 +132,7 @@ def test_update_nro_request_state_to_draft(app):
 
     eid = _get_event_id(cursor)
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     fake_request = FakeRequest()
     fake_request.requestId = 884047
@@ -158,7 +158,7 @@ def test_update_nro_request_state_to_approved(app):
 
     eid = _get_event_id(cursor)
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     fake_request = FakeRequest()
     fake_request.requestId = 884047
@@ -184,7 +184,7 @@ def test_update_nro_change_and_remove_name_choices(app):
 
     eid = _get_event_id(cursor)
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     fake_request = FakeRequest()
     fake_name1 = FakeName()
@@ -251,7 +251,7 @@ def test_update_nro_add_new_name_choice(app):
 
     eid = _get_event_id(cursor)
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
     fake_request = FakeRequest()
     fake_name1 = FakeName()
@@ -310,7 +310,7 @@ def test_update_nro_nwpta_ab(app):
     con = nro.connection
     cursor = con.cursor()
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
    #Set upo request
     cursor.execute("insert into request(request_id, nr_num) values(42, 'NR XXXXXXX')")
@@ -364,7 +364,7 @@ def test_update_nro_nwpta_sk(app):
     con = nro.connection
     cursor = con.cursor()
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
 
    #Set upo request
     cursor.execute("insert into request(request_id, nr_num) values(42, 'NR XXXXXXX')")

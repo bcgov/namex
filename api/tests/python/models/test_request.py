@@ -13,7 +13,7 @@ def test_get_queued_oldest(client, app):
     nr.stateCd = State.DRAFT
     nr.save_to_db()
 
-    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak')
+    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak', idp_userid = '123', login_source = 'IDIR')
     user.save_to_db()
 
     nr_oldest, new_req = RequestDAO.get_queued_oldest(user)
@@ -37,7 +37,7 @@ def test_get_queued_oldest_multirow(client, app):
         nr.stateCd = State.DRAFT
         nr.save_to_db()
 
-    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak')
+    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak', idp_userid = '123', login_source = 'IDIR')
     user.save_to_db()
 
     nr_oldest, new_req = RequestDAO.get_queued_oldest(user)
@@ -54,7 +54,7 @@ def test_get_queued_empty_queue(client, app):
     from namex.models import Request as RequestDAO, User
     from namex.exceptions import BusinessException
 
-    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak')
+    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak', idp_userid = '123', login_source = 'IDIR')
     user.save_to_db()
 
     with pytest.raises(BusinessException) as e_info:

@@ -48,7 +48,7 @@ def create_base_nr():
 def test_event_create_nrl(client, jwt, app):
 
     #add a user for the comment
-    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','url')
+    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','url', '123', 'IDIR')
     user.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -102,7 +102,7 @@ def test_event_create_nrl(client, jwt, app):
 def test_get_inprogress_event_history(client, jwt, app):
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc', 'url')
+    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc', 'url', '123', 'IDIR')
     user.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -128,7 +128,7 @@ def test_get_next_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -156,7 +156,7 @@ def test_on_hold_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -179,7 +179,7 @@ def test_expired_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -203,7 +203,7 @@ def test_cancelled_in_nro_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -226,7 +226,7 @@ def test_cancelled_in_namex_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -249,7 +249,7 @@ def test_decision_event_history(client, jwt, app):
 
         # add a user for the comment
         user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                    'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                    'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
         user.save_to_db()
 
         headers = create_header(jwt, [User.EDITOR])
@@ -273,7 +273,7 @@ def test_edit_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -297,7 +297,7 @@ def test_reopen_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -330,7 +330,7 @@ def test_edit_inprogress_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -366,7 +366,7 @@ def test_get_staff_comment_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -398,7 +398,7 @@ def test_consumed_event_history(client, jwt, app):
 
     # add a user for the comment
     user = User('nro_service_account', '', '', '8ca7d47a-024e-4c85-a367-57c9c93de1cd',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc')
+                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])

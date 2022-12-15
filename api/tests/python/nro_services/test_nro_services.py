@@ -49,7 +49,7 @@ nro_request_fetch_test_data = [
 @pytest.mark.parametrize("nr_num, expected_nr_num", nro_request_fetch_test_data)
 def test_fetch_nro_request_and_copy_to_namex_request(app, session, nr_num, expected_nr_num):
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     nr = nro.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr_num)
 
     assert expected_nr_num == None if (expected_nr_num is None) else nr.nrNum
@@ -59,7 +59,7 @@ def test_fetch_nro_request_and_copy_to_namex_request(app, session, nr_num, expec
 @pytest.mark.parametrize("nr_num, expected_nr_num", nro_request_fetch_test_data)
 def test_fetch_nro_request_and_copy_to_namex_request_with_nr(app, session, nr_num, expected_nr_num):
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     user.save_to_db()
     nr = Request()
     nr.nrNum = nr_num
@@ -85,7 +85,7 @@ nro_request_move_nr_test_data = [
 @pytest.mark.parametrize("nr_num, expected_nr_num", nro_request_move_nr_test_data)
 def test_move_control_of_request_from_nro(app, session, nr_num, expected_nr_num):
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     user.save_to_db()
     nr = Request()
     nr.nrNum = nr_num
@@ -102,7 +102,7 @@ def test_move_control_of_request_from_nro(app, session, nr_num, expected_nr_num)
 
 def test_move_control_of_request_from_nro_missing_nr(app, session):
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     nr = None
 
     warnings = nro.move_control_of_request_from_nro(nr, user)
@@ -111,7 +111,7 @@ def test_move_control_of_request_from_nro_missing_nr(app, session):
 
 def test_move_control_of_existing_request_from_nro_missing_nr(app, session):
 
-    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost')
+    user = User('idir/bob', 'bob', 'last', 'idir', 'localhost', '123', 'IDIR')
     user.save_to_db()
     nr = Request()
     nr.nrNum = 'NR 9999999'
