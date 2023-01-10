@@ -91,7 +91,27 @@ objects:
                     valueFrom:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
-                        key: PAY_PORT      
+                        key: PAY_PORT
+                  - name: COLIN_USER
+                    valueFrom:
+                      secretKeyRef:
+                        name: ${NAME}-${TAG}-secret
+                        key: COLIN_USER
+                  - name: COLIN_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: ${NAME}-${TAG}-secret
+                        key: COLIN_PASSWORD
+                  - name: COLIN_DB_NAME
+                    valueFrom:
+                      secretKeyRef:
+                        name: ${NAME}-${TAG}-secret
+                        key: COLIN_DB_NAME
+                  - name: COLIN_HOST
+                    valueFrom:
+                      secretKeyRef:
+                        name: ${NAME}-${TAG}-secret
+                        key: COLIN_HOST
                   - name: APP_FILE
                     valueFrom:
                       secretKeyRef:
@@ -127,11 +147,61 @@ objects:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
                         key: NUMBER_OF_DAYS_PAYMENT
-                  - name: ENVIRONMENT
+                 - name: TYPE
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: TYPE
+                - name: PROJECT_ID
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: PROJECT_ID
+                - name: PRIVATE_KEY_ID
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: PRIVATE_KEY_ID
+                - name: PRIVATE_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: PRIVATE_KEY
+                - name: CLIENT_EMAIL
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: TYPCLIENT_EMAILE
+                 - name: CLIENT_ID
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: CLIENT_ID
+                 - name: AUTH_URI
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: AUTH_URI
+                 - name: TOKEN_URI
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: TOKEN_URI
+                 - name: AUTH_PROVIDER_X509_cert_URL
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: AUTH_PROVIDER_X509_cert_URL
+                 - name: CLIENT_X509_CERT_URL
+                    valueFrom:
+                      secretKeyRef:
+                        name: google-service-${TAG}-secret
+                        key: CLIENT_X509_CERT_URL
+                - name: ENVIRONMENT
                     valueFrom:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
-                        key: ENVIRONMENT  
+                        key: ENVIRONMENT
             restartPolicy: "Never"
             terminationGracePeriodSeconds: 30
             activeDeadlineSeconds: 1600

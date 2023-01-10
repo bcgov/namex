@@ -9,7 +9,9 @@ spacy
 papermill
 schedule
 attrs==19.2.0
+df2gspread
 future==0.18.2
+gspread
 Jinja2==3.0
 markupsafe==2.0.1
 python-dateutil==2.8.2
@@ -29,3 +31,5 @@ Werkzeug==0.16.1
 certifi==2020.4.5.1
 urllib3==1.25.9
 idna==2.9
+cx-Oracle==8.1.0
+oauth2client

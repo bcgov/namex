@@ -104,7 +104,6 @@ def processnotebooks(notebookdirectory, data_dir):
     status = False
     logging.info('NR Duploicates Report start processing directory: %s',
                  notebookdirectory)
-
     try:
         pm.execute_notebook(os.path.join(notebookdirectory, 'nr-duplicates.ipynb'),
                             data_dir + 'temp.ipynb', parameters=None)
