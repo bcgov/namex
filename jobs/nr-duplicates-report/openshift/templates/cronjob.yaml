@@ -147,57 +147,57 @@ objects:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
                         key: NUMBER_OF_DAYS_PAYMENT
-                 - name: TYPE
+                  - name: TYPE
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: TYPE
-                - name: PROJECT_ID
+                  - name: PROJECT_ID
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: PROJECT_ID
-                - name: PRIVATE_KEY_ID
+                  - name: PRIVATE_KEY_ID
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: PRIVATE_KEY_ID
-                - name: PRIVATE_KEY
+                  - name: PRIVATE_KEY
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: PRIVATE_KEY
-                - name: CLIENT_EMAIL
+                  - name: CLIENT_EMAIL
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: TYPCLIENT_EMAILE
-                 - name: CLIENT_ID
+                  - name: CLIENT_ID
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: CLIENT_ID
-                 - name: AUTH_URI
+                  - name: AUTH_URI
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: AUTH_URI
-                 - name: TOKEN_URI
+                  - name: TOKEN_URI
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: TOKEN_URI
-                 - name: AUTH_PROVIDER_X509_cert_URL
+                  - name: AUTH_PROVIDER_X509_cert_URL
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: AUTH_PROVIDER_X509_cert_URL
-                 - name: CLIENT_X509_CERT_URL
+                  - name: CLIENT_X509_CERT_URL
                     valueFrom:
                       secretKeyRef:
                         name: google-service-${TAG}-secret
                         key: CLIENT_X509_CERT_URL
-                - name: ENVIRONMENT
+                  - name: ENVIRONMENT
                     valueFrom:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
