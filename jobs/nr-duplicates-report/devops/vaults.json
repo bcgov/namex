@@ -4,6 +4,7 @@
         "application": [
             "postgres-namex",
             "postgres-pay",
+            "colin_db",
             "nr-duplicates-report"
         ]
     }
