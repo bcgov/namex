@@ -275,11 +275,11 @@ class ReportResource(Resource):
                           ' download and submit a form'
             },
             'CP': {
-               'DEFAULT': 'To complete your filing, visit <a href="www.bcregistry.ca/business/auth/">www.bcregistry.gov.bc.ca</a>'
+               'DEFAULT': 'To complete your filing, visit <a href="www.bcregistry.ca/business/">www.bcregistry.gov.bc.ca</a>'
                           ' for more information'
             },
             'BC': {
-               'DEFAULT': 'To complete your filing, visit <a href="www.bcregistry.ca/business/auth/">www.bcregistry.gov.bc.ca</a>'
+               'DEFAULT': 'To complete your filing, visit <a href="www.bcregistry.ca/business/">www.bcregistry.gov.bc.ca</a>'
                           ' for more information'
             },
             'CC': {
