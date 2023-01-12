@@ -274,16 +274,21 @@ class ReportResource(Resource):
                           'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
                           ' download and submit a form'
             },
-            'CP': 'BC Cooperative Association',
+            'CP': {
+               'DEFAULT': 'To complete your filing, visit <a href="www.bcregistry.ca/business/">www.bcregistry.gov.bc.ca</a>'
+                          ' for more information'
+            },
             'BC': {
-               'DEFAULT': 'To complete your filing, visit <a href="bcregistry.ca/business">www.bcregistry.gov.bc.ca</a>'
+               'DEFAULT': 'To complete your filing, visit <a href="www.bcregistry.ca/business/">www.bcregistry.gov.bc.ca</a>'
                           ' for more information'
             },
             'CC': {
                'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
                           'corporateonline.gov.bc.ca</a> for more information'
             },
-            'SO': 'BC Social Enterprise',
+            'SO': {
+               'DEFAULT': 'BC Social Enterprise'
+            },
             'PA': {
                'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
             },
@@ -324,9 +329,15 @@ class ReportResource(Resource):
                           'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
                           ' download and submit a form'
             },
-            'XCP': 'Extraprovincial Cooperative Association',
-            'XSO': 'Extraprovincial Social Enterprise',
+            'XCP': {
+                'DEFAULT': 'Extraprovincial Cooperative Association'
+            },
+            'XSO': {
+                'DEFAULT': 'Extraprovincial Social Enterprise'
+            },
             # Used for mapping back to legacy oracle codes, description not required
-            'FIRM': 'FIRM (Legacy Oracle)'
+            'FIRM': {
+                'DEFAULT': 'FIRM (Legacy Oracle)'
+            }
         }
         return next_action_text.get(entity_type_cd, None)
