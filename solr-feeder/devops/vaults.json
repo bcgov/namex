@@ -16,7 +16,8 @@
         "vault": "API",
         "application": [
             "colin-api-entity",
-            "registries-search-api"
+            "registries-search-api",
+            "registries-search-api-internal"
         ]
     }
 ]
