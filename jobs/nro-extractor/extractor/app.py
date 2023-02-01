@@ -178,19 +178,19 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                     nr_header = get_nr_header(ora_cursor, nr_num)
                     nr_submitter = get_nr_submitter(ora_cursor, nr_header['request_id'])
                     # get pending payments
-                    pending_payments = []
+                    completed_payments = []
                     if nr:
-                        pending_payments = [x for x in nr.payments.all() if x.payment_status_code == PaymentStatusCode.CREATED.value]
+                        completed_payments = [x for x in nr.payments.all() if x.payment_status_code == PaymentStatusCode.COMPLETED.value]
                     # ignore if:
                     # - NR does not exist and NR originated in namex (handles racetime condition for when it is still in the process of saving)
                     # - NR has a pending update from namex (pending payment)
-                    if (not nr and nr_submitter and nr_submitter.get('submitter', '') == 'namex') or (nr and len(pending_payments) > 0):
+                    if (not nr and nr_submitter and nr_submitter.get('submitter', '') == 'namex') or (nr and len(completed_payments) == 0):
                         success = update_feeder_row(
                             ora_con,
                             row_id=row['id'],
                             status='C',
                             send_count=1 + 0 if (row['send_count'] is None) else row['send_count'],
-                            error_message='Ignored - Request: not processed'
+                            error_message='Ignored - Request: not processed.'
                         )
                         ora_con.commit()
                     else:
