@@ -591,30 +591,39 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
         assert 'Must be of date format %Y-%m-%d' in msg
 
 
-def test_namex_search_direct_nrs_bad_roles(client, jwt, app):
-    """Test searching directly using name request numbers with bad roles."""
-    base_nrs = generate_nrs(5, [], [], [])
-    for nr in base_nrs:
-        nr.save_to_db()
-    qs = "&".join(["nrNumbers="+nr.nrNum for nr in base_nrs])
-    rv = client.get(
-        f'api/v1/requests?{qs}',
-        headers=create_header(jwt, [])
-    )
-    assert rv
-    assert rv.status_code == 403
-
-
-def test_namex_search_direct_nrs(client, jwt, app):
+@pytest.mark.parametrize('identifiers, search_identifier, status, name, total_results', [
+    (['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', State.APPROVED, '', 1),
+    (['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', State.DRAFT, '', 1),
+    (['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', '', 'TEST', 5),
+    (['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', '', 'BAD', 0),
+    (['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], 'NR 1', '', '', 1),
+    ([], '', '', '', 0),
+    (['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', '', '', 5),
+])
+def test_namex_search_direct_nrs(client, jwt, app, identifiers, search_identifier, status, name, total_results):
     """Test searching directly using name requests."""
-    base_nrs = generate_nrs(5, [], [], [])
+    names = [
+        [{'name': 'test1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
+    ]
+    base_nrs = generate_nrs(5, [], names, [])
     for nr in base_nrs:
         nr.save_to_db()
 
-    qs = "&".join(["nrNumbers="+nr.nrNum for nr in base_nrs])
-    rv = client.get(
-        f'api/v1/requests?{qs}',
-        headers=create_header(jwt, [User.APPROVER, User.EDITOR, User.VIEWONLY])
+    rv = client.post(
+        'api/v1/requests/search',
+        headers={**create_header(jwt, [User.SYSTEM]), **{'content-type': 'application/json'}},
+        data=json.dumps({
+            'identifiers': identifiers,
+            'searchIdentifier': search_identifier,
+            'status': status,
+            'name': name,
+            'page': 1,
+            'limit': 20
+        })
     )
 
     assert rv
@@ -622,4 +631,4 @@ def test_namex_search_direct_nrs(client, jwt, app):
     assert rv.status_code == 200
     assert rv.data
     resp = json.loads(rv.data.decode('utf-8'))
-    assert len(resp) == 5
+    assert len(resp) == total_results
