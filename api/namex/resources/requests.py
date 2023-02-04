@@ -394,6 +394,8 @@ class RequestSearch(Resource):
         status = search.get('status', None)
         page = search.get('page', 1)
         limit = search.get('limit', 20)
+        # Only names and applicants are needed for this query, we want this query to be lighting fast 
+        # to prevent putting a load on namex-api.
         q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers)) \
             .options(
                 lazyload('*'),
@@ -434,8 +436,7 @@ class RequestSearch(Resource):
         for r in requests:
             if nr_actions := nr_filing_actions.get_actions(r.requestTypeCd, r.entity_type_cd):
                  r = {**r, **nr_actions}
-        requests = request_auth_search_schemas.dump(requests)
-        return jsonify(requests)
+        return jsonify(request_auth_search_schemas.dump(requests))
 
 
 # noinspection PyUnresolvedReferences
