@@ -2,7 +2,6 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from collections import namedtuple
 from http import HTTPStatus
 from flask import request, jsonify, g, current_app, get_flashed_messages
 from flask_restx import Namespace, Resource, fields, cors
@@ -12,7 +11,7 @@ from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.models.request import RequestsAuthSearchSchema
 from namex.utils.logging import setup_logging
 
-from sqlalchemy.orm import load_only, joinedload, lazyload, subqueryload, selectinload, eagerload
+from sqlalchemy.orm import load_only, lazyload, eagerload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, func, or_, text
 from sqlalchemy.inspection import inspect
