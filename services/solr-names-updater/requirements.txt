@@ -14,7 +14,7 @@ MarkupSafe==1.1.1
 pyrsistent==0.17.3
 requests==2.25.1
 six==1.15.0
-urllib3==1.26.4
+urllib3==1.26.5
 Werkzeug==1.0.1
 
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
