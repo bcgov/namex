@@ -60,7 +60,7 @@ asyncio-nats-streaming==0.4.0
 
 # protobuf is a temporary solution for https://github.com/protocolbuffers/protobuf/issues/10051
 # will be removed once the bug is fixed
-protobuf==3.20.1
+protobuf==3.20.2
 
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
 git+https://github.com/bcgov/namex-payment-api-py-client.git@dev#egg=openapi_client
