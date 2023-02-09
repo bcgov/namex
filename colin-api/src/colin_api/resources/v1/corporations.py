@@ -211,24 +211,24 @@ class Methods:
         """Find objects for bc company."""
         incorp_addr_id_obj = db.engine.execute(incorp_addr_id_sql)
         incorp_addr_ids = incorp_addr_id_obj.fetchall()
-        incorp_reg_addr_id = incorp_addr_ids[0][0]
-        incorp_reg_addr_id_sql = "\'" + str(incorp_reg_addr_id) + "\'"
-        incorp_reg_addr_sql = f'select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, \
-                                       province, country_typ_cd, postal_cd \
-                                  from bc_registries.address_vw \
-                                 where addr_id= {incorp_reg_addr_id_sql} AND addr_id IS NOT NULL;'
-        incorp_registered_addr_obj = db.engine.execute(incorp_reg_addr_sql)
-        try:
-            incorp_rec_addr_id = incorp_addr_ids[1][0]
-        except:  # pylint: disable=bare-except # noqa: E722
-            incorp_records_addr_obj = None
-        else:
-            incorp_rec_addr_id_sql = "\'" + str(incorp_rec_addr_id) + "\'"
-            incorp_rec_addr_sql = f'select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, \
-                                           province, country_typ_cd, postal_cd \
-                                      from bc_registries.address_vw \
-                                     where addr_id= {incorp_rec_addr_id_sql} AND addr_id IS NOT NULL;'
-            incorp_records_addr_obj = db.engine.execute(incorp_rec_addr_sql)
+        incorp_registered_addr_obj = None
+        incorp_records_addr_obj = None
+        if len(incorp_addr_ids) > 0:
+            incorp_reg_addr_id = incorp_addr_ids[0][0]
+            incorp_reg_addr_id_sql = "\'" + str(incorp_reg_addr_id) + "\'"
+            incorp_reg_addr_sql = f'select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, \
+                                        province, country_typ_cd, postal_cd \
+                                    from bc_registries.address_vw \
+                                    where addr_id= {incorp_reg_addr_id_sql} AND addr_id IS NOT NULL;'
+            incorp_registered_addr_obj = db.engine.execute(incorp_reg_addr_sql)
+            if len(incorp_addr_ids) > 1:
+                incorp_rec_addr_id = incorp_addr_ids[1][0]
+                incorp_rec_addr_id_sql = "\'" + str(incorp_rec_addr_id) + "\'"
+                incorp_rec_addr_sql = f'select addr_line_1, ADDR_LINE_2, ADDR_LINE_3, city, \
+                                            province, country_typ_cd, postal_cd \
+                                        from bc_registries.address_vw \
+                                        where addr_id= {incorp_rec_addr_id_sql} AND addr_id IS NOT NULL;'
+                incorp_records_addr_obj = db.engine.execute(incorp_rec_addr_sql)
 
         return incorp_registered_addr_obj, incorp_records_addr_obj
 
