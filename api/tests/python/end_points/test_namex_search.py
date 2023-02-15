@@ -591,16 +591,11 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
         assert 'Must be of date format %Y-%m-%d' in msg
 
 
-@pytest.mark.parametrize('test_name, identifiers, search_identifier, status, name, total_results', [
-    ('Search by status for approved', ['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', State.APPROVED, '', 1),
-    ('Search by status for draft', ['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', State.DRAFT, '', 1),
-    ('Search by name for all five NRs', ['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', '', 'TEST', 5),
-    ('Search by name for zero NRs', ['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', '', 'BAD', 0),
-    ('Search by search identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], 'NR 1', '', '', 1),
-    ('Empty Search', [], '', '', '', 0),
-    ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], '', '', '', 5),
+@pytest.mark.parametrize('test_name, identifiers, total_results', [
+    ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], 5),
+    ('Empty Search', [], 0),
 ])
-def test_namex_search_direct_nrs(client, jwt, app, identifiers, search_identifier, status, name, total_results):
+def test_namex_search_direct_nrs(client, jwt, app, identifiers, total_results):
     """Test searching directly using name requests."""
     names = [
         [{'name': 'test1', 'state': 'NE', 'choice': 1}],
@@ -617,12 +612,7 @@ def test_namex_search_direct_nrs(client, jwt, app, identifiers, search_identifie
         'api/v1/requests/search',
         headers={**create_header(jwt, [User.SYSTEM]), **{'content-type': 'application/json'}},
         data=json.dumps({
-            'identifiers': identifiers,
-            'searchIdentifier': search_identifier,
-            'status': status,
-            'name': name,
-            'page': 1,
-            'limit': 20
+            'identifiers': identifiers
         })
     )
 

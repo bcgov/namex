@@ -387,12 +387,8 @@ class RequestSearch(Resource):
     @jwt.has_one_of_roles([User.SYSTEM])
     def post():
         search = request.get_json()
-        name = search.get('name', None)
         identifiers = search.get('identifiers', [])
-        search_identifier = search.get('searchIdentifier', None)
-        status = search.get('status', None)
-        page = search.get('page', 1)
-        limit = search.get('limit', 20)
+
         # Only names and applicants are needed for this query, we want this query to be lighting fast 
         # to prevent putting a load on namex-api.
         q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers)) \
@@ -411,27 +407,7 @@ class RequestSearch(Resource):
                     RequestDAO._entity_type_cd
                 ))
 
-        if name:
-            name = name.strip().replace(' ', '%')
-            ## nameSearch column is populated like: '|1<name 1>|2<name 2>|3<name 3>
-            # to ensure we don't get a match that spans over a single name
-            q = q.filter(or_(
-                    RequestDAO.nameSearch.ilike(f'%|1%{name}%1|%'),
-                    RequestDAO.nameSearch.ilike(f'%|2%{name}%2|%'),
-                    RequestDAO.nameSearch.ilike(f'%|3%{name}%3|%')
-                ))
-        if search_identifier:
-            q = q.filter(RequestDAO.nrNum.ilike(f'%{search_identifier}%'))
-        if status:
-            q = q.filter(RequestDAO.stateCd == status)
-        
-        sub_query = q.with_entities(RequestDAO.id).\
-                    group_by(RequestDAO.id).\
-                    limit(limit).\
-                    offset(((page) - 1) * (limit)).\
-                    subquery()
-
-        requests = q.filter(RequestDAO.id.in_(sub_query)).all()
+        requests = q.all()
         for r in requests:
             if nr_actions := nr_filing_actions.get_actions(r.requestTypeCd, r.entity_type_cd):
                  r = {**r, **nr_actions}
