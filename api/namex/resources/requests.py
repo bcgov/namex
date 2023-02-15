@@ -8,8 +8,10 @@ from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
 from namex.constants import DATE_TIME_FORMAT_SQL
+from namex.models.request import RequestsAuthSearchSchema
 from namex.utils.logging import setup_logging
 
+from sqlalchemy.orm import load_only, lazyload, eagerload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, func, or_, text
 from sqlalchemy.inspection import inspect
@@ -23,6 +25,7 @@ from namex.models import User, State, Comment, NameCommentSchema, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
+from namex.services.lookup import nr_filing_actions
 from namex.services import ServicesError, MessageServices, EventRecorder
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 
@@ -45,6 +48,7 @@ request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
 request_header_schema = RequestsHeaderSchema(many=False)
 request_search_schemas = RequestsSearchSchema(many=True)
+request_auth_search_schemas = RequestsAuthSearchSchema(many=True)
 
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
@@ -192,7 +196,6 @@ class Requests(Resource):
                 order_list = order_list + '{attribute} {direction} NULLS LAST'.format(attribute=k, direction=vl)
 
         # Assemble the query
-        nr_numbers = request.args.getlist('nrNumbers', None)
         nrNum = request.args.get('nrNum', None)
         activeUser = request.args.get('activeUser', None)
         compName = request.args.get('compName', None)
@@ -212,15 +215,6 @@ class Requests(Resource):
             q = q.filter(RequestDAO.stateCd.in_(queue))
 
         q = q.filter(RequestDAO.nrNum.notlike('NR L%'))
-        # For sbc-auth - My Business Registry page.
-        if nr_numbers:
-            if not jwt.validate_roles([User.EDITOR]) and not jwt.validate_roles([User.APPROVER]) \
-                    and not jwt.validate_roles([User.VIEWONLY]):
-                return {}, HTTPStatus.FORBIDDEN.value
-            nr_numbers = [nr_number.upper() for nr_number in nr_numbers]
-            requests = RequestDAO.query.filter(RequestDAO.nrNum.in_(nr_numbers)).all()
-            requests = [request.json() for request in requests]
-            return jsonify(requests)
         if nrNum:
             # set any variation of mixed case 'nr' to 'NR'
             nrNum = nrNum.upper().strip()
@@ -382,6 +376,42 @@ class Requests(Resource):
     def post(self, *args, **kwargs):
         current_app.logger.info('Someone is trying to post a new request')
         return jsonify({'message': 'Not Implemented'}), 501
+
+# For sbc-auth - My Business Registry page.
+@cors_preflight("POST")
+@api.route('/search', methods=['POST'])
+class RequestSearch(Resource):
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.has_one_of_roles([User.SYSTEM])
+    def post():
+        search = request.get_json()
+        identifiers = search.get('identifiers', [])
+
+        # Only names and applicants are needed for this query, we want this query to be lighting fast 
+        # to prevent putting a load on namex-api.
+        q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers)) \
+            .options(
+                lazyload('*'),
+                eagerload(RequestDAO.names).load_only(Name.state, Name.name),
+                eagerload(RequestDAO.applicants).load_only(
+                    Applicant.emailAddress, Applicant.phoneNumber
+                ),
+                load_only(
+                    RequestDAO.id,
+                    RequestDAO.nrNum,
+                    RequestDAO.stateCd,
+                    RequestDAO.requestTypeCd,
+                    RequestDAO.natureBusinessInfo,
+                    RequestDAO._entity_type_cd
+                ))
+
+        requests = q.all()
+        for r in requests:
+            if nr_actions := nr_filing_actions.get_actions(r.requestTypeCd, r.entity_type_cd):
+                 r = {**r, **nr_actions}
+        return jsonify(request_auth_search_schemas.dump(requests))
 
 
 # noinspection PyUnresolvedReferences
