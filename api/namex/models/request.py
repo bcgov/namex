@@ -88,11 +88,11 @@ class Request(db.Model):
     activeUser = db.relationship('User', backref=backref('active_user', uselist=False), foreign_keys=[userId])
     submitter = db.relationship('User', backref=backref('submitter', uselist=False), foreign_keys=[submitter_userid])
     # Relationships - Names
-    names = db.relationship('Name', lazy='select')
+    names = db.relationship('Name', lazy='dynamic')
     # Relationships - Events
     events = db.relationship('Event', lazy='dynamic')
     # Relationships - Applicants
-    applicants = db.relationship('Applicant', lazy='select')
+    applicants = db.relationship('Applicant', lazy='dynamic')
     # Relationships - Examiner Comments
     comments = db.relationship('Comment', lazy='dynamic', order_by="Comment.timestamp")
     # Relationships - Examiner Comments
@@ -772,22 +772,3 @@ class RequestsSearchSchema(ma.SQLAlchemySchema):
     activeUser = ma.Pluck(UserSchema, 'username', many=False)
     comments = ma.Nested(CommentSchema, many=True, only=('comment', 'examiner', 'timestamp'))
     applicants = ma.Nested(ApplicantSchema, many=True, only=('firstName', 'lastName'))
-
-class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = Request
-        fields = (
-            'id',
-            'nrNum',
-            'stateCd',
-            'names',
-            'requestTypeCd'
-            'entity_type_cd',
-            'natureBusinessInfo',
-            'applicants'
-            'legalType',
-            'target',
-            'actions'
-        )
-    names = ma.Nested(NameSchema, many=True, only=('name', 'state'))
-    applicants = ma.Nested(ApplicantSchema, many=True, only=('email', 'phoneNumber'))
