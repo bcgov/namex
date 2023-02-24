@@ -69,7 +69,7 @@ pylint: ## Linting with pylint
 	. venv/bin/activate && pylint --rcfile=setup.cfg  notebookreport.py
 
 flake8: ## Linting with flake8
-	. venv/bin/activate && flake8 notebookreport.py tests
+	. venv/bin/activate && flake8 notebookreport.py
 
 lint: pylint flake8 ## run all lint type scripts
 
