@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from typing import List
 
 from namex.models import User
-from tests.python.end_points.services.utils import create_header
+from tests.python.end_points.util import create_header
+
 
 def test_get_new_user_settings(client, jwt, app):
     """Test getting user settings for a new user."""

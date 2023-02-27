@@ -10,7 +10,7 @@ from namex.services.payment.client import SBCPaymentClient
 from tests.python.end_points.common.http import get_test_headers
 from tests.python.end_points.name_requests.test_setup_utils.test_helpers import \
     post_test_nr_json
-from tests.python.end_points.services.utils import create_header
+from tests.python.end_points.util import create_header
 
 from ..common.http import build_request_uri, build_test_query
 from ..common.logging import log_request_path
