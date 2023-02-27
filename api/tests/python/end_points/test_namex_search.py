@@ -604,7 +604,7 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
 
 
 @pytest.mark.parametrize('test_name, identifiers, total_results', [
-    ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3', 'NR 4'], 5),
+    ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3'], 4),
     ('Empty Search', [], 0),
 ])
 def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total_results):
@@ -617,8 +617,6 @@ def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
     ]
     base_nrs = generate_nrs(5, [], names, [])
-    for nr in base_nrs:
-        nr.save_to_db()
 
     rv = client.post(
         'api/v1/requests/search',

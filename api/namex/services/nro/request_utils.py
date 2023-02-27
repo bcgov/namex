@@ -174,10 +174,7 @@ def add_names(nr, nr_names):
 
 def add_applicant(nr, nr_applicant):
 
-    applicant = None
-    if nr.applicants:
-        applicant = nr.applicants[0]
-
+    applicant = nr.applicants[0] if nr.applicants else None
     if not applicant:
         applicant = Applicant()
         nr.applicants.append(applicant)
