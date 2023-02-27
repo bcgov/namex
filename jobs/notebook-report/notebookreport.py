@@ -62,7 +62,7 @@ def send_email(subject, filename, emailtype, errormessage):
         if subject.startswith('Weekly NameX'):
             recipients = os.getenv('WEEKLY_REPORT_NAMEX_RECIPIENTS', '')
         # Add body to email
-        message.attach(MIMEText('Please see attached.', 'plain'))
+        message.attach(MIMEText('Please see the attachment(s).', 'plain'))
 
         # Open file in binary mode
         with open(os.getenv('DATA_DIR', '')+filename, 'rb') as attachment:

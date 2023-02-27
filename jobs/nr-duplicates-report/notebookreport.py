@@ -67,7 +67,7 @@ def send_email(emailtype, errormessage):
         filename = 'nr_duplicates_' + date + '.csv'
         recipients = os.getenv('DAILY_REPORT_RECIPIENTS', '')
         # Add body to email
-        message.attach(MIMEText('Please see attached.', 'plain'))
+        message.attach(MIMEText('Please see the attachment(s).', 'plain'))
 
         # Open file in binary mode
         with open(os.path.join(os.getcwd(), r'data/')+filename, 'rb') as attachment:
