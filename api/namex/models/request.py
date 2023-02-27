@@ -782,10 +782,10 @@ class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
             'nrNum',
             'stateCd',
             'names',
-            'requestTypeCd'
+            'requestTypeCd',
             'entity_type_cd',
             'natureBusinessInfo',
-            'applicants'
+            'applicants',
             'legalType',
             'target',
             'actions'
