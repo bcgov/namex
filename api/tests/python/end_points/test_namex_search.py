@@ -616,7 +616,7 @@ def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total
         [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
     ]
-    base_nrs = generate_nrs(5, [], names, [])
+    generate_nrs(5, [], names, [])
 
     rv = client.post(
         'api/v1/requests/search',
