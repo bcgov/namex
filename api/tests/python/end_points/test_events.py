@@ -7,7 +7,7 @@ from namex.constants import ValidSources
 from namex.models import Event, Name as NameDAO, Request as RequestDAO, State, User
 from namex.services import EventRecorder
 
-from tests.python.end_points.services.utils import create_header
+from tests.python.end_points.util import create_header
 
 def create_base_nr():
     nr = RequestDAO()

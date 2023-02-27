@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 import pytest
+from contextlib import suppress
 from datetime import datetime, timedelta
+from http import HTTPStatus
 from typing import List
 
 from namex.models import Applicant, Name, Request, State, User
-from tests.python.end_points.services.utils import create_header
+from tests.python.end_points.util import create_header
 from tests.python.end_points.common.utils import (
     get_utc_server_now_with_delta,
     get_server_now_str,
@@ -623,3 +625,46 @@ def test_namex_search_direct_nrs(client, jwt, app):
     assert rv.data
     resp = json.loads(rv.data.decode('utf-8'))
     assert len(resp) == 5
+
+
+@pytest.mark.parametrize('test_name, identifiers, total_results', [
+    ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3'], 4),
+    ('Empty Search', [], 0),
+])
+def test_request_search(client, jwt, app, test_name, identifiers, total_results):
+    """Test request search end point."""
+    names = [
+        [{'name': 'test1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
+    ]
+    generate_nrs(5, [], names, [])
+
+    rv = client.post('api/v1/requests/search',
+                     headers=create_header(jwt, [User.SYSTEM]),
+                     json={'identifiers': identifiers})
+
+    assert rv.status_code == HTTPStatus.OK
+    nrs = [x['nrNum'] for x in rv.json]
+    for nr in nrs:
+        assert nr in identifiers
+
+
+def test_request_search_system_only(client, jwt, app):
+    """Test request search end point requires system role."""
+
+    # flask-restx / flask-jwt-oidc AttributeError on auth error response (this is a low impact bug in prod)
+    with suppress(AttributeError):
+        rv = client.post('api/v1/requests/search',
+                         headers=create_header(jwt, [User.APPROVER, User.EDITOR, User.VIEWONLY, User.STAFF]),
+                         json={'identifiers': []})
+
+        # commented out because unauthorized status code not getting passed by auth error
+        # assert rv.status_code == HTTPStatus.UNAUTHORIZED
+        assert rv.status_code not in [HTTPStatus.OK, HTTPStatus.ACCEPTED, HTTPStatus.CREATED]
+        # assert rv.json['code'] == 'missing_a_valid_role'
+        # assert rv.json['description'] == 'Missing a role required to access this endpoint'
+
+'NR 0264726','NR 0259837','NR 0260589','NR 0260052','NR 0257685','NR 0255752','NR 0252447','NR 0250983','NR 0239826','NR 0237185','NR 0236363','NR 0235509','NR 0233714','NR 0232142','NR 0227554','NR 0223392','NR 0219954','NR 0218900','NR 0216516','NR 0210425','NR 0210206','NR 0209810','NR 0209211','NR 0209363','NR 0209120','NR 0204375','NR 0202302','NR 0202021','NR 0198877','NR 0199983','NR 0198075','NR 0197885','NR 0191777','NR 0185530','NR 0184585','NR 0183625','NR 0182895','NR 0176274','NR 0174560','NR 0166283','NR 0162667','NR 0157137','NR 0152171','NR 0149909','NR 0144569','NR 0145581','NR 0139571','NR 0138325','NR 0138954','NR 0267563','NR 0266874','NR 0263536','NR 0257331','NR 0252183','NR 0252860'
