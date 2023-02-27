@@ -15,7 +15,7 @@ from tests.python.common.test_name_request_utils import (
 )
 from tests.python.end_points.common.http import get_test_headers
 from tests.python.end_points.name_requests.test_setup_utils.test_helpers import add_states_to_db, add_test_user_to_db
-from tests.python.end_points.services.utils import create_header
+from tests.python.end_points.util import create_header
 from tests.python.unit.test_setup_utils import build_nr
 
 # Import token and claims if you need it

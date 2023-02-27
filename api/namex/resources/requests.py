@@ -1497,3 +1497,21 @@ class NRComment(Resource):
 
         EventRecorder.record(user, Event.POST, nrd, json_data)
         return jsonify(comment_instance.as_dict()), 200
+
+
+# For sbc-auth - My Business Registry page.
+@cors_preflight("POST")
+@api.route('/search', methods=['POST'])
+class RequestSearch(Resource):
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.has_one_of_roles([User.SYSTEM])
+    def post():
+        search = request.get_json()
+        identifiers = search.get('identifiers', [])
+
+        # temporary (due to slowness) until request relationship with names/applicants is updated
+        q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers))
+        requests = q.all()
+        return jsonify([x.json() for x in requests])
