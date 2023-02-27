@@ -207,8 +207,8 @@ class Request(db.Model):
             'corpNum': self.corpNum,
             'tradeMark': self.tradeMark,
             'homeJurisNum': self.homeJurisNum,
-            'names': [name.as_dict() for name in self.names.all()],
-            'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
+            'names': [name.as_dict() for name in self.names],
+            'applicants': '' if (len(self.applicants) < 1) else self.applicants[0].as_dict(),
             'comments': [comment.as_dict() for comment in self.comments.all()],
             'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()],
             'checkedOutBy': self.checkedOutBy,
@@ -315,7 +315,8 @@ class Request(db.Model):
     @classmethod
     def find_name_by_choice(cls, nr_id, choice):
         names = cls.query.filter_by(id=nr_id).first().names
-        return names.filter_by(choice=choice).one_or_none()
+        name_by_choice = next((name for name in names if name.choice == choice), None)
+        return name_by_choice
 
     @classmethod
     def validNRFormat(cls, nr):

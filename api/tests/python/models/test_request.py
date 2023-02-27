@@ -78,7 +78,7 @@ def test_name_search_populated_by_name():
 
     test = RequestDAO.find_by_id(nr.id)
     # sanity check
-    names = test.names.all()
+    names = test.names
     assert len(names) == 1
     assert names[0].name == 'TEST'
 

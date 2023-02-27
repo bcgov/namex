@@ -117,7 +117,7 @@ def add_names(nr, nr_names):
 
         # find existing name record
         name_found = False
-        for name in nr.names.all():
+        for name in nr.names:
             if name.choice == n['choice_number']:
                 name_found = True
 
@@ -167,14 +167,14 @@ def add_names(nr, nr_names):
     # if there were any names not send back from NRO that are in Namex, remove them from Namex
     # since they were deleted in NRO
     if name_choice_numbers is not []:
-        for name in nr.names.all():
+        for name in nr.names:
             if name.choice in name_choice_numbers:
                 nr.names.remove(name)
 
 
 def add_applicant(nr, nr_applicant):
 
-    applicant = nr.applicants.one_or_none()
+    applicant = nr.applicants
 
     if not applicant:
         applicant = Applicant()

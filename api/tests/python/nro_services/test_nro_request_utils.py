@@ -108,7 +108,7 @@ def test_request_add_applicant_existing(app, request, session, applicant1, appli
     session.add(nr)
     session.commit()
 
-    appl = nr.applicants.one_or_none()
+    appl = nr.applicants[0]
 
     nra = dict_to_json_keys(applicant2)
     a = appl.as_dict()
@@ -140,7 +140,7 @@ def test_request_add_applicant_not_existing(app, request, session, applicant1, a
     session.add(nr)
     session.commit()
 
-    appl = nr.applicants.one_or_none()
+    appl = nr.applicants[0]
 
     nra = dict_to_json_keys(applicant2)
     a = appl.as_dict()
@@ -329,7 +329,7 @@ def test_add_names(app, request, session, test_names, previous_names):
     session.add(nr)
     session.commit()
 
-    names = nr.names.all()
+    names = nr.names
 
     assert len(test_names) == len(names)
 
@@ -391,7 +391,7 @@ def test_add_names_after_reset(app, request, session, previous_names, test_names
     session.add(nr)
     session.commit()
 
-    names = nr.names.all()
+    names = nr.names
 
     assert len(test_names) == len(names)
 
@@ -462,7 +462,7 @@ def test_add_names_with_changes(app, request, session, previous_names, test_name
     session.add(nr)
     session.commit()
 
-    names = nr.names.all()
+    names = nr.names
 
     assert len(test_names) == len(names)
 
@@ -508,6 +508,7 @@ def test_add_nr_header_with_priority(priority_cd, expected):
         'additional_info': None,
         'nature_business_info': 'N/A',
         'xpro_jurisdiction': None,
+        'home_juris_num': None,
         'submitted_date': EPOCH_DATETIME,
         'last_update': EPOCH_DATETIME
     }
@@ -688,6 +689,7 @@ def test_add_nr_header_set_state(state_type_cd, nr_names, expected):
         'additional_info': None,
         'nature_business_info': 'N/A',
         'xpro_jurisdiction': None,
+        'home_juris_num': None,
         'submitted_date': EPOCH_DATETIME,
         'last_update': EPOCH_DATETIME
     }

@@ -85,9 +85,7 @@ def _consume_nro_names(oracle_cursor, nr, event_id, corp_num):
        otherwise, create a new name_instance and set its start_event_id to event_id
     """
 
-    for name in nr.names.all():
-
-
+    for name in nr.names:
         oracle_cursor.execute("""
         SELECT ni.name_instance_id, ni.name_id
         FROM name_instance ni

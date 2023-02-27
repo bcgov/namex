@@ -764,8 +764,8 @@ class Request(Resource):
             is_changed__applicant = False
             is_changed__address = False
 
-            applicants_d = nrd.applicants.one_or_none()
-            if applicants_d:
+            if nrd.applicants:
+                applicants_d = nrd.applicants[0]
                 orig_applicant = applicants_d.as_dict()
                 appl = json_input.get('applicants', None)
                 if appl:
@@ -843,7 +843,7 @@ class Request(Resource):
             is_changed__name3 = False
             deleted_names = [False] * 3
 
-            if len(nrd.names.all()) == 0:
+            if len(nrd.names) == 0:
                 new_name_choice = Name()
                 new_name_choice.nrId = nrd.id
 
@@ -852,13 +852,13 @@ class Request(Resource):
 
                 nrd.names.append(new_name_choice)
 
-            for nrd_name in nrd.names.all():
+            for nrd_name in nrd.names:
 
                 orig_name = nrd_name.as_dict()
 
                 for in_name in json_input.get('names', []):
 
-                    if len(nrd.names.all()) < in_name['choice']:
+                    if len(nrd.names) < in_name['choice']:
 
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
@@ -1159,7 +1159,7 @@ class RequestsAnalysis(Resource):
         if not nrd:
             return jsonify(message='{nr} not found'.format(nr=nr)), 404
 
-        nrd_name = nrd.names.filter_by(choice=choice).one_or_none()
+        nrd_name = next((name for name in nrd.names if name.choice == choice), None)
 
         if not nrd_name:
             return jsonify(message='Name choice:{choice} not found for {nr}'.format(nr=nr, choice=choice)), 404
