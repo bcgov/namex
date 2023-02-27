@@ -28,6 +28,7 @@ def create_applicant(first_name: str, last_name: str) -> Applicant:
     applicant.save_to_db()
     return applicant
 
+
 def create_name(name: str, state: str, choice: int) -> Name:
     """Create new name."""
     name = Name(
@@ -37,6 +38,7 @@ def create_name(name: str, state: str, choice: int) -> Name:
     )
     name.save_to_db()
     return name
+
 
 def create_nr(nr_num: str, state_cd: str, submitted: datetime, names: list) -> Request:
     """Create new NR."""
@@ -49,6 +51,7 @@ def create_nr(nr_num: str, state_cd: str, submitted: datetime, names: list) -> R
         nr.names.append(create_name(name['name'], name['state'], name['choice']))
     nr.save_to_db()
     return nr
+
 
 def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[datetime]) -> List[Request]:
     """Generate a set of NRs for testing."""
@@ -65,13 +68,15 @@ def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[date
     for i in range(num):
         nr_num = nr_num = nr_nums[i] if i < len(nr_nums) else f'NR {i}'
         submitted_date = submitted[i] if i < len(submitted) else datetime.utcnow() - timedelta(days=i)
-        state_index = i%len(states)
+        state_index = i % len(states)
         new_names = names[i] if i < len(names) else []
         nr = create_nr(nr_num, states[state_index], submitted_date, new_names)
         nrs.append(nr)
     return nrs
 
-### TODO: add tests for searching by last modified by, etc. and combined searches
+# TODO: add tests for searching by last modified by, etc. and combined searches
+
+
 def test_namex_search_default(client, jwt, app):
     """Test default search brings back nrs as expected."""
     generate_nrs(14, [], [], [])
@@ -117,6 +122,7 @@ def test_namex_search_state(client, jwt, app, state_cd):
     for nr in resp['nameRequests'][0]:
         assert nr['stateCd'] == state_cd
 
+
 @pytest.mark.parametrize('search_nr, nrs', [
     ('NR', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
     ('NR 00', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
@@ -139,11 +145,12 @@ def test_namex_search_nr_num(client, jwt, app, search_nr, nrs):
     resp = json.loads(data.decode('utf-8'))
 
     assert resp.get('nameRequests') and resp.get('response')
-    assert len(resp['nameRequests'][0]) == len([ nr for nr in nrs if search_nr in nr])
+    assert len(resp['nameRequests'][0]) == len([nr for nr in nrs if search_nr in nr])
 
     # should only contain nrs that contain the search_nr
     for nr in resp['nameRequests'][0]:
         assert search_nr in nr['nrNum']
+
 
 @pytest.mark.parametrize('order, submitted_interval, last_date', [
     ('desc', 'All', None),
@@ -156,12 +163,12 @@ def test_namex_search_nr_num(client, jwt, app, search_nr, nrs):
     ('asc', '30 days', datetime.utcnow() - timedelta(days=30)),
     ('desc', '90 days', datetime.utcnow() - timedelta(days=90)),
     ('asc', '90 days', datetime.utcnow() - timedelta(days=90)),
-    ('desc', '1 year', datetime.utcnow() - timedelta(days=1*(365))),
-    ('asc', '1 year', datetime.utcnow() - timedelta(days=1*(365))),
-    ('desc', '3 years', datetime.utcnow() - timedelta(days=3*(365))),
-    ('asc', '3 years', datetime.utcnow() - timedelta(days=3*(365))),
-    ('desc', '5 years', datetime.utcnow() - timedelta(days=5*(365))),
-    ('asc', '5 years', datetime.utcnow() - timedelta(days=5*(365))),
+    ('desc', '1 year', datetime.utcnow() - timedelta(days=1 * (365))),
+    ('asc', '1 year', datetime.utcnow() - timedelta(days=1 * (365))),
+    ('desc', '3 years', datetime.utcnow() - timedelta(days=3 * (365))),
+    ('asc', '3 years', datetime.utcnow() - timedelta(days=3 * (365))),
+    ('desc', '5 years', datetime.utcnow() - timedelta(days=5 * (365))),
+    ('asc', '5 years', datetime.utcnow() - timedelta(days=5 * (365))),
 ])
 def test_namex_search_submitted(client, jwt, app, order, submitted_interval, last_date):
     """Test searching by submitted date."""
@@ -173,10 +180,10 @@ def test_namex_search_submitted(client, jwt, app, order, submitted_interval, las
         datetime.utcnow() - timedelta(days=31),
         datetime.utcnow() - timedelta(days=89),
         datetime.utcnow() - timedelta(days=91),
-        datetime.utcnow() - timedelta(days=1*(365)),
-        datetime.utcnow() - timedelta(days=2*(365)),
-        datetime.utcnow() - timedelta(days=3*(365)),
-        datetime.utcnow() - timedelta(days=5*(365)),
+        datetime.utcnow() - timedelta(days=1 * (365)),
+        datetime.utcnow() - timedelta(days=2 * (365)),
+        datetime.utcnow() - timedelta(days=3 * (365)),
+        datetime.utcnow() - timedelta(days=5 * (365)),
     ]
     generate_nrs(len(submitted), [], [], submitted)
 
@@ -203,6 +210,7 @@ def test_namex_search_submitted(client, jwt, app, order, submitted_interval, las
             assert date >= nr['submittedDate']
         date = nr['submittedDate']
 
+
 @pytest.mark.parametrize('search_name', [
     't',
     'test 1',
@@ -214,12 +222,12 @@ def test_namex_search_submitted(client, jwt, app, order, submitted_interval, las
 def test_namex_search_compname(client, jwt, app, search_name):
     """Test searching by NR names."""
     names = [
-        [{ 'name': 'test1', 'state': 'NE', 'choice': 1 }],
-        [{ 'name': 'test 1', 'state': 'NE', 'choice': 1 }],
-        [{ 'name': 'test tester 1', 'state': 'NE', 'choice': 1 }],
-        [{ 'name': 'testing tester 1', 'state': 'NE', 'choice': 1 }],
-        [{ 'name': 'test tester 1', 'state': 'NE', 'choice': 1 }],
-        [{ 'name': 'tes', 'state': 'NE', 'choice': 1 }, { 'name': 'ting', 'state': 'NE', 'choice': 2 }]
+        [{'name': 'test1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
+        [{'name': 'tes', 'state': 'NE', 'choice': 1}, {'name': 'ting', 'state': 'NE', 'choice': 2}]
     ]
     generate_nrs(len(names), [], names, [])
 
@@ -247,6 +255,7 @@ def test_namex_search_compname(client, jwt, app, search_name):
                 break
         # assert at least one name in the NR contained all the search words
         assert matching_name
+
 
 @pytest.mark.parametrize('consent_option', [
     'All',
@@ -286,6 +295,7 @@ def test_namex_search_consent(client, jwt, app, consent_option):
             else:
                 assert nr['consentFlag'] in ['N', None]
 
+
 @pytest.mark.parametrize('search_name', [
     't',
     'test',
@@ -321,6 +331,7 @@ def test_namex_search_first_name(client, jwt, app, search_name):
     # check it returned NRs based on filter
     for nr in resp['nameRequests'][0]:
         assert search_name in nr['applicants'][0]['firstName']
+
 
 @pytest.mark.parametrize('search_name', [
     't',
@@ -362,19 +373,19 @@ def test_namex_search_last_name(client, jwt, app, search_name):
 @pytest.mark.parametrize('submitted_start_date, expected_result_count', [
     (get_server_now_with_delta_str(timedelta(days=-1)), 9),
     (get_server_now_with_delta_str(timedelta(days=-2)), 9),
-    (get_server_now_with_delta_str(timedelta(-5*(365)+1)), 11),
-    (get_server_now_with_delta_str(timedelta(-5*(365))), 12),
+    (get_server_now_with_delta_str(timedelta(-5 * (365) + 1)), 11),
+    (get_server_now_with_delta_str(timedelta(-5 * (365))), 12),
     (get_server_now_str(), 6),
     (get_server_now_with_delta_str(timedelta(days=1)), 4),
-    (get_server_now_with_delta_str(timedelta(days=5*(365))), 1),
-    (get_server_now_with_delta_str(timedelta(days=5*(365)+1)), 0),
+    (get_server_now_with_delta_str(timedelta(days=5 * (365))), 1),
+    (get_server_now_with_delta_str(timedelta(days=5 * (365) + 1)), 0),
 ])
 def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_date, expected_result_count):
     """Test searching by submitted start date."""
 
     submitted = [
-        get_utc_server_now_with_delta(timedelta(days=-5*(365))),
-        get_utc_server_now_with_delta(timedelta(days=-1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-5 * (365))),
+        get_utc_server_now_with_delta(timedelta(days=-1 * (365))),
         get_utc_server_now_with_delta(timedelta(days=-100)),
         get_utc_server_now_with_delta(timedelta(days=-1)),
         get_utc_server_now_with_delta(timedelta(days=-1)),
@@ -383,8 +394,8 @@ def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_dat
         get_utc_server_now(),
         get_utc_server_now_with_delta(timedelta(days=1)),
         get_utc_server_now_with_delta(timedelta(days=100)),
-        get_utc_server_now_with_delta(timedelta(days=1*(365))),
-        get_utc_server_now_with_delta(timedelta(days=5*(365))),
+        get_utc_server_now_with_delta(timedelta(days=1 * (365))),
+        get_utc_server_now_with_delta(timedelta(days=5 * (365))),
     ]
     generate_nrs(len(submitted), [], [], submitted)
 
@@ -404,23 +415,23 @@ def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_dat
 
 
 @pytest.mark.parametrize('submitted_end_date, expected_result_count', [
-    (get_server_now_with_delta_str(timedelta(-5*(365)-1)), 0),
-    (get_server_now_with_delta_str(timedelta(-5*(365))), 1),
+    (get_server_now_with_delta_str(timedelta(-5 * (365) - 1)), 0),
+    (get_server_now_with_delta_str(timedelta(-5 * (365))), 1),
     (get_server_now_with_delta_str(timedelta(days=-105)), 2),
     (get_server_now_with_delta_str(timedelta(days=-1)), 6),
     (get_server_now_str(), 8),
     (get_server_now_with_delta_str(timedelta(days=1)), 9),
-    (get_server_now_with_delta_str(timedelta(days=1*(365))), 11),
-    (get_server_now_with_delta_str(timedelta(days=5*(365)-1)), 11),
-    (get_server_now_with_delta_str(timedelta(days=5*(365))), 12),
-    (get_server_now_with_delta_str(timedelta(days=6*(365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=1 * (365))), 11),
+    (get_server_now_with_delta_str(timedelta(days=5 * (365) - 1)), 11),
+    (get_server_now_with_delta_str(timedelta(days=5 * (365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=6 * (365))), 12),
 ])
 def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, expected_result_count):
     """Test searching by submitted end date."""
 
     submitted = [
-        get_utc_server_now_with_delta(timedelta(days=-5*(365))),
-        get_utc_server_now_with_delta(timedelta(days=-1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-5 * (365))),
+        get_utc_server_now_with_delta(timedelta(days=-1 * (365))),
         get_utc_server_now_with_delta(timedelta(days=-100)),
         get_utc_server_now_with_delta(timedelta(days=-1)),
         get_utc_server_now_with_delta(timedelta(days=-1)),
@@ -429,8 +440,8 @@ def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, e
         get_utc_server_now(),
         get_utc_server_now_with_delta(timedelta(days=1)),
         get_utc_server_now_with_delta(timedelta(days=100)),
-        get_utc_server_now_with_delta(timedelta(days=1*(365))),
-        get_utc_server_now_with_delta(timedelta(days=5*(365))),
+        get_utc_server_now_with_delta(timedelta(days=1 * (365))),
+        get_utc_server_now_with_delta(timedelta(days=5 * (365))),
     ]
     generate_nrs(len(submitted), [], [], submitted)
 
@@ -450,13 +461,13 @@ def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, e
 
 
 @pytest.mark.parametrize('submitted_start_date, submitted_end_date, expected_result_count', [
-    (get_server_now_with_delta_str(timedelta(days=-5*(365)-2)), get_server_now_with_delta_str(timedelta(days=-5*(365)-1)), 0),
-    (get_server_now_with_delta_str(timedelta(days=-5*(365)-2)), get_server_now_with_delta_str(timedelta(days=-5*(365))), 1),
-    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_with_delta_str(timedelta(days=-100)), 3),
-    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_str(), 8),
-    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_with_delta_str(timedelta(days=1*(365))), 11),
-    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_with_delta_str(timedelta(days=5*(365))), 12),
-    (get_server_now_with_delta_str(timedelta(days=-5*(365))), get_server_now_with_delta_str(timedelta(days=6*(365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=-5 * (365) - 2)), get_server_now_with_delta_str(timedelta(days=-5 * (365) - 1)), 0),
+    (get_server_now_with_delta_str(timedelta(days=-5 * (365) - 2)), get_server_now_with_delta_str(timedelta(days=-5 * (365))), 1),
+    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_with_delta_str(timedelta(days=-100)), 3),
+    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_str(), 8),
+    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_with_delta_str(timedelta(days=1 * (365))), 11),
+    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_with_delta_str(timedelta(days=5 * (365))), 12),
+    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_with_delta_str(timedelta(days=6 * (365))), 12),
     (get_server_now_with_delta_str(timedelta(days=-1)), get_server_now_with_delta_str(timedelta(days=100)), 7),
     (get_server_now_str(), get_server_now_str(), 2),
 ])
@@ -464,8 +475,8 @@ def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_s
     """Test searching by submitted start date and submitted end date."""
 
     submitted = [
-        get_utc_server_now_with_delta(timedelta(days=-5*(365))),
-        get_utc_server_now_with_delta(timedelta(days=-1*(365))),
+        get_utc_server_now_with_delta(timedelta(days=-5 * (365))),
+        get_utc_server_now_with_delta(timedelta(days=-1 * (365))),
         get_utc_server_now_with_delta(timedelta(days=-100)),
         get_utc_server_now_with_delta(timedelta(days=-1)),
         get_utc_server_now_with_delta(timedelta(days=-1)),
@@ -474,8 +485,8 @@ def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_s
         get_utc_server_now(),
         get_utc_server_now_with_delta(timedelta(days=1)),
         get_utc_server_now_with_delta(timedelta(days=100)),
-        get_utc_server_now_with_delta(timedelta(days=1*(365))),
-        get_utc_server_now_with_delta(timedelta(days=5*(365))),
+        get_utc_server_now_with_delta(timedelta(days=1 * (365))),
+        get_utc_server_now_with_delta(timedelta(days=5 * (365))),
     ]
     generate_nrs(len(submitted), [], [], submitted)
 
@@ -492,7 +503,6 @@ def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_s
     response_count = len(resp['nameRequests'][0])
     assert response_count >= 0
     assert response_count == expected_result_count
-
 
 
 @pytest.mark.parametrize('submitted_start_date, submitted_end_date', [
@@ -529,11 +539,11 @@ def test_namex_search_submitted_end_date_before_submitted_start_date(client,
     ('1 year', '', '2021-05-01'),
 ])
 def test_namex_search_submitted_interval_with_submitted_start_and_end_date(client,
-                                                                     jwt,
-                                                                     app,
-                                                                     submitted_interval,
-                                                                     submitted_start_date,
-                                                                     submitted_end_date):
+                                                                           jwt,
+                                                                           app,
+                                                                           submitted_interval,
+                                                                           submitted_start_date,
+                                                                           submitted_end_date):
     """Test searching by submitted interval with submitted start and end date."""
 
     # get the resource (this is what we are testing)
@@ -588,7 +598,7 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
     if not valid_start_date:
         assert 'Invalid submittedStartDate: ' in msg
         assert 'Must be of date format %Y-%m-%d' in msg
-    elif(valid_start_date and not valid_end_date):
+    elif (valid_start_date and not valid_end_date):
         assert 'Invalid submittedEndDate: ' in msg
         assert 'Must be of date format %Y-%m-%d' in msg
 
@@ -598,7 +608,7 @@ def test_namex_search_direct_nrs_bad_roles(client, jwt, app):
     base_nrs = generate_nrs(5, [], [], [])
     for nr in base_nrs:
         nr.save_to_db()
-    qs = "&".join(["nrNumbers="+nr.nrNum for nr in base_nrs])
+    qs = "&".join(["nrNumbers=" + nr.nrNum for nr in base_nrs])
     rv = client.get(
         f'api/v1/requests?{qs}',
         headers=create_header(jwt, [])
@@ -613,7 +623,7 @@ def test_namex_search_direct_nrs(client, jwt, app):
     for nr in base_nrs:
         nr.save_to_db()
 
-    qs = "&".join(["nrNumbers="+nr.nrNum for nr in base_nrs])
+    qs = "&".join(["nrNumbers=" + nr.nrNum for nr in base_nrs])
     rv = client.get(
         f'api/v1/requests?{qs}',
         headers=create_header(jwt, [User.APPROVER, User.EDITOR, User.VIEWONLY])
@@ -666,5 +676,3 @@ def test_request_search_system_only(client, jwt, app):
         assert rv.status_code not in [HTTPStatus.OK, HTTPStatus.ACCEPTED, HTTPStatus.CREATED]
         # assert rv.json['code'] == 'missing_a_valid_role'
         # assert rv.json['description'] == 'Missing a role required to access this endpoint'
-
-'NR 0264726','NR 0259837','NR 0260589','NR 0260052','NR 0257685','NR 0255752','NR 0252447','NR 0250983','NR 0239826','NR 0237185','NR 0236363','NR 0235509','NR 0233714','NR 0232142','NR 0227554','NR 0223392','NR 0219954','NR 0218900','NR 0216516','NR 0210425','NR 0210206','NR 0209810','NR 0209211','NR 0209363','NR 0209120','NR 0204375','NR 0202302','NR 0202021','NR 0198877','NR 0199983','NR 0198075','NR 0197885','NR 0191777','NR 0185530','NR 0184585','NR 0183625','NR 0182895','NR 0176274','NR 0174560','NR 0166283','NR 0162667','NR 0157137','NR 0152171','NR 0149909','NR 0144569','NR 0145581','NR 0139571','NR 0138325','NR 0138954','NR 0267563','NR 0266874','NR 0263536','NR 0257331','NR 0252183','NR 0252860'
