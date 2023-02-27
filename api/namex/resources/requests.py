@@ -1249,7 +1249,7 @@ class NRNames(Resource):
         if not nrd:
             return None, None, jsonify({"message": "{nr} not found".format(nr=nr)}), 404
 
-        name = nrd.names.filter_by(choice=choice).one_or_none()
+        name = next((name for name in nrd.names if name.choice == choice), None)
         if not name:
             return None, None, jsonify({"message": "Choice {choice} for {nr} not found".format(choice=choice, nr=nr)}), 404
 
