@@ -271,7 +271,7 @@ def test_namex_search_compname(client, jwt, app, search_name):
 ])
 def test_namex_search_consent(client, jwt, app, consent_option):
     """Test searching by consent."""
-    base_nrs = generate_nrs(4, [], [], [])
+    base_nrs, _ = generate_nrs(4, [], [], [])
     base_nrs[0].consentFlag = 'N'
     base_nrs[1].consentFlag = 'Y'
     base_nrs[2].consentFlag = 'R'
@@ -317,7 +317,7 @@ def test_namex_search_first_name(client, jwt, app, search_name):
         create_applicant('testing', 'flop'),
         create_applicant('testingmoreletters', 'bobbly'),
     ]
-    base_nrs = generate_nrs(len(applicants), [], [], [])
+    base_nrs, _ = generate_nrs(len(applicants), [], [], [])
     for nr, applicant in zip(base_nrs, applicants):
         nr.applicants.append(applicant)
         nr.save_to_db()
@@ -354,7 +354,7 @@ def test_namex_search_last_name(client, jwt, app, search_name):
         create_applicant('4', 'testing'),
         create_applicant('5', 'testingmoreletters'),
     ]
-    base_nrs = generate_nrs(len(applicants), [], [], [])
+    base_nrs, _ = generate_nrs(len(applicants), [], [], [])
     for nr, applicant in zip(base_nrs, applicants):
         nr.applicants.append(applicant)
         nr.save_to_db()
