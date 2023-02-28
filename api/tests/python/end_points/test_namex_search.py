@@ -301,24 +301,14 @@ def test_namex_search_consent(client, jwt, app, consent_option):
 
 
 @pytest.mark.parametrize('search_name', [
-    't',
-    'test',
-    'testing',
+    '1',
+    '2',
+    '3',
     'no matches'
 ])
 def test_namex_search_first_name(client, jwt, app, search_name):
     """Test search by applicant first name."""
-    applicants = [
-        create_applicant('ted', 'tester'),
-        create_applicant('test', 'blob'),
-        create_applicant('pretest', 'blobber'),
-        create_applicant('testing', 'flop'),
-        create_applicant('testingmoreletters', 'bobbly'),
-    ]
-    base_nrs = generate_nrs(len(applicants), [], [], [])
-    for nr, applicant in zip(base_nrs, applicants):
-        nr.applicants.append(applicant)
-        nr.save_to_db()
+    generate_nrs(5, [], [], [])
 
     # get the resource (this is what we are testing)
     rv = client.get(f'api/v1/requests?firstName={search_name}', headers=create_header(jwt, [User.EDITOR]))
@@ -345,17 +335,7 @@ def test_namex_search_first_name(client, jwt, app, search_name):
 ])
 def test_namex_search_last_name(client, jwt, app, search_name):
     """Test search by applicant last name."""
-    applicants = [
-        create_applicant('1', 'ted'),
-        create_applicant('2', 'test'),
-        create_applicant('3', 'pretest'),
-        create_applicant('4', 'testing'),
-        create_applicant('5', 'testingmoreletters'),
-    ]
-    base_nrs = generate_nrs(len(applicants), [], [], [])
-    for nr, applicant in zip(base_nrs, applicants):
-        nr.applicants.append(applicant)
-        nr.save_to_db()
+    generate_nrs(5, [], [], [])
 
     # get the resource (this is what we are testing)
     rv = client.get(f'api/v1/requests?lastName={search_name}', headers=create_header(jwt, [User.EDITOR]))
