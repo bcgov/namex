@@ -407,11 +407,11 @@ class RequestSearch(Resource):
                     RequestDAO._entity_type_cd
                 ))
 
-        requests = q.all()
-        for r in requests:
-            if nr_actions := nr_filing_actions.get_actions(r.requestTypeCd, r.entity_type_cd):
-                 r = {**r, **nr_actions}
-        return jsonify(request_auth_search_schemas.dump(requests))
+        requests = request_auth_search_schemas.dump(q.all())
+        actions_array = [nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd']) for r in requests]
+        for r, additional_fields in zip(requests, actions_array):
+            r.update(additional_fields)
+        return jsonify(requests)
 
 
 # noinspection PyUnresolvedReferences
