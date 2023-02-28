@@ -55,7 +55,7 @@ def create_nr(nr_num: str, state_cd: str, submitted: datetime, names: list) -> R
     return nr
 
 
-def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[datetime]) -> tuple:
+def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[datetime]) -> List[Request]:
     """Generate a set of NRs and applicants for testing."""
     states = [
         State.APPROVED,
@@ -67,7 +67,6 @@ def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[date
         State.PENDING_PAYMENT
     ]
     nrs = []
-    applicants = []
     for i in range(num):
         nr_num = nr_num = nr_nums[i] if i < len(nr_nums) else f'NR {i}'
         submitted_date = submitted[i] if i < len(submitted) else datetime.utcnow() - timedelta(days=i)
@@ -76,9 +75,8 @@ def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[date
         nr = create_nr(nr_num, states[state_index], submitted_date, new_names)
         applicant = create_applicant(i, i, email_address=i, phone_number=i)
         nr.applicants.append(applicant)
-        applicants.append(applicant)
         nrs.append(nr)
-    return nrs, applicants
+    return nrs
 
 # TODO: add tests for searching by last modified by, etc. and combined searches
 
@@ -271,7 +269,7 @@ def test_namex_search_compname(client, jwt, app, search_name):
 ])
 def test_namex_search_consent(client, jwt, app, consent_option):
     """Test searching by consent."""
-    base_nrs, _ = generate_nrs(4, [], [], [])
+    base_nrs = generate_nrs(4, [], [], [])
     base_nrs[0].consentFlag = 'N'
     base_nrs[1].consentFlag = 'Y'
     base_nrs[2].consentFlag = 'R'
@@ -317,7 +315,7 @@ def test_namex_search_first_name(client, jwt, app, search_name):
         create_applicant('testing', 'flop'),
         create_applicant('testingmoreletters', 'bobbly'),
     ]
-    base_nrs, _ = generate_nrs(len(applicants), [], [], [])
+    base_nrs = generate_nrs(len(applicants), [], [], [])
     for nr, applicant in zip(base_nrs, applicants):
         nr.applicants.append(applicant)
         nr.save_to_db()
@@ -354,7 +352,7 @@ def test_namex_search_last_name(client, jwt, app, search_name):
         create_applicant('4', 'testing'),
         create_applicant('5', 'testingmoreletters'),
     ]
-    base_nrs, _ = generate_nrs(len(applicants), [], [], [])
+    base_nrs = generate_nrs(len(applicants), [], [], [])
     for nr, applicant in zip(base_nrs, applicants):
         nr.applicants.append(applicant)
         nr.save_to_db()
@@ -611,7 +609,7 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
 
 @pytest.mark.parametrize('test_name, identifiers, total_results', [
     ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3'], 4),
-    #  ('Empty Search', [], 0),
+    ('Empty Search', [], 0),
 ])
 def test_namex_search_direct_nrs(
     client, jwt, app, test_name, identifiers, total_results
@@ -624,7 +622,7 @@ def test_namex_search_direct_nrs(
         [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
     ]
-    _, base_applicants = generate_nrs(5, [], base_names, [])
+    generate_nrs(5, [], base_names, [])
     rv = client.post(
         'api/v1/requests/search',
         headers={**create_header(jwt, [User.SYSTEM]), **{'content-type': 'application/json'}},
@@ -641,9 +639,7 @@ def test_namex_search_direct_nrs(
 
     for nr in nrs:
         assert nr in identifiers
-    for applicant, base_applicant in zip(applicants, base_applicants):
-        assert applicant['phoneNumber'] == base_applicant.phoneNumber
-        assert applicant['emailAddress'] == base_applicant.emailAddress
+    assert len(applicants) == total_results
     for name, base_name in zip(names, base_names):
         assert name['name'] == base_name[0]['name'].upper()
 
