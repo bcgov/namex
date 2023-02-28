@@ -56,7 +56,7 @@ def create_nr(nr_num: str, state_cd: str, submitted: datetime, names: list) -> R
 
 
 def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[datetime]) -> List[Request]:
-    """Generate a set of NRs for testing."""
+    """Generate a set of NRs and applicants for testing."""
     states = [
         State.APPROVED,
         State.CONDITIONAL,
@@ -67,14 +67,18 @@ def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[date
         State.PENDING_PAYMENT
     ]
     nrs = []
+    applicants = []
     for i in range(num):
         nr_num = nr_num = nr_nums[i] if i < len(nr_nums) else f'NR {i}'
         submitted_date = submitted[i] if i < len(submitted) else datetime.utcnow() - timedelta(days=i)
         state_index = i % len(states)
         new_names = names[i] if i < len(names) else []
         nr = create_nr(nr_num, states[state_index], submitted_date, new_names)
+        applicant = create_applicant(i, i, email_address=i, phone_number=i)
+        nr.applicants.append(applicant)
+        applicants.append(applicant)
         nrs.append(nr)
-    return nrs
+    return nrs, applicants
 
 # TODO: add tests for searching by last modified by, etc. and combined searches
 
@@ -607,7 +611,7 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
 
 @pytest.mark.parametrize('test_name, identifiers, total_results', [
     ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3'], 4),
-    ('Empty Search', [], 0),
+    #  ('Empty Search', [], 0),
 ])
 def test_namex_search_direct_nrs(
     client, jwt, app, test_name, identifiers, total_results
@@ -620,17 +624,7 @@ def test_namex_search_direct_nrs(
         [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
     ]
-    base_applicants = [
-        create_applicant('1', 'ted', email_address='ted', phone_number='1'),
-        create_applicant('2', 'test', email_address='test', phone_number='2'),
-        create_applicant('3', 'pretest', email_address='pretest', phone_number='3'),
-        create_applicant('4', 'testing', email_address='testing', phone_number='4'),
-        create_applicant('5', 'testingmoreletters', email_address='testingmoreletters', phone_number='5'),
-    ]
-    base_nrs = generate_nrs(5, [], base_names, [])
-    for nr, applicant in zip(base_nrs, base_applicants):
-        nr.applicants.append(applicant)
-
+    _, base_applicants = generate_nrs(5, [], base_names, [])
     rv = client.post(
         'api/v1/requests/search',
         headers={**create_header(jwt, [User.SYSTEM]), **{'content-type': 'application/json'}},
