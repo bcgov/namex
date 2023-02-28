@@ -55,7 +55,7 @@ def create_nr(nr_num: str, state_cd: str, submitted: datetime, names: list) -> R
     return nr
 
 
-def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[datetime]) -> List[Request]:
+def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[datetime]) -> tuple:
     """Generate a set of NRs and applicants for testing."""
     states = [
         State.APPROVED,
