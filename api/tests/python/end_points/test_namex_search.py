@@ -328,9 +328,9 @@ def test_namex_search_first_name(client, jwt, app, search_name):
 
 
 @pytest.mark.parametrize('search_name', [
-    't',
-    'test',
-    'testing',
+    '1',
+    '2',
+    '3',
     'no matches'
 ])
 def test_namex_search_last_name(client, jwt, app, search_name):
