@@ -470,12 +470,10 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             )
 
             # Save the payment info to Postgres
-            payment = PaymentDAO.find_by_existing_nr_id(nr_id, payment_action)
-            if not payment:
-                payment = PaymentDAO()
-                payment.nrId = nr_model.id
-                payment.payment_action = payment_action
-                payment.save_to_db()
+            payment = PaymentDAO()
+            payment.nrId = nr_model.id
+            payment.payment_action = payment_action
+            # payment.save_to_db()
 
             payment_response = create_payment(req.as_dict(), headers)
             return handle_payment_response(payment_action,
