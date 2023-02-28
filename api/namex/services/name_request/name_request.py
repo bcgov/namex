@@ -243,7 +243,7 @@ class NameRequestService(AbstractNameRequestMixin):
 
             def create_or_update_applicant(mapped_applicants, applicant_data):
                 if request_applicant_id:
-                    existing_applicants = name_request.applicants.all()
+                    existing_applicants = name_request.applicants
                     match = get_item_from_list(existing_applicants, request_applicant_id, 'partyId')
                     if match:
                         applicant = map_request_applicant(match, applicant_data)
@@ -289,7 +289,7 @@ class NameRequestService(AbstractNameRequestMixin):
             for request_name in self.request_names:
                 request_name_id = request_name.get('id')
                 if request_name_id:
-                    existing_names = name_request.names.all()
+                    existing_names = name_request.names
                     match = self.get_item_from_list(existing_names, request_name_id)
                     if match:
                         # Update the name

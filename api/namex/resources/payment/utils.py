@@ -161,7 +161,7 @@ def build_payment_details(nr_model):
             'value': ''
         }
     )
-    name_choices = sorted(nr_model.names.all(), key=lambda x: x.choice)
+    name_choices = sorted(nr_model.names, key=lambda x: x.choice)
     for name in name_choices:
         details.append(
             {

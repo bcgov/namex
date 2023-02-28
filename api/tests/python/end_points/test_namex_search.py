@@ -19,11 +19,13 @@ from tests.python.end_points.common.utils import (
 # TODO: import these helper functions from somewhere shared by the tests
 
 
-def create_applicant(first_name: str, last_name: str) -> Applicant:
+def create_applicant(first_name: str, last_name: str, email_address: str = None, phone_number: str = None) -> Applicant:
     """Create new applicant."""
     applicant = Applicant(
         firstName=first_name,
-        lastName=last_name
+        lastName=last_name,
+        emailAddress=email_address,
+        phoneNumber=phone_number
     )
     applicant.save_to_db()
     return applicant
@@ -54,7 +56,7 @@ def create_nr(nr_num: str, state_cd: str, submitted: datetime, names: list) -> R
 
 
 def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[datetime]) -> List[Request]:
-    """Generate a set of NRs for testing."""
+    """Generate a set of NRs and applicants for testing."""
     states = [
         State.APPROVED,
         State.CONDITIONAL,
@@ -71,6 +73,8 @@ def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[date
         state_index = i % len(states)
         new_names = names[i] if i < len(names) else []
         nr = create_nr(nr_num, states[state_index], submitted_date, new_names)
+        applicant = create_applicant(i, i, email_address=i, phone_number=i)
+        nr.applicants.append(applicant)
         nrs.append(nr)
     return nrs
 
@@ -297,24 +301,14 @@ def test_namex_search_consent(client, jwt, app, consent_option):
 
 
 @pytest.mark.parametrize('search_name', [
-    't',
-    'test',
-    'testing',
+    '1',
+    '2',
+    '3',
     'no matches'
 ])
 def test_namex_search_first_name(client, jwt, app, search_name):
     """Test search by applicant first name."""
-    applicants = [
-        create_applicant('ted', 'tester'),
-        create_applicant('test', 'blob'),
-        create_applicant('pretest', 'blobber'),
-        create_applicant('testing', 'flop'),
-        create_applicant('testingmoreletters', 'bobbly'),
-    ]
-    base_nrs = generate_nrs(len(applicants), [], [], [])
-    for nr, applicant in zip(base_nrs, applicants):
-        nr.applicants.append(applicant)
-        nr.save_to_db()
+    generate_nrs(5, [], [], [])
 
     # get the resource (this is what we are testing)
     rv = client.get(f'api/v1/requests?firstName={search_name}', headers=create_header(jwt, [User.EDITOR]))
@@ -334,24 +328,14 @@ def test_namex_search_first_name(client, jwt, app, search_name):
 
 
 @pytest.mark.parametrize('search_name', [
-    't',
-    'test',
-    'testing',
+    '1',
+    '2',
+    '3',
     'no matches'
 ])
 def test_namex_search_last_name(client, jwt, app, search_name):
     """Test search by applicant last name."""
-    applicants = [
-        create_applicant('1', 'ted'),
-        create_applicant('2', 'test'),
-        create_applicant('3', 'pretest'),
-        create_applicant('4', 'testing'),
-        create_applicant('5', 'testingmoreletters'),
-    ]
-    base_nrs = generate_nrs(len(applicants), [], [], [])
-    for nr, applicant in zip(base_nrs, applicants):
-        nr.applicants.append(applicant)
-        nr.save_to_db()
+    generate_nrs(5, [], [], [])
 
     # get the resource (this is what we are testing)
     rv = client.get(f'api/v1/requests?lastName={search_name}', headers=create_header(jwt, [User.EDITOR]))
@@ -603,63 +587,41 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
         assert 'Must be of date format %Y-%m-%d' in msg
 
 
-def test_namex_search_direct_nrs_bad_roles(client, jwt, app):
-    """Test searching directly using name request numbers with bad roles."""
-    base_nrs = generate_nrs(5, [], [], [])
-    for nr in base_nrs:
-        nr.save_to_db()
-    qs = "&".join(["nrNumbers=" + nr.nrNum for nr in base_nrs])
-    rv = client.get(
-        f'api/v1/requests?{qs}',
-        headers=create_header(jwt, [])
-    )
-    assert rv
-    assert rv.status_code == 403
-
-
-def test_namex_search_direct_nrs(client, jwt, app):
-    """Test searching directly using name requests."""
-    base_nrs = generate_nrs(5, [], [], [])
-    for nr in base_nrs:
-        nr.save_to_db()
-
-    qs = "&".join(["nrNumbers=" + nr.nrNum for nr in base_nrs])
-    rv = client.get(
-        f'api/v1/requests?{qs}',
-        headers=create_header(jwt, [User.APPROVER, User.EDITOR, User.VIEWONLY])
-    )
-
-    assert rv
-    assert rv.status_code
-    assert rv.status_code == 200
-    assert rv.data
-    resp = json.loads(rv.data.decode('utf-8'))
-    assert len(resp) == 5
-
-
 @pytest.mark.parametrize('test_name, identifiers, total_results', [
     ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3'], 4),
     ('Empty Search', [], 0),
 ])
-def test_request_search(client, jwt, app, test_name, identifiers, total_results):
-    """Test request search end point."""
-    names = [
+def test_namex_search_direct_nrs(
+    client, jwt, app, test_name, identifiers, total_results
+):  # pylint: disable=unused-argument
+    """Test searching directly using name requests."""
+    base_names = [
         [{'name': 'test1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
     ]
-    generate_nrs(5, [], names, [])
-
-    rv = client.post('api/v1/requests/search',
-                     headers=create_header(jwt, [User.SYSTEM]),
-                     json={'identifiers': identifiers})
+    generate_nrs(5, [], base_names, [])
+    rv = client.post(
+        'api/v1/requests/search',
+        headers={**create_header(jwt, [User.SYSTEM]), **{'content-type': 'application/json'}},
+        data=json.dumps({
+            'identifiers': identifiers
+        })
+    )
 
     assert rv.status_code == HTTPStatus.OK
+
     nrs = [x['nrNum'] for x in rv.json]
+    applicants = [x['applicants'][0] for x in rv.json]
+    names = [x['names'][0] for x in rv.json]
+
     for nr in nrs:
         assert nr in identifiers
+    assert len(applicants) == total_results
+    for name, base_name in zip(names, base_names):
+        assert name['name'] == base_name[0]['name'].upper()
 
 
 def test_request_search_system_only(client, jwt, app):

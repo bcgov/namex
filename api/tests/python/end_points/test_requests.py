@@ -4,8 +4,8 @@ from http import HTTPStatus
 from flask import jsonify
 from flask import json
 
-from namex.models import User
-
+from namex.models import (Applicant as ApplicantDAO, Comment as CommentDAO, Event as EventDAO, Name as NameDAO,
+                           Request as RequestDAO, State, User)
 from tests.python import integration_oracle_namesdb
 from tests.python.end_points.util import create_header
 
@@ -13,7 +13,6 @@ from tests.python.end_points.util import create_header
 def test_get_next(client, jwt, app):
 
     # add NR to database
-    from namex.models import Request as RequestDAO, State
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
     nr.stateCd = State.DRAFT
@@ -37,7 +36,6 @@ def test_get_next(client, jwt, app):
 def test_get_next_no_draft_avail(client, jwt, app):
 
     # add NR to database
-    from namex.models import Request as RequestDAO, State
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
     nr.stateCd = State.APPROVED
@@ -57,7 +55,6 @@ def test_get_next_no_draft_avail(client, jwt, app):
 def test_get_next_oldest(client, jwt, app):
 
     # add NR to database
-    from namex.models import Request as RequestDAO, State
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
     nr.stateCd = State.DRAFT
@@ -88,7 +85,6 @@ def test_get_next_oldest(client, jwt, app):
 def test_get_next_not_approver(client, jwt, app):
 
     # add NR to database
-    from namex.models import Request as RequestDAO, State
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
     nr.stateCd = State.DRAFT
@@ -113,23 +109,28 @@ def test_get_next_not_approver(client, jwt, app):
 def test_get_nr_view_only(client, jwt, app):
 
     # add NR to database
-    from namex.models import Request as RequestDAO, State
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
     nr.stateCd = State.DRAFT
     nr._source = 'NRO'
+
+    applicant = ApplicantDAO()
+    nr.applicants.append(applicant)
+
+    name = NameDAO(nrId=nr.id, name='TEST NAME', state=State.DRAFT)
+    nr.names.append(name)
+
     nr.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, [User.VIEWONLY])
 
-    # The message expected to be returned
-    json_msg = jsonify(nameRequest='NR 0000001')
-
     # get the resource (this is the test)
     rv = client.get('/api/v1/requests/NR%200000001', headers=headers)
 
     assert rv.status_code == HTTPStatus.OK
+    assert len(rv.json['names']) == 1
+    assert len(rv.json['applicants'])
 
 
 def test_patch_nr_view_only(client, jwt, app):
@@ -176,7 +177,6 @@ def test_put_nr_view_only(client, jwt, app):
 def test_add_new_name_to_nr(client, jwt, app):
 
     # add NR to database
-    from namex.models import Request as RequestDAO, State, Name as NameDAO
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
@@ -215,7 +215,6 @@ def test_add_new_name_to_nr(client, jwt, app):
 def test_add_new_blank_name_to_nr(client, jwt, app):
 
     # add NR to database
-    from namex.models import Request as RequestDAO, State, Name as NameDAO
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
@@ -254,7 +253,6 @@ def test_add_new_blank_name_to_nr(client, jwt, app):
 def test_remove_name_from_nr(client, jwt, app):
 
     # add NR to database
-    from namex.models import Request as RequestDAO, State, Name as NameDAO
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS
@@ -292,8 +290,6 @@ def test_remove_name_from_nr(client, jwt, app):
 
 
 def test_add_new_comment_to_nr(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User, \
-        Event as EventDAO
     from sqlalchemy import desc
 
     # add a user for the comment
@@ -341,7 +337,6 @@ def test_add_new_comment_to_nr(client, jwt, app):
 
 
 def test_comment_where_no_nr(client, jwt, app):
-    from namex.models import User
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc', 'https://dev.loginproxy.gov.bc.ca/auth/realms/bcregistry', '123', 'IDIR')
     user.save_to_db()
@@ -356,8 +351,6 @@ def test_comment_where_no_nr(client, jwt, app):
 
 
 def test_comment_where_no_user(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, Comment as CommentDAO, User
-
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
     nr.stateCd = State.INPROGRESS

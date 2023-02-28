@@ -48,26 +48,25 @@ def new_nr(nr, ora_cursor,con):
     else:
         priority = 'RQ'
 
-    request_id = _create_request(ora_cursor,nr_num)
+    request_id = _create_request(ora_cursor, nr_num)
     nr.requestId = request_id
     current_app.logger.debug('got to new_nr() for NR:{}'.format(nr_num))
 
     eid = _get_event_id(ora_cursor)
-    current_app.logger.debug('event ID for NR:{1}. event id:{0}'.format(eid,nr_num))
+    current_app.logger.debug('event ID for NR:{1}. event id:{0}'.format(eid, nr_num))
 
     nr.requestId = request_id
     _create_nro_transaction(ora_cursor, nr, eid, transaction_type='NRREQ')
     con.commit()
     current_app.logger.debug('Created the transaction for new_nr() for NR:{}'.format(nr_num))
 
-    _create_request_instance(ora_cursor, nr, eid,priority)
+    _create_request_instance(ora_cursor, nr, eid, priority)
     con.commit()
-    applicantInfo = nr.applicants.one_or_none()
-    if not applicantInfo:
+    if not (applicant_info := nr.applicants):
         current_app.logger.error("Error on getting applicant info.")
         return jsonify({"Message": "No applicant info"}), 404
 
-    _create_request_party(ora_cursor, applicantInfo, eid, request_id) #includes address
+    _create_request_party(ora_cursor, applicant_info[0], eid, request_id)  # includes address
     con.commit()
     current_app.logger.debug('Created Request Party and Address in new_nr() for NR:{}'.format(nr_num))
 
@@ -192,13 +191,15 @@ def  _create_request_state(oracle_cursor, new_state,eid,request_id):
                           start_event_id=eid,
 
                           )
+
+
 def  _create_names(oracle_cursor, nr, eid):
-    name_count = nr.names.all()
+    name_count = len(nr.names)
     if name_count == 0:
         current_app.logger.error("Error on getting names for NR:{0}".format(nr.nrNum))
         return jsonify({"Message": "Error getting names"}), 404
 
-    for name in nr.names.all():
+    for name in nr.names:
         oracle_cursor.execute("""select name_seq.NEXTVAL from dual""")
         row = oracle_cursor.fetchone()
         n_id = int(row[0])
