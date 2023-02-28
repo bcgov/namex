@@ -19,11 +19,13 @@ from tests.python.end_points.common.utils import (
 # TODO: import these helper functions from somewhere shared by the tests
 
 
-def create_applicant(first_name: str, last_name: str) -> Applicant:
+def create_applicant(first_name: str, last_name: str, email_address: str = None, phone_number: str = None) -> Applicant:
     """Create new applicant."""
     applicant = Applicant(
         firstName=first_name,
-        lastName=last_name
+        lastName=last_name,
+        emailAddress=email_address,
+        phoneNumber=phone_number
     )
     applicant.save_to_db()
     return applicant
@@ -607,16 +609,27 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
     ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3'], 4),
     ('Empty Search', [], 0),
 ])
-def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total_results):
+def test_namex_search_direct_nrs(
+    client, jwt, app, test_name, identifiers, total_results
+):  # pylint: disable=unused-argument
     """Test searching directly using name requests."""
-    names = [
+    base_names = [
         [{'name': 'test1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
     ]
-    generate_nrs(5, [], names, [])
+    base_applicants = [
+        create_applicant('1', 'ted', email_address='ted', phone_number='1'),
+        create_applicant('2', 'test', email_address='test', phone_number='2'),
+        create_applicant('3', 'pretest', email_address='pretest', phone_number='3'),
+        create_applicant('4', 'testing', email_address='testing', phone_number='4'),
+        create_applicant('5', 'testingmoreletters', email_address='testingmoreletters', phone_number='5'),
+    ]
+    base_nrs = generate_nrs(5, [], base_names, [])
+    for nr, applicant in zip(base_nrs, base_applicants):
+        nr.applicants.append(applicant)
 
     rv = client.post(
         'api/v1/requests/search',
@@ -627,9 +640,18 @@ def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total
     )
 
     assert rv.status_code == HTTPStatus.OK
+
     nrs = [x['nrNum'] for x in rv.json]
+    applicants = [x['applicants'][0] for x in rv.json]
+    names = [x['names'][0] for x in rv.json]
+
     for nr in nrs:
         assert nr in identifiers
+    for applicant, base_applicant in zip(applicants, base_applicants):
+        assert applicant['phoneNumber'] == base_applicant.phoneNumber
+        assert applicant['emailAddress'] == base_applicant.emailAddress
+    for name, base_name in zip(names, base_names):
+        assert name['name'] == base_name[0]['name'].upper()
 
 
 def test_request_search_system_only(client, jwt, app):

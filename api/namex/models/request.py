@@ -791,4 +791,4 @@ class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
             'actions'
         )
     names = ma.Nested(NameSchema, many=True, only=('name', 'state'))
-    applicants = ma.Nested(ApplicantSchema, many=True, only=('email', 'phoneNumber'))
+    applicants = ma.Nested(ApplicantSchema, many=True, only=('emailAddress', 'phoneNumber'))
