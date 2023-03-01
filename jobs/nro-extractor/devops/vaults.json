@@ -1,5 +1,11 @@
 [
     {
+        "vault": "shared",
+        "application": [
+            "nats"
+        ]
+    },
+    {
         "vault": "namex",
         "application": [
             "postgres-namex",
