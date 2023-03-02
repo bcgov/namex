@@ -199,7 +199,7 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
        otherwise, create a new name_instance and set its start_event_id to event_id
     """
 
-    for name in nr.names.all():
+    for name in nr.names:
 
         if (name.choice == 1 and change_flags['is_changed__name1']) or \
            (name.choice == 2 and change_flags['is_changed__name2']) or \
@@ -271,17 +271,16 @@ def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
        create a new request_party and set it start_event_id to event_id
        Also add record to address table in global db.
     """
-
-    applicantInfo = nr.applicants.one_or_none()
-    if not applicantInfo:
+    if not nr.applicants:
         return
+    applicant_info = nr.applicants[0]
 
     if change_flags['is_changed__applicant'] or change_flags['is_changed__address']:
 
         # find request_party ID
         oracle_cursor.execute("""
         SELECT party_id, address_id
-        FROM request_party 
+        FROM request_party
         WHERE request_id = :request_id
         AND end_event_id IS NULL
         AND party_type_cd='APP'
@@ -315,13 +314,13 @@ def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
             """,
                                   address_id=address_id,
                                   application_cd='AB',
-                                  state_province_cd=applicantInfo.stateProvinceCd,
-                                  postal_cd=applicantInfo.postalCd,
-                                  addr_line_1=applicantInfo.addrLine1,
-                                  addr_line_2=applicantInfo.addrLine2,
-                                  addr_line_3=applicantInfo.addrLine3,
-                                  city=applicantInfo.city,
-                                  country_type_cd=applicantInfo.countryTypeCd
+                                  state_province_cd=applicant_info.stateProvinceCd,
+                                  postal_cd=applicant_info.postalCd,
+                                  addr_line_1=applicant_info.addrLine1,
+                                  addr_line_2=applicant_info.addrLine2,
+                                  addr_line_3=applicant_info.addrLine3,
+                                  city=applicant_info.city,
+                                  country_type_cd=applicant_info.countryTypeCd
                                   )
 
         # create new record for request party instance
@@ -334,18 +333,18 @@ def _update_nro_address(oracle_cursor, nr, event_id, change_flags):
                 :client_first_name, :client_last_name, :decline_notification_ind)
         """,
                               request_id=nr.requestId,
-                              last_name=applicantInfo.lastName,
-                              first_name=applicantInfo.firstName,
-                              middle_name=applicantInfo.middleName,
-                              phone_number=applicantInfo.phoneNumber,
-                              fax_number=applicantInfo.faxNumber,
-                              email_address=applicantInfo.emailAddress,
+                              last_name=applicant_info.lastName,
+                              first_name=applicant_info.firstName,
+                              middle_name=applicant_info.middleName,
+                              phone_number=applicant_info.phoneNumber,
+                              fax_number=applicant_info.faxNumber,
+                              email_address=applicant_info.emailAddress,
                               address_id=address_id,
                               event_id=event_id,
-                              contact=applicantInfo.contact,
-                              client_first_name=applicantInfo.clientFirstName,
-                              client_last_name=applicantInfo.clientLastName,
-                              decline_notification_ind=applicantInfo.declineNotificationInd
+                              contact=applicant_info.contact,
+                              client_first_name=applicant_info.clientFirstName,
+                              client_last_name=applicant_info.clientLastName,
+                              decline_notification_ind=applicant_info.declineNotificationInd
                               )
 
 

@@ -88,11 +88,11 @@ class Request(db.Model):
     activeUser = db.relationship('User', backref=backref('active_user', uselist=False), foreign_keys=[userId])
     submitter = db.relationship('User', backref=backref('submitter', uselist=False), foreign_keys=[submitter_userid])
     # Relationships - Names
-    names = db.relationship('Name', lazy='dynamic')
+    names = db.relationship('Name', lazy='select')
     # Relationships - Events
     events = db.relationship('Event', lazy='dynamic')
     # Relationships - Applicants
-    applicants = db.relationship('Applicant', lazy='dynamic')
+    applicants = db.relationship('Applicant', lazy='select')
     # Relationships - Examiner Comments
     comments = db.relationship('Comment', lazy='dynamic', order_by="Comment.timestamp")
     # Relationships - Examiner Comments
@@ -207,8 +207,8 @@ class Request(db.Model):
             'corpNum': self.corpNum,
             'tradeMark': self.tradeMark,
             'homeJurisNum': self.homeJurisNum,
-            'names': [name.as_dict() for name in self.names.all()],
-            'applicants': '' if (self.applicants.one_or_none() is None) else self.applicants.one_or_none().as_dict(),
+            'names': [name.as_dict() for name in self.names],
+            'applicants': '' if (len(self.applicants) < 1) else self.applicants[0].as_dict(),
             'comments': [comment.as_dict() for comment in self.comments.all()],
             'nwpta': [partner_name.as_dict() for partner_name in self.partnerNS.all()],
             'checkedOutBy': self.checkedOutBy,
@@ -315,7 +315,8 @@ class Request(db.Model):
     @classmethod
     def find_name_by_choice(cls, nr_id, choice):
         names = cls.query.filter_by(id=nr_id).first().names
-        return names.filter_by(choice=choice).one_or_none()
+        name_by_choice = next((name for name in names if name.choice == choice), None)
+        return name_by_choice
 
     @classmethod
     def validNRFormat(cls, nr):
@@ -772,3 +773,22 @@ class RequestsSearchSchema(ma.SQLAlchemySchema):
     activeUser = ma.Pluck(UserSchema, 'username', many=False)
     comments = ma.Nested(CommentSchema, many=True, only=('comment', 'examiner', 'timestamp'))
     applicants = ma.Nested(ApplicantSchema, many=True, only=('firstName', 'lastName'))
+
+class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Request
+        fields = (
+            'id',
+            'nrNum',
+            'stateCd',
+            'names',
+            'requestTypeCd',
+            'entity_type_cd',
+            'natureBusinessInfo',
+            'applicants',
+            'legalType',
+            'target',
+            'actions'
+        )
+    names = ma.Nested(NameSchema, many=True, only=('name', 'state'))
+    applicants = ma.Nested(ApplicantSchema, many=True, only=('emailAddress', 'phoneNumber'))

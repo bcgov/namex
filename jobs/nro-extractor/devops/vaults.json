@@ -1,39 +1,5 @@
 [
     {
-        "vault": "keycloak",
-        "application": [
-            "base",
-            "jwt-base",
-            "name-request-service-account",
-            "namex",
-            "namex-sbc"
-        ]
-    },
-    {
-        "vault": "sentry",
-        "application": [
-            "examination"
-        ]
-    },
-    {
-        "vault": "database",
-        "application": [
-            "namex-db",
-            "oracle-base",
-            "oracle-namex-db"
-        ]
-    },
-    {
-        "vault": "API",
-        "application": [
-            "report-api",
-            "pay-api",
-            "namex-api",
-            "colin-api-namex",
-            "solr-synonyms-api"
-        ]
-    },
-    {
         "vault": "nats",
         "application": [
             "base",

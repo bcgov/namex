@@ -641,7 +641,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 # but we still want to process names, so we need to add
                 # them to the request, otherwise they won't be processed!
                 _self.request_data = {
-                    'names': [n.as_dict() for n in nr_model.names.all()]
+                    'names': [n.as_dict() for n in nr_model.names]
                 }
                 # Set the request data to the service
                 _self.nr_service.request_data = self.request_data

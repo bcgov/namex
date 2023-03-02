@@ -49,10 +49,11 @@ def full_access_to_name_request(request: Request) -> bool:
         if not (name_request := RequestDAO.find_by_nr(nrl)):
             current_app.logger.debug('Failed to find NR - NR: %s, NRL: %s, Email: %s, Phone: %s', nr, nrl, email, phone)
             return False
-    
-    if not (applicant := name_request.applicants.one_or_none()):
+
+    if not name_request.applicants:
         current_app.logger.debug('Failed to find Applicant - NR: %s, NRL: %s, Email: %s, Phone: %s', nr, nrl, email, phone)
         return False
+    applicant = name_request.applicants[0]
 
     if phone:
         phone = phone.translate(str.maketrans('', '', string.punctuation))

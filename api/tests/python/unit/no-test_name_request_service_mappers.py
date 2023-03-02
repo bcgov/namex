@@ -201,7 +201,7 @@ def test_update_request_names(client, jwt, app):
     db.session.flush()
 
     # NR
-    added_names = list(map(lambda n: n.as_dict(), nr.names.all()))
+    added_names = list(map(lambda n: n.as_dict(), nr.names))
     added_name_0 = pick_name_from_list(added_names, test_names_no_id[0].get('name'))
     added_name_1 = pick_name_from_list(added_names, test_names_no_id[1].get('name'))
 

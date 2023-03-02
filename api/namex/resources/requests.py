@@ -8,8 +8,10 @@ from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
 from namex.constants import DATE_TIME_FORMAT_SQL
+from namex.models.request import RequestsAuthSearchSchema
 from namex.utils.logging import setup_logging
 
+from sqlalchemy.orm import load_only, lazyload, eagerload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, func, or_, text
 from sqlalchemy.inspection import inspect
@@ -23,6 +25,7 @@ from namex.models import User, State, Comment, NameCommentSchema, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 
+from namex.services.lookup import nr_filing_actions
 from namex.services import ServicesError, MessageServices, EventRecorder
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 
@@ -45,6 +48,7 @@ request_schema = RequestsSchema(many=False)
 request_schemas = RequestsSchema(many=True)
 request_header_schema = RequestsHeaderSchema(many=False)
 request_search_schemas = RequestsSearchSchema(many=True)
+request_auth_search_schemas = RequestsAuthSearchSchema(many=True)
 
 names_schema = NameSchema(many=False)
 names_schemas = NameSchema(many=True)
@@ -192,7 +196,6 @@ class Requests(Resource):
                 order_list = order_list + '{attribute} {direction} NULLS LAST'.format(attribute=k, direction=vl)
 
         # Assemble the query
-        nr_numbers = request.args.getlist('nrNumbers', None)
         nrNum = request.args.get('nrNum', None)
         activeUser = request.args.get('activeUser', None)
         compName = request.args.get('compName', None)
@@ -212,15 +215,6 @@ class Requests(Resource):
             q = q.filter(RequestDAO.stateCd.in_(queue))
 
         q = q.filter(RequestDAO.nrNum.notlike('NR L%'))
-        # For sbc-auth - My Business Registry page.
-        if nr_numbers:
-            if not jwt.validate_roles([User.EDITOR]) and not jwt.validate_roles([User.APPROVER]) \
-                    and not jwt.validate_roles([User.VIEWONLY]):
-                return {}, HTTPStatus.FORBIDDEN.value
-            nr_numbers = [nr_number.upper() for nr_number in nr_numbers]
-            requests = RequestDAO.query.filter(RequestDAO.nrNum.in_(nr_numbers)).all()
-            requests = [request.json() for request in requests]
-            return jsonify(requests)
         if nrNum:
             # set any variation of mixed case 'nr' to 'NR'
             nrNum = nrNum.upper().strip()
@@ -382,6 +376,43 @@ class Requests(Resource):
     def post(self, *args, **kwargs):
         current_app.logger.info('Someone is trying to post a new request')
         return jsonify({'message': 'Not Implemented'}), 501
+
+# For sbc-auth - My Business Registry page.
+@cors_preflight("POST")
+@api.route('/search', methods=['POST'])
+class RequestSearch(Resource):
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @jwt.has_one_of_roles([User.SYSTEM])
+    def post():
+        search = request.get_json()
+        identifiers = search.get('identifiers', [])
+
+        # Only names and applicants are needed for this query, we want this query to be lighting fast 
+        # to prevent putting a load on namex-api.
+        q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers)) \
+            .options(
+                lazyload('*'),
+                eagerload(RequestDAO.names).load_only(Name.state, Name.name),
+                eagerload(RequestDAO.applicants).load_only(
+                    Applicant.emailAddress, Applicant.phoneNumber
+                ),
+                load_only(
+                    RequestDAO.id,
+                    RequestDAO.nrNum,
+                    RequestDAO.stateCd,
+                    RequestDAO.requestTypeCd,
+                    RequestDAO.natureBusinessInfo,
+                    RequestDAO._entity_type_cd
+                ))
+
+        requests = request_auth_search_schemas.dump(q.all())
+        actions_array = [nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd']) for r in requests]
+        for r, additional_fields in zip(requests, actions_array):
+            if additional_fields:
+                r.update(additional_fields)
+        return jsonify(requests)
 
 
 # noinspection PyUnresolvedReferences
@@ -734,8 +765,8 @@ class Request(Resource):
             is_changed__applicant = False
             is_changed__address = False
 
-            applicants_d = nrd.applicants.one_or_none()
-            if applicants_d:
+            if nrd.applicants:
+                applicants_d = nrd.applicants[0]
                 orig_applicant = applicants_d.as_dict()
                 appl = json_input.get('applicants', None)
                 if appl:
@@ -813,7 +844,7 @@ class Request(Resource):
             is_changed__name3 = False
             deleted_names = [False] * 3
 
-            if len(nrd.names.all()) == 0:
+            if len(nrd.names) == 0:
                 new_name_choice = Name()
                 new_name_choice.nrId = nrd.id
 
@@ -822,13 +853,13 @@ class Request(Resource):
 
                 nrd.names.append(new_name_choice)
 
-            for nrd_name in nrd.names.all():
+            for nrd_name in nrd.names:
 
                 orig_name = nrd_name.as_dict()
 
                 for in_name in json_input.get('names', []):
 
-                    if len(nrd.names.all()) < in_name['choice']:
+                    if len(nrd.names) < in_name['choice']:
 
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
@@ -1129,7 +1160,7 @@ class RequestsAnalysis(Resource):
         if not nrd:
             return jsonify(message='{nr} not found'.format(nr=nr)), 404
 
-        nrd_name = nrd.names.filter_by(choice=choice).one_or_none()
+        nrd_name = next((name for name in nrd.names if name.choice == choice), None)
 
         if not nrd_name:
             return jsonify(message='Name choice:{choice} not found for {nr}'.format(nr=nr, choice=choice)), 404
@@ -1219,7 +1250,7 @@ class NRNames(Resource):
         if not nrd:
             return None, None, jsonify({"message": "{nr} not found".format(nr=nr)}), 404
 
-        name = nrd.names.filter_by(choice=choice).one_or_none()
+        name = next((name for name in nrd.names if name.choice == choice), None)
         if not name:
             return None, None, jsonify({"message": "Choice {choice} for {nr} not found".format(choice=choice, nr=nr)}), 404
 
