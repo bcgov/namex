@@ -180,8 +180,7 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                     # get pending payments
                     completed_payments = []
                     if nr:
-                        completed_payments = [x for x in nr.payments.all() if x.payment_status_code == PaymentStatusCode.COMPLETED.value]
-                    current_app.logger.debug('{} has {} completed payment(s)'.format(nr_num, len(completed_payments)))
+                        completed_payments = [x for x in nr.payments.all() if x.payment_status_code in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]
                     # ignore if:
                     # - NR does not exist and NR originated in namex (handles racetime condition for when it is still in the process of saving)
                     # - NR has a pending update from namex (pending payment)
