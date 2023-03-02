@@ -1,9 +1,7 @@
 [
     {
-        "vault": "shared",
         "vault": "nats",
         "application": [
-            "nats"
             "base",
             "namex"
         ]
