@@ -1,7 +1,9 @@
 [
     {
+        "vault": "shared",
         "vault": "nats",
         "application": [
+            "nats"
             "base",
             "namex"
         ]
@@ -9,8 +11,9 @@
     {
         "vault": "namex",
         "application": [
+            "postgres-namex",
             "namex-api",
-            "mras-api"
+            "nro-service"
         ]
     }
 ]
