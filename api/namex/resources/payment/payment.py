@@ -473,7 +473,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             payment = PaymentDAO()
             payment.nrId = nr_model.id
             payment.payment_action = payment_action
-            # payment.save_to_db()
+            # payment will be saved in handle_payment_response with a payment_token
 
             payment_response = create_payment(req.as_dict(), headers)
             return handle_payment_response(payment_action,
