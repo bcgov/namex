@@ -788,7 +788,9 @@ class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
             'applicants',
             'legalType',
             'target',
-            'actions'
+            'actions',
+            'expirationDate'
         )
+    expirationDate = ma.DateTime()
     names = ma.Nested(NameSchema, many=True, only=('name', 'state'))
     applicants = ma.Nested(ApplicantSchema, many=True, only=('emailAddress', 'phoneNumber'))
