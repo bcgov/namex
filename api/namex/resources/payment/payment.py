@@ -290,44 +290,45 @@ class FindNameRequestPayments(PaymentNameRequestResource):
             response_data = []
             # Wrap our payment
             for payment in nr_payments:
-                payment_response = get_payment(payment.payment_token)
-                receipts = payment_response.receipts
-                if not receipts and payment_response.statusCode == PaymentState.APPROVED.value:
-                    # generate temp receipts for approved payments
-                    current_app.logger.debug('adding temporary receipt details.')
-                    receipts = [
-                        {
-                            'id': payment.payment_token,
-                            'receiptAmount': None,
-                            'receiptDate': None,
-                            'receiptNumber': 'Pending'
-                        }
-                    ]
-                    payment_response.receipts = receipts
-                    response_data.append({
-                        'id': payment.id,
-                        'nrId': payment.nrId,
-                        'token': payment.payment_token,
-                        'statusCode': payment.payment_status_code,
-                        'action': payment.payment_action,
-                        'completionDate': payment.payment_completion_date,
-                        'payment': payment.as_dict(),
-                        'sbcPayment': payment_response.as_dict(),
-                        'receipts': receipts
-                    })
-                else:
-                    # Wrap the response, providing info from both the SBC Pay response and the payment we created
-                    response_data.append({
-                        'id': payment.id,
-                        'nrId': payment.nrId,
-                        'token': payment.payment_token,
-                        'statusCode': payment.payment_status_code,
-                        'action': payment.payment_action,
-                        'completionDate': payment.payment_completion_date,
-                        'payment': payment.as_dict(),
-                        'sbcPayment': payment_response.as_dict(),
-                        'receipts': list(map(lambda r: map_receipt(r), receipts))
-                    })
+                if (payment.payment_token):
+                    payment_response = get_payment(payment.payment_token)
+                    receipts = payment_response.receipts
+                    if not receipts and payment_response.statusCode == PaymentState.APPROVED.value:
+                        # generate temp receipts for approved payments
+                        current_app.logger.debug('adding temporary receipt details.')
+                        receipts = [
+                            {
+                                'id': payment.payment_token,
+                                'receiptAmount': None,
+                                'receiptDate': None,
+                                'receiptNumber': 'Pending'
+                            }
+                        ]
+                        payment_response.receipts = receipts
+                        response_data.append({
+                            'id': payment.id,
+                            'nrId': payment.nrId,
+                            'token': payment.payment_token,
+                            'statusCode': payment.payment_status_code,
+                            'action': payment.payment_action,
+                            'completionDate': payment.payment_completion_date,
+                            'payment': payment.as_dict(),
+                            'sbcPayment': payment_response.as_dict(),
+                            'receipts': receipts
+                        })
+                    else:
+                        # Wrap the response, providing info from both the SBC Pay response and the payment we created
+                        response_data.append({
+                            'id': payment.id,
+                            'nrId': payment.nrId,
+                            'token': payment.payment_token,
+                            'statusCode': payment.payment_status_code,
+                            'action': payment.payment_action,
+                            'completionDate': payment.payment_completion_date,
+                            'payment': payment.as_dict(),
+                            'sbcPayment': payment_response.as_dict(),
+                            'receipts': list(map(lambda r: map_receipt(r), receipts))
+                        })
 
             return jsonify(response_data), 200
         except PaymentServiceError as err:
@@ -472,7 +473,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             payment = PaymentDAO()
             payment.nrId = nr_model.id
             payment.payment_action = payment_action
-            payment.save_to_db()
+            # payment will be saved in handle_payment_response with a payment_token
 
             payment_response = create_payment(req.as_dict(), headers)
             return handle_payment_response(payment_action,
