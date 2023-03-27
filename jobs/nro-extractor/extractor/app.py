@@ -184,8 +184,8 @@ def job(app, namex_db, nro_connection, user, max_rows=100):
                     # ignore if:
                     # - NR does not exist and NR originated in namex (handles racetime condition for when it is still in the process of saving)
                     # - NR has a pending update from namex (pending payment)
-                    current_app.logger.debug("Nr payments exist: {}".format(nr and nr.payments.exists()))
-                    if (not nr and nr_submitter and nr_submitter.get('submitter', '') == 'namex') or (nr and nr.payments.exists() and len(completed_payments) == 0):
+                    current_app.logger.debug("Nr payments exist: {}".format(nr and nr.payments.first() is not None))
+                    if (not nr and nr_submitter and nr_submitter.get('submitter', '') == 'namex') or (nr and nr.payments.first() is not None and len(completed_payments) == 0):
                         success = update_feeder_row(
                             ora_con,
                             row_id=row['id'],
