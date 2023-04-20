@@ -405,7 +405,8 @@ class RequestSearch(Resource):
                     RequestDAO.requestTypeCd,
                     RequestDAO.natureBusinessInfo,
                     RequestDAO._entity_type_cd,
-                    RequestDAO.expirationDate
+                    RequestDAO.expirationDate,
+                    RequestDAO.consentFlag
                 ))
 
         requests = request_auth_search_schemas.dump(q.all())
