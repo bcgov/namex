@@ -1,28 +1,29 @@
-from uuid import uuid4
 from datetime import datetime
-from flask import current_app, request, jsonify
+from uuid import uuid4
+
+import requests
+from flask import current_app, jsonify, request
 from flask_restx import cors
 
-from namex.utils.logging import setup_logging
-from namex.utils.auth import cors_preflight, full_access_to_name_request
-from namex.utils.api_resource import handle_exception
-
-from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentAction, PaymentState
-from namex.models import Request, State, Event, User, Payment
-
+from namex import jwt
+from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
+from namex.models import Event, Payment, Request, State, User
 from namex.services import EventRecorder
+from namex.services.name_request.exceptions import InvalidInputError, NameRequestException, NameRequestIsInProgressError
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
-from namex.services.name_request.exceptions import \
-    NameRequestException, InvalidInputError, NameRequestIsInProgressError
 from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
+from namex.utils.api_resource import handle_exception
+from namex.utils.auth import cors_preflight, full_access_to_name_request
+from namex.utils.logging import setup_logging
 from namex.utils.queue_util import publish_email_notification
 
-from .api_namespace import api
 from .api_models import nr_request
+from .api_namespace import api
 from .base_nr_resource import BaseNameRequestResource
-from .constants import request_editable_states, contact_editable_states
+from .constants import contact_editable_states, request_editable_states
+
 
 setup_logging()  # Important to do this first
 
@@ -37,32 +38,46 @@ MSG_NOT_FOUND = 'Resource not found'
     'nr_id': 'NR ID - This field is required'
 })
 class NameRequestResource(BaseNameRequestResource):
-    @cors.crossdomain(origin='*')
-    def get(self, nr_id):
+    """Name Request endpoint."""
 
-        return {"message": "Not Implemented"}, 503
+    @cors.crossdomain(origin='*')
+    @jwt.requires_auth
+    def get(self, nr_id):
+        """Name Request GET endpoint."""
         try:
             nr_model = Request.query.get(nr_id)
 
-            if nr_model.requestTypeCd and (not nr_model.entity_type_cd or not nr_model.request_action_cd):
-                # If requestTypeCd is set, but a request_entity (entity_type_cd) and a request_action (request_action_cd)
-                # are not, use get_mapped_entity_and_action_code to map the values from the requestTypeCd
-                entity_type, request_action = get_mapped_entity_and_action_code(nr_model.requestTypeCd)
-                nr_model.entity_type_cd = entity_type
-                nr_model.request_action_cd = request_action
+            if nr_model:
+                org_id = request.args.get('org_id', None)
 
-            response_data = nr_model.json()
+                headers = {
+                    'Authorization': f'Bearer {jwt.get_token_auth_header()}',
+                    'Content-Type': 'application/json'
+                }
 
-            # If draft, get the wait time and oldest queued request
-            if nr_model.stateCd == 'DRAFT':
+                auth_svc_url = current_app.config.get('AUTH_SVC_URL')
+                auth_url = f'{auth_svc_url}/orgs/{org_id}/affiliations/{nr_model.nrNum}'
+                auth_response = requests.get(url=auth_url, headers=headers)
 
-                service = WaitTimeStatsService()
-                wait_time_response = service.get_waiting_time_dict()
-                response_data.update(wait_time_response)
+                if auth_response.status_code == 200:
+                    if nr_model.requestTypeCd and (not nr_model.entity_type_cd or not nr_model.request_action_cd):
+                        # If requestTypeCd is set, but a request_entity (entity_type_cd) and a request_action (request_action_cd)
+                        # are not, use get_mapped_entity_and_action_code to map the values from the requestTypeCd
+                        entity_type, request_action = get_mapped_entity_and_action_code(nr_model.requestTypeCd)
+                        nr_model.entity_type_cd = entity_type
+                        nr_model.request_action_cd = request_action
 
-            # Add the list of valid Name Request actions for the given state to the response
-            response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
-            return jsonify(response_data), 200
+                    response_data = nr_model.json()
+
+                    # If draft, get the wait time and oldest queued request
+                    if nr_model.stateCd == 'DRAFT':
+                        service = WaitTimeStatsService()
+                        wait_time_response = service.get_waiting_time_dict()
+                        response_data.update(wait_time_response)
+
+                    # Add the list of valid Name Request actions for the given state to the response
+                    response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
+                    return jsonify(response_data), 200
         except Exception as err:
             current_app.logger.debug(repr(err))
             return handle_exception(err, 'Error retrieving the NR.', 500)
@@ -372,17 +387,17 @@ class NameRequestFields(BaseNameRequestResource):
             PaymentState.COMPLETED.value,
             PaymentState.PARTIAL.value
         ]
-        
+
         refund_value = 0
 
-        # Check for NR that has been renewed - do not refund any payments. 
+        # Check for NR that has been renewed - do not refund any payments.
         # UI should not order refund for an NR renewed/reapplied it.
         if not any(payment.payment_action == Payment.PaymentActions.REAPPLY.value for payment in nr_model.payments.all()):
             # Try to refund all payments associated with the NR
             for payment in nr_model.payments.all():
                 if payment.payment_status_code in valid_states:
                     # Some refunds may fail. Some payment methods are not refundable and return HTTP 400 at the refund.
-                    # The refund status is checked from the payment_response and a appropriate message is displayed by the UI. 
+                    # The refund status is checked from the payment_response and a appropriate message is displayed by the UI.
                     refund_payment(payment.payment_token, {})
                     payment_response = get_payment(payment.payment_token)
                     payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
@@ -418,7 +433,7 @@ class NameRequestRollback(BaseNameRequestResource):
         try:
             if not full_access_to_name_request(request):
                 return {"message": "You do not have access to this NameRequest."}, 403
-                
+
             # Find the existing name request
             nr_model = Request.query.get(nr_id)
 
