@@ -45,9 +45,7 @@ class NameRequestResource(BaseNameRequestResource):
     def get(self, nr_id):
         """Name Request GET endpoint."""
         try:
-            nr_model = Request.query.get(nr_id)
-
-            if nr_model:
+            if nr_model := Request.query.get(nr_id):
                 org_id = request.args.get('org_id', None)
 
                 headers = {
