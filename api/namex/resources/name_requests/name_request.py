@@ -40,6 +40,7 @@ MSG_NOT_FOUND = 'Resource not found'
 class NameRequestResource(BaseNameRequestResource):
     """Name Request endpoint."""
 
+    @api.expect(nr_request)
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(self, nr_id):

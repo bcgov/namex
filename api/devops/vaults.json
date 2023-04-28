@@ -28,6 +28,7 @@
         "application": [
             "report-api",
             "pay-api",
+            "auth-api",
             "namex-api",
             "colin-api-namex",
             "solr-synonyms-api"
