@@ -42,6 +42,8 @@ class Config(object):
     PAYMENT_SVC_URL = os.getenv('PAY_API_URL', None)
     PAYMENT_SVC_VERSION = os.getenv('PAY_API_VERSION', None)
 
+    AUTH_SVC_URL = f'{os.getenv("AUTH_API_URL", None)}{os.getenv("AUTH_API_VERSION", "/api/v1")}'
+
     COLIN_SVC_URL = f'{os.getenv("COLIN_SVC_URL", None)}{os.getenv("COLIN_SVC_VERSION", None)}'
 
     NRO_EXTRACTOR_URI = f'{os.getenv("NAMEX_API_URL", None)}{os.getenv("NAMEX_API_VERSION", None)}/nro-extract/nro-requests'
