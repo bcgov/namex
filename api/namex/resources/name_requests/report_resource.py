@@ -91,7 +91,6 @@ class ReportResource(Resource):
             'name-request/nrDetails',
             'name-request/nameChoices',
             'name-request/applicantContactInfo',
-            'name-request/manageNameRequest',
             'name-request/resultDetails'
         ]
         # substitute template parts - marked up by [[filename]]
