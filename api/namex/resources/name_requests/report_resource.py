@@ -108,6 +108,7 @@ class ReportResource(Resource):
             nr_model.entity_type_cd = entity_type
             nr_model.request_action_cd = request_action
         nr_report_json = nr_model.json()
+        nr_report_json['service_url'] = current_app.config.get('NAME_REQUEST_URL')
         nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.entity_type_cd)
         isXPRO = nr_model.entity_type_cd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
