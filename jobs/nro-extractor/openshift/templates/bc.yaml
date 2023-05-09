@@ -32,41 +32,15 @@ objects:
     runPolicy: Serial
     source:
       contextDir: ${SOURCE_CONTEXT_DIR}
-      git:
-        ref: ${GIT_REF}
-        uri: ${GIT_REPO_URL}
-      dockerfile: |
-        FROM docker-remote.artifacts.developer.gov.bc.ca/python:3.8.6-buster
-        USER root
-
-        # Create working directory
-        RUN mkdir /opt/app-root && chmod 755 /opt/app-root
-        WORKDIR /opt/app-root
-
-        # Install the requirements
-        COPY ./requirements/prod.txt .
-
-        #RUN pip install --upgrade pip
-        RUN pip install pip==20.1.1
-        RUN pip install --no-cache-dir -r prod.txt
-
-        COPY . .
-
-        USER 1001
-
-        # Set Python path
-        ENV PYTHONPATH=/opt/app-root/src
-
-        EXPOSE 8080
-
-        CMD [ "python", "/opt/app-root/nro_extractor.py" ]
       type: Git
+      git:
+        uri: ${GIT_REPO_URL}
+        ref: ${GIT_REF}
     strategy:
       type: Docker
       dockerStrategy:
-        pullSecret:
-          name: artifactory-creds
-
+        dockerfilePath: Dockerfile
+    runPolicy: Serial
     triggers:
     - type: ConfigChange
 parameters:
@@ -88,7 +62,7 @@ parameters:
   displayName: Git Reference
   name: GIT_REF
   required: true
-  value: master
+  value: main
 - description: The source context directory.
   displayName: Source Context Directory
   name: SOURCE_CONTEXT_DIR

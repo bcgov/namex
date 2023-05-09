@@ -45,6 +45,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+ENV TZ=PST8PDT
+WORKDIR /
+COPY ./crontab .
+ARG SOURCE_REPO=webdevops
+ARG GOCROND_VERSION=23.2.0
+ADD https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond.linux.amd64 /usr/bin/go-crond
+USER root
+RUN chmod +x /usr/bin/go-crond
+RUN echo $TZ > /etc/timezone
+
 USER 1001
 
 # Set Python path
@@ -52,4 +62,4 @@ ENV PYTHONPATH=/opt/app-root
 
 EXPOSE 8080
 
-CMD [ "python", "/opt/app-root/nro_update.py" ]
+ENTRYPOINT ["go-crond", "crontab", "--allow-unprivileged"]
