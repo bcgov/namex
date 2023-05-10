@@ -47,5 +47,11 @@
             "namex-api",
             "mras-api"
         ]
+    },
+    {
+        "vault": "web-url",
+        "application": [
+            "name-request"
+        ]
     }
 ]
