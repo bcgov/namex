@@ -27,13 +27,8 @@ def get_ops_params():
         max_rows = int(current_app.config.get('MAX_ROW_LIMIT', 1000))
     except:
         max_rows = 1000
-    try:
-        expires_days = int(current_app.config.get('EXPIRES_DAYS', 60))
-    except:
-        expires_days=60
 
-
-    return delay, max_rows, expires_days
+    return delay, max_rows
 
 
 # #### Send the NameX Request info to NRO
@@ -41,7 +36,7 @@ def get_ops_params():
 
 # this allows me to use the NameX ORM Model, and use the db scoped session attached to the models.
 app = create_app(Config)
-delay, max_rows, expires_days = get_ops_params()
+delay, max_rows = get_ops_params()
 
 start_time = datetime.utcnow()
 row_count = 0
