@@ -33,7 +33,6 @@
       </div>
       [[name-request/nrDetails.html]]
       [[name-request/applicantContactInfo.html]]
-      [[name-request/nameChoices.html]]
       {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' %}
          <div class="section-header mt-5 pt-4">APPROVAL DETAILS</div>
       {% else %}
@@ -49,5 +48,8 @@
             </div>
          {% endif %}
       </div>
+      {% if stateCd != 'CONDITIONAL' and stateCd != 'APPROVED' %}
+         [[name-request/nameChoices.html]]
+      {% endif %}
    </body>
 </html>

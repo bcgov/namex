@@ -46,20 +46,11 @@
              </div>
         </div>
         <div class="separator mt-4"></div>
-        <div class="section-data mt-4">
-            <span>Please complete the filing before the expiry date. If it is not used before it expires, a new name request will be required:</span>
+        <div class="section-data">
+            <div class="section-title-gray mt-4">ACTION REQUIRED:</div>
         </div>
         {% if choice.state == 'CONDITION' %}
-                <div class="section-title-gray mt-4">Consent</div>
-                    <div class="section-data">
-                        {% if consentFlag == 'Y' %}
-                            Required. Not Yet Received.
-                        {% elif consentFlag == 'R' %}
-                            Required. Received.
-                        {% endif %}
-                    </div>
-            <div class="section-title-gray mt-4">Conditions/Comments</div>
-            <div class="section-data">
+            <div class="section-data mt-4">
                 <span>{{ choice.decision_text }}. </span>
                 {% if consentFlag in ['Y', 'R'] %}
                     <span>Send your consent letter so registry staff can release the condition before
@@ -86,6 +77,15 @@
               </label>
           </div>
       {% endif %}
+      <div class="section-data mt-4">
+          {% if consentFlag not in ['Y', 'R'] %}
+                <span>Please complete the filing before the expiry date. </span>
+          {% endif %}
+          {% if consentFlag in ['Y', 'R'] %}
+                <span>Once you have confirmation that your consent letter has been accepted, please complete the filing before the expiry date. </span>
+          {% endif %}
+          <span>If it is not used before it expires, a new name request will be required</span>
+      </div>
       {% if nextAction %}
           <div class="{{ 'mt-2' if consentFlag in ['Y', 'R'] else '' }}">
               <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTFweCIgaGVpZ2h0PSIxMXB4IiB2aWV3Qm94PSIwIDAgMTEgMTEiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiAgICA8dGl0bGU+Y2hlY2tib3gtYmxhbmstb3V0bGluZSBjb3B5PC90aXRsZT4KICAgIDxnIGlkPSJGaW5hbC1PdXRwdXRzIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyBpZD0iUGcxLVJlc3VsdHMtLUFwcHJvdmVkLUNvbmNlbnQtUmVjZWl2ZWQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC01MS4wMDAwMDAsIC01NDEuMDAwMDAwKSIgZmlsbD0iIzIzNDA3NSIgZmlsbC1ydWxlPSJub256ZXJvIj4KICAgICAgICAgICAgPGcgaWQ9ImNoZWNrYm94LWJsYW5rLW91dGxpbmUtY29weSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTEuMDAwMDAwLCA1NDEuMDAwMDAwKSI+CiAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOS43Nzc3Nzc3OCwwIEwxLjIyMjIyMjIyLDAgQzAuNTQzODg4ODg5LDAgMCwwLjU0Mzg4ODg4OSAwLDEuMjIyMjIyMjIgTDAsOS43Nzc3Nzc3OCBDMCwxMC40NTI3OTI1IDAuNTQ3MjA3NTI4LDExIDEuMjIyMjIyMjIsMTEgTDkuNzc3Nzc3NzgsMTEgQzEwLjQ1Mjc5MjUsMTEgMTEsMTAuNDUyNzkyNSAxMSw5Ljc3Nzc3Nzc4IEwxMSwxLjIyMjIyMjIyIEMxMSwwLjU0Mzg4ODg4OSAxMC40NSwwIDkuNzc3Nzc3NzgsMCBNOS43Nzc3Nzc3OCwxLjIyMjIyMjIyIEw5Ljc3Nzc3Nzc4LDkuNzc3Nzc3NzggTDEuMjIyMjIyMjIsOS43Nzc3Nzc3OCBMMS4yMjIyMjIyMiwxLjIyMjIyMjIyIEw5Ljc3Nzc3Nzc4LDEuMjIyMjIyMjIgWiIgaWQ9IlNoYXBlIj48L3BhdGg+CiAgICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICA8L2c+Cjwvc3ZnPg==">
