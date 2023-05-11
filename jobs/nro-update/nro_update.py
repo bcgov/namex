@@ -75,13 +75,14 @@ try:
         compile_kwargs={"literal_binds": True}))
     )
 
+    nr_service = NameRequestService()
+    current_app.logger.debug('calls nr_service.get_expiry_days(r)')
+
     for r in q.all():
         row_count += 1
 
         current_app.logger.debug('processing: {}'.format(r.nrNum))
-
         try:
-            nr_service = NameRequestService()
             expiry_days = int(nr_service.get_expiry_days(r))
             nro_data_pump_update(r, ora_cursor, expiry_days)
             db.session.add(r)
