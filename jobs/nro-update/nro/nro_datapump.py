@@ -29,7 +29,7 @@ def nro_data_pump_update(nr, ora_cursor, expires_days=56):
         {'state': None, 'decision': None, 'conflict1': None, 'conflict2': None, 'conflict3': None}
     ]
     current_app.logger.debug('processing names for :{}'.format(nr.nrNum))
-    for name in nr.names.all():
+    for name in nr.names:
         choice = name.choice - 1
         if name.state in [Name.APPROVED, Name.CONDITION]:
             nro_names[choice]['state'] = 'A'
