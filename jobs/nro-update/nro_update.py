@@ -84,7 +84,13 @@ try:
         current_app.logger.debug('processing: {}'.format(r.nrNum))
         try:
             expiry_days = int(nr_service.get_expiry_days(r))
-            nro_data_pump_update(r, ora_cursor, expiry_days)
+            expiry_date = nr_service.create_expiry_date(
+                start=nr_service.lastUpdate,
+                expires_in_days=expiry_days
+            )
+            current_app.logger.debug(f'Setting expiry date to: { expiry_date }')
+
+            nro_data_pump_update(r, ora_cursor, expiry_date)
             db.session.add(r)
             EventRecorder.record(user, Event.NRO_UPDATE, r, r.json(), save_to_session=True)
 
