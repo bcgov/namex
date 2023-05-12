@@ -78,32 +78,32 @@ try:
     nr_service = NameRequestService()
     current_app.logger.debug('calls nr_service.get_expiry_days(r)')
 
-    for r in q.all():
+    for nr in q.all():
         row_count += 1
 
-        current_app.logger.debug('processing: {}'.format(r.nrNum))
+        current_app.logger.debug('processing: {}'.format(nr.nrNum))
         try:
             expiry_days = int(nr_service.get_expiry_days(r))
             expiry_date = nr_service.create_expiry_date(
-                start=nr_service.lastUpdate,
+                start=nr.lastUpdate,
                 expires_in_days=expiry_days
             )
             current_app.logger.debug(f'Setting expiry date to: { expiry_date }')
 
-            nro_data_pump_update(r, ora_cursor, expiry_date)
-            db.session.add(r)
-            EventRecorder.record(user, Event.NRO_UPDATE, r, r.json(), save_to_session=True)
+            nro_data_pump_update(nr, ora_cursor, expiry_date)
+            db.session.add(nr)
+            EventRecorder.record(user, Event.NRO_UPDATE, nr, nr.json(), save_to_session=True)
 
             ora_con.commit()
             db.session.commit()
-            JobTracker.job_detail(db, job_id, r.nrNum)
+            JobTracker.job_detail(db, job_id, nr.nrNum)
 
         except Exception as err:
             current_app.logger.error(err)
-            current_app.logger.error('ERROR: {}'.format(r.nrNum))
+            current_app.logger.error('ERROR: {}'.format(nr.nrNum))
             db.session.rollback()
             ora_con.rollback()
-            JobTracker.job_detail_error(db, job_id, r.nrNum, str(err))
+            JobTracker.job_detail_error(db, job_id, nr.nrNum, str(err))
 
     JobTracker.end_job(db, job_id, datetime.utcnow(), 'success')
 
