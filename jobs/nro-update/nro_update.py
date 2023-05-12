@@ -76,7 +76,6 @@ try:
     )
 
     nr_service = NameRequestService()
-    current_app.logger.debug('calls nr_service.get_expiry_days(nr)')
 
     for nr in q.all():
         row_count += 1
