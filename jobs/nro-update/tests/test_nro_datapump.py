@@ -61,9 +61,9 @@ def test_datapump(app, mocker, start_date, expected_date):
 
     # mock the oracle cursor
     oc = mocker.MagicMock()
-    # make the real call
-    nro_data_pump_update(nr, ora_cursor=oc, expires_days=56)
 
+    # make the real call
+    nro_data_pump_update(nr, ora_cursor=oc, expiry_date=datetime(2023, 6, 30, 23, 59))
     oc.callfunc.assert_called_with('NRO_DATAPUMP_PKG.name_examination_func',  # package.func_name
                                    str,
                                    ['NR 0000001',  # p_nr_number
@@ -120,7 +120,8 @@ def test_datapump_nr_requires_consent_flag(app, mocker,consent_flag,state_cd):
     # mock the oracle cursor
     oc = mocker.MagicMock()
     # make the real call
-    nro_data_pump_update(nr, ora_cursor=oc, expires_days=60)
+
+    nro_data_pump_update(nr, ora_cursor=oc, expiry_date=datetime(2023, 6, 30, 23, 59))
 
     oc.callfunc.assert_called_with('NRO_DATAPUMP_PKG.name_examination_func',  # package.func_name
                                    str,

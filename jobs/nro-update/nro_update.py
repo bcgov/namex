@@ -76,14 +76,14 @@ try:
     )
 
     nr_service = NameRequestService()
-    current_app.logger.debug('calls nr_service.get_expiry_days(r)')
+    current_app.logger.debug('calls nr_service.get_expiry_days(nr)')
 
     for nr in q.all():
         row_count += 1
 
         current_app.logger.debug('processing: {}'.format(nr.nrNum))
         try:
-            expiry_days = int(nr_service.get_expiry_days(r))
+            expiry_days = int(nr_service.get_expiry_days(nr))
             expiry_date = nr_service.create_expiry_date(
                 start=nr.lastUpdate,
                 expires_in_days=expiry_days
