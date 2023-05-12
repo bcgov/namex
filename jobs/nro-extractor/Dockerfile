@@ -54,4 +54,4 @@ ENV PYTHONPATH=/opt/app-root
 
 EXPOSE 8080
 
-ENTRYPOINT ["go-crond", "crontab", "--allow-unprivileged"]
+ENTRYPOINT ["go-crond", "crontab", "--allow-unprivileged", "--verbose", "--log.json"]
