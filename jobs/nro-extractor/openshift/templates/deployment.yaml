@@ -23,6 +23,10 @@ objects:
         labels:
           deployment: ${NAME}
       spec:
+        volumes:
+          - name: mutex
+            persistentVolumeClaim:
+              claimName: mutex-pvc
         containers:
           - name: "${NAME}-${TAG}"
             image: "${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${NAME}:${TAG}"
@@ -121,6 +125,9 @@ objects:
                   secretKeyRef:
                     name: ${NAME}-${TAG}-secret
                     key: NATS_NR_STATE_SUBJECT
+        volumeMounts:
+          - name: mutex
+            mountPath: /mutex/
         restartPolicy: Always
         terminationGracePeriodSeconds: 30
         dnsPolicy: ClusterFirst
