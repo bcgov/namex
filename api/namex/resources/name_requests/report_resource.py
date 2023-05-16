@@ -219,72 +219,69 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_next_action_text(entity_type_cd: str):
+
+        DECIDE_BUSINESS_URL =  current_app.config.get('DECIDE_BUSINESS_URL')
+        BUSINESS_CHANGES_URL =  current_app.config.get('BUSINESS_CHANGES_URL')
+        CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
+        BUSINESS_URL = current_app.config.get('BUSINESS_URL')
+        CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
+
         next_action_text = {
             # BC Types
             'CR':  {
-               'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
-                          'corporateonline.gov.bc.ca</a> for more information'
+               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a> for more information'
             },
             'UL': {
-               'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
-                          'corporateonline.gov.bc.ca</a> for more information'
+               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a> for more information'
             },
             'FR': {
-               'NEW': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business">'
+               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
                         'Registering Proprietorships and Partnerships'
                       '</a> for more information',
-               'DEFAULT': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business">'
+               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
-                          '<a href="https://www2.gov.bc.ca/gov/content/employment-business/business/'
-                          'managing-a-business/permits-licences/businesses-incorporated-companies/'
-                          'proprietorships-partnerships/making-changes">Making Changes to your Proprietorship or'
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'GP': {
-               'NEW': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business">'
+               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
                         'BC Registries and Online Services'
                      '</a> for more information',
-               'DEFAULT': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business">'
+               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
                           'BC Registries and Online Services</a> for more information. To learn more, visit '
-                          '<a href="https://www2.gov.bc.ca/gov/content/employment-business/business/'
-                          'managing-a-business/permits-licences/businesses-incorporated-companies/'
-                          'proprietorships-partnerships/making-changes">Making Changes to your Proprietorship or'
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'DBA': {
-               'NEW': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business">'
+               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
                         'Registering Proprietorships and Partnerships'
                       '</a> for more information',
-               'DEFAULT': 'To complete your filing, visit <a href="https://www.bcregistry.ca/business/auth/home/decide-business">'
+               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
-                          '<a href="https://www2.gov.bc.ca/gov/content/employment-business/business/'
-                          'managing-a-business/permits-licences/businesses-incorporated-companies/'
-                          'proprietorships-partnerships/making-changes">Making Changes to your Proprietorship or'
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'LP': {
-               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
-                          'employment-business/business/managing-a-business/permits-licences/'
-                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'LL': {
-               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
-                          'employment-business/business/managing-a-business/permits-licences/'
-                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'CP': {
-               'DEFAULT': 'To complete your filing, visit <a href="www.bcregistry.ca/business/">www.bcregistry.gov.bc.ca</a>'
+               'DEFAULT': f'To complete your filing, visit <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
                           ' for more information'
             },
             'BC': {
-               'DEFAULT': 'To complete your filing, visit <a href="www.bcregistry.ca/business/">www.bcregistry.gov.bc.ca</a>'
+               'DEFAULT': f'To complete your filing, visit <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
                           ' for more information'
             },
             'CC': {
-               'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
-                          'corporateonline.gov.bc.ca</a> for more information'
+               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a> for more information'
             },
             'SO': {
                'DEFAULT': 'BC Social Enterprise'
@@ -300,33 +297,27 @@ class ReportResource(Resource):
             },
             # XPRO and Foreign Types
             'XCR': {
-               'NEW': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
-                      'corporateonline.gov.bc.ca</a> for more information',
-               'CHG': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
-                      'corporateonline.gov.bc.ca</a> for more information',
-               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
-                          'employment-business/business/managing-a-business/permits-licences/'
-                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+               'NEW': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+                      f'{CORP_ONLINE_URL}</a> for more information',
+               'CHG': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+                      f'{CORP_ONLINE_URL}</a> for more information',
+               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'XUL': {
-               'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
-                          'corporateonline.gov.bc.ca</a> for more information'
+               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a> for more information'
             },
             'RLC': {
-                'DEFAULT': 'To complete your filing, visit <a href="corporateonline.gov.bc.ca">'
-                          'corporateonline.gov.bc.ca</a> for more information'
+                'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a> for more information'
             },
             'XLP': {
-               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
-                          'employment-business/business/managing-a-business/permits-licences/'
-                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'XLL': {
-               'DEFAULT': 'To complete your filing, <a href= "https://www2.gov.bc.ca/gov/content/'
-                          'employment-business/business/managing-a-business/permits-licences/'
-                          'businesses-incorporated-companies/forms-corporate-registry">visit our Forms page</a> to'
+               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'XCP': {

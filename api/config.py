@@ -50,6 +50,12 @@ class Config(object):
 
     NAME_REQUEST_URL = os.getenv('NAME_REQUEST_URL', '')
 
+    DECIDE_BUSINESS_URL = os.getenv('DECIDE_BUSINESS_URL', '')
+    BUSINESS_CHANGES_URL = os.getenv('BUSINESS_CHANGES_URL', '')
+    CORP_FORMS_URL = os.getenv('CORP_FORMS_URL', '')
+    BUSINESS_URL = os.getenv('BUSINESS_URL', '')
+    CORP_ONLINE_URL = os.getenv('CORP_ONLINE_URL', '')
+
     # POSTGRESQL
     DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
     DB_PASSWORD = os.getenv('NAMEX_DATABASE_PASSWORD', '')
