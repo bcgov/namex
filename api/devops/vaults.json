@@ -51,7 +51,8 @@
     {
         "vault": "web-url",
         "application": [
-            "name-request"
+            "name-request",
+            "bcregistry"
         ]
     }
 ]
