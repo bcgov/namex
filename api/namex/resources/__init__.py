@@ -15,6 +15,7 @@ from .auto_analyse.paths import name_analysis_api
 
 from .mras import mras_profile_api
 from .colin import colin_api
+from .entities import entity_api
 from .statistics.wait_time_statistics import api as wait_time_stats_api
 
 from .user_settings import api as user_settings_api
@@ -50,5 +51,6 @@ api.add_namespace(name_analysis_api, path='/name-analysis')
 api.add_namespace(payment_api, path='/payments')
 api.add_namespace(mras_profile_api, path='/mras-profile')
 api.add_namespace(colin_api, path='/colin')
+api.add_namespace(entity_api, path='/businesses')
 api.add_namespace(wait_time_stats_api, path='/statistics')
 api.add_namespace(user_settings_api, path='/usersettings')
