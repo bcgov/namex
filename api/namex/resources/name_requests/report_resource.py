@@ -16,9 +16,11 @@ from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.logging import setup_logging
 from .api_namespace import api
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
+from namex.services.name_request import NameRequestService
 
 setup_logging()  # Important to do this first
 
+EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
 
 @cors_preflight('GET')
 @api.route('/<int:nr_id>/result', strict_slashes=False, methods=['GET', 'OPTIONS'])
@@ -27,41 +29,115 @@ setup_logging()  # Important to do this first
 })
 class ReportResource(Resource):
     @cors.crossdomain(origin='*')
+    def email_report(self, nr_id):
+        try:
+            nr_model = Request.query.get(nr_id)
+            if not nr_model:
+                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
+            if not nr_model.expirationDate:
+                nr_service = NameRequestService()
+                expiry_days = int(nr_service.get_expiry_days(nr_model))
+                expiry_date = nr_service.create_expiry_date(
+                    start=nr_model.lastUpdate,
+                    expires_in_days=expiry_days
+                )
+                nr_model.expirationDate = expiry_date
+            report, status_code = ReportResource._get_report(nr_model)
+            if status_code != HTTPStatus.OK:
+                return jsonify(message=str(report)), status_code
+            report_name = nr_model.nrNum + ' - ' + EMAIL_SUBJECT
+            recepient_emails = []
+            for applicant in nr_model.applicants:
+                recepient_emails.append(applicant.emailAddress)
+            recepients = ','.join(recepient_emails)
+            template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
+            nr_url = current_app.config.get('NAME_REQUEST_URL')
+            email_body = Path(f'{template_path}/emails/rejected.md').read_text()
+            if nr_model.stateCd in [State.APPROVED, State.CONDITIONAL]:
+                email_body = Path(f'{template_path}/emails/approved.md').read_text()
+                tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
+                localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
+                email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+            email_body = email_body.replace('{{NAME_REQUEST_URL}}', nr_url)
+            email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
+            email = {
+                'recipients': recepients,
+                'content': {
+                    'subject': report_name,
+                    'body': email_body,
+                    'attachments': []
+                }
+            }
+            attachments = []
+            attachments.append(
+                {
+                    'fileName': report_name.replace(' - ', ' ').replace(' ', '_') + '.pdf',
+                    'fileBytes': base64.b64encode(report).decode(),
+                    'fileUrl': '',
+                    'attachOrder': 1
+                }
+            )
+            email['content']['attachments'] = attachments
+            return ReportResource._send_email(email)
+        except Exception as err:
+            return handle_exception(err, 'Error retrieving the report.', 500)
+
+    @cors.crossdomain(origin='*')
     def get(self, nr_id):
         try:
             if not full_access_to_name_request(request):
                 return {"message": "You do not have access to this NameRequest."}, 403
-
             nr_model = Request.query.get(nr_id)
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
-
-            if nr_model.stateCd not in [State.APPROVED, State.CONDITIONAL,
-                                        State.CONSUMED, State.EXPIRED, State.REJECTED]:
-                return jsonify(message='Invalid NR state'.format(nr_id=nr_model.id)), HTTPStatus.BAD_REQUEST
-
-            authenticated, token = ReportResource._get_service_client_token()
-            if not authenticated:
-                return jsonify(message='Error in authentication'.format(nr_id=nr_model.id)),\
-                       HTTPStatus.INTERNAL_SERVER_ERROR
-
-            headers = {
-                'Authorization': 'Bearer {}'.format(token),
-                'Content-Type': 'application/json'
-            }
-            data = {
-                'reportName': ReportResource._get_report_filename(nr_model),
-                'template': "'" + base64.b64encode(bytes(self._get_template(), 'utf-8')).decode() + "'",
-                'templateVars': ReportResource._get_template_data(nr_model)
-            }
-            response = requests.post(url=current_app.config.get('REPORT_SVC_URL'), headers=headers,
-                                     data=json.dumps(data))
-
-            if response.status_code != HTTPStatus.OK:
-                return jsonify(message=str(response.content)), response.status_code
-            return response.content, response.status_code
+            return ReportResource._get_report(nr_model)
         except Exception as err:
             return handle_exception(err, 'Error retrieving the report.', 500)
+
+    @staticmethod
+    def _send_email(email):
+        """Send the email."""
+        notify_base_url = current_app.config.get('NOTIFY_API_URL')
+        authenticated, token = ReportResource._get_service_client_token()
+        if not authenticated:
+            return jsonify(message='Error in authentication when sending email'), HTTPStatus.INTERNAL_SERVER_ERROR
+
+        headers = {
+            'Authorization': 'Bearer {}'.format(token),
+            'Content-Type': 'application/json'
+        }
+        url = notify_base_url + "/api/v1/notify"
+        response = requests.request("POST", url, json=email, headers=headers)
+        if response.status_code != 200:
+            raise Exception(response.text)
+        return response.content, response.status_code
+
+    @staticmethod
+    def _get_report(nr_model):
+        if nr_model.stateCd not in [State.APPROVED, State.CONDITIONAL,
+                                    State.CONSUMED, State.EXPIRED, State.REJECTED]:
+            return jsonify(message='Invalid NR state'.format(nr_id=nr_model.id)), HTTPStatus.BAD_REQUEST
+
+        authenticated, token = ReportResource._get_service_client_token()
+        if not authenticated:
+            return jsonify(message='Error in authentication'.format(nr_id=nr_model.id)),\
+                    HTTPStatus.INTERNAL_SERVER_ERROR
+
+        headers = {
+            'Authorization': 'Bearer {}'.format(token),
+            'Content-Type': 'application/json'
+        }
+        data = {
+            'reportName': ReportResource._get_report_filename(nr_model),
+            'template': "'" + base64.b64encode(bytes(ReportResource._get_template(), 'utf-8')).decode() + "'",
+            'templateVars': ReportResource._get_template_data(nr_model)
+        }
+        response = requests.post(url=current_app.config.get('REPORT_SVC_URL'), headers=headers,
+                                    data=json.dumps(data))
+
+        if response.status_code != HTTPStatus.OK:
+            return jsonify(message=str(response.content)), response.status_code
+        return response.content, response.status_code
 
     @staticmethod
     def _get_report_filename(nr_model):
@@ -121,7 +197,7 @@ class ReportResource(Resource):
         if nr_report_json['expirationDate']:
             tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
             localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-            nr_report_json['expirationDate'] = localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %P Pacific time')
+            nr_report_json['expirationDate'] = localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time')
         if nr_report_json['submittedDate']:
             nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
         if nr_report_json['applicants']['countryTypeCd']:

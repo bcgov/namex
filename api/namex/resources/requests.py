@@ -35,6 +35,7 @@ from namex.utils.common import (convert_to_ascii,
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
+from namex.resources.name_requests import ReportResource
 
 import datetime
 
@@ -593,6 +594,14 @@ class Request(Resource):
 
         if 'warnings' in locals() and warnings:
             return jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206
+
+        if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
+            try:
+                report = ReportResource()
+                report.email_report(nrd.id)
+            except Exception as err:
+                return jsonify(err.messages), 502
+
         return jsonify(message='Request:{} - patched'.format(nr)), 200
 
     @staticmethod
