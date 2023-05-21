@@ -20,7 +20,8 @@ from namex.services.name_request import NameRequestService
 
 setup_logging()  # Important to do this first
 
-EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
+RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
+CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
 
 @cors_preflight('GET')
 @api.route('/<int:nr_id>/result', strict_slashes=False, methods=['GET', 'OPTIONS'])
@@ -28,6 +29,43 @@ EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
     'nr_id': 'NR ID - This field is required'
 })
 class ReportResource(Resource):
+    @cors.crossdomain(origin='*')
+    def email_consent_letter(self, nr_id):
+        try:
+            nr_model = Request.query.get(nr_id)
+            if not nr_model:
+                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
+            report_name = nr_model.nrNum + ' - ' + CONSENT_EMAIL_SUBJECT
+            recepient_emails = []
+            for applicant in nr_model.applicants:
+                recepient_emails.append(applicant.emailAddress)
+            if not nr_model.expirationDate:
+                nr_service = NameRequestService()
+                expiry_days = int(nr_service.get_expiry_days(nr_model))
+                expiry_date = nr_service.create_expiry_date(
+                    start=nr_model.lastUpdate,
+                    expires_in_days=expiry_days
+                )
+                nr_model.expirationDate = expiry_date
+            recepients = ','.join(recepient_emails)
+            template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
+            email_body = Path(f'{template_path}/emails/consent.md').read_text()
+            tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
+            localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
+            email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+            email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
+            email = {
+                'recipients': recepients,
+                'content': {
+                    'subject': report_name,
+                    'body': email_body,
+                    'attachments': []
+                }
+            }
+            return ReportResource._send_email(email)
+        except Exception as err:
+            return handle_exception(err, 'Error retrieving the report.', 500)
+
     @cors.crossdomain(origin='*')
     def email_report(self, nr_id):
         try:
@@ -45,7 +83,7 @@ class ReportResource(Resource):
             report, status_code = ReportResource._get_report(nr_model)
             if status_code != HTTPStatus.OK:
                 return jsonify(message=str(report)), status_code
-            report_name = nr_model.nrNum + ' - ' + EMAIL_SUBJECT
+            report_name = nr_model.nrNum + ' - ' + RESULT_EMAIL_SUBJECT
             recepient_emails = []
             for applicant in nr_model.applicants:
                 recepient_emails.append(applicant.emailAddress)

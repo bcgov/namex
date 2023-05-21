@@ -764,6 +764,11 @@ class Request(Resource):
                 is_changed__request_state = True
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
+                try:
+                    report = ReportResource()
+                    report.email_consent_letter(nrd.id)
+                except Exception as err:
+                    return jsonify(err.messages), 502
 
             # Need this for a re-open
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
