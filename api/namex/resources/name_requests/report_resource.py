@@ -133,7 +133,7 @@ class ReportResource(Resource):
     @staticmethod
     def _send_email(email):
         """Send the email."""
-        notify_base_url = current_app.config.get('NOTIFY_API_URL')
+        notify_url = current_app.config.get('NOTIFY_API_URL') + current_app.config.get('NOTIFY_API_VERSION')
         authenticated, token = ReportResource._get_service_client_token()
         if not authenticated:
             return jsonify(message='Error in authentication when sending email'), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -142,7 +142,7 @@ class ReportResource(Resource):
             'Authorization': 'Bearer {}'.format(token),
             'Content-Type': 'application/json'
         }
-        url = notify_base_url + "/api/v1/notify"
+        url = notify_url + "/notify"
         response = requests.request("POST", url, json=email, headers=headers)
         if response.status_code != 200:
             raise Exception(response.text)

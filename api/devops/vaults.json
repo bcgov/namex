@@ -31,7 +31,8 @@
             "auth-api",
             "namex-api",
             "colin-api-namex",
-            "solr-synonyms-api"
+            "solr-synonyms-api",
+            "notify-api"
         ]
     },
     {

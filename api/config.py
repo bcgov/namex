@@ -57,6 +57,7 @@ class Config(object):
     BUSINESS_URL = os.getenv('BUSINESS_URL', '')
     COLIN_URL = os.getenv('COLIN_URL', '')
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL', '')
+    NOTIFY_API_VERSION = os.getenv('NOTIFY_API_VERSION', '')
 
     # POSTGRESQL
     DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
