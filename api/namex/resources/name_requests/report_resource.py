@@ -29,7 +29,6 @@ CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
     'nr_id': 'NR ID - This field is required'
 })
 class ReportResource(Resource):
-    @cors.crossdomain(origin='*')
     def email_consent_letter(self, nr_id):
         try:
             nr_model = Request.query.get(nr_id)
@@ -66,7 +65,6 @@ class ReportResource(Resource):
         except Exception as err:
             return handle_exception(err, 'Error retrieving the report.', 500)
 
-    @cors.crossdomain(origin='*')
     def email_report(self, nr_id):
         try:
             nr_model = Request.query.get(nr_id)
