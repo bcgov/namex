@@ -38,14 +38,6 @@ class BaseConfig(object):
     NRO_HOST = os.getenv('NRO_HOST', '')
     NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
     
-    DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 0))
-
-    # NATS
-    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://localhost:4222')
-    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', 'namex.worker')
-    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
-    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
-    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
 
 class Config(BaseConfig):
     DEBUG = False
@@ -68,5 +60,3 @@ class TestConfig(BaseConfig):
          port=int(DB_PORT),
          name=DB_NAME,
     )
-
-    DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 1))
