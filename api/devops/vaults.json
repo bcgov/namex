@@ -31,7 +31,8 @@
             "auth-api",
             "namex-api",
             "colin-api-namex",
-            "solr-synonyms-api"
+            "solr-synonyms-api",
+            "notify-api"
         ]
     },
     {
@@ -46,6 +47,13 @@
         "application": [
             "namex-api",
             "mras-api"
+        ]
+    },
+    {
+        "vault": "web-url",
+        "application": [
+            "name-request",
+            "bcregistry"
         ]
     }
 ]
