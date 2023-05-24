@@ -31,6 +31,13 @@ objects:
           - name: "${NAME}-${TAG}"
             image: "${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${NAME}:${TAG}"
             imagePullPolicy: Always
+            lifecycle:
+              preStop:
+                exec:
+                  command:
+                    - sh
+                    - '-c'
+                    - rm /mutex/file
             ports:
               - containerPort: 9000
                 protocol: TCP

@@ -1,7 +1,7 @@
 """ NRO Extractor moves changes from the NamesDB to the new NameX system."""
 import sys
 from datetime import datetime
-
+import os.path
 from flask import current_app
 
 from namex.utils.logging import setup_logging
@@ -9,7 +9,6 @@ from namex.models import User
 
 from config import Config
 from extractor.app import create_app, db, nro, job
-import os.path
 
 setup_logging() # important to do this first
 
@@ -24,11 +23,13 @@ def get_ops_params():
     return max_rows
 
 
-if __name__ == "__main__":
+def job_runner():
+    """NRO extractor job runner, checks if an instnace of the job is already running via /mutex/file"""
     start_time = datetime.utcnow()
-
-    if not os.path.isfile('/mutex/file'):
-        open('/mutex/file', 'w').close()
+    mutex_file = '/mutex/file'
+    if not os.path.isfile(mutex_file):
+        with open(mutex_file, mode='a'):
+            pass
         print('nro-extractor: starting job: {}'.format(start_time))
 
         # setup Flask, push a context, initialize db & nro connections
@@ -46,7 +47,7 @@ if __name__ == "__main__":
         app.do_teardown_appcontext()
         end_time = datetime.utcnow()
 
-        os.remove('/mutex/file')
+        os.remove(mutex_file)
 
         # report out
         if processed < 0:
@@ -56,8 +57,12 @@ if __name__ == "__main__":
 
         print("nro-extractor: finished - requests processed: {0} completed in:{1}".format(processed, end_time-start_time),
             file=sys.stderr)
+        nro.connection.close()
         sys.exit(0)
-
     else:
         print('previous job still running')
         sys.exit(0)
+
+
+if __name__ == "__main__":
+    job_runner()
