@@ -35,6 +35,8 @@ from namex.utils.common import (convert_to_ascii,
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
+from namex.resources.name_requests import ReportResource
+from namex.resources.flask_threads import FlaskThread
 
 import datetime
 
@@ -593,7 +595,22 @@ class Request(Resource):
 
         if 'warnings' in locals() and warnings:
             return jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206
+
+        if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
+            thread = FlaskThread(target=Request._email_report, args=(nrd.id, ))
+            thread.daemon = True
+            thread.start()
+
         return jsonify(message='Request:{} - patched'.format(nr)), 200
+
+
+    def _email_report(nr_id):
+        report = ReportResource()
+        report.email_report(nr_id)
+
+    def _email_consent(nr_id):
+        report = ReportResource()
+        report.email_consent_letter(nr_id)
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -755,6 +772,9 @@ class Request(Resource):
                 is_changed__request_state = True
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
+                thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
+                thread.daemon = True
+                thread.start()
 
             # Need this for a re-open
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:

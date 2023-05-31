@@ -19,8 +19,7 @@
                   </div>
                   <div class="report-type-desc">
                       <span class="support-contact-details">
-                         <span class="contact-number">Canada & U.S. Toll Free: 1-877-370-1033</span>
-                        <a href="www.bcregistry.ca/namerequest" target="_blank">www.bcregistry.ca/namerequest</a>
+                           <a href={{service_url}} target="_blank" rel="noopener noreferrer">{{service_url}}</a>
                       </span>
                   </div>
                </td>
@@ -33,6 +32,7 @@
          </div>
       </div>
       [[name-request/nrDetails.html]]
+      [[name-request/applicantContactInfo.html]]
       {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' %}
          <div class="section-header mt-5 pt-4">APPROVAL DETAILS</div>
       {% else %}
@@ -40,10 +40,6 @@
       {% endif %}
       <div class="container pt-4">
          [[name-request/resultDetails.html]]
-         {% if stateCd == 'CONDITIONAL' or stateCd == 'APPROVED' %}
-            [[name-request/manageNameRequest.html]]
-         {% endif %}
-         [[name-request/nameChoices.html]]
          {% if additionalInfo and additionalInfo != '' %}
             <div class="no-page-break">
                <div class="separator mt-4"></div>
@@ -51,8 +47,9 @@
                <div class="section-data mt-2">{{additionalInfo}}</div>
             </div>
          {% endif %}
-         [[name-request/applicantContactInfo.html]]
-
       </div>
+      {% if stateCd != 'CONDITIONAL' and stateCd != 'APPROVED' %}
+         [[name-request/nameChoices.html]]
+      {% endif %}
    </body>
 </html>

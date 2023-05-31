@@ -50,6 +50,17 @@ class Config(object):
 
     NRO_EXTRACTOR_URI = f'{os.getenv("NAMEX_API_URL", None)}{os.getenv("NAMEX_API_VERSION", None)}/nro-extract/nro-requests'
 
+
+    NAME_REQUEST_URL = os.getenv('NAME_REQUEST_URL', '')
+
+    DECIDE_BUSINESS_URL = os.getenv('DECIDE_BUSINESS_URL', '')
+    BUSINESS_CHANGES_URL = os.getenv('BUSINESS_CHANGES_URL', '')
+    CORP_FORMS_URL = os.getenv('CORP_FORMS_URL', '')
+    BUSINESS_URL = os.getenv('BUSINESS_URL', '')
+    COLIN_URL = os.getenv('COLIN_URL', '')
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL', '')
+    NOTIFY_API_VERSION = os.getenv('NOTIFY_API_VERSION', '')
+
     # POSTGRESQL
     DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
     DB_PASSWORD = os.getenv('NAMEX_DATABASE_PASSWORD', '')
