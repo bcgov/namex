@@ -15,7 +15,10 @@ MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
 
+
 class EntityServiceException(Exception):
+    """get business info"""
+
     def __init__(self, wrapped_err=None, message="Entity API exception.", status_code=500):
         self.err = wrapped_err
         self.colin_error_code = None
@@ -47,24 +50,24 @@ class EntityServiceException(Exception):
 entity_api = Namespace('entity', description='ENTITY API')
 
 
-@cors_preflight('POST')
-@entity_api.route('/<string:corp_num>', strict_slashes=False, methods=['POST', 'OPTIONS'])
+@cors_preflight('GET')
+@entity_api.route('/<string:corp_num>', methods=['GET', 'OPTIONS'])
 @entity_api.doc(params={
     'corp_num': 'Incorporation Number - This field is required'
 })
 class EntityApi(Resource):
     @cors.crossdomain(origin='*')
-    def post(self, corp_num):
+    def get(self, corp_num):
         try:
             SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')
-            SBC_SVC_AUTH_CLIENT_ID = 'entity-service-account'
-            SBC_SVC_CLIENT_SECRET = 'a6b70721-3241-43ba-a298-6b4412461c73'
-            authenticated, token = get_client_credentials(SBC_SVC_AUTH_URL, SBC_SVC_AUTH_CLIENT_ID, SBC_SVC_CLIENT_SECRET)
+            ENTITY_AUTH_CLIENT_ID = current_app.config.get('ENTITY_SERVICE_ACCOUNT_CLIENT_ID', '')
+            ENTITY_CLIENT_SECRET = current_app.config.get('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET', '')
+            authenticated, token = get_client_credentials(SBC_SVC_AUTH_URL, ENTITY_AUTH_CLIENT_ID, ENTITY_CLIENT_SECRET)
             if not authenticated:
                 raise EntityServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
 
             # Get the profile
-            entity_url = f'https://legal-api-dev.apps.silver.devops.gov.bc.ca/api/v1/businesses/{corp_num}'
+            entity_url = f'{current_app.config.get("ENTITY_SVC_URL")}/businesses/{corp_num}'
             headers = {
                 'Authorization': 'Bearer ' + token
             }
