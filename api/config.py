@@ -46,6 +46,8 @@ class Config(object):
 
     COLIN_SVC_URL = f'{os.getenv("COLIN_SVC_URL", None)}{os.getenv("COLIN_SVC_VERSION", None)}'
 
+    ENTITY_SVC_URL = f'{os.getenv("LEGAL_API_URL", None)}{os.getenv("LEGAL_API_VERSION", "/api/v1")}'
+
     NRO_EXTRACTOR_URI = f'{os.getenv("NAMEX_API_URL", None)}{os.getenv("NAMEX_API_VERSION", None)}/nro-extract/nro-requests'
 
 
@@ -89,6 +91,9 @@ class Config(object):
     SBC_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
     SBC_SVC_AUTH_CLIENT_ID = os.getenv('NAMEX_SBC_SERVICE_ACCOUNT_CLIENT_ID', '')
     SBC_SVC_CLIENT_SECRET = os.getenv('NAMEX_SBC_SERVICE_ACCOUNT_CLIENT_SECRET', '')
+
+    ENTITY_SERVICE_ACCOUNT_CLIENT_ID = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_ID', '')
+    ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET', '')
 
     PAYMENT_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
     PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_ID', '')
