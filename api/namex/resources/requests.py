@@ -39,7 +39,6 @@ from namex.resources.name_requests import ReportResource
 from namex.resources.flask_threads import FlaskThread
 
 import ldclient
-from ldclient.config import Config
 
 import datetime
 
@@ -600,7 +599,6 @@ class Request(Resource):
             return jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
-            ldclient.set_config(Config(NAMEX_LD_SDK_ID))
             ldc = ldclient.get()
             emailer_enable = ldc.variation('emailer-enable', {'key': 'anonymous'}, False)
             if emailer_enable:
@@ -779,7 +777,6 @@ class Request(Resource):
                 is_changed__request_state = True
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
-                ldclient.set_config(Config(NAMEX_LD_SDK_ID))
                 emailer_enable = ldclient.get().variation('emailer-enable',  {'key': 'anonymous'}, False)
                 if emailer_enable:
                     thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
