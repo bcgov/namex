@@ -38,6 +38,12 @@
         ]
     },
     {
+        "vault": "launchdarkly",
+        "application": [
+            "namex"
+        ]
+    },
+    {
         "vault": "nats",
         "application": [
             "base",
