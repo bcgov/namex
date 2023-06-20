@@ -3,14 +3,14 @@
       <td class="col-33">
         <div class="section-title-gray">Applicant Information</div>
         <div class="section-data mt-2">
-          <span class="uppercase-text">{{ applicants.firstName }} </span>
+          <span>{{ applicants.firstName }} </span>
           {% if applicants.middleName %}
-            <span class="uppercase-text">{{ applicants.middleName }}</span>
+            <span>{{ applicants.middleName }}</span>
           {% endif %}
-           <span class="uppercase-text">{{ applicants.lastName }}</span>
+           <span>{{ applicants.lastName }}</span>
            <div>{{ applicants.addrLine1 }}</div>
            <div>
-               <span class="captitalize-text">{{ applicants.city }} </span>
+               <span>{{ applicants.city }} </span>
                <span>{{ applicants.stateProvinceCd }} </span>
                <span>{{ applicants.postalCd }}</span>
            </div>
@@ -22,6 +22,12 @@
         <div class="section-data mt-2">
           {% if applicants.contact %}
           <div>{{ applicants.contact }}</div>
+          {% else %}
+              <span>{{ applicants.firstName }} </span>
+              {% if applicants.middleName %}
+                <span>{{ applicants.middleName }}</span>
+              {% endif %}
+              <span>{{ applicants.lastName }}</span>
           {% endif %}
           <div>{{ applicants.emailAddress }}</div>
           {% if applicants.phoneNumber %}

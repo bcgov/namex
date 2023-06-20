@@ -17,6 +17,7 @@ from namex.utils.logging import setup_logging
 from .api_namespace import api
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request import NameRequestService
+from datetime import datetime
 
 setup_logging()  # Important to do this first
 
@@ -246,6 +247,7 @@ class ReportResource(Resource):
                 action_text = actions_obj.get('DEFAULT')
             if action_text:
                 nr_report_json['nextAction'] = action_text
+        nr_report_json['approvalDate'] = datetime.today().strftime('%B %-d, %Y')
         return nr_report_json
 
     @staticmethod
@@ -341,36 +343,36 @@ class ReportResource(Resource):
         next_action_text = {
             # BC Types
             'CR':  {
-               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
                           f'{CORP_ONLINE_URL}</a> for more information'
             },
             'UL': {
-               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
                           f'{CORP_ONLINE_URL}</a> for more information'
             },
             'FR': {
-               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                         'Registering Proprietorships and Partnerships'
                       '</a> for more information',
-               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'GP': {
-               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                         'BC Registries and Online Services'
                      '</a> for more information',
-               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                           'BC Registries and Online Services</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'DBA': {
-               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                         'Registering Proprietorships and Partnerships'
                       '</a> for more information',
-               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
@@ -384,15 +386,15 @@ class ReportResource(Resource):
                           ' download and submit a form'
             },
             'CP': {
-               'DEFAULT': f'To complete your filing, visit <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
                           ' for more information'
             },
             'BC': {
-               'DEFAULT': f'To complete your filing, visit <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
                           ' for more information'
             },
             'CC': {
-               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
                           f'{CORP_ONLINE_URL}</a> for more information'
             },
             'SO': {
@@ -409,19 +411,19 @@ class ReportResource(Resource):
             },
             # XPRO and Foreign Types
             'XCR': {
-               'NEW': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
                       f'{CORP_ONLINE_URL}</a> for more information',
-               'CHG': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+               'CHG': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
                       f'{CORP_ONLINE_URL}</a> for more information',
                'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'XUL': {
-               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
                           f'{CORP_ONLINE_URL}</a> for more information'
             },
             'RLC': {
-                'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
+                'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
                           f'{CORP_ONLINE_URL}</a> for more information'
             },
             'XLP': {
