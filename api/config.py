@@ -61,6 +61,8 @@ class Config(object):
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL', '')
     NOTIFY_API_VERSION = os.getenv('NOTIFY_API_VERSION', '')
 
+    NAMEX_LD_SDK_ID = os.getenv('NAMEX_LD_SDK_ID', '')
+
     # POSTGRESQL
     DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
     DB_PASSWORD = os.getenv('NAMEX_DATABASE_PASSWORD', '')
