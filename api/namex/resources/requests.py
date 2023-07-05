@@ -38,6 +38,8 @@ from namex.services.nro import NROServicesError
 from namex.resources.name_requests import ReportResource
 from namex.resources.flask_threads import FlaskThread
 
+import ldclient
+
 import datetime
 
 setup_logging()  # Important to do this first
@@ -597,9 +599,12 @@ class Request(Resource):
             return jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
-            thread = FlaskThread(target=Request._email_report, args=(nrd.id, ))
-            thread.daemon = True
-            thread.start()
+            ldc = ldclient.get()
+            emailer_enable = ldc.variation('emailer-enable', {'key': 'anonymous'}, False)
+            if emailer_enable:
+                thread = FlaskThread(target=Request._email_report, args=(nrd.id, ))
+                thread.daemon = True
+                thread.start()
 
         return jsonify(message='Request:{} - patched'.format(nr)), 200
 
@@ -772,9 +777,11 @@ class Request(Resource):
                 is_changed__request_state = True
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
-                thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
-                thread.daemon = True
-                thread.start()
+                emailer_enable = ldclient.get().variation('emailer-enable',  {'key': 'anonymous'}, False)
+                if emailer_enable:
+                    thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
+                    thread.daemon = True
+                    thread.start()
 
             # Need this for a re-open
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
