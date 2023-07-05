@@ -31,6 +31,8 @@ def map_request_attrs(name_request, **kwargs):
         request_action = kwargs.get('request_action', name_request.request_action_cd)
         request_type = kwargs.get('request_type', name_request.requestTypeCd)
 
+        conversion_type = kwargs.get('conversion_type', None)
+
         # Set action and entity
         if request_entity:
             name_request.entity_type_cd = request_entity
@@ -44,8 +46,13 @@ def map_request_attrs(name_request, **kwargs):
             # but a request_entity (entity_type_cd) and a request_action (request_action_cd)
             # are supplied, use get_mapped_request_type to map the requestTypeCd in the model
             # using the action and entity type
-            request_type = get_mapped_request_type(request_entity, request_action)
-            name_request.requestTypeCd = request_type[0]
+
+            # if conversion_type exists, using conversion_type as request_type
+            if conversion_type:
+                name_request.requestTypeCd = conversion_type
+            else:
+                request_type = get_mapped_request_type(request_entity, request_action)
+                name_request.requestTypeCd = request_type[0]
         elif request_type is not None:
             # If request_type is NOT None, (eg. 'requestTypeCd' was provided in the payload)
             # then use the provided value
