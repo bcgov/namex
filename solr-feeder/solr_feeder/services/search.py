@@ -14,31 +14,25 @@
 """Manages search-api interactions."""
 import logging
 from http import HTTPStatus
-from typing import Dict
 
 import requests
 from requests import exceptions
-from flask import current_app
 
 from .auth import get_bearer_token
 
 
-def update_search(payload: Dict[str, str]):
-    """Update the registries search solr core."""
+def update_search(url: str, payload: dict[str, str], timeout: int, token: str):
+    """Update solr core."""
     try:
-        token, error = get_bearer_token()
-        if error:
-            return error
         headers = {'Authorization': 'Bearer ' + token}
-        solr_update_url = f'{current_app.config["SEARCH_API_URL"]}/internal/solr/update'
-        timeout = current_app.config["SEARCH_API_TIMEOUT"]
-        res = requests.put(url=solr_update_url, headers=headers, json=payload, timeout=timeout)
+
+        res = requests.put(url=url, headers=headers, json=payload, timeout=timeout)
         if res.status_code != HTTPStatus.OK:
             return {'message': res.json(), 'status_code': res.status_code}
 
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
-        logging.error('SEARCH connection failure %s', err)
-        return {'message': 'SEARCH connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
+        logging.error('%s connection failure %s', url, err)
+        return {'message': f'{url} connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
     except Exception as err:  # noqa: B902
-        logging.error('SEARCH service error %s', err.with_traceback(None))
-        return {'message': 'SEARCH service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
+        logging.error('%s service error %s', url, err.with_traceback(None))
+        return {'message': f'{url} service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}

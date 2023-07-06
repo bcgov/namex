@@ -14,14 +14,13 @@
 """This manages all of the authentication and authorization service."""
 import logging
 from http import HTTPStatus
-from typing import Tuple
 
 import requests
 from requests import exceptions
 from flask import current_app
 
 
-def get_bearer_token() -> Tuple[str, dict]:
+def get_bearer_token() -> tuple[str, dict]:
     """Get a valid Bearer token for the service to use."""
     token_url = current_app.config.get('KEYCLOAK_AUTH_TOKEN_URL')
     client_id = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_ID')

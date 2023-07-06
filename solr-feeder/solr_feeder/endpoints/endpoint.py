@@ -12,15 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manage endpoints."""
-from typing import List
-
 from flask import Blueprint, Flask  # noqa: I001
 
 
 class Endpoint:  # pylint: disable=too-few-public-methods
     """Manage the mounting, traversal and redirects for an enpoint."""
 
-    def __init__(self, name: str, bps: List, app: Flask = None):
+    def __init__(self, name: str, bps: list, app: Flask = None):
         """Initialize the endpoint and mount the blueprints to it."""
         self.app = None
         self.bp = Blueprint(name, __name__, url_prefix='/api/v1')

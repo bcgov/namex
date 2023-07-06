@@ -17,7 +17,15 @@
         "application": [
             "colin-api-entity",
             "registries-search-api",
-            "registries-search-api-internal"
+            "registries-search-api-internal",
+            "bor-api",
+            "bor-api-internal"
+        ]
+    },
+    {
+        "vault": "sentry",
+        "application": [
+            "solr-feeder"
         ]
     }
 ]

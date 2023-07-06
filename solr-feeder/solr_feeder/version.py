@@ -1,4 +1,4 @@
-# Copyright © 2022 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This module wraps the calls to external services used by the Solr Feeder."""
-from .auth import get_bearer_token
-from .colin import get_business_info, get_owners, get_parties
-from .search import update_search
+"""Version of this service in PEP440.
+
+[N!]N(.N)*[{a|b|rc}N][.postN][.devN]
+Epoch segment: N!
+Release segment: N(.N)*
+Pre-release segment: {a|b|rc}N
+Post-release segment: .postN
+Development release segment: .devN
+"""
+
+__version__ = '2.0.0'  # pylint: disable=invalid-name

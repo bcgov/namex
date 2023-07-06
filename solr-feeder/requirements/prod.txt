@@ -1,5 +1,6 @@
 Flask
+Werkzeug
+gunicorn
 python-dotenv
 requests
-gunicorn
-Werkzeug
+sentry-sdk[flask]
