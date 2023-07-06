@@ -190,7 +190,8 @@ class NameRequestService(AbstractNameRequestMixin):
             nr_num=self.nr_num,
             request_entity=self.request_entity,
             request_action=self.request_action,
-            request_type=self.request_type
+            request_type=self.request_type,
+            conversion_type=self.conversion_type
         )
 
         # If this is a DRAFT, set draft attributes

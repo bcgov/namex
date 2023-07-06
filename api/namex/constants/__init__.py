@@ -435,8 +435,12 @@ request_type_mapping = [
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
     ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True),
     ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
+    ('ULBE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True),
+    ('ULBE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
     ('BECR', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
-    ('BECR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value)
+    ('BECR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
+    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
+    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value)
 ]
 
 reverse_request_type_mapping = [m for m in request_type_mapping if len(m) == 4 and m[3] is True]

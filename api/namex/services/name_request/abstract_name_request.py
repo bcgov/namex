@@ -65,6 +65,12 @@ class AbstractNameRequestMixin(object):
             return entity_type_cd
 
     @property
+    def conversion_type(self):
+        conversion_type_cd = self.request_data.get('conversion_type_cd', None)
+        if conversion_type_cd:
+            return conversion_type_cd
+
+    @property
     def request_type(self):
         request_type_cd = self.request_data.get('requestTypeCd', None)
         if request_type_cd:
