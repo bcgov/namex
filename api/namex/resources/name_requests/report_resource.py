@@ -95,8 +95,28 @@ class ReportResource(Resource):
                 tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
                 localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
                 email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+                if nr_model.stateCd in [State.APPROVED]:
+                    email_body = email_body.replace('{{APPROVAL_STATUS}}', 'approved')
+                else:
+                    email_body = email_body.replace('{{APPROVAL_STATUS}}', 'conditionally approved')
+
+                action_url = ReportResource._get_action_url(nr_model.entity_type_cd)
+                if 'https' in action_url:
+                    email_body = email_body.replace('{{REGISTRATION_INSTRUCTIONS}}', f'[Register Now]({action_url})')
+                else:
+                    email_body = email_body.replace('{{REGISTRATION_INSTRUCTIONS}}', action_url)
+
+                LIST_STEPS = ''
+                if nr_model.consentFlag in ['Y', 'R']:
+                    LIST_STEPS += '* Send in your consent letter to BCregistries@gov.bc.ca \n\n'
+                    LIST_STEPS += '* Receive confirmation that the consent letter has been accepted \n\n'
+
+                LIST_STEPS += '* Use this name request to register the business \n\n'
+                email_body = email_body.replace('{{LIST_STEPS}}', LIST_STEPS)
+
             email_body = email_body.replace('{{NAME_REQUEST_URL}}', nr_url)
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
+
             email = {
                 'recipients': recepients,
                 'content': {
@@ -330,6 +350,41 @@ class ReportResource(Resource):
             'FIRM': 'FIRM (Legacy Oracle)'
         }
         return entity_type_descriptions.get(entity_type_cd, None)
+
+    @staticmethod
+    def _get_action_url(entity_type_cd: str):
+
+        DECIDE_BUSINESS_URL =  current_app.config.get('DECIDE_BUSINESS_URL')
+        CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
+        BUSINESS_URL = current_app.config.get('BUSINESS_URL')
+        CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
+
+        next_action_text = {
+            # BC Types
+            'CR':  CORP_ONLINE_URL,
+            'UL':  CORP_ONLINE_URL,
+            'FR':  DECIDE_BUSINESS_URL,
+            'GP':  DECIDE_BUSINESS_URL,
+            'DBA': DECIDE_BUSINESS_URL,
+            'LP':  CORP_FORMS_URL,
+            'LL':  CORP_FORMS_URL,
+            'CP':  BUSINESS_URL,
+            'BC':  BUSINESS_URL,
+            'CC':  CORP_ONLINE_URL,
+            'SO': 'BC Social Enterprise',
+            'PA': 'Submit appropriate form to BC Registries. Call if assistance required',
+            'FI': 'Submit appropriate form to BC Registries. Call if assistance required',
+            'PAR': 'Submit appropriate form to BC Registries. Call if assistance required.',
+            # XPRO and Foreign Types
+            'XCR': CORP_ONLINE_URL,
+            'XUL': CORP_ONLINE_URL,
+            'RLC': CORP_ONLINE_URL,
+            'XLP': CORP_FORMS_URL,
+            'XLL': CORP_FORMS_URL,
+            'XCP': 'Extraprovincial Cooperative Association',
+            'XSO': 'Extraprovincial Cooperative Association',
+        }
+        return next_action_text.get(entity_type_cd, None)
 
     @staticmethod
     def _get_next_action_text(entity_type_cd: str):
