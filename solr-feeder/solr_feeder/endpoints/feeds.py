@@ -1,3 +1,17 @@
+# Copyright © 2023 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Manages feeder api endpoints."""
 import logging
 from http import HTTPStatus
 
@@ -29,7 +43,7 @@ def feed_solr():
             legalType: str
         }
     """
-    logging.debug('request raw data: {}'.format(flask.request.data))
+    logging.debug('request raw data: %s', flask.request.data)
     json_data = flask.request.get_json()
 
     solr_core = json_data.get('solr_core')
@@ -59,7 +73,7 @@ def feed_solr():
         if error:
             logging.error('Error getting COLIN business data: %s', error)
             return {'message': error['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
-        
+
         error_messages = []
         # send data to bor search core via bor-api
         if bor_url := current_app.config['BOR_API_URL']:
@@ -75,9 +89,9 @@ def feed_solr():
                                   token=token)
             if error:
                 if error['status_code'] == HTTPStatus.GATEWAY_TIMEOUT:
-                    logging.warn('BOR update error probably due to many parties associated ' + \
-                                 'with the entity. Please verify the update for %s and ' + \
-                                 'manually retry if necessary.', identifier)
+                    logging.debug('BOR update error probably due to many parties associated ' + \
+                                  'with the entity. Please verify the update for %s and ' + \
+                                  'manually retry if necessary.', identifier)
                     # error log for sentry message -- do not return an error msg as COLIN will keep retrying
                     logging.error('Timeout error updating %s', identifier)
                 else:

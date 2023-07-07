@@ -18,8 +18,6 @@ from http import HTTPStatus
 import requests
 from requests import exceptions
 
-from .auth import get_bearer_token
-
 
 def update_search(url: str, payload: dict[str, str], timeout: int, token: str):
     """Update solr core."""
@@ -30,9 +28,11 @@ def update_search(url: str, payload: dict[str, str], timeout: int, token: str):
         if res.status_code != HTTPStatus.OK:
             return {'message': res.json(), 'status_code': res.status_code}
 
+        return None
+
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
         logging.error('%s connection failure %s', url, err)
         return {'message': f'{url} connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
-    except Exception as err:  # noqa: B902
+    except Exception as err:  # pylint: disable=broad-exception-caught; noqa: B902
         logging.error('%s service error %s', url, err.with_traceback(None))
         return {'message': f'{url} service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}

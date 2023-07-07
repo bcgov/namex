@@ -23,7 +23,7 @@ or by accessing this configuration directly.
 import os
 
 
-class Config(object):
+class Config():  # pylint: disable=too-few-public-methods;
     """Base class configuration that should set reasonable defaults.
 
     Used as the base for all the other configurations.
@@ -32,13 +32,13 @@ class Config(object):
     SECRET_KEY = 'a secret'
 
     POD_NAMESPACE = os.getenv('POD_NAMESPACE', 'unknown')
-    
+
     COLIN_API_URL = os.getenv('COLIN_SVC_URL', 'http://') + \
         os.getenv('COLIN_SVC_VERSION', '/api/v1')
 
     SEARCH_API_URL = os.getenv('REGISTRIES_SEARCH_API_INTERNAL_URL', 'http://') \
         + os.getenv('REGISTRIES_SEARCH_API_VERSION', '/api/v1')
-    
+
     BOR_API_URL = os.getenv('BOR_API_INTERNAL_URL', '') \
         + os.getenv('BOR_API_VERSION', '')
 
@@ -63,7 +63,7 @@ class Config(object):
     KEYCLOAK_AUTH_TOKEN_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL')
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('BUSINESS_SEARCH_SERVICE_ACCOUNT_CLIENT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('BUSINESS_SEARCH_SERVICE_ACCOUNT_SECRET')
-    
+
     SENTRY_DSN = os.getenv('SENTRY_DSN')
     SENTRY_TSR = os.getenv('SENTRY_TSR', '1.0')
 
@@ -71,16 +71,19 @@ class Config(object):
     TESTING = False
 
 
-class DevelopmentConfig(Config):
+class DevelopmentConfig(Config):  # pylint: disable=too-few-public-methods;
+    """Development config."""
     DEBUG = True
     TESTING = True
 
 
-class UnitTestingConfig(Config):
+class UnitTestingConfig(Config):  # pylint: disable=too-few-public-methods;
+    """Testing config."""
     DEBUG = True
     TESTING = True
 
-class ProductionConfig(Config):
+class ProductionConfig(Config):  # pylint: disable=too-few-public-methods;
+    """Production config."""
     SECRET_KEY = os.getenv('SOLR_FEEDER_FLASK_SECRET_KEY')
     if not SECRET_KEY:
         raise RuntimeError('Environment variable SOLR_FEEDER_FLASK_SECRET_KEY in not defined')

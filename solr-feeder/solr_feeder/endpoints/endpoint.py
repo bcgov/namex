@@ -21,7 +21,7 @@ class Endpoint:  # pylint: disable=too-few-public-methods
     def __init__(self, name: str, bps: list, app: Flask = None):
         """Initialize the endpoint and mount the blueprints to it."""
         self.app = None
-        self.bp = Blueprint(name, __name__, url_prefix='/api/v1')
+        self.bp = Blueprint(name, __name__, url_prefix='/api/v1')  # pylint: disable=invalid-name;
 
         for bp in bps:  # pylint: disable=invalid-name
             self.bp.register_blueprint(bp)
@@ -32,6 +32,6 @@ class Endpoint:  # pylint: disable=too-few-public-methods
     def init_app(self, app: Flask):
         """Add the version endpoint to the app."""
         if not app:
-            raise Exception('Cannot initialize without a Flask App.')
+            raise Exception('Cannot initialize without a Flask App.')  # pylint: disable=broad-exception-raised;
         self.app = app
         self.app.register_blueprint(self.bp)
