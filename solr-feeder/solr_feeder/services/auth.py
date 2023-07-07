@@ -43,6 +43,6 @@ def get_bearer_token() -> tuple[str, dict]:
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
         logging.error('AUTH api connection failure: %s', err)
         return None, {'message': 'AUTH connection failure', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
-    except Exception as err:  # noqa: B902
+    except Exception as err:
         logging.error('AUTH service failure: %s', err.with_traceback(None))
         return None, {'message': 'AUTH service error', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}

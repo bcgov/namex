@@ -60,6 +60,11 @@ class Config():  # pylint: disable=too-few-public-methods;
     except:  # pylint: disable=bare-except; # noqa: B901, E722
         BOR_API_TIMEOUT = 20
 
+    try:
+        NAMEX_SOLR_TIMEOUT = int(os.getenv('NAMEX_SOLR_TIMEOUT', '20'))
+    except:  # pylint: disable=bare-except; # noqa: B901, E722
+        NAMEX_SOLR_TIMEOUT = 20
+
     KEYCLOAK_AUTH_TOKEN_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL')
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('BUSINESS_SEARCH_SERVICE_ACCOUNT_CLIENT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('BUSINESS_SEARCH_SERVICE_ACCOUNT_SECRET')
@@ -73,20 +78,25 @@ class Config():  # pylint: disable=too-few-public-methods;
 
 class DevelopmentConfig(Config):  # pylint: disable=too-few-public-methods;
     """Development config."""
+
     DEBUG = True
     TESTING = True
 
 
 class UnitTestingConfig(Config):  # pylint: disable=too-few-public-methods;
     """Testing config."""
+
     DEBUG = True
     TESTING = True
 
+
 class ProductionConfig(Config):  # pylint: disable=too-few-public-methods;
     """Production config."""
+
     SECRET_KEY = os.getenv('SOLR_FEEDER_FLASK_SECRET_KEY')
     if not SECRET_KEY:
         raise RuntimeError('Environment variable SOLR_FEEDER_FLASK_SECRET_KEY in not defined')
+
 
 config = {
     'development': DevelopmentConfig,

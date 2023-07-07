@@ -22,6 +22,7 @@ from flask import current_app
 
 FIRM_LEGAL_TYPES = ['SP', 'GP', 'LP', 'XP', 'LL', 'XL', 'MF']
 
+
 def _parse_party(party: dict, legal_type: str):
     """Return the party information with parsed data expected by the apis."""
     officer = {'id': party.get('id')}
@@ -49,6 +50,7 @@ def _parse_party(party: dict, legal_type: str):
 
     return party
 
+
 def get_business_info(legal_type: str, identifier: str) -> tuple[dict, dict]:
     """Return the basic business info of the business."""
     try:
@@ -72,7 +74,7 @@ def get_business_info(legal_type: str, identifier: str) -> tuple[dict, dict]:
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
         logging.error('COLIN connection failure %s', err)
         return None, {'message': 'COLIN connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
-    except Exception as err:  # pylint: disable=broad-exception-caught; noqa: B902
+    except Exception as err:
         logging.error('COLIN service error %s', err.with_traceback(None))
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
 
@@ -86,8 +88,10 @@ def get_owners(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
 
         parties_url = f'{current_app.config["COLIN_API_URL"]}/businesses/{legal_type}/{identifier}/parties'
         # get owners
-        fio_res = requests.get(f'{parties_url}?partyType=Firm Individual Owner', timeout=current_app.config['COLIN_API_TIMEOUT'])
-        fbo_res = requests.get(f'{parties_url}?partyType=Firm Business Owner', timeout=current_app.config['COLIN_API_TIMEOUT'])
+        fio_res = requests.get(f'{parties_url}?partyType=Firm Individual Owner',
+                               timeout=current_app.config['COLIN_API_TIMEOUT'])
+        fbo_res = requests.get(f'{parties_url}?partyType=Firm Business Owner',
+                               timeout=current_app.config['COLIN_API_TIMEOUT'])
         if fio_res.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND]:
             return None, {'message': fio_res.json(), 'status_code': fio_res.status_code}
         if fbo_res.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND]:
@@ -107,7 +111,7 @@ def get_owners(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
         logging.error('COLIN connection failure %s', err)
         return None, {'message': 'COLIN connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
-    except Exception as err:  # pylint: disable=broad-exception-caught; noqa: B902
+    except Exception as err:
         logging.error('COLIN service error %s', err.with_traceback(None))
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
 
@@ -131,6 +135,6 @@ def get_parties(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
         logging.error('COLIN connection failure %s', err)
         return None, {'message': 'COLIN connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
-    except Exception as err:  # pylint: disable=broad-exception-caught; noqa: B902
+    except Exception as err:
         logging.error('COLIN service error %s', err.with_traceback(None))
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}

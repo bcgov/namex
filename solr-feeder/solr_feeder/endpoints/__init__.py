@@ -14,7 +14,7 @@
 """Exposes the endpoints."""
 from .feeds import bp as feeder_bp
 from .probes import bp as probes_bp
-from .endpoint import Endpoint
+from .utils import Endpoint
 
 
 endpoint = Endpoint(name='SOLR_FEEDER', bps=[feeder_bp, probes_bp])
