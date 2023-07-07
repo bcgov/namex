@@ -243,6 +243,7 @@ class ReportResource(Resource):
         nr_report_json = nr_model.json()
         nr_report_json['service_url'] = current_app.config.get('NAME_REQUEST_URL')
         nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.entity_type_cd)
+        nr_report_json['legalAct'] = ReportResource._get_legal_act(nr_model.entity_type_cd)
         isXPRO = nr_model.entity_type_cd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
         nr_report_json['requestCodeDescription'] = \
@@ -374,7 +375,7 @@ class ReportResource(Resource):
             'SO': 'BC Social Enterprise',
             'PA': 'Submit appropriate form to BC Registries. Call if assistance required',
             'FI': 'Submit appropriate form to BC Registries. Call if assistance required',
-            'PAR': 'Submit appropriate form to BC Registries. Call if assistance required.',
+            'PAR': 'Submit appropriate form to BC Registries. Call if assistance required',
             # XPRO and Foreign Types
             'XCR': CORP_ONLINE_URL,
             'XUL': CORP_ONLINE_URL,
@@ -383,6 +384,36 @@ class ReportResource(Resource):
             'XLL': CORP_FORMS_URL,
             'XCP': 'Extraprovincial Cooperative Association',
             'XSO': 'Extraprovincial Cooperative Association',
+        }
+        return next_action_text.get(entity_type_cd, None)
+
+    @staticmethod
+    def _get_legal_act(entity_type_cd: str):
+
+        next_action_text = {
+            # BC Types
+            'CR':  'Business Corporations Act',
+            'UL':  'Business Corporations Act',
+            'FR':  'Partnership Act',
+            'GP':  'Partnership Act',
+            'DBA': 'Partnership Act',
+            'LP':  'Partnership Act',
+            'LL':  'Partnership Act',
+            'CP':  'Cooperative Association Act',
+            'BC':  'Business Corporations Act',
+            'CC':  'Business Corporations Act',
+            'SO':  'Business Corporations Act',
+            'PA':  '',
+            'FI':  'Credit Union Incorporation Act',
+            'PAR': 'Trustee (Church Property) Act',
+            # XPRO and Foreign Types
+            'XCR': '',
+            'XUL': '',
+            'RLC': '',
+            'XLP': '',
+            'XLL': '',
+            'XCP': '',
+            'XSO': '',
         }
         return next_action_text.get(entity_type_cd, None)
 
