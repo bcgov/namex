@@ -14,7 +14,6 @@
 """Manages colin-api interactions."""
 import logging
 from http import HTTPStatus
-from typing import List, Tuple
 
 import requests
 from requests import exceptions
@@ -24,7 +23,35 @@ from flask import current_app
 FIRM_LEGAL_TYPES = ['SP', 'GP', 'LP', 'XP', 'LL', 'XL', 'MF']
 
 
-def get_business_info(legal_type: str, identifier: str) -> Tuple[dict, dict]:
+def _parse_party(party: dict, legal_type: str):
+    """Return the party information with parsed data expected by the apis."""
+    officer = {'id': party.get('id')}
+    if party['officer'].get('orgName'):
+        officer['organizationName'] = party['officer']['orgName']
+        officer['partyType'] = 'organization'
+    else:
+        officer['firstName'] = party['officer']['firstName']
+        officer['middleInitial'] = party['officer'].get('middleInitial')
+        officer['lastName'] = party['officer']['lastName']
+        officer['partyType'] = 'person'
+
+    party['officer'] = officer
+    party['source'] = 'COLIN'
+
+    if legal_type in FIRM_LEGAL_TYPES:
+        for role in party['roles']:
+            if role['roleType'] in ['Firm Business Owner', 'Firm Individual Owner']:
+                # convert role type to modernized description
+                role['roleType'] = 'proprietor' if legal_type == 'SP' else 'partner'
+
+    # if no address then set it to empty delivery
+    if not party.get('deliveryAddress'):
+        party['deliveryAddress'] = {'addressType': 'DELIVERY'}
+
+    return party
+
+
+def get_business_info(legal_type: str, identifier: str) -> tuple[dict, dict]:
     """Return the basic business info of the business."""
     try:
         res = requests.get(f'{current_app.config["COLIN_API_URL"]}/businesses/{legal_type}/{identifier}',
@@ -47,46 +74,67 @@ def get_business_info(legal_type: str, identifier: str) -> Tuple[dict, dict]:
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
         logging.error('COLIN connection failure %s', err)
         return None, {'message': 'COLIN connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
-    except Exception as err:  # noqa: B902
+    except Exception as err:
         logging.error('COLIN service error %s', err.with_traceback(None))
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
 
 
-def get_owners(legal_type: str, identifier: str) -> Tuple[List[dict], dict]:
-    """Return the owners of the business."""
+def get_owners(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
+    """Return the firm owners of the business."""
     try:
+        owners = []
         if legal_type not in FIRM_LEGAL_TYPES:
-            return {'parties': []}, None
+            return [], None
+
         parties_url = f'{current_app.config["COLIN_API_URL"]}/businesses/{legal_type}/{identifier}/parties'
-        fio_res = requests.get(f'{parties_url}?partyType=Firm Individual Owner', timeout=current_app.config['COLIN_API_TIMEOUT'])
-        fbo_res = requests.get(f'{parties_url}?partyType=Firm Business Owner', timeout=current_app.config['COLIN_API_TIMEOUT'])
-        if fio_res.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND] or fbo_res.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND]:
-            return None, {'message': res.json(), 'status_code': res.status_code}
-        
+        # get owners
+        fio_res = requests.get(f'{parties_url}?partyType=Firm Individual Owner',
+                               timeout=current_app.config['COLIN_API_TIMEOUT'])
+        fbo_res = requests.get(f'{parties_url}?partyType=Firm Business Owner',
+                               timeout=current_app.config['COLIN_API_TIMEOUT'])
+        if fio_res.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND]:
+            return None, {'message': fio_res.json(), 'status_code': fio_res.status_code}
+        if fbo_res.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND]:
+            return None, {'message': fbo_res.json(), 'status_code': fbo_res.status_code}
+
         fio_json = fio_res.json()
         fbo_json = fbo_res.json()
         colin_owners = fio_json.get('directors', []) + fbo_json.get('directors', [])
-        
-        owners = []
-        for owner in colin_owners:
-            officer = {}
-            if owner['officer'].get('orgName'):
-                officer['organizationName'] = owner['officer']['orgName']
-                officer['partyType'] = 'organization'
-            else:
-                officer['firstName'] = owner['officer']['firstName']
-                officer['middleInitial'] = owner['officer'].get('middleInitial')
-                officer['lastName'] = owner['officer']['lastName']
-                officer['partyType'] = 'person'
-            roles = [{'roleType': 'proprietor' if legal_type == 'SP' else 'partner'}]
-            
-            owners.append({'officer': officer, 'roles': roles})
 
-        return {'parties': owners}, None
+        for owner in colin_owners:
+            parsed_owner = _parse_party(owner, legal_type)
+            # only need to include officer and roles for this flow
+            owners.append({'officer': parsed_owner['officer'], 'roles': parsed_owner['roles']})
+
+        return owners, None
 
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
         logging.error('COLIN connection failure %s', err)
         return None, {'message': 'COLIN connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
-    except Exception as err:  # noqa: B902
+    except Exception as err:
+        logging.error('COLIN service error %s', err.with_traceback(None))
+        return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
+
+
+def get_parties(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
+    """Return the parties of the business."""
+    try:
+        parties = []
+        parties_url = f'{current_app.config["COLIN_API_URL"]}/businesses/{legal_type}/{identifier}/parties/all'
+
+        # get all parties
+        all_parties = requests.get(f'{parties_url}', timeout=current_app.config['COLIN_API_TIMEOUT'])
+        if all_parties.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND]:
+            return None, {'message': all_parties.json(), 'status_code': all_parties.status_code}
+
+        for party in (all_parties.json()).get('parties', []):
+            parties.append(_parse_party(party, legal_type))
+
+        return parties, None
+
+    except (exceptions.ConnectionError, exceptions.Timeout) as err:
+        logging.error('COLIN connection failure %s', err)
+        return None, {'message': 'COLIN connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
+    except Exception as err:
         logging.error('COLIN service error %s', err.with_traceback(None))
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}

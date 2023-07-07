@@ -1,3 +1,17 @@
+# Copyright © 2023 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Manages feeder api endpoints."""
 import logging
 from http import HTTPStatus
 
@@ -5,7 +19,9 @@ import flask
 from flask import Blueprint
 
 from solr_feeder import solr
-from solr_feeder.services import get_business_info, get_owners, update_search
+from solr_feeder.services import update_search_cores
+
+from .utils import feeds_validate
 
 
 bp = Blueprint('FEEDER', __name__, url_prefix='/feeds')  # pylint: disable=invalid-name
@@ -14,7 +30,7 @@ bp = Blueprint('FEEDER', __name__, url_prefix='/feeds')  # pylint: disable=inval
 # Feed the specified core with the given data.
 @bp.post('')
 def feed_solr():
-    """Updates the solr cores for namex and search.
+    """Update the solr cores for namex and search.
 
     Expected payload for updating namex core:
         {
@@ -29,46 +45,20 @@ def feed_solr():
             legalType: str
         }
     """
-    logging.debug('request raw data: {}'.format(flask.request.data))
+    logging.debug('request raw data: %s', flask.request.data)
     json_data = flask.request.get_json()
+    if error := feeds_validate(json_data):
+        return {'message': error}, HTTPStatus.BAD_REQUEST
 
-    solr_core = json_data.get('solr_core')
-    if not solr_core:
-        return {'message': 'Required parameter "solr_core" not defined'}, HTTPStatus.BAD_REQUEST
-
-    if solr_core not in ('names', 'possible.conflicts', 'search'):
-        return {'message': 'Parameter "solr_core" only has valid values of "names", "possible.conflicts" or "search"'}, 400
+    solr_core = json_data['solr_core']
 
     if solr_core == 'search':
-        identifier = json_data.get('identifier')
-        legal_type = json_data.get('legalType')
-        if not identifier:
-            return {'message': 'Required parameter "identifier" not defined'}, HTTPStatus.BAD_REQUEST
-        if not legal_type:
-            return {'message': 'Required parameter "legalType" not defined'}, HTTPStatus.BAD_REQUEST
-        logging.debug('Updating search core record for %s...', identifier)
-        # get business data
-        business, error_response = get_business_info(legal_type, identifier)
-        if error_response:
-            logging.error('Error getting COLIN business data: %s', error_response)
-            return {'message': error_response['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
-        
-        owners, error_response = get_owners(legal_type, identifier)
-        if error_response:
-            logging.error('Error getting COLIN owners data: %s', error_response)
-            return {'message': error_response['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
-        # send data to search core via search-api
-        error_response = update_search({**business, **owners})
-        if error_response:
-            logging.error('Error updating search core: %s', error_response)
-            return {'message': error_response['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
-
-        logging.debug('Search core updated.')
+        # update registries search AND bor search
+        errors = update_search_cores(json_data['identifier'], json_data['legalType'])
+        if errors:
+            return error
 
     else:
-        if 'request' not in json_data:
-            return {'message': 'Required parameter "request" not defined'}, HTTPStatus.BAD_REQUEST
-
         logging.debug('Updating namex core record...')
         error_response = solr.update_core(solr_core, json_data['request'])
         if error_response:

@@ -1,0 +1,86 @@
+{
+	"info": {
+		"_postman_id": "d4b9a1c5-8ee7-4f9a-9d1c-74c2a016fc69",
+		"name": "solr-feeder",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6835935",
+		"_collection_link": "https://warped-escape-616276.postman.co/workspace/bc-registries~8ef8e652-492a-4d19-b978-d4f0da255b2c/collection/6835935-d4b9a1c5-8ee7-4f9a-9d1c-74c2a016fc69?action=share&creator=6835935&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "probes",
+			"item": [
+				{
+					"name": "liveness",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{version}}/probes/liveness",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{version}}",
+								"probes",
+								"liveness"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "readiness",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{version}}/probes/readiness",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{version}}",
+								"probes",
+								"readiness"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "feeder",
+			"item": [
+				{
+					"name": "update search cores",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"solr_core\": \"search\",\n    \"identifier\": \"LP0022908\",\n    \"legalType\": \"LP\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{version}}/feeds",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{version}}",
+								"feeds"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

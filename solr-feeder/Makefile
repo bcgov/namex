@@ -51,7 +51,9 @@ install: clean ## Install python virtrual environment
 	pip install -Ur requirements.txt
 
 install-dev: ## Install local application
-	. venv/bin/activate && pip install -e .
+	. venv/bin/activate ; \
+	pip install -Ur requirements/dev.txt; \
+	pip install -e .
 
 #################################################################################
 # COMMANDS - CI                                                                 #
@@ -59,10 +61,10 @@ install-dev: ## Install local application
 ci: pylint flake8 test ## CI flow
 
 pylint: ## Linting with pylint
-	. venv/bin/activate && pylint $(PROJECT_NAME)
+	. venv/bin/activate && pylint --rcfile=setup.cfg $(PROJECT_NAME)
 
 flake8: ## Linting with flake8
-	. venv/bin/activate && flake8 $(PROJECT_NAME) tests
+	. venv/bin/activate && flake8 $(PROJECT_NAME)
 
 lint: pylint flake8 ## run all lint type scripts
 

@@ -44,7 +44,9 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     EXCEPTION
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
-            application_log_insert('solr:gen_conf', SYSDATE(), -1, SQLERRM);
+            if SQLERRM <> 'ORA-01403: no data found' then
+               application_log_insert('solr:gen_conf', SYSDATE(), -1, SQLERRM);
+            end if;
 
             RAISE;
     END;
@@ -75,7 +77,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         SELECT value INTO oracle_wallet FROM configuration WHERE application = 'GLOBAL' AND name = 'oracle_wallet';
         SELECT value INTO destination_url FROM configuration WHERE application = 'SOLR_FEEDER' AND name =
                 'destination_url';
-        
+
         IF action = ACTION_SYNC THEN
             -- NOTE: nr_number == corp_num in this case
             SELECT corp_typ_cd INTO corp_typ_cd FROM corp_type NATURAL JOIN corporation WHERE corp_num = nr_number;
@@ -134,7 +136,9 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     EXCEPTION
         WHEN OTHERS THEN
             dbms_output.put_line('error: ' || SQLCODE || ' / ' || SQLERRM);
-            application_log_insert('solr.send_to_solr', SYSDATE(), -1, SQLERRM);
+            if SQLERRM <> 'ORA-01403: no data found' then
+               application_log_insert('solr.send_to_solr', SYSDATE(), -1, SQLERRM);
+            end if;
 
             return SQLERRM;
     END;
@@ -221,7 +225,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     -- Called from a trigger to queue corporation data that needs to be sent to Search Solr.
     --
     PROCEDURE load_corporation_data IS
-        CURSOR pending_rows IS SELECT * FROM triggered_corporation WHERE status_solr = STATUS_PENDING ORDER BY id;
+        CURSOR pending_rows IS SELECT max(id) as id, corp_num, status_solr FROM triggered_corporation WHERE status_solr = STATUS_PENDING GROUP BY corp_num, status_solr ORDER BY id ASC;
         triggered_corp triggered_corporation%ROWTYPE;
     BEGIN
         OPEN pending_rows;
@@ -246,7 +250,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     -- Called from a job to send queued changes to Solr.
     --
     PROCEDURE feed_solr IS
-        CURSOR solr_feeder IS SELECT * FROM solr_feeder WHERE status <> STATUS_COMPLETE ORDER BY id;
+        CURSOR solr_feeder IS SELECT * FROM solr_feeder WHERE status <> STATUS_COMPLETE and status <> STATUS_IGNORED AND send_count < 60 ORDER BY id;
         solr_feeder_row solr_feeder%ROWTYPE;
 
         error_response VARCHAR2(4000);
@@ -255,7 +259,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
         -- Load any data needed for the rows inserted by the trigger.
         load_name_data();
         load_state_data();
-        load_corporation_data();  -- for business search sync
+        load_corporation_data();  -- for business/director search sync
 
         OPEN solr_feeder;
         LOOP
