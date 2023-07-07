@@ -59,10 +59,11 @@ jobs:
       - name: Install dependencies
         run: |
           make setup
-      - name: Test with pytest
-        id: test
-        run: |
-          make test
+      # no pytests exist for this project
+      # - name: Test with pytest
+      #   id: test
+      #   run: |
+      #     make test
       #- name: Upload coverage to Codecov
       #  uses: codecov/codecov-action@v3
       #  with:
