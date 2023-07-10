@@ -391,7 +391,7 @@ class RequestSearch(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    # @jwt.requires_auth
+    @jwt.requires_auth
     def get():
         """Query for name requests.
 
