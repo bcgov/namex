@@ -3,6 +3,7 @@
 #
 import string
 from typing import List
+from urllib import parse
 
 import pytest
 
@@ -30,6 +31,7 @@ def test_compress_name(name, expected):
     response = SolrQueries._compress_name(name)
 
     assert expected == response
+
 
 name_copy_test_data = [
     ('waffle corp', ''),
@@ -90,10 +92,10 @@ def test_tokenz(name_string, expected):
 name_parse_data = [
     (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records', 'skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
     (['skinny', ' ', '-', '"', 'records', '"'], ['skinny']),
-    (['skinny', ' ', '"', 'puppy', ' ', 'records', '"'], ['skinny', 'puppy', 'records','skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
-    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records','skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
-    (['skinny', ' ', 'puppy', '-', 'records'], ['skinny', 'puppy', 'records','skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
-    (['skinny', ' ', 'puppy', ' ', '-', 'records'], ['skinny', 'puppy','skinnypuppy']),
+    (['skinny', ' ', '"', 'puppy', ' ', 'records', '"'], ['skinny', 'puppy', 'records', 'skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
+    (['skinny', ' ', '"', 'puppy', '-', 'records', '"'], ['skinny', 'puppy', 'records', 'skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
+    (['skinny', ' ', 'puppy', '-', 'records'], ['skinny', 'puppy', 'records', 'skinnypuppy', 'skinnypuppyrecords', 'puppyrecords']),
+    (['skinny', ' ', 'puppy', ' ', '-', 'records'], ['skinny', 'puppy', 'skinnypuppy']),
     (['skinny', ' ', '@', 'puppy'], ['skinny']),
     (['skinny', ' ', '@', '"', 'puppy', ' ', 'records', '"'], ['skinny']),
     (['skinny', ' ', '@', '"', 'puppy', '-', 'records', '"'], ['skinny']),
@@ -107,7 +109,25 @@ def test_parse_for_synonym_candidates(tokens, expected):
 
     synonym_candidates = SolrQueries._parse_for_synonym_candidates(tokens)
 
-    print (synonym_candidates)
+    print(synonym_candidates)
 
     assert expected == synonym_candidates
 
+
+@pytest.mark.parametrize('search_value, expected_solr_query, expected_nr_number, expected_nr_name', [
+    (None, '*:*', None, None),
+    ('test name one', '(name_copy:*test* AND name_copy:*name* AND name_copy:*one*)', None, 'test name one'),
+    ('1234567', 'nr_num:*1234567* OR (name_copy:*1234567*)', '1234567', '1234567'),
+    ('nr1234567', 'nr_num:*1234567*', '1234567', ''),
+    ('nr 1234567', 'nr_num:*1234567*', '1234567', ''),
+    ('NR1234567', 'nr_num:*1234567*', '1234567', ''),
+    ('NR 1234567', 'nr_num:*1234567*', '1234567', ''),
+    ('NR123 test one', 'nr_num:*123* AND (name_copy:*test* AND name_copy:*one*)', '123', 'test one'),
+    ('test 123 one', '(name_copy:*test* AND name_copy:*123* AND name_copy:*one*)', None, 'test 123 one'),
+    ('123 test on', 'nr_num:*123* OR (name_copy:*123* AND name_copy:*test* AND name_copy:*on*)', '123', '123 test on')
+])
+def test_get_parsed_query_name_nr_search(search_value, expected_solr_query, expected_nr_number, expected_nr_name):
+    solr_query, nr_number, nr_name = SolrQueries.get_parsed_query_name_nr_search(search_value)
+    assert expected_solr_query == parse.unquote(solr_query)
+    assert expected_nr_number == nr_number
+    assert expected_nr_name == nr_name

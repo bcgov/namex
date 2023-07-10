@@ -6,6 +6,7 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import List
+from namex.analytics.solr import SolrQueries
 
 from namex.models import Applicant, Name, Request, State, User
 from tests.python.end_points.util import create_header
@@ -638,3 +639,50 @@ def test_request_search_system_only(client, jwt, app):
         assert rv.status_code not in [HTTPStatus.OK, HTTPStatus.ACCEPTED, HTTPStatus.CREATED]
         # assert rv.json['code'] == 'missing_a_valid_role'
         # assert rv.json['description'] == 'Missing a role required to access this endpoint'
+
+
+@pytest.mark.parametrize('search_name, expected_len', [
+    ('test name one', 1),
+    ('name test one', 1),
+    ('one test name', 1),
+    ('1234567', 1),
+    ('nr1234567', 1),
+    ('nr 1234567', 1),
+    ('NR1234567', 1),
+    ('NR 1234567', 1),
+    ('NR123 test one', 1),
+    ('12345678', 0),
+    ('test 1234567 name one', 0)
+])
+def test_search_get(client, jwt, app, monkeypatch, search_name, expected_len):
+
+    nr_no_return = Request()
+    nr_no_return.nrNum = 'NR 7654321'
+    nr_no_return.stateCd = State.DRAFT
+    name1 = Name()
+    name1.choice = 1
+    name1.name = 'SHOULD NOT RETURN'
+    nr_no_return.names = [name1]
+    nr_no_return.save_to_db()
+
+    nr = Request()
+    nr.nrNum = 'NR 1234567'
+    nr.stateCd = State.DRAFT
+    name1 = Name()
+    name1.choice = 1
+    name1.name = 'TEST NAME ONE'
+    nr.names = [name1]
+    nr.save_to_db()
+
+    def mock_get_name_nr_search_results(solr_query, start=0, rows=10):
+        return ({'names': []}, '', None)
+    monkeypatch.setattr(SolrQueries, 'get_name_nr_search_results', mock_get_name_nr_search_results)
+
+    # create JWT & setup header with a Bearer Token using the JWT
+    headers = create_header(jwt, ['public_user'])
+    rv = client.get(f'/api/v1/requests/search?query={search_name}', headers=headers)
+    assert rv.status_code == HTTPStatus.OK
+    assert len(rv.json) == expected_len
+    if expected_len > 0:
+        assert rv.json[0]['nrNum'] == nr.nrNum
+        assert rv.json[0]['names'] == [name1.name]

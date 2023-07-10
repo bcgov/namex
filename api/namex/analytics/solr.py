@@ -35,6 +35,7 @@ class SolrQueries:
     HISTORY = 'histories'
     TRADEMARKS = 'trademarks'
     RESTRICTED_WORDS = 'restricted_words'
+    NAME_NR_SEARCH = 'name_nr_search'
     VALID_QUERIES = [CONFLICTS, HISTORY, TRADEMARKS]
 
     #
@@ -119,7 +120,15 @@ class SolrQueries:
             '&fl=application_number,name,status,description,score'
             '&bq=status:%22Registration%20published%22^5.0'
             '&sort=score%20desc'
-            '{name_copy_clause}'
+            '{name_copy_clause}',
+        NAME_NR_SEARCH:
+            '/solr/names/select?'
+            'indent=on'
+            '&q={query}'
+            '&sort=score%20desc,start_date%20desc'
+            '&wt=json'
+            '&start={start}&rows={rows}'
+            '&fl=nr_num,score'
     }
 
     @classmethod
@@ -198,9 +207,9 @@ class SolrQueries:
                 solr['response']['numFound'] += result['response']['numFound']
                 result_name = parse.unquote(connection[1])
                 if previous_stack_title.replace(' ', '') != result_name.replace(' ', ''):
-                    stack_title_info = {'name_info': {'name': result_name}, 'stems': stemmed_words[:int(stem_count/2)]}
-                    for word in list_name_split[:int(stem_count/2)]:
-                        for stem in stemmed_words[:int(stem_count/2)]:
+                    stack_title_info = {'name_info': {'name': result_name}, 'stems': stemmed_words[:int(stem_count / 2)]}
+                    for word in list_name_split[:int(stem_count / 2)]:
+                        for stem in stemmed_words[:int(stem_count / 2)]:
                             if stem in word:
                                 break
                             elif stem[:-1] in word:
@@ -296,7 +305,7 @@ class SolrQueries:
                                                 stem = [synonym.upper()[:-1]]
                                                 stack_title_info = solr['response']['docs'].pop()
                                                 if stem[0] not in name['stems']:
-                                                    sorted_names.append({'name_info': name['name_info'],'stems': stem + name['stems'].copy()})
+                                                    sorted_names.append({'name_info': name['name_info'], 'stems': stem + name['stems'].copy()})
                                                     if stem[0] not in stack_title_info['stems'] and synonym.upper() in stack_title_info['stems']:
                                                         stack_title_info['stems'] += stem
                                                 else:
@@ -360,14 +369,14 @@ class SolrQueries:
             connections = []
             if name == '':
                 name = '*'
-                prox_search_strs.append((['*'],'','',1))
+                prox_search_strs.append((['*'], '', '', 1))
                 old_alg_search_strs.append('*')
 
             for prox_search_tuple, old_alg_search in zip(prox_search_strs, old_alg_search_strs):
 
                 old_alg_search_str = old_alg_search[:-2].replace(' ', '%20') + '*'  # [:-2] takes off the last '\ '
                 synonyms_clause = cls._get_synonyms_clause(prox_search_tuple[1], prox_search_tuple[2], name_tokens) if exact_phrase == '' else ''
-                exact_phrase_clause = '&fq=contains_exact_phrase:' + '\"' + parse.quote(exact_phrase).replace('%2A','') + '\"' if exact_phrase != '' else ''
+                exact_phrase_clause = '&fq=contains_exact_phrase:' + '\"' + parse.quote(exact_phrase).replace('%2A', '') + '\"' if exact_phrase != '' else ''
 
                 if name.find('*') == -1:
                     for name in prox_search_tuple[0]:
@@ -381,7 +390,7 @@ class SolrQueries:
                         )
                         current_app.logger.debug('Query: ' + query)
                         connections.append((json.load(request.urlopen(query)),
-                                            '----' + prox_search_str.replace('\\', '').replace('*','').replace('@','')
+                                            '----' + prox_search_str.replace('\\', '').replace('*', '').replace('@', '')
                                             + synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')
                                             + ' - PROXIMITY SEARCH'))
 
@@ -395,7 +404,7 @@ class SolrQueries:
                 )
                 current_app.logger.debug('Query: ' + query)
                 connections.append((json.load(request.urlopen(query)), '----' +
-                                    old_alg_search_str.replace('\\', '').replace('%20', ' ').replace('**','*') +
+                                    old_alg_search_str.replace('\\', '').replace('%20', ' ').replace('**', '*') +
                                     synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ') +
                                     ' - EXACT WORD ORDER'))
             return connections
@@ -408,7 +417,7 @@ class SolrQueries:
     def get_cobrs_phonetic_results(cls, solr_base_url, search_strs, name_tokens, start=0, rows=100):
         try:
             if search_strs == []:
-                connections = [({'response':{'numFound':0,'docs':[]},'responseHeader':{'params':{'q':'*'}}},'----*')]
+                connections = [({'response': {'numFound': 0, 'docs': []}, 'responseHeader':{'params': {'q': '*'}}}, '----*')]
             else:
                 connections = []
                 for str_tuple in search_strs:
@@ -424,7 +433,7 @@ class SolrQueries:
                         )
                         current_app.logger.debug('Query: ' + query)
                         result = json.load(request.urlopen(query))
-                        connections.append((result, '----' + start_str.replace('*','').replace('@','') +
+                        connections.append((result, '----' + start_str.replace('*', '').replace('@', '') +
                                             synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
             return connections
 
@@ -436,7 +445,7 @@ class SolrQueries:
     def get_phonetic_results(cls, solr_base_url, name, search_strs, name_tokens, start=0, rows=100):
         try:
             if search_strs == []:
-                connections = [({'response':{'numFound':0,'docs':[]},'responseHeader':{'params':{'q':'*'}}},'----*')]
+                connections = [({'response': {'numFound': 0, 'docs': []}, 'responseHeader':{'params': {'q': '*'}}}, '----*')]
             else:
                 connections = []
                 for str_tuple in search_strs:
@@ -453,13 +462,97 @@ class SolrQueries:
                     result = json.load(request.urlopen(query))
                     docs = result['response']['docs']
                     result['response']['docs'] = cls.post_treatment(docs, start_str)
-                    connections.append((result, '----' + start_str.replace('*','').replace('@','') +
+                    connections.append((result, '----' + start_str.replace('*', '').replace('@', '') +
                                         synonyms_clause.replace('&fq=name_with_', ' ').replace('%20', ', ')))
             return connections
 
         except Exception as err:
             current_app.logger.error(err, query)
             return None, 'SOLR query error', 500
+
+    @classmethod
+    def get_name_nr_search_results(cls, solr_query, start=0, rows=10):
+        """Search for the query param in `names` core."""
+        solr_base_url = current_app.config.get('SOLR_BASE_URL', None)
+        if not solr_base_url:
+            current_app.logger.error('SOLR: SOLR_BASE_URL is not set')
+            return None, 'Internal server error', 500
+
+        try:
+            query = solr_base_url + SolrQueries.queries[SolrQueries.NAME_NR_SEARCH].format(
+                start=start,
+                rows=rows,
+                query=solr_query
+            )
+            current_app.logger.debug('Query: ' + query)
+            connection = request.urlopen(query)
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'Internal server error', 500
+
+        try:
+            solr = json.load(connection)
+            results = {
+                'response': {
+                    'numFound': solr['response']['numFound'],
+                    'start': solr['response']['start'],
+                    'rows': solr['responseHeader']['params']['rows'],
+                    'maxScore': solr['response']['maxScore'],
+                    'name': solr['responseHeader']['params']['q']
+                },
+                'names': solr['response']['docs']
+            }
+            return results, '', None
+        except Exception as err:
+            current_app.logger.error(err, query)
+            return None, 'Internal server error', 500
+
+    @classmethod
+    def get_parsed_query_name_nr_search(cls, value: str):
+        """Build query to search nr number or name.
+
+        - `None` -> *:*
+        - NR 1234567 -> nr_num:*1234567*
+        - HNR239 HOLDINGS -> (name_copy:*HNR239* AND name_copy:*HOLDINGS*)
+        - NR 955 HNR239 HOLDINGS -> nr_num:*955* AND (name_copy:*HNR239* AND name_copy:*HOLDINGS)
+        - HNR239 HOLDINGS NR 955 -> nr_num:*955* AND (name_copy:*HNR239* AND name_copy:*HOLDINGS)
+        - HNR239 NR 955 HOLDINGS -> nr_num:*955* OR
+                                (name_copy:*HNR239* AND name_copy:*NR* AND name_copy:*955* AND name_copy:*HOLDINGS)
+        """
+        solr_query = '*:*'
+        nr_number = None
+        if value:
+            value = value.strip()
+
+            nr_num = ''
+            # match whole/start/end string  NR 1234567, NR1234567
+            nr_num_regex = r'(^(NR( |)[0-9]+)$)|(^(NR( |)[0-9]+)\s)|(\s(NR( |)[0-9]+)$)'
+            nr_num_fallback_regex = r'(^[0-9]+$)|(^[0-9]+\s)|(\s[0-9]+$)'  # 1234567
+            if result := re.search(nr_num_regex, value, re.IGNORECASE):
+                matching_nr = result.group()
+                nr_number = re.sub('NR', '', matching_nr, flags=re.IGNORECASE).strip()
+                value = value.replace(matching_nr, '', 1).strip()  # removing nr num
+                nr_num = 'nr_num:*' + nr_number + '*'
+                if value:
+                    nr_num += ' AND'  # Get results which match nr_num and name
+                else:
+                    return nr_num, nr_number, value
+            elif result := re.search(nr_num_fallback_regex, value):
+                nr_number = result.group().strip()
+                nr_num = 'nr_num:*' + nr_number + '* OR'
+
+            name_copy = 'name_copy:*'
+            name_copy += '* AND name_copy:*'.join(value.split())
+            name_copy += '*'  # name_copy += '* AND'
+
+            # name = f'({name_copy} name:(*"{value}"*))'
+            name = f'({name_copy})'
+
+            solr_query = parse.quote(f'{nr_num} {name}'.strip())
+
+            # 'nr_num:*0285176* OR (name_copy:*0285176* AND name:(*"0285176"*))'
+
+        return solr_query, nr_number, value
 
     @classmethod
     def get_results(cls, query_type, name, start=0, rows=10):
@@ -517,9 +610,9 @@ class SolrQueries:
         # TODO: these should be loaded from somewhere.
         designations = [
             'corp.', 'corporation', 'inc.', 'incorporated', 'incorporee', 'l.l.c.', 'limited liability co.',
-            'limited liability company', 'limited liability partnership', 'limited partnership','limitee', 'llc', 'llp', 'ltd.', 'ltee',
+            'limited liability company', 'limited liability partnership', 'limited partnership', 'limitee', 'llc', 'llp', 'ltd.', 'ltee',
             'sencrl', 'societe a responsabilite limitee', 'societe en nom collectif a responsabilite limitee', 'srl',
-            'ulc', 'unlimited liability company', 'limited',]
+            'ulc', 'unlimited liability company', 'limited', ]
 
         # Match the designation with whitespace before and either followed by whitespace or end of line.
         for designation in designations:
@@ -549,7 +642,7 @@ class SolrQueries:
         :param categories: List[str]: a list of strings used as categories to classify the tokens
         :return: List[str]: a list of string tokens that can be parsed left-> as order is preserved
         """
-        tokens = [] # yep, lazy format
+        tokens = []  # yep, lazy format
         start_token: int = 0
         idx: int
         category: List[str] = None
@@ -633,7 +726,6 @@ class SolrQueries:
 
         return candidates
 
-
     @classmethod
     def _get_concatenated_terms(cls, candidates):
 
@@ -644,14 +736,14 @@ class SolrQueries:
 
         for x in range(len(candidates)):
             if x < len(candidates) - 1:
-                multiples.append("".join(candidates[x:x+2]))
+                multiples.append("".join(candidates[x:x + 2]))
                 if x < len(candidates) - 2:
-                    multiples.append("".join(candidates[x:x+3]))
+                    multiples.append("".join(candidates[x:x + 3]))
 
         return multiples
 
-
     # Call the synonyms API for the given token.
+
     @classmethod
     def _synonyms_exist(cls, token, col):
         solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
@@ -704,7 +796,7 @@ class SolrQueries:
 
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod
-    def _get_synonyms_clause(cls, name, stemmed_name, name_tokens={'full_words':[], 'stemmed_words':[]}):
+    def _get_synonyms_clause(cls, name, stemmed_name, name_tokens={'full_words': [], 'stemmed_words': []}):
         # name = re.sub(' +', ' ', name)
         current_app.logger.debug('getting synonyms for: {}'.format(name))
         clause = ''
@@ -717,7 +809,7 @@ class SolrQueries:
                                                   string.ascii_lowercase])
             candidates = cls._parse_for_synonym_candidates(tokens)
             for token in candidates:
-                for full, stem in zip(name_tokens['full_words'],name_tokens['stemmed_words']):
+                for full, stem in zip(name_tokens['full_words'], name_tokens['stemmed_words']):
                     if token.upper() == full.upper():
                         token = stem
                         break
@@ -726,10 +818,10 @@ class SolrQueries:
 
         if stemmed_name:
             tokens = cls._tokenize(stemmed_name.lower(), [string.digits,
-                                                  string.whitespace,
-                                                  RESERVED_CHARACTERS,
-                                                  string.punctuation,
-                                                  string.ascii_lowercase])
+                                                          string.whitespace,
+                                                          RESERVED_CHARACTERS,
+                                                          string.punctuation,
+                                                          string.ascii_lowercase])
             candidates = cls._parse_for_synonym_candidates(tokens)
             for token in candidates:
                 if cls._synonyms_exist(token, 'stems_text') and token.upper() not in synonyms:
@@ -803,7 +895,7 @@ class SolrQueries:
         # TODO: these should be loaded from somewhere.
         designations = [
             'corp.', 'corp', 'corporation', 'inc.', 'inc', 'incorporated', 'incorporee', 'l.l.c.', 'llc', 'limited partnership',
-            'limited liability co.', 'limited liability co','limited liability company', 'limited liability partnership', 'limitee',
+            'limited liability co.', 'limited liability co', 'limited liability company', 'limited liability partnership', 'limitee',
             'llp', 'ltd.', 'ltd', 'ltee', 'sencrl', 'societe a responsabilite limitee',
             'societe en nom collectif a responsabilite limitee', 'limited', 'srl', 'ulc', 'unlimited liability company']
 
@@ -839,8 +931,8 @@ class SolrQueries:
 
         max_len = len(name.split()) * 2
         query = solr_base_url + \
-                '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={name}&analysis.fieldname=name' \
-                '&wt=json&indent=true'.format(name=parse.quote(name.strip()).replace('%2A', ''))
+            '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={name}&analysis.fieldname=name' \
+            '&wt=json&indent=true'.format(name=parse.quote(name.strip()).replace('%2A', ''))
         current_app.logger.debug('Query: ' + query)
 
         processed_words = json.load(request.urlopen(query))
@@ -863,7 +955,7 @@ class SolrQueries:
         name = parse.unquote(name)
         processed_list = name.split()
 
-        return processed_list,name.strip()
+        return processed_list, name.strip()
 
     @classmethod
     def build_solr_search_strs(cls, name, stemmed_name, name_tokens):
@@ -898,7 +990,7 @@ class SolrQueries:
             prox_compounded_words = [prox_combined_terms.strip()]
 
             if num_terms > 2:
-                prox_compounded_words.append(prox_combined_terms.replace(' ',''))
+                prox_compounded_words.append(prox_combined_terms.replace(' ', ''))
 
             # concat for compound versions of combined terms
             combined_terms_list = prox_combined_terms.split()
@@ -918,7 +1010,7 @@ class SolrQueries:
     @classmethod
     def get_synonyms_for_words(cls, list_name_split):
         # get synonym list for each word in the name
-        list_name_split = [wrd.replace('*','').upper() for wrd in list_name_split]
+        list_name_split = [wrd.replace('*', '').upper() for wrd in list_name_split]
         synonyms_for_word = {}
         for word in list_name_split:
             synonyms_for_word[word] = [x.upper().strip() for x in cls._get_synonym_list(word)]
@@ -948,11 +1040,11 @@ class SolrQueries:
         for item in list_of_words:
             words_to_process += ' ' + item
 
-        return_dict = {'stems':[]}
+        return_dict = {'stems': []}
         if words_to_process != '':
             query = solr_base_url + \
-                    '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={words}&analysis.fieldname=name' \
-                    '&wt=json&indent=true'.format(words=parse.quote(words_to_process.strip()))
+                '/solr/possible.conflicts/analysis/field?analysis.fieldvalue={words}&analysis.fieldname=name' \
+                '&wt=json&indent=true'.format(words=parse.quote(words_to_process.strip()))
             current_app.logger.debug('Query: ' + query)
 
             processed_words = json.load(request.urlopen(query))
@@ -1094,7 +1186,7 @@ class SolrQueries:
             word_sound = word_first_consonant + word_first_vowels
 
         if word_sound == query_sound:
-                return True
+            return True
 
         return False
 

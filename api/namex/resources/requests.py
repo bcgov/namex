@@ -13,7 +13,7 @@ from namex.utils.logging import setup_logging
 
 from sqlalchemy.orm import load_only, lazyload, eagerload
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_, func, or_, text
+from sqlalchemy import and_, func, or_, text, Date
 from sqlalchemy.inspection import inspect
 
 from namex import jwt, nro, services
@@ -233,16 +233,16 @@ class Requests(Resource):
 
         if compName:
             compName = compName.strip().replace(' ', '%')
-            ## nameSearch column is populated like: '|1<name 1>|2<name 2>|3<name 3>
+            # nameSearch column is populated like: '|1<name 1>|2<name 2>|3<name 3>
             # to ensure we don't get a match that spans over a single name
             compName1 = '%|1%' + compName + '%1|%'
             compName2 = '%|2%' + compName + '%2|%'
             compName3 = '%|3%' + compName + '%3|%'
             q = q.filter(or_(
-                    RequestDAO.nameSearch.ilike(compName1),
-                    RequestDAO.nameSearch.ilike(compName2),
-                    RequestDAO.nameSearch.ilike(compName3)
-                ))
+                RequestDAO.nameSearch.ilike(compName1),
+                RequestDAO.nameSearch.ilike(compName2),
+                RequestDAO.nameSearch.ilike(compName3)
+            ))
 
         if firstName:
             firstName = firstName.strip().replace(' ', '%')
@@ -321,7 +321,7 @@ class Requests(Resource):
                 submittedStartDateTimeUtc = submittedStartDateTimeUtcObj.strftime(DATE_TIME_FORMAT_SQL)
                 q = q.filter(RequestDAO.submittedDate >=
                              text('\'{submittedStartDateTimeUtc}\''
-                              .format(submittedStartDateTimeUtc=submittedStartDateTimeUtc)))
+                                  .format(submittedStartDateTimeUtc=submittedStartDateTimeUtc)))
             except ValueError as ve:
                 return jsonify({"message": "Invalid submittedStartDate: {}.  Must be of date format %Y-%m-%d"
                                .format(submittedStartDate)}), 400
@@ -339,7 +339,7 @@ class Requests(Resource):
                                .format(submittedEndDate)}), 400
 
         if (submittedStartDateTimeUtcObj and submittedEndDateTimeUtcObj)\
-            and submittedEndDateTimeUtcObj < submittedStartDateTimeUtcObj:
+                and submittedEndDateTimeUtcObj < submittedStartDateTimeUtcObj:
             return jsonify({"message": "submittedEndDate must be after submittedStartDate"}), 400
 
         q = q.order_by(text(sort_by))
@@ -382,9 +382,100 @@ class Requests(Resource):
         return jsonify({'message': 'Not Implemented'}), 501
 
 # For sbc-auth - My Business Registry page.
-@cors_preflight("POST")
-@api.route('/search', methods=['POST'])
+
+
+@cors_preflight("GET, POST")
+@api.route('/search', methods=['GET', 'POST', 'OPTIONS'])
 class RequestSearch(Resource):
+    """Search for NR's."""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    # @jwt.requires_auth
+    def get():
+        """Query for name requests.
+
+        example: query=NR3742302 or query=abcd
+        """
+        data = []
+        start = request.args.get('start', 0)
+        rows = request.args.get('rows', 10)
+        query = request.args.get('query', '')
+        if not query:
+            return jsonify(data), 200
+
+        try:
+            solr_query, nr_number, nr_name = SolrQueries.get_parsed_query_name_nr_search(query)
+            condition = ''
+            if nr_number:
+                condition = f"requests.nr_num ILIKE '%{nr_number}%'"
+            if nr_name:
+                if condition:
+                    condition += ' OR '
+                name_condition = "requests.name_search ILIKE '%"
+                name_condition += "%' AND requests.name_search ILIKE '%".join(nr_name.split())
+                name_condition += "%'"
+
+                condition += f'({name_condition})'
+
+            results = RequestDAO.query.filter(
+                RequestDAO.stateCd.in_([State.DRAFT, State.INPROGRESS, State.REFUND_REQUESTED]),
+                text(f'({condition})')
+            ).options(
+                lazyload('*'),
+                eagerload(RequestDAO.names).load_only(Name.name),
+                load_only(
+                    RequestDAO.id,
+                    RequestDAO.nrNum
+                )
+            ).limit(rows).all()
+
+            data.extend([{
+                # 'id': nr.id,
+                'nrNum': nr.nrNum,
+                'names': [n.name for n in nr.names]
+            } for nr in results])
+
+            while len(data) < rows:
+                nr_data, have_more_data = RequestSearch._get_next_set_from_solr(solr_query, start, rows)
+                nr_data = nr_data[:(rows - len(data))]
+                data.extend([{
+                    # 'id': nr.id,
+                    'nrNum': nr.nrNum,
+                    'names': [n.name for n in nr.names]
+                } for nr in nr_data])
+
+                if not have_more_data:
+                    break  # no more data in solr
+                start += rows
+
+            return jsonify(data), 200
+        except Exception:
+            return jsonify({'message': 'Internal server error'}), 500
+
+    @staticmethod
+    def _get_next_set_from_solr(solr_query, start, rows):
+        results, msg, code = SolrQueries.get_name_nr_search_results(solr_query, start, rows)
+        if code:
+            raise Exception(msg)
+        elif len(results['names']) > 0:
+            have_more_data = results['response']['numFound'] > (start + rows)
+            identifiers = [name['nr_num'] for name in results['names']]
+            return RequestDAO.query.filter(
+                RequestDAO.nrNum.in_(identifiers),
+                or_(RequestDAO.stateCd != State.EXPIRED,
+                    text(f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
+                         "interval '60 day' >= CAST(now() AS DATE))"))
+            ).options(
+                lazyload('*'),
+                eagerload(RequestDAO.names).load_only(Name.name),
+                load_only(
+                    RequestDAO.id,
+                    RequestDAO.nrNum
+                )
+            ).all(), have_more_data
+
+        return [], False
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -393,7 +484,7 @@ class RequestSearch(Resource):
         search = request.get_json()
         identifiers = search.get('identifiers', [])
 
-        # Only names and applicants are needed for this query, we want this query to be lighting fast 
+        # Only names and applicants are needed for this query, we want this query to be lighting fast
         # to prevent putting a load on namex-api.
         q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers)) \
             .options(
@@ -608,7 +699,6 @@ class Request(Resource):
 
         return jsonify(message='Request:{} - patched'.format(nr)), 200
 
-
     def _email_report(nr_id):
         report = ReportResource()
         report.email_report(nr_id)
@@ -777,7 +867,7 @@ class Request(Resource):
                 is_changed__request_state = True
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
-                emailer_enable = ldclient.get().variation('emailer-enable',  {'key': 'anonymous'}, False)
+                emailer_enable = ldclient.get().variation('emailer-enable', {'key': 'anonymous'}, False)
                 if emailer_enable:
                     thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
                     thread.daemon = True
