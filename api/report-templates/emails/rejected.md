@@ -14,7 +14,6 @@ Your Name Request is **rejected**. Visit [Name Request]({{NAME_REQUEST_URL}}) to
 The following documents are attached to this email:
 
 * Results of Name Request
-* Receipt
 
 ---
 

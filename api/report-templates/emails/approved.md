@@ -25,7 +25,6 @@ Next Step(s):
 The following documents are attached to this email:
 
 * Results of Name Request
-* Receipt
 
 ---
 

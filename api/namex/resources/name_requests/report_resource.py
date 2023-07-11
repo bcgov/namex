@@ -402,18 +402,18 @@ class ReportResource(Resource):
             'CP':  'Cooperative Association Act',
             'BC':  'Business Corporations Act',
             'CC':  'Business Corporations Act',
-            'SO':  'Business Corporations Act',
-            'PA':  '',
+            'SO':  'Society Act',
+            'PA':  'Individual Acts',
             'FI':  'Credit Union Incorporation Act',
             'PAR': 'Trustee (Church Property) Act',
             # XPRO and Foreign Types
-            'XCR': '',
-            'XUL': '',
-            'RLC': '',
-            'XLP': '',
-            'XLL': '',
-            'XCP': '',
-            'XSO': '',
+            'XCR': 'Business Corporations Act',
+            'XUL': 'Business Corporations Act',
+            'RLC': 'Business Corporations Act',
+            'XLP': 'Partnership Act',
+            'XLL': 'Partnership Act',
+            'XCP': 'Cooperative Association Act',
+            'XSO': 'Society Act',
         }
         return next_action_text.get(entity_type_cd, None)
 
