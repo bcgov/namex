@@ -428,7 +428,7 @@ class RequestSearch(Resource):
                     RequestDAO.id,
                     RequestDAO.nrNum
                 )
-            ).limit(rows).all()
+            ).order_by(RequestDAO.submittedDate.desc()).limit(rows).all()
 
             data.extend([{
                 # 'id': nr.id,
