@@ -5,5 +5,12 @@
             "postgres-namex",
             "namex-api"
         ]
+    },
+        {
+        "vault": "nats",
+        "application": [
+            "namex",
+            "base"
+        ]
     }
 ]
