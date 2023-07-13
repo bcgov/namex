@@ -425,6 +425,7 @@ class ReportResource(Resource):
         CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
         BUSINESS_URL = current_app.config.get('BUSINESS_URL')
         CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
+        SOCIETIES_URL = current_app.config.get('SOCIETIES_URL')
 
         next_action_text = {
             # BC Types
@@ -479,7 +480,8 @@ class ReportResource(Resource):
                           f'{CORP_ONLINE_URL}</a>'
             },
             'SO': {
-               'DEFAULT': 'BC Social Enterprise'
+               'DEFAULT': f'To complete your filing, visit <a href="{SOCIETIES_URL}">'
+                          f'{SOCIETIES_URL}</a> for more information'
             },
             'PA': {
                'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
@@ -519,7 +521,8 @@ class ReportResource(Resource):
                 'DEFAULT': 'Extraprovincial Cooperative Association'
             },
             'XSO': {
-                'DEFAULT': 'Extraprovincial Social Enterprise'
+                'DEFAULT': f'To complete your filing, visit <a href="{SOCIETIES_URL}">'
+                           f'{SOCIETIES_URL}</a> for more information'
             },
             # Used for mapping back to legacy oracle codes, description not required
             'FIRM': {
