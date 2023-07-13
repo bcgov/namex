@@ -700,12 +700,13 @@
         <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.SnowballPorterFilterFactory" protected="protected_syns.txt" language="English"/>
-		<filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
-            sql="select stems_text from synonym where enabled = true" ignoreMissingDatabase="true"
-            ignoreCase="true" expand="true"/>
+        <filter class="com.s24.search.solr.analysis.jdbc.JdbcSynonymFilterFactory" dataSource="jdbc/synonyms"
+                sql="select stems_text from synonym where enabled = true" ignoreMissingDatabase="true"
+                ignoreCase="true" expand="true"/>
         <filter class="solr.WordDelimiterGraphFilterFactory" catenateNumbers="1" generateNumberParts="0" splitOnCaseChange="0" generateWordParts="0" catenateAll="1" catenateWords="1"/>
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
         <filter class="solr.FlattenGraphFilterFactory"/>
+        <filter class="solr.LimitTokenCountFilterFactory" maxTokenCount="60" consumeAllTokens="false" />
       </analyzer>
     </fieldType>
 
