@@ -30,6 +30,12 @@ CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
     'nr_id': 'NR ID - This field is required'
 })
 class ReportResource(Resource):
+
+    EX_COOP_ASSOC = 'Extraprovincial Cooperative Association'
+    GENERIC_STEPS = 'Submit appropriate form to BC Registries. Call if assistance required'
+    BCA = 'Business Corporations Act'
+    PA = 'Partnership Act'
+
     def email_consent_letter(self, nr_id):
         try:
             nr_model = Request.query.get(nr_id)
@@ -354,7 +360,7 @@ class ReportResource(Resource):
             'RLC': 'Extraprovincial Limited Liability Company',
             'XLP': 'Extraprovincial Limited Partnership',
             'XLL': 'Extraprovincial Limited Liability Partnership',
-            'XCP': 'Extraprovincial Cooperative Association',
+            'XCP':  ReportResource.EX_COOP_ASSOC,
             'XSO': 'Extraprovincial Social Enterprise',
             # Used for mapping back to legacy oracle codes, description not required
             'FIRM': 'FIRM (Legacy Oracle)'
@@ -382,17 +388,17 @@ class ReportResource(Resource):
             'BC':  BUSINESS_URL,
             'CC':  CORP_ONLINE_URL,
             'SO': 'BC Social Enterprise',
-            'PA': 'Submit appropriate form to BC Registries. Call if assistance required',
-            'FI': 'Submit appropriate form to BC Registries. Call if assistance required',
-            'PAR': 'Submit appropriate form to BC Registries. Call if assistance required',
+            'PA': ReportResource.GENERIC_STEPS,
+            'FI': ReportResource.GENERIC_STEPS,
+            'PAR': ReportResource.GENERIC_STEPS,
             # XPRO and Foreign Types
             'XCR': CORP_ONLINE_URL,
             'XUL': CORP_ONLINE_URL,
             'RLC': CORP_ONLINE_URL,
             'XLP': CORP_FORMS_URL,
             'XLL': CORP_FORMS_URL,
-            'XCP': 'Extraprovincial Cooperative Association',
-            'XSO': 'Extraprovincial Cooperative Association',
+            'XCP':  ReportResource.EX_COOP_ASSOC,
+            'XSO':  ReportResource.EX_COOP_ASSOC,
         }
         return next_action_text.get(entity_type_cd, None)
 
@@ -401,26 +407,26 @@ class ReportResource(Resource):
 
         next_action_text = {
             # BC Types
-            'CR':  'Business Corporations Act',
-            'UL':  'Business Corporations Act',
-            'FR':  'Partnership Act',
-            'GP':  'Partnership Act',
-            'DBA': 'Partnership Act',
-            'LP':  'Partnership Act',
-            'LL':  'Partnership Act',
+            'CR':  ReportResource.BCA,
+            'UL':  ReportResource.BCA,
+            'FR':  ReportResource.PA,
+            'GP':  ReportResource.PA,
+            'DBA': ReportResource.PA,
+            'LP':  ReportResource.PA,
+            'LL':  ReportResource.PA,
             'CP':  'Cooperative Association Act',
-            'BC':  'Business Corporations Act',
-            'CC':  'Business Corporations Act',
+            'BC':  ReportResource.BCA,
+            'CC':  ReportResource.BCA,
             'SO':  'Society Act',
             'PA':  'Individual Acts',
             'FI':  'Credit Union Incorporation Act',
             'PAR': 'Trustee (Church Property) Act',
             # XPRO and Foreign Types
-            'XCR': 'Business Corporations Act',
-            'XUL': 'Business Corporations Act',
-            'RLC': 'Business Corporations Act',
-            'XLP': 'Partnership Act',
-            'XLL': 'Partnership Act',
+            'XCR': ReportResource.BCA,
+            'XUL': ReportResource.BCA,
+            'RLC': ReportResource.BCA,
+            'XLP': ReportResource.PA,
+            'XLL': ReportResource.PA,
             'XCP': 'Cooperative Association Act',
             'XSO': 'Society Act',
         }
@@ -493,13 +499,13 @@ class ReportResource(Resource):
                           f'{SOCIETIES_URL}</a> for more information'
             },
             'PA': {
-               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+               'DEFAULT': ReportResource.GENERIC_STEPS
             },
             'FI': {
-               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+               'DEFAULT': ReportResource.GENERIC_STEPS
             },
             'PAR': {
-               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+               'DEFAULT': ReportResource.GENERIC_STEPS
             },
             # XPRO and Foreign Types
             'XCR': {
