@@ -254,7 +254,7 @@ class Request(db.Model):
         }, 403)
 
     @classmethod
-    def get_queued_oldest(cls, userObj):
+    def get_queued_oldest(cls, userObj, priority_queue):
         """
         Gets the Next NR# from the database
         It sets the STATUS == INPROGRESS
@@ -268,24 +268,32 @@ class Request(db.Model):
             return existing_nr, False
 
         # this will error if there's nothing in the queue - likelihood ~ 0
-        r = db.session.query(Request). \
-            filter(
-                Request.stateCd.in_([State.DRAFT]),
-                Request.nrNum.notlike('NR L%')). \
-            order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
-            with_for_update().first()
-        # this row is now locked
+        result = None
+        if priority_queue:
+            result = db.session.query(Request). \
+                filter(
+                    Request.stateCd.in_([State.DRAFT]),
+                    Request.nrNum.notlike('NR L%')). \
+                order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
+                with_for_update().first()
+        else:
+            result = db.session.query(Request). \
+                filter(
+                    Request.stateCd.in_([State.DRAFT]),
+                    Request.nrNum.notlike('NR L%')). \
+                order_by(Request.submittedDate.asc()). \
+                with_for_update().first()
 
-        if not r:
+        if result is None:
             raise BusinessException(None, 404)
 
         # mark this as assigned to the user, masking it from others.
-        r.stateCd = State.INPROGRESS
-        r.userId = userObj.id
+        result.stateCd = State.INPROGRESS
+        result.userId = userObj.id
 
-        db.session.add(r)
+        db.session.add(result)
         db.session.commit()
-        return r, True
+        return result, True
 
     @classmethod
     def get_oldest_draft(cls):
