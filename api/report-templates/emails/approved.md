@@ -1,18 +1,17 @@
 # Results of your Name Request
 
----
-
-Your Name Request is **{{APPROVAL_STATUS}}**. Follow the step(s) below to register a business with this name. If the name request expires before the business is registered, a new name request will be required.
+Your Name Request is **{{APPROVAL_STATUS}}**. Follow the steps below to register a business with this name. If the name request expires before the business is registered, a new name request will be required.
 
 ---
 
-Next Step(s):
+{{TITLE_STEPS}}
 
+Follow these steps to register your business using this name:
 {{LIST_STEPS}}
 
-{{REGISTRATION_INSTRUCTIONS}}
-
 ---
+
+# Your Name Request Details
 
 **Name Request Number:**
 {{NAMEREQUEST_NUMBER}}
@@ -21,6 +20,8 @@ Next Step(s):
 {{EXPIRATION_DATE}}
 
 ---
+
+# Attached to this Email
 
 The following documents are attached to this email:
 

@@ -2,14 +2,24 @@
 
 ---
 
-Your Name Request is **rejected**. Visit [Name Request]({{NAME_REQUEST_URL}}) to submit another Name Request.
+Your Name Request is **rejected**. Visit [BC Registries and Online Services]({{NAME_REQUEST_URL}}) to submit another Name Request.
 
 ---
+
+# Your Next Steps
+
+{{LIST_STEPS}}
+
+---
+
+# Your Name Request Details
 
 **Name Request Number:**
 {{NAMEREQUEST_NUMBER}}
 
 ---
+
+# Attached to this Email
 
 The following documents are attached to this email:
 
