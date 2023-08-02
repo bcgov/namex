@@ -1,7 +1,5 @@
 # Results of your Name Request
 
----
-
 Your Name Request is **rejected**. Visit [BC Registries and Online Services]({{NAME_REQUEST_URL}}) to submit another Name Request.
 
 ---
