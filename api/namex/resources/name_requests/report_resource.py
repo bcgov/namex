@@ -96,41 +96,20 @@ class ReportResource(Resource):
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
             nr_url = current_app.config.get('NAME_REQUEST_URL')
             email_body = Path(f'{template_path}/emails/rejected.md').read_text()
-            LIST_STEPS = ''
             if nr_model.stateCd in [State.APPROVED, State.CONDITIONAL]:
                 email_body = Path(f'{template_path}/emails/approved.md').read_text()
+                if nr_model.consentFlag in ['Y', 'R']:
+                    email_body = Path(f'{template_path}/emails/conditional.md').read_text()
+
                 tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
                 localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
                 email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
-                if nr_model.stateCd in [State.APPROVED]:
-                    email_body = email_body.replace('{{APPROVAL_STATUS}}', 'approved')
-                    email_body = email_body.replace('{{TITLE_STEPS}}', '# You\'re not done yet!')
-                else:
-                    email_body = email_body.replace('{{APPROVAL_STATUS}}', 'conditionally approved')
-                    email_body = email_body.replace('{{TITLE_STEPS}}', '# Your Next Steps')
 
-                business_url = current_app.config.get('DECIDE_BUSINESS_URL')
+            business_url = current_app.config.get('DECIDE_BUSINESS_URL')
 
-                if nr_model.consentFlag in ['Y', 'R']:
-                    LIST_STEPS += '1. Send in your consent letter to BCregistries@gov.bc.ca \n'
-                    LIST_STEPS += '2. Receive confirmation that the consent letter has been accepted \n'
-                    LIST_STEPS += '3. Visit [BC Registries and Online Services](' + nr_url + ')\n'
-                    LIST_STEPS += '4. Log in with your BC Registries Account\n'
-                    LIST_STEPS += '5. Look-up your Name Request\n'
-                    LIST_STEPS += '6. Register the business with this name by following the instructions'
-                else:
-                    LIST_STEPS += '1. Visit [BC Registries and Online Services](' + nr_url + ')\n'
-                    LIST_STEPS += '2. Log in with your BC Registries Account\n'
-                    LIST_STEPS += '3. Look-up your Name Request\n'
-                    LIST_STEPS += '4. Register the business with this name by following the instructions\n\n\n'
-                    LIST_STEPS += 'If you don\'t have a BC Registries Account, [create one here](' + business_url + ')'
-            else:
-                LIST_STEPS += '1. Review the attached Results of Name Request\n'
-                LIST_STEPS += '2. (Oprtional) Visit [BC Registries and Online Services](' + nr_url +') to request a new name'
-
-            email_body = email_body.replace('{{LIST_STEPS}}', LIST_STEPS)
             email_body = email_body.replace('{{NAME_REQUEST_URL}}', nr_url)
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
+            email_body = email_body.replace('{{BUSINESS_URL}}', business_url)
 
             email = {
                 'recipients': recepients,

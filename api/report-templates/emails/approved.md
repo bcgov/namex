@@ -1,13 +1,19 @@
 # Results of your Name Request
 
-Your Name Request is **{{APPROVAL_STATUS}}**. Follow the steps below to register a business with this name. If the name request expires before the business is registered, a new name request will be required.
+Your Name Request is **approved**. Follow the steps below to register a business with this name. If the name request expires before the business is registered, a new name request will be required.
 
 ---
 
-{{TITLE_STEPS}}
+# You\'re not done yet!
 
 Follow these steps to register your business using this name:
-{{LIST_STEPS}}
+
+1. Visit [BC Registries and Online Services]({{NAME_REQUEST_URL}})
+2. Log in with your BC Registries Account
+3. Look up your Name Request
+4. Register the business with this name by following the instructions
+
+If you don\'t have a BC Registries Account, [create one here]({{BUSINESS_URL}})
 
 ---
 

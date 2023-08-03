@@ -6,7 +6,8 @@ Your Name Request is **rejected**. Visit [BC Registries and Online Services]({{N
 
 # Your Next Steps
 
-{{LIST_STEPS}}
+1. Review the attached Results of Name Request
+2. (Oprtional) Visit [BC Registries and Online Services]({{NAME_REQUEST_URL}}) to request a new name
 
 ---
 
