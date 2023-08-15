@@ -58,6 +58,7 @@ class Config(object):
     CORP_FORMS_URL = os.getenv('CORP_FORMS_URL', '')
     BUSINESS_URL = os.getenv('BUSINESS_URL', '')
     COLIN_URL = os.getenv('COLIN_URL', '')
+    SOCIETIES_URL = os.getenv('SOCIETIES_URL', '')
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL', '')
     NOTIFY_API_VERSION = os.getenv('NOTIFY_API_VERSION', '')
 

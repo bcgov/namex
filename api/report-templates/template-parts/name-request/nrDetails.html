@@ -3,15 +3,15 @@
       <tr>
         <td class="col-10">
            <div class="bold">Business Type:</div>
-           <div class="bold pt-2">Request Type:</div>
            <div class="bold pt-2">Request Status:</div>
-           <div class="bold pt-2">Submitted Date:</div>
+           <div class="bold pt-2">Request Type:</div>
+           <div class="bold pt-2">Approval Date:</div>
         </td>
         <td>
            <div>{{entityTypeDescription}}</div>
+           <div class="pt-2">{{ nrStateDescription }}</div>
            <div class="pt-2">{{ requestCodeDescription }}</div>
-           <div class="bold pt-2">{{ nrStateDescription }}</div>
-           <div class="pt-2">{{ submittedDate }}</div>
+           <div class="pt-2">{{ approvalDate }} Pacific Time</div>
         </td>
       </tr>
    </table>

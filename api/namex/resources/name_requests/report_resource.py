@@ -17,6 +17,7 @@ from namex.utils.logging import setup_logging
 from .api_namespace import api
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request import NameRequestService
+from datetime import datetime
 
 setup_logging()  # Important to do this first
 
@@ -29,6 +30,12 @@ CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
     'nr_id': 'NR ID - This field is required'
 })
 class ReportResource(Resource):
+
+    EX_COOP_ASSOC = 'Extraprovincial Cooperative Association'
+    GENERIC_STEPS = 'Submit appropriate form to BC Registries. Call if assistance required'
+    BCA = 'Business Corporations Act'
+    PA = 'Partnership Act'
+
     def email_consent_letter(self, nr_id):
         try:
             nr_model = Request.query.get(nr_id)
@@ -91,11 +98,19 @@ class ReportResource(Resource):
             email_body = Path(f'{template_path}/emails/rejected.md').read_text()
             if nr_model.stateCd in [State.APPROVED, State.CONDITIONAL]:
                 email_body = Path(f'{template_path}/emails/approved.md').read_text()
+                if nr_model.consentFlag in ['Y', 'R']:
+                    email_body = Path(f'{template_path}/emails/conditional.md').read_text()
+
                 tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
                 localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
                 email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+
+            business_url = current_app.config.get('DECIDE_BUSINESS_URL')
+
             email_body = email_body.replace('{{NAME_REQUEST_URL}}', nr_url)
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
+            email_body = email_body.replace('{{BUSINESS_URL}}', business_url)
+
             email = {
                 'recipients': recepients,
                 'content': {
@@ -222,6 +237,7 @@ class ReportResource(Resource):
         nr_report_json = nr_model.json()
         nr_report_json['service_url'] = current_app.config.get('NAME_REQUEST_URL')
         nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.entity_type_cd)
+        nr_report_json['legalAct'] = ReportResource._get_legal_act(nr_model.entity_type_cd)
         isXPRO = nr_model.entity_type_cd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
         nr_report_json['requestCodeDescription'] = \
@@ -246,6 +262,7 @@ class ReportResource(Resource):
                 action_text = actions_obj.get('DEFAULT')
             if action_text:
                 nr_report_json['nextAction'] = action_text
+        nr_report_json['approvalDate'] = datetime.today().strftime('%B %-d, %Y')
         return nr_report_json
 
     @staticmethod
@@ -322,12 +339,77 @@ class ReportResource(Resource):
             'RLC': 'Extraprovincial Limited Liability Company',
             'XLP': 'Extraprovincial Limited Partnership',
             'XLL': 'Extraprovincial Limited Liability Partnership',
-            'XCP': 'Extraprovincial Cooperative Association',
+            'XCP':  ReportResource.EX_COOP_ASSOC,
             'XSO': 'Extraprovincial Social Enterprise',
             # Used for mapping back to legacy oracle codes, description not required
             'FIRM': 'FIRM (Legacy Oracle)'
         }
         return entity_type_descriptions.get(entity_type_cd, None)
+
+    @staticmethod
+    def _get_action_url(entity_type_cd: str):
+
+        DECIDE_BUSINESS_URL =  current_app.config.get('DECIDE_BUSINESS_URL')
+        CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
+        BUSINESS_URL = current_app.config.get('BUSINESS_URL')
+        CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
+
+        next_action_text = {
+            # BC Types
+            'CR':  CORP_ONLINE_URL,
+            'UL':  CORP_ONLINE_URL,
+            'FR':  DECIDE_BUSINESS_URL,
+            'GP':  DECIDE_BUSINESS_URL,
+            'DBA': DECIDE_BUSINESS_URL,
+            'LP':  CORP_FORMS_URL,
+            'LL':  CORP_FORMS_URL,
+            'CP':  BUSINESS_URL,
+            'BC':  BUSINESS_URL,
+            'CC':  CORP_ONLINE_URL,
+            'SO': 'BC Social Enterprise',
+            'PA': ReportResource.GENERIC_STEPS,
+            'FI': ReportResource.GENERIC_STEPS,
+            'PAR': ReportResource.GENERIC_STEPS,
+            # XPRO and Foreign Types
+            'XCR': CORP_ONLINE_URL,
+            'XUL': CORP_ONLINE_URL,
+            'RLC': CORP_ONLINE_URL,
+            'XLP': CORP_FORMS_URL,
+            'XLL': CORP_FORMS_URL,
+            'XCP':  ReportResource.EX_COOP_ASSOC,
+            'XSO':  ReportResource.EX_COOP_ASSOC,
+        }
+        return next_action_text.get(entity_type_cd, None)
+
+    @staticmethod
+    def _get_legal_act(entity_type_cd: str):
+
+        next_action_text = {
+            # BC Types
+            'CR':  ReportResource.BCA,
+            'UL':  ReportResource.BCA,
+            'FR':  ReportResource.PA,
+            'GP':  ReportResource.PA,
+            'DBA': ReportResource.PA,
+            'LP':  ReportResource.PA,
+            'LL':  ReportResource.PA,
+            'CP':  'Cooperative Association Act',
+            'BC':  ReportResource.BCA,
+            'CC':  ReportResource.BCA,
+            'SO':  'Society Act',
+            'PA':  'Individual Acts',
+            'FI':  'Credit Union Incorporation Act',
+            'PAR': 'Trustee (Church Property) Act',
+            # XPRO and Foreign Types
+            'XCR': ReportResource.BCA,
+            'XUL': ReportResource.BCA,
+            'RLC': ReportResource.BCA,
+            'XLP': ReportResource.PA,
+            'XLL': ReportResource.PA,
+            'XCP': 'Cooperative Association Act',
+            'XSO': 'Society Act',
+        }
+        return next_action_text.get(entity_type_cd, None)
 
     @staticmethod
     def _get_next_action_text(entity_type_cd: str):
@@ -337,40 +419,38 @@ class ReportResource(Resource):
         CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
         BUSINESS_URL = current_app.config.get('BUSINESS_URL')
         CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
+        SOCIETIES_URL = current_app.config.get('SOCIETIES_URL')
 
         next_action_text = {
             # BC Types
             'CR':  {
-               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a> for more information'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a>'
             },
             'UL': {
-               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a> for more information'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a>'
             },
             'FR': {
-               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
-                        'Registering Proprietorships and Partnerships'
-                      '</a> for more information',
-               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+                        'Registering Proprietorships and Partnerships</a>',
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'GP': {
-               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
-                        'BC Registries and Online Services'
-                     '</a> for more information',
-               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+                        'BC Registries and Online Services</a>',
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                           'BC Registries and Online Services</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'DBA': {
-               'NEW': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
-                        'Registering Proprietorships and Partnerships'
-                      '</a> for more information',
-               'DEFAULT': f'To complete your filing, visit <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+                        'Registering Proprietorships and Partnerships</a>',
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
@@ -384,45 +464,44 @@ class ReportResource(Resource):
                           ' download and submit a form'
             },
             'CP': {
-               'DEFAULT': f'To complete your filing, visit <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
-                          ' for more information'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
             },
             'BC': {
-               'DEFAULT': f'To complete your filing, visit <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
-                          ' for more information'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
             },
             'CC': {
-               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a> for more information'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a>'
             },
             'SO': {
-               'DEFAULT': 'BC Social Enterprise'
+               'DEFAULT': f'To complete your filing, visit <a href="{SOCIETIES_URL}">'
+                          f'{SOCIETIES_URL}</a> for more information'
             },
             'PA': {
-               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+               'DEFAULT': ReportResource.GENERIC_STEPS
             },
             'FI': {
-               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+               'DEFAULT': ReportResource.GENERIC_STEPS
             },
             'PAR': {
-               'DEFAULT': 'Submit appropriate form to BC Registries. Call if assistance required.'
+               'DEFAULT': ReportResource.GENERIC_STEPS
             },
             # XPRO and Foreign Types
             'XCR': {
-               'NEW': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
-                      f'{CORP_ONLINE_URL}</a> for more information',
-               'CHG': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
-                      f'{CORP_ONLINE_URL}</a> for more information',
+               'NEW': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
+                      f'{CORP_ONLINE_URL}</a>',
+               'CHG': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
+                      f'{CORP_ONLINE_URL}</a>',
                'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'XUL': {
-               'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a> for more information'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a>'
             },
             'RLC': {
-                'DEFAULT': f'To complete your filing, visit <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a> for more information'
+                'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
+                          f'{CORP_ONLINE_URL}</a>'
             },
             'XLP': {
                'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
@@ -436,7 +515,8 @@ class ReportResource(Resource):
                 'DEFAULT': 'Extraprovincial Cooperative Association'
             },
             'XSO': {
-                'DEFAULT': 'Extraprovincial Social Enterprise'
+                'DEFAULT': f'To complete your filing, visit <a href="{SOCIETIES_URL}">'
+                           f'{SOCIETIES_URL}</a> for more information'
             },
             # Used for mapping back to legacy oracle codes, description not required
             'FIRM': {
