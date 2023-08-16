@@ -9,7 +9,7 @@
         "vault": "keycloak",
         "application": [
             "base",
-            "nds-service-account"
+            "bor-service-account"
         ]
     },
     {
