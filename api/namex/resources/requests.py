@@ -398,8 +398,8 @@ class RequestSearch(Resource):
         example: query=NR3742302 or query=abcd
         """
         data = []
-        start = request.args.get('start', 0)
-        rows = request.args.get('rows', 10)
+        start = request.args.get('start', 0, type=int)
+        rows = request.args.get('rows', 10, type=int)
         query = request.args.get('query', '')
         if not query:
             return jsonify(data), 200
