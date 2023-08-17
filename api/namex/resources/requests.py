@@ -116,7 +116,8 @@ class RequestsQueue(Resource):
 
         # get the next NR assigned to the User
         try:
-            nr, new_assignment = RequestDAO.get_queued_oldest(user)
+            priority_queue = request.args.get('priorityQueue')
+            nr, new_assignment = RequestDAO.get_queued_oldest(user, priority_queue == 'true')
         except BusinessException as be:
             return jsonify(message='There are no more requests in the {} Queue'.format(State.DRAFT)), 404
         except Exception as unmanaged_error:

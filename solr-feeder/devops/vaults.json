@@ -9,7 +9,7 @@
         "vault": "keycloak",
         "application": [
             "base",
-            "business-search-service-account"
+            "bor-service-account"
         ]
     },
     {

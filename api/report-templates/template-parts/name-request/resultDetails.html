@@ -1,97 +1,44 @@
-{% if stateCd == 'REJECTED' %}
 <div>
-    <div class="section-title">Your Name Request {{nrNum}} was not approved for use.</div>
-    {% if isXPRO %}
-        <div class="section-data mt-4">Please contact BC Registry staff to obtain an assumed name for an
-            extraprovincial business:
-            <div class="mt-4">
-                <span class="bold-text">Canada & U.S. Toll Free: </span>
-                <span><a href="tel:1-877-370-1033">1-877-370-1033</a></span>
-            </div>
-            <div class="mt-1">
-                <span class="bold-text">Victoria Office: </span>
-                <span><a href="tel:250-370-1033">250-370-1033</a></span>
-            </div>
-            <div class="mt-1">
-                <span class="bold-text">Email: </span>
-                <span><a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a></span>
-            </div>
-        </div>
-    {% else %}
-        <div class="section-data mt-4">To submit another Name Request, visit
-            <a href={{service_url}} target="_blank" rel="noopener noreferrer">{{service_url}}</a>
-        </div>
-    {% endif %}
-</div>
-{% else %}
-<div>
-  {% for choice in names %}
-      {% if choice.state == 'CONDITION' or choice.state == 'APPROVED' %}
-         <div class="section-title">
-             <div>
-                 <span>Approved Name</span>
-                 {% if choice.choice == 1 %}
-                    <span class="section-data highlighted-blue-text">(1st Choice)</span>
-                 {% elif choice.choice == 2 %}
-                    <span class="section-data highlighted-blue-text">(2nd Choice)</span>
-                 {% elif choice.choice == 3 %}
-                    <span class="section-data highlighted-blue-text">(3rd Choice)</span>
-                 {% endif %}
-                 <span>: </span>
-                 <span class="uppercase-text">{{choice.name}}</span>
-             </div>
-             <div>
-                 <span>Expires:</span>
-                 <span>{{ expirationDate }}</span>
-             </div>
-        </div>
-        <div class="separator mt-4"></div>
-        <div class="section-data">
-            <div class="section-title-gray mt-4">ACTION REQUIRED:</div>
-        </div>
-        {% if choice.state == 'CONDITION' %}
-            <div class="section-data mt-4">
-                <span>{{ choice.decision_text }}. </span>
-                {% if consentFlag in ['Y', 'R'] %}
-                    <span>Send your consent letter so registry staff can release the condition before
-                    you incorporate or register. Consent letters will be processed within two business days
-                    of receipt.</span> 
-                {% endif %}
-            </div>
+    {% for choice in names %}
+        {% if choice.state == 'CONDITION' or choice.state == 'APPROVED' %}
+           <div class="section-title">
+               <div>
+                   <span>Approved Name</span>
+                   {% if choice.choice == 1 %}
+                      <span class="section-data highlighted-blue-text">(1st Choice)</span>
+                   {% elif choice.choice == 2 %}
+                      <span class="section-data highlighted-blue-text">(2nd Choice)</span>
+                   {% elif choice.choice == 3 %}
+                      <span class="section-data highlighted-blue-text">(3rd Choice)</span>
+                   {% endif %}
+                   <span>: </span>
+                   <span class="uppercase-text">{{choice.name}}</span>
+               </div>
+               <div>
+                   <span>Expires:</span>
+                   <span>{{ expirationDate }}</span>
+               </div>
+          </div>
         {% endif %}
-      {% endif %}
-  {% endfor %}
+    {% endfor %}
 </div>
-<div class="mt-4">
-  <form>
-      {% if consentFlag in ['Y', 'R'] %}
-          <div>
-              {% if consentFlag=='R' %}
-                <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTFweCIgaGVpZ2h0PSIxMXB4IiB2aWV3Qm94PSIwIDAgMTEgMTEiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiAgICA8dGl0bGU+Y2hlY2tib3gtbWFya2VkPC90aXRsZT4KICAgIDxnIGlkPSJGaW5hbC1PdXRwdXRzIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyBpZD0iUGcxLVJlc3VsdHMtLUFwcHJvdmVkLUNvbmNlbnQtUmVjZWl2ZWQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC01MS4wMDAwMDAsIC01MTguMDAwMDAwKSIgZmlsbD0iIzIzNDA3NSIgZmlsbC1ydWxlPSJub256ZXJvIj4KICAgICAgICAgICAgPGcgaWQ9ImNoZWNrYm94LW1hcmtlZCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTEuMDAwMDAwLCA1MTguMDAwMDAwKSI+CiAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNC4yNzc3Nzc3OCw4LjU1NTU1NTU2IEwxLjIyMjIyMjIyLDUuNSBMMi4wODM4ODg4OSw0LjYzMjIyMjIyIEw0LjI3Nzc3Nzc4LDYuODI2MTExMTEgTDguOTE2MTExMTEsMi4xODc3Nzc3OCBMOS43Nzc3Nzc3OCwzLjA1NTU1NTU2IE05Ljc3Nzc3Nzc4LDAgTDEuMjIyMjIyMjIsMCBDMC41NDM4ODg4ODksMCAwLDAuNTQzODg4ODg5IDAsMS4yMjIyMjIyMiBMMCw5Ljc3Nzc3Nzc4IEMwLDEwLjQ1Mjc5MjUgMC41NDcyMDc1MjgsMTEgMS4yMjIyMjIyMiwxMSBMOS43Nzc3Nzc3OCwxMSBDMTAuNDUyNzkyNSwxMSAxMSwxMC40NTI3OTI1IDExLDkuNzc3Nzc3NzggTDExLDEuMjIyMjIyMjIgQzExLDAuNTQzODg4ODg5IDEwLjQ1LDAgOS43Nzc3Nzc3OCwwIFoiIGlkPSJTaGFwZSI+PC9wYXRoPgogICAgICAgICAgICA8L2c+CiAgICAgICAgPC9nPgogICAgPC9nPgo8L3N2Zz4=">
-              {% elif consentFlag=='Y' %}
-                <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTFweCIgaGVpZ2h0PSIxMXB4IiB2aWV3Qm94PSIwIDAgMTEgMTEiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiAgICA8dGl0bGU+Y2hlY2tib3gtYmxhbmstb3V0bGluZSBjb3B5PC90aXRsZT4KICAgIDxnIGlkPSJGaW5hbC1PdXRwdXRzIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyBpZD0iUGcxLVJlc3VsdHMtLUFwcHJvdmVkLUNvbmNlbnQtUmVjZWl2ZWQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC01MS4wMDAwMDAsIC01NDEuMDAwMDAwKSIgZmlsbD0iIzIzNDA3NSIgZmlsbC1ydWxlPSJub256ZXJvIj4KICAgICAgICAgICAgPGcgaWQ9ImNoZWNrYm94LWJsYW5rLW91dGxpbmUtY29weSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTEuMDAwMDAwLCA1NDEuMDAwMDAwKSI+CiAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOS43Nzc3Nzc3OCwwIEwxLjIyMjIyMjIyLDAgQzAuNTQzODg4ODg5LDAgMCwwLjU0Mzg4ODg4OSAwLDEuMjIyMjIyMjIgTDAsOS43Nzc3Nzc3OCBDMCwxMC40NTI3OTI1IDAuNTQ3MjA3NTI4LDExIDEuMjIyMjIyMjIsMTEgTDkuNzc3Nzc3NzgsMTEgQzEwLjQ1Mjc5MjUsMTEgMTEsMTAuNDUyNzkyNSAxMSw5Ljc3Nzc3Nzc4IEwxMSwxLjIyMjIyMjIyIEMxMSwwLjU0Mzg4ODg4OSAxMC40NSwwIDkuNzc3Nzc3NzgsMCBNOS43Nzc3Nzc3OCwxLjIyMjIyMjIyIEw5Ljc3Nzc3Nzc4LDkuNzc3Nzc3NzggTDEuMjIyMjIyMjIsOS43Nzc3Nzc3OCBMMS4yMjIyMjIyMiwxLjIyMjIyMjIyIEw5Ljc3Nzc3Nzc4LDEuMjIyMjIyMjIgWiIgaWQ9IlNoYXBlIj48L3BhdGg+CiAgICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICA8L2c+Cjwvc3ZnPg==">
-              {% endif %}
-              <label for="consent-box" class="checkbox-label section-data mt-2">
-                  Send in your consent letter to
-                  <a href="mailto:bcregistries@gov.bc.ca" class="pl-2">bcregistries@gov.bc.ca</a>
-              </label>
-          </div>
-      {% endif %}
-      <div class="section-data mt-4">
-          {% if consentFlag not in ['Y', 'R'] %}
-                <span>Please complete the filing before the expiry date. </span>
-          {% endif %}
-          {% if consentFlag in ['Y', 'R'] %}
-                <span>Once you have confirmation that your consent letter has been accepted, please complete the filing before the expiry date. </span>
-          {% endif %}
-          <span>If it is not used before it expires, a new name request will be required</span>
-      </div>
-      {% if nextAction %}
-          <div class="{{ 'mt-2' if consentFlag in ['Y', 'R'] else '' }}">
-              <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTFweCIgaGVpZ2h0PSIxMXB4IiB2aWV3Qm94PSIwIDAgMTEgMTEiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiAgICA8dGl0bGU+Y2hlY2tib3gtYmxhbmstb3V0bGluZSBjb3B5PC90aXRsZT4KICAgIDxnIGlkPSJGaW5hbC1PdXRwdXRzIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyBpZD0iUGcxLVJlc3VsdHMtLUFwcHJvdmVkLUNvbmNlbnQtUmVjZWl2ZWQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC01MS4wMDAwMDAsIC01NDEuMDAwMDAwKSIgZmlsbD0iIzIzNDA3NSIgZmlsbC1ydWxlPSJub256ZXJvIj4KICAgICAgICAgICAgPGcgaWQ9ImNoZWNrYm94LWJsYW5rLW91dGxpbmUtY29weSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTEuMDAwMDAwLCA1NDEuMDAwMDAwKSI+CiAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOS43Nzc3Nzc3OCwwIEwxLjIyMjIyMjIyLDAgQzAuNTQzODg4ODg5LDAgMCwwLjU0Mzg4ODg4OSAwLDEuMjIyMjIyMjIgTDAsOS43Nzc3Nzc3OCBDMCwxMC40NTI3OTI1IDAuNTQ3MjA3NTI4LDExIDEuMjIyMjIyMjIsMTEgTDkuNzc3Nzc3NzgsMTEgQzEwLjQ1Mjc5MjUsMTEgMTEsMTAuNDUyNzkyNSAxMSw5Ljc3Nzc3Nzc4IEwxMSwxLjIyMjIyMjIyIEMxMSwwLjU0Mzg4ODg4OSAxMC40NSwwIDkuNzc3Nzc3NzgsMCBNOS43Nzc3Nzc3OCwxLjIyMjIyMjIyIEw5Ljc3Nzc3Nzc4LDkuNzc3Nzc3NzggTDEuMjIyMjIyMjIsOS43Nzc3Nzc3OCBMMS4yMjIyMjIyMiwxLjIyMjIyMjIyIEw5Ljc3Nzc3Nzc4LDEuMjIyMjIyMjIgWiIgaWQ9IlNoYXBlIj48L3BhdGg+CiAgICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICA8L2c+Cjwvc3ZnPg==">
-              <span class="checkbox-label section-data mt-2">{{ nextAction | safe }}</span>
-          </div>
-      {% endif %}
-  </form>
+<div>
+    <div class="mt-2"><span class="section-title-gray">Request Status:</span> <span class="section-data">{{ nrStateDescription }}</span</div>
+    {% if consentFlag in ['Y'] %}
+    <div class="mt-2"><span class="section-title-gray">Consent:</span> <span class="section-data">Required. Not Yet Received.</span></div>
+    {% elif consentFlag in ['R'] %}
+    <div class="mt-2"><span class="section-title-gray">Consent:</span> <span class="section-data">Required. Received.</span></div>
+    {% else %}
+    <div class="mt-2"><span class="section-title-gray">Consent:</span> <span class="section-data">Not Required.</span></div>
+    {% endif %}
+    {% for choice in names %}
+        {% if choice.state == 'CONDITION' %}
+            <div class="mt-2"><span class="section-title-gray">Conditions/Comments:</span>
+            <div>{{ choice.decision_text }}.</div>
+            {% if consentFlag in ['R'] %}
+                <span class="section-data">Consent is required from {{choice.name}}. Send your consent letter so registry staff can release the condition before you incorporate or register. Consent letters will be processed within one business day of receipt.</span>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% endfor %}
 </div>
-{% endif %}

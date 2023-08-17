@@ -1,8 +1,30 @@
-Thank you for using Name Requests Online. The results of your Name Request **{{NAMEREQUEST_NUMBER}}** are attached. Please save or print these results for future reference. To view the attachment you require Adobe Acrobat Reader. If you do not already have the reader, you can download it for [free](www.adobe.com/products/acrobat/readstep2.html).
+# Results of your Name Request
 
-To submit another Name Request, visit [{{NAME_REQUEST_URL}}]({{NAME_REQUEST_URL}})
+Your Name Request is **rejected**. Visit [BC Registries and Online Services]({{NAME_REQUEST_URL}}) to submit another Name Request.
 
-PLEASE DO NOT REPLY TO THIS EMAIL. It was sent from an unmonitored email address and the Corporate Registry is unable to respond to any replies.
+---
+
+# Your Next Steps
+
+1. Review the attached Results of Name Request
+2. (Oprtional) Visit [BC Registries and Online Services]({{NAME_REQUEST_URL}}) to request a new name
+
+---
+
+# Your Name Request Details
+
+**Name Request Number:**
+{{NAMEREQUEST_NUMBER}}
+
+---
+
+# Attached to this Email
+
+The following documents are attached to this email:
+
+* Results of Name Request
+
+---
 
 **Business Registry**
 BC Registries and Online Services

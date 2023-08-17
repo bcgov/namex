@@ -42,6 +42,17 @@
 		font-style: normal;
 	}
 
+	.watermark
+	{
+		position:fixed;
+		color: #003366;
+		width: 300px;
+		padding-left: 210px;
+		padding-top: 200px;
+		opacity: .4;
+		z-index:99;
+	}
+
 	.header {
 		/* NB: repeats on every page due to fixed position */
 		position: fixed;
@@ -270,7 +281,7 @@
 	.registrar-signature img {
 		width: 64px;
 		height: 29px;
-		vertical-align: center;
+		vertical-align: middle;
 	}
 
 	.registrar-name {
@@ -349,7 +360,7 @@
 		color: #313132;
 		border-radius: 2px;
 		margin: 0 1px;
-		text-transform: upper;
+		text-transform: uppercase;
 	}
 
 	a {
@@ -394,8 +405,10 @@
 	    text-decoration: none
 	}
 
-    .checkbox-label {
-       padding-left: 0.25rem;
+    .checkbox {
+		padding-top: 0.1rem;
+		padding-right: 0.5rem;
+		vertical-align: top;
     }
 
     .bold-text {
