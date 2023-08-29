@@ -114,7 +114,7 @@ class Request(db.Model):
     checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True),index=True)
 
     # MRAS fields
-    homeJurisNum = db.Column('home_juris_num', db.String(40))
+    homeJurisNum = db.Column('home_juris_num', db.String(150))
 
     ## Advanced Search fields
     # all names stripped of '|' and divided by a '|<name choice>'
