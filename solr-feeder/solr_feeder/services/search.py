@@ -28,7 +28,7 @@ def _update_solr(url: str, payload: dict[str, str], timeout: int, token: str):
         headers = {'Authorization': 'Bearer ' + token}
 
         res = requests.put(url=url, headers=headers, json=payload, timeout=timeout)
-        if res.status_code != HTTPStatus.OK:
+        if res.status_code not in [HTTPStatus.OK, HTTPStatus.ACCEPTED]:
             return {'message': res.json(), 'status_code': res.status_code}
 
         return None
