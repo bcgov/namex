@@ -56,9 +56,9 @@ class Config():  # pylint: disable=too-few-public-methods;
     except:  # pylint: disable=bare-except; # noqa: B901, E722
         SEARCH_API_TIMEOUT = 20
     try:
-        BOR_API_TIMEOUT = int(os.getenv('BOR_API_TIMEOUT', '20'))
+        BOR_API_TIMEOUT = int(os.getenv('SOLR_FEEDER_BOR_API_TIMEOUT', '30'))
     except:  # pylint: disable=bare-except; # noqa: B901, E722
-        BOR_API_TIMEOUT = 20
+        BOR_API_TIMEOUT = 30
 
     try:
         NAMEX_SOLR_TIMEOUT = int(os.getenv('NAMEX_SOLR_TIMEOUT', '20'))
