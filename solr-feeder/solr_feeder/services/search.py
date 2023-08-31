@@ -63,7 +63,7 @@ def update_search_cores(identifier: str, legal_type: str):
             logging.error('Error getting COLIN party data: %s', error)
             return {'message': error['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
 
-        logging.debug(f'Updating BOR core ({identifier})...')
+        logging.debug('Updating BOR core (%s)...', identifier)
         error = _update_solr(url=f'{bor_url}/internal/solr/update',
                              payload={**business, 'parties': parties},
                              timeout=current_app.config['BOR_API_TIMEOUT'],
@@ -79,7 +79,7 @@ def update_search_cores(identifier: str, legal_type: str):
                 logging.error('Error updating bor core (%s): %s', identifier, error)
                 error_messages.append(error['message'])
         else:
-            logging.debug(f'BOR core updated ({identifier}).')
+            logging.debug('BOR core updated (%s).', identifier)
 
     # for business search only include owners
     owners, error = get_owners(legal_type, identifier)
@@ -88,7 +88,7 @@ def update_search_cores(identifier: str, legal_type: str):
         return {'message': error['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
 
     # send data to business search core via search-api
-    logging.debug(f'Updating BUSINESS SEARCH core ({identifier})...')
+    logging.debug('Updating BUSINESS SEARCH core (%s)...', identifier)
     error = _update_solr(url=f'{current_app.config["SEARCH_API_URL"]}/internal/solr/update',
                          payload={**business, 'parties': owners},
                          timeout=current_app.config['SEARCH_API_TIMEOUT'],
@@ -97,7 +97,7 @@ def update_search_cores(identifier: str, legal_type: str):
         logging.error('Error updating business search core (%s): %s', identifier, error)
         error_messages.append(error['message'])
     else:
-        logging.debug(f'BUSINESS SEARCH core updated ({identifier}).')
+        logging.debug('BUSINESS SEARCH core updated (%s).', identifier)
 
     if error_messages:
         return {'message': error_messages}, HTTPStatus.INTERNAL_SERVER_ERROR
