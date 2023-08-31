@@ -11,14 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Version of this service in PEP440.
-
-[N!]N(.N)*[{a|b|rc}N][.postN][.devN]
-Epoch segment: N!
-Release segment: N(.N)*
-Pre-release segment: {a|b|rc}N
-Post-release segment: .postN
-Development release segment: .devN
+"""The configuration for gunicorn, which picks up the
+   runtime options from environment variables
 """
 
-__version__ = '2.0.3'  # pylint: disable=invalid-name
+import os
+
+workers = int(os.environ.get('GUNICORN_PROCESSES', '1'))  # pylint: disable=invalid-name
+threads = int(os.environ.get('GUNICORN_THREADS', '1'))  # pylint: disable=invalid-name
+timeout = int(os.environ.get('GUNICORN_TIMEOUT', '90'))  # pylint: disable=invalid-name
+
+forwarded_allow_ips = '*'  # pylint: disable=invalid-name
+secure_scheme_headers = {'X-Forwarded-Proto': 'https'}  # pylint: disable=invalid-name
