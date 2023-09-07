@@ -14,7 +14,7 @@ from namex.models import Request as RequestDAO
 from namex.models import State, User
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from namex.services import EventRecorder
-from namex.services.name_request.name_request_state import get_nr_state_actions
+from namex.services.name_request.name_request_state import get_nr_state_actions, display_reapply_action
 from namex.services.name_request.utils import get_active_payment, has_active_payment
 from namex.services.payment.exceptions import PaymentServiceError, SBCPaymentError, SBCPaymentException
 from namex.services.payment.models import PaymentRequest
@@ -403,16 +403,20 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                     nr_model = self.add_records_to_network_services(nr_model, update_solr)
 
             existing_payment = PaymentDAO.find_by_existing_nr_id(nr_id, payment_action)
-            if existing_payment :
+            if existing_payment:
                 # if we already have a payment record, we can request existing payment status and return it
                 # get the payment status from Pay API
-                payment_response = get_payment(existing_payment.payment_token)
-                return handle_payment_response(payment_action,
-                                               payment_response,
-                                               existing_payment,
-                                               nr_id,
-                                               nr_model,
-                                               nr_svc)
+                if payment_action == PaymentDAO.PaymentActions.REAPPLY.value and display_reapply_action(nr_model):
+                    # skip valid cases of REAPPLY, as these potentially can have more than a single instance
+                    pass
+                else:
+                    payment_response = get_payment(existing_payment.payment_token)
+                    return handle_payment_response(payment_action,
+                                                payment_response,
+                                                existing_payment,
+                                                nr_id,
+                                                nr_model,
+                                                nr_svc)
 
             json_input = request.get_json()
             payment_request = {}
