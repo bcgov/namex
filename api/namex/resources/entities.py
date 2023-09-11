@@ -85,3 +85,39 @@ class EntityApi(Resource):
             return handle_exception(err, err.message, err.status_code)
         except Exception as err:
             return handle_exception(err, 'Internal Server Error', 500)
+
+@cors_preflight('GET')
+@entity_api.route('/colin/<string:corp_num>', methods=['GET', 'OPTIONS'])
+@entity_api.doc(params={
+    'corp_num': 'Incorporation Number - This field is required'
+})
+class EntityApi(Resource):
+    @cors.crossdomain(origin='*')
+    def get(self, corp_num):
+        try:
+            SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')
+            ENTITY_AUTH_CLIENT_ID = current_app.config.get('ENTITY_SERVICE_ACCOUNT_CLIENT_ID', '')
+            ENTITY_CLIENT_SECRET = current_app.config.get('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET', '')
+            authenticated, token = get_client_credentials(SBC_SVC_AUTH_URL, ENTITY_AUTH_CLIENT_ID, ENTITY_CLIENT_SECRET)
+            if not authenticated:
+                raise EntityServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+
+            # Get the profile
+            entity_url = f'{current_app.config.get("ENTITY_SVC_URL")}/colin/{corp_num}'
+            headers = {
+                'Authorization': 'Bearer ' + token
+            }
+
+            response = requests.get(
+                entity_url,
+                headers=headers
+            )
+
+            content = json.loads(response.text)
+            if response.status_code != 200:
+                return jsonify(content.get('message')), response.status_code
+            return jsonify(content), response.status_code
+        except EntityServiceException as err:
+            return handle_exception(err, err.message, err.status_code)
+        except Exception as err:
+            return handle_exception(err, 'Internal Server Error', 500)
