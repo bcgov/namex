@@ -1,6 +1,6 @@
 #  Consent Letter Acceptance Confirmation
 
-Thank you for using Name Requests Online. The consent letter for your Name Request **{{NAMEREQUEST_NUMBER}}** has been received. Please note: Your name request will expire on **{{EXPIRATION_DATE}}**.
+Thank you for using Name Requests Online. The consent letter for your Name Request **{{NAMEREQUEST_NUMBER}}** has been received. You will receive another email notification with the result of the review. Please note: Your name request will expire on **{{EXPIRATION_DATE}}**.
 
 ---
 
