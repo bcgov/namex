@@ -36,6 +36,6 @@ class VersionEndpoint:  # pylint: disable=too-few-public-methods
     def init_app(self, app: Flask):
         """Add the version endpoint to the app."""
         if not app:
-            raise Exception('Cannot initialize without a Flask App.')
+            raise Exception('Cannot initialize without a Flask App.')  # pylint: disable=W0719
         self.app = app
         self.app.register_blueprint(self.version_bp)

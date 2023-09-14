@@ -124,7 +124,7 @@ def request_colin(corp_num: str):  # pylint: disable=too-many-locals, too-many-b
 @cross_origin(origin='*')
 @jwt.requires_auth
 def business_request_colin(corp_num: str):
-    """Get business details from COLIN"""
+    """Get business details from COLIN."""
     corp_num_sql = "\'" + corp_num + "\'"
 
     incorp_info_sql = Methods.build_info_sql(corp_num_sql)
@@ -132,8 +132,9 @@ def business_request_colin(corp_num: str):
     incorp_name_sql = Methods.build_incorp_name_sql(corp_num)
 
     try:
-        incorp_info_dict = Methods.init_info(incorp_info_sql, incorp_directors_sql)
+        incorp_init_info = Methods.init_info(incorp_info_sql, incorp_directors_sql)
         incorp_name_dict = Methods.get_incorp_name(incorp_name_sql)
+        incorp_info_dict = incorp_init_info[0]
         incorp_class = incorp_info_dict['corp_class']
         incorp_jurisdiction = 'BC'
         incorp_home_identifier = None
@@ -154,13 +155,11 @@ def business_request_colin(corp_num: str):
         current_app.logger.debug(err.with_traceback(None))
         return jsonify({'message': 'Unknown error occurred in colin-api'}), 500
 
-    response_dict = {
-        'identifier': corp_num,
-        'legalName': incorp_name_dict['corp_nme'],
-        'legalType': incorp_info_dict['corp_typ_cd'],
-        'jurisdiction': incorp_jurisdiction,
-        'homeIdentifier': incorp_home_identifier
-    }
+    response_dict = {'identifier': corp_num,
+                     'legalName': incorp_name_dict['corp_nme'],
+                     'legalType': incorp_info_dict['corp_typ_cd'],
+                     'jurisdiction': incorp_jurisdiction,
+                     'homeIdentifier': incorp_home_identifier}
 
     return jsonify(response_dict), 200
 
