@@ -19,6 +19,7 @@ six==1.15.0
 urllib3>=1.26.4
 requests==2.25.1
 protobuf==3.20.1
+idna>=2.5
 
 git+https://github.com/bcgov/business-schemas.git#egg=registry_schemas
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
