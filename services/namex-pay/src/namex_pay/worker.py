@@ -209,8 +209,14 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
             logger.debug('COMPLETED transaction on queue: %s', pay_msg)
 
             if payment_token := pay_msg.get('paymentToken', {}).get('id'):
-                if payment := Payment.find_by_payment_token(payment_token):
-
+                payment = None
+                counter = 1
+                while not payment and counter <= 5:
+                    payment = Payment.find_by_payment_token(payment_token)
+                    counter += 1
+                    if not payment:
+                        await asyncio.sleep(0.2)
+                if payment:
                     if update_payment := await update_payment_record(payment):
                         payment = update_payment
                         # record event
