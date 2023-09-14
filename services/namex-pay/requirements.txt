@@ -16,7 +16,7 @@ Jinja2==2.11.3
 MarkupSafe==1.1.1
 pyrsistent==0.17.3
 six==1.15.0
-urllib3==1.26.4
+urllib3>=1.26.4
 requests==2.25.1
 protobuf==3.20.1
 
