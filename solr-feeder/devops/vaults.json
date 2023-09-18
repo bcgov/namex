@@ -2,6 +2,7 @@
     {
         "vault": "namex",
         "application": [
+            "shared",
             "solr-feeder"
         ]
     },
