@@ -85,7 +85,7 @@ def get_business_info(legal_type: str, identifier: str, token: str) -> tuple[dic
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
 
 
-def get_owners(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
+def get_owners(legal_type: str, identifier: str, token: str) -> tuple[list[dict], dict]:
     """Return the firm owners of the business."""
     try:
         owners = []
@@ -93,10 +93,13 @@ def get_owners(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
             return [], None
 
         parties_url = f'{current_app.config["COLIN_API_URL"]}/businesses/{legal_type}/{identifier}/parties'
+        headers = {'Authorization': 'Bearer ' + token}
         # get owners
         fio_res = requests.get(f'{parties_url}?partyType=Firm Individual Owner',
+                               headers=headers,
                                timeout=current_app.config['COLIN_API_TIMEOUT'])
         fbo_res = requests.get(f'{parties_url}?partyType=Firm Business Owner',
+                               headers=headers,
                                timeout=current_app.config['COLIN_API_TIMEOUT'])
         if fio_res.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND]:
             return None, {'message': fio_res.json(), 'status_code': fio_res.status_code}
@@ -122,14 +125,16 @@ def get_owners(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
 
 
-def get_parties(legal_type: str, identifier: str) -> tuple[list[dict], dict]:
+def get_parties(legal_type: str, identifier: str, token: str) -> tuple[list[dict], dict]:
     """Return the parties of the business."""
     try:
         parties = []
         parties_url = f'{current_app.config["COLIN_API_URL"]}/businesses/{legal_type}/{identifier}/parties/all'
-
+        headers = {'Authorization': 'Bearer ' + token}
         # get all parties
-        all_parties = requests.get(f'{parties_url}', timeout=current_app.config['COLIN_API_TIMEOUT'])
+        all_parties = requests.get(f'{parties_url}',
+                                   headers=headers,
+                                   timeout=current_app.config['COLIN_API_TIMEOUT'])
         if all_parties.status_code not in [HTTPStatus.OK, HTTPStatus.NOT_FOUND]:
             return None, {'message': all_parties.json(), 'status_code': all_parties.status_code}
 
