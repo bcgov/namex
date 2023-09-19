@@ -51,11 +51,15 @@ def _parse_party(party: dict, legal_type: str):
     return party
 
 
-def get_business_info(legal_type: str, identifier: str) -> tuple[dict, dict]:
+def get_business_info(legal_type: str, identifier: str, token: str) -> tuple[dict, dict]:
     """Return the basic business info of the business."""
     try:
+        headers = {'Authorization': 'Bearer ' + token}
+
         res = requests.get(f'{current_app.config["COLIN_API_URL"]}/businesses/{legal_type}/{identifier}',
+                           headers=headers,
                            timeout=current_app.config['COLIN_API_TIMEOUT'])
+
         if res.status_code != HTTPStatus.OK:
             return None, {'message': res.json(), 'status_code': res.status_code}
 
