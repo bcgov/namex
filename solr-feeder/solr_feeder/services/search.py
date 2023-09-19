@@ -50,7 +50,7 @@ def update_search_cores(identifier: str, legal_type: str):
         return error
 
     # get business data
-    business, error = get_business_info(legal_type, identifier)
+    business, error = get_business_info(legal_type, identifier, token)
     if error:
         logging.error('Error getting COLIN business data: %s', error)
         return {'message': error['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
