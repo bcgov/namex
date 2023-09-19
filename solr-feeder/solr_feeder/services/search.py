@@ -58,7 +58,7 @@ def update_search_cores(identifier: str, legal_type: str):
     error_messages = []
     # send data to bor search core via bor-api
     if bor_url := current_app.config['BOR_API_URL']:
-        parties, error = get_parties(legal_type, identifier)
+        parties, error = get_parties(legal_type, identifier, token)
         if error:
             logging.error('Error getting COLIN party data: %s', error)
             return {'message': error['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
@@ -82,7 +82,7 @@ def update_search_cores(identifier: str, legal_type: str):
             logging.debug('BOR core updated (%s).', identifier)
 
     # for business search only include owners
-    owners, error = get_owners(legal_type, identifier)
+    owners, error = get_owners(legal_type, identifier, token)
     if error:
         logging.error('Error getting COLIN owner data: %s', error)
         return {'message': error['message']}, HTTPStatus.INTERNAL_SERVER_ERROR
