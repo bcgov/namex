@@ -95,6 +95,14 @@ class _Config():  # pylint: disable=too-few-public-methods
     JWT_OIDC_AUDIENCE = os.getenv('NAMEX_SERVICE_ACCOUNT_CLIENT_ID')
     JWT_OIDC_CLIENT_SECRET = os.getenv('NAMEX_SERVICE_ACCOUNT_CLIENT_SECRET')
 
+    # ORACLE - LEGACY NRO NAMESDB
+    NRO_USER = os.getenv('NRO_USER', '')
+    NRO_SCHEMA = os.getenv('NRO_SCHEMA', None)
+    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
+    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
+    NRO_HOST = os.getenv('ORACLE_HOST', '')
+    NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""

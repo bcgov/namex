@@ -18,10 +18,12 @@ from flask import Blueprint, current_app, jsonify
 from flask_cors import cross_origin
 
 from colin_api.models import db
+from colin_api.services.nro import NROServices
 from colin_api.utils.auth import jwt
 
 
 logger = logging.getLogger(__name__)
+nro = NROServices()
 
 bp = Blueprint('Corporations', __name__, url_prefix='/corporations')
 
@@ -122,26 +124,17 @@ def request_colin(corp_num: str):  # pylint: disable=too-many-locals, too-many-b
 
 @bp.route('/business/<string:corp_num>', methods=['GET', 'OPTIONS'])
 @cross_origin(origin='*')
-@jwt.requires_auth
 def business_request_colin(corp_num: str):
     """Get business details from COLIN."""
     corp_num_sql = "\'" + corp_num + "\'"
-
-    incorp_info_sql = Methods.build_info_sql(corp_num_sql)
-    incorp_directors_sql = Methods.build_directors_sql(corp_num_sql)
-    incorp_name_sql = Methods.build_incorp_name_sql(corp_num)
+    incorp_name_sql = Methods.build_incorp_name_sql(corp_num_sql)
 
     try:
-        incorp_init_info = Methods.init_info(incorp_info_sql, incorp_directors_sql)
-        incorp_name_dict = Methods.get_incorp_name(incorp_name_sql)
-        incorp_info_dict = incorp_init_info[0]
-        incorp_class = incorp_info_dict['corp_class']
-        incorp_jurisdiction = 'BC'
-        incorp_home_identifier = None
+        business_info_dict = nro.get_business_info_by_corp_num(corp_num=corp_num_sql)
+        if not business_info_dict:
+            return jsonify({'message': 'Error: Could not find corporation details'}), 404
 
-        if incorp_class == 'XPRO':
-            incorp_jurisdiction_sql = Methods.build_jurisdiction_sql(corp_num_sql)
-            incorp_jurisdiction, incorp_home_identifier = Methods.xpro_get_id(incorp_jurisdiction_sql)
+        incorp_name = Methods.get_incorp_name(incorp_name_sql)
 
     except exc.SQLAlchemyError as err:  # pylint: disable=undefined-variable # noqa: F821
         current_app.logger.debug(err.with_traceback(None))
@@ -156,10 +149,10 @@ def business_request_colin(corp_num: str):
         return jsonify({'message': 'Unknown error occurred in colin-api'}), 500
 
     response_dict = {'identifier': corp_num,
-                     'legalName': incorp_name_dict['corp_nme'],
-                     'legalType': incorp_info_dict['corp_typ_cd'],
-                     'jurisdiction': incorp_jurisdiction,
-                     'homeIdentifier': incorp_home_identifier}
+                     'legalName': incorp_name,
+                     'legalType': business_info_dict['corp_typ_cd'],
+                     'jurisdiction': business_info_dict['jurisdiction'],
+                     'homeIdentifier': business_info_dict['home_juris_num']}
 
     return jsonify(response_dict), 200
 
@@ -197,7 +190,7 @@ class Methods:
     @staticmethod
     def build_jurisdiction_sql(corp_num_sql):
         """Build jurisdiction sql."""
-        return f'select home_jurisdiction, home_juris_num \
+        return f'select home_jurisdiction \
                    from bc_registries.corp_jurs_vw \
                   where corp_num = {corp_num_sql}'
 
@@ -223,10 +216,10 @@ class Methods:
 
     @staticmethod
     def build_incorp_name_sql(corp_num_sql):
-        """Build name sql."""
-        return f'select start_event_id, corp_nme, corp_name_typ_cd, corp_num, end_event_id \
-                   from bc_registries.corp_name \
-                   where corp_num = {corp_num_sql} and end_event_id is null;'
+        """Build business info sql."""
+        return f'select * \
+                   from bc_registries.solr_dataimport_conflicts_vw \
+                   where id = {corp_num_sql};'
 
     @staticmethod
     def init_info(incorp_info_sql, incorp_directors_sql):
@@ -240,23 +233,6 @@ class Methods:
         incorp_directors_obj = db.engine.execute(incorp_directors_sql)
 
         return incorp_info_dict, incorp_directors_obj
-
-    @staticmethod
-    def get_incorp_name(incorp_name_sql):
-        """Get incorp name obj."""
-        incorp_name_obj = db.engine.execute(incorp_name_sql)
-        incorp_name_dict = dict(incorp_name_obj.fetchall()[0])
-
-        return incorp_name_dict
-
-    @staticmethod
-    def xpro_get_id(incorp_jurisdiction_sql):
-        """Find objects for xpro company."""
-        incorp_jurisdiction_obj = db.engine.execute(incorp_jurisdiction_sql)
-        incorp_jurisdiction = incorp_jurisdiction_obj.fetchall()[0][0]
-        incorp_home_identifier = incorp_jurisdiction_obj.fetchall()[0][1]
-
-        return incorp_jurisdiction, incorp_home_identifier
 
     @staticmethod
     def xpro_get_objs(incorp_addr_id_sql, incorp_attorneys_sql, incorp_jurisdiction_sql):
@@ -395,3 +371,12 @@ class Methods:
                 incorp_nob = 'Not Available'
 
         return incorp_nob
+
+    @staticmethod
+    def get_incorp_name(business_info_sql):
+        """Find business info."""
+        incorp_info_obj = db.engine.execute(business_info_sql)
+        incorp_info_dict = dict(incorp_info_obj.fetchall()[0])
+        incorp_name = incorp_info_dict['name']
+
+        return incorp_name
