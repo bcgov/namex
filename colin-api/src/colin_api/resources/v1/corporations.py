@@ -127,14 +127,14 @@ def request_colin(corp_num: str):  # pylint: disable=too-many-locals, too-many-b
 def business_request_colin(corp_num: str):
     """Get business details from COLIN."""
     corp_num_sql = "\'" + corp_num + "\'"
-    incorp_name_sql = Methods.build_incorp_name_sql(corp_num_sql)
+    incorp_info_sql = Methods.build_incorp_info_sql(corp_num_sql)
 
     try:
         business_info_dict = nro.get_business_info_by_corp_num(corp_num=corp_num_sql)
         if not business_info_dict:
             return jsonify({'message': 'Error: Could not find corporation details'}), 404
 
-        incorp_name = Methods.get_incorp_name(incorp_name_sql)
+        incorp_name, incorp_state = Methods.get_incorp_info(incorp_info_sql)
 
     except exc.SQLAlchemyError as err:  # pylint: disable=undefined-variable # noqa: F821
         current_app.logger.debug(err.with_traceback(None))
@@ -151,6 +151,7 @@ def business_request_colin(corp_num: str):
     response_dict = {'identifier': corp_num,
                      'legalName': incorp_name,
                      'legalType': business_info_dict['corp_typ_cd'],
+                     'state': incorp_state,
                      'jurisdiction': business_info_dict['jurisdiction'],
                      'homeIdentifier': business_info_dict['home_juris_num']}
 
@@ -215,7 +216,7 @@ class Methods:
                    where corp_num = {corp_num_sql};'
 
     @staticmethod
-    def build_incorp_name_sql(corp_num_sql):
+    def build_incorp_info_sql(corp_num_sql):
         """Build business info sql."""
         return f'select * \
                    from bc_registries.solr_dataimport_conflicts_vw \
@@ -373,10 +374,11 @@ class Methods:
         return incorp_nob
 
     @staticmethod
-    def get_incorp_name(business_info_sql):
+    def get_incorp_info(business_info_sql):
         """Find business info."""
         incorp_info_obj = db.engine.execute(business_info_sql)
         incorp_info_dict = dict(incorp_info_obj.fetchall()[0])
         incorp_name = incorp_info_dict['name']
+        incorp_state = incorp_info_dict['state_type_cd']
 
-        return incorp_name
+        return incorp_name, incorp_state
