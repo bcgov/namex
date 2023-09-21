@@ -60,6 +60,7 @@ class ColinApi(Resource):
         response, status_code = _init(colin_url, corp_num)
         return response, status_code
 
+    @cors.crossdomain(origin='*')
     def get(self, corp_num):
         colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/business/{corp_num}'
         response, status_code = _init(colin_url, corp_num)
@@ -77,8 +78,6 @@ def _init(colin_url, corp_num):
         # Get the profile
         print(f'\nCalling COLIN API using [corp_num: {corp_num}]')
         headers = {
-            # 'x-api-key': COLIN_SVC_API_KEY,
-            # 'Accept': 'application/xml'
             'Authorization': 'Bearer ' + token
         }
 
@@ -91,7 +90,7 @@ def _init(colin_url, corp_num):
 
         content = json.loads(response.text)
         if response.status_code != 200:
-            return jsonify(content.get('message')), response.status_code
+            return jsonify(content), response.status_code
         return jsonify(content), response.status_code
     except ColinServiceException as err:
         return handle_exception(err, err.message, err.status_code)
