@@ -124,6 +124,7 @@ def request_colin(corp_num: str):  # pylint: disable=too-many-locals, too-many-b
 
 @bp.route('/business/<string:corp_num>', methods=['GET', 'OPTIONS'])
 @cross_origin(origin='*')
+@jwt.requires_auth
 def business_request_colin(corp_num: str):
     """Get business details from COLIN."""
     try:
