@@ -57,16 +57,16 @@ class ColinApi(Resource):
     @cors.crossdomain(origin='*')
     def post(self, corp_num):
         colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/{corp_num}'
-        response, status_code = _init(colin_url, corp_num)
+        response, status_code = _init(colin_url)
         return response, status_code
 
     @cors.crossdomain(origin='*')
     def get(self, corp_num):
         colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/business/{corp_num}'
-        response, status_code = _init(colin_url, corp_num)
+        response, status_code = _init(colin_url)
         return response, status_code
 
-def _init(colin_url, corp_num):
+def _init(colin_url):
     try:
         SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')
         SBC_SVC_AUTH_CLIENT_ID = current_app.config.get('SBC_SVC_AUTH_CLIENT_ID', '')

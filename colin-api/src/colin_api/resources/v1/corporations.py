@@ -27,6 +27,7 @@ nro = NROServices()
 
 bp = Blueprint('Corporations', __name__, url_prefix='/corporations')
 
+MSG_COULD_NOT_FIND_CORP = 'Error: Could not find corporation details'
 
 @bp.route('/echo', methods=['GET', 'OPTIONS'])
 @cross_origin(origin='*')
@@ -76,7 +77,7 @@ def request_colin(corp_num: str):  # pylint: disable=too-many-locals, too-many-b
         return jsonify({'message': 'Attribute error'}), 500
     except IndexError as err:
         current_app.logger.debug(err.with_traceback(None))
-        return jsonify({'message': 'Error: Could not find corporation details'}), 404
+        return jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404
     except Exception as err:  # noqa: B902
         current_app.logger.debug(err.with_traceback(None))
         return jsonify({'message': 'Unknown error occurred in colin-api'}), 500
@@ -131,7 +132,7 @@ def business_request_colin(corp_num: str):
     try:
         business_info_dict = nro.get_business_info_by_corp_num(corp_num=corp_num)
         if not business_info_dict:
-            return jsonify({'message': 'Error: Could not find corporation details'}), 404
+            return jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404
 
     except exc.SQLAlchemyError as err:  # pylint: disable=undefined-variable # noqa: F821
         current_app.logger.debug(err.with_traceback(None))
@@ -140,7 +141,7 @@ def business_request_colin(corp_num: str):
         return jsonify({'message': 'Attribute error'}), 500
     except IndexError as err:
         current_app.logger.debug(err.with_traceback(None))
-        return jsonify({'message': 'Error: Could not find corporation details'}), 404
+        return jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404
     except Exception as err:  # noqa: B902
         current_app.logger.debug(err.with_traceback(None))
         return jsonify({'message': 'Unknown error occurred in colin-api'}), 500
