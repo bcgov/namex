@@ -76,13 +76,10 @@ def _init(colin_url, corp_num):
             raise ColinServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
 
         # Get the profile
-        print(f'\nCalling COLIN API using [corp_num: {corp_num}]')
         headers = {
             'Authorization': 'Bearer ' + token
         }
 
-        print(colin_url)
-        print(repr(headers))
         response = requests.get(
             colin_url,
             headers=headers

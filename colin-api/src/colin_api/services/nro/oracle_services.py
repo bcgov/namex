@@ -56,7 +56,7 @@ class NROServices(object):
         # setting threaded =True wraps the underlying calls in a Mutex
         # so we don't have to that here
 
-        def InitSession(conn, requestedTag):
+        def init_session(conn, requested_tag):
             cursor = conn.cursor()
             cursor.execute("alter session set TIME_ZONE = 'America/Vancouver'")
 
@@ -76,7 +76,7 @@ class NROServices(object):
                                      getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,
                                      waitTimeout=1500,
                                      timeout=3600,
-                                     sessionCallback=InitSession)
+                                     sessionCallback=init_session)
 
     @property
     def connection(self):
