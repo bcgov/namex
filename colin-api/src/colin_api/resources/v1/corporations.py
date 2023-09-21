@@ -130,7 +130,7 @@ def business_request_colin(corp_num: str):
     incorp_info_sql = Methods.build_incorp_info_sql(corp_num_sql)
 
     try:
-        business_info_dict = nro.get_business_info_by_corp_num(corp_num=corp_num_sql)
+        business_info_dict = nro.get_business_info_by_corp_num(corp_num=corp_num)
         if not business_info_dict:
             return jsonify({'message': 'Error: Could not find corporation details'}), 404
 
