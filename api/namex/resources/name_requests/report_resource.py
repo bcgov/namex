@@ -42,9 +42,9 @@ class ReportResource(Resource):
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
             report_name = nr_model.nrNum + ' - ' + CONSENT_EMAIL_SUBJECT
-            recepient_emails = []
+            recipient_emails = []
             for applicant in nr_model.applicants:
-                recepient_emails.append(applicant.emailAddress)
+                recipient_emails.append(applicant.emailAddress)
             if not nr_model.expirationDate:
                 nr_service = NameRequestService()
                 expiry_days = int(nr_service.get_expiry_days(nr_model))
@@ -53,7 +53,7 @@ class ReportResource(Resource):
                     expires_in_days=expiry_days
                 )
                 nr_model.expirationDate = expiry_date
-            recepients = ','.join(recepient_emails)
+            recipients = ','.join(recipient_emails)
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
             email_body = Path(f'{template_path}/emails/consent.md').read_text()
             tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
@@ -61,7 +61,7 @@ class ReportResource(Resource):
             email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
             email = {
-                'recipients': recepients,
+                'recipients': recipients,
                 'content': {
                     'subject': report_name,
                     'body': email_body,
@@ -89,12 +89,12 @@ class ReportResource(Resource):
             if status_code != HTTPStatus.OK:
                 return jsonify(message=str(report)), status_code
             report_name = nr_model.nrNum + ' - ' + RESULT_EMAIL_SUBJECT
-            recepient_emails = []
+            recipient_emails = []
             for applicant in nr_model.applicants:
-                recepient_emails.append(applicant.emailAddress)
-            recepients = ','.join(recepient_emails)
+                recipient_emails.append(applicant.emailAddress)
+            recipients = ','.join(recipient_emails)
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
-            nr_url = current_app.config.get('NAME_REQUEST_URL')
+            nr_url = ReportResource._get_action_url(nr_model.entity_type_cd)
             email_body = Path(f'{template_path}/emails/rejected.md').read_text()
             if nr_model.stateCd in [State.APPROVED, State.CONDITIONAL]:
                 email_body = Path(f'{template_path}/emails/approved.md').read_text()
@@ -112,7 +112,7 @@ class ReportResource(Resource):
             email_body = email_body.replace('{{BUSINESS_URL}}', business_url)
 
             email = {
-                'recipients': recepients,
+                'recipients': recipients,
                 'content': {
                     'subject': report_name,
                     'body': email_body,
@@ -291,7 +291,7 @@ class ReportResource(Resource):
     @staticmethod
     def _get_request_action_cd_description(request_cd: str):
         request_cd_description = {
-            'NEW': 'New Business',
+            'NEW': 'New Business Name',
             'MVE': 'Continuation in',
             'REH': 'Restoration or Reinstatement',
             'AML': 'Amalgamation',
@@ -329,7 +329,7 @@ class ReportResource(Resource):
             'CP': 'BC Cooperative Association',
             'BC': 'BC Benefit Company',
             'CC': 'BC Community Contribution Company',
-            'SO': 'BC Social Enterprise',
+            'SO': 'BC Society',
             'PA': 'BC Private Act',
             'FI': 'BC Credit Union',
             'PAR': 'BC Parish',
@@ -340,7 +340,7 @@ class ReportResource(Resource):
             'XLP': 'Extraprovincial Limited Partnership',
             'XLL': 'Extraprovincial Limited Liability Partnership',
             'XCP':  ReportResource.EX_COOP_ASSOC,
-            'XSO': 'Extraprovincial Social Enterprise',
+            'XSO': 'Extraprovincial Non-share Corporation',
             # Used for mapping back to legacy oracle codes, description not required
             'FIRM': 'FIRM (Legacy Oracle)'
         }
@@ -354,7 +354,7 @@ class ReportResource(Resource):
         BUSINESS_URL = current_app.config.get('BUSINESS_URL')
         CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
 
-        next_action_text = {
+        url = {
             # BC Types
             'CR':  CORP_ONLINE_URL,
             'UL':  CORP_ONLINE_URL,
@@ -366,7 +366,7 @@ class ReportResource(Resource):
             'CP':  BUSINESS_URL,
             'BC':  BUSINESS_URL,
             'CC':  CORP_ONLINE_URL,
-            'SO': 'BC Social Enterprise',
+            'SO': 'BC Society',
             'PA': ReportResource.GENERIC_STEPS,
             'FI': ReportResource.GENERIC_STEPS,
             'PAR': ReportResource.GENERIC_STEPS,
@@ -377,9 +377,9 @@ class ReportResource(Resource):
             'XLP': CORP_FORMS_URL,
             'XLL': CORP_FORMS_URL,
             'XCP':  ReportResource.EX_COOP_ASSOC,
-            'XSO':  ReportResource.EX_COOP_ASSOC,
+            'XSO': 'Extraprovincial Non-share Corporation',
         }
-        return next_action_text.get(entity_type_cd, None)
+        return url.get(entity_type_cd, None)
 
     @staticmethod
     def _get_legal_act(entity_type_cd: str):
