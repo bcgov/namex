@@ -102,13 +102,23 @@ class NROServices(object):
         """
         try:
             cursor = self.connection.cursor()
-
             cursor.execute("""
-                select corp.corp_num, corp_typ_cd, can_jur_typ_cd, othr_juris_desc, home_juris_num
-                from CORPORATION corp
-                    left join JURISDICTION on JURISDICTION.corp_num = corp.corp_num
-                      and JURISDICTION.end_event_id is null
-                where corp.CORP_NUM=:corp_num""", corp_num=corp_num)
+                select c.corp_num,
+                       c.corp_typ_cd,
+                       j.can_jur_typ_cd,
+                       j.othr_juris_desc,
+                       j.home_juris_num,
+                       cn.corp_nme,
+                       cos.op_state_typ_cd
+                from CORPORATION@colin_readonly.bcgov c
+                         left join JURISDICTION@colin_readonly.bcgov j on j.corp_num = c.corp_num
+                    and j.end_event_id is null
+                         left join CORP_NAME@colin_readonly.bcgov cn on cn.corp_num = c.corp_num
+                    and cn.end_event_id is null
+                         left join CORP_STATE@colin_readonly.bcgov cs on cs.corp_num = c.corp_num
+                    and cs.end_event_id is null
+                         left join CORP_OP_STATE@colin_readonly.bcgov cos on cos.state_typ_cd = cs.state_typ_cd
+                where c.CORP_NUM=:corp_num""", corp_num=corp_num)
 
             business = cursor.fetchone()
             if not business:
