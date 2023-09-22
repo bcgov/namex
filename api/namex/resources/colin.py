@@ -66,9 +66,6 @@ class ColinApi(Resource):
 
     @cors.crossdomain(origin='*')
     def get(self, corp_num):
-        # colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/business/{corp_num}'
-        # response, status_code = _init(colin_url)
-        # return response, status_code
         try:
             business_info_dict = oracle_services.get_business_info_by_corp_num(corp_num=corp_num)
             if not business_info_dict:
