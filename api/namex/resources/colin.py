@@ -4,6 +4,7 @@ import requests
 from flask import current_app, jsonify
 from flask_restx import Namespace, Resource, cors
 
+from namex.services.colin.oracle_services import OracleServices
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import MSG_CLIENT_CREDENTIALS_REQ_FAILED, cors_preflight, get_client_credentials
 from namex.utils.logging import setup_logging
@@ -14,6 +15,9 @@ setup_logging()  # Important to do this first
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
+MSG_COULD_NOT_FIND_CORP = 'Error: Could not find corporation details'
+
+oracle_services = OracleServices()
 
 class ColinServiceException(Exception):
     def __init__(self, wrapped_err=None, message="COLIN API exception.", status_code=500):
@@ -62,9 +66,27 @@ class ColinApi(Resource):
 
     @cors.crossdomain(origin='*')
     def get(self, corp_num):
-        colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/business/{corp_num}'
-        response, status_code = _init(colin_url)
-        return response, status_code
+        # colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/business/{corp_num}'
+        # response, status_code = _init(colin_url)
+        # return response, status_code
+        try:
+            business_info_dict = oracle_services.get_business_info_by_corp_num(corp_num=corp_num)
+            if not business_info_dict:
+                return jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404
+
+        except ColinServiceException as err:
+            return handle_exception(err, err.message, err.status_code)
+        except Exception as err:
+            return handle_exception(err, 'Internal Server Error', 500)
+        
+        response_dict = {'identifier': corp_num,
+                         'legalName': business_info_dict['corp_nme'],
+                         'legalType': business_info_dict['corp_typ_cd'],
+                         'state': business_info_dict['op_state_typ_cd'],
+                         'jurisdiction': business_info_dict['jurisdiction'],
+                         'homeIdentifier': business_info_dict['home_juris_num']}
+
+        return jsonify(response_dict), 200
 
 def _init(colin_url):
     try:
