@@ -60,22 +60,23 @@ class ColinServices(object):
             cursor = conn.cursor()
             cursor.execute("alter session set TIME_ZONE = 'America/Vancouver'")
 
-        return cx_Oracle.SessionPool(user=current_app.config.get('ORACLE_COLIN_USER'),  # pylint:disable=c-extension-no-member
-                                     password=current_app.config.get('ORACLE_COLIN_PASSWORD'),
-                                     dsn='{0}:{1}/{2}'.format(current_app.config.get('ORACLE_COLIN_HOST'),
-                                                              current_app.config.get('ORACLE_COLIN_PORT'),
-                                                              current_app.config.get('ORACLE_COLIN_DB_NAME')),
+        user = current_app.config.get('NRO_USER')
+        password = current_app.config.get('NRO_PASSWORD')
+        host = current_app.config.get('NRO_HOST')
+        port = current_app.config.get('NRO_PORT')
+        db_name = current_app.config.get('NRO_DB_NAME')
+        return cx_Oracle.SessionPool(user=user,
+                                     password=password,
+                                     dsn=f'{host}:{port}/{db_name}',
                                      min=1,
                                      max=10,
                                      increment=1,
-                                     connectiontype=cx_Oracle.Connection,  # pylint:disable=c-extension-no-member
+                                     connectiontype=cx_Oracle.Connection,
                                      threaded=True,
-                                     getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,  # pylint:disable=c-extension-no-member
+                                     getmode=cx_Oracle.SPOOL_ATTRVAL_NOWAIT,
                                      waitTimeout=1500,
                                      timeout=3600,
-                                     sessionCallback=init_session,
-                                     encoding='UTF-8',
-                                     nencoding='UTF-8')
+                                     sessionCallback=init_session)
 
     @property
     def connection(self):
