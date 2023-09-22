@@ -139,7 +139,24 @@ def get_parties(legal_type: str, identifier: str, token: str) -> tuple[list[dict
             return None, {'message': all_parties.json(), 'status_code': all_parties.status_code}
 
         for party in (all_parties.json()).get('parties', []):
-            parties.append(_parse_party(party, legal_type))
+            # David R said to ignore these (they are also ignored in the importer job):
+            #   - Data for these is garbage and won't be brought over when they are modernized.
+            #   - party_typ_cds: ('PAS','PDI','PSA','RAD','RAF','RAO','RAS','TAP','TAA','TSP')
+            ignored_types = ['Partner ATT SK', 'Partner DIRECTOR', 'Partner Sign Auth',
+                             'Partner Reinstatement Applicant - Director of foreign entity',
+                             'Partner Reinstatement Applicant - Foreign Entity Reinstated',
+                             'Partner Reinstatement Applicant - Office of foreign entity',
+                             'Partner Reinstatement Applicant - Shareholder of foreign entity',
+                             'TILMA Alternate Attorney', 'TILMA Primary Attorney', 'TILMA Submitting Party']
+            roles = []
+            for role in party['roles']:
+                # only add valid roles
+                if role['roleType'] not in ignored_types:
+                    roles.append(role)
+            if roles:
+                # has valid roles so add party to update
+                party['roles'] = roles
+                parties.append(_parse_party(party, legal_type))
 
         return parties, None
 
