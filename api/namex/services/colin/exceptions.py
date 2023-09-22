@@ -1,7 +1,7 @@
 """Format error response and append status code."""
 
 
-class OracleServicesError(Exception):
+class ColinServicesError(Exception):
     """Oracle Service Error Object."""
 
     def __init__(self, error, status_code):

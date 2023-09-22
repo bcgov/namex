@@ -12,5 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This module wraps the calls to external services used by the API."""
-from .exceptions import NROServicesError
-from .oracle_services import NROServices
+from .exceptions import ColinServicesError
+from .oracle_services import ColinServices

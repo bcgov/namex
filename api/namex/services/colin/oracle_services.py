@@ -19,10 +19,10 @@ These will get initialized by the application.
 import cx_Oracle
 from flask import _app_ctx_stack, current_app
 
-from .exceptions import OracleServicesError
+from .exceptions import ColinServicesError
 
 
-class OracleServices(object):
+class ColinServices(object):
     """Provides services to change the legacy NRO Database."""
 
     def __init__(self, app=None):
