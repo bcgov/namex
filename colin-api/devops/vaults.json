@@ -3,9 +3,7 @@
         "vault": "database",
         "application": [
             "fdw-registries-db",
-            "fdw-names-db",
-            "oracle-base",
-            "oracle-namex-db"
+            "fdw-names-db"
         ]
     },
     {
