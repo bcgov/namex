@@ -18,12 +18,10 @@ from flask import Blueprint, current_app, jsonify
 from flask_cors import cross_origin
 
 from colin_api.models import db
-from colin_api.services.nro import NROServices
 from colin_api.utils.auth import jwt
 
 
 logger = logging.getLogger(__name__)
-nro = NROServices()
 
 bp = Blueprint('Corporations', __name__, url_prefix='/corporations')
 
@@ -121,39 +119,6 @@ def request_colin(corp_num: str):  # pylint: disable=too-many-locals, too-many-b
                              'nature of business': incorp_nob}
 
     return jsonify(corp_details_dict), 200
-
-
-@bp.route('/business/<string:corp_num>', methods=['GET', 'OPTIONS'])
-@cross_origin(origin='*')
-@jwt.requires_auth
-@jwt.has_one_of_roles(['names_viewer'])
-def business_request_colin(corp_num: str):
-    """Get business details from COLIN."""
-    try:
-        business_info_dict = nro.get_business_info_by_corp_num(corp_num=corp_num)
-        if not business_info_dict:
-            return jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404
-
-    except exc.SQLAlchemyError as err:  # pylint: disable=undefined-variable # noqa: F821
-        current_app.logger.debug(err.with_traceback(None))
-        return jsonify({'message': 'Error occurred getting the corporation details'}), 500
-    except AttributeError:
-        return jsonify({'message': 'Attribute error'}), 500
-    except IndexError as err:
-        current_app.logger.debug(err.with_traceback(None))
-        return jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404
-    except Exception as err:  # noqa: B902
-        current_app.logger.debug(err.with_traceback(None))
-        return jsonify({'message': 'Unknown error occurred in colin-api'}), 500
-
-    response_dict = {'identifier': corp_num,
-                     'legalName': business_info_dict['corp_nme'],
-                     'legalType': business_info_dict['corp_typ_cd'],
-                     'state': business_info_dict['op_state_typ_cd'],
-                     'jurisdiction': business_info_dict['jurisdiction'],
-                     'homeIdentifier': business_info_dict['home_juris_num']}
-
-    return jsonify(response_dict), 200
 
 
 class Methods:
