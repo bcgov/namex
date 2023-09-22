@@ -80,14 +80,6 @@ class Config(object):
     NRO_HOST = os.getenv('ORACLE_HOST', '')
     NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
 
-    # ORACLE - CDEV/CTST/CPRD
-    ORACLE_USER = os.getenv('ORACLE_USER', '')
-    ORACLE_PASSWORD = os.getenv('ORACLE_PASSWORD', '')
-    ORACLE_DB_NAME = os.getenv('ORACLE_DB_NAME', '')
-    ORACLE_HOST = os.getenv('ORACLE_HOST', '')
-    ORACLE_PORT = int(os.getenv('ORACLE_PORT', '1521'))
-    ORACLE_BNI_DB_LINK = os.getenv('ORACLE_BNI_DB_LINK', '')
-
     # KEYCLOAK & JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
     JWT_OIDC_ALGORITHMS = os.getenv('JWT_OIDC_ALGORITHMS')
