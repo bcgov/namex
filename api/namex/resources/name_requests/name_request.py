@@ -12,6 +12,7 @@ from namex.services import EventRecorder
 from namex.services.name_request.exceptions import InvalidInputError, NameRequestException, NameRequestIsInProgressError
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
+from namex.services.name_request.name_request_state import is_request_editable, is_name_request_refundable
 from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 from namex.utils.api_resource import handle_exception
@@ -182,8 +183,12 @@ class NameRequestFields(BaseNameRequestResource):
 
                 if nr_action is NameRequestPatchActions.CHECKOUT.value:
                     # Make sure the NR isn't already checked out
-                    checked_out_by_different_user = nr_model.checkedOutBy is not None and nr_model.checkedOutBy != request_json.get('checkedOutBy', None)
-                    if checked_out_by_different_user:
+                    if nr_model.checkedOutBy is None:
+                        if not is_request_editable(nr_model.stateCd):
+                            # the name is in examination
+                            raise NameRequestIsInProgressError()
+                    elif nr_model.checkedOutBy != request_json.get('checkedOutBy', None):
+                        # checked out by another user
                         raise NameRequestIsInProgressError()
 
                     # set the user id of the request to name_request_service_account
@@ -206,6 +211,10 @@ class NameRequestFields(BaseNameRequestResource):
                     }
                     # Set the request data to the service
                     _self.nr_service.request_data = self.request_data
+                elif nr_action is NameRequestPatchActions.REQUEST_REFUND.value \
+                        and not is_name_request_refundable(nr_model.stateCd):
+                    # the NR can be cancelled and refund when state_cd = DRAFT
+                    raise NameRequestIsInProgressError()
                 else:
                     super().initialize()
 

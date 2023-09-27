@@ -184,6 +184,36 @@ def get_nr_state_actions(next_state, nr_model=None):
         raise NameRequestActionError(err)
 
 
+def is_request_editable(nr_state):
+    """
+    Determine whether a Name Request (NR) with a specific state is editable by a user (not a staff).
+
+    This function takes the state of a Name Request as input and returns True if the NR
+    is in a state that allows editing, or False otherwise.
+
+    :param nr_state: The state of the Name Request to be checked.
+    :type nr_state: str
+    :return: True if the NR is editable, False otherwise.
+    :rtype: bool
+    """
+    return State.DRAFT == nr_state
+
+
+def is_name_request_refundable(nr_state):
+    """
+    Determine whether a Name Request (NR) with a specific state is cancellable by a user (not a staff).
+
+    This function takes the state of a Name Request as input and returns True if the NR
+    is in a state that allows cancellation, or False otherwise.
+
+    :param nr_state: The state of the Name Request to be checked.
+    :type nr_state: str
+    :return: True if the NR is cancellable, False otherwise.
+    :rtype: bool
+    """
+    return State.DRAFT == nr_state
+
+
 def to_draft(resource, nr, on_success_cb=None):
     valid_states = [State.DRAFT, State.INPROGRESS, State.PENDING_PAYMENT]
     if nr.stateCd not in valid_states:
