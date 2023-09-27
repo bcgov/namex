@@ -128,3 +128,8 @@ class GetUserIdError(NameRequestException):
 class VirtualWordConditionServiceError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error initializing VirtualWordCondition Service."):
         super().__init__(wrapped_err, message)
+
+###################rajan exception raising for existing by same name and by same user
+class NameRequestIsAlreadySubmittedError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="The request with same name is already in process."):
+        super().__init__(wrapped_err, message)

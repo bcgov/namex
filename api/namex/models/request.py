@@ -325,6 +325,22 @@ class Request(db.Model):
         names = cls.query.filter_by(id=nr_id).first().names
         name_by_choice = next((name for name in names if name.choice == choice), None)
         return name_by_choice
+    
+    @classmethod
+    def find_existing_name_by_user(cls, user_data, request_owner):
+        """	
+        Gets requests submited by user with given name choice in state draft
+        """
+        existing_nr = db.session.query(Request). \
+            filter(
+                Request.stateCd == 'DRAFT',
+                Request.nameSearch.ilike('%'+user_data+'%')). \
+            one_or_none()
+        
+        if(existing_nr):
+            return True
+        return False
+
 
     @classmethod
     def validNRFormat(cls, nr):
