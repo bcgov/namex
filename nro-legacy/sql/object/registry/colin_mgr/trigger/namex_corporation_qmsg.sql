@@ -7,8 +7,8 @@ BEGIN
     if (nvl(:old.bn_9            ,'^') <> nvl(:new.bn_9             ,'^')
      or nvl(:old.bn_15           ,'^') <> nvl(:new.bn_15            ,'^')
      or nvl(:old.corp_typ_cd     ,'^') <> nvl(:new.corp_typ_cd      ,'^')
-     or nvl(:old.last_ar_filed_dt,'^') <> nvl(:new.last_ar_filed_dt ,'^')
-     or nvl(:old.transition_dt   ,'^') <> nvl(:new.transition_dt    ,'^')) then
+     or nvl(:old.last_ar_filed_dt,to_date('00010101','yyyymmdd')) <> nvl(:new.last_ar_filed_dt,to_date('00010101','yyyymmdd'))
+     or nvl(:old.transition_dt   ,to_date('00010101','yyyymmdd')) <> nvl(:new.transition_dt   ,to_date('00010101','yyyymmdd'))) then
         namex_trigger_handler.enqueue_corporation(:new.corp_num);
     end if;
 
