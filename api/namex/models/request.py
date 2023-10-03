@@ -327,6 +327,23 @@ class Request(db.Model):
         return name_by_choice
 
     @classmethod
+    def find_existing_name_by_user(cls, user_data, request_owner):
+        """	
+        Gets requests submited by user with given name choice in state draft
+        """
+        existing_nr = db.session.query(Request). \
+            join(Applicant, and_(Applicant.nrId == Request.id)). \
+            filter(
+                Applicant.emailAddress == request_owner,
+                Request.stateCd == 'DRAFT',
+                Request.nameSearch.ilike('%'+user_data+'%')). \
+            one_or_none()
+        
+        if(existing_nr):
+            return True
+        return False
+        
+    @classmethod
     def validNRFormat(cls, nr):
         """NR should be of the format 'NR 1234567'"""
         if len(nr) != 10 or nr[:2] != 'NR' or nr[2:3] != ' ':

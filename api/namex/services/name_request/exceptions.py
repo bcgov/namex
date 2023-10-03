@@ -128,3 +128,8 @@ class GetUserIdError(NameRequestException):
 class VirtualWordConditionServiceError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error initializing VirtualWordCondition Service."):
         super().__init__(wrapped_err, message)
+
+# exception raising for existing request by same name and by same user email
+class NameRequestIsAlreadySubmittedError(NameRequestException):
+    def __init__(self, wrapped_err=None, message="The request with same name is already submitted."):
+        super().__init__(wrapped_err, message)
