@@ -1,21 +1,12 @@
 from datetime import timedelta, datetime
 from flask import current_app
 from pytz import timezone
-import pytz
 
 from namex.models import Name, State
-from namex.services.name_request import NameRequestService
 from namex.services.nro.utils import nro_examiner_name
 
 
-def nro_data_pump_update(nr, ora_cursor, expires_days=56):
-    nr_service = NameRequestService()
-    expiry_date = nr_service.create_expiry_date(
-        start=nr.lastUpdate,
-        expires_in_days=expires_days
-    )
-
-    current_app.logger.debug(f'Setting expiry date to: { expiry_date }')
+def nro_data_pump_update(nr, ora_cursor, expiry_date):
     # init dict for examiner comment data, populated below in loop through names
     examiner_comment = {
         'choice': 0,
