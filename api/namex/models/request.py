@@ -327,7 +327,7 @@ class Request(db.Model):
         return name_by_choice
 
     @classmethod
-    def find_existing_name_by_user(cls, user_data, request_owner):
+    def find_existing_name_by_user(cls, user_name_search_string, request_owner):
         """	
         Gets requests submited by user with given name choice in state draft
         """
@@ -336,7 +336,7 @@ class Request(db.Model):
             filter(
                 Applicant.emailAddress == request_owner,
                 Request.stateCd == 'DRAFT',
-                Request.nameSearch.ilike('%'+user_data+'%')). \
+                (Request.nameSearch == ('('+user_name_search_string+')')) | ( Request.nameSearch == user_name_search_string )). \
             one_or_none()
         
         if(existing_nr):
