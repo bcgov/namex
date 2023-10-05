@@ -411,6 +411,7 @@ class RequestSearch(Resource):
             if nr_number:
                 condition = f"requests.nr_num ILIKE '%{nr_number}%'"
             if nr_name:
+                nr_name = nr_name.replace("'", "''")
                 if condition:
                     condition += ' OR '
                 name_condition = "requests.name_search ILIKE '%"
