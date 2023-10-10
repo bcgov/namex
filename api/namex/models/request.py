@@ -335,7 +335,7 @@ class Request(db.Model):
             join(Applicant, and_(Applicant.nrId == Request.id)). \
             filter(
                 Applicant.emailAddress == request_owner,
-                Request.stateCd == 'DRAFT',
+                (Request.stateCd == 'DRAFT') | (Request.stateCd == 'PENDING_PAYMENT') ,
                 (Request.nameSearch == ('('+user_name_search_string+')')) | ( Request.nameSearch == user_name_search_string )). \
             one_or_none()
         
