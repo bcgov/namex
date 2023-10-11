@@ -29,8 +29,9 @@ from namex.services.audit_trail.hotjar_tracking import HotjarTracking
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request.exceptions import \
-    NameRequestException, InvalidInputError
+    NameRequestException, InvalidInputError, NameRequestIsAlreadySubmittedError
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
+
 
 from .api_namespace import api
 from .api_models import nr_request
@@ -144,6 +145,19 @@ class NameRequestsResource(BaseNameRequestResource):
             # Creates a new NameRequestService, validates the app config, and sets the request data to the NameRequestService instance
             self.initialize()
             nr_svc = self.nr_service
+            # initialize search string from user 
+            name_search_string = ""
+            # user id 
+            submitter=nr_svc.user_id
+            # collect submitted user data names choices
+            customer_data = nr_svc.request_names
+            # loop through the list of choices obtained
+            for item, index in zip(customer_data, range(len(customer_data))):
+                #concat them with format saving as namesearch
+                name_search_string += f'|{index + 1}{item.get("name")}{index + 1}|'
+            #if same user submitted the request of same name choices again raise exception otherwise continue creating nr
+            if(Request().find_existing_name_by_user(name_search_string,submitter)):
+                raise NameRequestIsAlreadySubmittedError()
 
             # Create a new DRAFT name request
             nr_model = nr_svc.create_name_request()
@@ -153,7 +167,6 @@ class NameRequestsResource(BaseNameRequestResource):
             # Transition the DRAFT to the state specified in the request:
             # eg. one of [State.DRAFT, State.COND_RESERVE, State.RESERVED]
             nr_model = self.update_nr(nr_model, nr_svc.request_state_code, self.handle_nr_create)
-
             # Record the event
             EventRecorder.record(nr_svc.user, Event.POST, nr_model, nr_model.json())
 
