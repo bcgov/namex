@@ -13,7 +13,7 @@ alembic==1.5.8
 aniso8601==9.0.1
 attrs==20.3.0
 cachelib==0.1.1
-certifi==2020.12.5
+certifi==2022.12.7
 chardet==4.0.0
 click==7.1.2
 cmudict==0.4.5
