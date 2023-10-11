@@ -40,4 +40,4 @@ asyncio-nats-streaming==0.4.0
 
 # protobuf is a temporary solution for https://github.com/protocolbuffers/protobuf/issues/10051
 # will be removed once the bug is fixed
-protobuf==3.20.1
+protobuf==3.20.2
