@@ -56,9 +56,7 @@ class ReportResource(Resource):
             recipients = ','.join(recipient_emails)
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
             email_body = Path(f'{template_path}/emails/consent.md').read_text()
-            tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-            localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-            email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+            email_body = email_body.replace('{{EXPIRATION_DATE}}', nr_model.expirationDate.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
             email = {
                 'recipients': recipients,
@@ -101,9 +99,7 @@ class ReportResource(Resource):
                 if nr_model.consentFlag in ['Y', 'R']:
                     email_body = Path(f'{template_path}/emails/conditional.md').read_text()
 
-                tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-                localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-                email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+                email_body = email_body.replace('{{EXPIRATION_DATE}}', nr_model.expirationDate.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
 
             business_url = current_app.config.get('DECIDE_BUSINESS_URL')
 
@@ -247,9 +243,7 @@ class ReportResource(Resource):
         if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
-            tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-            localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-            nr_report_json['expirationDate'] = localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time')
+            nr_report_json['expirationDate'] = nr_model.expirationDate.strftime('%B %-d, %Y at %-I:%M %p Pacific time')
         if nr_report_json['submittedDate']:
             nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
         if nr_report_json['applicants']['countryTypeCd']:
