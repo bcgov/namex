@@ -148,9 +148,9 @@ class NameRequestsResource(BaseNameRequestResource):
             name_search_string = ""
             user_email = ""
             # user id 
-            submitter=nr_svc.request_data.get("applicants")
+            submitter = nr_svc.request_data.get("applicants")
             for item, index in zip(submitter, range(len(submitter))):
-                user_email=item.get("emailAddress")
+                user_email = item.get("emailAddress")
                 
             # collect submitted user data names choices
             customer_data = nr_svc.request_names
@@ -159,7 +159,7 @@ class NameRequestsResource(BaseNameRequestResource):
                 #concat them with format saving as namesearch
                 name_search_string += f'|{index + 1}{item.get("name")}{index + 1}|'
             #if same user submitted the request of same name choices again raise exception otherwise continue creating nr
-            if(Request().find_existing_name_by_user(name_search_string,user_email)):
+            if(Request().find_existing_name_by_user(name_search_string, user_email)):
                 raise NameRequestIsAlreadySubmittedError()
             # Create a new DRAFT name request
             nr_model = nr_svc.create_name_request()
