@@ -66,7 +66,7 @@ six==1.16.0
 toolz==0.12.0
 tqdm==4.64.1
 typing_extensions==4.4.0
-urllib3==1.26.12
+urllib3==1.26.18
 zipp==3.8.1
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
 git+https://github.com/bcgov/namex.git#egg=queue_common&subdirectory=services/common
