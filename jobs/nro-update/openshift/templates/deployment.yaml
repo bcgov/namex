@@ -75,11 +75,6 @@ objects:
                   secretKeyRef:
                     name: ${NAME}-${TAG}-secret
                     key: MIN_DELAY_SECONDS
-              - name: EXPIRES_DAYS
-                valueFrom:
-                  secretKeyRef:
-                    name: ${NAME}-${TAG}-secret
-                    key: EXPIRES_DAYS
               - name: ORA_PORT
                 valueFrom:
                   secretKeyRef:
