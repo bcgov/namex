@@ -1,28 +1,27 @@
 import base64
-import json
-import os
-import pycountry
 from http import HTTPStatus
+import json
+from datetime import datetime
 from pathlib import Path
+import pycountry
 
 import requests
 from flask import current_app, jsonify, request
 from flask_restx import Resource, cors
-from pytz import timezone
 
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.logging import setup_logging
-from .api_namespace import api
-from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request import NameRequestService
-from datetime import datetime
+from namex.services.name_request.utils import get_mapped_entity_and_action_code
+from .api_namespace import api
 
 setup_logging()  # Important to do this first
 
 RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
 CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
+DATE_FORMAT = '%B %-d, %Y at %-I:%M %p Pacific time'
 
 @cors_preflight('GET')
 @api.route('/<int:nr_id>/result', strict_slashes=False, methods=['GET', 'OPTIONS'])
@@ -56,9 +55,7 @@ class ReportResource(Resource):
             recipients = ','.join(recipient_emails)
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
             email_body = Path(f'{template_path}/emails/consent.md').read_text()
-            tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-            localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-            email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+            email_body = email_body.replace('{{EXPIRATION_DATE}}', nr_model.expirationDate.strftime(DATE_FORMAT))
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
             email = {
                 'recipients': recipients,
@@ -101,9 +98,7 @@ class ReportResource(Resource):
                 if nr_model.consentFlag in ['Y', 'R']:
                     email_body = Path(f'{template_path}/emails/conditional.md').read_text()
 
-                tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-                localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-                email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+                email_body = email_body.replace('{{EXPIRATION_DATE}}', nr_model.expirationDate.strftime(DATE_FORMAT))
 
             business_url = current_app.config.get('DECIDE_BUSINESS_URL')
 
@@ -247,9 +242,7 @@ class ReportResource(Resource):
         if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
-            tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-            localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-            nr_report_json['expirationDate'] = localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time')
+            nr_report_json['expirationDate'] = nr_model.expirationDate.strftime(DATE_FORMAT)
         if nr_report_json['submittedDate']:
             nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
         if nr_report_json['applicants']['countryTypeCd']:
