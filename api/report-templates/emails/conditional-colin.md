@@ -8,9 +8,10 @@ Your Name Request is **conditionally approved**. Follow the steps below to regis
 
 Follow these steps to register your business using this name:
 
-1. Acquire the consent letter
-2. Visit [Forms, fees and information packages page]({{CORP_FORMS_URL}}) and download the appropriate form
-3. Complete and submit the form along with the consent letter and any additional required documentation and payment
+1. Send in your consent letter to BCregistries@gov.bc.ca
+2. Receive confirmation that the consent letter has been accepted
+3. Visit [BC Corporate Online]({{CORP_ONLINE_URL}})
+4. Register the business with this name by filing an Incorporation Application
 
 ---
 
