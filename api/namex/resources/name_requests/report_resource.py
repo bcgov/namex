@@ -277,7 +277,7 @@ class ReportResource(Resource):
     @staticmethod
     def _hasUnReviewedNames(names):
         for choice in names:
-            if not choice['state'] in ['REJECTED', 'APPROVED', 'CONDITION']:
+            if choice['state'] not in ['REJECTED', 'APPROVED', 'CONDITION']:
                 return True
         return False
 
