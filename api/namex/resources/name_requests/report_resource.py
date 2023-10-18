@@ -1,23 +1,21 @@
 import base64
-import json
-import os
-import pycountry
 from http import HTTPStatus
+import json
+from datetime import datetime
 from pathlib import Path
+import pycountry
 
 import requests
 from flask import current_app, jsonify, request
 from flask_restx import Resource, cors
-from pytz import timezone
 
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.logging import setup_logging
-from .api_namespace import api
-from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request import NameRequestService
-from datetime import datetime
+from namex.services.name_request.utils import get_mapped_entity_and_action_code
+from .api_namespace import api
 
 setup_logging()  # Important to do this first
 
