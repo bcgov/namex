@@ -608,7 +608,8 @@ class Request(Resource):
 
                 # if the NR is in DRAFT then LOGICALLY lock the record in NRO
                 # if we fail to do that, send back the NR and the errors for user-intervention
-                if nrd.stateCd == State.DRAFT:
+                # if state is already approved do not update from nro
+                if nrd.stateCd == State.DRAFT and state != State.APPROVED:
                     warnings = nro.move_control_of_request_from_nro(nrd, user)
 
                 # if we're changing to DRAFT, update NRO status to "D" in NRO
