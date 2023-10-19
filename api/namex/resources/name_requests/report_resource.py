@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 import pycountry
+from pytz import timezone
 
 import requests
 from flask import current_app, jsonify, request
@@ -45,13 +46,7 @@ class ReportResource(Resource):
             for applicant in nr_model.applicants:
                 recipient_emails.append(applicant.emailAddress)
             if not nr_model.expirationDate:
-                nr_service = NameRequestService()
-                expiry_days = int(nr_service.get_expiry_days(nr_model))
-                expiry_date = nr_service.create_expiry_date(
-                    start=nr_model.lastUpdate,
-                    expires_in_days=expiry_days
-                )
-                nr_model.expirationDate = expiry_date
+                ReportResource._add_expiry_date(nr_model)
             recipients = ','.join(recipient_emails)
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
             email_body = Path(f'{template_path}/emails/consent.md').read_text()
@@ -74,14 +69,6 @@ class ReportResource(Resource):
             nr_model = Request.query.get(nr_id)
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
-            if not nr_model.expirationDate:
-                nr_service = NameRequestService()
-                expiry_days = int(nr_service.get_expiry_days(nr_model))
-                expiry_date = nr_service.create_expiry_date(
-                    start=nr_model.lastUpdate,
-                    expires_in_days=expiry_days
-                )
-                nr_model.expirationDate = expiry_date
             report, status_code = ReportResource._get_report(nr_model)
             if status_code != HTTPStatus.OK:
                 return jsonify(message=str(report)), status_code
@@ -215,6 +202,18 @@ class ReportResource(Resource):
     def _get_template_filename():
         return 'nameRequest.html'
 
+
+    @staticmethod
+    def _add_expiry_date(nr_model):
+        nr_service = NameRequestService()
+        expiry_days = int(nr_service.get_expiry_days(nr_model))
+        expiry_date = nr_service.create_expiry_date(
+            start=nr_model.lastUpdate,
+            expires_in_days=expiry_days
+        )
+        nr_model.expirationDate = expiry_date
+
+
     @staticmethod
     def _substitute_template_parts(template_code):
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
@@ -256,9 +255,16 @@ class ReportResource(Resource):
         if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
+            tz_aware_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
+            localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
+            nr_report_json['expirationDate'] = localized_date.strftime(DATE_FORMAT)
+        else:
+            ReportResource._add_expiry_date(nr_model)
             nr_report_json['expirationDate'] = nr_model.expirationDate.strftime(DATE_FORMAT)
         if nr_report_json['submittedDate']:
-            nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
+            tz_aware_date = nr_model.submittedDate.replace(tzinfo=timezone('UTC'))
+            localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
+            nr_report_json['submittedDate'] = localized_date.strftime(DATE_FORMAT)
         if nr_report_json['applicants']['countryTypeCd']:
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
