@@ -1,28 +1,28 @@
 import base64
-import json
-import os
-import pycountry
 from http import HTTPStatus
+import json
+from datetime import datetime
 from pathlib import Path
+import pycountry
+from pytz import timezone
 
 import requests
 from flask import current_app, jsonify, request
 from flask_restx import Resource, cors
-from pytz import timezone
 
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.logging import setup_logging
-from .api_namespace import api
-from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request import NameRequestService
-from datetime import datetime
+from namex.services.name_request.utils import get_mapped_entity_and_action_code
+from .api_namespace import api
 
 setup_logging()  # Important to do this first
 
 RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
 CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
+DATE_FORMAT = '%B %-d, %Y at %-I:%M %p Pacific time'
 
 @cors_preflight('GET')
 @api.route('/<int:nr_id>/result', strict_slashes=False, methods=['GET', 'OPTIONS'])
@@ -46,19 +46,11 @@ class ReportResource(Resource):
             for applicant in nr_model.applicants:
                 recipient_emails.append(applicant.emailAddress)
             if not nr_model.expirationDate:
-                nr_service = NameRequestService()
-                expiry_days = int(nr_service.get_expiry_days(nr_model))
-                expiry_date = nr_service.create_expiry_date(
-                    start=nr_model.lastUpdate,
-                    expires_in_days=expiry_days
-                )
-                nr_model.expirationDate = expiry_date
+                ReportResource._add_expiry_date(nr_model)
             recipients = ','.join(recipient_emails)
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
             email_body = Path(f'{template_path}/emails/consent.md').read_text()
-            tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-            localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-            email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+            email_body = email_body.replace('{{EXPIRATION_DATE}}', nr_model.expirationDate.strftime(DATE_FORMAT))
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
             email = {
                 'recipients': recipients,
@@ -77,14 +69,6 @@ class ReportResource(Resource):
             nr_model = Request.query.get(nr_id)
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
-            if not nr_model.expirationDate:
-                nr_service = NameRequestService()
-                expiry_days = int(nr_service.get_expiry_days(nr_model))
-                expiry_date = nr_service.create_expiry_date(
-                    start=nr_model.lastUpdate,
-                    expires_in_days=expiry_days
-                )
-                nr_model.expirationDate = expiry_date
             report, status_code = ReportResource._get_report(nr_model)
             if status_code != HTTPStatus.OK:
                 return jsonify(message=str(report)), status_code
@@ -94,22 +78,31 @@ class ReportResource(Resource):
                 recipient_emails.append(applicant.emailAddress)
             recipients = ','.join(recipient_emails)
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
-            nr_url = ReportResource._get_action_url(nr_model.entity_type_cd)
             email_body = Path(f'{template_path}/emails/rejected.md').read_text()
             if nr_model.stateCd in [State.APPROVED, State.CONDITIONAL]:
-                email_body = Path(f'{template_path}/emails/approved.md').read_text()
+                instruction_group = ReportResource._get_instruction_group(nr_model.entity_type_cd)
+                file_name=''
                 if nr_model.consentFlag in ['Y', 'R']:
-                    email_body = Path(f'{template_path}/emails/conditional.md').read_text()
+                    file_name = 'conditional'
+                else:
+                    file_name = 'approved'
 
-                tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-                localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-                email_body = email_body.replace('{{EXPIRATION_DATE}}', localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time'))
+                if instruction_group:
+                    file_name += '-'
+                    file_name += instruction_group
 
-            business_url = current_app.config.get('DECIDE_BUSINESS_URL')
+                email_body = Path(f'{template_path}/emails/{file_name}.md').read_text()
+                email_body = email_body.replace('{{EXPIRATION_DATE}}', nr_model.expirationDate.strftime(DATE_FORMAT))
 
-            email_body = email_body.replace('{{NAME_REQUEST_URL}}', nr_url)
+            DECIDE_BUSINESS_URL =  current_app.config.get('DECIDE_BUSINESS_URL')
+            CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
+            CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
+            NAME_REQUEST_URL = current_app.config.get('NAME_REQUEST_URL')
+            email_body = email_body.replace('{{NAME_REQUEST_URL}}', NAME_REQUEST_URL)
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
-            email_body = email_body.replace('{{BUSINESS_URL}}', business_url)
+            email_body = email_body.replace('{{BUSINESS_URL}}', DECIDE_BUSINESS_URL)
+            email_body = email_body.replace('{{CORP_ONLINE_URL}}', CORP_ONLINE_URL)
+            email_body = email_body.replace('{{CORP_FORMS_URL}}', CORP_FORMS_URL)
 
             email = {
                 'recipients': recipients,
@@ -209,6 +202,18 @@ class ReportResource(Resource):
     def _get_template_filename():
         return 'nameRequest.html'
 
+
+    @staticmethod
+    def _add_expiry_date(nr_model):
+        nr_service = NameRequestService()
+        expiry_days = int(nr_service.get_expiry_days(nr_model))
+        expiry_date = nr_service.create_expiry_date(
+            start=nr_model.lastUpdate,
+            expires_in_days=expiry_days
+        )
+        nr_model.expirationDate = expiry_date
+
+
     @staticmethod
     def _substitute_template_parts(template_code):
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
@@ -240,6 +245,9 @@ class ReportResource(Resource):
         nr_report_json['legalAct'] = ReportResource._get_legal_act(nr_model.entity_type_cd)
         isXPRO = nr_model.entity_type_cd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
+        nr_report_json['isModernized'] = ReportResource._is_modernized(nr_model.entity_type_cd)
+        nr_report_json['isColin'] = ReportResource._is_colin(nr_model.entity_type_cd)
+        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model.entity_type_cd) or ReportResource._is_modernized(nr_model.entity_type_cd))
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
         nr_report_json['nrStateDescription'] = \
@@ -247,11 +255,16 @@ class ReportResource(Resource):
         if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
-            tz_aware_expiration_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
-            localized_payment_completion_date = tz_aware_expiration_date.astimezone(timezone('US/Pacific'))
-            nr_report_json['expirationDate'] = localized_payment_completion_date.strftime('%B %-d, %Y at %-I:%M %p Pacific time')
+            tz_aware_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
+            localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
+            nr_report_json['expirationDate'] = localized_date.strftime(DATE_FORMAT)
+        else:
+            ReportResource._add_expiry_date(nr_model)
+            nr_report_json['expirationDate'] = nr_model.expirationDate.strftime(DATE_FORMAT)
         if nr_report_json['submittedDate']:
-            nr_report_json['submittedDate'] = nr_model.submittedDate.strftime('%B %-d, %Y')
+            tz_aware_date = nr_model.submittedDate.replace(tzinfo=timezone('UTC'))
+            localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
+            nr_report_json['submittedDate'] = localized_date.strftime(DATE_FORMAT)
         if nr_report_json['applicants']['countryTypeCd']:
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
@@ -263,7 +276,17 @@ class ReportResource(Resource):
             if action_text:
                 nr_report_json['nextAction'] = action_text
         nr_report_json['approvalDate'] = datetime.today().strftime('%B %-d, %Y')
+        nr_report_json['hasUnreviewedNames'] = ReportResource._hasUnReviewedNames(nr_report_json['names'])
         return nr_report_json
+
+
+    @staticmethod
+    def _hasUnReviewedNames(names):
+        for choice in names:
+            if choice['state'] not in ['REJECTED', 'APPROVED', 'CONDITION']:
+                return True
+        return False
+
 
     @staticmethod
     def _get_service_client_token():
@@ -346,6 +369,27 @@ class ReportResource(Resource):
         }
         return entity_type_descriptions.get(entity_type_cd, None)
 
+
+    @staticmethod
+    def _is_modernized(legal_type):
+        modernized_list = ['GP', 'DBA', 'FR', 'CP', 'BC']
+        return legal_type in modernized_list
+
+
+    @staticmethod
+    def _is_colin(legal_type):
+        colin_list = ['CR', 'UL', 'CC', 'XCR', 'XUL', 'RLC']
+        return legal_type in colin_list
+
+
+    @staticmethod
+    def _get_instruction_group(legal_type):
+        if ReportResource._is_modernized(legal_type):
+            return 'modernized'
+        if ReportResource._is_colin(legal_type):
+            return 'colin'
+        return ''
+
     @staticmethod
     def _get_action_url(entity_type_cd: str):
 
@@ -353,6 +397,7 @@ class ReportResource(Resource):
         CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
         BUSINESS_URL = current_app.config.get('BUSINESS_URL')
         CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
+        SOCIETIES_URL = current_app.config.get('SOCIETIES_URL')
 
         url = {
             # BC Types
@@ -366,7 +411,7 @@ class ReportResource(Resource):
             'CP':  BUSINESS_URL,
             'BC':  BUSINESS_URL,
             'CC':  CORP_ONLINE_URL,
-            'SO': 'BC Society',
+            'SO':  SOCIETIES_URL,
             'PA': ReportResource.GENERIC_STEPS,
             'FI': ReportResource.GENERIC_STEPS,
             'PAR': ReportResource.GENERIC_STEPS,
@@ -376,8 +421,8 @@ class ReportResource(Resource):
             'RLC': CORP_ONLINE_URL,
             'XLP': CORP_FORMS_URL,
             'XLL': CORP_FORMS_URL,
-            'XCP':  ReportResource.EX_COOP_ASSOC,
-            'XSO': 'Extraprovincial Non-share Corporation',
+            'XCP': ReportResource.EX_COOP_ASSOC,
+            'XSO': SOCIETIES_URL,
         }
         return url.get(entity_type_cd, None)
 
@@ -414,68 +459,65 @@ class ReportResource(Resource):
     @staticmethod
     def _get_next_action_text(entity_type_cd: str):
 
-        DECIDE_BUSINESS_URL =  current_app.config.get('DECIDE_BUSINESS_URL')
         BUSINESS_CHANGES_URL =  current_app.config.get('BUSINESS_CHANGES_URL')
-        CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
-        BUSINESS_URL = current_app.config.get('BUSINESS_URL')
-        CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
-        SOCIETIES_URL = current_app.config.get('SOCIETIES_URL')
+
+        url = ReportResource._get_action_url(entity_type_cd)
 
         next_action_text = {
             # BC Types
             'CR':  {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a>'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+                          f'{url}</a>'
             },
             'UL': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a>'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+                          f'{url}</a>'
             },
             'FR': {
-               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{url}">'
                         'Registering Proprietorships and Partnerships</a>',
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'GP': {
-               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{url}">'
                         'BC Registries and Online Services</a>',
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
                           'BC Registries and Online Services</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'DBA': {
-               'NEW': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+               'NEW': f'Use this name request to register a business by visiting <a href="{url}">'
                         'Registering Proprietorships and Partnerships</a>',
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{DECIDE_BUSINESS_URL}">'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'LP': {
-               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
-                          ' download and submit a form'
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
             },
             'LL': {
-               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
-                          ' download and submit a form'
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
             },
             'CP': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">{url}</a>'
             },
             'BC': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{BUSINESS_URL}">{BUSINESS_URL}</a>'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">{url}</a>'
             },
             'CC': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a>'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+                          f'{url}</a>'
             },
             'SO': {
-               'DEFAULT': f'To complete your filing, visit <a href="{SOCIETIES_URL}">'
-                          f'{SOCIETIES_URL}</a> for more information'
+               'DEFAULT': f'To complete your filing, visit <a href="{url}">'
+                          f'{url}</a> for more information'
             },
             'PA': {
                'DEFAULT': ReportResource.GENERIC_STEPS
@@ -488,35 +530,35 @@ class ReportResource(Resource):
             },
             # XPRO and Foreign Types
             'XCR': {
-               'NEW': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
-                      f'{CORP_ONLINE_URL}</a>',
-               'CHG': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
-                      f'{CORP_ONLINE_URL}</a>',
-               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
+               'NEW': f'Use this name request to register a business by visiting <a href="{url}">'
+                      f'{url}</a>',
+               'CHG': f'Use this name request to register a business by visiting <a href="{url}">'
+                      f'{url}</a>',
+               'DEFAULT': f'To complete your filing, <a href= "{url}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'XUL': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a>'
+               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+                          f'{url}</a>'
             },
             'RLC': {
-                'DEFAULT': f'Use this name request to register a business by visiting <a href="{CORP_ONLINE_URL}">'
-                          f'{CORP_ONLINE_URL}</a>'
+                'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+                          f'{url}</a>'
             },
             'XLP': {
-               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
-                          ' download and submit a form'
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
             },
             'XLL': {
-               'DEFAULT': f'To complete your filing, <a href= "{CORP_FORMS_URL}">visit our Forms page</a> to'
-                          ' download and submit a form'
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
             },
             'XCP': {
                 'DEFAULT': 'Extraprovincial Cooperative Association'
             },
             'XSO': {
-                'DEFAULT': f'To complete your filing, visit <a href="{SOCIETIES_URL}">'
-                           f'{SOCIETIES_URL}</a> for more information'
+                'DEFAULT': f'To complete your filing, visit <a href="{url}">'
+                           f'{url}</a> for more information'
             },
             # Used for mapping back to legacy oracle codes, description not required
             'FIRM': {
