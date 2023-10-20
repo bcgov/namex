@@ -1547,6 +1547,10 @@ class Stats(Resource):
     @jwt.requires_auth
     def get(*args, **kwargs):
 
+        user = None
+        if bool(request.args.get('myStats', False)):
+            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+
         # default is last 1 hour, but can be sent as parameter
         timespan = int(request.args.get('timespan', 1))
 
@@ -1562,9 +1566,11 @@ class Stats(Resource):
             return jsonify({'message': 'paging parameters were not integers'}), 406
 
         q = RequestDAO.query \
-            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE))\
-            .filter(RequestDAO.lastUpdate >= text('(now() at time zone \'utc\') - INTERVAL \'{delay} HOURS\''.format(delay=timespan))) \
-            .order_by(RequestDAO.lastUpdate.desc())
+            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE)) \
+            .filter(RequestDAO.lastUpdate >= text('(now() at time zone \'utc\') - INTERVAL \'{delay} HOURS\''.format(delay=timespan)))
+        if user:
+            q = q.filter(RequestDAO.userId == user.id)
+        q = q.order_by(RequestDAO.lastUpdate.desc())
 
         count_q = q.statement.with_only_columns([func.count()]).order_by(None)
         count = db.session.execute(count_q).scalar()
@@ -1580,7 +1586,7 @@ class Stats(Resource):
         requests = q.all()
         rep = {
             'numRecords': count,
-            'nameRequests': request_search_schemas.dump(requests)[0]
+            'nameRequests': request_search_schemas.dump(requests)
         }
         return jsonify(rep)
 
