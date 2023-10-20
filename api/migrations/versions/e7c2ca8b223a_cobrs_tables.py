@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade():
-    op.create_table('cobrs_request',
+    op.create_table('cobrs_reqname',
     sa.Column('RQUESTNO', sa.VARCHAR(), nullable=False),
     sa.Column('CHOICENO', sa.VARCHAR(), nullable=True),
     sa.Column('ACCREJFL', sa.VARCHAR(), nullable=True),
@@ -26,7 +26,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('RQUESTNO')
     )
 
-    op.create_table('cobrs_reqname',
+    op.create_table('cobrs_request',
     sa.Column('RQUESTNO', sa.VARCHAR(), nullable=False),
     sa.Column('REQSTATS', sa.VARCHAR(), nullable=True),
     sa.Column('PRIORQST', sa.VARCHAR(), nullable=True),
