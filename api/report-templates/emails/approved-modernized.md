@@ -8,7 +8,7 @@ Your Name Request is **approved**. Follow the steps below to register a business
 
 Follow these steps to register your business using this name:
 
-1. Visit [BC Registries and Online Services]({{NAME_REQUEST_URL}})
+1. Visit [BC Registries and Online Services]({{DECIDE_BUSINESS_URL}})
 2. Log in with your BC Registries Account
 3. Look up your Name Request
 4. Register the business with this name by following the instructions
@@ -17,7 +17,7 @@ If you don\'t have a BC Registries Account, [create one here]({{BUSINESS_URL}})
 
 If you were not signed into your BC Registries Account when this Name Request was created, you will need to affiliate the two together. Follow these steps to affiliate a Name Request with your BC Registries Account.
 
-1. Log in at [BC Registries and Online Services]({{NAME_REQUEST_URL}})
+1. Log in at [BC Registries and Online Services]({{DECIDE_BUSINESS_URL}})
 2. Log in with your BC Registries Account
 3. Navigate to My Business Registry
 4. Select Name Request radio button
