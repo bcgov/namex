@@ -22,6 +22,6 @@ gunicorn[eventlet]
 greenlet
 eventlet
 
-werkzeug==0.16.1
+werkzeug==3.0.1
 nltk
 pyinflect
