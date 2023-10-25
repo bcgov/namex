@@ -8,7 +8,7 @@ marshmallow==2.19.2
 pandas
 nltk==3.4.5
 pattern
-werkzeug==0.16.1
+werkzeug==3.0.1
 jsonpickle
 pysolr
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
