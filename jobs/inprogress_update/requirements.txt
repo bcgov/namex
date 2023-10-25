@@ -3,7 +3,7 @@ Flask==1.1.2
 Jinja2==2.11.3
 MarkupSafe==1.1.1
 SQLAlchemy==1.4.11
-Werkzeug==1.0.1
+Werkzeug==3.0.1
 click==7.1.2
 cx-Oracle==8.1.0
 greenlet==1.0.0
