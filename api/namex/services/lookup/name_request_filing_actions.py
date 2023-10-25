@@ -113,7 +113,7 @@ class NameRequestFilingActions:
         ('BECT', 'BEN', 'BC Benefit Company Incorporation', 'Continuation In', 'lear', None, None, None),
         ('BERE', 'BEN', 'BC Benefit Company Incorporation', 'Restoration', 'lear', None, None, None),
         ('BECV', 'BEN', 'BC Benefit Company Incorporation', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('BECR', 'BEN', 'BC Benefit Company Incorporation', 'Convert to BC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BECR', 'BC', 'B.C. limited Company', 'Convert to BC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('ULBE', 'BEN', 'BC Benefit Company', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('ULCR', 'BC', 'B.C. limited Company', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
     ]
