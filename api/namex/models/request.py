@@ -331,11 +331,14 @@ class Request(db.Model):
         """	
         Gets requests submited by user with given name choice in state draft
         """
+        current_time = datetime.utcnow()
         existing_nr = db.session.query(Request). \
             join(Applicant, and_(Applicant.nrId == Request.id)). \
             filter(
                 Applicant.emailAddress == email,
                 (Request.stateCd == 'DRAFT') | (Request.stateCd == 'PENDING_PAYMENT') ,
+                #check if the request is being made within 5 minutes, if time >= 5 minutes, it will let the user create a new request with same name otherwise it will give the error message to prevent accidental duplicates and accidental double payments for them.
+                Request.submittedDate >= current_time - timedelta(minutes=5),
                 (Request.nameSearch == ('('+user_name_search_string+')')) | ( Request.nameSearch == user_name_search_string )). \
             one_or_none()
         
