@@ -336,10 +336,10 @@ class Request(db.Model):
             join(Applicant, and_(Applicant.nrId == Request.id)). \
             filter(
                 Applicant.emailAddress == email,
-                #Check if status of request is in pending payment state (payment failed/stuck) 
+                #Check if status of request is in pending payment state (payment failed/stuck) within 5 mins
                 #check if status of request is in draft (payment successful/request in for name examination) 
-                (Request.stateCd == 'DRAFT') | ( \
-                (Request.stateCd == 'PENDING_PAYMENT') & (Request.submittedDate >= current_time - timedelta(minutes=5))),
+                (Request.stateCd == 'DRAFT') | (Request.stateCd == 'PENDING_PAYMENT'),
+                (Request.submittedDate >= current_time - timedelta(minutes=5)),
                 (Request.nameSearch == ('('+user_name_search_string+')')) | ( Request.nameSearch == user_name_search_string )). \
             one_or_none()
         
