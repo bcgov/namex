@@ -98,11 +98,13 @@ class ReportResource(Resource):
             CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
             CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
             NAME_REQUEST_URL = current_app.config.get('NAME_REQUEST_URL')
+            SOCIETIES_URL = current_app.config.get('SOCIETIES_URL')
             email_body = email_body.replace('{{NAME_REQUEST_URL}}', NAME_REQUEST_URL)
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
             email_body = email_body.replace('{{BUSINESS_URL}}', DECIDE_BUSINESS_URL)
             email_body = email_body.replace('{{CORP_ONLINE_URL}}', CORP_ONLINE_URL)
             email_body = email_body.replace('{{CORP_FORMS_URL}}', CORP_FORMS_URL)
+            email_body = email_body.replace('{{SOCIETIES_URL}}', SOCIETIES_URL)
 
             email = {
                 'recipients': recipients,
@@ -247,6 +249,7 @@ class ReportResource(Resource):
         nr_report_json['isXPRO'] = isXPRO
         nr_report_json['isModernized'] = ReportResource._is_modernized(nr_model.entity_type_cd)
         nr_report_json['isColin'] = ReportResource._is_colin(nr_model.entity_type_cd)
+        nr_report_json['isSociety'] = ReportResource._is_society(nr_model.entity_type_cd)
         nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model.entity_type_cd) or ReportResource._is_modernized(nr_model.entity_type_cd))
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
@@ -380,6 +383,11 @@ class ReportResource(Resource):
     def _is_colin(legal_type):
         colin_list = ['CR', 'UL', 'CC', 'XCR', 'XUL', 'RLC']
         return legal_type in colin_list
+    
+    @staticmethod
+    def _is_society(legal_type):
+        society_list = ['SO', 'XSO']
+        return legal_type in society_list
 
 
     @staticmethod
@@ -388,6 +396,8 @@ class ReportResource(Resource):
             return 'modernized'
         if ReportResource._is_colin(legal_type):
             return 'colin'
+        if ReportResource._is_society(legal_type):
+            return 'so'
         return ''
 
     @staticmethod
