@@ -331,11 +331,15 @@ class Request(db.Model):
         """	
         Gets requests submited by user with given name choice in state draft
         """
+        current_time = datetime.utcnow()
         existing_nr = db.session.query(Request). \
             join(Applicant, and_(Applicant.nrId == Request.id)). \
             filter(
                 Applicant.emailAddress == email,
-                (Request.stateCd == 'DRAFT') | (Request.stateCd == 'PENDING_PAYMENT') ,
+                #Check if status of request is in pending payment state (payment failed/stuck) within 5 mins
+                #check if status of request is in draft (payment successful/request in for name examination) 
+                (Request.stateCd == 'DRAFT') | (Request.stateCd == 'PENDING_PAYMENT'),
+                (Request.submittedDate >= current_time - timedelta(minutes=5)),
                 (Request.nameSearch == ('('+user_name_search_string+')')) | ( Request.nameSearch == user_name_search_string )). \
             one_or_none()
         
