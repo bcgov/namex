@@ -250,7 +250,7 @@ class ReportResource(Resource):
         nr_report_json['isModernized'] = ReportResource._is_modernized(nr_model.entity_type_cd)
         nr_report_json['isColin'] = ReportResource._is_colin(nr_model.entity_type_cd)
         nr_report_json['isSociety'] = ReportResource._is_society(nr_model.entity_type_cd)
-        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model.entity_type_cd) or ReportResource._is_modernized(nr_model.entity_type_cd))
+        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model.entity_type_cd) or ReportResource._is_modernized(nr_model.entity_type_cd) or ReportResource._is_society(nr_model.entity_type_cd))
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
         nr_report_json['nrStateDescription'] = \
@@ -333,7 +333,7 @@ class ReportResource(Resource):
     def _get_state_cd_description(state_cd: str):
         nr_state_description = {
             'APPROVED': 'Approved',
-            'CONDITIONAL': 'Conditional Approval',
+            'CONDITIONAL': 'Conditionally Approved',
             'REJECTED': 'Rejected',
             'CONSUMED': 'Consumed',
             'EXPIRED': 'Expired'

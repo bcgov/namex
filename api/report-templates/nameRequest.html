@@ -47,7 +47,7 @@
                <div class="section-title-gray pt-4">Next Step(s):</div>
                <table role="presentation">
                   {% if consentFlag in ['Y', 'R'] %}
-                     {% if isSociety or not isPaper %}
+                     {% if not isPaper %}
                         <tr>
                            {% if consentFlag=='R' %}
                            <td class="checkbox">
