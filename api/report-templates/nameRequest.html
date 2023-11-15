@@ -18,8 +18,9 @@
                      RESULTS OF NAME REQUEST
                   </div>
                   <div class="report-type-desc">
-                     {% if entityTypeDescription in ['BC Society'] %}
-                        <span class="section-data mt-2">Societies</span>
+                     {% if isSociety %}
+                        <span class="highlighted-blue-text mt-1">Societies </span>
+                        
                      {% else  %}                        
                         {{ entityTypeDescription }} - {{ legalAct}}
                      {% endif %}
@@ -46,7 +47,7 @@
                <div class="section-title-gray pt-4">Next Step(s):</div>
                <table role="presentation">
                   {% if consentFlag in ['Y', 'R'] %}
-                     {% if not isPaper%}
+                     {% if isSociety or not isPaper %}
                         <tr>
                            {% if consentFlag=='R' %}
                            <td class="checkbox">
@@ -103,7 +104,7 @@
                            {% if isModernized %}
                            <span class="section-data mt-2">You will need your NR Number and Applicant phone number or email address to access your Name Request.</span>
                            {% endif %}
-                           {% if isColin %}
+                           {% if isColin or isSociety %}
                            <span class="section-data mt-2">You will need your NR Number.</span>
                            {% endif %}
                         </td>
@@ -111,7 +112,7 @@
                   {% endif %}
                   {% if isPaper %}
                   <tr>
-                     {% if entityTypeDescription not  in ['BC Society'] %}
+                     {% if not isSociety %}
                      <td  class="{{ 'mt-2 checkbox' if consentFlag in ['Y', 'R'] else 'checkbox' }}">
                         <img alt="" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTFweCIgaGVpZ2h0PSIxMXB4IiB2aWV3Qm94PSIwIDAgMTEgMTEiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiAgICA8dGl0bGU+Y2hlY2tib3gtYmxhbmstb3V0bGluZSBjb3B5PC90aXRsZT4KICAgIDxnIGlkPSJGaW5hbC1PdXRwdXRzIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyBpZD0iUGcxLVJlc3VsdHMtLUFwcHJvdmVkLUNvbmNlbnQtUmVjZWl2ZWQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC01MS4wMDAwMDAsIC01NDEuMDAwMDAwKSIgZmlsbD0iIzIzNDA3NSIgZmlsbC1ydWxlPSJub256ZXJvIj4KICAgICAgICAgICAgPGcgaWQ9ImNoZWNrYm94LWJsYW5rLW91dGxpbmUtY29weSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTEuMDAwMDAwLCA1NDEuMDAwMDAwKSI+CiAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOS43Nzc3Nzc3OCwwIEwxLjIyMjIyMjIyLDAgQzAuNTQzODg4ODg5LDAgMCwwLjU0Mzg4ODg4OSAwLDEuMjIyMjIyMjIgTDAsOS43Nzc3Nzc3OCBDMCwxMC40NTI3OTI1IDAuNTQ3MjA3NTI4LDExIDEuMjIyMjIyMjIsMTEgTDkuNzc3Nzc3NzgsMTEgQzEwLjQ1Mjc5MjUsMTEgMTEsMTAuNDUyNzkyNSAxMSw5Ljc3Nzc3Nzc4IEwxMSwxLjIyMjIyMjIyIEMxMSwwLjU0Mzg4ODg4OSAxMC40NSwwIDkuNzc3Nzc3NzgsMCBNOS43Nzc3Nzc3OCwxLjIyMjIyMjIyIEw5Ljc3Nzc3Nzc4LDkuNzc3Nzc3NzggTDEuMjIyMjIyMjIsOS43Nzc3Nzc3OCBMMS4yMjIyMjIyMiwxLjIyMjIyMjIyIEw5Ljc3Nzc3Nzc4LDEuMjIyMjIyMjIgWiIgaWQ9IlNoYXBlIj48L3BhdGg+CiAgICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICA8L2c+Cjwvc3ZnPg==">
                      </td>

@@ -527,7 +527,7 @@ class ReportResource(Resource):
             },
             'SO': {
                'DEFAULT': f'To complete your filing, visit <a href="{url}">'
-                          f'{url}</a> for more information'
+                          f'{url}</a> and login with your BCeID.'
             },
             'PA': {
                'DEFAULT': ReportResource.GENERIC_STEPS
@@ -568,7 +568,7 @@ class ReportResource(Resource):
             },
             'XSO': {
                 'DEFAULT': f'To complete your filing, visit <a href="{url}">'
-                           f'{url}</a> for more information'
+                           f'{url}</a> and login with your BCeID.'
             },
             # Used for mapping back to legacy oracle codes, description not required
             'FIRM': {
