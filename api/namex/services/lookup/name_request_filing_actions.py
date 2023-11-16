@@ -115,7 +115,7 @@ class NameRequestFilingActions:
         ('BECV', 'BEN', 'BC Benefit Company Incorporation', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('BECR', 'BC', 'B.C. limited Company', 'Convert to BC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('ULBE', 'BEN', 'BC Benefit Company', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('ULCR', 'BC', 'B.C. limited Company', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('ULCB', 'BC', 'B.C. limited Company', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
     ]
 
     @cached_property
