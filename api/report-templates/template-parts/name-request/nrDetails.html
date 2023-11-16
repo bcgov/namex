@@ -8,7 +8,12 @@
            <div class="bold pt-2">Approval Date:</div>
         </td>
         <td>
-           <div>{{entityTypeDescription}}</div>
+           <div>
+            {% if isSociety %}
+            <span>Society</span>
+            {% else  %}
+            {{entityTypeDescription}}</div>
+            {% endif %}
            <div class="pt-2">{{ nrStateDescription }}</div>
            <div class="pt-2">{{ requestCodeDescription }}</div>
            <div class="pt-2">{{ approvalDate }} Pacific Time</div>
