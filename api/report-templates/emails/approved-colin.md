@@ -9,7 +9,7 @@ Your Name Request is **approved**. Follow the steps below to register a business
 Follow these steps to register your business using this name:
 
 1. Visit [BC Corporate Online]({{CORP_ONLINE_URL}})
-2. Register the business with this name by filing an Incorporation Application
+2. Complete and submit the form along with any required documentation and payment
 
 ---
 
