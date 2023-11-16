@@ -6,12 +6,12 @@ Your Name Request is **approved**. Follow the steps below to register a business
 
 # You\'re not done yet!
 
-Follow these steps to register your business using this name:
+Follow these steps to complete your application using this business name:
 
 1. Visit [BC Registries and Online Services]({{DECIDE_BUSINESS_URL}})
 2. Log in with your BC Registries Account
 3. Look up your Name Request
-4. Register the business with this name by following the instructions
+4. Complete and submit the form along with any required documentation and payment
 
 If you don\'t have a BC Registries Account, [create one here]({{BUSINESS_URL}})
 

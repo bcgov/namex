@@ -6,7 +6,7 @@ Your Name Request is **conditionally approved**. Follow the steps below to regis
 
 # Your Next Steps
 
-Follow these steps to register your business using this name:
+Follow these steps to complete your application using this business name:
 
 1. Acquire the consent letter
 2. Visit [Forms, fees and information packages page]({{CORP_FORMS_URL}}) and download the appropriate form
