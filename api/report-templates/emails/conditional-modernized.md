@@ -6,7 +6,7 @@ Your Name Request is **conditionally approved**. Follow the steps below to regis
 
 # Your Next Steps
 
-Follow these steps to register your business using this name:
+Follow these steps to complete your application using this business name:
 
 1. Send in your consent letter to BCregistries@gov.bc.ca
 2. Receive confirmation that the consent letter has been accepted
