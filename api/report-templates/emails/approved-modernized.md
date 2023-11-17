@@ -1,6 +1,6 @@
 # Results of your Name Request
 
-Your Name Request is **approved**. Follow the steps below to register a business with this name. If the name request expires before the business is registered, a new name request will be required.
+Your Name Request is **approved**. Follow the steps below to complete your application with this name. If the name request expires before application is completed, a new name request will be required.
 
 ---
 
