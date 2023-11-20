@@ -35,9 +35,10 @@
         {% if choice.state == 'CONDITION' %}
             <div class="mt-2"><span class="section-title-gray">Conditions/Comments:</span>
             <div>{{ choice.decision_text }}.</div>
-            {% if consentFlag in ['R'] %}
-                <span class="section-data">Consent is required from {{choice.name}}. Send your consent letter so registry staff can release the condition before you incorporate or register. Consent letters will be processed within one business day of receipt.</span>
+            {% if consentFlag == 'Y' %}
+                <span class="section-data">Consent letters will be processed within two business day of receipt.</span>
             {% endif %}
+        </div>
         </div>
         {% endif %}
     {% endfor %}
