@@ -9,7 +9,7 @@ Your Name Request is **approved**. Follow the steps below to complete your appli
 Follow these steps to complete your application using this business name:
 
 1. Visit [Societies Online]({{SOCIETIES_URL}})
-2. Log in with BCeID
+2. Log in with your BCeID
 3. Complete your Society application with the approved Name Request Number
 
 ---

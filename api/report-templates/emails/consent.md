@@ -10,6 +10,6 @@ PLEASE DO NOT REPLY TO THIS EMAIL. It was sent from an unmonitored email address
 
 **Business Registry**
 BC Registries and Online Services
-Toll Free: 1-877-526-1526
+Toll Free: 1877-370-1033
 Victoria Office: 250-387-7848
 Email: [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)
