@@ -12,13 +12,13 @@
 
 """
 
+from datetime import datetime
 from flask import current_app
 from .utils import generate_compressed_name, nro_examiner_name
 from namex.models import State
-from namex.constants import NROChangeFlags
+import pytz
 
-
-def update_nr(nr, ora_cursor, change_flags,con):
+def update_nr(nr, ora_cursor, change_flags, con):
     """Update the Name Request in NRO
     :raises Exception: what ever error we get, let our caller handle, this is here in case we want to wrap it - future
     """
@@ -38,7 +38,7 @@ def update_nr(nr, ora_cursor, change_flags,con):
     _update_nro_request_state(ora_cursor, nr, eid, change_flags)
     con.commit()
 
-    _update_request(ora_cursor, nr, eid, change_flags,priority)
+    _update_request(ora_cursor, nr, eid, change_flags, priority)
     con.commit()
 
     _update_nro_names(ora_cursor, nr, eid, change_flags)
@@ -127,13 +127,22 @@ def _update_nro_request_state(oracle_cursor, nr, event_id, change_flags):
                        )
 
 
-def _update_request(oracle_cursor, nr, event_id, change_flags,priority):
+def format_datetime(timestamp_str):
+    """format datetime from python to oracle format
+    """
+    # Parse the string to a datetime object
+    timestamp_datetime = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.UTC)
+    timestamp_datetime_pacific = timestamp_datetime.astimezone(pytz.timezone('US/Pacific'))
+    # Format the datetime object as per the Oracle date format
+    formatted_timestamp = timestamp_datetime_pacific.strftime('%Y-%m-%d %H:%M:%S')
+    return formatted_timestamp
+
+
+def _update_request(oracle_cursor, nr, event_id, change_flags, priority):
     """ Update the current request instance.
     """
 
-
     if change_flags['is_changed__request']:
-
         # get request_instance record, with all fields
         oracle_cursor.execute("""
         SELECT *
@@ -155,25 +164,26 @@ def _update_request(oracle_cursor, nr, event_id, change_flags,priority):
                               event_id=event_id,
                               req_inst_id=req_inst_id)
 
+        formated_expiration_date = format_datetime(nr.expirationDate)
         # create cursor for env
         # create new request_instance record
         oracle_cursor.execute("""
             INSERT INTO request_instance(request_instance_id, request_id,priority_cd, request_type_cd,
             expiration_date, start_event_id, tilma_ind, xpro_jurisdiction,
             nuans_expiration_date, queue_position, additional_info, nature_business_info,
-            user_note, nuans_num, tilma_transaction_id, assumed_nuans_num, assumed_nuans_name, assumed_nuans_expiration_date,
-            last_nuans_update_role, admin_comment, home_juris_num)
-            VALUES (request_instance_seq.nextval, :request_id, :priority_cd, :request_type_cd, 
-                  :expiration_date, :event_id, :tilma_ind, :xpro_jurisdiction, 
+            user_note, nuans_num, tilma_transaction_id, assumed_nuans_num, assumed_nuans_name,
+            assumed_nuans_expiration_date, last_nuans_update_role, admin_comment, home_juris_num)
+            VALUES (request_instance_seq.nextval, :request_id, :priority_cd, :request_type_cd,
+                  to_date(:expiration_date, 'YYYY-MM-DD HH24:MI:SS'), :event_id, :tilma_ind, :xpro_jurisdiction,
                   :nuans_expiration_date, :queue_position, :additional_info, :nature_business_info,
-                  :user_note, :nuans_num, :tilma_transaction_id, :assumed_nuans_num, 
-                  :assumed_nuans_name, :assumed_nuans_expiration_date, :last_nuans_updated_role, 
+                  :user_note, :nuans_num, :tilma_transaction_id, :assumed_nuans_num,
+                  :assumed_nuans_name, :assumed_nuans_expiration_date, :last_nuans_updated_role,
                   :admin_comment, :home_juris_num)
             """,
                               request_id=nr.requestId,
                               priority_cd=priority,
                               request_type_cd=nr.requestTypeCd,
-                              expiration_date=nr.expirationDate,
+                              expiration_date=formated_expiration_date,
                               event_id=event_id,
                               tilma_ind=row[7],
                               xpro_jurisdiction=nr.xproJurisdiction,
