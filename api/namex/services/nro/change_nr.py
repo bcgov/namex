@@ -127,11 +127,10 @@ def _update_nro_request_state(oracle_cursor, nr, event_id, change_flags):
                        )
 
 
-def format_datetime(timestamp_str):
+def format_datetime(timestamp_datetime):
     """format datetime from python to oracle format
     """
     # Parse the string to a datetime object
-    timestamp_datetime = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.UTC)
     timestamp_datetime_pacific = timestamp_datetime.astimezone(pytz.timezone('US/Pacific'))
     # Format the datetime object as per the Oracle date format
     formatted_timestamp = timestamp_datetime_pacific.strftime('%Y-%m-%d %H:%M:%S')
