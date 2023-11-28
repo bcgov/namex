@@ -94,7 +94,8 @@ def notify_nr_before_expiry():
         current_app.logger.debug('entering notify_nr_before_expiry')
 
         where_clause = text(
-            "expiration_date::DATE - interval '14 day' <= CURRENT_DATE")
+            "expiration_date::DATE - interval '14 day' <= CURRENT_DATE" \
+                "and expiration_date::DATE > CURRENT_DATE")
         requests = db.session.query(Request).filter(
             Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
             Request.notifiedBeforeExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
