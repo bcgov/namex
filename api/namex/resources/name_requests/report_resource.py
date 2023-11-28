@@ -476,33 +476,33 @@ class ReportResource(Resource):
         next_action_text = {
             # BC Types
             'CR':  {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
             'UL': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
             'FR': {
-               'NEW': f'Use this name request to register a business by visiting <a href="{url}">'
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
                         'Registering Proprietorships and Partnerships</a>',
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'GP': {
-               'NEW': f'Use this name request to register a business by visiting <a href="{url}">'
+               'NEW': f'Use this name request to complete your applications by visiting <a href="{url}">'
                         'BC Registries and Online Services</a>',
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           'BC Registries and Online Services</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
             },
             'DBA': {
-               'NEW': f'Use this name request to register a business by visiting <a href="{url}">'
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
                         'Registering Proprietorships and Partnerships</a>',
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
                           f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
                           ' Partnership</a>'
@@ -516,13 +516,13 @@ class ReportResource(Resource):
                           ' download the appropriate form'
             },
             'CP': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">{url}</a>'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">{url}</a>'
             },
             'BC': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">{url}</a>'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">{url}</a>'
             },
             'CC': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
             'SO': {
@@ -540,19 +540,19 @@ class ReportResource(Resource):
             },
             # XPRO and Foreign Types
             'XCR': {
-               'NEW': f'Use this name request to register a business by visiting <a href="{url}">'
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
                       f'{url}</a>',
-               'CHG': f'Use this name request to register a business by visiting <a href="{url}">'
+               'CHG': f'Use this name request to complete your application by visiting <a href="{url}">'
                       f'{url}</a>',
                'DEFAULT': f'To complete your filing, <a href= "{url}">visit our Forms page</a> to'
                           ' download and submit a form'
             },
             'XUL': {
-               'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
             'RLC': {
-                'DEFAULT': f'Use this name request to register a business by visiting <a href="{url}">'
+                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
             'XLP': {
