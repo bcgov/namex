@@ -94,7 +94,8 @@ def notify_nr_before_expiry():
         current_app.logger.debug('entering notify_nr_before_expiry')
 
         where_clause = text(
-            "expiration_date - interval '14 day' <= CURRENT_DATE AND expiration_date > CURRENT_DATE")
+            "expiration_date::DATE - interval '14 day' <= CURRENT_DATE" \
+                "and expiration_date::DATE > CURRENT_DATE")
         requests = db.session.query(Request).filter(
             Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
             Request.notifiedBeforeExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
@@ -111,10 +112,9 @@ def notify_nr_expired():
     try:
         current_app.logger.debug('entering notify_nr_expired')
 
-        where_clause = text('expiration_date <= CURRENT_DATE')
+        where_clause = text('expiration_date::DATE <= CURRENT_DATE')
         requests = db.session.query(Request).filter(
             Request.stateCd.in_((State.APPROVED, State.CONDITIONAL)),
-            Request.notifiedBeforeExpiry == True,  # noqa E712; pylint: disable=singleton-comparison
             Request.notifiedExpiry == False,  # noqa E712; pylint: disable=singleton-comparison
             where_clause
         ).all()
@@ -130,5 +130,5 @@ if __name__ == '__main__':
 
     application = create_app()
     with application.app_context():
-        notify_nr_before_expiry()
         notify_nr_expired()
+        notify_nr_before_expiry()
