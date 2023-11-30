@@ -276,7 +276,7 @@ CREATE OR REPLACE PACKAGE BODY NAMEX.solr AS
     -- Called from a job to send queued changes to Solr.
     --
     PROCEDURE feed_solr IS
-        CURSOR solr_feeder IS SELECT * FROM solr_feeder WHERE status <> STATUS_COMPLETE ORDER BY id;
+        CURSOR solr_feeder IS SELECT * FROM solr_feeder WHERE status <> STATUS_COMPLETE and status <> STATUS_IGNORED AND send_count < 60 ORDER BY id;
         solr_feeder_row solr_feeder%ROWTYPE;
 
         error_response VARCHAR2(4000);
