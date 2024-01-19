@@ -156,7 +156,14 @@ def get_parties(legal_type: str, identifier: str, token: str) -> tuple[list[dict
             if roles:
                 # has valid roles so add party to update
                 party['roles'] = roles
-                parties.append(_parse_party(party, legal_type))
+                if parsed_party := _parse_party(party, legal_type):
+                    # check to make sure it contains a person name (otherwise we will ignore this record)
+                    # - NOTE: some records contain no organization name AND no party name
+                    has_person_name = parsed_party['officer'].get('firstName') \
+                        or parsed_party['officer'].get('middleInitial') \
+                        or parsed_party['officer'].get('lastName')
+                    if has_person_name:
+                        parties.append(parsed_party)
 
         return parties, None
 
