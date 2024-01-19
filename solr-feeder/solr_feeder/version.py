@@ -21,4 +21,4 @@ Post-release segment: .postN
 Development release segment: .devN
 """
 
-__version__ = '2.0.7'  # pylint: disable=invalid-name
+__version__ = '2.0.8'  # pylint: disable=invalid-name
