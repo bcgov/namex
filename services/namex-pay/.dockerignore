@@ -1,3 +1,5 @@
+Dockerfile
+.dockerignore
 .pytest_cache
 __pycache__
 venv
@@ -6,4 +8,5 @@ venv
 .env*
 .eggs
 Makefile
+devops
 tests
