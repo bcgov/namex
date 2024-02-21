@@ -25,7 +25,7 @@ from config import get_named_config
 from contextlib import contextmanager
 from flask import Flask
 from namex.models import db as _db
-from namex_pay import worker  # noqa: I001
+from namex_pay.resources import worker  # noqa: I001
 from nats.aio.client import Client as Nats
 from sqlalchemy import event, text, MetaData
 from stan.aio.client import Client as Stan

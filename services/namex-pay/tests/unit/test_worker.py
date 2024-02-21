@@ -20,14 +20,14 @@ import nest_asyncio
 import pytest
 from freezegun import freeze_time
 from queue_common.service_utils import QueueException
-import namex_pay
+import services as services
 
 from namex_pay.utils.datetime import datetime, timedelta
-from namex_pay.worker import NAME_REQUEST_LIFESPAN_DAYS
+from namex_pay.resources.worker import NAME_REQUEST_LIFESPAN_DAYS
 
 def test_extract_payment_token():
     """Assert that the payment token can be extracted from the Queue delivered Msg."""
-    from namex_pay.worker import extract_message
+    from namex_pay.resources.worker import extract_message
     from stan.aio.client import Msg
     import stan.pb.protocol_pb2 as protocol
 
@@ -87,7 +87,7 @@ async def test_update_payment_record(app, session,
                                      ):
     """Assert that the update_payment_record works as expected."""
     from namex.models import Request, State, Payment
-    from namex_pay.worker import update_payment_record
+    from namex_pay.resources.worker import update_payment_record
 
     print(test_name)
 
@@ -157,7 +157,7 @@ async def test_process_payment(app, session, mocker,
                                      start_payment_date,
                                      ):
     from namex.models import Request, State, Payment
-    from namex_pay.worker import process_payment, FLASK_APP
+    from namex_pay.resources.worker import process_payment, FLASK_APP
     nest_asyncio.apply()
 
     # setup

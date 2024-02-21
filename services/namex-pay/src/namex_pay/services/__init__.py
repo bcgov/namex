@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,18 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""The Entity Filing service.
 
+This module is the service worker for applying filings to the Business Database structure.
+"""
 
-COPYRIGHT="Copyright © 2019 Province of British Columbia"
-RET=0
+from namex_pay.services.gcp_queue import GcpQueue
 
-for file in $(find $@ -not \( -path */venv -prune \) -not \( -path */migrations -prune \) -not \( -path */tests -prune \) -not \( -path */.egg* -prune \) -name \*.py)
-do
-  grep "${COPYRIGHT}" ${file} >/dev/null
-  if [[ $? != 0 ]]
-  then
-    echo "${file} missing copyright header"
-    RET=1
-  fi
-done
-exit ${RET}
+queue = GcpQueue()

@@ -9,18 +9,18 @@ packages = [{include = "namex_pay", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
-namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", branch = "main" }
+namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", branch = "feature-queue-upgrade" }
 registry_schemas = { git = "https://github.com/bcgov/business-schemas.git"}
-queue_common = { git = "https://github.com/bcgov/namex.git", subdirectory="services/common" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
-nest-asyncio = "^1.6.0"
+simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
+google-auth = "^2.27.0"
+google-cloud-pubsub = "^2.19.4"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 freezegun = "^1.4.0"
 pytest-aiohttp = "^1.0.5"
-pytest-asyncio = "^0.23.5"
 pytest-mock = "^3.12.0"
 pyhamcrest = "^2.1.0"
 dpath = "^2.1.6"
