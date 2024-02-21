@@ -32,7 +32,7 @@ async def test_queue_config_sanity(app, session, stan_server, event_loop, client
     """Assert that payment tokens can be retrieved and decoded from the Queue."""
     import uuid
     import dpath.util
-    from namex_pay.worker import APP_CONFIG
+    from namex_pay.resources.worker import APP_CONFIG
     # Call back for the subscription
     msgs = []
 
@@ -117,7 +117,7 @@ async def test_furnish_receipt_message(app, session, stan_server, event_loop, cl
     from queue_common.messages import create_cloud_event_msg
     from queue_common.service import ServiceWorker
     from queue_common.service_utils import subscribe_to_queue
-    from namex_pay.worker import APP_CONFIG, furnish_receipt_message, qsm
+    from namex_pay.resources.worker import APP_CONFIG, furnish_receipt_message, qsm
     from namex.models import Request, State, Payment
 
     print('test vars')

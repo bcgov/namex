@@ -18,5 +18,11 @@
         "application": [
             "pay-api"
         ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+
+        ]
     }
 ]

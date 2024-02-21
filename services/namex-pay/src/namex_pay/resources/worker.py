@@ -15,43 +15,31 @@
 
 The entry-point is the **cb_subscription_handler**
 
-The design and flow leverage a few constraints that are placed upon it
-by NATS Streaming and using AWAIT on the default loop.
-- NATS streaming queues require one message to be processed at a time.
-- AWAIT on the default loop effectively runs synchronously
-
-If these constraints change, the use of Flask-SQLAlchemy would need to change.
-Flask-SQLAlchemy currently allows the base model to be changed, or reworking
-the model to a standalone SQLAlchemy usage with an async engine would need
-to be pursued.
 """
-import asyncio
-import json
-import os
+from http import HTTPStatus
 import time
 import uuid
 from enum import Enum
 from typing import Optional
-
-import nest_asyncio
-import nats  # noqa:I001;
-from flask import Flask
+from contextlib import suppress
+from dataclasses import dataclass
+import re
+from flask import Blueprint, current_app, request
 from namex import nro
 from namex.models import db, Event, Payment, Request as RequestDAO, State, User  # noqa:I001; import orders
 from namex.services import EventRecorder, queue  # noqa:I005;
-from queue_common.messages import create_cloud_event_msg  # noqa:I005
-from queue_common.service import QueueServiceManager
-from queue_common.service_utils import QueueException, logger
 from sentry_sdk import capture_message
-from sqlalchemy.exc import OperationalError
+# from sqlalchemy.exc import OperationalError
+from namex_pay.utils import datetime, timedelta, timezone
+from simple_cloudevent import SimpleCloudEvent
 
-from namex_pay import config
-from namex_pay.utils.datetime import datetime, timedelta, timezone
+from namex_pay.services import queue
+from namex_pay.services.logging import structured_log
 
+bp = Blueprint("worker", __name__)
 
 NAME_REQUEST_LIFESPAN_DAYS = 56  # TODO this should be defined as a lookup from somewhere
 NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup from somewhere
-
 
 class PaymentState(Enum):
     """Render all the payment states we know what to do with."""
@@ -61,20 +49,99 @@ class PaymentState(Enum):
     TRANSACTION_FAILED = 'TRANSACTION_FAILED'
 
 
-def extract_message(msg: nats.aio.client.Msg) -> Optional[dict]:
-    """Return a dict of the json string in the Msg.data."""
-    try:
-        return json.loads(msg.data.decode('utf-8'))
-    except (TypeError, json.decoder.JSONDecodeError):
-        return None
+@bp.route("/", methods=("POST",))
+def worker():
+    """Process the incoming cloud event.
+
+    Flow
+    --------
+    1. Get cloud event
+    2. Get filing and payment information
+    3. Process payment
+
+    Decisions on returning a 2xx or failing value to
+    the Queue should be noted here:
+    - Empty or garbaled messages are knocked off the Q
+    - If the Filing is already marked paid, skip and knock off Q
+    - Once the filing is marked paid, no errors should escape to the Q
+    - If there's no matching filing, put back on Q
+    """
+    structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
+
+    # 1. Get cloud event
+    # ##
+    if not (ce := queue.get_simple_cloud_event(request)):
+        #
+        # Decision here is to return a 200,
+        # so the event is removed from the Queue
+        return {}, HTTPStatus.OK
+
+    structured_log(request, "INFO", f"received ce: {str(ce)}")
+
+    # 2. Get payment information
+    # ##
+    if not (payment_token := get_payment_token(ce)) or payment_token.status_code != "COMPLETED":
+        # no payment info, or not a payment COMPLETED token, take off Q
+        return {}, HTTPStatus.OK
+    
+    # 3. Process payment 
+    # ##
+    with suppress(Exception):
+        process_payment(ce)
+        structured_log(request, "INFO", f"publish to emailer for pay-id: {payment_token.id}")
+
+    structured_log(request, "INFO", f"completed ce: {str(ce)}")
+    return {}, HTTPStatus.OK
+
+@dataclass
+class PaymentToken:
+    """Payment Token class"""
+
+    id: Optional[str] = None
+    status_code: Optional[str] = None
+    filing_identifier: Optional[str] = None
+    corp_type_code: Optional[str] = None
 
 
-async def publish_email_message(qsm: QueueServiceManager,  # pylint: disable=redefined-outer-name
-                                cloud_event_msg: dict):
-    """Publish the email message onto the NATS emailer subject."""
-    logger.debug('publish to queue, subject:%s, event:%s', APP_CONFIG.EMAIL_PUBLISH_OPTIONS['subject'], cloud_event_msg)
-    await qsm.service.publish(subject=APP_CONFIG.EMAIL_PUBLISH_OPTIONS['subject'],
-                              msg=cloud_event_msg)
+def get_payment_token(ce: SimpleCloudEvent):
+    """Return a PaymentToken if enclosed in the cloud event."""
+    if (
+        (ce.type == "payment")
+        and (data := ce.data)
+        and isinstance(data, dict)
+        and (payment_token := data.get("paymentToken", {}))
+    ):
+        converted = dict_keys_to_snake_case(payment_token)
+        pt = PaymentToken(**converted)
+        return pt
+    return None
+
+
+def dict_keys_to_snake_case(d: dict):
+    """Convert the keys of a dict to snake_case"""
+    pattern = re.compile(r"(?<!^)(?=[A-Z])")
+    converted = {}
+    for k, v in d.items():
+        converted[pattern.sub("_", k).lower()] = v
+    return converted
+
+
+def create_cloud_event_msg(msg_id, msg_type, source, time, identifier, json_data_body):  # pylint: disable=too-many-arguments # noqa E501
+    # industry standard arguments for this message
+    """Create a payload for the email service."""
+    cloud_event_msg = {
+        'specversion': '1.x-wip',
+        'type': msg_type,
+        'source': source,
+        'id': msg_id,
+        'time': time,
+        'datacontenttype': 'application/json',
+        'identifier': identifier
+    }
+    if json_data_body:
+        cloud_event_msg['data'] = json_data_body
+
+    return cloud_event_msg
 
 
 async def update_payment_record(payment: Payment) -> Optional[Payment]:
@@ -88,7 +155,7 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
     """
     if payment.payment_completion_date:
         msg = f'Queue Issue: Duplicate, payment already processed for payment.id={payment.id}'
-        logger.debug(msg)
+        structured_log(message=msg)
         capture_message(msg)
         return None
 
@@ -110,9 +177,9 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
     elif payment_action == Payment.PaymentActions.UPGRADE.value:
         if nr.stateCd == State.PENDING_PAYMENT:
             msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
-            logger.debug(msg)
+            structured_log(message=msg)
             capture_message(msg)
-            raise QueueException(msg)
+            # raise QueueException(msg)
 
         nr.priorityCd = 'Y'
         nr.priorityDate = datetime.utcnow()
@@ -128,9 +195,9 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
                 and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
             msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
                 'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
-            logger.debug(msg)
+            structured_log(message=msg)
             capture_message(msg)
-            raise QueueException(msg)
+            # raise QueueException(msg)
         nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
         payment.payment_completion_date = datetime.utcnow()
         payment.payment_status_code = State.COMPLETED
@@ -140,21 +207,22 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
         return payment
 
     msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
-    logger.debug(msg)
+    structured_log(message=msg)
     capture_message(msg)
-    raise QueueException(f'Unknown action:{payment_action} for payment.id={payment.id}')
+    # raise QueueException(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
 
-async def furnish_receipt_message(qsm: QueueServiceManager, payment: Payment):  # pylint: disable=redefined-outer-name
+async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
     """Send receipt info to the mail queue if it hasn't yet been done."""
     if payment.furnished is True:
-        logger.debug('Queue Issue: Duplicate, already furnished receipt for payment.id=%s', payment.id)
-        capture_message(f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}')
+        msg = f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}'
+        structured_log(message=msg)
+        capture_message(msg)
         return
 
     nr = None
-
-    logger.debug('Start of the furnishing of receipt for payment record:%s', payment.as_dict())
+    msg = f'Start of the furnishing of receipt for payment record:{payment.as_dict()}'
+    structured_log(message=msg)
     try:
         payment.furnished = True
         payment.save_to_db()
@@ -178,36 +246,38 @@ async def furnish_receipt_message(qsm: QueueServiceManager, payment: Payment):  
                                                          'statusCode': nr.stateCd
                                                      }}
                                                  )
-        logger.debug('About to publish email for payment.id=%s', payment.id)
-        await publish_email_message(qsm, cloud_event_msg)
+        msg = f'About to publish email for payment.id={payment.id}'
+        structured_log(message=msg)
+        namex_topic = current_app.config.get("NAMEX_RECEIPT_TOPIC", "mailer")
+        queue.publish(topic=namex_topic, payload=queue.to_queue_message(cloud_event_msg))  # noqa: F841
+
     except Exception as err:  # noqa: B902; bare exception to catch all
         payment.furnished = False
         payment.save_to_db()
-        logger.debug('Reset payment furnish status payment.id= %s', payment.id)
-        raise QueueException(f'Unable to furnish NR info. {err}') from err
+        msg = f'Reset payment furnish status payment.id={payment.id}'
+        structured_log(message=msg)
+        # raise QueueException(f'Unable to furnish NR info. {err}') from err
 
 
-async def process_payment(pay_msg: dict, flask_app: Flask):
+async def process_payment(pay_msg: dict):
     """Render the payment status."""
-    if not flask_app or not pay_msg:
-        raise QueueException('Flask App or token not available.')
+    if not current_app or not pay_msg:
+        structured_log(pay_msg, 'ERROR', 'Flask App or token not available')
+        return
 
-    with flask_app.app_context():
-        logger.debug('entering process payment: %s', pay_msg)
-
-        # capture_message(f'Queue Issue: Unable to find payment.id={payment_id} to place on email queue')
-        # return
+    with current_app.app_context():
+        structured_log(pay_msg, 'DEBUG', 'entering process payment')
 
         if pay_msg.get('paymentToken', {}).get('statusCode') == PaymentState.TRANSACTION_FAILED.value:
             # TODO: The customer has cancelled out of paying, so we could note this better
             # technically the payment for this service is still pending
-            logger.debug('Failed transaction on queue:%s', pay_msg)
+            structured_log(pay_msg, 'ERROR', 'Failed transaction on queue')
             return
 
         complete_payment_status = [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]
         if pay_msg.get('paymentToken', {}).get('statusCode') in complete_payment_status:  # pylint: disable=R1702
-            logger.debug('COMPLETED transaction on queue: %s', pay_msg)
-
+            msg = f'COMPLETED transaction on queue:{pay_msg}'
+            structured_log(message=msg)
             if payment_token := pay_msg.get('paymentToken', {}).get('id'):
                 payment = None
                 counter = 1
@@ -215,7 +285,7 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
                     payment = Payment.find_by_payment_token(payment_token)
                     counter += 1
                     if not payment:
-                        await asyncio.sleep(0.2)
+                        await time.sleep(0.2)
                 if payment:
                     if update_payment := await update_payment_record(payment):
                         payment = update_payment
@@ -247,69 +317,23 @@ async def process_payment(pay_msg: dict, flask_app: Flask):
                             }
                             warnings = nro.change_nr(nr, change_flags)
                             if warnings:
-                                logger.error('Queue Error: Unable to update NRO :%s', warnings)
+                                msg = f'Queue Error: Unable to update NRO :{warnings}'
+                                structured_log(message=msg)
                                 capture_message(
                                     f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
                                     level='error'
                                 )
 
-                    await furnish_receipt_message(qsm, payment)
+                    await furnish_receipt_message(payment)
 
                 else:
-                    logger.debug('Queue Error: Unable to find payment record for :%s', pay_msg)
+                    msg = f'Queue Error: Unable to find payment record for :{pay_msg}'
+                    structured_log(message=msg)
                     capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
-                    raise QueueException(f'Queue Error: Unable to find payment record for :{pay_msg}')
+                    # raise QueueException(f'Queue Error: Unable to find payment record for :{pay_msg}')
             else:
-                logger.debug('Queue Error: Missing id :%s', pay_msg)
+                msg = f'Queue Error: Missing id :{pay_msg}'
+                structured_log(message=msg)
                 capture_message(f'Queue Error: Missing id :{pay_msg}', level='error')
 
             return
-
-        # if we're here and haven't been able to action it,
-        # then we've received an unknown token
-        # Capture it to the log and remove it rom the queue
-        logger.error('Unknown payment token given: %s', pay_msg.get('paymentToken', {}))
-        capture_message(
-            f'Queue Error: Unknown paymentToken:{pay_msg.get("paymentToken", {})}',
-            level='error')
-
-
-qsm = QueueServiceManager()  # pylint: disable=invalid-name
-APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
-FLASK_APP = Flask(__name__)
-FLASK_APP.config.from_object(APP_CONFIG)
-db.init_app(FLASK_APP)
-queue.init_app(FLASK_APP, asyncio.new_event_loop())
-nest_asyncio.apply()
-
-
-async def cb_subscription_handler(msg: nats.aio.client.Msg):
-    """Use Callback to process Queue Msg objects.
-
-    This is the callback handler that gets called when a message is placed on the queue.
-    If an exception is thrown and not handled, the message is not marked as consumed
-    on the queue. It eventually times out and another worker can grab it.
-
-    In some cases we want to consume the message and capture our failure on Sentry
-    to be handled manually by staff.
-
-    This call MUST BE IDEMPOTENT and unroll any partial changes in failures.
-    """
-    try:
-        logger.info('Received raw message seq:%s, data=  %s', msg.sequence, msg.data.decode())
-        if not (pay_msg := extract_message(msg)):
-            capture_message('Queue Error: no message on queue', level='error')
-            logger.debug('Queue Error: no message on queue')
-        else:
-
-            logger.debug('Begin process_payment for pay_msg: %s', pay_msg)
-            await process_payment(pay_msg, FLASK_APP)
-            logger.debug('Completed process_payment for pay_msg: %s', pay_msg)
-
-    except OperationalError as err:  # message goes back on the queue
-        logger.error('Queue Blocked - Database Issue: %s', json.dumps(pay_msg), exc_info=True)
-        raise err  # We don't want to handle the error, as a DB down would drain the queue
-    except (QueueException, KeyError, Exception):  # pylint: disable=broad-except # noqa B902
-        # Catch Exception so that any error is still caught and the message is removed from the queue
-        capture_message('Queue Error:' + json.dumps(pay_msg), level='error')
-        logger.error('Queue Error: %s', json.dumps(pay_msg), exc_info=True)

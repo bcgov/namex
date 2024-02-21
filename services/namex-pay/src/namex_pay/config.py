@@ -20,8 +20,6 @@ Flask config, rather than reading environment variables directly
 or by accessing this configuration directly.
 """
 import os
-import random
-
 from dotenv import find_dotenv, load_dotenv
 
 
@@ -84,39 +82,11 @@ class Config():  # pylint: disable=too-few-public-methods
     NRO_HOST = os.getenv('ORACLE_HOST', '')
     NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
 
-    # NATS
-    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://localhost:4222')
-    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', 'namex.worker')
-    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
-    NATS_QUEUE = os.getenv('NATS_QUEUE', 'namerequest-processor')
-    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
-    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
-
-    NATS_CONNECTION_OPTIONS = {
-        'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_CLIENT_NAME', 'entity.filing.worker')
-
-    }
-    STAN_CONNECTION_OPTIONS = {
-        'cluster_id': os.getenv('NATS_CLUSTER_ID', 'test-cluster'),
-        'client_id': str(random.SystemRandom().getrandbits(0x58)),
-        'ping_interval': 1,
-        'ping_max_out': 5,
-    }
-
-    SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_SUBJECT', 'entity.filings'),
-        'queue': os.getenv('NATS_QUEUE', 'filing-worker'),
-        'durable_name': os.getenv('NATS_QUEUE', 'filing-worker') + '_durable',
-    }
-
-    FILER_PUBLISH_OPTIONS = {
-        'subject': os.getenv('NATS_FILER_SUBJECT', 'entity.filing.filer'),
-    }
-
-    EMAIL_PUBLISH_OPTIONS = {
-        'subject': os.getenv('NATS_EMAILER_SUBJECT', 'entity.email'),
-    }
+    GCP_AUTH_KEY = os.getenv("GCP_AUTH_KEY", None)
+    NAMEX_PAY_TOPIC = os.getenv("NAMEX_PAY_TOPIC", "namex-pay-dev")
+    NAMEX_RECEIPT_TOPIC = os.getenv("NAMEX_RECEIPT_TOPIC", "namex-receipt-dev")
+    AUDIENCE = os.getenv("AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Subscriber")
+    PUBLISHER_AUDIENCE = os.getenv("PUBLISHER_AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Publisher")
 
     ENVIRONMENT = os.getenv('ENVIRONMENT', 'prod')
 
