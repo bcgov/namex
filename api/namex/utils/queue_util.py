@@ -55,10 +55,10 @@ def create_name_request_state_msg(nr_num, state_cd, old_state_cd):
 
 def send_name_request_state_msg(nr_num, state_cd, old_state_cd):
     """Publish name request state message to NATS nr state subject."""
-    queue.publish_json_to_subject_sync(
-        create_name_request_state_msg(nr_num, state_cd, old_state_cd),
-        current_app.config.get('NATS_NR_STATE_SUBJECT')
-    )
+    # queue.publish_json_to_subject_sync(
+    #     create_name_request_state_msg(nr_num, state_cd, old_state_cd),
+    #     current_app.config.get('NATS_NR_STATE_SUBJECT')
+    # )
     current_app.logger \
         .debug('Published name request ({}) state change from {} -> {}'.format(nr_num, old_state_cd, state_cd))
 

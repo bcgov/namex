@@ -78,9 +78,6 @@ RUN groupadd -g "${GID}" -r web \
 # Copy only requirements, to cache them in docker layer
 COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 
-COPY --chown=web:web ./logging.conf /code
-COPY --chown=web:web ./run.py /code
-COPY --chown=web:web ./config.py /code
 COPY --chown=web:web ./src /code/src
 COPY --chown=web:web ./README.md /code
 
@@ -99,6 +96,6 @@ USER web
 
 # The following stage is only for production:
 # FROM development_build AS production_build
-# COPY --chown=web:web . /code
+COPY --chown=web:web . /code
 
-CMD [ "python", "/code/run.py" ]
+CMD gunicorn --bind 0.0.0.0:${PORT} --config /code/gunicorn_config.py wsgi:app
