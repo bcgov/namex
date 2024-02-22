@@ -108,7 +108,9 @@ exclude-protected = ["_asdict", "_fields", "_replace", "_source", "_make", "os._
 valid-classmethod-first-arg = ["cls"]
 valid-metaclass-classmethod-first-arg = ["mcs"]
 
+
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
 minversion = "2.0"
 testpaths = [
    "tests",

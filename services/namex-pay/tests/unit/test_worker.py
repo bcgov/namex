@@ -13,32 +13,110 @@
 # limitations under the License.
 """The Test Suites to ensure that the worker is operating correctly."""
 from datetime import timedelta
-from namex.models import Request, State, Payment
-import json
+from namex.models import State, Payment
+from http import HTTPStatus
+import base64
 import nest_asyncio
 
 import pytest
 from freezegun import freeze_time
 from queue_common.service_utils import QueueException
-import services as services
 
-from namex_pay.utils.datetime import datetime, timedelta
+from namex.models import Request, Payment
+from namex_pay.utils import datetime, timedelta
 from namex_pay.resources.worker import NAME_REQUEST_LIFESPAN_DAYS
+from simple_cloudevent import SimpleCloudEvent, to_queue_message
+from namex_pay.resources.worker import get_payment_token
+from tests.unit import nested_session
 
-def test_extract_payment_token():
-    """Assert that the payment token can be extracted from the Queue delivered Msg."""
-    from namex_pay.resources.worker import extract_message
-    from stan.aio.client import Msg
-    import stan.pb.protocol_pb2 as protocol
 
-    # setup
-    token = {'paymentToken': {'id': 1234, 'statusCode': 'COMPLETED'}}
-    msg = Msg()
-    msg.proto = protocol.MsgProto
-    msg.proto.data = json.dumps(token).encode('utf-8')
+CLOUD_EVENT = SimpleCloudEvent(
+    id="fake-id",
+    source="fake-for-tests",
+    subject="fake-subject",
+    type="payment",
+    data={
+        "paymentToken": {
+            "id": "29590",
+            "statusCode": "COMPLETED",
+            "filingIdentifier": 12345,
+            "corpTypeCode": "BC",
+        }
+    },
+)
 
-    # test and verify
-    assert extract_message(msg) == token
+
+#
+# This needs to mimic the envelope created by GCP PubSb when call a resource
+#
+CLOUD_EVENT_ENVELOPE = {
+    "subscription": "projects/PUBSUB_PROJECT_ID/subscriptions/SUBSCRIPTION_ID",
+    "message": {
+        "data": base64.b64encode(to_queue_message(CLOUD_EVENT)).decode("UTF-8"),
+        "messageId": "10",
+        "attributes": {},
+    },
+    "id": 1,
+}
+
+def test_no_message(client):
+    """Return a 4xx when an no JSON present."""
+
+    rv = client.post("/")
+
+    assert rv.status_code == HTTPStatus.OK
+
+
+@pytest.mark.parametrize(
+    "test_name,queue_envelope,expected",
+    [("invalid", {}, HTTPStatus.OK), ("valid", CLOUD_EVENT_ENVELOPE, HTTPStatus.OK)],
+)
+def test_simple_cloud_event(client, session, test_name, queue_envelope, expected):
+    with nested_session(session):
+        request = Request()
+        payment = Payment()
+        payment.nrId = request.id
+        payment._payment_token = 29590
+        request.payments = payment
+        request.save()
+
+        rv = client.post("/", json=CLOUD_EVENT_ENVELOPE)
+
+        assert rv.status_code == expected
+
+def test_get_payment_token():
+    """Test that the payment token is retrieved."""
+    from copy import deepcopy
+
+    CLOUD_EVENT_TEMPLATE = {
+        "data": {
+            "paymentToken": {
+                "id": 29590,
+                "statusCode": "COMPLETED",
+                "filingIdentifier": None,
+                "corpTypeCode": "BC",
+            }
+        },
+        "id": 29590,
+        "source": "sbc-pay",
+        "subject": "BC1234567",
+        "time": "2023-07-05T22:04:25.952027",
+        "type": "payment",
+    }
+
+    # base - should pass
+    ce_dict = deepcopy(CLOUD_EVENT_TEMPLATE)
+    ce = SimpleCloudEvent(**ce_dict)
+    payment_token = get_payment_token(ce)
+    assert payment_token
+    assert payment_token.id == ce_dict["data"]["paymentToken"]["id"]
+
+    # wrong type
+    ce_dict = deepcopy(CLOUD_EVENT_TEMPLATE)
+    ce_dict["type"] = "not-a-payment"
+    ce = SimpleCloudEvent(**ce_dict)
+    payment_token = get_payment_token(ce)
+    assert not payment_token
 
 
 @pytest.mark.parametrize(
@@ -86,7 +164,7 @@ async def test_update_payment_record(app, session,
                                      error
                                      ):
     """Assert that the update_payment_record works as expected."""
-    from namex.models import Request, State, Payment
+    from namex.models import Request, Payment
     from namex_pay.resources.worker import update_payment_record
 
     print(test_name)
@@ -157,7 +235,7 @@ async def test_process_payment(app, session, mocker,
                                      start_payment_date,
                                      ):
     from namex.models import Request, State, Payment
-    from namex_pay.resources.worker import process_payment, FLASK_APP
+    from namex_pay.resources.worker import process_payment
     nest_asyncio.apply()
 
     # setup
@@ -182,7 +260,7 @@ async def test_process_payment(app, session, mocker,
 
     # setup mock and patch
     msg=None
-    def catch(qsm,cloud_event_msg):
+    def catch(cloud_event_msg):
         nonlocal msg
         msg=cloud_event_msg
 
@@ -190,7 +268,7 @@ async def test_process_payment(app, session, mocker,
 
     # Test
     pay_msg = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None}}
-    await process_payment(pay_msg,FLASK_APP)
+    await process_payment(pay_msg)
 
     print (msg)
     # Verify message that would be sent to the email server
