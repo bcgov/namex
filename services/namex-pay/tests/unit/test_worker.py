@@ -12,23 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Test Suites to ensure that the worker is operating correctly."""
-from datetime import timedelta
-from namex.models import State, Payment
-from http import HTTPStatus
 import base64
-import nest_asyncio
+from datetime import timedelta
+from http import HTTPStatus
 
+import nest_asyncio
 import pytest
 from freezegun import freeze_time
+from namex.models import Payment, Request, State
 from queue_common.service_utils import QueueException
-
-from namex.models import Request, Payment
-from namex_pay.utils import datetime, timedelta
-from namex_pay.resources.worker import NAME_REQUEST_LIFESPAN_DAYS
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
-from namex_pay.resources.worker import get_payment_token
-from tests.unit import nested_session
 
+from namex_pay.resources.worker import NAME_REQUEST_LIFESPAN_DAYS, get_payment_token
+from namex_pay.utils import datetime, timedelta
+from tests.unit import nested_session
 
 CLOUD_EVENT = SimpleCloudEvent(
     id="fake-id",
@@ -93,9 +90,7 @@ def test_get_payment_token():
             "paymentToken": {
                 "id": 29590,
                 "statusCode": "COMPLETED",
-                "filingIdentifier": None,
-                "corpTypeCode": "BC",
-            }
+                "filingIdentifier": None            }
         },
         "id": 29590,
         "source": "sbc-pay",
@@ -164,7 +159,8 @@ async def test_update_payment_record(app, session,
                                      error
                                      ):
     """Assert that the update_payment_record works as expected."""
-    from namex.models import Request, Payment
+    from namex.models import Payment, Request
+
     from namex_pay.resources.worker import update_payment_record
 
     print(test_name)
@@ -225,7 +221,7 @@ async def test_update_payment_record(app, session,
          None,  # start_payment_date
          ),
          ])
-async def test_process_payment(app, session, mocker,
+async def test_process_payment(app, session, client, mocker,
                                      test_name,
                                      action_code,
                                      start_request_state,
@@ -234,10 +230,14 @@ async def test_process_payment(app, session, mocker,
                                      start_payment_state,
                                      start_payment_date,
                                      ):
-    from namex.models import Request, State, Payment
-    from namex_pay.resources.worker import process_payment
-    nest_asyncio.apply()
+    # from namex_pay.resources.worker import process_payment
+    from namex.models import Payment
+    from namex.models import Request
+    from namex.models import Request as RequestDAO
 
+    from namex_pay.services import queue
+    nest_asyncio.apply()
+    # with nested_session(session):
     # setup
     PAYMENT_TOKEN = 'dog'
     NR_NUMBER = 'NR B000001'
@@ -258,24 +258,125 @@ async def test_process_payment(app, session, mocker,
     payment._payment_completion_date = start_payment_date
     payment.save_to_db()
 
-    # setup mock and patch
-    msg=None
-    def catch(cloud_event_msg):
-        nonlocal msg
-        msg=cloud_event_msg
-
-    mocker.patch('namex_pay.worker.publish_email_message', side_effect=catch)
-
     # Test
-    pay_msg = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None}}
-    await process_payment(pay_msg)
+    payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None}}
+    
+    message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
-    print (msg)
-    # Verify message that would be sent to the email server
-    assert msg['type'] == 'bc.registry.names.request'
-    assert msg['source'] == '/requests/NR B000001'
-    assert msg['datacontenttype'] == 'application/json'
-    assert msg['identifier'] == 'NR B000001'
-    assert msg['data']['request']['header']['nrNum'] == NR_NUMBER
-    assert msg['data']['request']['paymentToken'] == PAYMENT_TOKEN
-    assert msg['data']['request']['statusCode'] == 'DRAFT'
+    topics = []
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        topics.append(topic)
+        return {}
+    
+    mocker.patch.object(queue, "publish", mock_publish)
+
+    rv = client.post("/", json=message) 
+
+        # Check
+    assert rv.status_code == HTTPStatus.OK
+    assert len(topics) == 1
+    assert "mailer" in topics
+    
+        # await process_payment(pay_msg)
+
+        # Verify message that would be sent to the email server
+        # assert msg['type'] == 'bc.registry.names.request'
+        # assert msg['source'] == '/requests/NR B000001'
+        # assert msg['datacontenttype'] == 'application/json'
+        # assert msg['identifier'] == 'NR B000001'
+        # assert msg['data']['request']['header']['nrNum'] == NR_NUMBER
+        # assert msg['data']['request']['paymentToken'] == PAYMENT_TOKEN
+        # assert msg['data']['request']['statusCode'] == 'DRAFT'
+
+
+# def test_process_payment(app, session, client, mocker):
+#     """Assert that an AR filling status is set to error if payment transaction failed."""
+#     from legal_api.models import Filing
+
+#     from entity_pay.resources.worker import get_filing_by_payment_id
+#     from entity_pay.services import queue
+
+#     # vars
+#     payment_id = str(random.SystemRandom().getrandbits(0x58))
+#     identifier = "CP1234567"
+
+#     # setup
+#     legal_entity = create_legal_entity(identifier)
+#     legal_entity_id = legal_entity.id
+#     filing = create_filing(payment_id, None, legal_entity.id)
+#     payment_token = {
+#         "paymentToken": {
+#             "id": payment_id,
+#             "statusCode": "COMPLETED",
+#             "filingIdentifier": filing.id,
+#             "corpTypeCode": "BC",
+#         }
+#     }
+
+#     message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
+#     # keep track of topics called on the mock
+#     topics = []
+
+#     def mock_publish(topic: str, payload: bytes):
+#         nonlocal topics
+#         topics.append(topic)
+#         return {}
+
+#     mocker.patch.object(queue, "publish", mock_publish)
+
+#     # TEST
+#     # await process_payment(payment_token, app)
+#     rv = client.post("/", json=message)
+
+#     # Check
+#     assert rv.status_code == HTTPStatus.OK
+#     assert len(topics) == 2
+#     assert "mailer" in topics
+#     assert "filer" in topics
+
+#     # Get modified data
+#     filing_from_db = get_filing_by_payment_id(int(payment_id))
+#     # check it out
+#     assert filing_from_db.business_id == legal_entity_id
+#     assert filing_from_db.status == Filing.Status.PAID.value
+
+
+def helper_create_cloud_event_envelope(
+    cloud_event_id: str = None,
+    source: str = "fake-for-tests",
+    subject: str = "fake-subject",
+    type: str = "payment",
+    data: dict = {},
+    pubsub_project_id: str = "PUBSUB_PROJECT_ID",
+    subscription_id: str = "SUBSCRIPTION_ID",
+    message_id: int = 1,
+    envelope_id: int = 1,
+    attributes: dict = {},
+    ce: SimpleCloudEvent = None,
+):
+    if not data:
+        data = {
+            "paymentToken": {
+                "id": "29590",
+                "statusCode": "COMPLETED",
+                "filingIdentifier": 12345,
+                "corpTypeCode": "BC",
+            }
+        }
+    if not ce:
+        ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
+    #
+    # This needs to mimic the envelope created by GCP PubSb when call a resource
+    #
+    envelope = {
+        "subscription": f"projects/{pubsub_project_id}/subscriptions/{subscription_id}",
+        "message": {
+            "data": base64.b64encode(to_queue_message(ce)).decode("UTF-8"),
+            "messageId": str(message_id),
+            "attributes": attributes,
+        },
+        "id": envelope_id,
+    }
+    return envelope

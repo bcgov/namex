@@ -16,25 +16,27 @@
 The entry-point is the **cb_subscription_handler**
 
 """
-from http import HTTPStatus
+import re
 import time
 import uuid
-from enum import Enum
-from typing import Optional
 from contextlib import suppress
 from dataclasses import dataclass
-import re
+from enum import Enum
+from http import HTTPStatus
+from typing import Optional
+
 from flask import Blueprint, current_app, request
 from namex import nro
-from namex.models import db, Event, Payment, Request as RequestDAO, State, User  # noqa:I001; import orders
+from namex.models import Event, Payment
+from namex.models import Request as RequestDAO  # noqa:I001; import orders
+from namex.models import State, User, db
 from namex.services import EventRecorder, queue  # noqa:I005;
 from sentry_sdk import capture_message
-# from sqlalchemy.exc import OperationalError
-from namex_pay.utils import datetime, timedelta, timezone
 from simple_cloudevent import SimpleCloudEvent
 
 from namex_pay.services import queue
 from namex_pay.services.logging import structured_log
+from namex_pay.utils import datetime, timedelta, timezone
 
 bp = Blueprint("worker", __name__)
 
@@ -87,8 +89,9 @@ def worker():
     # 3. Process payment 
     # ##
     with suppress(Exception):
-        process_payment(ce)
-        structured_log(request, "INFO", f"publish to emailer for pay-id: {payment_token.id}")
+        with current_app.app_context():
+            structured_log(request, "INFO", f"process namex payment for pay-id: {payment_token.id}")
+            process_payment(ce)
 
     structured_log(request, "INFO", f"completed ce: {str(ce)}")
     return {}, HTTPStatus.OK
@@ -100,7 +103,6 @@ class PaymentToken:
     id: Optional[str] = None
     status_code: Optional[str] = None
     filing_identifier: Optional[str] = None
-    corp_type_code: Optional[str] = None
 
 
 def get_payment_token(ce: SimpleCloudEvent):
@@ -144,7 +146,9 @@ def create_cloud_event_msg(msg_id, msg_type, source, time, identifier, json_data
     return cloud_event_msg
 
 
-async def update_payment_record(payment: Payment) -> Optional[Payment]:
+# async def update_payment_record(payment: Payment) -> Optional[Payment]:
+def update_payment_record(payment: Payment) -> Optional[Payment]:
+
     """Update the payment record in the database.
 
     Alter the NR state as required based on the payment action.
@@ -155,7 +159,7 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
     """
     if payment.payment_completion_date:
         msg = f'Queue Issue: Duplicate, payment already processed for payment.id={payment.id}'
-        structured_log(message=msg)
+        # structured_log(message=msg)
         capture_message(msg)
         return None
 
@@ -177,7 +181,7 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
     elif payment_action == Payment.PaymentActions.UPGRADE.value:
         if nr.stateCd == State.PENDING_PAYMENT:
             msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
-            structured_log(message=msg)
+            # structured_log(message=msg)
             capture_message(msg)
             # raise QueueException(msg)
 
@@ -195,7 +199,7 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
                 and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
             msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
                 'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
-            structured_log(message=msg)
+            # structured_log(message=msg)
             capture_message(msg)
             # raise QueueException(msg)
         nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
@@ -207,22 +211,23 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
         return payment
 
     msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
-    structured_log(message=msg)
+    # structured_log(message=msg)
     capture_message(msg)
     # raise QueueException(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
 
-async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
+# async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
+def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
     """Send receipt info to the mail queue if it hasn't yet been done."""
     if payment.furnished is True:
         msg = f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}'
-        structured_log(message=msg)
+        # structured_log(message=msg)
         capture_message(msg)
         return
 
     nr = None
     msg = f'Start of the furnishing of receipt for payment record:{payment.as_dict()}'
-    structured_log(message=msg)
+    # structured_log(message=msg)
     try:
         payment.furnished = True
         payment.save_to_db()
@@ -247,93 +252,97 @@ async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefine
                                                      }}
                                                  )
         msg = f'About to publish email for payment.id={payment.id}'
-        structured_log(message=msg)
-        namex_topic = current_app.config.get("NAMEX_RECEIPT_TOPIC", "mailer")
-        queue.publish(topic=namex_topic, payload=queue.to_queue_message(cloud_event_msg))  # noqa: F841
+        # structured_log(message=msg)
+        with current_app.app_context():
+            namex_topic = current_app.config.get("NAMEX_RECEIPT_TOPIC", "mailer")
+            queue.publish(topic=namex_topic, payload=queue.to_queue_message(cloud_event_msg))  # noqa: F841
 
     except Exception as err:  # noqa: B902; bare exception to catch all
         payment.furnished = False
         payment.save_to_db()
         msg = f'Reset payment furnish status payment.id={payment.id}'
-        structured_log(message=msg)
+        # structured_log(message=msg)
         # raise QueueException(f'Unable to furnish NR info. {err}') from err
 
 
-async def process_payment(pay_msg: dict):
+# async def process_payment(pay_msg: dict):
+def process_payment(ce: SimpleCloudEvent):
     """Render the payment status."""
-    if not current_app or not pay_msg:
-        structured_log(pay_msg, 'ERROR', 'Flask App or token not available')
+    # if not current_app or not pay_msg:
+    #     structured_log(pay_msg, 'ERROR', 'Flask App or token not available')
+    #     return
+
+    # with current_app.app_context():
+    structured_log(ce, 'DEBUG', 'entering process payment')
+
+    pay_msg = get_payment_token(ce)
+
+    if pay_msg.status_code == PaymentState.TRANSACTION_FAILED.value:
+        # TODO: The customer has cancelled out of paying, so we could note this better
+        # technically the payment for this service is still pending
+        structured_log(pay_msg, 'ERROR', 'Failed transaction on queue')
         return
 
-    with current_app.app_context():
-        structured_log(pay_msg, 'DEBUG', 'entering process payment')
+    complete_payment_status = [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]
+    if pay_msg.status_code in complete_payment_status:  # pylint: disable=R1702
+        msg = f'COMPLETED transaction on queue:{pay_msg}'
+        # structured_log(message=msg)
+        if payment_token := pay_msg.id:
+            payment = None
+            counter = 1
+            while not payment and counter <= 5:
+                payment = Payment.find_by_payment_token(payment_token)
+                counter += 1
+                if not payment:
+                    time.sleep(0.2)
+            if payment:
+                if update_payment := update_payment_record(payment):
+                    payment = update_payment
+                    # record event
+                    nr = RequestDAO.find_by_id(payment.nrId)
+                    # TODO: create a namex_pay user for this
+                    user = User.find_by_username('name_request_service_account')
+                    EventRecorder.record(
+                        user,
+                        Event.NAMEX_PAY + f' [payment completed] { payment.payment_action }',
+                        nr,
+                        nr.json()
+                    )
+                    # try to update NRO otherwise send a sentry msg for OPS
+                    if payment.payment_action in \
+                            [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
+                        change_flags = {
+                            'is_changed__request': True,
+                            'is_changed__previous_request': False,
+                            'is_changed__applicant': False,
+                            'is_changed__address': False,
+                            'is_changed__name1': False,
+                            'is_changed__name2': False,
+                            'is_changed__name3': False,
+                            'is_changed__nwpta_ab': False,
+                            'is_changed__nwpta_sk': False,
+                            'is_changed__request_state': False,
+                            'is_changed_consent': False
+                        }
+                        warnings = nro.change_nr(nr, change_flags)
+                        if warnings:
+                            msg = f'Queue Error: Unable to update NRO :{warnings}'
+                            # structured_log(message=msg)
+                            capture_message(
+                                f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
+                                level='error'
+                            )
 
-        if pay_msg.get('paymentToken', {}).get('statusCode') == PaymentState.TRANSACTION_FAILED.value:
-            # TODO: The customer has cancelled out of paying, so we could note this better
-            # technically the payment for this service is still pending
-            structured_log(pay_msg, 'ERROR', 'Failed transaction on queue')
-            return
+                furnish_receipt_message(payment)
 
-        complete_payment_status = [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]
-        if pay_msg.get('paymentToken', {}).get('statusCode') in complete_payment_status:  # pylint: disable=R1702
-            msg = f'COMPLETED transaction on queue:{pay_msg}'
-            structured_log(message=msg)
-            if payment_token := pay_msg.get('paymentToken', {}).get('id'):
-                payment = None
-                counter = 1
-                while not payment and counter <= 5:
-                    payment = Payment.find_by_payment_token(payment_token)
-                    counter += 1
-                    if not payment:
-                        await time.sleep(0.2)
-                if payment:
-                    if update_payment := await update_payment_record(payment):
-                        payment = update_payment
-                        # record event
-                        nr = RequestDAO.find_by_id(payment.nrId)
-                        # TODO: create a namex_pay user for this
-                        user = User.find_by_username('name_request_service_account')
-                        EventRecorder.record(
-                            user,
-                            Event.NAMEX_PAY + f' [payment completed] { payment.payment_action }',
-                            nr,
-                            nr.json()
-                        )
-                        # try to update NRO otherwise send a sentry msg for OPS
-                        if payment.payment_action in \
-                                [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                            change_flags = {
-                                'is_changed__request': True,
-                                'is_changed__previous_request': False,
-                                'is_changed__applicant': False,
-                                'is_changed__address': False,
-                                'is_changed__name1': False,
-                                'is_changed__name2': False,
-                                'is_changed__name3': False,
-                                'is_changed__nwpta_ab': False,
-                                'is_changed__nwpta_sk': False,
-                                'is_changed__request_state': False,
-                                'is_changed_consent': False
-                            }
-                            warnings = nro.change_nr(nr, change_flags)
-                            if warnings:
-                                msg = f'Queue Error: Unable to update NRO :{warnings}'
-                                structured_log(message=msg)
-                                capture_message(
-                                    f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
-                                    level='error'
-                                )
-
-                    await furnish_receipt_message(payment)
-
-                else:
-                    msg = f'Queue Error: Unable to find payment record for :{pay_msg}'
-                    structured_log(message=msg)
-                    capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
-                    # raise QueueException(f'Queue Error: Unable to find payment record for :{pay_msg}')
             else:
-                msg = f'Queue Error: Missing id :{pay_msg}'
-                structured_log(message=msg)
-                capture_message(f'Queue Error: Missing id :{pay_msg}', level='error')
+                msg = f'Queue Error: Unable to find payment record for :{pay_msg}'
+                # structured_log(message=msg)
+                capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
+                # raise QueueException(f'Queue Error: Unable to find payment record for :{pay_msg}')
+        else:
+            msg = f'Queue Error: Missing id :{pay_msg}'
+            # structured_log(message=msg)
+            capture_message(f'Queue Error: Missing id :{pay_msg}', level='error')
 
-            return
+        return

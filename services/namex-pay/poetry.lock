@@ -1772,9 +1772,9 @@ zipp = "3.8.1"
 
 [package.source]
 type = "git"
-url = "https://github.com/bcgov/namex.git"
+url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade"
-resolved_reference = "2cdcc90cda993bd662efd2ab8717f798afa23705"
+resolved_reference = "611a45cd5607d4b971ef259ba075010dbcaf5e68"
 subdirectory = "api"
 
 [[package]]
@@ -3290,4 +3290,4 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "6763e9881db2b6e734bb2529b8bddaf3f5cc60a0dc1552b185351739c1b448bc"
+content-hash = "af892a4fea07dc6d402f28dfdd637e9cf6f67785cbf4574afd28c48256f4f044"

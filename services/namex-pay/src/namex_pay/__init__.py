@@ -38,16 +38,16 @@ puts a message onto the Filers queue to process the file.
 """
 from __future__ import annotations
 
-
-from config import Config, ProdConfig
-from .services import queue
-from .resources import register_endpoints
 import sentry_sdk
 from flask import Flask
 from namex.models import db
-from namex_pay.utils import get_run_version
 from sentry_sdk.integrations.flask import FlaskIntegration
 
+from config import Config, ProdConfig
+from namex_pay.utils import get_run_version
+
+from .resources import register_endpoints
+from .services import queue
 
 
 def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
