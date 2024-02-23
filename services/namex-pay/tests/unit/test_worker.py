@@ -13,6 +13,7 @@
 # limitations under the License.
 """The Test Suites to ensure that the worker is operating correctly."""
 import base64
+import json
 from datetime import timedelta
 from http import HTTPStatus
 
@@ -90,7 +91,8 @@ def test_get_payment_token():
             "paymentToken": {
                 "id": 29590,
                 "statusCode": "COMPLETED",
-                "filingIdentifier": None            }
+                "filingIdentifier": None
+                }
         },
         "id": 29590,
         "source": "sbc-pay",
@@ -221,23 +223,25 @@ async def test_update_payment_record(app, session,
          None,  # start_payment_date
          ),
          ])
-async def test_process_payment(app, session, client, mocker,
-                                     test_name,
-                                     action_code,
-                                     start_request_state,
-                                     start_priority,
-                                     start_datetime,
-                                     start_payment_state,
-                                     start_payment_date,
-                                     ):
-    # from namex_pay.resources.worker import process_payment
+async def test_process_payment(app, 
+                                session, 
+                                client, 
+                                mocker,
+                                test_name,
+                                action_code,
+                                start_request_state,
+                                start_priority,
+                                start_datetime,
+                                start_payment_state,
+                                start_payment_date,
+                                ):
     from namex.models import Payment
     from namex.models import Request
     from namex.models import Request as RequestDAO
+    from namex.models import State
 
     from namex_pay.services import queue
     nest_asyncio.apply()
-    # with nested_session(session):
     # setup
     PAYMENT_TOKEN = 'dog'
     NR_NUMBER = 'NR B000001'
@@ -264,83 +268,43 @@ async def test_process_payment(app, session, client, mocker,
     message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
     topics = []
+    msg=None
 
     def mock_publish(topic: str, payload: bytes):
         nonlocal topics
+        nonlocal msg
         topics.append(topic)
+        msg = payload
         return {}
     
     mocker.patch.object(queue, "publish", mock_publish)
 
-    rv = client.post("/", json=message) 
+    rv = client.post("/", json=message)
 
-        # Check
+    # Check
     assert rv.status_code == HTTPStatus.OK
     assert len(topics) == 1
     assert "mailer" in topics
-    
-        # await process_payment(pay_msg)
 
-        # Verify message that would be sent to the email server
-        # assert msg['type'] == 'bc.registry.names.request'
-        # assert msg['source'] == '/requests/NR B000001'
-        # assert msg['datacontenttype'] == 'application/json'
-        # assert msg['identifier'] == 'NR B000001'
-        # assert msg['data']['request']['header']['nrNum'] == NR_NUMBER
-        # assert msg['data']['request']['paymentToken'] == PAYMENT_TOKEN
-        # assert msg['data']['request']['statusCode'] == 'DRAFT'
+    # Get modified data
+    nr_from_db = Request.find_by_nr(NR_NUMBER)
+    # check it out
+    assert nr_from_db.nrNum == NR_NUMBER
+    assert nr_from_db.stateCd == State.DRAFT
 
+    payments = nr_from_db.payments
+    payments[0].payment_status_code == State.COMPLETED
+    payments[0].payment_token == PAYMENT_TOKEN
 
-# def test_process_payment(app, session, client, mocker):
-#     """Assert that an AR filling status is set to error if payment transaction failed."""
-#     from legal_api.models import Filing
+    email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
 
-#     from entity_pay.resources.worker import get_filing_by_payment_id
-#     from entity_pay.services import queue
-
-#     # vars
-#     payment_id = str(random.SystemRandom().getrandbits(0x58))
-#     identifier = "CP1234567"
-
-#     # setup
-#     legal_entity = create_legal_entity(identifier)
-#     legal_entity_id = legal_entity.id
-#     filing = create_filing(payment_id, None, legal_entity.id)
-#     payment_token = {
-#         "paymentToken": {
-#             "id": payment_id,
-#             "statusCode": "COMPLETED",
-#             "filingIdentifier": filing.id,
-#             "corpTypeCode": "BC",
-#         }
-#     }
-
-#     message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
-#     # keep track of topics called on the mock
-#     topics = []
-
-#     def mock_publish(topic: str, payload: bytes):
-#         nonlocal topics
-#         topics.append(topic)
-#         return {}
-
-#     mocker.patch.object(queue, "publish", mock_publish)
-
-#     # TEST
-#     # await process_payment(payment_token, app)
-#     rv = client.post("/", json=message)
-
-#     # Check
-#     assert rv.status_code == HTTPStatus.OK
-#     assert len(topics) == 2
-#     assert "mailer" in topics
-#     assert "filer" in topics
-
-#     # Get modified data
-#     filing_from_db = get_filing_by_payment_id(int(payment_id))
-#     # check it out
-#     assert filing_from_db.business_id == legal_entity_id
-#     assert filing_from_db.status == Filing.Status.PAID.value
+    # Verify message that would be sent to the emailer pubsub
+    assert email_pub['type'] == 'bc.registry.names.request'
+    assert email_pub['source'] == 'namex_pay'
+    assert email_pub['subject'] == 'namerequest'
+    assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
+    assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
+    assert email_pub['data']['request']['statusCode'] == State.DRAFT
 
 
 def helper_create_cloud_event_envelope(
@@ -361,9 +325,7 @@ def helper_create_cloud_event_envelope(
             "paymentToken": {
                 "id": "29590",
                 "statusCode": "COMPLETED",
-                "filingIdentifier": 12345,
-                "corpTypeCode": "BC",
-            }
+                "filingIdentifier": 12345            }
         }
     if not ce:
         ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
