@@ -128,24 +128,6 @@ def dict_keys_to_snake_case(d: dict):
     return converted
 
 
-def create_cloud_event_msg(msg_id, msg_type, source, time, identifier, json_data_body):  # pylint: disable=too-many-arguments # noqa E501
-    # industry standard arguments for this message
-    """Create a payload for the email service."""
-    cloud_event_msg = {
-        'specversion': '1.x-wip',
-        'type': msg_type,
-        'source': source,
-        'id': msg_id,
-        'time': time,
-        'datacontenttype': 'application/json',
-        'identifier': identifier
-    }
-    if json_data_body:
-        cloud_event_msg['data'] = json_data_body
-
-    return cloud_event_msg
-
-
 # async def update_payment_record(payment: Payment) -> Optional[Payment]:
 def update_payment_record(payment: Payment) -> Optional[Payment]:
 
@@ -236,26 +218,23 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
 
     try:
         nr = RequestDAO.find_by_id(payment.nrId)
-        cloud_event_msg = create_cloud_event_msg(msg_id=str(uuid.uuid4()),
-                                                 msg_type='bc.registry.names.request',
-                                                 source=f'/requests/{nr.nrNum}',
-                                                 time=datetime.
-                                                 utcfromtimestamp(time.time()).
-                                                 replace(tzinfo=timezone.utc).
-                                                 isoformat(),
-                                                 identifier=nr.nrNum,
-                                                 json_data_body={
-                                                     'request': {
-                                                         'header': {'nrNum': nr.nrNum},
-                                                         'paymentToken': payment.payment_token,
-                                                         'statusCode': nr.stateCd
-                                                     }}
-                                                 )
+        cloud_event_msg = SimpleCloudEvent(
+        source=__name__[: __name__.find(".")],
+        subject="namerequest",
+        type="bc.registry.names.request",
+        data={
+            'request': {
+                'header': {'nrNum': nr.nrNum},
+                'paymentToken': payment.payment_token,
+                'statusCode': nr.stateCd
+            }}
+        )
         msg = f'About to publish email for payment.id={payment.id}'
         # structured_log(message=msg)
         with current_app.app_context():
             namex_topic = current_app.config.get("NAMEX_RECEIPT_TOPIC", "mailer")
-            queue.publish(topic=namex_topic, payload=queue.to_queue_message(cloud_event_msg))  # noqa: F841
+            payload = queue.to_queue_message(cloud_event_msg)
+            queue.publish(topic=namex_topic, payload=payload)  # noqa: F841
 
     except Exception as err:  # noqa: B902; bare exception to catch all
         payment.furnished = False
