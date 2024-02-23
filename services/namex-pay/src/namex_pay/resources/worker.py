@@ -83,9 +83,9 @@ def worker():
     # 2. Get payment information
     # ##
     if not (payment_token := get_payment_token(ce)) or payment_token.status_code != "COMPLETED":
-        # no payment info, or not a payment COMPLETED token, take off Q
+    # no payment info, or not a payment COMPLETED token, take off Q
         return {}, HTTPStatus.OK
-    
+
     # 3. Process payment 
     # ##
     with suppress(Exception):
@@ -103,6 +103,7 @@ class PaymentToken:
     id: Optional[str] = None
     status_code: Optional[str] = None
     filing_identifier: Optional[str] = None
+    corp_type_code: Optional[str] = None
 
 
 def get_payment_token(ce: SimpleCloudEvent):
@@ -146,7 +147,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
         return None
 
     payment_action = payment.payment_action
-    nr = RequestDAO.find_by_id(payment.nrId)
+    nr: RequestDAO = RequestDAO.find_by_id(payment.nrId)
 
     # As RESUBMIT is a new NR it should follow the same flow as CREATE
     if payment_action in [Payment.PaymentActions.CREATE.value, Payment.PaymentActions.RESUBMIT.value]:  \

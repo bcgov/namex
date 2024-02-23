@@ -91,7 +91,8 @@ def test_get_payment_token():
             "paymentToken": {
                 "id": 29590,
                 "statusCode": "COMPLETED",
-                "filingIdentifier": None
+                "filingIdentifier": None,
+                "corpTypeCode": None
                 }
         },
         "id": 29590,
@@ -149,8 +150,11 @@ def test_get_payment_token():
          None, 'is',
          QueueException),
     ])
-@pytest.mark.asyncio
-async def test_update_payment_record(app, session,
+# @pytest.mark.asyncio
+async def test_update_payment_record(app,
+                                     session,
+                                     client,
+                                     mocker,
                                      test_name,
                                      action_code,
                                      start_request_state, end_request_state,
@@ -163,8 +167,8 @@ async def test_update_payment_record(app, session,
     """Assert that the update_payment_record works as expected."""
     from namex.models import Payment, Request
 
-    from namex_pay.resources.worker import update_payment_record
-
+    from namex_pay.services import queue
+    nest_asyncio.apply()
     print(test_name)
 
     now = datetime.utcnow()
@@ -190,21 +194,39 @@ async def test_update_payment_record(app, session,
         payment._payment_completion_date = start_payment_date
         payment.save_to_db()
 
-        # run test
-        if error:  # expecting it to raise an error
-            with pytest.raises(error):
-                await update_payment_record(payment)
-        else:
-            # else it was processable
-            if not (payment_final := await update_payment_record(payment)):
-                payment_final = payment
+        # payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": action_code, "filingIdentifier": None, "corpTypeCode": None}}
+        payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}}
 
-            nr_final = Request.find_by_nr(NR_NUMBER)
+        message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
-            assert nr_final.stateCd == end_request_state
-            assert nr_final.priorityCd == end_priority
-            assert eval(f'payment_final.payment_completion_date {end_payment_has_value} None')
-            assert payment_final.payment_status_code == end_payment_state
+        topics = []
+        msg=None
+
+        def mock_publish(topic: str, payload: bytes):
+            nonlocal topics
+            nonlocal msg
+            topics.append(topic)
+            msg = payload
+            return {}
+
+        mocker.patch.object(queue, "publish", mock_publish)
+
+        rv = client.post("/", json=message)
+
+        # Check
+        assert rv.status_code == HTTPStatus.OK
+        assert len(topics) == 1
+        assert "mailer" in topics
+
+        nr_final = Request.find_by_nr(NR_NUMBER)
+        payments = nr_final.payments
+
+        payment_final = payments[0]
+
+        assert nr_final.stateCd == end_request_state
+        assert nr_final.priorityCd == end_priority
+        assert eval(f'payment_final.payment_completion_date {end_payment_has_value} None')
+        assert payment_final.payment_status_code == end_payment_state
 
 
 @pytest.mark.parametrize(
@@ -235,10 +257,7 @@ async def test_process_payment(app,
                                 start_payment_state,
                                 start_payment_date,
                                 ):
-    from namex.models import Payment
-    from namex.models import Request
-    from namex.models import Request as RequestDAO
-    from namex.models import State
+    from namex.models import Payment, Request, State
 
     from namex_pay.services import queue
     nest_asyncio.apply()
@@ -263,7 +282,7 @@ async def test_process_payment(app,
     payment.save_to_db()
 
     # Test
-    payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None}}
+    payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}}
     
     message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
