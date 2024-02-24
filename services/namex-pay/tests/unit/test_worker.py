@@ -21,7 +21,6 @@ import nest_asyncio
 import pytest
 from freezegun import freeze_time
 from namex.models import Payment, Request, State
-from queue_common.service_utils import QueueException
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 from namex_pay.resources.worker import NAME_REQUEST_LIFESPAN_DAYS, get_payment_token
@@ -150,7 +149,6 @@ def test_get_payment_token():
          None, 'is',
          Exception),
     ])
-# @pytest.mark.asyncio
 async def test_update_payment_record(app,
                                      session,
                                      client,
