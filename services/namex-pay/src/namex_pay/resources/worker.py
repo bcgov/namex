@@ -18,8 +18,6 @@ The entry-point is the **cb_subscription_handler**
 """
 import re
 import time
-import uuid
-from contextlib import suppress
 from dataclasses import dataclass
 from enum import Enum
 from http import HTTPStatus
@@ -38,7 +36,7 @@ from simple_cloudevent import SimpleCloudEvent
 
 from namex_pay.services import queue
 from namex_pay.services.logging import structured_log
-from namex_pay.utils import datetime, timedelta, timezone
+from namex_pay.utils import datetime, timedelta
 
 bp = Blueprint("worker", __name__)
 
