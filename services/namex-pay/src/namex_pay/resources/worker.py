@@ -90,10 +90,9 @@ def worker():
 
     # 3. Process payment 
     # ##
-    with suppress(Exception):
-        with current_app.app_context():
-            structured_log(request, "INFO", f"process namex payment for pay-id: {payment_token.id}")
-            process_payment(ce)
+    with current_app.app_context():
+        structured_log(request, "INFO", f"process namex payment for pay-id: {payment_token.id}")
+        process_payment(ce)
 
     structured_log(request, "INFO", f"completed ce: {str(ce)}")
     return {}, HTTPStatus.OK
