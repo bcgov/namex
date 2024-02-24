@@ -168,13 +168,12 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
             msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
             # structured_log(message=msg)
             capture_message(msg)
-            # raise QueueException(msg)
+            raise Exception(msg)
 
         nr.priorityCd = 'Y'
         nr.priorityDate = datetime.utcnow()
         payment.payment_completion_date = datetime.utcnow()
         payment.payment_status_code = State.COMPLETED
-
         nr.save_to_db()
         payment.save_to_db()
         return payment
@@ -200,7 +199,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
     msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
     # structured_log(message=msg)
     capture_message(msg)
-    # raise QueueException(f'Unknown action:{payment_action} for payment.id={payment.id}')
+    raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
 
 # async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
