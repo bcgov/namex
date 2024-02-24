@@ -148,7 +148,7 @@ def test_get_payment_token():
         ('extend expired', Payment.PaymentActions.REAPPLY.value, State.DRAFT, State.DRAFT, 'N', 'N',
          datetime.utcnow() - timedelta(days=(NAME_REQUEST_LIFESPAN_DAYS + 3)), NAME_REQUEST_LIFESPAN_DAYS, 'PENDING_PAYMENT', 'PENDING_PAYMENT',
          None, 'is',
-         QueueException),
+         Exception),
     ])
 # @pytest.mark.asyncio
 async def test_update_payment_record(app,
@@ -211,22 +211,26 @@ async def test_update_payment_record(app,
 
         mocker.patch.object(queue, "publish", mock_publish)
 
-        rv = client.post("/", json=message)
+        if error:  # expecting it to raise an error
+            with pytest.raises(error):
+                client.post("/", json=message)
+        else:
+            rv = client.post("/", json=message)
 
-        # Check
-        assert rv.status_code == HTTPStatus.OK
-        assert len(topics) == 1
-        assert "mailer" in topics
+            # Check
+            assert rv.status_code == HTTPStatus.OK
+            assert len(topics) == 1
+            assert "mailer" in topics
 
-        nr_final = Request.find_by_nr(NR_NUMBER)
-        payments = nr_final.payments
+            nr_final = Request.find_by_nr(NR_NUMBER)
+            payments = nr_final.payments
 
-        payment_final = payments[0]
+            payment_final = payments[0]
 
-        assert nr_final.stateCd == end_request_state
-        assert nr_final.priorityCd == end_priority
-        assert eval(f'payment_final.payment_completion_date {end_payment_has_value} None')
-        assert payment_final.payment_status_code == end_payment_state
+            assert nr_final.stateCd == end_request_state
+            assert nr_final.priorityCd == end_priority
+            assert eval(f'payment_final.payment_completion_date {end_payment_has_value} None')
+            assert payment_final.payment_status_code == end_payment_state
 
 
 @pytest.mark.parametrize(

@@ -1774,7 +1774,7 @@ zipp = "3.8.1"
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade"
-resolved_reference = "611a45cd5607d4b971ef259ba075010dbcaf5e68"
+resolved_reference = "655ba8b02c50bcc4af4223b748be479a0b3706e6"
 subdirectory = "api"
 
 [[package]]
