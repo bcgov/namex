@@ -7,11 +7,19 @@
 Common library used by the queue based services.
 
 ## Technology Stack Used
-* NATS
-* AIOHTTP
+* Poetry
+* GCP PubSub
 
 
 ## Files in this repository
+```
+# build dependencies
+poetry install
+# update poetry.lock and rebuild
+poetry update
+# run tests
+poetry run pytest
+```
 
 ## How to Contribute
 
