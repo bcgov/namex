@@ -9,7 +9,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
-queue_common = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/common"}
+queue_common = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/common",  branch = "feature-queue-upgrade" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 gunicorn = "^20.1.0"
