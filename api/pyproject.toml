@@ -1,7 +1,7 @@
 
 [tool.poetry]
 name = "namex"
-version = "0.1.0"
+version = "1.50.0"
 description = ""
 authors = ["Thor Wolpert <thor@wolpert.ca>"]
 license = "Apache Software License Version 2.0"
