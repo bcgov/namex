@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "queue_common"
-version = "0.1.0"
+version = "2.0.0"
 description = ""
 authors = ["Thor Wolpert <thor@wolpert.ca>"]
 license = "Apache Software License Version 2.0"
