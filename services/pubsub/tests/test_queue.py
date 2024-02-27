@@ -6,7 +6,7 @@ import flask
 import pytest
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
-from gcp_queue.gcp_queue import GcpQueue
+from gcp_queue import GcpQueue
 
 BASE_ENVELOPE = {
     "subscription": "projects/PUBSUB_PROJECT_ID/subscriptions/SUBSCRIPTION_ID",
