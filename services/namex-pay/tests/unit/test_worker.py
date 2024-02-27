@@ -17,7 +17,6 @@ import json
 from datetime import timedelta
 from http import HTTPStatus
 
-import nest_asyncio
 import pytest
 from freezegun import freeze_time
 from namex.models import Payment, Request, State
@@ -166,7 +165,6 @@ async def test_update_payment_record(app,
     from namex.models import Payment, Request
 
     from namex_pay.services import queue
-    nest_asyncio.apply()
     print(test_name)
 
     now = datetime.utcnow()
@@ -262,7 +260,6 @@ async def test_process_payment(app,
     from namex.models import Payment, Request, State
 
     from namex_pay.services import queue
-    nest_asyncio.apply()
     # setup
     PAYMENT_TOKEN = 'dog'
     NR_NUMBER = 'NR B000001'
