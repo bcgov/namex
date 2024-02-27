@@ -213,17 +213,6 @@ files = [
 pycodestyle = ">=2.10.0"
 
 [[package]]
-name = "backoff"
-version = "2.2.1"
-description = "Function decoration for backoff and retry"
-optional = false
-python-versions = ">=3.7,<4.0"
-files = [
-    {file = "backoff-2.2.1-py3-none-any.whl", hash = "sha256:63579f9a0628e06278f7e47b7d7d5b6ce20dc65c5e96a6f3ca99a6adca0396e8"},
-    {file = "backoff-2.2.1.tar.gz", hash = "sha256:03f829f5bb1923180821643f8753b0502c3b682293992485b0eef2807afa5cba"},
-]
-
-[[package]]
 name = "blinker"
 version = "1.7.0"
 description = "Fast, simple object-to-object and broadcast signaling"
@@ -845,7 +834,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "f24103ff25fdbc174a8d2002553d5bb1fb1d3447"
+resolved_reference = "e4358caa55ae1d755e1b3a8b4df6a7668a6bfb4a"
 subdirectory = "services/pubsub"
 
 [[package]]
@@ -1327,30 +1316,6 @@ consul = ["python-consul (>=1.0.1)"]
 dynamodb = ["boto3 (>=1.9.71)"]
 redis = ["redis (>=2.10.5)"]
 test-filesource = ["pyyaml (>=3.0,<5.2)", "watchdog (>=0.9,!=0.10.5,<1.0)"]
-
-[[package]]
-name = "ldclient-py"
-version = "6.9.1"
-description = "LaunchDarkly SDK for Python"
-optional = false
-python-versions = "*"
-files = [
-    {file = "ldclient-py-6.9.1.tar.gz", hash = "sha256:1c72eb08d6d504dbc228b3d09fea4d27ec31b6271e634357365c067ae51bd6e0"},
-]
-
-[package.dependencies]
-backoff = ">=1.4.3"
-certifi = ">=2018.4.16"
-expiringdict = ">=1.1.4"
-pyRFC3339 = ">=1.0"
-semver = ">=2.7.9"
-six = ">=1.10.0"
-urllib3 = ">=1.22.0"
-
-[package.extras]
-consul = ["python-consul (>=1.0.1)"]
-dynamodb = ["boto3 (>=1.9.71)"]
-redis = ["redis (>=2.10.5)"]
 
 [[package]]
 name = "lxml"
@@ -3143,4 +3108,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "76c9d95bac2ffa7a9d78138654ce790ad2c2a85f8b4ff18f6ab6c25891d31bd8"
+content-hash = "e2ca01fdc906546852b18bdcf298678916f296cfa9cc04cea770e33a8d95b9e6"
