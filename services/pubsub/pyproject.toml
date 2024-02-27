@@ -7,8 +7,8 @@ license = "Apache Software License Version 2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8.18"
-flask = "*"
+python = "^3.12"
+flask = "^3.0.2"
 google-auth = "^2.27.0"
 google-cloud-pubsub = "^2.19.4"
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
