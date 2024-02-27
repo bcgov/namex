@@ -23,7 +23,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 from namex.services.lookup import nr_filing_actions
 from namex.services.nro import NROServices
 from namex.services.cache import cache
-from namex.services import queue
+from .services import queue
 nro = NROServices()
 from namex.models import db, ma
 from namex.resources import api
