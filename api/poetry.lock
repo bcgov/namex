@@ -871,7 +871,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade"
-resolved_reference = "178161f75682acb156634059dad45c49d13184b7"
+resolved_reference = "627f62cb63d351ac73e68d364acbaab3790e619a"
 subdirectory = "services/pubsub"
 
 [[package]]
