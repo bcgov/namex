@@ -13,7 +13,6 @@ gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = 
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 gunicorn = "^20.1.0"
-ldclient-py = "^6.9.1"
 flask-jwt-oidc = "^0.3.0"
 flask = "^3.0.2"
 flask-restx = "^0.5.1"
