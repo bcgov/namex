@@ -8,8 +8,6 @@ TODO: Fill in a larger description once the API is defined for V1
 import config
 from namex.utils.logging import setup_logging
 setup_logging()  # important to do this first
-import ldclient
-from ldclient.config import Config
 
 import os
 
@@ -60,7 +58,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     nro.init_app(app)
     cache.init_app(app)
     nr_filing_actions.init_app(app)
-    ldclient.set_config(Config(os.getenv('NAMEX_LD_SDK_ID')))
 
     @app.after_request
     def add_version(response):
