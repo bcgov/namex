@@ -8,8 +8,8 @@ license = "Apache Software License Version 2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
-queue_common = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/common",  branch = "feature-queue-upgrade" }
+python = "^3.8.18"
+gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "services/pubsub",  branch = "feature-queue-upgrade" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 gunicorn = "^20.1.0"
