@@ -169,6 +169,7 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
         nr.activeUser = user
         nr.submitter = user
         nr.submitter_userid = user.id
+        nr.nrNum = 'NR 123456'
 
         nr.save_to_db()
 
