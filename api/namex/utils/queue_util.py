@@ -93,6 +93,6 @@ def create_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
 
 
 def send_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
-    """Publish name state message to NATS nr state subject."""
+    """Publish name state message to pubsub nr state subject."""
     email_topic = current_app.config.get("NAMEX_NR_STATE_TOPIC", "mailer")
     queue.publish(topic=email_topic, payload=create_name_state_msg(nr_num, state_cd, old_state_cd))

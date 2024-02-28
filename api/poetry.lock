@@ -154,33 +154,6 @@ files = [
 ]
 
 [[package]]
-name = "asyncio-nats-client"
-version = "0.11.5"
-description = "NATS client for Python Asyncio"
-optional = false
-python-versions = "*"
-files = [
-    {file = "asyncio-nats-client-0.11.5.tar.gz", hash = "sha256:c6a2855a63db68289bb270240670ff30514ba0082a8b4f759b8e9955ac84c575"},
-]
-
-[package.extras]
-nkeys = ["nkeys"]
-
-[[package]]
-name = "asyncio-nats-streaming"
-version = "0.4.0"
-description = "NATS Streaming client for Python Asyncio"
-optional = false
-python-versions = "*"
-files = [
-    {file = "asyncio-nats-streaming-0.4.0.tar.gz", hash = "sha256:1fecb125917b438028e6eb753cdc1689dd1c7c86df8a9808534d9fc1711b0aa6"},
-]
-
-[package.dependencies]
-asyncio-nats-client = ">=0.7.0"
-protobuf = ">=3.7"
-
-[[package]]
 name = "attrs"
 version = "22.2.0"
 description = "Classes Without Boilerplate"
@@ -834,7 +807,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "5f1cac3cbaab2dfe3872c0897070181d26aa975d"
+resolved_reference = "5053f42d15725f07b4935f4b2522f010e8844261"
 subdirectory = "services/pubsub"
 
 [[package]]
@@ -3108,4 +3081,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "3b1d4bfa87459f7b73c515bf0ee8bcd78e403ab67fc91b3701e1feaeb95ea772"
+content-hash = "80fe5a5591cbf23357953f0aec6813c4d26b6718d74bdcdac2782f5b608ca769"
