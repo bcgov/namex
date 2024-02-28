@@ -564,6 +564,20 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app, mocker):
     :param app:
     :return:
     """
+
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
     # Define our data
     input_fields = build_test_input_fields()
     custom_names = [{
@@ -587,19 +601,6 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app, mocker):
     # Expect this to fail as we
     nr_data = {}
 
-    from namex.services import queue
-
-    topics = []
-    msg = None
-
-    def mock_publish(topic: str, payload: bytes):
-        nonlocal topics
-        nonlocal msg
-        topics.append(topic)
-        msg = payload
-        return {}
-
-    mocker.patch.object(queue, "publish", mock_publish)
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
@@ -622,6 +623,20 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app, mocker):
     :param app:
     :return:
     """
+
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
     # Define our data
     input_fields = build_test_input_fields()
 
@@ -647,19 +662,6 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app, mocker):
     # Expect this to fail as we
     nr_data = {}
 
-    from namex.services import queue
-
-    topics = []
-    msg = None
-
-    def mock_publish(topic: str, payload: bytes):
-        nonlocal topics
-        nonlocal msg
-        topics.append(topic)
-        msg = payload
-        return {}
-
-    mocker.patch.object(queue, "publish", mock_publish)
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
