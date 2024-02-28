@@ -162,6 +162,9 @@ async def test_update_payment_record(app,
                                      error
                                      ):
     """Assert that the update_payment_record works as expected."""
+    mocker.patch("namex.utils.queue_util.send_name_request_state_msg")
+    mocker.patch("namex.utils.queue_util.publish_email_notification")
+
     from namex.models import Payment, Request
 
     from namex_pay.services import queue
@@ -206,6 +209,9 @@ async def test_update_payment_record(app,
             return {}
 
         mocker.patch.object(queue, "publish", mock_publish)
+
+        # access_mock = mocker.patch("queue_util.send_name_request_state_msg")
+        # access_mock.return_value = True
 
         if error:  # expecting it to raise an error
             with pytest.raises(error):
@@ -260,6 +266,8 @@ async def test_process_payment(app,
     from namex.models import Payment, Request, State
 
     from namex_pay.services import queue
+
+    mocker.patch("namex.utils.queue_util.send_name_request_state_msg")
     # setup
     PAYMENT_TOKEN = 'dog'
     NR_NUMBER = 'NR B000001'
