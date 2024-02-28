@@ -113,8 +113,7 @@ def update_nr_state(mapper, connection, target):
                     WHERE id={nr.id}
                     """
                 )
-                if current_app.config.get('DISABLE_NAMEREQUEST_NATS_UPDATES', 0) != 1:
-                    queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
+                queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
 
 
 
