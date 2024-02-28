@@ -528,7 +528,7 @@ def test_draft_patch_cancel_with_invalid_states(client, jwt, app):
     assert isinstance(patched_nr.get('message'), str)
 
 
-def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
+def test_draft_patch_cancel_with_consumed_name(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -559,7 +559,7 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
     # Take the response and edit it
     # Expect this to fail as we
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
     print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
@@ -618,7 +618,7 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
     assert isinstance(patched_nr.get('message'), str)
 
 
-def test_draft_patch_refund(client, jwt, app):
+def test_draft_patch_refund(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -627,7 +627,21 @@ def test_draft_patch_refund(client, jwt, app):
     :param app:
     :return:
     """
-    # Define our data
+
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
+
     input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
@@ -637,7 +651,7 @@ def test_draft_patch_refund(client, jwt, app):
 
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.REQUEST_REFUND.value, draft_nr.get('id'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.REQUEST_REFUND.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -648,6 +662,22 @@ def test_draft_patch_refund(client, jwt, app):
 
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
+
+
+    # Check pubsub messages
+    assert len(topics) == 1
+    assert "mailer" in topics
+
+
+    email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+
+    # Verify message that would be sent to the emailer pubsub
+    assert email_pub['type'] == 'bc.registry.names.request'
+    assert email_pub['source'] == '/requests/NR L000001'
+    assert email_pub['subject'] == 'namerequest'
+    assert email_pub['data']['request']['nrNum'] == 'NR L000001'
+    assert email_pub['data']['request']['option'] == 'refund'
+    assert email_pub['data']['request']['refundValue'] == '0.00'
 
 
 def test_draft_patch_reapply(client, jwt, app):
