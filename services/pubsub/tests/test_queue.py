@@ -94,3 +94,26 @@ def test_get_simple_cloud_event(mocker, test_name, queue_envelope, expected, ret
             with suppress(Exception):
                 ce.time = None
             assert ce == expected
+
+
+@pytest.mark.skip(reason="leave this to manually verify pubsub connection; needs env vars")
+def test_gcp_pubsub_connectivity():
+    """Test that queue can publish to gcp pubsub."""
+    from gcp_queue import GcpQueue
+    from dotenv import load_dotenv
+    import os
+
+    load_dotenv(".env")
+
+    app = flask.Flask(__name__)
+    app.config['GCP_AUTH_KEY'] = os.getenv('GCP_AUTH_KEY')
+
+    queue = GcpQueue()
+    queue.init_app(app)
+
+    topic = os.getenv('PUB_TOPIC')
+    for n in range(1, 10):
+        data_str = f"Message number {n}"
+        # Data must be a bytestring
+        data = data_str.encode("utf-8")
+        queue.publish(topic, data)

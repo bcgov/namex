@@ -13,8 +13,8 @@ google-auth = "^2.27.0"
 google-cloud-pubsub = "^2.19.4"
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 
-
 [tool.poetry.group.dev.dependencies]
+python-dotenv = "^0.21.0"
 pytest = "^8.0.0"
 freezegun = "^1.4.0"
 pytest-aiohttp = "^1.0.5"
