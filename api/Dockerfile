@@ -99,5 +99,6 @@ COPY --chown=web:web . /code
 
 # Run the server
 ENV PYTHONPATH=/opt/app-root
+EXPOSE 8080
 
-CMD gunicorn --bind 0.0.0.0:8000 --config /code/gunicorn_config.py wsgi:app
+CMD gunicorn --bind 0.0.0.0:8080 --config /code/gunicorn_config.py wsgi:app
