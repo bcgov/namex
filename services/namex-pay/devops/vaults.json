@@ -22,7 +22,7 @@
     {
         "vault": "gcp-queue",
         "application": [
-
+            "namex"
         ]
     }
 ]
