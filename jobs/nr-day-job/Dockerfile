@@ -59,8 +59,6 @@ RUN groupadd -g "${GID}" -r web \
   && useradd -d '/code' -g web -l -r -u "${UID}" web \
   && chown web:web -R '/code'
 
-
-# Copy only requirements, to cache them in docker layer
 COPY --chown=web:web . /code
 
 # Project initialization:
@@ -82,4 +80,4 @@ COPY --chown=web:web . /code
 
 EXPOSE 8080
 
-CMD [ "python", "/opt/app-root/nr_day_job.py" ]
+CMD [ "python", "/code/nr_day_job.py" ]
