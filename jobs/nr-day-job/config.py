@@ -58,12 +58,6 @@ class Config():  # pylint: disable=too-few-public-methods
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    NATS_SERVERS = os.getenv('NATS_SERVERS', None)
-    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', None)
-    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', None)
-    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
-    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
-
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # POSTGRESQL
@@ -79,6 +73,10 @@ class Config():  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME,
     )
+
+    GCP_AUTH_KEY = os.getenv("GCP_AUTH_KEY", None)
+    NAMEX_NR_STATE_TOPIC = os.getenv("NAMEX_NR_STATE_TOPIC", "namex-pay-dev")
+    NAMEX_RECEIPT_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
 
 
 class DevConfig(Config):  # pylint: disable=too-few-public-methods
