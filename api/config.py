@@ -111,7 +111,7 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
 
     GCP_AUTH_KEY = os.getenv("GCP_AUTH_KEY", None)
     NAMEX_NR_STATE_TOPIC = os.getenv("NAMEX_NR_STATE_TOPIC", "namex-pay-dev")
-    NAMEX_RECEIPT_TOPIC = os.getenv("NAMEX_RECEIPT_TOPIC", "namex-receipt-dev")
+    NAMEX_RECEIPT_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
 
     AUDIENCE = os.getenv("AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Subscriber")
     PUBLISHER_AUDIENCE = os.getenv("PUBLISHER_AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Publisher")
