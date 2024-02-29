@@ -96,9 +96,7 @@ class GcpQueue:
 
         if not self._publisher and self.credentials_pub:
             self._publisher = pubsub_v1.PublisherClient(credentials=self.credentials_pub)
-        else:
-            self._publisher = pubsub_v1.PublisherClient()
-        return self.credentials_pub
+        return self._publisher
 
     @staticmethod
     def is_valid_envelope(msg: dict):
@@ -164,6 +162,7 @@ class GcpQueue:
                 if return_raw and str_data:
                     return str_data
         return None
+
 
     def publish(self, topic: str, payload: bytes):
         """Send payload to the queue."""
