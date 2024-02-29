@@ -1,5 +1,5 @@
 # platform=linux/amd64
-FROM python:3.8.5-buster
+FROM python:3.12.2
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
