@@ -40,7 +40,9 @@ from __future__ import annotations
 
 import sentry_sdk
 from flask import Flask
+from flask_restx import Api
 from namex.models import db
+from namex.resources.ops import api as nr_ops
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from config import Config, ProdConfig
@@ -67,5 +69,10 @@ def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
     db.init_app(app)
     queue.init_app(app)
     register_endpoints(app)
+
+    api = Api()
+
+    api.add_namespace(nr_ops, path='/ops')
+    api.init_app(app)
 
     return app
