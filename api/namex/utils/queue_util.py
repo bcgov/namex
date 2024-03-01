@@ -29,7 +29,7 @@ def publish_email_notification(nr_num: str, option: str, refund_value=None):
         data=event_data
     )
 
-    email_topic = current_app.config.get("NAMEX_RECEIPT_TOPIC", "mailer")
+    email_topic = current_app.config.get("EMAILER_TOPIC", "mailer")
     payload = queue.to_queue_message(ce)
     current_app.logger.debug('About to publish email for %s nrNum=%s', option, nr_num)
     queue.publish(topic=email_topic, payload=payload)

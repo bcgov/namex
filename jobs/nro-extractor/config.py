@@ -40,9 +40,9 @@ class BaseConfig(object):
 
     GCP_AUTH_KEY = os.getenv("GCP_AUTH_KEY", None)
     NAMEX_NR_STATE_TOPIC = os.getenv("NAMEX_NR_STATE_TOPIC", "namex-pay-dev")
-    NAMEX_RECEIPT_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
+    EMAILER_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
 
-
+    
 class Config(BaseConfig):
     DEBUG = False
     TESTING = False
