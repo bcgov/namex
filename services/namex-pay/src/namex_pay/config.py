@@ -83,8 +83,8 @@ class Config():  # pylint: disable=too-few-public-methods
     NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
 
     GCP_AUTH_KEY = os.getenv("GCP_AUTH_KEY", None)
-    NAMEX_PAY_TOPIC = os.getenv("NAMEX_PAY_TOPIC", "namex-pay-dev")
-    NAMEX_RECEIPT_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
+    NAMEX_PAY_SUB = os.getenv("GCP_SUB", "namex-pay-dev")
+    EMAIL_TOPIC = os.getenv("GCP_TOPIC", "namex-receipt-dev")
     AUDIENCE = os.getenv("AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Subscriber")
     PUBLISHER_AUDIENCE = os.getenv("PUBLISHER_AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Publisher")
 
