@@ -66,6 +66,7 @@ def worker():
     - Once the filing is marked paid, no errors should escape to the Q
     - If there's no matching filing, put back on Q
     """
+    structured_log(request, "INFO", f"Incoming raw msg: {request.headers}")
     structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
 
     # 1. Get cloud event
