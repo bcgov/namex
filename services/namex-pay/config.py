@@ -86,6 +86,7 @@ class Config():  # pylint: disable=too-few-public-methods
     NAMEX_RECEIPT_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
     AUDIENCE = os.getenv("AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Subscriber")
     PUBLISHER_AUDIENCE = os.getenv("PUBLISHER_AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Publisher")
+    NAMEX_SUB_AUDIENCE = os.getenv("NAMEX_SUB_AUDIENCE", "namex-pay")
 
     ENVIRONMENT = os.getenv('ENVIRONMENT', 'prod')
 
