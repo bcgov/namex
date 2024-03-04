@@ -37,6 +37,8 @@ from simple_cloudevent import SimpleCloudEvent
 from namex_pay.services import queue
 from namex_pay.services.logging import structured_log
 from namex_pay.utils import datetime, timedelta
+import google.oauth2.id_token as id_token
+import google.auth.transport.requests as requests
 
 bp = Blueprint("worker", __name__)
 
@@ -68,7 +70,32 @@ def worker():
     - Once the filing is marked paid, no errors should escape to the Q
     - If there's no matching filing, put back on Q
     """
-    structured_log(request, "INFO", f"Incoming raw msg: {request.headers}")
+    structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
+    structured_log(request, "INFO", f"Headers: {request.headers}")
+    structured_log(request, "INFO", f"Token: {request.args.get("token", "")}")
+    structured_log(request, "INFO", f"args: {request.args}")
+    structured_log(request, "INFO", f"json: {request.get_json()}")
+
+    # https://cloud.google.com/pubsub/docs/authenticate-push-subscriptions
+
+    # if request.args.get("token", "") != current_app.config["PUBSUB_VERIFICATION_TOKEN"]:
+    #     return "Invalid request", 400
+
+    # Verify that the push request originates from Cloud Pub/Sub.
+    try:
+        # Get the Cloud Pub/Sub-generated JWT in the "Authorization" header.
+        bearer_token = request.headers.get("Authorization")
+        token = bearer_token.split(" ")[1]
+        # TOKENS.append(token)
+
+        claim = id_token.verify_oauth2_token(
+            token, requests.Request(), audience=current_app.config.get("NAMEX_SUB_AUDIENCE")
+        )
+
+        print(claim)
+    except Exception as e:
+        return f"Invalid token: {e}\n", 400
+
     structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
 
     # 1. Get cloud event
@@ -80,6 +107,8 @@ def worker():
         return {}, HTTPStatus.OK
 
     structured_log(request, "INFO", f"received ce: {str(ce)}")
+    structured_log(request, "INFO", f"Incoming raw msg: {request.headers}")
+
 
     # 2. Get payment information
     # ##
