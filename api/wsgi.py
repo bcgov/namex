@@ -2,7 +2,7 @@
 from namex import create_app
 import sys
 
-application = create_app()
+app = create_app()
 
 if __name__ == "__main__":
-    application.run()
+    app.run()
