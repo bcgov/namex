@@ -11,7 +11,6 @@ namex = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "api
 gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "services/pubsub", branch = "feature-queue-upgrade-python3.12" }
 
 flask = "^2.3.3"
-flask-script = "^2.0.6"
 flask-moment = "^0.11.0"
 flask-jwt-oidc = "^0.3.0"
 jinja2 = "^3.1.2"
