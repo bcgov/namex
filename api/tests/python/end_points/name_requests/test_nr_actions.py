@@ -723,7 +723,8 @@ def test_draft_patch_refund(client, jwt, app, mocker):
 
     # Check pubsub messages
     assert len(topics) == 1
-    assert "mailer" in topics
+    mailer = app.config.get("EMAILER_TOPIC")
+    assert mailer in topics
 
 
     email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))

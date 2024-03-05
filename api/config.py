@@ -153,6 +153,7 @@ class TestConfig(Config):
         port=int(DB_PORT),
         name=DB_NAME
     )
+    EMAILER_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
 
     # We can't run NRO locally for running our tests
     DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 1))
