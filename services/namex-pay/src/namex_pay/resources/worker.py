@@ -23,7 +23,10 @@ from enum import Enum
 from http import HTTPStatus
 from typing import Optional
 
+import google.oauth2.id_token as id_token
+from cachecontrol import CacheControl
 from flask import Blueprint, current_app, request
+from google.auth.transport.requests import Request
 from namex import nro
 from namex.models import db, Event, Payment, Request as RequestDAO, State, User  # noqa:I001; import orders
 from namex.services import EventRecorder, queue, is_reapplication_eligible  # noqa:I005;
@@ -37,8 +40,6 @@ from simple_cloudevent import SimpleCloudEvent
 from namex_pay.services import queue
 from namex_pay.services.logging import structured_log
 from namex_pay.utils import datetime, timedelta
-import google.oauth2.id_token as id_token
-import google.auth.transport.requests as requests
 
 bp = Blueprint("worker", __name__)
 
@@ -70,31 +71,11 @@ def worker():
     - Once the filing is marked paid, no errors should escape to the Q
     - If there's no matching filing, put back on Q
     """
-    structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
-    structured_log(request, "INFO", f"Headers: {request.headers}")
-    structured_log(request, "INFO", f"Token: {request.args.get("token", "")}")
-    structured_log(request, "INFO", f"args: {request.args}")
-    structured_log(request, "INFO", f"json: {request.get_json()}")
+    session = Session()
+    cached_session = CacheControl(session)
 
-    # https://cloud.google.com/pubsub/docs/authenticate-push-subscriptions
-
-    # if request.args.get("token", "") != current_app.config["PUBSUB_VERIFICATION_TOKEN"]:
-    #     return "Invalid request", 400
-
-    # Verify that the push request originates from Cloud Pub/Sub.
-    try:
-        # Get the Cloud Pub/Sub-generated JWT in the "Authorization" header.
-        bearer_token = request.headers.get("Authorization")
-        token = bearer_token.split(" ")[1]
-        # TOKENS.append(token)
-
-        claim = id_token.verify_oauth2_token(
-            token, requests.Request(), audience=current_app.config.get("NAMEX_SUB_AUDIENCE")
-        )
-
-        print(claim)
-    except Exception as e:
-        return f"Invalid token: {e}\n", 400
+    if len(verify_res := verify_jwt(request, cached_session)) > 0:
+        return f"{verify_res}\n", 400
 
     structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
 
@@ -133,6 +114,28 @@ class PaymentToken:
     status_code: Optional[str] = None
     filing_identifier: Optional[str] = None
     corp_type_code: Optional[str] = None
+
+
+def verify_jwt(request, cached_session):
+    try:
+        msg = ''
+        if current_app.config.get("DEBUG_REQUEST"):
+            structured_log(request, "INFO", f"Headers: {request.headers}")
+
+        # Get the Cloud Pub/Sub-generated JWT in the "Authorization" header.
+        bearer_token = request.headers.get("Authorization")
+        token = bearer_token.split(" ")[1]
+
+        claim = id_token.verify_oauth2_token(
+            token, Request(session=cached_session), audience=current_app.config.get("NAMEX_SUB_AUDIENCE")
+        )
+
+        if claim['email'] != current_app.config.get("NAMEX_SUB_SA_EMAIL") or not claim['email_verified']:
+            msg = f'Wrong service account email provided={current_app.config.get("NAMEX_SUB_SA_EMAIL")}'
+    except Exception as e:
+        msg = f"Invalid token: {e}\n"
+    finally:
+        return msg
 
 
 def get_payment_token(ce: SimpleCloudEvent):
@@ -263,7 +266,7 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
         msg = f'About to publish email for payment.id={payment.id}'
         # structured_log(message=msg)
         with current_app.app_context():
-            namex_topic = current_app.config.get("NAMEX_RECEIPT_TOPIC", "mailer")
+            namex_topic = current_app.config.get("NAMEX_RECEIPT_TOPIC", None)
             payload = queue.to_queue_message(cloud_event_msg)
             queue.publish(topic=namex_topic, payload=payload)  # noqa: F841
 

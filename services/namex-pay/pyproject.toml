@@ -16,6 +16,7 @@ swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 google-auth = "^2.27.0"
 google-cloud-pubsub = "^2.19.4"
+cachecontrol = "^0.14.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
