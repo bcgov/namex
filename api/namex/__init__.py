@@ -7,28 +7,34 @@ TODO: Fill in a larger description once the API is defined for V1
 """
 import config
 from namex.utils.logging import setup_logging
+
 setup_logging()  # important to do this first
 
 import os
 
-from .VERSION import __version__  # noqa: F401; imported from here
 from flask import Flask
 from flask_jwt_oidc import JwtManager
+
+from .VERSION import __version__  # noqa: F401; imported from here
 
 jwt = JwtManager()
 
 import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
+from flask_migrate import Migrate
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
+from namex.services.cache import cache
 from namex.services.lookup import nr_filing_actions
 from namex.services.nro import NROServices
-from namex.services.cache import cache
+
 from .services import queue
+
 nro = NROServices()
+from namex import models
 from namex.models import db, ma
 from namex.resources import api
-from namex import models
 from namex.utils.run_version import get_run_version
+
 # noqa: I003; dont know what flake8 wants here
 
 run_version = get_run_version()
@@ -50,6 +56,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     queue.init_app(app)
 
     db.init_app(app)
+    Migrate(app, db)
+
     ma.init_app(app)
 
     api.init_app(app)
