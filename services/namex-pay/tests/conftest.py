@@ -26,7 +26,7 @@ from sqlalchemy.sql.ddl import DropConstraint
 
 from namex_pay import create_app
 from namex_pay import db as _db
-from namex_pay.config import TestConfig
+from config import TestConfig
 
 from . import FROZEN_DATETIME
 
