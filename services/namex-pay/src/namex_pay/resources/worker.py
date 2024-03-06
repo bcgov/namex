@@ -24,6 +24,7 @@ from http import HTTPStatus
 from typing import Optional
 
 import google.oauth2.id_token as id_token
+import humps
 from cachecontrol import CacheControl
 from flask import Blueprint, current_app, request
 from google.auth.transport.requests import Request
@@ -135,19 +136,10 @@ def get_payment_token(ce: SimpleCloudEvent):
         and isinstance(data, dict)
         and (payment_token := data.get("paymentToken", {}))
     ):
-        converted = dict_keys_to_snake_case(payment_token)
+        converted = humps.decamelize(payment_token)
         pt = PaymentToken(**converted)
         return pt
     return None
-
-
-def dict_keys_to_snake_case(d: dict):
-    """Convert the keys of a dict to snake_case"""
-    pattern = re.compile(r"(?<!^)(?=[A-Z])")
-    converted = {}
-    for k, v in d.items():
-        converted[pattern.sub("_", k).lower()] = v
-    return converted
 
 
 # async def update_payment_record(payment: Payment) -> Optional[Payment]:

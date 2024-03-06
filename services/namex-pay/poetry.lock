@@ -844,7 +844,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "b840997088469cfcb5782802f94b7bda9b82e33e"
+resolved_reference = "1551b791428d8bec11b459bd7285126bd5b71603"
 subdirectory = "services/pubsub"
 
 [[package]]
@@ -896,13 +896,13 @@ requests = ["requests (>=2.20.0,<3.0.0.dev0)"]
 
 [[package]]
 name = "google-cloud-pubsub"
-version = "2.19.8"
+version = "2.20.1"
 description = "Google Cloud Pub/Sub API client library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google-cloud-pubsub-2.19.8.tar.gz", hash = "sha256:598b944ef6345ab1e881816f5667f0f14244d6a8605be37acc0fae7059602be2"},
-    {file = "google_cloud_pubsub-2.19.8-py2.py3-none-any.whl", hash = "sha256:0e302ec702832a9aaf83ad24c0bf56940ab84f90600e45bb6142f70f23f54986"},
+    {file = "google-cloud-pubsub-2.20.1.tar.gz", hash = "sha256:b6d06f1827968273c42b57a09f642462649c9504dc0f8756f99770f4e3e755ad"},
+    {file = "google_cloud_pubsub-2.20.1-py2.py3-none-any.whl", hash = "sha256:06dd62181e2f248f32b9077f4dc07b413191a84fc06d7323b208602d887207bc"},
 ]
 
 [package.dependencies]
@@ -1858,7 +1858,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "b840997088469cfcb5782802f94b7bda9b82e33e"
+resolved_reference = "1551b791428d8bec11b459bd7285126bd5b71603"
 subdirectory = "api"
 
 [[package]]
@@ -2333,6 +2333,17 @@ tests = ["coverage[toml]", "dataclasses", "mypy (!=0.940)", "pytest (>=5.0)", "p
 tests-numpy = ["numpy", "pyhamcrest[tests]"]
 
 [[package]]
+name = "pyhumps"
+version = "3.8.0"
+description = "🐫  Convert strings (and dictionary keys) between snake case, camel case and pascal case in Python. Inspired by Humps for Node"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyhumps-3.8.0-py3-none-any.whl", hash = "sha256:060e1954d9069f428232a1adda165db0b9d8dfdce1d265d36df7fbff540acfd6"},
+    {file = "pyhumps-3.8.0.tar.gz", hash = "sha256:498026258f7ee1a8e447c2e28526c0bea9407f9a59c03260aee4bd6c04d681a3"},
+]
+
+[[package]]
 name = "pylint"
 version = "3.1.0"
 description = "python code static checker"
@@ -2385,13 +2396,13 @@ pylint = ">=1.7"
 
 [[package]]
 name = "pyparsing"
-version = "3.1.1"
+version = "3.1.2"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
 optional = false
 python-versions = ">=3.6.8"
 files = [
-    {file = "pyparsing-3.1.1-py3-none-any.whl", hash = "sha256:32c7c0b711493c72ff18a981d24f28aaf9c1fb7ed5e9667c9e84e3db623bdbfb"},
-    {file = "pyparsing-3.1.1.tar.gz", hash = "sha256:ede28a1a32462f5a9705e07aea48001a08f7cf81a021585011deba701581a0db"},
+    {file = "pyparsing-3.1.2-py3-none-any.whl", hash = "sha256:f9db75911801ed778fe61bb643079ff86601aca99fcae6345aa67292038fb742"},
+    {file = "pyparsing-3.1.2.tar.gz", hash = "sha256:a1bac0ce561155ecc3ed78ca94d3c9378656ad4c94c1270de543f621420f94ad"},
 ]
 
 [package.extras]
@@ -3392,4 +3403,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "a5e838f780713618a0e5d1a5607661a860b6a11e10c0dc16f6e7b3b370585c5e"
+content-hash = "cfd774be279d692a29d1761d007e22e1e638b5a6062b2c4c220ec5bc04385b42"
