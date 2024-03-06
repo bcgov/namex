@@ -78,26 +78,16 @@ def worker():
 
     structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
 
-    # 1. Get cloud event
-    # ##
     if not (ce := queue.get_simple_cloud_event(request)):
-        #
-        # Decision here is to return a 200,
-        # so the event is removed from the Queue
         return {}, HTTPStatus.OK
 
     structured_log(request, "INFO", f"received ce: {str(ce)}")
     structured_log(request, "INFO", f"Incoming raw msg: {request.headers}")
 
 
-    # 2. Get payment information
-    # ##
-    if not (payment_token := get_payment_token(ce)) or payment_token.status_code != "COMPLETED":
-    # no payment info, or not a payment COMPLETED token, take off Q
+    if not (payment_token := get_payment_token(ce)) or payment_token.status_code != State.COMPLETED:
         return {}, HTTPStatus.OK
 
-    # 3. Process payment 
-    # ##
     with current_app.app_context():
         structured_log(request, "INFO", f"process namex payment for pay-id: {payment_token.id}")
         process_payment(ce)
@@ -286,6 +276,29 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
         raise Exception(err)
 
 
+def update_nro(nr, payment):
+    change_flags = {
+    'is_changed__request': True,
+    'is_changed__previous_request': False,
+    'is_changed__applicant': False,
+    'is_changed__address': False,
+    'is_changed__name1': False,
+    'is_changed__name2': False,
+    'is_changed__name3': False,
+    'is_changed__nwpta_ab': False,
+    'is_changed__nwpta_sk': False,
+    'is_changed__request_state': False,
+    'is_changed_consent': False
+    }
+    warnings = nro.change_nr(nr, change_flags)
+    if warnings:
+        msg = f'Queue Error: Unable to update NRO :{warnings}'
+        structured_log(request, message=msg)
+        capture_message(
+            f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
+            level='error'
+        )
+
 # async def process_payment(pay_msg: dict):
 def process_payment(ce: SimpleCloudEvent):
     """Render the payment status."""
@@ -330,30 +343,9 @@ def process_payment(ce: SimpleCloudEvent):
                     nr,
                     nr.json()
                 )
-                # try to update NRO otherwise send a sentry msg for OPS
                 if payment.payment_action in \
                         [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                    change_flags = {
-                        'is_changed__request': True,
-                        'is_changed__previous_request': False,
-                        'is_changed__applicant': False,
-                        'is_changed__address': False,
-                        'is_changed__name1': False,
-                        'is_changed__name2': False,
-                        'is_changed__name3': False,
-                        'is_changed__nwpta_ab': False,
-                        'is_changed__nwpta_sk': False,
-                        'is_changed__request_state': False,
-                        'is_changed_consent': False
-                    }
-                    warnings = nro.change_nr(nr, change_flags)
-                    if warnings:
-                        msg = f'Queue Error: Unable to update NRO :{warnings}'
-                        # structured_log(message=msg)
-                        capture_message(
-                            f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
-                            level='error'
-                        )
+                    update_nro(nr, payment)
 
             furnish_receipt_message(payment)
         else:
