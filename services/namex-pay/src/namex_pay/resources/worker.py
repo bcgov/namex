@@ -311,51 +311,51 @@ def process_payment(ce: SimpleCloudEvent):
                 counter += 1
                 if not payment:
                     time.sleep(0.2)
-            if payment:
-                if update_payment := update_payment_record(payment):
-                    payment = update_payment
-                    # record event
-                    nr = RequestDAO.find_by_id(payment.nrId)
-                    # TODO: create a namex_pay user for this
-                    user = User.find_by_username('name_request_service_account')
-                    EventRecorder.record(
-                        user,
-                        Event.NAMEX_PAY + f' [payment completed] { payment.payment_action }',
-                        nr,
-                        nr.json()
-                    )
-                    # try to update NRO otherwise send a sentry msg for OPS
-                    if payment.payment_action in \
-                            [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                        change_flags = {
-                            'is_changed__request': True,
-                            'is_changed__previous_request': False,
-                            'is_changed__applicant': False,
-                            'is_changed__address': False,
-                            'is_changed__name1': False,
-                            'is_changed__name2': False,
-                            'is_changed__name3': False,
-                            'is_changed__nwpta_ab': False,
-                            'is_changed__nwpta_sk': False,
-                            'is_changed__request_state': False,
-                            'is_changed_consent': False
-                        }
-                        warnings = nro.change_nr(nr, change_flags)
-                        if warnings:
-                            msg = f'Queue Error: Unable to update NRO :{warnings}'
-                            # structured_log(message=msg)
-                            capture_message(
-                                f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
-                                level='error'
-                            )
 
-                furnish_receipt_message(payment)
-
-            else:
+            if not payment:
                 msg = f'Queue Error: Unable to find payment record for :{pay_msg}'
                 structured_log(request, message=msg)
                 capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
                 raise Exception(msg)
+
+            if update_payment := update_payment_record(payment):
+                payment = update_payment
+                # record event
+                nr = RequestDAO.find_by_id(payment.nrId)
+                # TODO: create a namex_pay user for this
+                user = User.find_by_username('name_request_service_account')
+                EventRecorder.record(
+                    user,
+                    Event.NAMEX_PAY + f' [payment completed] { payment.payment_action }',
+                    nr,
+                    nr.json()
+                )
+                # try to update NRO otherwise send a sentry msg for OPS
+                if payment.payment_action in \
+                        [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
+                    change_flags = {
+                        'is_changed__request': True,
+                        'is_changed__previous_request': False,
+                        'is_changed__applicant': False,
+                        'is_changed__address': False,
+                        'is_changed__name1': False,
+                        'is_changed__name2': False,
+                        'is_changed__name3': False,
+                        'is_changed__nwpta_ab': False,
+                        'is_changed__nwpta_sk': False,
+                        'is_changed__request_state': False,
+                        'is_changed_consent': False
+                    }
+                    warnings = nro.change_nr(nr, change_flags)
+                    if warnings:
+                        msg = f'Queue Error: Unable to update NRO :{warnings}'
+                        # structured_log(message=msg)
+                        capture_message(
+                            f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
+                            level='error'
+                        )
+
+            furnish_receipt_message(payment)
         else:
             msg = f'Queue Error: Missing id :{pay_msg}'
             structured_log(request, message=msg)
