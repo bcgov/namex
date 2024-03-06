@@ -195,7 +195,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
     elif payment_action == Payment.PaymentActions.UPGRADE.value:
         if nr.stateCd == State.PENDING_PAYMENT:
             msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
-            # structured_log(message=msg)
+            structured_log(request, message=msg)
             capture_message(msg)
             raise Exception(msg)
 
@@ -212,7 +212,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
                 and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
             msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
                 'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
-            # structured_log(message=msg)
+            structured_log(request, message=msg)
             capture_message(msg)
             raise Exception(msg)
 
@@ -225,7 +225,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
         return payment
 
     msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
-    # structured_log(message=msg)
+    structured_log(request, message=msg)
     capture_message(msg)
     raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
@@ -235,13 +235,13 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
     """Send receipt info to the mail queue if it hasn't yet been done."""
     if payment.furnished is True:
         msg = f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}'
-        # structured_log(message=msg)
+        structured_log(request, message=msg)
         capture_message(msg)
         return
 
     nr = None
     msg = f'Start of the furnishing of receipt for payment record:{payment.as_dict()}'
-    # structured_log(message=msg)
+    structured_log(request, message=msg)
     try:
         payment.furnished = True
         payment.save_to_db()
@@ -272,18 +272,13 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
         payment.furnished = False
         payment.save_to_db()
         msg = f'Reset payment furnish status payment.id={payment.id}'
-        # structured_log(message=msg)
-        # raise QueueException(f'Unable to furnish NR info. {err}') from err
+        structured_log(request, message=msg)
+        raise Exception(err)
 
 
 # async def process_payment(pay_msg: dict):
 def process_payment(ce: SimpleCloudEvent):
     """Render the payment status."""
-    # if not current_app or not pay_msg:
-    #     structured_log(pay_msg, 'ERROR', 'Flask App or token not available')
-    #     return
-
-    # with current_app.app_context():
     structured_log(ce, 'DEBUG', 'entering process payment')
 
     pay_msg = get_payment_token(ce)
@@ -297,7 +292,7 @@ def process_payment(ce: SimpleCloudEvent):
     complete_payment_status = [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]
     if pay_msg.status_code in complete_payment_status:  # pylint: disable=R1702
         msg = f'COMPLETED transaction on queue:{pay_msg}'
-        # structured_log(message=msg)
+        structured_log(request, message=msg)
         if payment_token := pay_msg.id:
             payment = None
             counter = 1
@@ -348,12 +343,12 @@ def process_payment(ce: SimpleCloudEvent):
 
             else:
                 msg = f'Queue Error: Unable to find payment record for :{pay_msg}'
-                # structured_log(message=msg)
+                structured_log(request, message=msg)
                 capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
-                # raise QueueException(f'Queue Error: Unable to find payment record for :{pay_msg}')
+                raise Exception(msg)
         else:
             msg = f'Queue Error: Missing id :{pay_msg}'
-            # structured_log(message=msg)
+            structured_log(request, message=msg)
             capture_message(f'Queue Error: Missing id :{pay_msg}', level='error')
 
         return
