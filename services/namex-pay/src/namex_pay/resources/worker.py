@@ -75,7 +75,7 @@ def worker():
     cached_session = CacheControl(session)
 
     if len(verify_res := verify_jwt(request, cached_session)) > 0:
-        return f"{verify_res}\n", 400
+        return f"{verify_res}\n", HTTPStatus.UNAUTHORIZED
 
     structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
 
