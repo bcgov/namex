@@ -174,62 +174,73 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
     """
     if payment.payment_completion_date:
         msg = f'Queue Issue: Duplicate, payment already processed for payment.id={payment.id}'
-        # structured_log(message=msg)
+        structured_log(request, message=msg)
         capture_message(msg)
         return None
 
     payment_action = payment.payment_action
     nr: RequestDAO = RequestDAO.find_by_id(payment.nrId)
 
-    # As RESUBMIT is a new NR it should follow the same flow as CREATE
-    if payment_action in [Payment.PaymentActions.CREATE.value, Payment.PaymentActions.RESUBMIT.value]:  \
-            # pylint: disable=R1705
-        if nr.stateCd == State.PENDING_PAYMENT:
-            nr.stateCd = State.DRAFT
-            nr.save_to_db()
-
-        payment.payment_completion_date = datetime.utcnow()
-        payment.payment_status_code = State.COMPLETED
-        payment.save_to_db()
-        return payment
-
-    elif payment_action == Payment.PaymentActions.UPGRADE.value:
-        if nr.stateCd == State.PENDING_PAYMENT:
-            msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
+    match payment_action:
+        case Payment.PaymentActions.CREATE.value:
+            create_payment(nr, payment)
+        case Payment.PaymentActions.RESUBMIT.value:
+            create_payment(nr, payment)
+        case Payment.PaymentActions.UPGRADE.value:
+            upgrade_payment(nr, payment)
+        case Payment.PaymentActions.REAPPLY.value:
+            reapply_payment(nr, payment)
+        case _:
+            msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
             structured_log(request, message=msg)
             capture_message(msg)
-            raise Exception(msg)
+            raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
-        nr.priorityCd = 'Y'
-        nr.priorityDate = datetime.utcnow()
-        payment.payment_completion_date = datetime.utcnow()
-        payment.payment_status_code = State.COMPLETED
+
+def reapply_payment(nr, payment):
+    if nr.stateCd != State.APPROVED \
+        and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
+        msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
+            'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
+        structured_log(request, message=msg)
+        capture_message(msg)
+        raise Exception(msg)
+    if is_reapplication_eligible(nr.expriationDate):
+        # to avoid duplicate expiration date calculated
+        nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+    payment.payment_completion_date = datetime.utcnow()
+    payment.payment_status_code = State.COMPLETED
+
+    nr.save_to_db()
+    payment.save_to_db()
+    return payment
+
+
+def create_payment(nr, payment):
+    # pylint: disable=R1705
+    if nr.stateCd == State.PENDING_PAYMENT:
+        nr.stateCd = State.DRAFT
         nr.save_to_db()
-        payment.save_to_db()
-        return payment
+    payment.payment_completion_date = datetime.utcnow()
+    payment.payment_status_code = State.COMPLETED
+    payment.save_to_db()
+    return payment
 
-    elif payment_action == Payment.PaymentActions.REAPPLY.value:
-        if nr.stateCd != State.APPROVED \
-                and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
-            msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
-                'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
-            structured_log(request, message=msg)
-            capture_message(msg)
-            raise QueueException(msg)
-        if is_reapplication_eligible(nr.expriationDate):
-            # to avoid duplicate expiration date calculated
-            nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
-        payment.payment_completion_date = datetime.utcnow()
-        payment.payment_status_code = State.COMPLETED
 
-        nr.save_to_db()
-        payment.save_to_db()
-        return payment
+def upgrade_payment(nr, payment):
+    if nr.stateCd == State.PENDING_PAYMENT:
+        msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
+        structured_log(request, message=msg)
+        capture_message(msg)
+        raise Exception(msg)
 
-    msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
-    structured_log(request, message=msg)
-    capture_message(msg)
-    raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
+    nr.priorityCd = 'Y'
+    nr.priorityDate = datetime.utcnow()
+    payment.payment_completion_date = datetime.utcnow()
+    payment.payment_status_code = State.COMPLETED
+    nr.save_to_db()
+    payment.save_to_db()
+    return payment
 
 
 # async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
