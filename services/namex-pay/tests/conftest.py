@@ -20,14 +20,14 @@ from typing import Final
 
 import pytest
 from flask_migrate import Migrate, upgrade
+from gcp_queue import GcpQueue
 from sqlalchemy import event, text
 from sqlalchemy.schema import MetaData
 from sqlalchemy.sql.ddl import DropConstraint
 
+from config import TestConfig
 from namex_pay import create_app
 from namex_pay import db as _db
-from config import TestConfig
-from gcp_queue import GcpQueue
 
 from . import FROZEN_DATETIME
 

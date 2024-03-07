@@ -16,7 +16,6 @@
 The entry-point is the **cb_subscription_handler**
 
 """
-import re
 import time
 from dataclasses import dataclass
 from enum import Enum
