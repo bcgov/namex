@@ -24,8 +24,9 @@ from typing import Optional
 
 import google.oauth2.id_token as id_token
 import humps
+import functools
 from cachecontrol import CacheControl
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app, request, abort
 from google.auth.transport.requests import Request
 from namex import nro
 from namex.models import Event, Payment
@@ -38,12 +39,16 @@ from simple_cloudevent import SimpleCloudEvent
 
 from namex_pay.services import queue
 from namex_pay.services.logging import structured_log
+from gcp_queue import structured_log
 from namex_pay.utils import datetime, timedelta
+from gcp_queue.logging import structured_log
+from gcp_queue.gcp_auth import ensure_authorized_queue_user
 
 bp = Blueprint("worker", __name__)
 
 NAME_REQUEST_LIFESPAN_DAYS = 56  # TODO this should be defined as a lookup from somewhere
 NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup from somewhere
+
 
 class PaymentState(Enum):
     """Render all the payment states we know what to do with."""
@@ -53,6 +58,7 @@ class PaymentState(Enum):
     TRANSACTION_FAILED = 'TRANSACTION_FAILED'
 
 
+@ensure_authorized_queue_user
 @bp.route("/", methods=("POST",))
 def worker():
     """Process the incoming cloud event.
@@ -70,12 +76,6 @@ def worker():
     - Once the filing is marked paid, no errors should escape to the Q
     - If there's no matching filing, put back on Q
     """
-    session = Session()
-    cached_session = CacheControl(session)
-
-    if len(verify_res := verify_jwt(request, cached_session)) > 0:
-        return f"{verify_res}\n", HTTPStatus.UNAUTHORIZED
-
     structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
 
     if not (ce := queue.get_simple_cloud_event(request)):
@@ -103,28 +103,6 @@ class PaymentToken:
     status_code: Optional[str] = None
     filing_identifier: Optional[str] = None
     corp_type_code: Optional[str] = None
-
-
-def verify_jwt(request, cached_session):
-    try:
-        msg = ''
-        if current_app.config.get("DEBUG_REQUEST"):
-            structured_log(request, "INFO", f"Headers: {request.headers}")
-
-        # Get the Cloud Pub/Sub-generated JWT in the "Authorization" header.
-        bearer_token = request.headers.get("Authorization")
-        token = bearer_token.split(" ")[1]
-
-        claim = id_token.verify_oauth2_token(
-            token, Request(session=cached_session), audience=current_app.config.get("NAMEX_SUB_AUDIENCE")
-        )
-
-        if claim['email'] != current_app.config.get("NAMEX_SUB_SA_EMAIL") or not claim['email_verified']:
-            msg = f'Wrong service account email provided={current_app.config.get("NAMEX_SUB_SA_EMAIL")}'
-    except Exception as e:
-        msg = f"Invalid token: {e}\n"
-    finally:
-        return msg
 
 
 def get_payment_token(ce: SimpleCloudEvent):
