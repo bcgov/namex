@@ -163,7 +163,8 @@ async def test_update_payment_record(app,
                                      start_datetime, days_after_start_datetime,
                                      start_payment_state, end_payment_state,
                                      start_payment_date, end_payment_has_value,
-                                     error
+                                     error,
+                                     queue_publish
                                      ):
     """Assert that the update_payment_record works as expected."""
     mocker.patch("namex.utils.queue_util.send_name_request_state_msg")
@@ -171,7 +172,6 @@ async def test_update_payment_record(app,
 
     from namex.models import Payment, Request
 
-    from namex_pay.services import queue
     print(test_name)
 
     now = datetime.utcnow()
@@ -197,27 +197,11 @@ async def test_update_payment_record(app,
         payment._payment_completion_date = start_payment_date
         payment.save_to_db()
 
-        # payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": action_code, "filingIdentifier": None, "corpTypeCode": None}}
         payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}}
 
         message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
         mocker.patch("namex_pay.resources.worker.verify_jwt")
-
-        topics = []
-        msg=None
-
-        def mock_publish(topic: str, payload: bytes):
-            nonlocal topics
-            nonlocal msg
-            topics.append(topic)
-            msg = payload
-            return {}
-
-        mocker.patch.object(queue, "publish", mock_publish)
-
-        # access_mock = mocker.patch("queue_util.send_name_request_state_msg")
-        # access_mock.return_value = True
 
         if error:  # expecting it to raise an error
             with pytest.raises(error):
@@ -226,10 +210,23 @@ async def test_update_payment_record(app,
             rv = client.post("/", json=message)
 
             # Check
+            topics = queue_publish['topics']
+            msg = queue_publish['msg']
+
             assert rv.status_code == HTTPStatus.OK
             assert len(topics) == 1
             mailer = app.config.get("NAMEX_RECEIPT_TOPIC")
             assert mailer in topics
+
+            email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+
+            # Verify message that would be sent to the emailer pubsub
+            assert email_pub['type'] == 'bc.registry.names.request'
+            assert email_pub['source'] == 'namex_pay'
+            assert email_pub['subject'] == 'namerequest'
+            assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
+            assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
+            assert email_pub['data']['request']['statusCode'] == State.DRAFT
 
             nr_final = Request.find_by_nr(NR_NUMBER)
             payments = nr_final.payments
@@ -269,10 +266,9 @@ async def test_process_payment(app,
                                 start_datetime,
                                 start_payment_state,
                                 start_payment_date,
+                                queue_publish
                                 ):
     from namex.models import Payment, Request, State
-
-    from namex_pay.services import queue
 
     mocker.patch("namex.utils.queue_util.send_name_request_state_msg")
     # setup
@@ -302,20 +298,10 @@ async def test_process_payment(app,
 
     mocker.patch("namex_pay.resources.worker.verify_jwt")
 
-    topics = []
-    msg=None
-
-    def mock_publish(topic: str, payload: bytes):
-        nonlocal topics
-        nonlocal msg
-        topics.append(topic)
-        msg = payload
-        return {}
-    
-    mocker.patch.object(queue, "publish", mock_publish)
-
     rv = client.post("/", json=message)
 
+    topics = queue_publish['topics']
+    msg = queue_publish['msg']
     # Check
     assert rv.status_code == HTTPStatus.OK
     assert len(topics) == 1

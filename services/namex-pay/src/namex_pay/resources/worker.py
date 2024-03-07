@@ -16,30 +16,27 @@
 The entry-point is the **cb_subscription_handler**
 
 """
-import re
 import time
 from dataclasses import dataclass
 from enum import Enum
 from http import HTTPStatus
 from typing import Optional
 
-import google.oauth2.id_token as id_token
 import humps
-from cachecontrol import CacheControl
 from flask import Blueprint, current_app, request
-from google.auth.transport.requests import Request
+from gcp_queue import structured_log
+from gcp_queue.gcp_auth import ensure_authorized_queue_user
+from gcp_queue.logging import structured_log
 from namex import nro
-from namex.models import db, Event, Payment, Request as RequestDAO, State, User  # noqa:I001; import orders
-from namex.services import EventRecorder, queue, is_reapplication_eligible  # noqa:I005;
-from queue_common.messages import create_cloud_event_msg  # noqa:I005
-from queue_common.service import QueueServiceManager
-from queue_common.service_utils import QueueException, logger
-
+from namex.models import Event, Payment
+from namex.models import Request as RequestDAO  # noqa:I001; import orders
+from namex.models import State, User
+from namex.services import EventRecorder, is_reapplication_eligible  # noqa:I005;
 from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
+from sqlalchemy.exc import OperationalError
 
 from namex_pay.services import queue
-from namex_pay.services.logging import structured_log
 from namex_pay.utils import datetime, timedelta
 
 bp = Blueprint("worker", __name__)

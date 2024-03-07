@@ -27,6 +27,7 @@ from sqlalchemy.sql.ddl import DropConstraint
 from namex_pay import create_app
 from namex_pay import db as _db
 from config import TestConfig
+from gcp_queue import GcpQueue
 
 from . import FROZEN_DATETIME
 
@@ -57,6 +58,23 @@ def not_raises(exception):
         yield
     except exception:
         raise pytest.fail(f'DID RAISE {exception}')
+
+
+@pytest.fixture(autouse=True)
+def queue_publish(monkeypatch):
+    """Pubsub publish mock.
+    """
+    topics = []
+    msg=bytearray()
+    def mock_publish(self, topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg[:] = payload
+        return {}
+
+    monkeypatch.setattr(GcpQueue, "publish", mock_publish)
+    return locals()
 
 
 # fixture to freeze utcnow to a fixed date-time
