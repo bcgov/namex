@@ -835,6 +835,7 @@ files = []
 develop = false
 
 [package.dependencies]
+cachecontrol = "^0.14.0"
 flask = "^2.3.3"
 google-auth = "^2.27.0"
 google-cloud-pubsub = "^2.19.4"
@@ -844,7 +845,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "1551b791428d8bec11b459bd7285126bd5b71603"
+resolved_reference = "b3b239ddeb46b2124bbd3dbfe19a791b4faf3dc4"
 subdirectory = "services/pubsub"
 
 [[package]]
@@ -1858,7 +1859,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "1551b791428d8bec11b459bd7285126bd5b71603"
+resolved_reference = "b3b239ddeb46b2124bbd3dbfe19a791b4faf3dc4"
 subdirectory = "api"
 
 [[package]]
@@ -3403,4 +3404,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "cfd774be279d692a29d1761d007e22e1e638b5a6062b2c4c220ec5bc04385b42"
+content-hash = "48611f130d720b7648a1af424e712ded5317010276e97dd5008c3a5aff8edfa4"

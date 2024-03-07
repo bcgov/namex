@@ -16,6 +16,6 @@
 This module is the service worker for applying filings to the Business Database structure.
 """
 
-from gcp_queue import GcpQueue
+from gcp_queue.pubsub import GcpQueue
 
 queue = GcpQueue()
