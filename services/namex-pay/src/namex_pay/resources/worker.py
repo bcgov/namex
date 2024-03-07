@@ -32,7 +32,7 @@ from namex import nro
 from namex.models import Event, Payment
 from namex.models import Request as RequestDAO  # noqa:I001; import orders
 from namex.models import State, User
-from namex.services import EventRecorder, queue  # noqa:I005;
+from namex.services import EventRecorder  # noqa:I005;
 from requests.sessions import Session
 from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
