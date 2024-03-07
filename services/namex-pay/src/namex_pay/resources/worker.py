@@ -22,27 +22,21 @@ from enum import Enum
 from http import HTTPStatus
 from typing import Optional
 
-import google.oauth2.id_token as id_token
 import humps
-import functools
-from cachecontrol import CacheControl
-from flask import Blueprint, current_app, request, abort
-from google.auth.transport.requests import Request
+from flask import Blueprint, current_app, request
+from gcp_queue import structured_log
+from gcp_queue.gcp_auth import ensure_authorized_queue_user
+from gcp_queue.logging import structured_log
 from namex import nro
 from namex.models import Event, Payment
 from namex.models import Request as RequestDAO  # noqa:I001; import orders
 from namex.models import State, User
 from namex.services import EventRecorder  # noqa:I005;
-from requests.sessions import Session
 from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
 
 from namex_pay.services import queue
-from namex_pay.services.logging import structured_log
-from gcp_queue import structured_log
 from namex_pay.utils import datetime, timedelta
-from gcp_queue.logging import structured_log
-from gcp_queue.gcp_auth import ensure_authorized_queue_user
 
 bp = Blueprint("worker", __name__)
 
@@ -60,7 +54,7 @@ class PaymentState(Enum):
 
 @ensure_authorized_queue_user
 @bp.route("/", methods=("POST",))
-def worker():
+async def worker():
     """Process the incoming cloud event.
 
     Flow
@@ -90,7 +84,7 @@ def worker():
 
     with current_app.app_context():
         structured_log(request, "INFO", f"process namex payment for pay-id: {payment_token.id}")
-        process_payment(ce)
+        await process_payment(ce)
 
     structured_log(request, "INFO", f"completed ce: {str(ce)}")
     return {}, HTTPStatus.OK
@@ -120,7 +114,7 @@ def get_payment_token(ce: SimpleCloudEvent):
 
 
 # async def update_payment_record(payment: Payment) -> Optional[Payment]:
-def update_payment_record(payment: Payment) -> Optional[Payment]:
+async def update_payment_record(payment: Payment) -> Optional[Payment]:
 
     """Update the payment record in the database.
 
@@ -141,13 +135,13 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
 
     match payment_action:
         case Payment.PaymentActions.CREATE.value:
-            create_payment(nr, payment)
+            await create_payment(nr, payment)
         case Payment.PaymentActions.RESUBMIT.value:
-            create_payment(nr, payment)
+            await create_payment(nr, payment)
         case Payment.PaymentActions.UPGRADE.value:
-            upgrade_paymnet(nr, payment)
+            await upgrade_payment(nr, payment)
         case Payment.PaymentActions.REAPPLY.value:
-            reapply_payment(nr, payment)
+            await reapply_payment(nr, payment)
         case _:
             msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
             structured_log(request, message=msg)
@@ -155,7 +149,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
             raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
 
-def reapply_payment(nr, payment):
+async def reapply_payment(nr, payment):
     if nr.stateCd != State.APPROVED \
         and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
         msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
@@ -172,7 +166,7 @@ def reapply_payment(nr, payment):
     return payment
 
 
-def create_payment(nr, payment):
+async def create_payment(nr, payment):
     # pylint: disable=R1705
     if nr.stateCd == State.PENDING_PAYMENT:
         nr.stateCd = State.DRAFT
@@ -183,7 +177,7 @@ def create_payment(nr, payment):
     return payment
 
 
-def upgrade_paymnet(nr, payment):
+async def upgrade_payment(nr, payment):
     if nr.stateCd == State.PENDING_PAYMENT:
         msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
         structured_log(request, message=msg)
@@ -200,7 +194,7 @@ def upgrade_paymnet(nr, payment):
 
 
 # async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
-def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
+async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
     """Send receipt info to the mail queue if it hasn't yet been done."""
     if payment.furnished is True:
         msg = f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}'
@@ -245,7 +239,7 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
         raise Exception(err)
 
 
-def update_nro(nr, payment):
+async def update_nro(nr, payment):
     change_flags = {
     'is_changed__request': True,
     'is_changed__previous_request': False,
@@ -268,8 +262,7 @@ def update_nro(nr, payment):
             level='error'
         )
 
-# async def process_payment(pay_msg: dict):
-def process_payment(ce: SimpleCloudEvent):
+async def process_payment(ce: SimpleCloudEvent):
     """Render the payment status."""
     structured_log(ce, 'DEBUG', 'entering process payment')
 
@@ -300,7 +293,7 @@ def process_payment(ce: SimpleCloudEvent):
                 capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
                 raise Exception(msg)
 
-            if update_payment := update_payment_record(payment):
+            if update_payment := await update_payment_record(payment):
                 payment = update_payment
                 # record event
                 nr = RequestDAO.find_by_id(payment.nrId)
@@ -314,9 +307,9 @@ def process_payment(ce: SimpleCloudEvent):
                 )
                 if payment.payment_action in \
                         [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                    update_nro(nr, payment)
+                    await update_nro(nr, payment)
 
-            furnish_receipt_message(payment)
+            await furnish_receipt_message(payment)
         else:
             msg = f'Queue Error: Missing id :{pay_msg}'
             structured_log(request, message=msg)

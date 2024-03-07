@@ -16,7 +16,6 @@ import base64
 import json
 from datetime import timedelta
 from http import HTTPStatus
-
 import pytest
 from freezegun import freeze_time
 from namex.models import Payment, Request, State
@@ -152,7 +151,7 @@ def test_get_payment_token():
          None, 'is',
          Exception),
     ])
-async def test_update_payment_record(app,
+def test_update_payment_record(app,
                                      session,
                                      client,
                                      mocker,
@@ -255,19 +254,19 @@ async def test_update_payment_record(app,
          None,  # start_payment_date
          ),
          ])
-async def test_process_payment(app, 
-                                session, 
-                                client, 
-                                mocker,
-                                test_name,
-                                action_code,
-                                start_request_state,
-                                start_priority,
-                                start_datetime,
-                                start_payment_state,
-                                start_payment_date,
-                                queue_publish
-                                ):
+def test_process_payment(app,
+                        session,
+                        client,
+                        mocker,
+                        test_name,
+                        action_code,
+                        start_request_state,
+                        start_priority,
+                        start_datetime,
+                        start_payment_state,
+                        start_payment_date,
+                        queue_publish
+                        ):
     from namex.models import Payment, Request, State
 
     mocker.patch("namex.utils.queue_util.send_name_request_state_msg")
