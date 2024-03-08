@@ -7,11 +7,15 @@ from flask import abort, current_app, request
 from google.auth.transport.requests import Request
 from requests.sessions import Session
 
+from .logging import structured_log
+
 
 def verify_jwt(session):
     """Verify token is valid."""
     msg = ''
     try:
+        if current_app.config.get("DEBUG_REQUEST"):
+            structured_log(request, "INFO", f"Headers: {request.headers}")
         # Get the Cloud Pub/Sub-generated JWT in the "Authorization" header.
         id_token.verify_oauth2_token(
             request.headers.get("Authorization").split()[1],
