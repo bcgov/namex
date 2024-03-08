@@ -17,7 +17,6 @@ simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 google-auth = "^2.27.0"
 google-cloud-pubsub = "^2.19.4"
 pyhumps = "3.8.0"
-flask = {version = "^2", extras = ["async"]}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
