@@ -54,7 +54,7 @@ class PaymentState(Enum):
 
 @bp.route("/", methods=("POST",))
 @ensure_authorized_queue_user
-async def worker():
+def worker():
     """Process the incoming cloud event.
 
     Flow
@@ -84,7 +84,7 @@ async def worker():
 
     with current_app.app_context():
         structured_log(request, "INFO", f"process namex payment for pay-id: {payment_token.id}")
-        await process_payment(ce)
+        process_payment(ce)
 
     structured_log(request, "INFO", f"completed ce: {str(ce)}")
     return {}, HTTPStatus.OK
@@ -113,9 +113,7 @@ def get_payment_token(ce: SimpleCloudEvent):
     return None
 
 
-# async def update_payment_record(payment: Payment) -> Optional[Payment]:
-async def update_payment_record(payment: Payment) -> Optional[Payment]:
-
+def update_payment_record(payment: Payment) -> Optional[Payment]:
     """Update the payment record in the database.
 
     Alter the NR state as required based on the payment action.
@@ -133,15 +131,15 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
     payment_action = payment.payment_action
     nr: RequestDAO = RequestDAO.find_by_id(payment.nrId)
 
-    match payment_action:
+    match payment_action: 
         case Payment.PaymentActions.CREATE.value:
-            await create_payment(nr, payment)
+            create_payment(nr, payment)
         case Payment.PaymentActions.RESUBMIT.value:
-            await create_payment(nr, payment)
+            create_payment(nr, payment)
         case Payment.PaymentActions.UPGRADE.value:
-            await upgrade_payment(nr, payment)
+            upgrade_payment(nr, payment)
         case Payment.PaymentActions.REAPPLY.value:
-            await reapply_payment(nr, payment)
+            reapply_payment(nr, payment)
         case _:
             msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
             structured_log(request, message=msg)
@@ -149,7 +147,7 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
             raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
 
-async def reapply_payment(nr, payment):
+def reapply_payment(nr, payment):
     if nr.stateCd != State.APPROVED \
         and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
         msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
@@ -166,7 +164,7 @@ async def reapply_payment(nr, payment):
     return payment
 
 
-async def create_payment(nr, payment):
+def create_payment(nr, payment):
     # pylint: disable=R1705
     if nr.stateCd == State.PENDING_PAYMENT:
         nr.stateCd = State.DRAFT
@@ -177,7 +175,7 @@ async def create_payment(nr, payment):
     return payment
 
 
-async def upgrade_payment(nr, payment):
+def upgrade_payment(nr, payment):
     if nr.stateCd == State.PENDING_PAYMENT:
         msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
         structured_log(request, message=msg)
@@ -193,8 +191,7 @@ async def upgrade_payment(nr, payment):
     return payment
 
 
-# async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
-async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
+def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-outer-name
     """Send receipt info to the mail queue if it hasn't yet been done."""
     if payment.furnished is True:
         msg = f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}'
@@ -239,7 +236,7 @@ async def furnish_receipt_message(payment: Payment):  # pylint: disable=redefine
         raise Exception(err)
 
 
-async def update_nro(nr, payment):
+def update_nro(nr, payment):
     change_flags = {
     'is_changed__request': True,
     'is_changed__previous_request': False,
@@ -262,7 +259,7 @@ async def update_nro(nr, payment):
             level='error'
         )
 
-async def process_payment(ce: SimpleCloudEvent):
+def process_payment(ce: SimpleCloudEvent):
     """Render the payment status."""
     structured_log(ce, 'DEBUG', 'entering process payment')
 
@@ -293,7 +290,7 @@ async def process_payment(ce: SimpleCloudEvent):
                 capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
                 raise Exception(msg)
 
-            if update_payment := await update_payment_record(payment):
+            if update_payment := update_payment_record(payment):
                 payment = update_payment
                 # record event
                 nr = RequestDAO.find_by_id(payment.nrId)
@@ -307,9 +304,9 @@ async def process_payment(ce: SimpleCloudEvent):
                 )
                 if payment.payment_action in \
                         [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                    await update_nro(nr, payment)
+                    update_nro(nr, payment)
 
-            await furnish_receipt_message(payment)
+            furnish_receipt_message(payment)
         else:
             msg = f'Queue Error: Missing id :{pay_msg}'
             structured_log(request, message=msg)

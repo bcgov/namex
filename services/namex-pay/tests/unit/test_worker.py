@@ -57,7 +57,7 @@ CLOUD_EVENT_ENVELOPE = {
 def test_no_message(client, mocker):
     """Return a 4xx when an no JSON present."""
 
-    mocker.patch("gcp_queue.gcp_auth.verify_jwt")
+    mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value='')
 
     rv = client.post("/")
 
@@ -70,7 +70,7 @@ def test_no_message(client, mocker):
 )
 def test_simple_cloud_event(client, session, mocker, test_name, queue_envelope, expected):
 
-    mocker.patch("gcp_queue.gcp_auth.verify_jwt")
+    mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value='')
     with nested_session(session):
         request = Request()
         payment = Payment()
@@ -200,7 +200,7 @@ def test_update_payment_record(app,
 
         message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
-        mocker.patch("gcp_queue.gcp_auth.verify_jwt")
+        mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value='')
 
         if error:  # expecting it to raise an error
             with pytest.raises(error):
@@ -295,7 +295,7 @@ def test_process_payment(app,
     
     message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
-    mocker.patch("gcp_queue.gcp_auth.verify_jwt")
+    mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value='')
 
     rv = client.post("/", json=message)
 
