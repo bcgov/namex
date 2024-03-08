@@ -52,8 +52,8 @@ class PaymentState(Enum):
     TRANSACTION_FAILED = 'TRANSACTION_FAILED'
 
 
-@ensure_authorized_queue_user
 @bp.route("/", methods=("POST",))
+@ensure_authorized_queue_user
 async def worker():
     """Process the incoming cloud event.
 
