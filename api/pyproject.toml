@@ -12,11 +12,11 @@ python = "^3.12"
 gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "services/pubsub",  branch = "feature-queue-upgrade-python3.12" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
+flask-jwt-oidc = { git = "https://github.com/thorwolpert/flask-jwt-oidc.git" }
 gunicorn = "^20.1.0"
-flask-jwt-oidc = "^0.3.0"
-flask = "^2.3.3"
+flask = "^3.0.2"
 flask-restx = "^1.0.3"
-flask-sqlalchemy = "^2.5.1"
+flask-sqlalchemy = "^3.0.0"
 flask-marshmallow = "^0.14.0"
 flask-caching = "^1.10.1"
 flask-migrate = "^2.7.0"
@@ -26,7 +26,7 @@ markupSafe = "^2.1.1"
 itsdangerous = "^2.1.2"
 werkzeug = "^3.0.0"
 protobuf = "^3.20.1"
-SQLAlchemy = "^1.4.11"
+SQLAlchemy = "^1.4.18"
 marshmallow-sqlalchemy = "^0.28.1"
 marshmallow = "^3.18.0"
 pandas = "^1.5.0"
