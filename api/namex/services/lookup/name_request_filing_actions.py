@@ -39,9 +39,6 @@ class NameRequestFilingActions:
 
     def teardown(self, exception):
         """Remove and cleanup after this service."""
-        # the oracle session pool will clean up after itself
-        # ctx = _app_ctx_stack.top
-        # if hasattr(ctx, 'nro_oracle_pool'):
 
     # This is the raw mapping data.
     # This list will be collapsed to a dict type
