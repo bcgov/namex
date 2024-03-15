@@ -1,4 +1,4 @@
-from gcp_queue import GcpQueue
+from gcp_queue.pubsub import GcpQueue
 
 queue = GcpQueue()
 
