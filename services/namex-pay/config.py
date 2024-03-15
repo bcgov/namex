@@ -109,10 +109,10 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     DEBUG = True
     TESTING = True
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'namex_pay')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', '127.0.0.1')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
     NAMEX_RECEIPT_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")

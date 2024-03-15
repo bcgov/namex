@@ -5,7 +5,7 @@ services:
     image: postgres:12.18
     container_name: namex-pay-testing
     environment:
-      - POSTGRES_DB=namex
+      - POSTGRES_DB=namex_pay
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust

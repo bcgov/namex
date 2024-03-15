@@ -49,6 +49,8 @@
 """The Unit Tests and the helper routines."""
 from contextlib import contextmanager
 
+from sqlalchemy.exc import ResourceClosedError
+
 
 @contextmanager
 def nested_session(session):
@@ -56,7 +58,12 @@ def nested_session(session):
         sess = session.begin_nested()
         yield sess
         sess.rollback()
-    except:  # noqa: E722
+    except AssertionError as err:
+        raise err
+    except ResourceClosedError as err:
+        # mean the close out of the transaction got fouled in pytest
         pass
+    except Exception as err:
+        raise err
     finally:
         pass
