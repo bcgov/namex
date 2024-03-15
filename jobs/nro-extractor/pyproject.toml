@@ -11,6 +11,7 @@ namex = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "api
 gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "services/pubsub", branch = "feature-queue-upgrade-python3.12" }
 openapi_client = { git = "https://github.com/bcgov/namex-payment-api-py-client.git" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
+flask-jwt-oidc = { git = "https://github.com/thorwolpert/flask-jwt-oidc.git" }
 
 # protobuf is a temporary solution for https://github.com/protocolbuffers/protobuf/issues/10051
 # will be removed once the bug is fixed
@@ -44,13 +45,12 @@ cx-Oracle = "^8.3.0"
 cmudict = "^1.0.2"
 chardet = "^4.0.0"
 alembic = "^1.5.8"
-flask = "^2.3.3"
+flask = "^3.0.2"
 flask-caching = "^1.10.1"
 flask-moment = "^0.11.0"
 flask-migrate = "^2.7.0"
-flask-jwt-oidc = "^0.3.0"
-flask-sqlalchemy = "^2.5.1"
-SQLAlchemy = "^1.4.11"
+flask-sqlalchemy = "^3.0.0"
+SQLAlchemy = "^1.4.18"
 jinja2 = "^3.1.2"
 markupSafe = "^2.1.1"
 werkzeug = "^3.0.0"
