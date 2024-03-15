@@ -1,10 +1,11 @@
 import base64
+import json
 from contextlib import suppress
 from http import HTTPStatus
 
 import flask
 import pytest
-from simple_cloudevent import SimpleCloudEvent, to_queue_message
+from simple_cloudevent import SimpleCloudEvent, to_queue_message, to_structured
 
 from gcp_queue import GcpQueue
 
@@ -58,7 +59,7 @@ CLOUD_EVENT = SimpleCloudEvent(
 #
 # This needs to mimic the envelope created by GCP PubSb when call a resource
 #
-CLOUD_EVENT_ENVELOPE = {
+WRAPPED_CLOUD_EVENT_ENVELOPE = {
     "subscription": "projects/PUBSUB_PROJECT_ID/subscriptions/SUBSCRIPTION_ID",
     "message": {
         "data": base64.b64encode(to_queue_message(CLOUD_EVENT)),
@@ -70,25 +71,26 @@ CLOUD_EVENT_ENVELOPE = {
 
 
 @pytest.mark.parametrize(
-    "test_name,queue_envelope,expected, ret_type",
+    "test_name,queue_message,wrapped,expected,ret_type",
     [
-        ("invalid", {}, None, type(None)),
-        ("valid", CLOUD_EVENT_ENVELOPE, CLOUD_EVENT, SimpleCloudEvent),
+        ("invalid", {}, True, None, type(None)),
+        ("valid-wrapped", WRAPPED_CLOUD_EVENT_ENVELOPE, True, CLOUD_EVENT, SimpleCloudEvent),
+        ("valid-unwrapped", to_structured(CLOUD_EVENT), False, CLOUD_EVENT, SimpleCloudEvent),
     ],
 )
-def test_get_simple_cloud_event(mocker, test_name, queue_envelope, expected, ret_type):
+def test_get_simple_cloud_event(mocker, test_name, queue_message, wrapped, expected, ret_type):
     """Test that getting a simple cloud event works as expected."""
     app = flask.Flask(__name__)
     with app.app_context():
         with app.test_request_context(content_type="application/json") as session:
+            ce = to_structured(CLOUD_EVENT)
 
             def mock_get_json():
-                return queue_envelope
+                return queue_message
 
             mocker.patch.object(session.request, "get_json", mock_get_json)
 
-            ce = GcpQueue.get_simple_cloud_event(session.request)
-
+            ce = GcpQueue.get_simple_cloud_event(session.request, wrapped=wrapped)
             assert isinstance(ce, ret_type)
             # The CE stamps the time it was created if none given, remove that
             with suppress(Exception):
@@ -99,9 +101,11 @@ def test_get_simple_cloud_event(mocker, test_name, queue_envelope, expected, ret
 @pytest.mark.skip(reason="leave this to manually verify pubsub connection; needs env vars")
 def test_gcp_pubsub_connectivity():
     """Test that queue can publish to gcp pubsub."""
-    from gcp_queue import GcpQueue
-    from dotenv import load_dotenv
     import os
+
+    from dotenv import load_dotenv
+
+    from gcp_queue import GcpQueue
 
     load_dotenv(".env")
 
