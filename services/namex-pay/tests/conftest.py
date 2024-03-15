@@ -15,13 +15,13 @@
 import datetime
 import os
 import random
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from typing import Final
 
 import pytest
 from flask_migrate import Migrate, upgrade
 from gcp_queue import GcpQueue
-from sqlalchemy import event, text
+from sqlalchemy import text
 from sqlalchemy.schema import MetaData
 from sqlalchemy.sql.ddl import DropConstraint
 
@@ -126,7 +126,7 @@ def client_id():
 
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
 
@@ -139,8 +139,10 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         for table in metadata.tables.values():
             for fk in table.foreign_keys:  # pylint: disable=invalid-name
                 _db.engine.execute(DropConstraint(fk.constraint))
-        metadata.drop_all()
-        _db.drop_all()
+        with suppress(Exception):
+            metadata.drop_all()
+        with suppress(Exception):
+            _db.drop_all()
 
         sequence_sql = """SELECT sequence_name FROM information_schema.sequences
                           WHERE sequence_schema='public'
@@ -172,42 +174,33 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         return _db
 
 
-@pytest.fixture(scope="function")
-def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
-    """Return a function-scoped session."""
+@pytest.fixture(scope="function", autouse=True)
+def session(app, db):
+    """yields a SQLAlchemy connection which is rollbacked after the test"""
     with app.app_context():
-        conn = db.engine.connect()
-        txn = conn.begin()
+        connection = db.engine.connect()
+        transaction = connection.begin()
 
-        try:
-            options = dict(bind=conn, binds={})
-            sess = db.create_scoped_session(options=options)
-            # sess = db._make_scoped_session(options=options)
-        except Exception as err:
-            print(err)
-            print("done")
+        options = dict(bind=connection, binds={})
+        session_ = db._make_scoped_session(options=options)
 
-        # establish  a SAVEPOINT just before beginning the test
-        # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
-        sess.begin_nested()
+        db.session = session_
 
-        @event.listens_for(sess(), "after_transaction_end")
-        def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
-            # Detecting whether this is indeed the nested transaction of the test
-            if trans.nested and not trans._parent.nested:  # pylint: disable=protected-access
-                # Handle where test DOESN'T session.commit(),
-                sess2.expire_all()
-                sess.begin_nested()
+        yield session_
 
-        db.session = sess
+        transaction.rollback()
+        connection.close()
+        session_.remove()
 
-        sql = text("select 1")
-        sess.execute(sql)
 
-        yield sess
+@pytest.fixture(autouse=True)
+def mock_publish(mocker):
+    """Mock pubsub publish events."""
+    mocker.patch("namex.utils.queue_util.send_name_request_state_msg")
+    mocker.patch("namex.utils.queue_util.publish_email_notification")
 
-        # Cleanup
-        sess.remove()
-        # This instruction rollsback any commit that were executed in the tests.
-        txn.rollback()
-        conn.close()
+
+@pytest.fixture(autouse=True)
+def mock_queue_auth(mocker):
+    """Mock queue authorization."""
+    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')
