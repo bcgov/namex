@@ -849,7 +849,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "1a3a14ed5e13356cd0b1eb4b69fa98aebd94496e"
+resolved_reference = "421a78830d4e2c74ef02868319a8adbbfefbd1a0"
 subdirectory = "services/pubsub"
 
 [[package]]
@@ -901,13 +901,13 @@ requests = ["requests (>=2.20.0,<3.0.0.dev0)"]
 
 [[package]]
 name = "google-cloud-pubsub"
-version = "2.20.1"
+version = "2.20.2"
 description = "Google Cloud Pub/Sub API client library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google-cloud-pubsub-2.20.1.tar.gz", hash = "sha256:b6d06f1827968273c42b57a09f642462649c9504dc0f8756f99770f4e3e755ad"},
-    {file = "google_cloud_pubsub-2.20.1-py2.py3-none-any.whl", hash = "sha256:06dd62181e2f248f32b9077f4dc07b413191a84fc06d7323b208602d887207bc"},
+    {file = "google-cloud-pubsub-2.20.2.tar.gz", hash = "sha256:236046ea860230c788e4d4ea2d0f12299cdf1d94ac71ec42ed1a0ce1ba28d66f"},
+    {file = "google_cloud_pubsub-2.20.2-py2.py3-none-any.whl", hash = "sha256:9607bb8f973cbd123b5fa2db9c0aa38501a1a42f18593739067cd307263d090f"},
 ]
 
 [package.dependencies]
@@ -1863,7 +1863,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "1a3a14ed5e13356cd0b1eb4b69fa98aebd94496e"
+resolved_reference = "421a78830d4e2c74ef02868319a8adbbfefbd1a0"
 subdirectory = "api"
 
 [[package]]
@@ -2639,13 +2639,13 @@ files = [
 
 [[package]]
 name = "referencing"
-version = "0.33.0"
+version = "0.34.0"
 description = "JSON Referencing + Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "referencing-0.33.0-py3-none-any.whl", hash = "sha256:39240f2ecc770258f28b642dd47fd74bc8b02484de54e1882b74b35ebd779bd5"},
-    {file = "referencing-0.33.0.tar.gz", hash = "sha256:c775fedf74bc0f9189c2a3be1c12fd03e8c23f4d371dce795df44e06c5b412f7"},
+    {file = "referencing-0.34.0-py3-none-any.whl", hash = "sha256:d53ae300ceddd3169f1ffa9caf2cb7b769e92657e4fafb23d34b93679116dfd4"},
+    {file = "referencing-0.34.0.tar.gz", hash = "sha256:5773bd84ef41799a5a8ca72dc34590c041eb01bf9aa02632b4a973fb0181a844"},
 ]
 
 [package.dependencies]
@@ -3206,13 +3206,13 @@ telegram = ["requests"]
 
 [[package]]
 name = "types-python-dateutil"
-version = "2.9.0.20240315"
+version = "2.9.0.20240316"
 description = "Typing stubs for python-dateutil"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-python-dateutil-2.9.0.20240315.tar.gz", hash = "sha256:c1f6310088eb9585da1b9f811765b989ed2e2cdd4203c1a367e944b666507e4e"},
-    {file = "types_python_dateutil-2.9.0.20240315-py3-none-any.whl", hash = "sha256:78aa9124f360df90bb6e85eb1a4d06e75425445bf5ecb13774cb0adef7ff3956"},
+    {file = "types-python-dateutil-2.9.0.20240316.tar.gz", hash = "sha256:5d2f2e240b86905e40944dd787db6da9263f0deabef1076ddaed797351ec0202"},
+    {file = "types_python_dateutil-2.9.0.20240316-py3-none-any.whl", hash = "sha256:6b8cb66d960771ce5ff974e9dd45e38facb81718cc1e208b10b1baccbfdbee3b"},
 ]
 
 [[package]]

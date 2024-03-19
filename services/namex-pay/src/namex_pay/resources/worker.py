@@ -34,6 +34,7 @@ from namex.models import State, User
 from namex.services import EventRecorder  # noqa:I005;
 from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
+from sqlalchemy.exc import OperationalError
 
 from namex_pay.services import queue
 from namex_pay.utils import datetime, timedelta
@@ -84,10 +85,21 @@ def worker():
 
     with current_app.app_context():
         structured_log(request, "INFO", f"process namex payment for pay-id: {payment_token.id}")
-        process_payment(ce)
+        ret = {}, HTTPStatus.OK
+        try:
+            process_payment(ce)
+            structured_log(request, "INFO", f"completed ce: {str(ce)}")
+        except OperationalError as err:  # message goes back on the queue
+            structured_log(request, "ERROR", f"Queue locked - Database Issue:: {payment_token.id}")
+            capture_message(f'Queue locked - Database Issue for payment id:{payment_token.id}', level='error')
+            ret = {}, HTTPStatus.INTERNAL_SERVER_ERROR
+        except Exception as e:  # pylint: disable=broad-except # noqa B902
+            # Catch Exception so that any error is still caught and the message is removed from the queue
+            structured_log(request, "ERROR", f"Queue Error for payment id: {payment_token.id}, with exception: {e}")
+            capture_message(f'Queue Error for payment id:{payment_token.id}, with exception: {e}', level='error')
+        finally:
+            return ret
 
-    structured_log(request, "INFO", f"completed ce: {str(ce)}")
-    return {}, HTTPStatus.OK
 
 @dataclass
 class PaymentToken:
