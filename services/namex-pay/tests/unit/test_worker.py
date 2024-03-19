@@ -16,9 +16,10 @@ import base64
 import json
 from datetime import timedelta
 from http import HTTPStatus
+
 import pytest
 from freezegun import freeze_time
-from namex.models import Payment, Request, State
+from namex.models import Payment, State
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 from namex_pay.resources.worker import NAME_REQUEST_LIFESPAN_DAYS, get_payment_token
@@ -102,8 +103,8 @@ def test_get_payment_token():
     'start_priority,end_priority,'
     'start_datetime,days_after_start_datetime,'
     'start_payment_state,end_payment_state,'
-    'start_payment_date,end_payment_has_value,'
-    'error', [
+    'start_payment_date,end_payment_has_value,',
+    [
         ('draft',  # test name
          Payment.PaymentActions.CREATE.value,  # payment action [CREATE|UPGRADE|REAPPLY|RESUBMIT]
          State.PENDING_PAYMENT,  # start state of NR
@@ -116,19 +117,14 @@ def test_get_payment_token():
          'COMPLETED',  # end_payment_completion_state
          None,  # start_payment_date
          'is not',  # end_payment_has_value
-         None  # error
          ),
-        ('already draft', Payment.PaymentActions.CREATE.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not', None),
-        ('resubmit', Payment.PaymentActions.RESUBMIT.value, State.PENDING_PAYMENT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, None, 'COMPLETED', None, 'is not', None),
-        ('resubmit draft', Payment.PaymentActions.RESUBMIT.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not', None),
-        ('upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'N', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
-        ('re-upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'Y', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
+        ('already draft', Payment.PaymentActions.CREATE.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not'),
+        ('resubmit', Payment.PaymentActions.RESUBMIT.value, State.PENDING_PAYMENT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, None, 'COMPLETED', None, 'is not'),
+        ('resubmit draft', Payment.PaymentActions.RESUBMIT.value, State.DRAFT, State.DRAFT, 'N', 'N', datetime.utcnow(), 0, 'COMPLETED', 'COMPLETED', None, 'is not'),
+        ('upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'N', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not'),
+        ('re-upgrade', Payment.PaymentActions.UPGRADE.value, State.DRAFT, State.DRAFT, 'Y', 'Y', datetime.utcnow(), 0, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not'),
         ('extend ', Payment.PaymentActions.REAPPLY.value, State.DRAFT, State.DRAFT, 'N', 'N',
-         datetime.utcnow() + timedelta(days=3), NAME_REQUEST_LIFESPAN_DAYS, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not', None),
-        ('extend expired', Payment.PaymentActions.REAPPLY.value, State.DRAFT, State.DRAFT, 'N', 'N',
-         datetime.utcnow() - timedelta(days=(NAME_REQUEST_LIFESPAN_DAYS + 3)), NAME_REQUEST_LIFESPAN_DAYS, 'PENDING_PAYMENT', 'PENDING_PAYMENT',
-         None, 'is',
-         Exception),
+         datetime.utcnow() + timedelta(days=3), NAME_REQUEST_LIFESPAN_DAYS, 'PENDING_PAYMENT', 'COMPLETED', None, 'is not'),
     ])
 def test_update_payment_record(app,
                                 session,
@@ -140,7 +136,6 @@ def test_update_payment_record(app,
                                 start_datetime, days_after_start_datetime,
                                 start_payment_state, end_payment_state,
                                 start_payment_date, end_payment_has_value,
-                                error,
                                 queue_publish
                                 ):
     """Assert that the update_payment_record works as expected."""
@@ -174,42 +169,72 @@ def test_update_payment_record(app,
 
             payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}}
 
-            message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
+            message = helper_create_cloud_event(source="sbc-pay", subject="payment", data=payment_token)
 
-            if error:  # expecting it to raise an error
-                with pytest.raises(error):
-                    client.post("/", json=message)
-            else:
-                rv = client.post("/", json=message)
+            rv = client.post("/", json=message)
 
-                # Check
-                topics = queue_publish['topics']
-                msg = queue_publish['msg']
+            # Check
+            topics = queue_publish['topics']
+            msg = queue_publish['msg']
 
-                assert rv.status_code == HTTPStatus.OK
-                assert len(topics) == 1
-                mailer = app.config.get("NAMEX_RECEIPT_TOPIC")
-                assert mailer in topics
+            assert rv.status_code == HTTPStatus.OK
+            assert len(topics) == 1
+            mailer = app.config.get("NAMEX_RECEIPT_TOPIC")
+            assert mailer in topics
 
-                email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+            email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
 
-                # Verify message that would be sent to the emailer pubsub
-                assert email_pub['type'] == 'bc.registry.names.request'
-                assert email_pub['source'] == 'namex_pay'
-                assert email_pub['subject'] == 'namerequest'
-                assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
-                assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
-                assert email_pub['data']['request']['statusCode'] == State.DRAFT
+            # Verify message that would be sent to the emailer pubsub
+            assert email_pub['type'] == 'bc.registry.names.request'
+            assert email_pub['source'] == 'namex_pay'
+            assert email_pub['subject'] == 'namerequest'
+            assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
+            assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
+            assert email_pub['data']['request']['statusCode'] == State.DRAFT
 
-                nr_final = Request.find_by_nr(NR_NUMBER)
-                payments = nr_final.payments
+            nr_final = Request.find_by_nr(NR_NUMBER)
+            payments = nr_final.payments
 
-                payment_final = payments[0]
+            payment_final = payments[0]
 
-                assert nr_final.stateCd == end_request_state
-                assert nr_final.priorityCd == end_priority
-                assert eval(f'payment_final.payment_completion_date {end_payment_has_value} None')
-                assert payment_final.payment_status_code == end_payment_state
+            assert nr_final.stateCd == end_request_state
+            assert nr_final.priorityCd == end_priority
+            assert eval(f'payment_final.payment_completion_date {end_payment_has_value} None')
+            assert payment_final.payment_status_code == end_payment_state
+
+
+def test_extend_expired_nr():
+
+    from namex.models import Payment, Request
+
+    from namex_pay.resources.worker import update_payment_record
+
+    now = datetime.utcnow()
+
+    with freeze_time(now):
+        # setup
+        PAYMENT_TOKEN = 'dog'
+        NR_NUMBER = 'NR B000001'
+        name_request = Request()
+        name_request.nrNum = NR_NUMBER
+        name_request.stateCd = State.DRAFT
+        name_request._source = 'NRO'
+        name_request.expirationDate = datetime.utcnow() - timedelta(days=(NAME_REQUEST_LIFESPAN_DAYS + 3))
+        name_request.priorityCd = 'N'
+        name_request.save_to_db()
+
+        payment = Payment()
+        payment.nrId = name_request.id
+        payment._payment_token = PAYMENT_TOKEN
+        payment._payment_status_code = 'PENDING_PAYMENT'
+        payment.payment_action = Payment.PaymentActions.REAPPLY.value
+        payment.furnished = False
+        payment._payment_completion_date = None
+        payment.save_to_db()
+
+        # run test
+        with pytest.raises(Exception):
+            update_payment_record(payment)
 
 
 @pytest.mark.parametrize(
@@ -265,7 +290,7 @@ def test_process_payment(app,
         # Test
         payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}}
         
-        message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
+        message = helper_create_cloud_event(source="sbc-pay", subject="payment", data=payment_token)
 
         rv = client.post("/", json=message)
 
@@ -297,39 +322,21 @@ def test_process_payment(app,
         assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
         assert email_pub['data']['request']['statusCode'] == State.DRAFT
 
-
-def helper_create_cloud_event_envelope(
+def helper_create_cloud_event(
     cloud_event_id: str = None,
     source: str = "fake-for-tests",
     subject: str = "fake-subject",
     type: str = "payment",
     data: dict = {},
-    pubsub_project_id: str = "PUBSUB_PROJECT_ID",
-    subscription_id: str = "SUBSCRIPTION_ID",
-    message_id: int = 1,
-    envelope_id: int = 1,
-    attributes: dict = {},
-    ce: SimpleCloudEvent = None,
 ):
     if not data:
         data = {
             "paymentToken": {
                 "id": "29590",
                 "statusCode": "COMPLETED",
-                "filingIdentifier": 12345            }
+                "filingIdentifier": 12345,
+                "corpTypeCode": "BC",
+            }
         }
-    if not ce:
-        ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
-    #
-    # This needs to mimic the envelope created by GCP PubSb when call a resource
-    #
-    envelope = {
-        "subscription": f"projects/{pubsub_project_id}/subscriptions/{subscription_id}",
-        "message": {
-            "data": base64.b64encode(to_queue_message(ce)).decode("UTF-8"),
-            "messageId": str(message_id),
-            "attributes": attributes,
-        },
-        "id": envelope_id,
-    }
-    return envelope
+    ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
+    return ce
