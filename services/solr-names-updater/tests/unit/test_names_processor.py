@@ -19,7 +19,7 @@ import pytest
 
 from namex.models import Request as RequestDAO
 from namex.utils import queue_util
-from solr_names_updater import worker  # noqa: I001
+from solr_names_updater.resources import worker  # noqa: I001
 from solr_names_updater.names_processors.names import get_nr_ids_to_delete_from_solr
 
 from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message # noqa: I003

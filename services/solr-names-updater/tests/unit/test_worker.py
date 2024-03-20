@@ -23,7 +23,7 @@ from freezegun import freeze_time
 from namex.models import Request as RequestDAO
 from namex.utils import queue_util
 from queue_common.service_utils import QueueException
-from solr_names_updater import worker # noqa: I001
+from solr_names_updater.resources import worker # noqa: I001
 from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message # noqa: I003
 
 @pytest.mark.parametrize(
