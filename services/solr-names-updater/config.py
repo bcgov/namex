@@ -137,10 +137,10 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     DEBUG = True
     TESTING = True
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'namex_pay')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', '127.0.0.1')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     # Set this in your .env to debug SQL Alchemy queries (for local development)
     # pylint: disable=invalid-envvar-default
@@ -159,7 +159,6 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     JWT_OIDC_TEST_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
     JWT_OIDC_TEST_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
     JWT_OIDC_TEST_ISSUER = 'https://dev.oidc.gov.bc.ca/auth/realms/fcf0kpqr'
-    # JWT_OIDC_TEST_ISSUER = 'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc'
     JWT_OIDC_TEST_KEYS = {
         'keys': [
             {

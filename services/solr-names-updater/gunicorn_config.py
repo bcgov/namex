@@ -31,49 +31,15 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-"""The Entity Payment service.
-
-This module applied payments against Filings, and if NOT a FED type
-puts a message onto the Filers queue to process the file.
+"""The configuration for gunicorn, which picks up the
+   runtime options from environment variables
 """
-from __future__ import annotations
 
-import sentry_sdk
-from flask import Flask
-from flask_restx import Api
-from namex.models import db
-from namex.resources.ops import api as nr_ops
-from sentry_sdk.integrations.flask import FlaskIntegration
+import os
 
-from config import Config, ProdConfig
-from solr_names_updater.utils import get_run_version
+workers = int(os.environ.get("GUNICORN_PROCESSES", "1"))  # pylint: disable=invalid-name
+threads = int(os.environ.get("GUNICORN_THREADS", "1"))  # pylint: disable=invalid-name
+timeout = int(os.environ.get("GUNICORN_TIMEOUT", "600"))  # pylint: disable=invalid-name
 
-from solr_names_updater.resources import register_endpoints
-
-from solr_names_updater.services import queue
-
-
-def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
-    """Return a configured Flask App using the Factory method."""
-    app = Flask(__name__)
-    app.config.from_object(environment)
-
-    # Configure Sentry
-    if dsn := app.config.get("SENTRY_DSN", None):
-        sentry_sdk.init(
-            dsn=dsn,
-            integrations=[FlaskIntegration()],
-            release=f"namex-api@{get_run_version()}",
-            send_default_pii=False,
-        )
-
-    db.init_app(app)
-    queue.init_app(app)
-    register_endpoints(app)
-
-    api = Api()
-
-    api.add_namespace(nr_ops, path='/ops')
-    api.init_app(app)
-
-    return app
+forwarded_allow_ips = "*"  # pylint: disable=invalid-name
+secure_scheme_headers = {"X-Forwarded-Proto": "https"}  # pylint: disable=invalid-name
