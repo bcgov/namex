@@ -259,8 +259,8 @@ class Requests(Resource):
             q = q.filter(RequestDAO.consentFlag == 'Y')
         elif consentOption == 'Waived':
             q = q.filter(RequestDAO.consentFlag == 'N')
-        else: # consentOption == 'No'
-            q = q.filter(RequestDAO.consentFlagis(None))
+        elif consentOption == 'No':
+            q = q.filter(RequestDAO.consentFlag.is_(None))
 
         if priority == 'Standard':
             q = q.filter(RequestDAO.priorityCd != 'Y')
