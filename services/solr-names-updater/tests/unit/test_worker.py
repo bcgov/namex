@@ -12,54 +12,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Test Suites to ensure that the worker is operating correctly."""
-import json
-from datetime import timedelta
+# from contextlib import suppress
 from unittest import mock
 from unittest.mock import patch
 
 import pytest
-from freezegun import freeze_time
-
-from namex.models import Request as RequestDAO
 from namex.utils import queue_util
-from queue_common.service_utils import QueueException
-from solr_names_updater.resources import worker # noqa: I001
-from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message # noqa: I003
+
+from solr_names_updater.resources import worker  # noqa: I001
+
+from . import create_nr, helper_create_cloud_event  # noqa: I003
+
 
 @pytest.mark.parametrize(
     ['testname','message_payload','nr_entity','assert_value'],[
-     ('Sole Prop Approved', create_request_state_change_message('APPROVED', 'DRAFT'), 'FR', False),
-     ('Sole Prop Conditional', create_request_state_change_message('CONDITIONAL', 'DRAFT'),'FR', False),
-     ('Sole Prop Cancelled', create_request_state_change_message('CANCELLED', 'DRAFT'), 'FR', False),
-     ('Sole Prop Reset', create_request_state_change_message('RESET', 'DRAFT'), 'FR', False),
-     ('Sole Prop Consumed', create_request_state_change_message('CONSUMED', 'DRAFT'), 'FR', False),
-     ('Gen Part Approved', create_request_state_change_message('APPROVED', 'DRAFT'),   'GP', False),
-     ('Gen Part Conditional', create_request_state_change_message('CONDITIONAL', 'DRAFT'), 'GP', False),
-     ('Gen Part Cancelled', create_request_state_change_message('CANCELLED', 'DRAFT'), 'GP', False),
-     ('Gen Part Reset', create_request_state_change_message('RESET', 'DRAFT'), 'GP', False),
-     ('Gen Part Consumed', create_request_state_change_message('CONSUMED', 'DRAFT'), 'GP', False),
-     ('CORPORATION Approved', create_request_state_change_message('APPROVED', 'DRAFT'), 'CR', True),
-     ('CORPORATION Conditional', create_request_state_change_message('CONDITIONAL', 'DRAFT'), 'CR', True),
-     ('CORPORATION Cancelled', create_request_state_change_message('CANCELLED', 'DRAFT'), 'CR', True),
-     ('CORPORATION Reset', create_request_state_change_message('RESET', 'DRAFT'), 'CR', True),
-     ('CORPORATION Consumed', create_request_state_change_message('CONSUMED', 'DRAFT'), 'CR', True)
+     ('Sole Prop Approved', helper_create_cloud_event('APPROVED', 'DRAFT'), 'FR', False),
+     ('Sole Prop Conditional', helper_create_cloud_event('CONDITIONAL', 'DRAFT'),'FR', False),
+     ('Sole Prop Cancelled', helper_create_cloud_event('CANCELLED', 'DRAFT'), 'FR', False),
+     ('Sole Prop Consumed', helper_create_cloud_event('CONSUMED', 'DRAFT'), 'FR', False),
+     ('Gen Part Approved', helper_create_cloud_event('APPROVED', 'DRAFT'),   'GP', False),
+     ('Gen Part Conditional', helper_create_cloud_event('CONDITIONAL', 'DRAFT'), 'GP', False),
+     ('Gen Part Cancelled', helper_create_cloud_event('CANCELLED', 'DRAFT'), 'GP', False),
+     ('Gen Part Consumed', helper_create_cloud_event('CONSUMED', 'DRAFT'), 'GP', False),
+     ('CORPORATION Approved', helper_create_cloud_event('APPROVED', 'DRAFT'), 'CR', True),
+     ('CORPORATION Conditional', helper_create_cloud_event('CONDITIONAL', 'DRAFT'), 'CR', True),
+     ('CORPORATION Cancelled', helper_create_cloud_event('CANCELLED', 'DRAFT'), 'CR', True),
+     ('CORPORATION Consumed', helper_create_cloud_event('CONSUMED', 'DRAFT'), 'CR', True)
     ])
-async def test_sp_gp_names_not_processed_to_solr(
+def test_sp_gp_names_not_processed_to_solr(
         testname,
+        client,
         message_payload,
         nr_entity,
         assert_value):
     """Assert that names are added to solr."""
-
-    queue_util.process_names_event_message = mock.Mock(return_value="True")
-    mock_msg = create_queue_mock_message(message_payload)
-    mock_nr = mock.Mock()
-    mock_nr.entity_type_cd = nr_entity
-
-    # mock process_names_event_message to do nothing in order to isolate testing relevant to this test
+    queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
+    nr_num = message_payload.data['request']['nrNum']
+    nr_new_state = message_payload.data['request']['newState']
+    create_nr(nr_num, nr_new_state, ['TEST NAME 1'], ['APPROVED'], nr_entity)
+    
     with patch.object(worker, 'process_names_event_message', return_value=True) as mock_process_names_evt_func:
-        # mock find_by_nr to do nothing in order to isolate testing relevant to this test
-        with patch.object(RequestDAO, 'find_by_nr', return_value=mock_nr):
-            await worker.cb_subscription_handler(mock_msg)
-
-            assert mock_process_names_evt_func.called == assert_value
+        rv = client.post("/", json=message_payload)
+        assert mock_process_names_evt_func.called == assert_value

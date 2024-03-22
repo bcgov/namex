@@ -82,27 +82,16 @@ class Config():  # pylint: disable=too-few-public-methods
         name=DB_NAME,
     )
 
+    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
+    NAMEX_RECEIPT_TOPIC = os.getenv('EMAILER_TOPIC', 'namex-receipt-dev')
+    AUDIENCE = os.getenv('AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Subscriber')
+    PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
+    SOLR_SUB_TYPE = os.getenv('SOLR_SUB_TYPE', 'bc.registry.names.events')
+    DEBUG_REQUEST = os.getenv('DEBUG_REQUEST', False)
+
     SOLR_FEEDER_API_URL = os.getenv('SOLR_FEEDER_API_URL', None)
 
     ALEMBIC_INI = 'migrations/alembic.ini'
-
-    NATS_CONNECTION_OPTIONS = {
-        'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_CLIENT_NAME', 'namex.solr.names.updater')
-
-    }
-    STAN_CONNECTION_OPTIONS = {
-        'cluster_id': os.getenv('NATS_CLUSTER_ID', 'test-cluster'),
-        'client_id': str(random.SystemRandom().getrandbits(0x58)),
-        'ping_interval': 1,
-        'ping_max_out': 5,
-    }
-
-    SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_SUBJECT', 'namerequest.state'),
-        'queue': os.getenv('NATS_QUEUE', 'namerequest-processor'),
-        'durable_name': os.getenv('NATS_QUEUE', 'namerequest-processor') + '_durable',
-    }
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
@@ -152,6 +141,7 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME,
     )
+    SOLR_FEEDER_API_URL = os.getenv('SOLR_FEEDER_API_URL', 'https://mock-solr-feeder/api/v1')
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use

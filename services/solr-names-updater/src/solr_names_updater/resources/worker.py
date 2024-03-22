@@ -43,62 +43,49 @@ bp = Blueprint("worker", __name__)
 @bp.route("/", methods=("POST",))
 @ensure_authorized_queue_user
 def worker():
-    """Process the incoming cloud event.
-
-    Flow
-    --------
-    1. Get cloud event
-    2. Get filing and payment information
-    3. Process payment
-
-    Decisions on returning a 2xx or failing value to
-    the Queue should be noted here:
-    - Empty or garbaled messages are knocked off the Q
-    - If the Filing is already marked paid, skip and knock off Q
-    - Once the filing is marked paid, no errors should escape to the Q
-    - If there's no matching filing, put back on Q
+    """
+    Process the incoming cloud event.
     """
     structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
-
+    ret = {}, HTTPStatus.OK
     if not (ce := queue.get_simple_cloud_event(request)):
-        return {}, HTTPStatus.OK
+        return ret
 
     structured_log(request, "INFO", f"received ce: {str(ce)}")
 
     with current_app.app_context():
         try:
-            nr_state_change_msg = json.loads(ce.data.decode('utf-8'))
-            structured_log(f'Extracted nr event msg: {nr_state_change_msg}')
-            ret = {}, HTTPStatus.OK
+            structured_log(f'Extracted nr event msg: {ce}')
 
-            if is_processable(nr_state_change_msg):
-                structured_log(request, message=f'Begin process_nr_state_change for nr_event_msg: {nr_state_change_msg}')
-                process_names_event_message(nr_state_change_msg, current_app)
-                structured_log(request, message=f'Completed process_nr_state_change for nr_event_msg: {nr_state_change_msg}')
+            if is_processable(ce):
+                structured_log(request, message=f'Begin process_nr_state_change for nr_event_msg: {ce}')
+                process_names_event_message(ce, current_app)
+                structured_log(request, message=f'Completed process_nr_state_change for nr_event_msg: {ce}')
             else:
                 # Skip processing of message as it isn't a message type this queue listener processes
-                structured_log(request, message=f'Skipping processing of nr event message as message type is not supported: {nr_state_change_msg}')
+                structured_log(request, message=f'Skipping processing of nr event message as message type is not supported: {ce}')
 
         except OperationalError as err:  # message goes back on the queue
-            structured_log(request, message=f'Queue Blocked - Database Issue: {json.dumps(nr_state_change_msg)}', severity='ERROR')
+            structured_log(request, message=f'Queue Blocked - Database Issue: {json.dumps(ce)}', severity='ERROR')
             ret = {}, HTTPStatus.INTERNAL_SERVER_ERROR
             raise err  # We don't want to handle the error, as a DB down would drain the queue
         except (RequestException, NewConnectionError) as err:  # message goes back on the queue
-            structured_log(request, message=f'Queue Blocked - HTTP Connection Issue: {json.dumps(nr_state_change_msg)}', severity='ERROR')
+            structured_log(request, message=f'Queue Blocked - HTTP Connection Issue: {json.dumps(ce)}', severity='ERROR')
             ret = {}, HTTPStatus.INTERNAL_SERVER_ERROR
             raise err  # We don't want to handle the error, as a http connection error would drain the queue
         except Exception as e:  # pylint: disable=broad-except # noqa B902
             # Catch Exception so that any error is still caught and the message is removed from the queue
             capture_message('Queue Error:' + e, level='error')
-            structured_log(request, message=f'Queue Error: {json.dumps(nr_state_change_msg)}', severity='ERROR')
+            structured_log(request, message=f'Queue Error: {json.dumps(ce)}', severity='ERROR')
         finally:
             return ret
 
 
 def is_names_event_msg_type(msg: dict):
     """Check message is of type nr state change."""
-    if msg and msg.get('type', '') == 'bc.registry.names.events':
-        return True
+    sub_type = current_app.config.get('SOLR_SUB_TYPE', None)
+    if msg and msg.type == sub_type:
+            return True
 
     return False
 
@@ -106,7 +93,7 @@ def is_names_event_msg_type(msg: dict):
 def is_processable(msg: dict):
     """Determine if message is processable using message type of msg."""
     if msg and is_names_event_msg_type(msg) \
-        and (nr_num := msg.get('data', {})
+        and (nr_num := msg.data
                             .get('request', {})
                             .get('nrNum', None)) \
         and (nr := RequestDAO.find_by_nr(nr_num)) \
@@ -123,7 +110,7 @@ def process_names_event_message(msg: dict, flask_app: Flask):
 
     structured_log( f'entering processing of nr event msg: {msg}')
 
-    request_state_change = msg.get('data').get('request', None)
+    request_state_change = msg.data.get('request', None)
 
     if request_state_change:
         new_state = request_state_change.get('newState')
