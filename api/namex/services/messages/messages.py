@@ -1,4 +1,4 @@
-from flask import _app_ctx_stack
+from flask import g
 
 
 class MessageServices(object):
@@ -26,16 +26,12 @@ class MessageServices(object):
         app.teardown_appcontext(self._teardown)
 
     def _teardown(self, exception):
-        ctx = _app_ctx_stack.top
-        if hasattr(ctx, 'namex_messages'):
-            ctx.namex_messages = None
+        g.pop('namex_messages')
+
 
     @staticmethod
     def _get_msg_stack():
-        ctx = _app_ctx_stack.top
-        if not hasattr(ctx, 'namex_messages'):
-            ctx.namex_messages = []
-        return ctx.namex_messages
+        return g.setdefault("namex_messages", [])
 
     @staticmethod
     def add_message(msg_type, code, msg):

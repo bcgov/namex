@@ -4,7 +4,7 @@ from flask import current_app
 from namex import jwt
 from namex.constants import PaymentState, request_type_mapping, reverse_request_type_mapping
 from namex.models import State, User
-from namex.services import ServicesError
+from namex.services.exceptions import ServicesError
 
 from .exceptions import MapRequestTypeError
 

@@ -3,7 +3,7 @@ import urllib
 from datetime import datetime
 
 import cx_Oracle
-from flask import _app_ctx_stack, current_app
+from flask import g, current_app
 
 from namex.models import Event, Request, State, User
 from namex.services import EventRecorder
@@ -50,9 +50,9 @@ class NROServices(object):
 
     def teardown(self, exception):
         # the oracle session pool will clean up after itself
-        ctx = _app_ctx_stack.top
-        if hasattr(ctx, 'nro_oracle_pool'):
-            ctx.nro_oracle_pool.close()
+        db_pool = g.pop('nro_oracle_pool', None)
+        if db_pool is not None:
+            db_pool.close()
 
     def _create_pool(self):
         """create the cx_oracle connection pool from the Flask Config Environment
@@ -95,11 +95,10 @@ class NROServices(object):
         and then return an acquired session
         :return: cx_Oracle.connection type
         """
-        ctx = _app_ctx_stack.top
-        if ctx is not None:
-            if not hasattr(ctx, 'nro_oracle_pool'):
-                ctx._nro_oracle_pool = self._create_pool()
-            return ctx._nro_oracle_pool.acquire()
+        if 'nro_oracle_pool' not in g:
+            g._nro_oracle_pool = self._create_pool()
+        return g._nro_oracle_pool.acquire()
+
 
     def get_last_update_timestamp(self, nro_request_id):
         """Gets a datetime object that holds the last time and part of the NRO Request was modified

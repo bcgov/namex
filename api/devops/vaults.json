@@ -44,13 +44,6 @@
         ]
     },
     {
-        "vault": "nats",
-        "application": [
-            "base",
-            "namex"
-        ]
-    },
-    {
         "vault": "namex",
         "application": [
             "namex-api",
@@ -62,6 +55,12 @@
         "application": [
             "name-request",
             "bcregistry"
+        ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "namex"
         ]
     }
 ]

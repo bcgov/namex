@@ -1,4 +1,4 @@
-FROM python:3.8.5-buster
+FROM python:3.12.2
 USER root
 
 ARG VCS_REF="missing"
@@ -12,24 +12,72 @@ LABEL org.label-schema.vcs-ref=${VCS_REF} \
 
 USER root
 
-# Create working directory
-RUN mkdir /opt/app-root && chmod 755 /opt/app-root
-WORKDIR /opt/app-root
+ARG APP_ENV \
+  # Needed for fixing permissions of files created by Docker:
+  UID=1000 \
+  GID=1000
 
-# Install the requirements
-COPY ./requirements.txt .
+ENV APP_ENV=${APP_ENV} \
+  # python:
+  PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PYTHONDONTWRITEBYTECODE=1 \
+  # pip:
+  PIP_NO_CACHE_DIR=1 \
+  PIP_DISABLE_PIP_VERSION_CHECK=1 \
+  PIP_DEFAULT_TIMEOUT=100 \
+  PIP_ROOT_USER_ACTION=ignore \
+  # poetry:
+  POETRY_VERSION=1.3.2 \
+  POETRY_NO_INTERACTION=1 \
+  POETRY_VIRTUALENVS_CREATE=false \
+  POETRY_CACHE_DIR='/var/cache/pypoetry' \
+  POETRY_HOME='/usr/local'
 
-#RUN pip install --upgrade pip
-RUN pip install pip==20.1.1
-RUN pip install --no-cache-dir -r requirements.txt
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-COPY . .
+RUN apt-get update && apt-get upgrade -y \
+  && apt-get install --no-install-recommends -y \
+    bash \
+    brotli \
+    build-essential \
+    curl \
+    gettext \
+    git \
+    libpq-dev \
+    wait-for-it \
+  && curl -sSL 'https://install.python-poetry.org' | python - \
+  && poetry --version \
+  # Cleaning cache:
+  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+  && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-USER 1001
+WORKDIR /code
 
-# Set Python path
-ENV PYTHONPATH=/opt/app-root
+RUN groupadd -g "${GID}" -r web \
+  && useradd -d '/code' -g web -l -r -u "${UID}" web \
+  && chown web:web -R '/code'
+
+COPY --chown=web:web . /code
+
+# Project initialization:
+RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
+  echo "$APP_ENV" \
+  && poetry version \
+  # Install deps:
+  && poetry run pip install -U pip \
+  && poetry install \
+    $(if [ -z ${APP_ENV+x} ] | [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
+    --no-interaction --no-ansi
+
+# Running as non-root user:
+USER web
+
+# The following stage is only for production:
+# FROM development_build AS production_build
+COPY --chown=web:web . /code
 
 EXPOSE 8080
 
-CMD [ "python", "/opt/app-root/nr_day_job.py" ]
+CMD [ "python", "/code/nr_day_job.py" ]

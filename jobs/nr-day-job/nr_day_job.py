@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from flask import Flask, current_app
 from namex.models import Request, State, db
 from namex.services import queue
-from queue_common.messages import create_cloud_event_msg
+from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy import text
 
 import config
@@ -52,11 +52,10 @@ def register_shellcontext(app):
 
 
 def publish_email_message(payload: dict):
-    """Publish the email message onto the NATS emailer subject."""
-    subject = APP_CONFIG.NATS_EMAILER_SUBJECT
-    current_app.logger.debug('publish to queue, subject:%s, event:%s', subject, payload)
-    queue.publish_json_to_subject_sync(payload, subject)
-
+    """Publish the email message onto the pubsub emailer topic."""
+    email_topic = current_app.config.get("EMAILER_TOPIC", "mailer")
+    current_app.logger.debug('publish to queue, subject:%s, event:%s', email_topic, payload)
+    queue.publish(topic=email_topic, payload=payload)
 
 def furnish_request_message(
         request: Request,
@@ -64,12 +63,12 @@ def furnish_request_message(
 ):  # pylint: disable=redefined-outer-name
     """Send notification info to the mail queue."""
     current_app.logger.debug('Start of the furnishing of request for %s nrNum=%s', option, request.nrNum)
-    payload = create_cloud_event_msg(
-        msg_id=str(uuid.uuid4()),
-        msg_type='bc.registry.names.request',
+    ce = SimpleCloudEvent(
+        id=str(uuid.uuid4()),
         source=f'/requests/{request.nrNum}',
+        subject="namerequest",
+        type='bc.registry.names.request',
         time=datetime.utcfromtimestamp(time.time()).replace(tzinfo=timezone.utc).isoformat(),
-        identifier=request.nrNum,
         json_data_body={
             'request': {
                 'nrNum': request.nrNum,
@@ -77,7 +76,9 @@ def furnish_request_message(
             }
         }
     )
+    payload = queue.to_queue_message(ce)
     current_app.logger.debug('About to publish email for %s nrNum=%s', option, request.nrNum)
+
     publish_email_message(payload)
 
     if option == 'before-expiry':

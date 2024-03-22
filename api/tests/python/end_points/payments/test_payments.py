@@ -505,7 +505,19 @@ mock_receipt_response = {
     ('Cancel Payment', 'CREATE', False, False, True, False),
     ('Request receipt', 'CREATE', False, False, False, True)
 ])
-def test_create_payment(client, jwt, test_name, action, complete_payment, do_refund, cancel_payment, request_receipt):
+def test_create_payment(client, jwt, test_name, action, complete_payment, do_refund, cancel_payment, request_receipt, mocker):
+    from namex.services import queue
+    topics = []
+    msg=None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
 
     payment = execute_payment(client, jwt, create_payment_request, action)
     assert payment['action'] == action
@@ -526,6 +538,20 @@ def test_create_payment(client, jwt, test_name, action, complete_payment, do_ref
 
         assert payment_id == completed_payment[0]['id']
         assert completed_payment[0]['statusCode'] == PaymentState.COMPLETED.value
+
+    if complete_payment:
+        assert len(topics) == 1
+
+        email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+
+        # Verify message that would be sent to the emailer pubsub
+        assert email_pub['type'] == 'bc.registry.names.events'
+        assert email_pub['source'] == '/requests/NR L000001'
+        assert email_pub['subject'] == 'namerequest'
+        assert email_pub['data']['request']['nrNum'] == 'NR L000001'
+        assert email_pub['data']['request']['newState'] == 'DRAFT'
+        assert email_pub['data']['request']['previousState'] == 'PENDING_PAYMENT'
+
 
     if do_refund:
         with patch.object(SBCPaymentClient, 'refund_payment', return_value={}):

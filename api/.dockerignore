@@ -39,3 +39,8 @@ venv/
 # Vim swap files
 *.swp
 **/*.swp
+
+Dockerfile
+Makefile
+devops
+tests

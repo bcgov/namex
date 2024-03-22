@@ -9,7 +9,7 @@ BC Registries Names Examination, research and approval system API
 ## Technology Stack Used
 * Python, Flask
 * Postgres -  SQLAlchemy, psycopg2-binary & alembic
-* NATS2
+* Google Cloud PubSub
 
 ## Third-Party Products/Libraries used and the the License they are covert by
 

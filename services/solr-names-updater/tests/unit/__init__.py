@@ -15,15 +15,35 @@
 import json
 from datetime import datetime
 
+from freezegun import freeze_time
+from namex.models import Name, Request, State
+from simple_cloudevent import SimpleCloudEvent
 from random import randrange
 from unittest.mock import Mock
 
-from freezegun import freeze_time
-
-from namex.models import Name, State, Request
-
 from .. import add_years
 
+"""The Unit Tests and the helper routines."""
+from contextlib import contextmanager
+
+from sqlalchemy.exc import ResourceClosedError
+
+
+@contextmanager
+def nested_session(session):
+    try:
+        sess = session.begin_nested()
+        yield sess
+        sess.rollback()
+    except AssertionError as err:
+        raise err
+    except ResourceClosedError as err:
+        # mean the close out of the transaction got fouled in pytest
+        pass
+    except Exception as err:
+        raise err
+    finally:
+        pass
 
 class Obj:
     """Make a custom object hook used by dict_to_obj."""
@@ -51,22 +71,12 @@ class MockResponse:
         return self.json_data
 
 
-def create_queue_mock_message(message_payload: dict):
-    """Return a mock message that can be processed by the queue listener."""
-    mock_msg = Mock()
-    mock_msg.sequence = randrange(1000)
-    mock_msg.data = dict_to_obj(message_payload)
-    json_msg_payload = json.dumps(message_payload)
-    mock_msg.data.decode = Mock(return_value=json_msg_payload)
-    return mock_msg
-
-
 def add_states_to_db(states):
     for code, desc in states:
         state = State(cd=code, description=desc)
         state.save_to_db()
 
-def create_nr(nr_num: str, request_state: str, names: list, names_state: list):
+def create_nr(nr_num: str, request_state: str, names: list, names_state: list, entity_type_cd: str = 'CR'):
 
     now = datetime.utcnow()
 
@@ -77,8 +87,7 @@ def create_nr(nr_num: str, request_state: str, names: list, names_state: list):
         name_request.stateCd = request_state
         name_request._source = 'NRO'
         name_request.expirationDate = add_years(now, 1)
-        name_request.entity_type_cd = 'CR'
-        # name_request.priorityCd = start_priority
+        name_request.entity_type_cd = entity_type_cd
         name_request.save_to_db()
 
         for index, name in enumerate(names):
@@ -96,21 +105,31 @@ def create_nr(nr_num: str, request_state: str, names: list, names_state: list):
         return name_request
 
 
-def create_request_state_change_message(new_state, prev_state):
+def create_queue_mock_message(message_payload: dict):
+    """Return a mock message that can be processed by the queue listener."""
+    mock_msg = Mock()
+    mock_msg.sequence = randrange(1000)
+    mock_msg.data = dict_to_obj(message_payload)
+    json_msg_payload = json.dumps(message_payload)
+    mock_msg.data.decode = Mock(return_value=json_msg_payload)
+    return mock_msg
 
-    return {
-        'specversion': '1.0.1',
-        'type': 'bc.registry.names.events',
-        'source': '/requests/NR 6724165',
-        'id': '16fd2706-8baf-433b-82eb-8c7fada847aa',
-        'time': '',
-        'datacontenttype': 'application/json',
-        'identifier': 'NR 6724165',
-        'data': {
+
+def helper_create_cloud_event(
+    new_state,
+    prev_state,
+    cloud_event_id: str = None,
+    source: str = "/requests/NR 6724165",
+    subject: str = "fake-subject",
+    type: str = "bc.registry.names.events",
+    data: dict = {}):
+
+    data = {
             'request': {
                 'nrNum': 'NR 6724165',
                 'newState': new_state,
                 'previousState': prev_state
             }
-        }
     }
+    ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
+    return ce
