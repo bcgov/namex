@@ -18,13 +18,13 @@ import random
 from contextlib import contextmanager, suppress
 
 import pytest
-from flask import Flask
 from flask_migrate import Migrate, upgrade
-from namex.models import db as _db
 from sqlalchemy import MetaData, text
 from sqlalchemy.sql.ddl import DropConstraint
 
-from config import get_named_config
+from config import TestConfig
+from solr_names_updater import create_app
+from solr_names_updater import db as _db
 from solr_names_updater.resources import worker  # noqa: I001
 
 from . import FROZEN_DATETIME
@@ -54,14 +54,10 @@ def freeze_datetime_utcnow(monkeypatch):
     monkeypatch.setattr(datetime, 'datetime', _Datetime)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def app():
     """Return a session-wide application configured in TEST mode."""
-    # _app = create_app('testing')
-    _app = Flask('testing')
-    print(config)
-    _app.config.from_object(get_named_config('testing'))
-    _db.init_app(_app)
+    _app = create_app(TestConfig)
 
     return _app
 
@@ -113,6 +109,12 @@ def session(app, db):
         session_.remove()
 
 
+@pytest.fixture(autouse=True)
+def mock_queue_auth(mocker):
+    """Mock queue authorization."""
+    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')
+
+
 @pytest.fixture(scope='function')
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
@@ -159,58 +161,3 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         upgrade()
 
         return _db
-
-
-# @pytest.fixture(scope='session')
-# def db(app):  # pylint: disable=redefined-outer-name, invalid-name
-#     """Return a session-wide initialised database.
-
-#     Drops all existing tables - Meta follows Postgres FKs
-#     """
-#     with app.app_context():
-#         # Clear out any existing tables
-#         metadata = MetaData(_db.engine)
-#         metadata.reflect()
-#         for table in metadata.tables.values():
-#             for fk in table.foreign_keys:  # pylint: disable=invalid-name
-#                 _db.engine.execute(DropConstraint(fk.constraint))
-#         with suppress(Exception):
-#             metadata.drop_all()
-#         with suppress(Exception):
-#             _db.drop_all()
-
-#         sequence_sql = """SELECT sequence_name FROM information_schema.sequences
-#                           WHERE sequence_schema='public'
-#                        """
-
-#         sess = _db.session()
-#         for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
-#             try:
-#                 sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
-#                 print('DROP SEQUENCE public.%s ' % seq)
-#             except Exception as err:  # pylint: disable=broad-except  # noqa B902
-#                 print(f'Error: {err}')
-#         sess.commit()
-
-#         # ############################################
-#         # There are 2 approaches, an empty database, or the same one that the app will use
-#         #     create the tables
-#         #     _db.create_all()
-#         # or
-#         # Use Alembic to load all of the DB revisions including supporting lookup data
-#         # This is the path we'll use in legal_api!!
-
-#         # even though this isn't referenced directly, it sets up the internal configs that upgrade needs
-#         namex_api_dir = os.path.abspath('..').replace('services', 'api')
-#         namex_api_dir = os.path.join(namex_api_dir, 'migrations')
-#         Migrate(app, _db, namex_api_dir)
-#         upgrade()
-
-#         return _db
-
-
-# @pytest.fixture(autouse=True)
-# def mock_settings_env_vars(app, db, monkeypatch):
-#     """Mock FLASK_APP and db to use test instances for worker.py."""
-#     monkeypatch.setattr(worker, 'FLASK_APP', app)
-#     monkeypatch.setattr(worker, 'db', db)
