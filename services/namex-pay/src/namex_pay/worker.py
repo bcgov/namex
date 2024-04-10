@@ -38,7 +38,7 @@ import nats  # noqa:I001;
 from flask import Flask
 from namex import nro
 from namex.models import db, Event, Payment, Request as RequestDAO, State, User  # noqa:I001; import orders
-from namex.services import EventRecorder, queue  # noqa:I005;
+from namex.services import EventRecorder, queue, is_reapplication_eligible  # noqa:I005;
 from queue_common.messages import create_cloud_event_msg  # noqa:I005
 from queue_common.service import QueueServiceManager
 from queue_common.service_utils import QueueException, logger
@@ -131,7 +131,9 @@ async def update_payment_record(payment: Payment) -> Optional[Payment]:
             logger.debug(msg)
             capture_message(msg)
             raise QueueException(msg)
-        nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+        if is_reapplication_eligible(nr.expriationDate):
+            # to avoid duplicate expiration date calculated
+            nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
         payment.payment_completion_date = datetime.utcnow()
         payment.payment_status_code = State.COMPLETED
 
