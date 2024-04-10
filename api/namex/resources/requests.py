@@ -873,7 +873,7 @@ class Request(Resource):
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
                 emailer_enable = ldclient.get().variation('emailer-enable', {'key': 'anonymous'}, False)
-                if emailer_enable:
+                if emailer_enable and nrd.consentFlag == 'R':
                     thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
                     thread.daemon = True
                     thread.start()
