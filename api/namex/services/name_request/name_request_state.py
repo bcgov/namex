@@ -86,7 +86,7 @@ def display_reapply_action(nr_model=None) -> Boolean:
 
 def is_reapplication_eligible(expiration_date) -> Boolean:
     if expiration_date:
-        todays_date = datetime.now(timezone.utc)
+        todays_date = datetime.now(timezone.utc).date()
         expiry_date = expiration_date.date()
 
         delta = expiry_date - todays_date
