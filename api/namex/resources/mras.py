@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
-import requests
-from flask import current_app, jsonify
+import requests, xmltodict
+from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource, cors
 from lxml import etree  # Don't worry about this it exists... the module is dynamically loaded
 
@@ -93,13 +93,10 @@ class MrasProfile(Resource):
             # Get the profile
             print('\nCalling MRAS Profile API using [corp_num: {corp_num}], [province: {province}]'.format(corp_num=corp_num, province=province))
             mras_url =  f'{current_app.config.get("MRAS_SVC_URL")}/api/v1/xpr/GetProfile/{corp_num}/{province}'
-            # headers = {
-            #     'x-api-key': MRAS_SVC_API_KEY,
-            #     'Accept': 'application/xml'
-            # }
+
             headers = {
                 'x-api-key': current_app.config.get('MRAS_SVC_API_KEY'),
-                'Accept': 'application/json'
+                'Accept': 'application/xml'
             }
 
             print(mras_url)
@@ -108,6 +105,7 @@ class MrasProfile(Resource):
                 mras_url,
                 headers=headers
             )
+
 
             # Return the auth response if an error occurs
             if not response.status_code == HTTPStatus.OK:
@@ -122,7 +120,10 @@ class MrasProfile(Resource):
                 # raise MrasServiceException(mras_error=mras_error)
 
             # Just return true or false, the profile either exists or it doesn't
-            return jsonify(response.json()), HTTPStatus.OK
+            # Note: the response content is in xml format so we need to parse it to json format.
+            dict_data = xmltodict.parse(response.content)
+            jsonify_data = jsonify(dict_data)
+            return make_response(jsonify_data), HTTPStatus.OK
         except MrasServiceException as err:
             return handle_exception(err, err.message, err.error_code)
         except Exception as err:
