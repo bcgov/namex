@@ -93,13 +93,10 @@ class MrasProfile(Resource):
             # Get the profile
             print('\nCalling MRAS Profile API using [corp_num: {corp_num}], [province: {province}]'.format(corp_num=corp_num, province=province))
             mras_url =  f'{current_app.config.get("MRAS_SVC_URL")}/api/v1/xpr/GetProfile/{corp_num}/{province}'
-            # headers = {
-            #     'x-api-key': MRAS_SVC_API_KEY,
-            #     'Accept': 'application/xml'
-            # }
+
             headers = {
                 'x-api-key': current_app.config.get('MRAS_SVC_API_KEY'),
-                'Accept': 'application/json'
+                'Accept': 'application/xml'
             }
 
             print(mras_url)
