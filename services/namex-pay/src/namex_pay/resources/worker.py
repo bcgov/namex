@@ -31,7 +31,7 @@ from namex import nro
 from namex.models import Event, Payment
 from namex.models import Request as RequestDAO  # noqa:I001; import orders
 from namex.models import State, User
-from namex.services import EventRecorder  # noqa:I005;
+from namex.services import EventRecorder, is_reapplication_eligible  # noqa:I005;
 from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy.exc import OperationalError
@@ -143,7 +143,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
     payment_action = payment.payment_action
     nr: RequestDAO = RequestDAO.find_by_id(payment.nrId)
 
-    match payment_action: 
+    match payment_action:
         case Payment.PaymentActions.CREATE.value:
             create_payment(nr, payment)
         case Payment.PaymentActions.RESUBMIT.value:
@@ -167,7 +167,9 @@ def reapply_payment(nr, payment):
         structured_log(request, message=msg)
         capture_message(msg)
         raise Exception(msg)
-    nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+    if is_reapplication_eligible(nr.expriationDate):
+        # to avoid duplicate expiration date calculated
+        nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
     payment.payment_completion_date = datetime.utcnow()
     payment.payment_status_code = State.COMPLETED
 

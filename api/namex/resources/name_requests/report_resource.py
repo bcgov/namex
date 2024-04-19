@@ -278,7 +278,8 @@ class ReportResource(Resource):
                 action_text = actions_obj.get('DEFAULT')
             if action_text:
                 nr_report_json['nextAction'] = action_text
-        nr_report_json['approvalDate'] = datetime.today().strftime('%B %-d, %Y')
+        nr_report_json['retrievalDateTime'] = datetime.now().astimezone(timezone('US/Pacific')).strftime(DATE_FORMAT)
+
         nr_report_json['hasUnreviewedNames'] = ReportResource._hasUnReviewedNames(nr_report_json['names'])
         return nr_report_json
 

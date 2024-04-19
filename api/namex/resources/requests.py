@@ -252,11 +252,13 @@ class Requests(Resource):
             q = q.join(RequestDAO.applicants).filter(Applicant.lastName.ilike('%' + lastName + '%'))
 
         if consentOption == 'Received':
-            q = q.filter(or_(RequestDAO.consentFlag == 'R', RequestDAO.consent_dt.isnot(None)))
+            q = q.filter(RequestDAO.consentFlag == 'R')
         if consentOption == 'Yes':
             q = q.filter(RequestDAO.consentFlag == 'Y')
+        elif consentOption == 'Waived':
+            q = q.filter(RequestDAO.consentFlag == 'N')
         elif consentOption == 'No':
-            q = q.filter(and_(RequestDAO.consentFlag == 'N', RequestDAO.consent_dt == None))
+            q = q.filter(RequestDAO.consentFlag.is_(None))
 
         if priority == 'Standard':
             q = q.filter(RequestDAO.priorityCd != 'Y')
@@ -865,9 +867,10 @@ class Request(Resource):
                 is_changed__request_state = True
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
-                thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
-                thread.daemon = True
-                thread.start()
+                if  nrd.consentFlag == 'R':
+                    thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
+                    thread.daemon = True
+                    thread.start()
 
             # Need this for a re-open
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:

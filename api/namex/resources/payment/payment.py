@@ -14,7 +14,7 @@ from namex.models import Request as RequestDAO
 from namex.models import State, User
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from namex.services import EventRecorder
-from namex.services.name_request.name_request_state import get_nr_state_actions, display_reapply_action
+from namex.services.name_request.name_request_state import get_nr_state_actions, is_reapplication_eligible
 from namex.services.name_request.utils import get_active_payment, has_active_payment
 from namex.services.payment.exceptions import PaymentServiceError, SBCPaymentError, SBCPaymentException
 from namex.services.payment.models import PaymentRequest
@@ -196,8 +196,9 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
                             timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
                         msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
                         current_app.logger.debug(msg)
-                    expiry_days = int(nr_svc.get_expiry_days(nr_model))
-                    nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
+                    if is_reapplication_eligible(nr_model.expirationDate):
+                        expiry_days = int(nr_svc.get_expiry_days(nr_model))
+                        nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
                     payment.payment_completion_date = datetime.utcnow()
 
                 nr_model.save_to_db()
@@ -406,7 +407,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             if existing_payment:
                 # if we already have a payment record, we can request existing payment status and return it
                 # get the payment status from Pay API
-                if payment_action == PaymentDAO.PaymentActions.REAPPLY.value and display_reapply_action(nr_model):
+                if payment_action == PaymentDAO.PaymentActions.REAPPLY.value and is_reapplication_eligible(nr_model.expirationDate):
                     # skip valid cases of REAPPLY, as these potentially can have more than a single instance
                     pass
                 else:
