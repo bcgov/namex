@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
-import requests
-from flask import current_app, jsonify
+import requests, xmltodict
+from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource, cors
 from lxml import etree  # Don't worry about this it exists... the module is dynamically loaded
 
@@ -109,6 +109,7 @@ class MrasProfile(Resource):
                 headers=headers
             )
 
+
             # Return the auth response if an error occurs
             if not response.status_code == HTTPStatus.OK:
                 return jsonify({'error': 'No profile found for the jurisdiction, registration number pair.'}), HTTPStatus.NOT_FOUND
@@ -122,7 +123,10 @@ class MrasProfile(Resource):
                 # raise MrasServiceException(mras_error=mras_error)
 
             # Just return true or false, the profile either exists or it doesn't
-            return jsonify(response.json()), HTTPStatus.OK
+            # Note: the response content is in xml format so we need to parse it to json format.
+            dict_data = xmltodict.parse(response.content)
+            jsonify_data = jsonify(dict_data)
+            return make_response(jsonify_data), HTTPStatus.OK
         except MrasServiceException as err:
             return handle_exception(err, err.message, err.error_code)
         except Exception as err:
