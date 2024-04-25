@@ -7,7 +7,9 @@ Your Name Request is **rejected**.
 # Your Next Steps
 
 1. Review the attached Results of Name Request
-2. (Optional) Visit [Name Request]({{NAME_REQUEST_URL}}) to request a new name
+2. For information about naming guidelines or how to appeal this decision, 
+   visit our [Names Information]({{NAMES_INFORMATION_URL}}) page (Optional).
+3. To request a new name, visit [Name Request]({{NAME_REQUEST_URL}}) (Optional)
 
 ---
 
