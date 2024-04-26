@@ -53,8 +53,8 @@ class Config(object):
 
     NAME_REQUEST_URL = os.getenv('NAME_REQUEST_URL', '')
     NAMES_INFORMATION_URL = os.getenv('NAMES_INFORMATION_URL', 
-                                      'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/ \
-                                       permits-licences/businesses-incorporated-companies/approval-business-name')
+                                      'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/\
+permits-licences/businesses-incorporated-companies/approval-business-name')
 
     DECIDE_BUSINESS_URL = os.getenv('DECIDE_BUSINESS_URL', '')
     BUSINESS_CHANGES_URL = os.getenv('BUSINESS_CHANGES_URL', '')
