@@ -8,8 +8,8 @@ The consent letter for your name request has been received and we have **approve
 
 Follow these steps to complete your application using this name:
 
-1. Visit [Forms, fees and information packages page]({{CORP_FORMS_URL}}) and download the appropriate form
-2. Complete and submit the form along with any additional required documentation and payment
+1. Visit [BC Corporate Online]({{CORP_ONLINE_URL}})
+2. Complete and submit the form along with any required documentation and payment
 
 ---
 
