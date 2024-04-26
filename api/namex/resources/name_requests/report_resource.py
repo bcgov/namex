@@ -49,9 +49,22 @@ class ReportResource(Resource):
                 ReportResource._add_expiry_date(nr_model)
             recipients = ','.join(recipient_emails)
             template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
-            email_body = Path(f'{template_path}/emails/consent.md').read_text()
+            file_name = 'consent'
+            instruction_group = ReportResource._get_instruction_group(nr_model.entity_type_cd)
+            if instruction_group:
+                file_name = f"{file_name}-{instruction_group}"
+            email_body = Path(f'{template_path}/emails/{file_name}.md').read_text()
             email_body = email_body.replace('{{EXPIRATION_DATE}}', nr_model.expirationDate.strftime(DATE_FORMAT))
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
+            DECIDE_BUSINESS_URL =  current_app.config.get('DECIDE_BUSINESS_URL')
+            CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
+            CORP_ONLINE_URL = current_app.config.get('COLIN_URL')
+            SOCIETIES_URL = current_app.config.get('SOCIETIES_URL')
+            email_body = email_body.replace('{{BUSINESS_URL}}', DECIDE_BUSINESS_URL)
+            email_body = email_body.replace('{{DECIDE_BUSINESS_URL}}', DECIDE_BUSINESS_URL)
+            email_body = email_body.replace('{{CORP_ONLINE_URL}}', CORP_ONLINE_URL)
+            email_body = email_body.replace('{{CORP_FORMS_URL}}', CORP_FORMS_URL)
+            email_body = email_body.replace('{{SOCIETIES_URL}}', SOCIETIES_URL)
             email = {
                 'recipients': recipients,
                 'content': {
@@ -104,6 +117,7 @@ class ReportResource(Resource):
             email_body = email_body.replace('{{NAME_REQUEST_URL}}', NAME_REQUEST_URL)
             email_body = email_body.replace('{{NAMEREQUEST_NUMBER}}', nr_model.nrNum)
             email_body = email_body.replace('{{BUSINESS_URL}}', DECIDE_BUSINESS_URL)
+            email_body = email_body.replace('{{DECIDE_BUSINESS_URL}}', DECIDE_BUSINESS_URL)
             email_body = email_body.replace('{{CORP_ONLINE_URL}}', CORP_ONLINE_URL)
             email_body = email_body.replace('{{CORP_FORMS_URL}}', CORP_FORMS_URL)
             email_body = email_body.replace('{{SOCIETIES_URL}}', SOCIETIES_URL)
