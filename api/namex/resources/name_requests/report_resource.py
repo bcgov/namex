@@ -133,13 +133,12 @@ class ReportResource(Resource):
 
     @staticmethod
     def _build_email_body(template: str, nr_model):
-        DECIDE_BUSINESS_URL = current_app.config.get('DECIDE_BUSINESS_URL')
         var_map = {
             '{{NAMES_INFORMATION_URL}}': current_app.config.get('NAMES_INFORMATION_URL'),
             '{{NAME_REQUEST_URL}}': current_app.config.get('NAME_REQUEST_URL'),
             '{{NAMEREQUEST_NUMBER}}': nr_model.nrNum,
-            '{{BUSINESS_URL}}': DECIDE_BUSINESS_URL,
-            '{{DECIDE_BUSINESS_URL}}': DECIDE_BUSINESS_URL,
+            '{{BUSINESS_URL}}': current_app.config.get('BUSINESS_URL'),
+            '{{DECIDE_BUSINESS_URL}}': current_app.config.get('DECIDE_BUSINESS_URL'),
             '{{CORP_ONLINE_URL}}': current_app.config.get('COLIN_URL'),
             '{{CORP_FORMS_URL}}': current_app.config.get('CORP_FORMS_URL'),
             '{{SOCIETIES_URL}}': current_app.config.get('SOCIETIES_URL'),
