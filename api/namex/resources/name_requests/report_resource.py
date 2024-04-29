@@ -42,9 +42,6 @@ class ReportResource(Resource):
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
             nr_model.consentFlag = 'R' # invariant: this function is only called when the consent letter has been received
-            report, status_code = ReportResource._get_report(nr_model)
-            if status_code != HTTPStatus.OK:
-                return jsonify(message=str(report)), status_code
             report_name = nr_model.nrNum + ' - ' + CONSENT_EMAIL_SUBJECT
             recipient_emails = []
             for applicant in nr_model.applicants:
@@ -59,20 +56,12 @@ class ReportResource(Resource):
                 file_name = f"{file_name}-{instruction_group}"
             email_template = Path(f'{template_path}/emails/{file_name}.md').read_text()
             email_body = ReportResource._build_email_body(email_template, nr_model)
-            attachments = [
-                {
-                    'fileName': report_name.replace(' - ', ' ').replace(' ', '_') + '.pdf',
-                    'fileBytes': base64.b64encode(report).decode(),
-                    'fileUrl': '',
-                    'attachOrder': 1
-                }
-            ]
             email = {
                 'recipients': recipients,
                 'content': {
                     'subject': report_name,
                     'body': email_body,
-                    'attachments': attachments
+                    'attachments': []
                 }
             }
             return ReportResource._send_email(email)
