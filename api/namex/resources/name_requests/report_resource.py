@@ -41,6 +41,7 @@ class ReportResource(Resource):
             nr_model = Request.query.get(nr_id)
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
+            nr_model.consentFlag = 'R' # invariant: this function is only called when the consent letter has been received
             report, status_code = ReportResource._get_report(nr_model)
             if status_code != HTTPStatus.OK:
                 return jsonify(message=str(report)), status_code
