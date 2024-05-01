@@ -60,7 +60,9 @@
     {
         "vault": "gcp-queue",
         "application": [
-            "namex"
+            "namex",
+            "topics",
+            "base"
         ]
     }
 ]
