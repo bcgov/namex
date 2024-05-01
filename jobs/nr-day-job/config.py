@@ -74,8 +74,8 @@ class Config():  # pylint: disable=too-few-public-methods
         name=DB_NAME,
     )
 
-    GCP_AUTH_KEY = os.getenv("GCP_AUTH_KEY", None)
-    EMAILER_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
+    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
+    EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', '')
 
 class DevConfig(Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""

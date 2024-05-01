@@ -53,7 +53,7 @@ def register_shellcontext(app):
 
 def publish_email_message(payload: dict):
     """Publish the email message onto the pubsub emailer topic."""
-    email_topic = current_app.config.get("EMAILER_TOPIC", "mailer")
+    email_topic = current_app.config.get('EMAILER_TOPIC', 'mailer')
     current_app.logger.debug('publish to queue, subject:%s, event:%s', email_topic, payload)
     queue.publish(topic=email_topic, payload=payload)
 
