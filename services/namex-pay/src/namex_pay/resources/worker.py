@@ -238,7 +238,7 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
         msg = f'About to publish email for payment.id={payment.id}'
         # structured_log(message=msg)
         with current_app.app_context():
-            namex_topic = current_app.config.get("NAMEX_RECEIPT_TOPIC", None)
+            namex_topic = current_app.config.get("EMAILER_TOPIC", None)
             payload = queue.to_queue_message(cloud_event_msg)
             queue.publish(topic=namex_topic, payload=payload)  # noqa: F841
 

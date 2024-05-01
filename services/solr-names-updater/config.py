@@ -83,7 +83,7 @@ class Config():  # pylint: disable=too-few-public-methods
     )
 
     GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
-    NAMEX_RECEIPT_TOPIC = os.getenv('EMAILER_TOPIC', 'namex-receipt-dev')
+    EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', 'namex-receipt-dev')
     AUDIENCE = os.getenv('AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Subscriber')
     PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
     SOLR_SUB_TYPE = os.getenv('SOLR_SUB_TYPE', 'bc.registry.names.events')

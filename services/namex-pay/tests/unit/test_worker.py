@@ -179,7 +179,7 @@ def test_update_payment_record(app,
 
             assert rv.status_code == HTTPStatus.OK
             assert len(topics) == 1
-            mailer = app.config.get("NAMEX_RECEIPT_TOPIC")
+            mailer = app.config.get("EMAILER_TOPIC")
             assert mailer in topics
 
             email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
@@ -299,7 +299,7 @@ def test_process_payment(app,
         # Check
         assert rv.status_code == HTTPStatus.OK
         assert len(topics) == 1
-        mailer = app.config.get("NAMEX_RECEIPT_TOPIC")
+        mailer = app.config.get("EMAILER_TOPIC")
         assert mailer in topics
 
         # Get modified data
