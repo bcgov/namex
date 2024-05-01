@@ -42,6 +42,7 @@ class ReportResource(Resource):
             if not nr_model:
                 return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
             nr_model.consentFlag = 'R' # invariant: this function is only called when the consent letter has been received
+            ReportResource._update_entity_and_action_code(nr_model)
             report_name = nr_model.nrNum + ' - ' + CONSENT_EMAIL_SUBJECT
             recipient_emails = []
             for applicant in nr_model.applicants:
@@ -243,14 +244,18 @@ class ReportResource(Resource):
             template_code = template_code.replace('[[{}.html]]'.format(template_part), template_part_code)
 
         return template_code
-
+    
     @staticmethod
-    def _get_template_data(nr_model):
+    def _update_entity_and_action_code(nr_model):
         if nr_model.requestTypeCd and (not nr_model.entity_type_cd or not nr_model.request_action_cd):
             # For the NRO ones.
             entity_type, request_action = get_mapped_entity_and_action_code(nr_model.requestTypeCd)
             nr_model.entity_type_cd = entity_type
             nr_model.request_action_cd = request_action
+
+    @staticmethod
+    def _get_template_data(nr_model):
+        ReportResource._update_entity_and_action_code(nr_model)
         nr_report_json = nr_model.json()
         nr_report_json['service_url'] = current_app.config.get('NAME_REQUEST_URL')
         nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.entity_type_cd)
