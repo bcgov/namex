@@ -88,6 +88,8 @@ class Config():  # pylint: disable=too-few-public-methods
     PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
     SOLR_SUB_TYPE = os.getenv('SOLR_SUB_TYPE', 'bc.registry.names.events')
     DEBUG_REQUEST = os.getenv('DEBUG_REQUEST', False)
+    SUB_AUDIENCE = os.getenv('SUB_AUDIENCE', '')
+    SUB_SERVICE_ACCOUNT = os.getenv('SUB_SERVICE_ACCOUNT', '')
 
     SOLR_FEEDER_API_URL = os.getenv('SOLR_FEEDER_API_URL', None)
 

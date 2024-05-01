@@ -17,11 +17,17 @@ def verify_jwt(session):
         if current_app.config.get("DEBUG_REQUEST"):
             structured_log(request, "INFO", f"Headers: {request.headers}")
         # Get the Cloud Pub/Sub-generated JWT in the "Authorization" header.
-        id_token.verify_oauth2_token(
+        claim = id_token.verify_oauth2_token(
             request.headers.get("Authorization").split()[1],
             Request(session=session),
-            audience=current_app.config.get("PAY_SUB_AUDIENCE")
+            audience=current_app.config.get("SUB_AUDIENCE")
         )
+        if current_app.config.get("DEBUG_REQUEST"):
+            structured_log(request, "INFO", f"claim: {claim}")
+        sa_email = current_app.config.get("SUB_SERVICE_ACCOUNT")
+        if not claim['email_verified'] or claim['email'] != sa_email:
+            msg = f"Invalid service account or email not verified for email: {claim['email']}\n"
+
     except Exception as e:  # TODO fix
         msg = f"Invalid token: {e}\n"
     finally:
