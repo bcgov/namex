@@ -50,19 +50,20 @@ def _parse_party(party: dict, legal_type: str):
 
     return party
 
+
 def _get_colin_api_resp(path: str, token: str, accepted_codes: list[HTTPStatus]) -> tuple[dict, dict]:
     """Return colin-api response json for the given path."""
     try:
         headers = {'Authorization': 'Bearer ' + token}
 
-        resp =  requests.get(f'{current_app.config["COLIN_API_URL"]}/{path}',
-                             headers=headers,
-                             timeout=current_app.config['COLIN_API_TIMEOUT'])
+        resp = requests.get(f'{current_app.config["COLIN_API_URL"]}/{path}',
+                            headers=headers,
+                            timeout=current_app.config['COLIN_API_TIMEOUT'])
 
         if resp.status_code not in accepted_codes:
             logging.debug('COLIN service unexpected response code %s %s %s', resp.status_code, path, resp.json())
             return None, {'message': resp.json(), 'status_code': resp.status_code}
-        
+
         return resp.json(), None
 
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
@@ -80,10 +81,14 @@ def get_business_info(legal_type: str, identifier: str, token: str) -> tuple[dic
         if error:
             return None, error
 
-        business_address_json = None
-        legal_types_with_ro = ['LP', 'BC', 'C', 'CC', 'CCC', 'CUL', 'QA', 'QB', 'QC', 'QD', 'QE', 'ULC', 'UQA', 'UQB', 'UQC', 'UQD', 'UQE']
+        bus_addresses = None
+        legal_types_with_ro = ['LP', 'BC', 'C', 'CC', 'CCC', 'CUL',
+                               'QA', 'QB', 'QC', 'QD', 'QE', 'ULC',
+                               'UQA', 'UQB', 'UQC', 'UQD', 'UQE']
         if legal_type in legal_types_with_ro:
-            business_address_json, error = _get_colin_api_resp(f'businesses/{legal_type}/{identifier}/office', token, [HTTPStatus.OK])
+            bus_addresses, error = _get_colin_api_resp(f'businesses/{legal_type}/{identifier}/office',
+                                                       token,
+                                                       [HTTPStatus.OK])
             if error:
                 # log error for ops and continue (address info should not block the update)
                 logging.error('Error getting address data while updating %s.', identifier)
@@ -98,8 +103,8 @@ def get_business_info(legal_type: str, identifier: str, token: str) -> tuple[dic
             'state': 'HISTORICAL' if business_json['business']['corpStateClass'] == 'HIS' else 'ACTIVE',
             'taxId': business_json['business']['businessNumber']
         }
-        if business_address_json and (delivery_address := business_address_json.get('registeredOffice', {}).get('deliveryAddress')):
-            business['addresses'] = [{**delivery_address, 'addressType': 'DELIVERY'}]
+        if bus_addresses and (address := bus_addresses.get('registeredOffice', {}).get('deliveryAddress')):
+            business['addresses'] = [{**address, 'addressType': 'DELIVERY'}]
 
         return {'business': business}, None
 
@@ -119,8 +124,12 @@ def get_owners(legal_type: str, identifier: str, token: str) -> tuple[list[dict]
 
     parties_path = f'businesses/{legal_type}/{identifier}/parties'
     # get owners
-    fio_json, fio_error = _get_colin_api_resp(f'{parties_path}?partyType=Firm Individual Owner', token, [HTTPStatus.OK, HTTPStatus.NOT_FOUND])
-    fbo_json, fbo_error = _get_colin_api_resp(f'{parties_path}?partyType=Firm Business Owner', token, [HTTPStatus.OK, HTTPStatus.NOT_FOUND])
+    fio_json, fio_error = _get_colin_api_resp(f'{parties_path}?partyType=Firm Individual Owner',
+                                              token,
+                                              [HTTPStatus.OK, HTTPStatus.NOT_FOUND])
+    fbo_json, fbo_error = _get_colin_api_resp(f'{parties_path}?partyType=Firm Business Owner',
+                                              token,
+                                              [HTTPStatus.OK, HTTPStatus.NOT_FOUND])
     if fio_error or fbo_error:
         return None, fio_error if fio_error else fbo_error
 
@@ -147,11 +156,11 @@ def get_parties(legal_type: str, identifier: str, token: str) -> tuple[list[dict
         #   - Data for these is garbage and won't be brought over when they are modernized.
         #   - party_typ_cds: ('PAS','PDI','PSA','RAD','RAF','RAO','RAS','TAP','TAA','TSP')
         ignored_types = ['Partner ATT SK', 'Partner DIRECTOR', 'Partner Sign Auth',
-                            'Partner Reinstatement Applicant - Director of foreign entity',
-                            'Partner Reinstatement Applicant - Foreign Entity Reinstated',
-                            'Partner Reinstatement Applicant - Office of foreign entity',
-                            'Partner Reinstatement Applicant - Shareholder of foreign entity',
-                            'TILMA Alternate Attorney', 'TILMA Primary Attorney', 'TILMA Submitting Party']
+                         'Partner Reinstatement Applicant - Director of foreign entity',
+                         'Partner Reinstatement Applicant - Foreign Entity Reinstated',
+                         'Partner Reinstatement Applicant - Office of foreign entity',
+                         'Partner Reinstatement Applicant - Shareholder of foreign entity',
+                         'TILMA Alternate Attorney', 'TILMA Primary Attorney', 'TILMA Submitting Party']
         roles = []
         for role in party['roles']:
             # only add valid roles
