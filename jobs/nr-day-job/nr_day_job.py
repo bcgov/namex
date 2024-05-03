@@ -13,7 +13,6 @@
 # limitations under the License.
 """s2i based launch script to run the service."""
 import os
-import time
 import uuid
 from datetime import datetime, timezone
 
@@ -68,7 +67,7 @@ def furnish_request_message(
         source=f'/requests/{request.nrNum}',
         subject="namerequest",
         type='bc.registry.names.request',
-        time=datetime.utcfromtimestamp(time.time()).replace(tzinfo=timezone.utc).isoformat(),
+        time=datetime.now(tz=timezone.utc).isoformat(),
         data={
             'request': {
                 'nrNum': request.nrNum,
