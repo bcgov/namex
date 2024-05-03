@@ -53,7 +53,7 @@ def register_shellcontext(app):
 
 def publish_email_message(payload: dict):
     """Publish the email message onto the pubsub emailer topic."""
-    email_topic = current_app.config.get('EMAILER_TOPIC', 'mailer')
+    email_topic = current_app.config.get('EMAILER_TOPIC', '')
     current_app.logger.debug('publish to queue, subject:%s, event:%s', email_topic, payload)
     queue.publish(topic=email_topic, payload=payload)
 
@@ -69,7 +69,7 @@ def furnish_request_message(
         subject="namerequest",
         type='bc.registry.names.request',
         time=datetime.utcfromtimestamp(time.time()).replace(tzinfo=timezone.utc).isoformat(),
-        json_data_body={
+        data={
             'request': {
                 'nrNum': request.nrNum,
                 'option': option
