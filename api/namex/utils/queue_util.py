@@ -51,6 +51,7 @@ def create_name_request_state_msg(nr_num, state_cd, old_state_cd):
         subject="namerequest",
         type='bc.registry.names.events',
         time=datetime.now(tz=timezone.utc).isoformat(),
+        identifier=nr_num,
         data=event_data
     )
 
@@ -84,6 +85,7 @@ def create_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
         subject="namerequest",
         type='bc.registry.names.events',
         time=datetime.now(tz=timezone.utc).isoformat(),
+        identifier=nr_num,
         data=event_data
     )
 
