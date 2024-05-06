@@ -16,6 +16,7 @@ import base64
 import json
 from datetime import timedelta
 from http import HTTPStatus
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 import pytest
 from freezegun import freeze_time
@@ -30,16 +31,14 @@ CLOUD_EVENT = SimpleCloudEvent(
     id="fake-id",
     source="fake-for-tests",
     subject="fake-subject",
-    type="payment",
+    type=QueueMessageTypes.PAYMENT.value,
     data={
-        "paymentToken": {
             "id": "29590",
             "statusCode": "COMPLETED",
             "filingIdentifier": 12345,
             "corpTypeCode": "BC",
         }
-    },
-)
+    )
 
 
 #
@@ -69,18 +68,16 @@ def test_get_payment_token():
 
     CLOUD_EVENT_TEMPLATE = {
         "data": {
-            "paymentToken": {
                 "id": 29590,
                 "statusCode": "COMPLETED",
                 "filingIdentifier": None,
                 "corpTypeCode": None
-                }
         },
         "id": 29590,
         "source": "sbc-pay",
         "subject": "BC1234567",
         "time": "2023-07-05T22:04:25.952027",
-        "type": "payment",
+        "type": QueueMessageTypes.PAYMENT.value,
     }
 
     # base - should pass
@@ -88,7 +85,7 @@ def test_get_payment_token():
     ce = SimpleCloudEvent(**ce_dict)
     payment_token = get_payment_token(ce)
     assert payment_token
-    assert payment_token.id == ce_dict["data"]["paymentToken"]["id"]
+    assert payment_token.id == ce_dict["data"]["id"]
 
     # wrong type
     ce_dict = deepcopy(CLOUD_EVENT_TEMPLATE)
@@ -167,7 +164,7 @@ def test_update_payment_record(app,
             payment._payment_completion_date = start_payment_date
             payment.save_to_db()
 
-            payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}}
+            payment_token = {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}
 
             message = helper_create_cloud_event(source="sbc-pay", subject="payment", data=payment_token)
 
@@ -185,11 +182,11 @@ def test_update_payment_record(app,
             email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
 
             # Verify message that would be sent to the emailer pubsub
-            assert email_pub['type'] == 'bc.registry.names.request'
+            assert email_pub['type'] == QueueMessageTypes.PAYMENT.value
             assert email_pub['source'] == 'namex_pay'
             assert email_pub['subject'] == 'namerequest'
             assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
-            assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
+            assert email_pub['data']['request'] == PAYMENT_TOKEN
             assert email_pub['data']['request']['statusCode'] == State.DRAFT
 
             nr_final = Request.find_by_nr(NR_NUMBER)
@@ -288,7 +285,7 @@ def test_process_payment(app,
         payment.save_to_db()
 
         # Test
-        payment_token = {"paymentToken": {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}}
+        payment_token = {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}
         
         message = helper_create_cloud_event(source="sbc-pay", subject="payment", data=payment_token)
 
@@ -315,28 +312,26 @@ def test_process_payment(app,
         email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
 
         # Verify message that would be sent to the emailer pubsub
-        assert email_pub['type'] == 'bc.registry.names.request'
+        assert email_pub['type'] == QueueMessageTypes.PAYMENT.value
         assert email_pub['source'] == 'namex_pay'
         assert email_pub['subject'] == 'namerequest'
         assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
-        assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
+        assert email_pub['data']['request'] == PAYMENT_TOKEN
         assert email_pub['data']['request']['statusCode'] == State.DRAFT
 
 def helper_create_cloud_event(
     cloud_event_id: str = None,
     source: str = "fake-for-tests",
     subject: str = "fake-subject",
-    type: str = "payment",
+    type: str = QueueMessageTypes.PAYMENT.value,
     data: dict = {},
 ):
     if not data:
         data = {
-            "paymentToken": {
                 "id": "29590",
                 "statusCode": "COMPLETED",
                 "filingIdentifier": 12345,
-                "corpTypeCode": "BC",
-            }
-        }
+                "corpTypeCode": "BC"
+                }
     ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
     return ce

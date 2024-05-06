@@ -14,6 +14,8 @@ gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = 
 registry_schemas = { git = "https://github.com/bcgov/business-schemas.git"}
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
+sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
+
 google-auth = "^2.27.0"
 google-cloud-pubsub = "^2.19.4"
 pyhumps = "3.8.0"
