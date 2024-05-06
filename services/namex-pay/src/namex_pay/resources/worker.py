@@ -35,7 +35,7 @@ from namex.services import EventRecorder, is_reapplication_eligible  # noqa:I005
 from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy.exc import OperationalError
-
+from sbc_common_components.utils.enums import QueueMessageTypes
 from namex_pay.services import queue
 from namex_pay.utils import datetime, timedelta
 
@@ -114,12 +114,11 @@ class PaymentToken:
 def get_payment_token(ce: SimpleCloudEvent):
     """Return a PaymentToken if enclosed in the cloud event."""
     if (
-        (ce.type == "payment")
+        (ce.type == QueueMessageTypes.PAYMENT.value)
         and (data := ce.data)
         and isinstance(data, dict)
-        and (payment_token := data.get("paymentToken", {}))
     ):
-        converted = humps.decamelize(payment_token)
+        converted = humps.decamelize(data)
         pt = PaymentToken(**converted)
         return pt
     return None
