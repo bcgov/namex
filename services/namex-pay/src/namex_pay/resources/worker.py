@@ -166,7 +166,7 @@ def reapply_payment(nr, payment):
         structured_log(request, message=msg)
         capture_message(msg)
         raise Exception(msg)
-    if is_reapplication_eligible(nr.expriationDate):
+    if is_reapplication_eligible(nr.expirationDate):
         # to avoid duplicate expiration date calculated
         nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
     payment.payment_completion_date = datetime.utcnow()

@@ -153,6 +153,8 @@ def test_update_payment_record(app,
             name_request._source = 'NRO'
             name_request.expirationDate = start_datetime
             name_request.priorityCd = start_priority
+            name_request.expirationDate = datetime.utcnow() + timedelta(days=2)
+
             name_request.save_to_db()
 
             payment = Payment()
@@ -166,7 +168,7 @@ def test_update_payment_record(app,
 
             payment_token = {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}
 
-            message = helper_create_cloud_event(source="sbc-pay", subject="payment", data=payment_token)
+            message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
             rv = client.post("/", json=message)
 
@@ -182,11 +184,11 @@ def test_update_payment_record(app,
             email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
 
             # Verify message that would be sent to the emailer pubsub
-            assert email_pub['type'] == QueueMessageTypes.PAYMENT.value
+            assert email_pub['type'] == QueueMessageTypes.NAMES_MESSAGE_TYPE.value
             assert email_pub['source'] == 'namex_pay'
             assert email_pub['subject'] == 'namerequest'
             assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
-            assert email_pub['data']['request'] == PAYMENT_TOKEN
+            assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
             assert email_pub['data']['request']['statusCode'] == State.DRAFT
 
             nr_final = Request.find_by_nr(NR_NUMBER)
@@ -287,7 +289,7 @@ def test_process_payment(app,
         # Test
         payment_token = {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}
         
-        message = helper_create_cloud_event(source="sbc-pay", subject="payment", data=payment_token)
+        message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
 
         rv = client.post("/", json=message)
 
@@ -312,26 +314,45 @@ def test_process_payment(app,
         email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
 
         # Verify message that would be sent to the emailer pubsub
-        assert email_pub['type'] == QueueMessageTypes.PAYMENT.value
+        assert email_pub['type'] == QueueMessageTypes.NAMES_MESSAGE_TYPE.value
         assert email_pub['source'] == 'namex_pay'
         assert email_pub['subject'] == 'namerequest'
         assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
-        assert email_pub['data']['request'] == PAYMENT_TOKEN
+        assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
         assert email_pub['data']['request']['statusCode'] == State.DRAFT
 
-def helper_create_cloud_event(
+
+def helper_create_cloud_event_envelope(
     cloud_event_id: str = None,
     source: str = "fake-for-tests",
     subject: str = "fake-subject",
     type: str = QueueMessageTypes.PAYMENT.value,
     data: dict = {},
+    pubsub_project_id: str = "PUBSUB_PROJECT_ID",
+    subscription_id: str = "SUBSCRIPTION_ID",
+    message_id: int = 1,
+    envelope_id: int = 1,
+    attributes: dict = {},
+    ce: SimpleCloudEvent = None,
 ):
     if not data:
         data = {
-                "id": "29590",
-                "statusCode": "COMPLETED",
-                "filingIdentifier": 12345,
-                "corpTypeCode": "BC"
-                }
-    ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
-    return ce
+            "email": {
+                "type": "bn",
+            }
+        }
+    if not ce:
+        ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
+    #
+    # This needs to mimic the envelope created by GCP PubSb when call a resource
+    #
+    envelope = {
+        "subscription": f"projects/{pubsub_project_id}/subscriptions/{subscription_id}",
+        "message": {
+            "data": base64.b64encode(to_queue_message(ce)).decode("UTF-8"),
+            "messageId": str(message_id),
+            "attributes": attributes,
+        },
+        "id": envelope_id,
+    }
+    return envelope
