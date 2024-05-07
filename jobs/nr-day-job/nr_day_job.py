@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from flask import Flask, current_app
 from namex.models import Request, State, db
 from namex.services import queue
+from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy import text
 
@@ -66,7 +67,7 @@ def furnish_request_message(
         id=str(uuid.uuid4()),
         source=f'/requests/{request.nrNum}',
         subject="namerequest",
-        type='bc.registry.names.request',
+        type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
         time=datetime.now(tz=timezone.utc).isoformat(),
         data={
             'request': {
