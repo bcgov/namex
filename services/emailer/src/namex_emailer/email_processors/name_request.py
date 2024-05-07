@@ -73,7 +73,7 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
 
     # get nr payments
     nr_payments = requests.get(
-        f'{current_app.config.get("NAMEX_SVC_URL")}payments/{nr_id}',
+        f'{current_app.config.get("NAMEX_SVC_URL")}/payments/{nr_id}',
         json={},
         headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
     )
@@ -96,7 +96,7 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
 
     # get receipt
     receipt = requests.post(
-        f'{current_app.config.get("NAMEX_SVC_URL")}payments/{payment_id}/receipt',
+        f'{current_app.config.get("NAMEX_SVC_URL")}/payments/{payment_id}/receipt',
         json={},
         headers={"Accept": "application/pdf", "Authorization": f"Bearer {token}"},
     )
