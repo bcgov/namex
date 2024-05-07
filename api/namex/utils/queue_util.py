@@ -24,7 +24,6 @@ def publish_email_notification(nr_num: str, option: str, refund_value=None):
         id=str(uuid.uuid4()),
         source=f'/requests/{nr_num}',
         subject="namerequest",
-        identifier=nr_num,
         type='bc.registry.names.request',
         time=datetime.now(tz=timezone.utc).isoformat(),
         data=event_data
@@ -52,7 +51,6 @@ def create_name_request_state_msg(nr_num, state_cd, old_state_cd):
         subject="namerequest",
         type='bc.registry.names.events',
         time=datetime.now(tz=timezone.utc).isoformat(),
-        identifier=nr_num,
         data=event_data
     )
 
@@ -86,7 +84,6 @@ def create_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
         subject="namerequest",
         type='bc.registry.names.events',
         time=datetime.now(tz=timezone.utc).isoformat(),
-        identifier=name_id,
         data=event_data
     )
 
