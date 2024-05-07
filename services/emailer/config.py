@@ -84,17 +84,13 @@ class Config:  # pylint: disable=too-few-public-methods
     LOG_LEVEL = os.getenv("LOG_LEVEL", None)
 
     # API Endpoints
-    AUTH_API_URL = os.getenv("AUTH_API_URL", "")
-    AUTH_API_VERSION = os.getenv("AUTH_API_VERSION", "")
     NOTIFY_API_URL = os.getenv("NOTIFY_API_URL", "")
     NOTIFY_API_VERSION = os.getenv("NOTIFY_API_VERSION", "")
     NAMEX_API_URL = os.getenv("NAMEX_API_URL", "")
     NAMEX_API_VERSION = os.getenv("NAMEX_API_VERSION", "")
-    PAY_API_VERSION = os.getenv("PAY_API_VERSION", "")
 
     NOTIFY_API_URL = f"{NOTIFY_API_URL + NOTIFY_API_VERSION}/notify"
     NAMEX_SVC_URL = f"{NAMEX_API_URL + NAMEX_API_VERSION}"
-    AUTH_URL = f"{AUTH_API_URL + AUTH_API_VERSION}"
 
     # service accounts
     ACCOUNT_SVC_AUTH_URL = os.getenv("KEYCLOAK_AUTH_TOKEN_URL")
