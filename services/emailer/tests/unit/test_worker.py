@@ -253,7 +253,7 @@ def helper_create_cloud_event_envelope(
     cloud_event_id: str = None,
     source: str = "fake-for-tests",
     subject: str = "fake-subject",
-    type: str = "email",
+    type: str = "bc.registry.names.request",
     data: dict = {},
     pubsub_project_id: str = "PUBSUB_PROJECT_ID",
     subscription_id: str = "SUBSCRIPTION_ID",
