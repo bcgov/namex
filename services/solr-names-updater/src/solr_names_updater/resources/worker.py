@@ -85,8 +85,7 @@ def worker():
 def is_names_event_msg_type(msg: dict):
     """Check message is of type nr state change."""
 
-    sub_type = QueueMessageTypes.NAMES_EVENT.value,
-    if msg and msg.type == sub_type:
+    if msg and msg.type == QueueMessageTypes.NAMES_EVENT.value:
             return True
 
     return False
