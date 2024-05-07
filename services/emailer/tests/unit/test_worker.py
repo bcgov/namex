@@ -33,18 +33,18 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """The Test Suites to ensure that the worker is operating correctly."""
 import base64
-from datetime import datetime
 from http import HTTPStatus
 from unittest.mock import patch
 
 import pytest
+from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
+from namex_emailer.email_processors import name_request
 from namex_emailer.resources import worker
-from namex_emailer.email_processors import name_request, nr_notification
 from namex_emailer.services import queue
-from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, query_nr_number
 from tests import MockResponse
+from . import helper_create_cloud_event_envelope
 
 default_legal_name = 'TEST COMP'
 default_names_array = [{'name': default_legal_name, 'state': 'NE'}]
@@ -142,12 +142,13 @@ def test_nr_notification(
         "names": names,
         "legalType": "BC",
         "applicants": {"emailAddress": "test@test.com"},
+        "id": "some_id"
     }
     nr_response = MockResponse(nr_json, 200)
     token = "token"
     email_msg = {
         "id": "123456789",
-        "type": "bc.registry.names.request",
+        "type": QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
         "source": f"/requests/{nr_number}",
         "data": {"request": {"nrNum": nr_number, "option": option, "refundValue": refund_value}},
     }
@@ -180,7 +181,7 @@ def test_nr_receipt_notification(app, client, mocker):
     pdfs = ["test"]
     email_msg = {
         "id": "123456789",
-        "type": "bc.registry.names.request",
+        "type": QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
         "source": f"/requests/{nr_number}",
         "data": {
             "request": {
@@ -247,39 +248,3 @@ def test_send_email_with_incomplete_payload(app, client, email_msg, mocker):
 
     # Check
     assert rv.status_code == HTTPStatus.OK
-
-
-def helper_create_cloud_event_envelope(
-    cloud_event_id: str = None,
-    source: str = "fake-for-tests",
-    subject: str = "fake-subject",
-    type: str = "bc.registry.names.request",
-    data: dict = {},
-    pubsub_project_id: str = "PUBSUB_PROJECT_ID",
-    subscription_id: str = "SUBSCRIPTION_ID",
-    message_id: int = 1,
-    envelope_id: int = 1,
-    attributes: dict = {},
-    ce: SimpleCloudEvent = None,
-):
-    if not data:
-        data = {
-            "email": {
-                "type": "bn",
-            }
-        }
-    if not ce:
-        ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
-    #
-    # This needs to mimic the envelope created by GCP PubSb when call a resource
-    #
-    envelope = {
-        "subscription": f"projects/{pubsub_project_id}/subscriptions/{subscription_id}",
-        "message": {
-            "data": base64.b64encode(to_queue_message(ce)).decode("UTF-8"),
-            "messageId": str(message_id),
-            "attributes": attributes,
-        },
-        "id": envelope_id,
-    }
-    return envelope

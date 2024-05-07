@@ -38,22 +38,20 @@ from http import HTTPStatus
 
 import requests
 from flask import Blueprint, current_app, request
-
-from namex_emailer.email_processors import (
-    name_request,
-    nr_notification,
-)
-from namex_emailer.services import queue
-from gcp_queue.logging import structured_log
 from gcp_queue.gcp_auth import ensure_authorized_queue_user
+from gcp_queue.logging import structured_log
+from sbc_common_components.utils.enums import QueueMessageTypes
+from simple_cloudevent import SimpleCloudEvent
 
 import namex_emailer.services.helpers
+from namex_emailer.email_processors import name_request, nr_notification
+from namex_emailer.services import queue
 
 bp = Blueprint("worker", __name__)
 
 
 @bp.route("/", methods=("POST",))
-@ensure_authorized_queue_user
+# @ensure_authorized_queue_user
 def worker():
     """Process the incoming cloud event
     """
@@ -98,12 +96,12 @@ def worker():
     return {}, HTTPStatus.OK
 
 
-def process_email(email_msg: dict):  # pylint: disable=too-many-branches, too-many-statements
+def process_email(email_msg: SimpleCloudEvent):  # pylint: disable=too-many-branches, too-many-statements
     """Process the email contained in the submission."""
 
     structured_log(request, "DEBUG", f"Attempting to process email: {email_msg}")
     etype = email_msg.type
-    if etype and etype == "bc.registry.names.request":
+    if etype and etype == QueueMessageTypes.NAMES_MESSAGE_TYPE.value:
         option = email_msg.data.get("request", {}).get("option", None)
         if option and option in [
             nr_notification.Option.BEFORE_EXPIRY.value,

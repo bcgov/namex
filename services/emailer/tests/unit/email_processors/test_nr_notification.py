@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Unit Tests for the name request expiry email processor."""
+import base64
 from datetime import datetime
 from unittest.mock import patch
 
 import pytest
+from sbc_common_components.utils.enums import QueueMessageTypes
+from simple_cloudevent import SimpleCloudEvent
 
 from namex_emailer.email_processors import nr_notification
 from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string
 from tests import MockResponse
-from simple_cloudevent import SimpleCloudEvent
+
+from .. import helper_create_cloud_event
 
 default_legal_name = "TEST COMP"
 default_names_array = [{"name": default_legal_name, "state": "NE"}]
@@ -82,13 +86,10 @@ def test_nr_notification(
         }
         nr_response = MockResponse(nr_json, 200)
         mocker.patch('namex_emailer.services.helpers.query_nr_number', return_value=nr_response)
+        email_msg = {"request": {"nrNum": nr_number, "option": option, "refundValue": refund_value}}
+        message = helper_create_cloud_event(data=email_msg, type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,)
         email = nr_notification.process(
-            {
-                "id": "123456789",
-                "type": "bc.registry.names.request",
-                "source": f"/requests/{nr_number}",
-                "data": {"request": {"nrNum": nr_number, "option": option, "refundValue": refund_value}},
-            },
+            message,
             option,
         )
 
@@ -111,19 +112,3 @@ def test_nr_notification(
         if option == nr_notification.Option.EXPIRED.value:
             assert nr_number in email["content"]["body"]
             assert expected_legal_name in email["content"]["body"]
-
-def helper_create_cloud_event(
-    cloud_event_id: str = None,
-    source: str = "fake-for-tests",
-    subject: str = "fake-subject",
-    type: str = QueueMessageTypes.PAYMENT.value,
-    data: dict = {},
-):
-    if not data:
-        data = {
-                "id": "29590",
-                "statusCode": "COMPLETED",
-                "corpTypeCode": "BC"
-                }
-    ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
-    return ce

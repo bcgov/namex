@@ -30,8 +30,8 @@ from namex_emailer.email_processors import substitute_template_parts
 def process(email_info: dict) -> dict:
     """Build the email for Name Request notification."""
     structured_log(request, "DEBUG", f"NR_notification: {email_info}")
-    nr_number = email_info.data.get("data", {}).get("request", {}).get("header", {}).get("nrNum", "")
-    payment_token = email_info.data.get("data", {}).get("request", {}).get("paymentToken", "")
+    nr_number = email_info.data.get("request", {}).get("header", {}).get("nrNum", "")
+    payment_token = email_info.data.get("request", {}).get("paymentToken", "")
     template = Path(f'{current_app.config.get("TEMPLATE_PATH")}/NR-PAID.html').read_text()
     filled_template = substitute_template_parts(template)
     # render template with vars

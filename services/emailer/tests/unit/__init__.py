@@ -32,10 +32,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 """The Unit Tests and the helper routines."""
+import base64
 import json
 from random import randrange
 from unittest.mock import Mock
 
+from sbc_common_components.utils.enums import QueueMessageTypes
+from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 from tests import EPOCH_DATETIME
 
@@ -63,3 +66,56 @@ def create_mock_message(message_payload: dict):
     json_msg_payload = json.dumps(message_payload)
     mock_msg.data.decode = Mock(return_value=json_msg_payload)
     return mock_msg
+
+def helper_create_cloud_event_envelope(
+    cloud_event_id: str = None,
+    source: str = "fake-for-tests",
+    subject: str = "fake-subject",
+    type: str = QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
+    data: dict = {},
+    pubsub_project_id: str = "PUBSUB_PROJECT_ID",
+    subscription_id: str = "SUBSCRIPTION_ID",
+    message_id: int = 1,
+    envelope_id: int = 1,
+    attributes: dict = {},
+    ce: SimpleCloudEvent = None,
+):
+    if not data:
+        data = {
+            "email": {
+                "type": "bn",
+            }
+        }
+    if not ce:
+        ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
+    #
+    # This needs to mimic the envelope created by GCP PubSb when call a resource
+    #
+    envelope = {
+        "subscription": f"projects/{pubsub_project_id}/subscriptions/{subscription_id}",
+        "message": {
+            "data": base64.b64encode(to_queue_message(ce)).decode("UTF-8"),
+            "messageId": str(message_id),
+            "attributes": attributes,
+        },
+        "id": envelope_id,
+    }
+    return envelope
+
+
+def helper_create_cloud_event(
+    cloud_event_id: str = None,
+    source: str = "fake-for-tests",
+    subject: str = "fake-subject",
+    type: str = QueueMessageTypes.PAYMENT.value,
+    data: dict = {},
+):
+    if not data:
+        data = {
+                "id": "29590",
+                "statusCode": "COMPLETED",
+                "corpTypeCode": "BC"
+                }
+    ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
+    return ce
+    

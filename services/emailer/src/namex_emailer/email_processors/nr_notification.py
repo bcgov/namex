@@ -26,7 +26,7 @@ from jinja2 import Template
 # from namex_emailer.services.helpers import query_nr_number, format_as_report_string, as_legislation_timezone
 import namex_emailer.services.helpers
 from namex_emailer.email_processors import substitute_template_parts
-
+from simple_cloudevent import SimpleCloudEvent
 
 class Option(Enum):
     """NR notification option."""
@@ -63,7 +63,7 @@ def __get_instruction_group(legal_type):
     return ""
 
 
-def process(email_info: dict, option) -> dict:  # pylint: disable-msg=too-many-locals
+def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-msg=too-many-locals
     """
     Build the email for Name Request notification.
 
@@ -87,7 +87,7 @@ def process(email_info: dict, option) -> dict:  # pylint: disable-msg=too-many-l
 
     refund_value = ""
     if option == Option.REFUND.value:
-        refund_value = email_info.get("data", {}).get("request", {}).get("refundValue", None)
+        refund_value = email_info.data.get("request", {}).get("refundValue", None)
 
     business_name = ""
     for n_item in nr_data["names"]:
