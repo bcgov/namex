@@ -226,7 +226,7 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
         cloud_event_msg = SimpleCloudEvent(
         source=__name__[: __name__.find(".")],
         subject="namerequest",
-        type="bc.registry.names.request",
+        type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
         data={
             'request': {
                 'header': {'nrNum': nr.nrNum},
