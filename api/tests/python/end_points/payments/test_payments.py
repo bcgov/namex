@@ -11,6 +11,7 @@ from tests.python.end_points.common.http import get_test_headers
 from tests.python.end_points.name_requests.test_setup_utils.test_helpers import \
     post_test_nr_json
 from tests.python.end_points.util import create_header
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from ..common.http import build_request_uri, build_test_query
 from ..common.logging import log_request_path
@@ -545,7 +546,7 @@ def test_create_payment(client, jwt, test_name, action, complete_payment, do_ref
         email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
 
         # Verify message that would be sent to the emailer pubsub
-        assert email_pub['type'] == 'bc.registry.names.events'
+        assert email_pub['type'] == QueueMessageTypes.NAMES_EVENT.value
         assert email_pub['source'] == '/requests/NR L000001'
         assert email_pub['subject'] == 'namerequest'
         assert email_pub['data']['request']['nrNum'] == 'NR L000001'

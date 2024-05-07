@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from flask import current_app
 from simple_cloudevent import SimpleCloudEvent
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from namex.services import queue
 
@@ -24,7 +25,7 @@ def publish_email_notification(nr_num: str, option: str, refund_value=None):
         id=str(uuid.uuid4()),
         source=f'/requests/{nr_num}',
         subject="namerequest",
-        type='bc.registry.names.request',
+        type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
         time=datetime.now(tz=timezone.utc).isoformat(),
         data=event_data
     )
@@ -49,7 +50,7 @@ def create_name_request_state_msg(nr_num, state_cd, old_state_cd):
         id=str(uuid.uuid4()),
         source=f'/requests/{nr_num}',
         subject="namerequest",
-        type='bc.registry.names.events',
+        type=QueueMessageTypes.NAMES_EVENT.value,
         time=datetime.now(tz=timezone.utc).isoformat(),
         data=event_data
     )
@@ -82,7 +83,7 @@ def create_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
         id=str(uuid.uuid4()),
         source=f'/request/{nr_num}/name/{name_id}',
         subject="namerequest",
-        type='bc.registry.names.events',
+        type=QueueMessageTypes.NAMES_EVENT.value,
         time=datetime.now(tz=timezone.utc).isoformat(),
         data=event_data
     )

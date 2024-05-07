@@ -5,6 +5,7 @@ import datetime
 import json
 
 import pytest
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from namex.constants import EntityTypes, NameRequestActions
 from namex.models import State
@@ -730,7 +731,7 @@ def test_draft_patch_refund(client, jwt, app, mocker):
     email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
 
     # Verify message that would be sent to the emailer pubsub
-    assert email_pub['type'] == 'bc.registry.names.request'
+    assert email_pub['type'] == QueueMessageTypes.NAMES_MESSAGE_TYPE.value
     assert email_pub['source'] == '/requests/NR L000001'
     assert email_pub['subject'] == 'namerequest'
     assert email_pub['data']['request']['nrNum'] == 'NR L000001'

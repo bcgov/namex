@@ -14,6 +14,8 @@ swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 # flask-jwt-oidc = { git = "https://github.com/thorwolpert/flask-jwt-oidc.git" }
 flask-jwt-oidc = { git = "https://github.com/bolyachevets/flask-jwt-oidc.git", branch = "bump-flask-version" }
+sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
+
 gunicorn = "^20.1.0"
 flask = "^3.0.2"
 flask-restx = "^1.0.3"
