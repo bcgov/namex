@@ -866,7 +866,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "6a61806814fbb0bc1dd5731949361647dc4e3f14"
+resolved_reference = "ac8b00b0fbce9dac22b586f4a51e0b124043d8d3"
 subdirectory = "services/pubsub"
 
 [[package]]
@@ -1892,7 +1892,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "feature-queue-upgrade-python3.12"
-resolved_reference = "6a61806814fbb0bc1dd5731949361647dc4e3f14"
+resolved_reference = "ac8b00b0fbce9dac22b586f4a51e0b124043d8d3"
 subdirectory = "api"
 
 [[package]]
@@ -3002,7 +3002,7 @@ jaeger-client = "*"
 type = "git"
 url = "https://github.com/bcgov/sbc-common-components.git"
 reference = "HEAD"
-resolved_reference = "6880382fb03881c30006b41117e04ca2792608ad"
+resolved_reference = "9c39308014c3f10c3407f18cf7007e1fc156ce0a"
 subdirectory = "python"
 
 [[package]]
