@@ -22,6 +22,7 @@ from gcp_queue.gcp_auth import ensure_authorized_queue_user
 from gcp_queue.logging import structured_log
 from namex.models import Request as RequestDAO
 from requests import RequestException
+from sbc_common_components.utils.enums import QueueMessageTypes
 from sentry_sdk import capture_message
 from sqlalchemy.exc import OperationalError
 from urllib3.exceptions import NewConnectionError
@@ -83,7 +84,8 @@ def worker():
 
 def is_names_event_msg_type(msg: dict):
     """Check message is of type nr state change."""
-    sub_type = current_app.config.get('SOLR_SUB_TYPE', None)
+
+    sub_type = QueueMessageTypes.NAMES_EVENT.value,
     if msg and msg.type == sub_type:
             return True
 

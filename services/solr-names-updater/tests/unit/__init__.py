@@ -14,12 +14,13 @@
 """The Unit Tests and the helper routines."""
 import json
 from datetime import datetime
+from random import randrange
+from unittest.mock import Mock
 
 from freezegun import freeze_time
 from namex.models import Name, Request, State
+from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
-from random import randrange
-from unittest.mock import Mock
 
 from .. import add_years
 
@@ -121,7 +122,7 @@ def helper_create_cloud_event(
     cloud_event_id: str = None,
     source: str = "/requests/NR 6724165",
     subject: str = "fake-subject",
-    type: str = "bc.registry.names.events",
+    type: str = QueueMessageTypes.NAMES_EVENT.value,
     data: dict = {}):
 
     data = {

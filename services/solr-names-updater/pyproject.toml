@@ -13,6 +13,7 @@ namex = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "api
 gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "services/pubsub", branch = "feature-queue-upgrade-python3.12" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
+sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
 flask = "^3.0.2"
 
 
