@@ -26,7 +26,9 @@ from .test_setup_utils.test_helpers import (
     assert_applicant_is_mapped_correctly,
     assert_names_are_mapped_correctly,
     create_approved_nr,
+    create_consumed_nr,
     create_draft_nr,
+    create_expired_nr,
     patch_nr,
 )
 
@@ -595,7 +597,9 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app, mocker):
 
     input_fields['names'] = custom_names
 
-    test_nr = create_approved_nr(client, input_fields)
+    # test_nr = create_approved_nr(client, input_fields)
+    test_nr = create_consumed_nr(client, input_fields)
+
     assert test_nr is not None
 
     # Take the response and edit it
@@ -605,7 +609,7 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app, mocker):
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
-    print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
+    assert patch_response.status_code == 500
 
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
@@ -656,7 +660,7 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app, mocker):
 
     input_fields['names'] = custom_names
 
-    test_nr = create_approved_nr(client, input_fields)
+    test_nr = create_expired_nr(client, input_fields)
     assert test_nr is not None
 
     # Take the response and edit it
@@ -666,7 +670,7 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app, mocker):
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
-    print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
+    assert patch_response.status_code == 500
 
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
