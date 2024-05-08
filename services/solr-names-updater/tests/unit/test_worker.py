@@ -13,6 +13,8 @@
 # limitations under the License.
 """The Test Suites to ensure that the worker is operating correctly."""
 # from contextlib import suppress
+import base64
+import json
 from unittest import mock
 from unittest.mock import patch
 
@@ -47,8 +49,11 @@ def test_sp_gp_names_not_processed_to_solr(
         assert_value):
     """Assert that names are added to solr."""
     queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
-    nr_num = message_payload.data['request']['nrNum']
-    nr_new_state = message_payload.data['request']['newState']
+
+    data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
+    nr_num = data_json['data']['request']['nrNum']
+
+    nr_new_state = data_json['data']['request']['newState']
     create_nr(nr_num, nr_new_state, ['TEST NAME 1'], ['APPROVED'], nr_entity)
     
     with patch.object(worker, 'process_names_event_message', return_value=True) as mock_process_names_evt_func:

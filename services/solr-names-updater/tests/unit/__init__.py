@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Unit Tests and the helper routines."""
+import base64
 import json
 from datetime import datetime
 from random import randrange
@@ -20,7 +21,7 @@ from unittest.mock import Mock
 from freezegun import freeze_time
 from namex.models import Name, Request, State
 from sbc_common_components.utils.enums import QueueMessageTypes
-from simple_cloudevent import SimpleCloudEvent
+from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 from .. import add_years
 
@@ -123,7 +124,13 @@ def helper_create_cloud_event(
     source: str = "/requests/NR 6724165",
     subject: str = "fake-subject",
     type: str = QueueMessageTypes.NAMES_EVENT.value,
-    data: dict = {}):
+    data: dict = {},
+    pubsub_project_id: str = "PUBSUB_PROJECT_ID",
+    subscription_id: str = "SUBSCRIPTION_ID",
+    message_id: int = 1,
+    envelope_id: int = 1,
+    attributes: dict = {}
+    ):
 
     data = {
             'request': {
@@ -133,4 +140,16 @@ def helper_create_cloud_event(
             }
     }
     ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
-    return ce
+    #
+    # This needs to mimic the envelope created by GCP PubSb when call a resource
+    #
+    envelope = {
+        "subscription": f"projects/{pubsub_project_id}/subscriptions/{subscription_id}",
+        "message": {
+            "data": base64.b64encode(to_queue_message(ce)).decode("UTF-8"),
+            "messageId": str(message_id),
+            "attributes": attributes,
+        },
+        "id": envelope_id,
+    }
+    return envelope

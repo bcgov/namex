@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests to ensure names processors function as intended."""
+import base64
+import json
 from unittest import mock
 from unittest.mock import patch
 
@@ -85,8 +87,9 @@ def test_should_add_names_to_solr(
     """Assert that names are added to solr."""
 
     queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
-    nr_num = message_payload.data['request']['nrNum']
-    nr_new_state = message_payload.data['request']['newState']
+    data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
+    nr_num = data_json['data']['request']['nrNum']
+    nr_new_state = data_json['data']['request']['newState']
     create_nr(nr_num, nr_new_state, names, names_state)
     # mock_msg = create_queue_mock_message(message_payload)
     mock_response = MockResponse({}, 200)
@@ -169,7 +172,8 @@ def test_should_delete_names_from_solr(
 
     queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
     queue_util.send_name_state_msg = mock.Mock(return_value="True")
-    nr_num = message_payload.data[state_change_type]['nrNum']
+    data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
+    nr_num = data_json['data'][state_change_type]['nrNum']
     mock_nr = create_nr(nr_num, new_nr_state, names, name_states)
     nr_ids_to_delete_from_solr = get_nr_ids_to_delete_from_solr(mock_nr)
     mock_response = MockResponse({}, 200)
