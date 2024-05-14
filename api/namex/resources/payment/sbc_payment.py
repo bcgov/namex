@@ -36,7 +36,6 @@ def handle_auth_error(ex):
 })
 class SBCPayment(Resource):
     @staticmethod
-    @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     @payment_api.response(200, 'Success', '')
     # @marshal_with(payment_response_schema)
@@ -67,7 +66,6 @@ class SBCPayment(Resource):
 @payment_api.route('/sbc-pay/extra', strict_slashes=False, methods=['DELETE', 'OPTIONS'])
 class SBCPaymentExtra(Resource):
     @staticmethod
-    @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @payment_api.expect()
     @payment_api.response(200, 'Success', '')

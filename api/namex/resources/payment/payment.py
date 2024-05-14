@@ -281,7 +281,6 @@ class PaymentNameRequestResource(AbstractNameRequestResource):
 
 class FindNameRequestPayments(PaymentNameRequestResource):
     """Find name request payments endpoints."""
-    @cors.crossdomain(origin='*')
     def get(self, nr_id):
         """Get endpoint."""
         try:
@@ -349,7 +348,6 @@ class FindNameRequestPayments(PaymentNameRequestResource):
 
 class CreateNameRequestPayment(AbstractNameRequestResource):
     """Create name request payment endpoints."""
-    @cors.crossdomain(origin='*')
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
     @payment_api.doc(params={
@@ -510,7 +508,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
 class NameRequestPayment(AbstractNameRequestResource):
     """Name request payment endpoints."""
-    @cors.crossdomain(origin='*')
     @payment_api.response(200, 'Success', '')
     # TODO: Update schema and marshal
     # @marshal_with(payment_response_schema)
@@ -578,7 +575,6 @@ class NameRequestPayment(AbstractNameRequestResource):
         except Exception as err:
             return handle_exception(err, err, 500)
 
-    @cors.crossdomain(origin='*')
     def delete(self, nr_id, payment_id):
         """Delete endpoint."""
         try:
@@ -628,7 +624,6 @@ class NameRequestPayment(AbstractNameRequestResource):
 class NameRequestPaymentAction(AbstractNameRequestResource):
     """Name request payment action endpoints."""
     # REST Method Handlers
-    @cors.crossdomain(origin='*')
     def patch(self, nr_id, payment_id, payment_action):
         """
         :param nr_id:

@@ -16,7 +16,6 @@ api = Namespace('exactMatchMeta', description='Exact Match System - Metadata')
 class ExactMatch(Resource):
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get():
         query = request.args.get('query')

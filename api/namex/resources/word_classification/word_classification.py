@@ -49,7 +49,6 @@ def handle_auth_error(ex):
 @api.route('/<string:word>', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 class WordClassification(Resource):
     @staticmethod
-    @cors.crossdomain(origin='*')
     @api.expect(word_request)
     def get(word):
         try:
@@ -66,7 +65,6 @@ class WordClassification(Resource):
             return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     @api.expect(word_request)
     def post(word):
@@ -90,7 +88,6 @@ class WordClassification(Resource):
             return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     # @jwt.requires_roles([User.APPROVER])
     # @api.marshal_with(word_classification)
     @api.expect(word_request)
@@ -113,7 +110,6 @@ class WordClassification(Resource):
             return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
     def delete(word):

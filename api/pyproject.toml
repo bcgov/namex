@@ -17,6 +17,7 @@ flask-jwt-oidc = { git = "https://github.com/bolyachevets/flask-jwt-oidc.git", b
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
 
 gunicorn = "^20.1.0"
+flask-cors = "^4.0.0"
 flask = "^3.0.2"
 flask-restx = "^1.0.3"
 flask-sqlalchemy = "^3.0.0"

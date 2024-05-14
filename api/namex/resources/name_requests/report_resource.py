@@ -139,7 +139,6 @@ class ReportResource(Resource):
             template = template.replace(template_string, val)
         return template
 
-    @cors.crossdomain(origin='*')
     def get(self, nr_id):
         try:
             if not full_access_to_name_request(request):

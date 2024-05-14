@@ -53,7 +53,6 @@ def load_xml_response_content(response, xpath_query=None):
     'corp_num': 'Incorporation Number - This field is required'
 })
 class MrasProfile(Resource):
-    @cors.crossdomain(origin='*')
     def get(self, province, corp_num):
         try:
             # Get the jurisdiction

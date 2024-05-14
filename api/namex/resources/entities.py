@@ -56,7 +56,6 @@ entity_api = Namespace('entity', description='ENTITY API')
     'corp_num': 'Incorporation Number - This field is required'
 })
 class EntityApi(Resource):
-    @cors.crossdomain(origin='*')
     def get(self, corp_num):
         try:
             SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')

@@ -57,7 +57,6 @@ class DocumentAnalysis(Resource):
     })
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     @api.expect(a_document)
     def post(analysis=None, *args, **kwargs):
@@ -90,7 +89,6 @@ class DocumentAnalysis(Resource):
         return jsonify(results), code
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(analysis=None, *args, **kwargs):
         # added because namerequest has no token and auto generated can't be allowed to POST

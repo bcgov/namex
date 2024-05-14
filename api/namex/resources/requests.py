@@ -74,7 +74,6 @@ class Echo(Resource):
     """Helper method to echo back all your JWT token info
     """
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(*args, **kwargs):
         try:
@@ -91,7 +90,6 @@ class RequestsQueue(Resource):
     and assigns it to your auth id, and marks it as INPROGRESS
     """
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_roles([User.APPROVER])
     def get():
         """ Gets the oldest nr num, that is in DRAFT status
@@ -156,7 +154,6 @@ class Requests(Resource):
     ROWS = 10
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(*args, **kwargs):
         # validate row & start params
@@ -376,7 +373,6 @@ class Requests(Resource):
 
     # noinspection PyUnusedLocal,PyUnusedLocal
     @api.expect(a_request)
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def post(self, *args, **kwargs):
         current_app.logger.info('Someone is trying to post a new request')

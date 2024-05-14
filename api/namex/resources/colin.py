@@ -58,13 +58,11 @@ colin_api = Namespace('colin', description='COLIN API')
     'corp_num': 'Incorporation Number - This field is required'
 })
 class ColinApi(Resource):
-    @cors.crossdomain(origin='*')
     def post(self, corp_num):
         colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/{corp_num}'
         response, status_code = _init(colin_url)
         return response, status_code
 
-    @cors.crossdomain(origin='*')
     def get(self, corp_num):
         try:
             business_info_dict = oracle_services.get_business_info_by_corp_num(corp_num=corp_num)

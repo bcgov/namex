@@ -30,7 +30,6 @@ def handle_auth_error(ex):
 @api.route('/', strict_slashes=False, methods=['GET', 'OPTIONS'])
 class WaitTimeStats(Resource):
     @staticmethod
-    @cors.crossdomain(origin='*')
     @cache.cached(timeout=14400) # cached for 4 hours
     def get():
         try:

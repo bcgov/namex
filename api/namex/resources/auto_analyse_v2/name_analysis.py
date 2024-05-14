@@ -102,7 +102,6 @@ def validate_name_request(location, entity_type, request_action):
 class NameAnalysisResource(Resource):
     """Wrapper service for Name analyzer."""
     @staticmethod
-    @cors.crossdomain(origin='*')
     @name_analysis_api.expect(NAME_ANALYSIS_REQUEST_SCHEMA)
     def post():
         """Posts a name analysis request to the name analyzer.
@@ -127,7 +126,6 @@ class NameAnalysisResource(Resource):
             return {'message': 'Unable to create name analyze request.'}, HTTPStatus.SERVICE_UNAVAILABLE
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     def get(identifier):
         """Retrieve the status of a name analysis request from the name analyzer."""
         if not identifier:
@@ -144,7 +142,6 @@ class NameAnalysisResource(Resource):
                     }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     def delete(identifier):
         """Cancel the name analysis request corresponding to the given identifier."""
         if not identifier:

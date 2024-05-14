@@ -15,7 +15,6 @@ api = Namespace('namexUserSettings', description='Namex - get/update user settin
 class UserSettings(Resource):
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(*args, **kwargs):
         try:
@@ -29,7 +28,6 @@ class UserSettings(Resource):
             return jsonify({'message': 'Error getting user settings.'}), 500
     
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def put():
         try:

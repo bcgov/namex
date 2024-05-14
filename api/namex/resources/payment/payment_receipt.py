@@ -40,7 +40,6 @@ def handle_auth_error(ex):
 })
 class PaymentReceipt(Resource):
     @staticmethod
-    @cors.crossdomain(origin='*')
     @payment_api.response(201, 'Created', '')
     def post(payment_id):
         try:
@@ -84,7 +83,6 @@ class PaymentReceipt(Resource):
             return handle_exception(err, err, 500)
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @payment_api.response(200, 'Success', '')
     def get(payment_id):
         try:

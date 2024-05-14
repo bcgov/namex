@@ -42,7 +42,6 @@ class NameRequestResource(BaseNameRequestResource):
     """Name Request endpoint."""
 
     @api.expect(nr_request)
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(self, nr_id):
         """Name Request GET endpoint."""
@@ -84,7 +83,6 @@ class NameRequestResource(BaseNameRequestResource):
 
     # REST Method Handlers
     @api.expect(nr_request)
-    @cors.crossdomain(origin='*')
     def put(self, nr_id):
         """
         NOT used for Existing Name Request updates that only change the Name Request. Use 'patch' instead.
@@ -147,7 +145,6 @@ class NameRequestResource(BaseNameRequestResource):
 })
 class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
-    @cors.crossdomain(origin='*')
     def patch(self, nr_id, nr_action: str):
         """
         Update a specific set of fields and/or a provided action. Fields excluded from the payload will not be updated.
@@ -430,7 +427,6 @@ class NameRequestFields(BaseNameRequestResource):
 })
 class NameRequestRollback(BaseNameRequestResource):
     @api.expect(nr_request)
-    @cors.crossdomain(origin='*')
     def patch(self, nr_id, action):
         """
         Roll back a Name Request to a usable state in case of a frontend error.

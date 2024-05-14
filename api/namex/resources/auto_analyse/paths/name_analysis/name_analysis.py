@@ -157,7 +157,6 @@ class NameAnalysis(Resource):
     """
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
     @api.doc(params={

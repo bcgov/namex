@@ -20,6 +20,7 @@ from .VERSION import __version__  # noqa: F401; imported from here
 jwt = JwtManager()
 
 import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
+from flask_cors import CORS
 from flask_migrate import Migrate
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
@@ -43,6 +44,7 @@ run_version = get_run_version()
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Create app."""
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(config.CONFIGURATION[run_mode])
 
     # Configure Sentry

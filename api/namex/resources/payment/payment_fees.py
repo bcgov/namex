@@ -44,7 +44,6 @@ def handle_auth_error(ex):
 @payment_api.route('/fees', strict_slashes=False, methods=['POST', 'OPTIONS'])
 class PaymentFees(Resource):
     @staticmethod
-    @cors.crossdomain(origin='*')
     @payment_api.expect(calculate_fees_request_schema)
     @payment_api.response(200, 'Success')
     @payment_api.response(400, 'Bad Request')
