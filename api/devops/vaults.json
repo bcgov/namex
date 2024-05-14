@@ -59,9 +59,11 @@
     },
     {
         "vault": "gcp-queue",
-        "application": [
+        "application":
+        [
             "namex",
-            "topics"
+            "topics",
+            "a083gt"
         ]
     }
 ]

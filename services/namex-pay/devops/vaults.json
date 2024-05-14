@@ -23,7 +23,8 @@
         "vault": "gcp-queue",
         "application": [
             "namex",
-            "topics"
+            "topics",
+            "a083gt"
         ]
     }
 ]
