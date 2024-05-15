@@ -21,6 +21,7 @@ from flask import Blueprint, Flask, current_app, request
 from gcp_queue.gcp_auth import ensure_authorized_queue_user
 from gcp_queue.logging import structured_log
 from namex.models import Request as RequestDAO
+from namex.services import queue
 from requests import RequestException
 from sbc_common_components.utils.enums import QueueMessageTypes
 from sentry_sdk import capture_message
@@ -35,7 +36,6 @@ from solr_names_updater.names_processors.possible_conflicts import (  # noqa: I0
 from solr_names_updater.names_processors.possible_conflicts import (  # noqa: I001, I005
     process_delete_from_solr as process_possible_conflicts_delete,
 )
-from solr_names_updater.services import queue
 
 bp = Blueprint("worker", __name__)
 

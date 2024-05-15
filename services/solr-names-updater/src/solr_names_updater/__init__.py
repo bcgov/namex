@@ -50,7 +50,7 @@ from solr_names_updater.utils import get_run_version
 
 from solr_names_updater.resources import register_endpoints
 
-from solr_names_updater.services import queue
+from namex.services import queue
 
 
 def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
