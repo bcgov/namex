@@ -83,7 +83,8 @@ class Config():  # pylint: disable=too-few-public-methods
     NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
 
     GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
-    EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', 'namex-receipt-dev')
+    EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', '')
+    NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
     AUDIENCE = os.getenv('AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Subscriber')
     PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
     SUB_AUDIENCE = os.getenv('SUB_AUDIENCE', '')
