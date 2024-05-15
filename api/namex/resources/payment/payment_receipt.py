@@ -71,7 +71,7 @@ class PaymentReceipt(Resource):
             return send_file(
                 receipt_response,
                 as_attachment=True,
-                attachment_filename='payment-receipt-{id}.pdf'.format(id=receipt_info.get('receiptNumber')))
+                download_name='payment-receipt-{id}.pdf'.format(id=receipt_info.get('receiptNumber')))
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
