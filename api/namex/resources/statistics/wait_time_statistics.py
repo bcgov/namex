@@ -42,8 +42,8 @@ class WaitTimeStats(Resource):
             return make_response(jsonify(response), HTTPStatus.OK)
 
         except ValueError as err:
-            return jsonify('Wait time stats not found: ' + repr(err)), 200
+            return make_response(jsonify('Wait time stats not found: ' + repr(err)), 200)
         except ApiServiceException as err:
             return handle_exception(err, err.message, 400)
         except Exception as err:
-            return jsonify('Internal Server Error\n' + repr(err)), 500
+            return make_response(jsonify('Internal Server Error\n' + repr(err)), 500)

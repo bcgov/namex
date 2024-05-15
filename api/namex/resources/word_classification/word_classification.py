@@ -49,6 +49,7 @@ def handle_auth_error(ex):
 @api.route('/<string:word>', strict_slashes=False, methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 class WordClassification(Resource):
     @staticmethod
+    @cors.crossdomain(origin='*')
     @api.expect(word_request)
     def get(word):
         try:
@@ -60,17 +61,18 @@ class WordClassification(Resource):
 
             return make_response(jsonify({'word': word}), HTTPStatus.OK)
         except ValueError as err:
-            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+            return make_response(jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND)
         except Exception as err:
-            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     @staticmethod
+    @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     @api.expect(word_request)
     def post(word):
         json_input = request.get_json()
         if not json_input:
-            return jsonify('No input data provided'), HTTPStatus.BAD_REQUEST
+            return make_response(jsonify('No input data provided'), HTTPStatus.BAD_REQUEST)
 
         try:
             service = WordClassificationService()
@@ -83,18 +85,19 @@ class WordClassification(Resource):
             data = entity.json()
             return make_response(jsonify(data), HTTPStatus.OK)
         except ValueError as err:
-            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+            return make_response(jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND)
         except Exception as err:
-            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     @staticmethod
+    @cors.crossdomain(origin='*')
     # @jwt.requires_roles([User.APPROVER])
     # @api.marshal_with(word_classification)
     @api.expect(word_request)
     def put(word):
         json_input = request.get_json()
         if not json_input:
-            return jsonify('No input data provided'), HTTPStatus.BAD_REQUEST
+            return make_response(jsonify('No input data provided'), HTTPStatus.BAD_REQUEST)
 
         try:
             service = WordClassificationService()
@@ -105,11 +108,12 @@ class WordClassification(Resource):
             data = entity.json()
             return make_response(jsonify(data), HTTPStatus.OK)
         except ValueError as err:
-            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+            return make_response(jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND)
         except Exception as err:
-            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     @staticmethod
+    @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
     def delete(word):
@@ -119,6 +123,6 @@ class WordClassification(Resource):
 
             return make_response({}, HTTPStatus.OK)
         # except ValueError as err:
-        #    return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+        #    return make_response(jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
         except Exception as err:
-            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR)

@@ -1,7 +1,7 @@
 import json
 
 import requests
-from flask import current_app, jsonify
+from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource, cors
 
 from namex.utils.api_resource import handle_exception
@@ -78,8 +78,8 @@ class EntityApi(Resource):
 
             content = json.loads(response.text)
             if response.status_code != 200:
-                return jsonify(content.get('message')), response.status_code
-            return jsonify(content), response.status_code
+                return make_response(jsonify(content.get('message')), response.status_code)
+            return make_response(jsonify(content), response.status_code)
         except EntityServiceException as err:
             return handle_exception(err, err.message, err.status_code)
         except Exception as err:

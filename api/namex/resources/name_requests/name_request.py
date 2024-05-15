@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import uuid4
 
 import requests
-from flask import current_app, jsonify, request
+from flask import current_app, jsonify, request, make_response
 from flask_restx import cors
 
 from namex import jwt
@@ -76,7 +76,7 @@ class NameRequestResource(BaseNameRequestResource):
 
                     # Add the list of valid Name Request actions for the given state to the response
                     response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
-                    return jsonify(response_data), 200
+                    return make_response(jsonify(response_data), 200)
         except Exception as err:
             current_app.logger.debug(repr(err))
             return handle_exception(err, 'Error retrieving the NR.', 500)
@@ -130,7 +130,7 @@ class NameRequestResource(BaseNameRequestResource):
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = nr_svc.current_state_actions
-            return jsonify(response_data), 200
+            return make_response(jsonify(response_data), 200)
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
         except Exception as err:
@@ -274,7 +274,7 @@ class NameRequestFields(BaseNameRequestResource):
                     'stateCd': response_data.get('stateCd', ''),
                     'actions': nr_svc.current_state_actions
                 }
-                return jsonify(response_data), 200
+                return make_response(jsonify(response_data), 200)
 
             if nr_action == NameRequestPatchActions.CHECKIN.value:
                 response_data = {
@@ -283,11 +283,11 @@ class NameRequestFields(BaseNameRequestResource):
                     'stateCd': response_data.get('stateCd', ''),
                     'actions': nr_svc.current_state_actions
                 }
-                return jsonify(response_data), 200
+                return make_response(jsonify(response_data), 200)
 
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = nr_svc.current_state_actions
-            return jsonify(response_data), 200
+            return make_response(jsonify(response_data), 200)
 
         except NameRequestIsInProgressError as err:
             # Might as well use the Mozilla WebDAV HTTP Locked status, it's pretty close
@@ -475,7 +475,7 @@ class NameRequestRollback(BaseNameRequestResource):
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = nr_svc.current_state_actions
-            return jsonify(response_data), 200
+            return make_response(jsonify(response_data), 200)
 
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)

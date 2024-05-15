@@ -1,5 +1,5 @@
 import copy, json
-from flask import jsonify
+from flask import jsonify, make_response
 from flask_restx import Resource, Namespace, cors
 
 from namex import jwt
@@ -25,11 +25,11 @@ class Events(Resource):
         if "id" in nrd:
             request_id = nrd["id"]
         if not request_id:
-            return jsonify({"message": "Request NR:{} not found".format(nr)}), 404
+            return make_response(jsonify({"message": "Request NR:{} not found".format(nr)}), 404)
 
         event = EventDAO.query.filter_by(nrId=request_id).order_by("id").first_or_404().json()
         if not "id" in event:
-            return jsonify({"message": "No events for NR:{} not found".format(nr)}), 404
+            return make_response(jsonify({"message": "No events for NR:{} not found".format(nr)}), 404)
 
         event_results = EventDAO.query.filter_by(nrId=request_id).order_by("id").all()
 
@@ -213,11 +213,11 @@ class Events(Resource):
             e_dict_previous = e_dict
 
         if len(e_txn_history) == 0:
-            return jsonify({ 'message': f'No valid events for {nr} found'}), 404
+            return make_response(jsonify({ 'message': f'No valid events for {nr} found'}), 404)
 
         resp = {
             'response': { 'count': len(e_txn_history) },
             'transactions': e_txn_history
         }
 
-        return jsonify(resp), 200
+        return make_response(jsonify(resp), 200)

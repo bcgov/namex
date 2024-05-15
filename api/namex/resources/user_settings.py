@@ -1,4 +1,4 @@
-from flask import current_app, jsonify, g, request
+from flask import current_app, jsonify, g, request, make_response
 from flask_restx import cors, Resource, Namespace
 from sqlalchemy import text, exc
 
@@ -21,11 +21,11 @@ class UserSettings(Resource):
             # GET existing or CREATE new user based on the JWT info
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             search_columns = user.searchColumns.split(',')
-            return jsonify({ 'searchColumns': search_columns }), 200
+            return make_response(jsonify({ 'searchColumns': search_columns }), 200)
             
         except Exception as err:
             current_app.logger.error(f'unable to get user settings: {err.with_traceback(None)}')
-            return jsonify({'message': 'Error getting user settings.'}), 500
+            return make_response(jsonify({'message': 'Error getting user settings.'}), 500)
     
     @staticmethod
     @jwt.requires_auth
@@ -34,10 +34,10 @@ class UserSettings(Resource):
             # GET existing or CREATE new user based on the JWT info
             user = User.find_by_jwtToken(g.jwt_oidc_token_info)
             if not user:
-                return jsonify({'message': 'Could not find existing user to update settings for.'}), 400
+                return make_response(jsonify({'message': 'Could not find existing user to update settings for.'}), 400)
             json_input = request.get_json()
             if not json_input or not json_input.get('searchColumns'):
-                return jsonify({'message': 'Invalid user settings provided in payload.'}), 400
+                return make_response(jsonify({'message': 'Invalid user settings provided in payload.'}), 400)
             search_columns = ''
             for column in json_input.get('searchColumns'):
                 if search_columns != '':
@@ -50,4 +50,4 @@ class UserSettings(Resource):
             
         except Exception as err:
             current_app.logger.error(f'unable to update user settings: {err.with_traceback(None)}')
-            return jsonify({'message': f'Error updating user settings.'}), 500
+            return make_response(jsonify({'message': f'Error updating user settings.'}), 500)

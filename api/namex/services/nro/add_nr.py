@@ -23,7 +23,7 @@
 
 """
 
-from flask import current_app, jsonify
+from flask import current_app, jsonify, make_response
 from .utils import generate_compressed_name
 from namex.services.nro.change_nr import _get_event_id, _create_nro_transaction
 from namex.models import State
@@ -64,7 +64,7 @@ def new_nr(nr, ora_cursor,con):
     con.commit()
     if not (applicant_info := nr.applicants):
         current_app.logger.error("Error on getting applicant info.")
-        return jsonify({"Message": "No applicant info"}), 404
+        return make_response(jsonify({"Message": "No applicant info"}), 404)
 
     _create_request_party(ora_cursor, applicant_info[0], eid, request_id)  # includes address
     con.commit()
@@ -108,7 +108,7 @@ def _create_request(oracle_cursor, nr_num):
 
     except Exception as error:
         current_app.logger.error("Error on adding request record for NR:{0}'. Error:{1}".format(nr_num, error))
-        return jsonify({"Message": "Error on adding request record in oracle"}), 404
+        return make_response(jsonify({"Message": "Error on adding request record in oracle"}), 404)
 
 def  _create_request_instance(oracle_cursor, nr, eid,priority):
     try:
@@ -131,7 +131,7 @@ def  _create_request_instance(oracle_cursor, nr, eid,priority):
         current_app.logger.debug('request instance record created')
     except Exception as error:
         current_app.logger.error("Error on adding request record for NR:{0}'. Error:{1}".format(nr.nrNum, error))
-        return jsonify({"Message": "Error on adding request instance record in oracle"}), 404
+        return make_response(jsonify({"Message": "Error on adding request instance record in oracle"}), 404)
 
 def   _create_request_party(oracle_cursor, applicantInfo, eid, request_id):
     # get next address ID
@@ -197,7 +197,7 @@ def  _create_names(oracle_cursor, nr, eid):
     name_count = len(nr.names)
     if name_count == 0:
         current_app.logger.error("Error on getting names for NR:{0}".format(nr.nrNum))
-        return jsonify({"Message": "Error getting names"}), 404
+        return make_response(jsonify({"Message": "Error getting names"}), 404)
 
     for name in nr.names:
         oracle_cursor.execute("""select name_seq.NEXTVAL from dual""")

@@ -123,12 +123,12 @@ class NameRequestsResource(BaseNameRequestResource):
 
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(results[0].stateCd, results[0])
-            return jsonify(response_data), 200
+            return make_response(jsonify(response_data), 200)
         elif len(results) > 0:
             # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
             # If the user / client accessing this data needs the Name Request actions, GET the individual record using NameRequest.get
             # This method, NameRequests.get is for Existing NR Search
-            return jsonify(list(map(lambda result: result.json(), results))), 200
+            return make_response(jsonify(list(map(lambda result: result.json(), results))), 200)
 
         # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
         # If the user / client accessing this data needs the Name Request actions, GET the individual record using NameRequest.get

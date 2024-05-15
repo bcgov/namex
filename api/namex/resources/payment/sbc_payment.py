@@ -46,7 +46,7 @@ class SBCPayment(Resource):
             payment = get_payment(payment_identifier)
 
             if not payment:
-                return jsonify(message=MSG_NOT_FOUND), 404
+                return make_response(jsonify(message=MSG_NOT_FOUND), 404)
 
             data = jsonify(payment)
             response = make_response(data, 200)
