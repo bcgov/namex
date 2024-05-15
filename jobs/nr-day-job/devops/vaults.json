@@ -6,11 +6,12 @@
             "namex-api"
         ]
     },
-        {
-        "vault": "nats",
+    {
+        "vault": "gcp-queue",
         "application": [
             "namex",
-            "base"
+            "topics",
+            "a083gt"
         ]
     }
 ]

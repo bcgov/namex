@@ -59,11 +59,11 @@ class WordClassification(Resource):
             if not entity:
                 raise ValueError('WordClassificationService did not return a result')
 
-            return jsonify({'word': word}), HTTPStatus.OK
+            return make_response(jsonify({'word': word}), HTTPStatus.OK)
         except ValueError as err:
-            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+            return make_response(jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND)
         except Exception as err:
-            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -72,7 +72,7 @@ class WordClassification(Resource):
     def post(word):
         json_input = request.get_json()
         if not json_input:
-            return jsonify('No input data provided'), HTTPStatus.BAD_REQUEST
+            return make_response(jsonify('No input data provided'), HTTPStatus.BAD_REQUEST)
 
         try:
             service = WordClassificationService()
@@ -83,11 +83,11 @@ class WordClassification(Resource):
             # TODO: Why are we not using the model schema...
             # model_schema = WordClassificationSchema().dump(entity)
             data = entity.json()
-            return jsonify(data), HTTPStatus.OK
+            return make_response(jsonify(data), HTTPStatus.OK)
         except ValueError as err:
-            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+            return make_response(jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND)
         except Exception as err:
-            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -97,7 +97,7 @@ class WordClassification(Resource):
     def put(word):
         json_input = request.get_json()
         if not json_input:
-            return jsonify('No input data provided'), HTTPStatus.BAD_REQUEST
+            return make_response(jsonify('No input data provided'), HTTPStatus.BAD_REQUEST)
 
         try:
             service = WordClassificationService()
@@ -106,11 +106,11 @@ class WordClassification(Resource):
             if not entity:
                 raise ValueError('WordClassificationService did not return a result')
             data = entity.json()
-            return jsonify(data), HTTPStatus.OK
+            return make_response(jsonify(data), HTTPStatus.OK)
         except ValueError as err:
-            return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+            return make_response(jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND)
         except Exception as err:
-            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -123,6 +123,6 @@ class WordClassification(Resource):
 
             return make_response({}, HTTPStatus.OK)
         # except ValueError as err:
-        #    return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
+        #    return make_response(jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
         except Exception as err:
-            return jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify('Internal server error: ' + repr(err)), HTTPStatus.INTERNAL_SERVER_ERROR)

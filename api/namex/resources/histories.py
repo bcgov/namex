@@ -18,7 +18,6 @@ MAX_RESULTS = '50'
 class Histories(Resource):
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get():
         query = request.args.get('query')

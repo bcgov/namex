@@ -82,27 +82,17 @@ class Config():  # pylint: disable=too-few-public-methods
         name=DB_NAME,
     )
 
+    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
+    EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', 'namex-receipt-dev')
+    AUDIENCE = os.getenv('AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Subscriber')
+    PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
+    DEBUG_REQUEST = os.getenv('DEBUG_REQUEST', False)
+    SUB_AUDIENCE = os.getenv('SUB_AUDIENCE', '')
+    SUB_SERVICE_ACCOUNT = os.getenv('SUB_SERVICE_ACCOUNT', '')
+
     SOLR_FEEDER_API_URL = os.getenv('SOLR_FEEDER_API_URL', None)
 
     ALEMBIC_INI = 'migrations/alembic.ini'
-
-    NATS_CONNECTION_OPTIONS = {
-        'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_CLIENT_NAME', 'namex.solr.names.updater')
-
-    }
-    STAN_CONNECTION_OPTIONS = {
-        'cluster_id': os.getenv('NATS_CLUSTER_ID', 'test-cluster'),
-        'client_id': str(random.SystemRandom().getrandbits(0x58)),
-        'ping_interval': 1,
-        'ping_max_out': 5,
-    }
-
-    SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_SUBJECT', 'namerequest.state'),
-        'queue': os.getenv('NATS_QUEUE', 'namerequest-processor'),
-        'durable_name': os.getenv('NATS_QUEUE', 'namerequest-processor') + '_durable',
-    }
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
@@ -137,10 +127,10 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     DEBUG = True
     TESTING = True
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'namex_pay')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', '127.0.0.1')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     # Set this in your .env to debug SQL Alchemy queries (for local development)
     # pylint: disable=invalid-envvar-default
@@ -152,6 +142,7 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME,
     )
+    SOLR_FEEDER_API_URL = os.getenv('SOLR_FEEDER_API_URL', 'https://mock-solr-feeder/api/v1')
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
@@ -159,7 +150,6 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     JWT_OIDC_TEST_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
     JWT_OIDC_TEST_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
     JWT_OIDC_TEST_ISSUER = 'https://dev.oidc.gov.bc.ca/auth/realms/fcf0kpqr'
-    # JWT_OIDC_TEST_ISSUER = 'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc'
     JWT_OIDC_TEST_KEYS = {
         'keys': [
             {

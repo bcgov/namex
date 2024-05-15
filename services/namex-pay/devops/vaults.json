@@ -1,12 +1,5 @@
 [
     {
-        "vault": "nats",
-        "application": [
-            "base",
-            "namex-pay"
-        ]
-    },
-    {
         "vault": "sentry",
         "application": [
             "examination"
@@ -24,6 +17,14 @@
         "vault": "API",
         "application": [
             "pay-api"
+        ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "namex",
+            "topics",
+            "a083gt"
         ]
     }
 ]

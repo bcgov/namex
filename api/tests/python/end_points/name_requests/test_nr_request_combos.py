@@ -43,7 +43,7 @@ draft_input_fields = {
 
 
 @pytest.mark.skip
-def test_fields_were_updated(client, initial_data, update_data, expected_result):
+def test_fields_were_updated(client, initial_data, update_data, expected_result, mocker):
     """
     Note that this does not test associations!
     Setup:
@@ -63,7 +63,7 @@ def test_fields_were_updated(client, initial_data, update_data, expected_result)
     assert draft_nr is not None
 
     # Take the response and edit it
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), update_data)
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), update_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -75,7 +75,7 @@ def test_fields_were_updated(client, initial_data, update_data, expected_result)
 
 
 @pytest.mark.skip
-def test_change_request_action_entity_reqtype(client, test_map):
+def test_change_request_action_entity_reqtype(client, test_map, mocker):
     """
     Setup:
     Test:
@@ -102,11 +102,11 @@ def test_change_request_action_entity_reqtype(client, test_map):
             'requestTypeCd': test_case.get('result')[2]
         }
 
-        test_fields_were_updated(client, initial_data, update_data, expected_result)
+        test_fields_were_updated(client, initial_data, update_data, expected_result, mocker)
 
 
 @pytest.mark.skip
-def test_change_request_actions(client):
+def test_change_request_actions(client, mocker):
     """
     Setup:
     Test:
@@ -176,10 +176,10 @@ def test_change_request_actions(client):
         }
     ]
 
-    test_change_request_action_entity_reqtype(client, test_cases)
+    test_change_request_action_entity_reqtype(client, test_cases, mocker)
 
 
-def test_change_request_entity(client):
+def test_change_request_entity(client, mocker):
     """
     Setup:
     Test:
@@ -194,10 +194,10 @@ def test_change_request_entity(client):
         }
     ]
 
-    test_change_request_action_entity_reqtype(client, test_cases)
+    test_change_request_action_entity_reqtype(client, test_cases, mocker)
 
 
-def test_change_request_type(client):
+def test_change_request_type(client, mocker):
     """
     Setup:
     Test:
@@ -212,6 +212,6 @@ def test_change_request_type(client):
         }
     ]
 
-    test_change_request_action_entity_reqtype(client, test_cases)
+    test_change_request_action_entity_reqtype(client, test_cases, mocker)
 
 

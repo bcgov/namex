@@ -1,6 +1,5 @@
 """Config for initializing the namex-api."""
 import os
-import random
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -108,15 +107,14 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
     # You can disable NRO updates for Name Requests by setting the variable in your .env / OpenShift configuration
     DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
-    DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 0))
 
-    # NATS
-    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://localhost:4222')
-    NATS_CLIENT_NAME = os.getenv('NATS_CLIENT_NAME', 'namex.worker')
-    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
-    NATS_QUEUE = os.getenv('NATS_QUEUE', 'namerequest-processor')
-    NATS_NR_STATE_SUBJECT = os.getenv('NATS_NR_STATE_SUBJECT', 'namex.event')
-    NATS_EMAILER_SUBJECT = os.getenv('NATS_EMAILER_SUBJECT', 'entity.email')
+
+    GCP_AUTH_KEY = os.getenv("GCP_AUTH_KEY", None)
+    NAMEX_NR_STATE_TOPIC = os.getenv("NAMEX_NR_STATE_TOPIC", "namex-pay-dev")
+    EMAILER_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
+
+    AUDIENCE = os.getenv("AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Subscriber")
+    PUBLISHER_AUDIENCE = os.getenv("PUBLISHER_AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Publisher")
 
     # MRAS
     MRAS_SVC_URL = os.getenv('MRAS_SVC_URL', '')
@@ -134,7 +132,6 @@ class DevConfig(Config):
     # We can't run NRO locally unless you're provisioned, you can disable NRO updates for Name Requests by setting the variable in your .env
     DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
-    DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 0))
 
 
 class TestConfig(Config):
@@ -159,11 +156,11 @@ class TestConfig(Config):
         port=int(DB_PORT),
         name=DB_NAME
     )
+    EMAILER_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
 
     # We can't run NRO locally for running our tests
     DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 1))
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
-    DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 1))
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use

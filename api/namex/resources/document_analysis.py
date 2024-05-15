@@ -1,4 +1,4 @@
-from flask import request, jsonify, current_app
+from flask import request, jsonify, current_app, make_response
 from flask_restx import Namespace, Resource, cors, fields as rp_fields
 from marshmallow import Schema, validates, ValidationError, fields as ma_fields
 from namex import jwt
@@ -57,7 +57,6 @@ class DocumentAnalysis(Resource):
     })
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     @api.expect(a_document)
     def post(analysis=None, *args, **kwargs):
@@ -66,15 +65,15 @@ class DocumentAnalysis(Resource):
 
         if analysis.lower() not in VALID_ANALYSIS:
             current_app.logger.info('requested analysis:{} is not valid'.format(analysis.lower()))
-            return jsonify(message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404
+            return make_response(jsonify(message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404)
 
         json_input = request.get_json()
         if not json_input:
-            return jsonify(message='No JSON data provided'), 400
+            return make_response(jsonify(message='No JSON data provided'), 400)
 
         err = DocumentSchema().validate(json_input)
         if err:
-            return jsonify(err), 400
+            return make_response(jsonify(err), 400)
 
         content = json_input['content']
 
@@ -86,11 +85,10 @@ class DocumentAnalysis(Resource):
             results, msg, code = SolrQueries.get_results(analysis.lower(), content, start=start, rows=rows)
 
         if code:
-            return jsonify(message=msg), code
-        return jsonify(results), code
+            return make_response(jsonify(message=msg), code)
+        return make_response(jsonify(results), code)
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(analysis=None, *args, **kwargs):
         # added because namerequest has no token and auto generated can't be allowed to POST
@@ -100,18 +98,18 @@ class DocumentAnalysis(Resource):
 
         if not analysis or analysis.lower() not in VALID_ANALYSIS:
             current_app.logger.info('requested analysis:{} is not valid'.format(analysis.lower()))
-            return jsonify(message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404
+            return make_response(jsonify(message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404)
 
         json_input = {
             'content': request.args.get('content'),
             'type': request.args.get('type', 'plain_text')
         }
         if not json_input:
-            return jsonify(message='No JSON data provided'), 400
+            return make_response(jsonify(message='No JSON data provided'), 400)
 
         err = DocumentSchema().validate(json_input)
         if err:
-            return jsonify(err), 400
+            return make_response(jsonify(err), 400)
 
         content = json_input['content']
 
@@ -123,5 +121,5 @@ class DocumentAnalysis(Resource):
             results, msg, code = SolrQueries.get_results(analysis.lower(), content, start=start, rows=rows)
 
         if code:
-            return jsonify(message=msg), code
-        return jsonify(results), code
+            return make_response(jsonify(message=msg), code)
+        return make_response(jsonify(results), code)
