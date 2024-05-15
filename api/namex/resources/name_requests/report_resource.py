@@ -114,7 +114,7 @@ class ReportResource(Resource):
                     'fileName': report_name.replace(' - ', ' ').replace(' ', '_') + '.pdf',
                     'fileBytes': base64.b64encode(report).decode(),
                     'fileUrl': '',
-                    'attachOrder': 1
+                    'attachOrder': '1'
                 }
             )
             email['content']['attachments'] = attachments
