@@ -58,7 +58,7 @@ class WordClassification(Resource):
             if not entity:
                 raise ValueError('WordClassificationService did not return a result')
 
-            return jsonify({'word': word}), HTTPStatus.OK
+            return make_response(jsonify({'word': word}), HTTPStatus.OK)
         except ValueError as err:
             return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
         except Exception as err:
@@ -81,7 +81,7 @@ class WordClassification(Resource):
             # TODO: Why are we not using the model schema...
             # model_schema = WordClassificationSchema().dump(entity)
             data = entity.json()
-            return jsonify(data), HTTPStatus.OK
+            return make_response(jsonify(data), HTTPStatus.OK)
         except ValueError as err:
             return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
         except Exception as err:
@@ -103,7 +103,7 @@ class WordClassification(Resource):
             if not entity:
                 raise ValueError('WordClassificationService did not return a result')
             data = entity.json()
-            return jsonify(data), HTTPStatus.OK
+            return make_response(jsonify(data), HTTPStatus.OK)
         except ValueError as err:
             return jsonify('Word [' + word + '] not found: ' + repr(err)), HTTPStatus.NOT_FOUND
         except Exception as err:

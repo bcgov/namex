@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, make_response
 
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
@@ -39,7 +39,7 @@ class WaitTimeStats(Resource):
             if not response:
                 raise ApiServiceException(message='WaitTimeStatsService did not return a result')
 
-            return jsonify(response), HTTPStatus.OK
+            return make_response(jsonify(response), HTTPStatus.OK)
 
         except ValueError as err:
             return jsonify('Wait time stats not found: ' + repr(err)), 200
