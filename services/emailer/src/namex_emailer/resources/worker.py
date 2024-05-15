@@ -45,7 +45,7 @@ from simple_cloudevent import SimpleCloudEvent
 
 import namex_emailer.services.helpers
 from namex_emailer.email_processors import name_request, nr_notification
-from namex_emailer.services import queue
+from namex_emailer.services import queue, ce_cache
 
 bp = Blueprint("worker", __name__)
 
@@ -63,38 +63,43 @@ def worker():
         # so the event is removed from the Queue
         return {}, HTTPStatus.OK
 
-    structured_log(request, "INFO", f"received ce: {str(ce)}")
-    token = namex_emailer.services.helpers.get_bearer_token()
-    if not (email := process_email(ce)):
-        # no email to send, take off queue
-        structured_log(request, "INFO", f"No email to send for: {ce}")
-        return {}, HTTPStatus.OK
+    item =ce_cache.get(ce.id, None)
 
-    if not email or "recipients" not in email or "content" not in email or "body" not in email["content"]:
-        # email object(s) is empty, take off queue
-        structured_log(request, "INFO", "Send email: email object(s) is empty")
-        return {}, HTTPStatus.OK
+    if item is None:
+        structured_log(request, "INFO", f"received ce: {str(ce)}")
+        token = namex_emailer.services.helpers.get_bearer_token()
+        if not (email := process_email(ce)):
+            # no email to send, take off queue
+            structured_log(request, "INFO", f"No email to send for: {ce}")
+            return {}, HTTPStatus.OK
 
-    if not email["recipients"] or not email["content"] or not email["content"]["body"]:
-        # email object(s) is missing, take off queue
-        structured_log(request, "INFO", "Send email: email object(s) is missing")
-        return {}, HTTPStatus.OK
+        if not email or "recipients" not in email or "content" not in email or "body" not in email["content"]:
+            # email object(s) is empty, take off queue
+            structured_log(request, "INFO", "Send email: email object(s) is empty")
+            return {}, HTTPStatus.OK
 
-    resp = send_email(email, token)
+        if not email["recipients"] or not email["content"] or not email["content"]["body"]:
+            # email object(s) is missing, take off queue
+            structured_log(request, "INFO", "Send email: email object(s) is missing")
+            return {}, HTTPStatus.OK
 
-    if resp.status_code != HTTPStatus.OK:
-        # log the error and put the email msg back on the queue
-        structured_log(
-            request,
-            "ERROR",
-            f"Queue Error - email failed to send: {str(ce)}"
-            "\n\nThis message has been put back on the queue for reprocessing.",
-        )
-        return {}, HTTPStatus.NOT_FOUND
+        resp = send_email(email, token)
 
-    structured_log(request, "INFO", f"completed ce: {str(ce)}")
+        if resp.status_code != HTTPStatus.OK:
+            # log the error and put the email msg back on the queue
+            structured_log(
+                request,
+                "ERROR",
+                f"Queue Error - email failed to send: {str(ce)}"
+                "\n\nThis message has been put back on the queue for reprocessing.",
+            )
+            return {}, HTTPStatus.NOT_FOUND
+        ce_cache[ce.id] = ce
+        structured_log(request, "INFO", f"completed ce: {str(ce)}")
+    else:
+        structured_log(request, "INFO", f"skipping duplicate ce: {str(ce)}")
+
     return {}, HTTPStatus.OK
-
 
 def process_email(email_msg: SimpleCloudEvent):  # pylint: disable=too-many-branches, too-many-statements
     """Process the email contained in the submission."""

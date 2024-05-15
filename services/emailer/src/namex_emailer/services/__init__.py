@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cachetools import TTLCache
 from gcp_queue.pubsub import GcpQueue
 
 queue = GcpQueue()
+ce_cache = TTLCache(maxsize=12000, ttl=1200)
