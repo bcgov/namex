@@ -68,6 +68,7 @@ def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
 
     db.init_app(app)
     queue.init_app(app)
+    app.queue = queue
     register_endpoints(app)
 
     api = Api()
