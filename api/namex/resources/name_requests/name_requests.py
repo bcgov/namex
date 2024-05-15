@@ -14,7 +14,7 @@
 import re
 from sqlalchemy import func
 
-from flask import request, jsonify, current_app
+from flask import request, jsonify, current_app, make_response
 from flask_restx import cors
 
 from namex.utils.logging import setup_logging
@@ -43,7 +43,6 @@ setup_logging()  # Important to do this first
 @api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
 class NameRequestsResource(BaseNameRequestResource):
     """Class to handle all name requests."""
-    @cors.crossdomain(origin='*')
     def get(self):
         """Name request search."""
         try:
@@ -124,20 +123,19 @@ class NameRequestsResource(BaseNameRequestResource):
 
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = get_nr_state_actions(results[0].stateCd, results[0])
-            return jsonify(response_data), 200
+            return make_response(jsonify(response_data), 200)
         elif len(results) > 0:
             # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
             # If the user / client accessing this data needs the Name Request actions, GET the individual record using NameRequest.get
             # This method, NameRequests.get is for Existing NR Search
-            return jsonify(list(map(lambda result: result.json(), results))), 200
+            return make_response(jsonify(list(map(lambda result: result.json(), results))), 200)
 
         # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
         # If the user / client accessing this data needs the Name Request actions, GET the individual record using NameRequest.get
         # This method, NameRequests.get is for Existing NR Search
-        return jsonify(results), 200
+        return make_response(jsonify(results), 200)
 
     @api.expect(nr_request)
-    @cors.crossdomain(origin='*')
     def post(self):
         """Create a new name request."""
         try:
@@ -191,7 +189,7 @@ class NameRequestsResource(BaseNameRequestResource):
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = nr_svc.current_state_actions
-            return jsonify(response_data), 201
+            return make_response(jsonify(response_data), 201)
         except NameRequestException as err:
             return handle_exception(err, err.message, 500)
         except Exception as err: # pylint: disable=broad-except

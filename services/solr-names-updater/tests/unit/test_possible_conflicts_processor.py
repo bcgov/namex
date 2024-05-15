@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests to ensure possible conflicts processors function as intended."""
+import base64
+import json
 from unittest import mock
 from unittest.mock import patch
-import requests
 
 import pytest
-
-from namex.models import Request as RequestDAO
+import requests
 from namex.utils import queue_util
-from solr_names_updater import worker  # noqa: I001
 
-from . import create_queue_mock_message, create_nr, MockResponse, create_request_state_change_message  # noqa: I003
+from solr_names_updater.resources import worker  # noqa: I001
+
+from . import MockResponse, create_nr, helper_create_cloud_event  # noqa: I003
 
 
 @pytest.mark.parametrize(
@@ -35,7 +36,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
      'not_expected_conflicts_to_add_to_solr'],
     [
         (
-            create_request_state_change_message('APPROVED', 'DRAFT'),
+            helper_create_cloud_event('APPROVED', 'DRAFT'),
             'APPROVED', 'DRAFT',
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'CONDITION', 'APPROVED'],
@@ -43,7 +44,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
             ['TEST NAME 2', 'TEST NAME 3']
         ),
         (
-            create_request_state_change_message('APPROVED', 'DRAFT'),
+            helper_create_cloud_event('APPROVED', 'DRAFT'),
             'APPROVED', 'DRAFT',
             ['TEST NAME 1'],
             ['APPROVED'],
@@ -51,7 +52,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
             []
         ),
         (
-            create_request_state_change_message('CONDITIONAL', 'DRAFT'),
+            helper_create_cloud_event('CONDITIONAL', 'DRAFT'),
             'CONDITIONAL', 'DRAFT',
             ['TEST NAME 1'],
             ['APPROVED'],
@@ -59,7 +60,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
             []
         ),
         (
-            create_request_state_change_message('APPROVED', 'DRAFT'),
+            helper_create_cloud_event('APPROVED', 'DRAFT'),
             'APPROVED', 'DRAFT',
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'NOT_EXAMINED', 'REJECTED'],
@@ -67,7 +68,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
             ['TEST NAME 2', 'TEST NAME 3']
         ),
         (
-            create_request_state_change_message('CANCELLED', 'DRAFT'),
+            helper_create_cloud_event('CANCELLED', 'DRAFT'),
             'CANCELLED', 'DRAFT',
             ['TEST NAME 1'],
             ['APPROVED'],
@@ -75,7 +76,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
             []
         ),
         (
-            create_request_state_change_message('RESET', 'APPROVED'),
+            helper_create_cloud_event('RESET', 'APPROVED'),
             'HOLD', 'DRAFT',
             ['TEST NAME 1'],
             ['APPROVED'],
@@ -83,7 +84,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
             []
         ),
         (
-            create_request_state_change_message('RESET', 'APPROVED'),
+            helper_create_cloud_event('RESET', 'APPROVED'),
             'INPROGRESS', 'DRAFT',
             ['TEST NAME 1'],
             ['APPROVED'],
@@ -91,7 +92,7 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
             []
         ),
         (
-            create_request_state_change_message('EXPIRED', 'DRAFT'),
+            helper_create_cloud_event('EXPIRED', 'DRAFT'),
             'EXPIRED', 'DRAFT',
             ['TEST NAME 1'],
             ['APPROVED'],
@@ -100,10 +101,11 @@ from . import create_queue_mock_message, create_nr, MockResponse, create_request
         ),
     ]
 )
-async def test_should_add_possible_conflicts_to_solr(
+def test_should_add_possible_conflicts_to_solr(
         app,
         db,
         session,
+        client,
         message_payload,
         new_nr_state,
         previous_nr_state,
@@ -114,9 +116,9 @@ async def test_should_add_possible_conflicts_to_solr(
     """Assert that names are added to solr."""
 
     queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
-    nr_num = message_payload['data']['request']['nrNum']
+    data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
+    nr_num = data_json['data']['request']['nrNum']
     create_nr(nr_num, new_nr_state, names, name_states)
-    mock_msg = create_queue_mock_message(message_payload)
     mock_response = MockResponse({}, 200)
 
     # mock post method to solr feeder api
@@ -127,7 +129,7 @@ async def test_should_add_possible_conflicts_to_solr(
             with patch.object(worker, 'process_names_add', return_value=True):
                 # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
                 with patch.object(worker, 'process_possible_conflicts_delete', return_value=True):
-                    await worker.cb_subscription_handler(mock_msg)
+                    rv = client.post("/", json=message_payload)
 
                     if len(expected_conflicts_to_add_to_solr) > 0:
                         assert mock_solr_feeder_api_post.called == True
@@ -153,38 +155,39 @@ async def test_should_add_possible_conflicts_to_solr(
     [
         (
             'request',
-            create_request_state_change_message('CANCELLED', 'APPROVED'),
+            helper_create_cloud_event('CANCELLED', 'APPROVED'),
             'CANCELLED', 'APPROVED',
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'CONDITION', 'REJECTED']
         ),
         (
             'request',
-            create_request_state_change_message('RESET', 'APPROVED'),
+            helper_create_cloud_event('RESET', 'APPROVED'),
             'HOLD', 'APPROVED',
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'CONDITION', 'REJECTED']
         ),
         (
             'request',
-            create_request_state_change_message('RESET', 'APPROVED'),
+            helper_create_cloud_event('RESET', 'APPROVED'),
             'INPROGRESS', 'APPROVED',
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'CONDITION', 'REJECTED']
         ),
         (
             'request',
-            create_request_state_change_message('CONSUMED', 'APPROVED'),
+            helper_create_cloud_event('CONSUMED', 'APPROVED'),
             'CONSUMED', 'APPROVED',
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'CONDITION', 'REJECTED']
         )
     ]
 )
-async def test_should_delete_possible_conflict_from_solr(
+def test_should_delete_possible_conflict_from_solr(
         app,
         db,
         session,
+        client,
         state_change_type,
         message_payload,
         new_nr_state,
@@ -195,17 +198,15 @@ async def test_should_delete_possible_conflict_from_solr(
 
     queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
     queue_util.send_name_state_msg = mock.Mock(return_value="True")
-    nr_num = message_payload['data'][state_change_type]['nrNum']
+    data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
+    nr_num = data_json['data'][state_change_type]['nrNum']
     mock_nr = create_nr(nr_num, new_nr_state, names, name_states)
-    mock_msg = create_queue_mock_message(message_payload)
     mock_response = MockResponse({}, 200)
 
     # mock post method to solr feeder api
     with patch.object(requests, 'post', return_value=mock_response) as mock_solr_feeder_api_post:
-        # mock process_names_delete to do nothing in order to isolate testing relevant to this test
         with patch.object(worker, 'process_names_delete', return_value=True):
-            await worker.cb_subscription_handler(mock_msg)
-
+            rv = client.post("/", json=message_payload)
             assert mock_solr_feeder_api_post.called == True
             assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]
 

@@ -7,7 +7,7 @@ import pycountry
 from pytz import timezone
 
 import requests
-from flask import current_app, jsonify, request
+from flask import current_app, jsonify, request, make_response
 from flask_restx import Resource, cors
 
 from namex.models import Request, State
@@ -40,7 +40,7 @@ class ReportResource(Resource):
         try:
             nr_model = Request.query.get(nr_id)
             if not nr_model:
-                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
+                return make_response(jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND)
             nr_model.consentFlag = 'R' # invariant: this function is only called when the consent letter has been received
             ReportResource._update_entity_and_action_code(nr_model)
             report_name = nr_model.nrNum + ' - ' + CONSENT_EMAIL_SUBJECT
@@ -73,10 +73,10 @@ class ReportResource(Resource):
         try:
             nr_model = Request.query.get(nr_id)
             if not nr_model:
-                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
+                return make_response(jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND)
             report, status_code = ReportResource._get_report(nr_model)
             if status_code != HTTPStatus.OK:
-                return jsonify(message=str(report)), status_code
+                return make_response(jsonify(message=str(report)), status_code)
             report_name = nr_model.nrNum + ' - ' + RESULT_EMAIL_SUBJECT
             recipient_emails = []
             for applicant in nr_model.applicants:
@@ -114,7 +114,7 @@ class ReportResource(Resource):
                     'fileName': report_name.replace(' - ', ' ').replace(' ', '_') + '.pdf',
                     'fileBytes': base64.b64encode(report).decode(),
                     'fileUrl': '',
-                    'attachOrder': 1
+                    'attachOrder': '1'
                 }
             )
             email['content']['attachments'] = attachments
@@ -139,14 +139,14 @@ class ReportResource(Resource):
             template = template.replace(template_string, val)
         return template
 
-    @cors.crossdomain(origin='*')
+
     def get(self, nr_id):
         try:
             if not full_access_to_name_request(request):
                 return {"message": "You do not have access to this NameRequest."}, 403
             nr_model = Request.query.get(nr_id)
             if not nr_model:
-                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
+                return make_response(jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND)
             return ReportResource._get_report(nr_model)
         except Exception as err:
             return handle_exception(err, 'Error retrieving the report.', 500)
@@ -157,7 +157,7 @@ class ReportResource(Resource):
         notify_url = current_app.config.get('NOTIFY_API_URL') + current_app.config.get('NOTIFY_API_VERSION')
         authenticated, token = ReportResource._get_service_client_token()
         if not authenticated:
-            return jsonify(message='Error in authentication when sending email'), HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify(message='Error in authentication when sending email'), HTTPStatus.INTERNAL_SERVER_ERROR)
 
         headers = {
             'Authorization': 'Bearer {}'.format(token),
@@ -173,12 +173,12 @@ class ReportResource(Resource):
     def _get_report(nr_model):
         if nr_model.stateCd not in [State.APPROVED, State.CONDITIONAL,
                                     State.CONSUMED, State.EXPIRED, State.REJECTED]:
-            return jsonify(message='Invalid NR state'.format(nr_id=nr_model.id)), HTTPStatus.BAD_REQUEST
+            return make_response(jsonify(message='Invalid NR state'.format(nr_id=nr_model.id)), HTTPStatus.BAD_REQUEST)
 
         authenticated, token = ReportResource._get_service_client_token()
         if not authenticated:
-            return jsonify(message='Error in authentication'.format(nr_id=nr_model.id)),\
-                    HTTPStatus.INTERNAL_SERVER_ERROR
+            return make_response(jsonify(message='Error in authentication'.format(nr_id=nr_model.id)),\
+                    HTTPStatus.INTERNAL_SERVER_ERROR)
 
         headers = {
             'Authorization': 'Bearer {}'.format(token),
@@ -193,7 +193,7 @@ class ReportResource(Resource):
                                     data=json.dumps(data))
 
         if response.status_code != HTTPStatus.OK:
-            return jsonify(message=str(response.content)), response.status_code
+            return make_response(jsonify(message=str(response.content)), response.status_code)
         return response.content, response.status_code
 
     @staticmethod

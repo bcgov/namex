@@ -1,13 +1,14 @@
 """Payments for a Request."""
 from enum import Enum
 
-from sqlalchemy import event
 from flask import current_app
+from sqlalchemy import event
 from sqlalchemy.orm.attributes import get_history
 
 from namex.constants import PaymentState, PaymentStatusCode
 from namex.models import State, db
 from namex.utils import queue_util
+
 
 class Payment(db.Model):
 
@@ -112,8 +113,7 @@ def update_nr_state(mapper, connection, target):
                     WHERE id={nr.id}
                     """
                 )
-                if current_app.config.get('DISABLE_NAMEREQUEST_NATS_UPDATES', 0) != 1:
-                    queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
+                queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
 
 
 

@@ -2,14 +2,13 @@ import json
 from unittest.mock import patch
 
 import pytest
+from sbc_common_components.utils.enums import QueueMessageTypes
 
-from namex.constants import (NameRequestPatchActions,
-                             NameRequestPaymentActions, PaymentState)
+from namex.constants import NameRequestPatchActions, NameRequestPaymentActions, PaymentState
 from namex.models import Payment, Request, State, User
 from namex.services.payment.client import SBCPaymentClient
 from tests.python.end_points.common.http import get_test_headers
-from tests.python.end_points.name_requests.test_setup_utils.test_helpers import \
-    post_test_nr_json
+from tests.python.end_points.name_requests.test_setup_utils.test_helpers import post_test_nr_json
 from tests.python.end_points.util import create_header
 
 from ..common.http import build_request_uri, build_test_query
@@ -505,7 +504,19 @@ mock_receipt_response = {
     ('Cancel Payment', 'CREATE', False, False, True, False),
     ('Request receipt', 'CREATE', False, False, False, True)
 ])
-def test_create_payment(client, jwt, test_name, action, complete_payment, do_refund, cancel_payment, request_receipt):
+def test_create_payment(client, jwt, test_name, action, complete_payment, do_refund, cancel_payment, request_receipt, mocker):
+    from namex.services import queue
+    topics = []
+    msg=None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
 
     payment = execute_payment(client, jwt, create_payment_request, action)
     assert payment['action'] == action
@@ -526,6 +537,20 @@ def test_create_payment(client, jwt, test_name, action, complete_payment, do_ref
 
         assert payment_id == completed_payment[0]['id']
         assert completed_payment[0]['statusCode'] == PaymentState.COMPLETED.value
+
+    if complete_payment:
+        assert len(topics) == 1
+
+        email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+
+        # Verify message that would be sent to the emailer pubsub
+        assert email_pub['type'] == QueueMessageTypes.NAMES_EVENT.value
+        assert email_pub['source'] == '/requests/NR L000001'
+        assert email_pub['subject'] == 'namerequest'
+        assert email_pub['data']['request']['nrNum'] == 'NR L000001'
+        assert email_pub['data']['request']['newState'] == 'DRAFT'
+        assert email_pub['data']['request']['previousState'] == 'PENDING_PAYMENT'
+
 
     if do_refund:
         with patch.object(SBCPaymentClient, 'refund_payment', return_value={}):

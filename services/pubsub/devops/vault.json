@@ -1,0 +1,10 @@
+[
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "namex",
+            "topics",
+            "a083gt"
+        ]
+    }
+]

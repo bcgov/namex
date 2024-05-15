@@ -1,17 +1,18 @@
 [
     {
-        "vault": "nats",
-        "application": [
-            "base",
-            "namex"
-        ]
-    },
-    {
         "vault": "namex",
         "application": [
             "postgres-namex",
             "namex-api",
             "nro-service"
+        ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "namex",
+            "topics",
+            "a083gt"
         ]
     }
 ]

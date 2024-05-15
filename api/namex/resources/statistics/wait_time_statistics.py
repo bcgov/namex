@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, make_response
 
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
@@ -30,7 +30,6 @@ def handle_auth_error(ex):
 @api.route('/', strict_slashes=False, methods=['GET', 'OPTIONS'])
 class WaitTimeStats(Resource):
     @staticmethod
-    @cors.crossdomain(origin='*')
     @cache.cached(timeout=14400) # cached for 4 hours
     def get():
         try:
@@ -40,11 +39,11 @@ class WaitTimeStats(Resource):
             if not response:
                 raise ApiServiceException(message='WaitTimeStatsService did not return a result')
 
-            return jsonify(response), HTTPStatus.OK
+            return make_response(jsonify(response), HTTPStatus.OK)
 
         except ValueError as err:
-            return jsonify('Wait time stats not found: ' + repr(err)), 200
+            return make_response(jsonify('Wait time stats not found: ' + repr(err)), 200)
         except ApiServiceException as err:
             return handle_exception(err, err.message, 400)
         except Exception as err:
-            return jsonify('Internal Server Error\n' + repr(err)), 500
+            return make_response(jsonify('Internal Server Error\n' + repr(err)), 500)

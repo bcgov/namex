@@ -1,7 +1,7 @@
 import json
 
 import requests
-from flask import current_app, jsonify
+from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource, cors
 
 from namex.services.colin.oracle_services import ColinServices
@@ -58,18 +58,16 @@ colin_api = Namespace('colin', description='COLIN API')
     'corp_num': 'Incorporation Number - This field is required'
 })
 class ColinApi(Resource):
-    @cors.crossdomain(origin='*')
     def post(self, corp_num):
         colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/{corp_num}'
         response, status_code = _init(colin_url)
         return response, status_code
 
-    @cors.crossdomain(origin='*')
     def get(self, corp_num):
         try:
             business_info_dict = oracle_services.get_business_info_by_corp_num(corp_num=corp_num)
             if not business_info_dict:
-                return jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404
+                return make_response(jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404)
 
         except ColinServiceException as err:
             return handle_exception(err, err.message, err.status_code)
@@ -83,7 +81,7 @@ class ColinApi(Resource):
                          'jurisdiction': business_info_dict['jurisdiction'],
                          'homeIdentifier': business_info_dict['home_juris_num']}
 
-        return jsonify(response_dict), 200
+        return make_response(jsonify(response_dict), 200)
 
 def _init(colin_url):
     try:
@@ -106,8 +104,8 @@ def _init(colin_url):
 
         content = json.loads(response.text)
         if response.status_code != 200:
-            return jsonify(content), response.status_code
-        return jsonify(content), response.status_code
+            return make_response(jsonify(content), response.status_code)
+        return make_response(jsonify(content), response.status_code)
     except ColinServiceException as err:
         return handle_exception(err, err.message, err.status_code)
     except Exception as err:

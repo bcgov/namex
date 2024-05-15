@@ -1,11 +1,5 @@
 [
     {
-        "vault": "nats",
-        "application": [
-            "base"
-        ]
-    },
-    {
         "vault": "namex",
         "application": [
             "postgres-namex",
@@ -16,6 +10,14 @@
         "vault": "sentry",
         "application": [
             "examination"
+        ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "namex",
+            "topics",
+            "a083gt"
         ]
     }
 ]

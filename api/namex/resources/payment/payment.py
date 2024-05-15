@@ -250,11 +250,11 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
             current_app.logger.error('Error with status code. Actual status code: ' + payment_response.statusCode)
             EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
             # return generic error status to the front end
-            return jsonify(message=f'Name Request {nr_id} encountered an error'), 402
+            return make_response(jsonify(message=f'Name Request {nr_id} encountered an error'), 402)
     except Exception as err:
         current_app.logger.error(err.with_traceback(None))
         EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
-        return jsonify(message=f'Name Request {nr_id} encountered an error'), 500
+        return make_response(jsonify(message=f'Name Request {nr_id} encountered an error'), 500)
 
 class PaymentNameRequestResource(AbstractNameRequestResource):
     """Name request payment resoure endpoint."""
@@ -281,7 +281,6 @@ class PaymentNameRequestResource(AbstractNameRequestResource):
 
 class FindNameRequestPayments(PaymentNameRequestResource):
     """Find name request payments endpoints."""
-    @cors.crossdomain(origin='*')
     def get(self, nr_id):
         """Get endpoint."""
         try:
@@ -331,7 +330,7 @@ class FindNameRequestPayments(PaymentNameRequestResource):
                             'receipts': list(map(lambda r: map_receipt(r), receipts))
                         })
 
-            return jsonify(response_data), 200
+            return make_response(jsonify(response_data), 200)
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
         except SBCPaymentException as err:
@@ -349,7 +348,6 @@ class FindNameRequestPayments(PaymentNameRequestResource):
 
 class CreateNameRequestPayment(AbstractNameRequestResource):
     """Create name request payment endpoints."""
-    @cors.crossdomain(origin='*')
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
     @payment_api.doc(params={
@@ -375,10 +373,10 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return jsonify(message=f'Name Request {nr_id} not found'), 400
+                return make_response(jsonify(message=f'Name Request {nr_id} not found'), 400)
 
             if not payment_action:
-                return jsonify(message=f'Invalid payment action, {payment_action} not found'), 400
+                return make_response(jsonify(message=f'Invalid payment action, {payment_action} not found'), 400)
 
             valid_payment_action = payment_action in [
                 NameRequestActions.CREATE.value,
@@ -388,14 +386,14 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             ]
 
             if not valid_payment_action:
-                return jsonify(message=f'Invalid payment action [{payment_action}]'), 400
+                return make_response(jsonify(message=f'Invalid payment action [{payment_action}]'), 400)
 
             # We only handle payments if the NR is in the following states
             valid_payment_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED,
                                     State.PENDING_PAYMENT]
             valid_nr_state = nr_model.stateCd in valid_payment_states
             if not valid_nr_state:
-                return jsonify(message=f'Invalid NR state [{payment_action}]'), 400
+                return make_response(jsonify(message=f'Invalid NR state [{payment_action}]'), 400)
 
             if valid_payment_action and valid_nr_state:
                 if payment_action in [NameRequestActions.CREATE.value, NameRequestActions.RESUBMIT.value]:
@@ -422,7 +420,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             json_input = request.get_json()
             payment_request = {}
             if not json_input:
-                # return jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
+                # return make_response(jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
                 # Grab the data from the NR, if it exists
                 payment_request = build_payment_request(nr_model)
             elif isinstance(json_input, dict):
@@ -493,7 +491,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
         except SBCPaymentException as err:
             response = req.as_dict()
             response['errors'] = [err.message]
-            return jsonify(response), err.status_code
+            return make_response(jsonify(response), err.status_code)
         except SBCPaymentError as err:
             return handle_exception(err, err.message, 500)
         except Exception as err:
@@ -510,7 +508,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
 class NameRequestPayment(AbstractNameRequestResource):
     """Name request payment endpoints."""
-    @cors.crossdomain(origin='*')
     @payment_api.response(200, 'Success', '')
     # TODO: Update schema and marshal
     # @marshal_with(payment_response_schema)
@@ -522,7 +519,7 @@ class NameRequestPayment(AbstractNameRequestResource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return jsonify(message=f'{nr_id} not found'), 400
+                return make_response(jsonify(message=f'{nr_id} not found'), 400)
 
             payment_id = int(clean_url_path_param(payment_id))
             payment = PaymentDAO.query.get(payment_id)
@@ -567,7 +564,7 @@ class NameRequestPayment(AbstractNameRequestResource):
                     'receipts': list(map(lambda r: map_receipt(r), receipts))
                 })
 
-            return jsonify(data), 200
+            return make_response(jsonify(data), 200)
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
@@ -578,24 +575,23 @@ class NameRequestPayment(AbstractNameRequestResource):
         except Exception as err:
             return handle_exception(err, err, 500)
 
-    @cors.crossdomain(origin='*')
     def delete(self, nr_id, payment_id):
         """Delete endpoint."""
         try:
             # Find the existing name request
             nr_model = RequestDAO.query.get(nr_id)
             if not nr_model:
-                return jsonify(message=f'No NR found with id: {nr_id}.'), 404
+                return make_response(jsonify(message=f'No NR found with id: {nr_id}.'), 404)
 
             # Find the existing payment record
             payment = PaymentDAO.find_by_payment_token(payment_id)
             if not payment:
-                return jsonify(message=f'No payment record with id: {payment_id}.'), 404
+                return make_response(jsonify(message=f'No payment record with id: {payment_id}.'), 404)
 
             # check payment record state is CREATED
             current_payment_state = payment.payment_status_code
             if current_payment_state != PaymentStatusCode.CREATED.value:
-                return jsonify(message=f'Unable to cancel a payment record in {current_payment_state} state.'), 400
+                return make_response(jsonify(message=f'Unable to cancel a payment record in {current_payment_state} state.'), 400)
 
             try:
                 # cancelling may change with refactor
@@ -609,7 +605,7 @@ class NameRequestPayment(AbstractNameRequestResource):
                 response_data = nr_model.json()
                 # Add the list of valid Name Request actions for the given state to the response
                 response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
-                return jsonify(response_data), 200
+                return make_response(jsonify(response_data), 200)
 
             except PaymentServiceError as err:
                 # should only get here if there was a conflict (payment went through before cancel happened)
@@ -628,7 +624,6 @@ class NameRequestPayment(AbstractNameRequestResource):
 class NameRequestPaymentAction(AbstractNameRequestResource):
     """Name request payment action endpoints."""
     # REST Method Handlers
-    @cors.crossdomain(origin='*')
     def patch(self, nr_id, payment_id, payment_action):
         """
         :param nr_id:
@@ -685,7 +680,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             response_data = nr_model.json()
             # Add the list of valid Name Request actions for the given state to the response
             response_data['actions'] = nr_svc.current_state_actions
-            return jsonify(response_data), 200
+            return make_response(jsonify(response_data), 200)
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
         except Exception as err:

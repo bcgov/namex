@@ -53,7 +53,6 @@ def load_xml_response_content(response, xpath_query=None):
     'corp_num': 'Incorporation Number - This field is required'
 })
 class MrasProfile(Resource):
-    @cors.crossdomain(origin='*')
     def get(self, province, corp_num):
         try:
             # Get the jurisdiction
@@ -85,7 +84,7 @@ class MrasProfile(Resource):
             jurisdiction_ids = [j.text for j in jurisdiction_id_els]  # All we care about are the codes / IDs
 
             if province not in jurisdiction_ids:
-                return jsonify(message='Invalid request, province jurisdiction is incorrect'), HTTPStatus.BAD_REQUEST
+                return make_response(jsonify(message='Invalid request, province jurisdiction is incorrect'), HTTPStatus.BAD_REQUEST)
             else:
                 print('Valid jurisdiction IDs')
                 print(repr(jurisdiction_ids))
@@ -109,7 +108,7 @@ class MrasProfile(Resource):
 
             # Return the auth response if an error occurs
             if not response.status_code == HTTPStatus.OK:
-                return jsonify({'error': 'No profile found for the jurisdiction, registration number pair.'}), HTTPStatus.NOT_FOUND
+                return make_response(jsonify({'error': 'No profile found for the jurisdiction, registration number pair.'}), HTTPStatus.NOT_FOUND)
                 # mras_errors = load_xml_response_content(response, './/mras_error')
                 # mras_error = {
                 #     'error_code': mras_errors[0].find('error_code').text,
