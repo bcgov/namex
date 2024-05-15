@@ -49,7 +49,7 @@ from config import Config, ProdConfig
 from namex_pay.utils import get_run_version
 
 from .resources import register_endpoints
-from .services import queue
+from namex.services import queue
 
 
 def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
@@ -68,7 +68,6 @@ def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
 
     db.init_app(app)
     queue.init_app(app)
-    app.queue = queue
     register_endpoints(app)
 
     api = Api()

@@ -36,7 +36,7 @@ from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy.exc import OperationalError
 from sbc_common_components.utils.enums import QueueMessageTypes
-from namex_pay.services import queue
+from namex.services import queue
 from namex_pay.utils import datetime, timedelta
 
 bp = Blueprint("worker", __name__)
