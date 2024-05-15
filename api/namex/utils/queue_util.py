@@ -31,13 +31,9 @@ def publish_email_notification(nr_num: str, option: str, refund_value=None):
     )
 
     email_topic = current_app.config.get("EMAILER_TOPIC", "mailer")
-    if hasattr(current_app, 'queue'):
-        q = current_app.queue
-    else:
-        q = queue
-    payload = q.to_queue_message(ce)
+    payload = queue.to_queue_message(ce)
     current_app.logger.debug('About to publish email for %s nrNum=%s', option, nr_num)
-    q.publish(topic=email_topic, payload=payload)
+    queue.publish(topic=email_topic, payload=payload)
 
 
 def create_name_request_state_msg(nr_num, state_cd, old_state_cd):
@@ -58,24 +54,16 @@ def create_name_request_state_msg(nr_num, state_cd, old_state_cd):
         time=datetime.now(tz=timezone.utc).isoformat(),
         data=event_data
     )
-    if hasattr(current_app, 'queue'):
-        q = current_app.queue
-    else:
-        q = queue
 
-    payload = q.to_queue_message(ce)
+    payload = queue.to_queue_message(ce)
 
     return payload
 
 
 def send_name_request_state_msg(nr_num, state_cd, old_state_cd):
     """Publish name request state message to pubsub nr state subject."""
-    if hasattr(current_app, 'queue'):
-        q = current_app.queue
-    else:
-        q = queue
     email_topic = current_app.config.get("NAMEX_NR_STATE_TOPIC", "mailer")
-    q.publish(topic=email_topic, payload=create_name_request_state_msg(nr_num, state_cd, old_state_cd))
+    queue.publish(topic=email_topic, payload=create_name_request_state_msg(nr_num, state_cd, old_state_cd))
     current_app.logger \
         .debug('Published name request ({}) state change from {} -> {}'.format(nr_num, old_state_cd, state_cd))
 
@@ -99,20 +87,13 @@ def create_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
         time=datetime.now(tz=timezone.utc).isoformat(),
         data=event_data
     )
-    if hasattr(current_app, 'queue'):
-        q = current_app.queue
-    else:
-        q = queue
-    payload = q.to_queue_message(ce)
+
+    payload = queue.to_queue_message(ce)
 
     return payload
 
 
 def send_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
     """Publish name state message to pubsub nr state subject."""
-    if hasattr(current_app, 'queue'):
-        q = current_app.queue
-    else:
-        q = queue
     email_topic = current_app.config.get("NAMEX_NR_STATE_TOPIC", "mailer")
-    q.publish(topic=email_topic, payload=create_name_state_msg(nr_num, state_cd, old_state_cd))
+    queue.publish(topic=email_topic, payload=create_name_state_msg(nr_num, state_cd, old_state_cd))
