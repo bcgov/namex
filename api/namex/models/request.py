@@ -801,7 +801,7 @@ class RequestsSearchSchema(ma.SQLAlchemySchema):
     names = ma.Nested(NameSchema, many=True)
     activeUser = ma.Pluck(UserSchema, 'username', many=False)
     comments = ma.Nested(CommentSchema, many=True, only=('comment', 'examiner', 'timestamp'))
-    applicants = ma.Nested(ApplicantSchema, many=True, only=('firstName', 'lastName'))
+    applicants = ma.Nested(ApplicantSchema, many=True, only=('firstName', 'lastName', 'middleName'))
 
 class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
     class Meta:
