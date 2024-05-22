@@ -13,35 +13,20 @@ defaults:
     working-directory: ./api
 
 jobs:
-  setup-job:
-    runs-on: ubuntu-20.04
-
-    if: github.repository == 'bcgov/namex'
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: setup check
-        run: |
-          echo "setup check pass."
-
   linting:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
     strategy:
-      matrix:
-        python-version: ["3.12"]
-
+      fail-fast: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working_directory }}
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v4
       - name: Install Poetry
         run: |
           pipx install poetry
-     - name: Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version-file: ${{ inputs.working_directory }}/pyproject.toml
@@ -61,9 +46,8 @@ jobs:
       - name: Run flake8
         run: |
           poetry run flake8 .
-
   testing:
-    needs: setup-job
+    needs: linting
     env:
       DATABASE_TEST_USERNAME: postgres
       DATABASE_TEST_PASSWORD: postgres
