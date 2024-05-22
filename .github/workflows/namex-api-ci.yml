@@ -5,6 +5,7 @@ on:
     types: [assigned, synchronize]
     paths:
       - "api/**"
+  workflow_dispatch:
 
 defaults:
   run:
