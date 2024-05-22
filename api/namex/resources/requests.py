@@ -765,11 +765,6 @@ class Request(Resource):
                 existing_nr.stateCd = State.HOLD
                 existing_nr.save_to_db()
 
-            # convert Expiration Date to correct format
-            if json_input.get('expirationDate', None):
-                json_input['expirationDate'] = str(datetime.datetime.strptime(
-                    str(json_input['expirationDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
-
             # convert Submitted Date to correct format
             if json_input.get('submittedDate', None):
                 json_input['submittedDate'] = str(datetime.datetime.strptime(
