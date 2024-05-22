@@ -29,7 +29,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v3
@@ -37,17 +37,29 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+     - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ${{ inputs.working_directory }}/pyproject.toml
+          cache: poetry
+          cache-dependency-path: ${{ inputs.working_directory }}/poetry.lock
       - name: Install dependencies
+        run: poetry install
+      - name: Run isort
         run: |
-          make setup
-      - name: Lint with pylint
-        id: pylint
+          poetry run isort . --check
+      - name: Run black
         run: |
-          make pylint
-      - name: Lint with flake8
-        id: flake8
+          poetry run black . --check
+      - name: Run pylint
         run: |
-          make flake8
+          poetry run pylint .
+      - name: Run flake8
+        run: |
+          poetry run flake8 .
 
   testing:
     needs: setup-job
@@ -61,7 +73,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.12"]
 
     services:
       postgres:
@@ -76,33 +88,39 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version-file: ${{ inputs.working_directory }}/pyproject.toml
+          cache: poetry
+          cache-dependency-path: ${{ inputs.working_directory }}/poetry.lock
       - name: Install dependencies
+        run: poetry install
+      - name: Run tests
         run: |
-          make setup
-      - name: Test with pytest
-        id: test
-        run: |
-          make test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+          poetry run pytest
+      - uses: actions/upload-artifact@v4
         with:
-          file: ./api/coverage.xml
-          flags: namexapi
-          name: codecov-namex-api
-          fail_ci_if_error: true
+          name: coveragefile
+          path: ${{ inputs.working_directory }}/coverage.xml
+          retention-days: 1
 
-  build-check:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
+  verify-build:
+    needs: linting
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working_directory }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v4
       - name: build to check strictness
         id: build
         run: |
-          make build-nc
+          docker build --no-cache -t ${{ inputs.app_name }} .
