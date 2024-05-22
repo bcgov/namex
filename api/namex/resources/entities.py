@@ -1,7 +1,7 @@
 import json
 
 import requests
-from flask import current_app, jsonify
+from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource, cors
 
 from namex.utils.api_resource import handle_exception
@@ -56,7 +56,6 @@ entity_api = Namespace('entity', description='ENTITY API')
     'corp_num': 'Incorporation Number - This field is required'
 })
 class EntityApi(Resource):
-    @cors.crossdomain(origin='*')
     def get(self, corp_num):
         try:
             SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')
@@ -79,8 +78,8 @@ class EntityApi(Resource):
 
             content = json.loads(response.text)
             if response.status_code != 200:
-                return jsonify(content.get('message')), response.status_code
-            return jsonify(content), response.status_code
+                return make_response(jsonify(content.get('message')), response.status_code)
+            return make_response(jsonify(content), response.status_code)
         except EntityServiceException as err:
             return handle_exception(err, err.message, err.status_code)
         except Exception as err:

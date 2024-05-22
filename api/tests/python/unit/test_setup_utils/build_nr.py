@@ -54,9 +54,11 @@ def build_nr(nr_state, data=None, test_names=None, generate_id_seq=None):
 
     return {
         State.DRAFT: build_draft,
+        State.EXPIRED: build_expired,
         State.RESERVED: build_reserved,
         State.COND_RESERVE: build_cond_reserved,
         State.CONDITIONAL: build_conditional,
+        State.CONSUMED: build_consumed,
         State.APPROVED: build_approved,
         State.CANCELLED: build_cancelled,
         State.HOLD: build_hold,
@@ -165,11 +167,65 @@ def build_conditional(data=None, test_names=None, generate_id_seq=None):
     return nr
 
 
+def build_consumed(data=None, test_names=None, generate_id_seq=None):
+    nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    nr.stateCd = State.CONSUMED
+    nr.requestId = 1460775
+    nr._source = 'NRO'
+
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
+
+    nr.names = []
+    for test_name in test_names:
+        nr.names.append(build_name(test_name, generate_id_seq))
+
+    return nr
+
+
 def build_approved(data=None, test_names=None, generate_id_seq=None):
     nr = RequestDAO()
 
     # Set defaults, if these exist in the provided data they will be overwritten
     nr.stateCd = State.APPROVED
+    nr.requestId = 1460775
+    nr._source = 'NRO'
+
+    if not data:
+        data = {}
+
+    # Map the data, if provided
+    for key, value in data.items():
+        # Don't set list attrs, they have to be set separately to handle sequences
+        if hasattr(nr, key) and not isinstance(data.get(key), list):
+            nr.__setattr__(key, value)
+
+    nr.names = []
+    for test_name in test_names:
+        nr.names.append(build_name(test_name, generate_id_seq))
+
+    return nr
+
+
+def build_expired(data=None, test_names=None, generate_id_seq=None):
+    """
+    :param data:
+    :param test_names:
+    :param generate_id_seq:
+    :return:
+    """
+    nr = RequestDAO()
+
+    # Set defaults, if these exist in the provided data they will be overwritten
+    nr.stateCd = State.EXPIRED
     nr.requestId = 1460775
     nr._source = 'NRO'
 

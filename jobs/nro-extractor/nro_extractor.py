@@ -1,6 +1,6 @@
 """ NRO Extractor moves changes from the NamesDB to the new NameX system."""
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app
 
@@ -24,7 +24,7 @@ def get_ops_params():
 
 
 if __name__ == "__main__":
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc).date()
     print('nro-extractor: starting job: {}'.format(start_time))
 
     # setup Flask, push a context, initialize db & nro connections
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     # clean up
     app.do_teardown_appcontext()
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc).date()
 
     # report out
     if processed < 0:

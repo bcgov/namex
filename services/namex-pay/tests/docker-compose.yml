@@ -1,16 +1,18 @@
-
-version: '2.1'
+# local postgres
+version: '1'
 services:
-    nats:
-        image: nats-streaming 
-        restart: always
-        mem_limit: 512m
-        expose:
-          - 4222
-          - 8222
-        labels:
-          - entity.services=nats
-        ports:
-          - 4222:4222
-          - 8222:8222
-        tty: true
+  db:
+    image: postgres:12.18
+    container_name: namex-pay-testing
+    environment:
+      - POSTGRES_DB=namex_pay
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    restart: always
+    stdin_open: true
+    tty: true
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/data

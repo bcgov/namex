@@ -7,6 +7,7 @@ from sqlalchemy import event, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import MetaData, DropConstraint
 from flask_migrate import Migrate, upgrade
+from contextlib import suppress
 
 from namex import create_app, jwt as _jwt
 from namex.models import db as _db
@@ -80,8 +81,10 @@ def db(app, request):
         for table in metadata.tables.values():
             for fk in table.foreign_keys:
                 _db.engine.execute(DropConstraint(fk.constraint))
-        metadata.drop_all()
-        _db.drop_all()
+        with suppress(Exception):
+            metadata.drop_all()
+        with suppress(Exception):
+            _db.drop_all()
 
         sequence_sql = '''SELECT sequence_name FROM information_schema.sequences
                           WHERE sequence_schema='public'  
@@ -121,7 +124,7 @@ def session(app, db, request):
         txn = conn.begin()
 
         options = dict(bind=conn, binds={})
-        sess = db.create_scoped_session(options=options)
+        sess = db._make_scoped_session(options=options)
 
         # establish  a SAVEPOINT just before beginning the test
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)

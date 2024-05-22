@@ -1,0 +1,18 @@
+# local postgres
+version: '1'
+services:
+  db:
+    image: postgres:12
+    container_name: namex-api-testing
+    environment:
+      - POSTGRES_DB=namex-pay
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    restart: always
+    stdin_open: true
+    tty: true
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/data

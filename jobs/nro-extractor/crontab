@@ -1,2 +1,2 @@
 # m   h  dom mon dow user    command
-  */2 *   *   *   *  default /opt/app-root/run.sh 
+  */2 *   *   *   *  default /code/run.sh 

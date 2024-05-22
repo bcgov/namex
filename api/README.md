@@ -19,24 +19,6 @@ As of 2018-02-22 in **ALPHA**
 
 GitHub Pages (https://guides.github.com/features/pages/) are a neat way to document you application/project.
 
-## Security
-
-Future - BCGov Keycloak
-
-Current - JWT hack
-
-## Files in this repository
-
-```
-docs/           - Project Documentation
-└── images        
-└── icons         
-
-openshift/      - OpenShift-specific files
-├── scripts     - helper scripts
-└── templates   - application templates
-```
-
 ## Deployment (Local Development)
 
 * Developer Workstation Requirements/Setup

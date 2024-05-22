@@ -17,7 +17,7 @@ These will get initialized by the application.
 """
 
 import cx_Oracle
-from flask import _app_ctx_stack, current_app
+from flask import g, current_app
 
 from .exceptions import ColinServicesError
 
@@ -42,9 +42,9 @@ class ColinServices(object):
     def teardown(self, exception):
         """Clean up oracle session."""
         # the oracle session pool will clean up after itself
-        ctx = _app_ctx_stack.top
-        if hasattr(ctx, 'nro_oracle_pool'):
-            ctx.nro_oracle_pool.close()
+        db_pool = g.pop('nro_oracle_pool', None)
+        if db_pool is not None:
+            db_pool.close()
 
     def _create_pool(self):
         """Create the cx_oracle connection pool from the Flask Config Environment.
@@ -87,11 +87,10 @@ class ColinServices(object):
         and then return an acquired session
         :return: cx_Oracle.connection type
         """
-        ctx = _app_ctx_stack.top
-        if ctx is not None:
-            if not hasattr(ctx, 'nro_oracle_pool'):
-                ctx._nro_oracle_pool = self._create_pool()
-            return ctx._nro_oracle_pool.acquire()
+        if 'nro_oracle_pool' not in g:
+            g._nro_oracle_pool = self._create_pool()
+        return g._nro_oracle_pool.acquire()
+
 
     def get_business_info_by_corp_num(self, corp_num):
         """Get a business info by corp_num.
