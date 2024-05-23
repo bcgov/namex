@@ -5,6 +5,7 @@ on:
     types: [assigned, synchronize]
     paths:
       - "services/solr-names-updater/**"
+  workflow_dispatch:
 
 defaults:
   run:
@@ -14,8 +15,6 @@ defaults:
 jobs:
   setup-job:
     runs-on: ubuntu-20.04
-
-    if: github.repository == 'bcgov/namex'
 
     steps:
       - uses: actions/checkout@v3
@@ -29,7 +28,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v3
@@ -40,14 +39,10 @@ jobs:
       - name: Install dependencies
         run: |
           make setup
-      - name: Lint with pylint
-        id: pylint
-        run: |
-          make pylint
       - name: Lint with flake8
         id: flake8
         run: |
-          make flake8
+          poetry run flake8
 
   testing:
     needs: setup-job
@@ -64,7 +59,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: ["3.12"]
 
     services:
       postgres:
@@ -90,7 +85,7 @@ jobs:
       - name: Test with pytest
         id: test
         run: |
-          make test
+          poetry run pytest
       - name: Temporarily save coverage.xml
         uses: actions/upload-artifact@v2
         with:
