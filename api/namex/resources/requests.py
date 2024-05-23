@@ -756,14 +756,14 @@ class Request(Resource):
                 existing_nr.stateCd = State.HOLD
                 existing_nr.save_to_db()
 
+            if json_input.get('consent_dt', None):
+                json_input['consent_dt'] = str(datetime.datetime.strptime(
+                    str(json_input['consent_dt'][5:]), '%d %b %Y %H:%M:%S %Z'))
+
             # convert Submitted Date to correct format
             if json_input.get('submittedDate', None):
                 json_input['submittedDate'] = str(datetime.datetime.strptime(
                     str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
-
-            if json_input.get('consent_dt', None):
-                json_input['consent_dt'] = str(datetime.datetime.strptime(
-                    str(json_input['consent_dt'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
