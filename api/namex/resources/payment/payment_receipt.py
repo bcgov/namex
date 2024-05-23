@@ -40,7 +40,6 @@ def handle_auth_error(ex):
 })
 class PaymentReceipt(Resource):
     @staticmethod
-    @cors.crossdomain(origin='*')
     @payment_api.response(201, 'Created', '')
     def post(payment_id):
         try:
@@ -50,12 +49,12 @@ class PaymentReceipt(Resource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), 400
+                return make_response(jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), 400)
 
             receipt_info = get_receipt(payment.payment_token)
             name_choice = RequestDAO.find_name_by_choice(nr_model.id, 1)
             if not name_choice:
-                return jsonify(message='Could not find name choice for {nr_id}'.format(nr_id=nr_model.id)), 400
+                return make_response(jsonify(message='Could not find name choice for {nr_id}'.format(nr_id=nr_model.id)), 400)
 
             tz_aware_submission_date = nr_model.submittedDate.replace(tzinfo=timezone('UTC'))
             localized_submission_date = tz_aware_submission_date.astimezone(timezone('US/Pacific'))
@@ -67,12 +66,12 @@ class PaymentReceipt(Resource):
             receipt_response = generate_receipt(payment.payment_token, receipt_req)
 
             if not receipt_response:
-                return jsonify(message=MSG_NOT_FOUND), 404
+                return make_response(jsonify(message=MSG_NOT_FOUND), 404)
 
             return send_file(
                 receipt_response,
                 as_attachment=True,
-                attachment_filename='payment-receipt-{id}.pdf'.format(id=receipt_info.get('receiptNumber')))
+                download_name='payment-receipt-{id}.pdf'.format(id=receipt_info.get('receiptNumber')))
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
@@ -84,7 +83,6 @@ class PaymentReceipt(Resource):
             return handle_exception(err, err, 500)
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     @payment_api.response(200, 'Success', '')
     def get(payment_id):
         try:
@@ -94,11 +92,11 @@ class PaymentReceipt(Resource):
 
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
-                return jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), 400
+                return make_response(jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), 400)
 
             receipt_response = get_receipt(payment.payment_token)
             if receipt_response is None:
-                return jsonify(message=MSG_NOT_FOUND), 404  # TODO: What if we have a record?
+                return make_response(jsonify(message=MSG_NOT_FOUND), 404)  # TODO: What if we have a record?
 
             response = make_response(receipt_response, 200)
             return response

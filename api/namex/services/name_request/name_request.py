@@ -287,6 +287,13 @@ class NameRequestService(AbstractNameRequestMixin):
             raise MapRequestNamesError()
 
         try:
+            # Create a set of current request name IDs for easy lookup
+            current_request_name_ids = {name.get('id') for name in self.request_names}
+
+            # Remove names that are no longer present in the request
+            name_request.names = [name for name in name_request.names if name.id in current_request_name_ids]
+
+            # Handle update and insert
             for request_name in self.request_names:
                 request_name_id = request_name.get('id')
                 if request_name_id:

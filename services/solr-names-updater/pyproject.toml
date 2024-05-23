@@ -1,0 +1,159 @@
+[tool.poetry]
+name = "solr-names-updater"
+version = "0.4.0"
+description = ""
+authors = ["Thor Wolpert <thor@wolpert.ca>"]
+license = "Apache Software License Version 2.0"
+readme = "README.md"
+packages = [{include = "solr_names_updater", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+namex = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "api", branch = "feature-queue-upgrade-python3.12" }
+gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "services/pubsub", branch = "feature-queue-upgrade-python3.12" }
+swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
+simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
+sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
+flask = "^3.0.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+freezegun = "^1.4.0"
+pytest-aiohttp = "^1.0.5"
+pytest-mock = "^3.12.0"
+pyhamcrest = "^2.1.0"
+dpath = "^2.1.6"
+pydocstyle = "^6.3.0"
+flake8 = "^7.0.0"
+autopep8 = "^2.0.4"
+coverage = "^7.4.1"
+pylint = "^3.0.3"
+pylint-flask = "^0.6"
+isort = "^5.13.2"
+pytest-cov = "^4.1.0"
+flake8-blind-except = "^0.2.1"
+flake8-debugger = "^4.1.2"
+flake8-docstrings = "^1.7.0"
+flake8-isort = "^6.1.1"
+flake8-quotes = "^3.4.0"
+pep8-naming = "^0.13.3"
+
+
+[tool.flake8]
+ignore = ["F401","E402", "Q000", "E203", "W503"]
+exclude = [
+    ".venv",
+    ".git",
+    ".history",
+    "devops",
+    "*migrations*",
+]
+per-file-ignores = [
+    "__init__.py:F401",
+    "*.py:B902"
+]
+max-line-length = 120
+docstring-min-length=10
+count = true
+
+[tool.black]
+target-version =  ["py310", "py311", "py312"]
+line-length = 120
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  migrations
+  | devops
+)/
+'''
+
+[tool.isort]
+atomic = true
+profile = "black"
+line_length = 120
+skip_gitignore = true
+skip_glob = ["migrations", "devops"]
+
+[tool.pylint.main]
+fail-under = 10
+max-line-length = 120
+ignore = [ "migrations", "devops", "tests"]
+ignore-patterns = ["^\\.#"]
+ignored-modules= ["flask_sqlalchemy", "sqlalchemy", "SQLAlchemy" , "alembic", "scoped_session"]
+ignored-classes= "scoped_session"
+ignore-long-lines = "^\\s*(# )?<?https?://\\S+>?$"
+extension-pkg-whitelist = "pydantic"
+notes = ["FIXME","XXX","TODO"]
+overgeneral-exceptions = ["builtins.BaseException", "builtins.Exception"]
+confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFINED"]
+disable = "C0209,C0301,W0511,W0613,W0703,W1514,R0801,R0902,R0903,R0911,R0401,R1705,R1718,W3101"
+argument-naming-style = "snake_case"
+attr-naming-style = "snake_case"
+class-attribute-naming-style = "any"
+class-const-naming-style = "UPPER_CASE"
+class-naming-style = "PascalCase"
+const-naming-style = "UPPER_CASE"
+function-naming-style = "snake_case"
+inlinevar-naming-style = "any"
+method-naming-style = "snake_case"
+module-naming-style = "any"
+variable-naming-style = "snake_case"
+docstring-min-length = -1
+good-names = ["i", "j", "k", "ex", "Run", "_"]
+bad-names = ["foo", "bar", "baz", "toto", "tutu", "tata"]
+defining-attr-methods = ["__init__", "__new__", "setUp", "asyncSetUp", "__post_init__"]
+exclude-protected = ["_asdict", "_fields", "_replace", "_source", "_make", "os._exit"]
+valid-classmethod-first-arg = ["cls"]
+valid-metaclass-classmethod-first-arg = ["mcs"]
+
+
+[tool.pytest.ini_options]
+minversion = "2.0"
+testpaths = [
+   "tests",
+]
+python_files = [
+   "test*.py"
+]
+norecursedirs = [
+   ".git", ".tox", "venv*", "requirements*", "build",
+]
+log_cli = true
+log_cli_level = "1"
+filterwarnings = [
+   "ignore::UserWarning"
+]
+markers = [
+   "slow",
+   "serial",
+]
+
+[tool.coverage.run]
+branch = true
+source = [
+   "src/entity-pay",
+]
+omit = [
+    "wsgi.py",
+    "gunicorn_config.py"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+   "pragma: no cover",
+   "from",
+   "import",
+   "def __repr__",
+   "if self.debug:",
+   "if settings.DEBUG",
+   "raise AssertionError",
+   "raise NotImplementedError",
+   "if 0:",
+   'if __name__ == "__main__":',
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

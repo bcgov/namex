@@ -157,7 +157,6 @@ class NameAnalysis(Resource):
     """
 
     @staticmethod
-    @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
     @api.doc(params={
@@ -181,13 +180,13 @@ class NameAnalysis(Resource):
         # TODO: take out xpro flow entirely (not used in name analysis flow anymore)
         xpro = get_query_param_str('jurisdiction') not in ['BC', None]
         if xpro:
-            return jsonify(message=['xpro not supported']), HTTPStatus.NOT_IMPLEMENTED
+            return make_response(jsonify(message=['xpro not supported']), HTTPStatus.NOT_IMPLEMENTED)
         service = None
 
         errors = bc_validate_name_request(location, entity_type, request_action)  # \
             # if not xpro else xpro_validate_name_request(location, entity_type, request_action)
         if errors:
-            return jsonify(message=errors), HTTPStatus.BAD_REQUEST
+            return make_response(jsonify(message=errors), HTTPStatus.BAD_REQUEST)
 
         # # used for BC
         # valid_protected_entity_type = None
@@ -229,7 +228,7 @@ class NameAnalysis(Resource):
             #             if request_action == AnalysisRequestActions.MVE.value else XproNameAnalysisService()
             #         builder = NameAnalysisBuilder(service)
             #     else:
-            #         return jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
+            #         return make_response(jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
 
             # else:
             # if valid_location and valid_protected_entity_type:  # and is_protected_action:
@@ -241,12 +240,12 @@ class NameAnalysis(Resource):
                 # service = UnprotectedNameAnalysisService()
                 # builder = NameAnalysisBuilder(service)
             # else:
-            #     return jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
+            #     return make_response(jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
 
             if not service:
-                return jsonify(message=['Failed to initialize service']), HTTPStatus.INTERNAL_SERVER_ERROR
+                return make_response(jsonify(message=['Failed to initialize service']), HTTPStatus.INTERNAL_SERVER_ERROR)
             if not builder:
-                return jsonify(message=['Failed to initialize builder']), HTTPStatus.INTERNAL_SERVER_ERROR
+                return make_response(jsonify(message=['Failed to initialize builder']), HTTPStatus.INTERNAL_SERVER_ERROR)
 
             # Register and initialize the builder
             service.use_builder(builder)  # Required step! TODO: Enforce this!

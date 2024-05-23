@@ -652,7 +652,7 @@ def on_insert_or_update_nr(mapper, connection, request):
 
        Temporary NRs (nrNum starting with 'NR L') are discarded.
     """
-    if current_app.config.get('DISABLE_NAMEREQUEST_NATS_UPDATES', 0) != 1 and not request.nrNum.startswith('NR L'):
+    if not request.nrNum.startswith('NR L'):
         state_cd_history = get_history(request, 'stateCd')
         nr_num_history = get_history(request, 'nrNum')
         if len(nr_num_history.added) or len(state_cd_history.added):
@@ -801,7 +801,7 @@ class RequestsSearchSchema(ma.SQLAlchemySchema):
     names = ma.Nested(NameSchema, many=True)
     activeUser = ma.Pluck(UserSchema, 'username', many=False)
     comments = ma.Nested(CommentSchema, many=True, only=('comment', 'examiner', 'timestamp'))
-    applicants = ma.Nested(ApplicantSchema, many=True, only=('firstName', 'lastName'))
+    applicants = ma.Nested(ApplicantSchema, many=True, only=('firstName', 'lastName', 'middleName'))
 
 class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
     class Meta:

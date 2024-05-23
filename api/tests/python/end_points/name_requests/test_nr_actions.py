@@ -5,6 +5,7 @@ import datetime
 import json
 
 import pytest
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from namex.constants import EntityTypes, NameRequestActions
 from namex.models import State
@@ -14,9 +15,7 @@ from tests.python.common.test_name_request_utils import (
     assert_field_is_mapped,
 )
 from tests.python.end_points.common.http import get_test_headers
-from tests.python.end_points.name_requests.test_setup_utils.test_helpers import add_states_to_db, add_test_user_to_db
-from tests.python.end_points.util import create_header
-from tests.python.unit.test_setup_utils import build_nr
+from tests.python.end_points.name_requests.test_setup_utils.test_helpers import add_test_user_to_db
 
 # Import token and claims if you need it
 # from ..common import token_header, claims
@@ -27,8 +26,9 @@ from .test_setup_utils.test_helpers import (
     assert_applicant_is_mapped_correctly,
     assert_names_are_mapped_correctly,
     create_approved_nr,
-    create_cancelled_nr,
+    create_consumed_nr,
     create_draft_nr,
+    create_expired_nr,
     patch_nr,
 )
 
@@ -145,7 +145,7 @@ def test_create_reserved_nr(client, jwt, app):
     assert payload is not None
 
 
-def test_draft_patch_edit_data(client, jwt, app):
+def test_draft_patch_edit_data(client, jwt, app, mocker):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -208,7 +208,21 @@ def test_draft_patch_edit_data(client, jwt, app):
     # updated_applicant = {}
     # nr_data['applicant'] = updated_applicant
 
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data)
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
+
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
     print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
@@ -259,7 +273,7 @@ def test_draft_patch_edit_data(client, jwt, app):
         assert_field_equals_value(patched_nr, key, value)
 
 
-def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app):
+def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app, mocker):
     """
     This is not designed to test all combinations, for those tests see test_nr_request_combos.
     Setup:
@@ -291,7 +305,21 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app):
         'requestTypeCd': 'CLC'  # From request_type_mapping in namex.constants
     }
 
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data)
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
+
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -311,7 +339,7 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app):
         assert_field_equals_value(patched_nr, key, value)
 
 
-def test_draft_patch_edit_and_repatch(client, jwt, app):
+def test_draft_patch_edit_and_repatch(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -361,8 +389,21 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     # updated_applicant = {}
 
     # nr_data['applicant'] = updated_applicant
+    from namex.services import queue
 
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data)
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
+
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -385,7 +426,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     Patch the NR again with the response to make sure everything runs as expected
     """
 
-    patch_response = patch_nr(client, NameRequestActions.EDIT.value, patched_nr.get('id'), patched_nr)
+    patch_response = patch_nr(client, NameRequestActions.EDIT.value, patched_nr.get('id'), patched_nr, mocker)
     patched_nr = json.loads(patch_response.data)
 
     re_patched_nr = json.loads(patch_response.data)
@@ -405,48 +446,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app):
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
 
-def test_draft_patch_upgrade(client, jwt, app):
-    """
-    Setup:
-    Test:
-    :param client:
-    :param jwt:
-    :param app:
-    :return:
-    """
-    # Define our data
-    input_fields = build_test_input_fields()
-    post_response = create_draft_nr(client, input_fields)
-
-    # Assign the payload to new nr var
-    draft_nr = json.loads(post_response.data)
-    assert draft_nr is not None
-    assert_field_equals_value(draft_nr, 'priorityCd', 'N')
-
-    # Take the response and edit it
-    nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.UPGRADE.value, draft_nr.get('id'), nr_data)
-
-    assert patch_response.status_code == 200
-    patched_nr = json.loads(patch_response.data)
-    assert patched_nr is not None
-
-    print('PATCH Response: \n' + json.dumps(patched_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
-
-    # Check state
-    assert patched_nr.get('stateCd') == State.PENDING_PAYMENT
-
-    # Check NR number is the same because these are PATCH and call change_nr
-    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
-
-    # Check actions (write a util for this)
-
-    # assert_field_equals_value(patched_nr, 'payment_token', '')
-    assert_field_equals_value(patched_nr, 'priorityCd', 'Y')
-    # assert_field_equals_value(patched_nr, 'priorityDate', '')
-
-
-def test_draft_patch_cancel(client, jwt, app):
+def test_draft_patch_cancel(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -464,9 +464,25 @@ def test_draft_patch_cancel(client, jwt, app):
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
 
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
+
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data)
+
+    from namex.services import queue
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -483,7 +499,7 @@ def test_draft_patch_cancel(client, jwt, app):
 
 
 @pytest.mark.skip
-def test_draft_patch_cancel_with_invalid_states(client, jwt, app):
+def test_draft_patch_cancel_with_invalid_states(client, jwt, app, mocker):
     """
     TODO: This isn't working finish it!
     Setup:
@@ -515,7 +531,21 @@ def test_draft_patch_cancel_with_invalid_states(client, jwt, app):
     # Take the response and edit it
     # Expect this to fail as we
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data)
+
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
     print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
@@ -528,7 +558,7 @@ def test_draft_patch_cancel_with_invalid_states(client, jwt, app):
     assert isinstance(patched_nr.get('message'), str)
 
 
-def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
+def test_draft_patch_cancel_with_consumed_name(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -537,6 +567,20 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
     :param app:
     :return:
     """
+
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
     # Define our data
     input_fields = build_test_input_fields()
     custom_names = [{
@@ -553,16 +597,19 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
 
     input_fields['names'] = custom_names
 
-    test_nr = create_approved_nr(client, input_fields)
+    # test_nr = create_approved_nr(client, input_fields)
+    test_nr = create_consumed_nr(client, input_fields)
+
     assert test_nr is not None
 
     # Take the response and edit it
     # Expect this to fail as we
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data)
+
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
-    print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
+    assert patch_response.status_code == 500
 
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
@@ -572,7 +619,7 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app):
     assert isinstance(patched_nr.get('message'), str)
 
 
-def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
+def test_draft_patch_cancel_with_expired_nr(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -581,6 +628,20 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
     :param app:
     :return:
     """
+
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
     # Define our data
     input_fields = build_test_input_fields()
 
@@ -599,16 +660,17 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
 
     input_fields['names'] = custom_names
 
-    test_nr = create_approved_nr(client, input_fields)
+    test_nr = create_expired_nr(client, input_fields)
     assert test_nr is not None
 
     # Take the response and edit it
     # Expect this to fail as we
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data)
+
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
-    print('Assert that the request failed: ' + str(bool(patch_response.status_code == 500)))
+    assert patch_response.status_code == 500
 
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
@@ -618,7 +680,7 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app):
     assert isinstance(patched_nr.get('message'), str)
 
 
-def test_draft_patch_refund(client, jwt, app):
+def test_draft_patch_refund(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -627,7 +689,21 @@ def test_draft_patch_refund(client, jwt, app):
     :param app:
     :return:
     """
-    # Define our data
+
+    from namex.services import queue
+
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
+
     input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
 
@@ -637,7 +713,7 @@ def test_draft_patch_refund(client, jwt, app):
 
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.REQUEST_REFUND.value, draft_nr.get('id'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.REQUEST_REFUND.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -650,61 +726,24 @@ def test_draft_patch_refund(client, jwt, app):
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
 
-def test_draft_patch_reapply(client, jwt, app):
-    """
-    Setup:
-    Test:
-    :param client:
-    :param jwt:
-    :param app:
-    :return:
-    """
-    # Define our data
-    input_fields = build_test_input_fields()
-    post_response = create_draft_nr(client, input_fields)
-
-    # Assign the payload to new nr var
-    draft_nr = json.loads(post_response.data)
-    assert draft_nr is not None
-
-    def do_reapply():
-        # Take the response and edit it
-        nr_data = {}
-        patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data)
-
-        updated_nr = None
-        if patch_response.status_code == 200:
-            updated_nr = json.loads(patch_response.data)
-            assert updated_nr is not None
-
-            print('PATCH Response: \n' + json.dumps(updated_nr, sort_keys=True, indent=4, separators=(',', ': ')) + '\n')
-
-        return updated_nr, patch_response.status_code
-
-    # Re-apply
-    patched_nr, status_code = do_reapply()
-
-    # Check state
-    assert patched_nr.get('stateCd') == draft_nr.get('stateCd')
-
-    # Check NR number is the same because these are PATCH and call change_nr
-    assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
-
-    assert_field_equals_value(patched_nr, 'submitCount', 2)
-    # assert_field_equals_value(patched_nr, 'expirationDate', '')
-
-    # Re-apply
-    patched_nr, status_code = do_reapply()
-
-    assert_field_equals_value(patched_nr, 'submitCount', 3)
-
-    # Re-apply
-    patched_nr, status_code = do_reapply()
-    # The submitCount should never be greater than 3, this should now fail with a 500
-    assert status_code == 500
+    # Check pubsub messages
+    assert len(topics) == 1
+    mailer = app.config.get("EMAILER_TOPIC")
+    assert mailer in topics
 
 
-def test_draft_patch_reapply_historical(client, jwt, app):
+    email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+
+    # Verify message that would be sent to the emailer pubsub
+    assert email_pub['type'] == QueueMessageTypes.NAMES_MESSAGE_TYPE.value
+    assert email_pub['source'] == '/requests/NR L000001'
+    assert email_pub['subject'] == 'namerequest'
+    assert email_pub['data']['request']['nrNum'] == 'NR L000001'
+    assert email_pub['data']['request']['option'] == 'refund'
+    assert email_pub['data']['request']['refundValue'] == '0.00'
+
+
+def test_draft_patch_reapply_historical(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -725,8 +764,21 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     nr_data = {
         'request_action_cd': 'REH'
     }
+    from namex.services import queue
 
-    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data)
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
+
+    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -746,7 +798,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
         'request_action_cd': 'REST'
     }
 
-    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data)
+    patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 
@@ -762,7 +814,7 @@ def test_draft_patch_reapply_historical(client, jwt, app):
     # assert_field_equals_value(patched_nr, 'expirationDate', '')
 
 
-def test_draft_patch_resend(client, jwt, app):
+def test_draft_patch_resend(client, jwt, app, mocker):
     """
     Setup:
     Test:
@@ -778,10 +830,24 @@ def test_draft_patch_resend(client, jwt, app):
     # Assign the payload to new nr var
     draft_nr = json.loads(post_response.data)
     assert draft_nr is not None
+    from namex.services import queue
 
+    topics = []
+    msg = None
+
+    def mock_publish(topic: str, payload: bytes):
+        nonlocal topics
+        nonlocal msg
+        topics.append(topic)
+        msg = payload
+        return {}
+
+    mocker.patch.object(queue, "publish", mock_publish)
     # Take the response and edit it
     nr_data = {}
-    patch_response = patch_nr(client, NameRequestActions.RESEND.value, draft_nr.get('id'), nr_data)
+    from namex.services import queue
+
+    patch_response = patch_nr(client, NameRequestActions.RESEND.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
 

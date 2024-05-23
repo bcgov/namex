@@ -119,6 +119,13 @@ def create_approved_nr(client, nr_data=None):
 def create_cancelled_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.CANCELLED)
 
+@pytest.mark.skip
+def create_expired_nr(client, nr_data=None):
+    return create_test_nr(nr_data, State.EXPIRED)
+
+@pytest.mark.skip
+def create_consumed_nr(client, nr_data=None):
+    return create_test_nr(nr_data, State.CONSUMED)
 
 @pytest.mark.skip
 def create_draft_nr(client, nr_data=None, use_api=True):
@@ -169,6 +176,7 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
         nr.activeUser = user
         nr.submitter = user
         nr.submitter_userid = user.id
+        nr.nrNum = 'NR 123456'
 
         nr.save_to_db()
 
@@ -274,8 +282,13 @@ def post_test_nr_json(client, nr_data=None):
 
 
 @pytest.mark.skip
-def patch_nr(client, action, nr_id, nr_data):
+def patch_nr(client, action, nr_id, nr_data, mocker):
     try:
+        access_mock = mocker.patch("namex.resources.name_requests.name_request.full_access_to_name_request")
+        access_mock.return_value = True
+        refundable_mock = mocker.patch("namex.resources.name_requests.name_request.is_name_request_refundable")
+        refundable_mock.return_value = True
+
         request_uri = API_BASE_URI + str(nr_id) + '/' + action
         test_params = [{}]
 

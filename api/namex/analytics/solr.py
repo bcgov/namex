@@ -616,7 +616,7 @@ class SolrQueries:
 
         # Match the designation with whitespace before and either followed by whitespace or end of line.
         for designation in designations:
-            name = re.sub(' ' + designation + '(\s|$)', '', name)
+            name = re.sub(' ' + designation + '(\\s|$)', '', name)
 
         return re.sub('[^a-z]', '', name)
 
@@ -1002,7 +1002,7 @@ class SolrQueries:
                 n += 1
             prox_search_strs.insert(0, (prox_compounded_words, name[len(prox_combined_terms):], stemmed_name[len(prox_stemmed_combined_terms):], num_terms))
             phon_search_strs.insert(0, (prox_combined_terms.strip(), name[len(prox_combined_terms):], stemmed_name[len(prox_stemmed_combined_terms):], num_terms))
-            old_alg_combined_terms += term + '\ '
+            old_alg_combined_terms += term + '\\ '
             old_alg_search_strs.insert(0, old_alg_combined_terms)
 
         return prox_search_strs, old_alg_search_strs, phon_search_strs

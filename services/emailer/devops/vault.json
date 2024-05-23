@@ -1,0 +1,31 @@
+[
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "namex",
+            "topics",
+            "a083gt"
+        ]
+    },
+    {
+        "vault": "API",
+        "application": [
+            "notify-api",
+            "namex-api"
+        ]
+    },
+    {
+        "vault": "keycloak",
+        "application": [
+            "entity-service-account",
+            "base"
+        ]
+    },
+    {
+        "vault": "web-url",
+        "application": [
+            "name-request",
+            "bcregistry"
+        ]
+    }
+]
