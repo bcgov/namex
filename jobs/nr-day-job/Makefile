@@ -12,7 +12,7 @@ DOCKER_NAME:=nr-day-job
 #################################################################################
 # COMMANDS -- Setup                                                             #
 #################################################################################
-setup: install install-dev ## Setup the project
+setup: install ## Setup the project
 
 clean: clean-build clean-pyc clean-test ## Clean the project
 	rm -rf venv/
@@ -36,25 +36,15 @@ clean-test: ## clean test files
 	rm -f .coverage
 	rm -fr htmlcov/
 
-build-req: clean ## Upgrade requirements
-	test -f venv/bin/activate || python3.8 -m venv  $(CURRENT_ABS_DIR)/venv ;\
-	. venv/bin/activate ;\
-	pip install pip==20.1.1 ;\
-	pip install -Ur requirements/prod.txt ;\
-	pip freeze | sort > requirements.txt ;\
-	cat requirements/bcregistry-libraries.txt >> requirements.txt ;\
-	pip install -Ur requirements/bcregistry-libraries.txt
+update: ## Upgrade lock
+	poetry update
 
 install: clean ## Install python virtrual environment
-	test -f venv/bin/activate || python3.8 -m venv  $(CURRENT_ABS_DIR)/venv ;\
+	test -f venv/bin/activate || python -m venv  $(CURRENT_ABS_DIR)/venv ;\
 	. venv/bin/activate ;\
-	pip install pip==20.1.1 ;\
-	pip install -Ur requirements.txt
+	pipx install poetry
+	poetry install
 
-install-dev: ## Install local application
-	. venv/bin/activate ; \
-	pip install -Ur requirements/dev.txt; \
-	pip install -e .
 
 #################################################################################
 # COMMANDS - CI                                                                 #
