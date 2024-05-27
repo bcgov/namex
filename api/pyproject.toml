@@ -9,7 +9,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "services/pubsub",  branch = "feature-queue-upgrade-python3.12" }
+gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/pubsub",  branch = "main" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 # flask-jwt-oidc = { git = "https://github.com/thorwolpert/flask-jwt-oidc.git" }
