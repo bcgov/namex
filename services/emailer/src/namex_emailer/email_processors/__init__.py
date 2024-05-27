@@ -36,23 +36,7 @@ def substitute_template_parts(template_code: str) -> str:
     parts. There is no recursive search and replace.
     """
     template_parts = [
-        "business-dashboard-link",
-        "business-dashboard-link-alt",
-        "business-info",
-        "business-information",
-        "reg-business-info",
-        "cra-notice",
-        "nr-footer",
-        "footer",
-        "header",
-        "initiative-notice",
-        "logo",
-        "pdf-notice",
-        "style",
-        "divider",
-        "20px",
-        "whitespace-16px",
-        "whitespace-24px",
+        "nr-footer"
     ]
 
     # substitute template parts - marked up by [[filename]]
