@@ -7,8 +7,8 @@ license = "Apache Software License Version 2.0"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-namex = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "api", branch = "feature-queue-upgrade-python3.12" }
-gcp_queue = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "services/pubsub", branch = "feature-queue-upgrade-python3.12" }
+namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api" }
+gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/pubsub" }
 openapi_client = { git = "https://github.com/bcgov/namex-payment-api-py-client.git" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 # flask-jwt-oidc = { git = "https://github.com/thorwolpert/flask-jwt-oidc.git" }
