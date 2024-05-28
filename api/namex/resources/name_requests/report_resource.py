@@ -198,7 +198,7 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_report_filename(nr_model):
-        return 'NR {}.pdf'.format(nr_model.nrNum).replace(' ', '_')
+        return '{}.pdf'.format(nr_model.nrNum).replace(' ', '_')
 
     @staticmethod
     def _get_template():
@@ -296,6 +296,7 @@ class ReportResource(Resource):
         nr_report_json['retrievalDateTime'] = datetime.now().astimezone(timezone('US/Pacific')).strftime(DATE_FORMAT)
 
         nr_report_json['hasUnreviewedNames'] = ReportResource._hasUnReviewedNames(nr_report_json['names'])
+        nr_report_json['nwpta'] = []
         return nr_report_json
 
 
