@@ -8,7 +8,7 @@ from pytz import timezone
 
 import requests
 from flask import current_app, jsonify, request, make_response
-from flask_restx import Resource, cors
+from flask_restx import Resource
 
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
@@ -20,8 +20,6 @@ from .api_namespace import api
 
 setup_logging()  # Important to do this first
 
-RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
-CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
 DATE_FORMAT = '%B %-d, %Y at %-I:%M %p Pacific time'
 
 @cors_preflight('GET')
@@ -36,109 +34,6 @@ class ReportResource(Resource):
     BCA = 'Business Corporations Act'
     PA = 'Partnership Act'
 
-    def email_consent_letter(self, nr_id):
-        try:
-            nr_model = Request.query.get(nr_id)
-            if not nr_model:
-                return make_response(jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND)
-            nr_model.consentFlag = 'R' # invariant: this function is only called when the consent letter has been received
-            ReportResource._update_entity_and_action_code(nr_model)
-            report_name = nr_model.nrNum + ' - ' + CONSENT_EMAIL_SUBJECT
-            recipient_emails = []
-            for applicant in nr_model.applicants:
-                recipient_emails.append(applicant.emailAddress)
-            if not nr_model.expirationDate:
-                ReportResource._add_expiry_date(nr_model)
-            recipients = ','.join(recipient_emails)
-            template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
-            file_name = 'consent'
-            instruction_group = ReportResource._get_instruction_group(nr_model.entity_type_cd)
-            if instruction_group:
-                file_name = f"{file_name}-{instruction_group}"
-            email_template = Path(f'{template_path}/emails/{file_name}.md').read_text()
-            email_body = ReportResource._build_email_body(email_template, nr_model)
-            email = {
-                'recipients': recipients,
-                'content': {
-                    'subject': report_name,
-                    'body': email_body,
-                    'attachments': []
-                }
-            }
-            return ReportResource._send_email(email)
-        except Exception as err:
-            return handle_exception(err, 'Error retrieving the report.', 500)
-
-    def email_report(self, nr_id):
-        try:
-            nr_model = Request.query.get(nr_id)
-            if not nr_model:
-                return make_response(jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND)
-            report, status_code = ReportResource._get_report(nr_model)
-            if status_code != HTTPStatus.OK:
-                return make_response(jsonify(message=str(report)), status_code)
-            report_name = nr_model.nrNum + ' - ' + RESULT_EMAIL_SUBJECT
-            recipient_emails = []
-            for applicant in nr_model.applicants:
-                recipient_emails.append(applicant.emailAddress)
-            recipients = ','.join(recipient_emails)
-            template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
-            email_template = Path(f'{template_path}/emails/rejected.md').read_text()
-            if nr_model.stateCd in [State.APPROVED, State.CONDITIONAL]:
-                instruction_group = ReportResource._get_instruction_group(nr_model.entity_type_cd)
-                file_name=''
-                if nr_model.consentFlag in ['Y', 'R']:
-                    file_name = 'conditional'
-                else:
-                    file_name = 'approved'
-
-                if instruction_group:
-                    file_name += '-'
-                    file_name += instruction_group
-
-                email_template = Path(f'{template_path}/emails/{file_name}.md').read_text()
-
-            email_body = ReportResource._build_email_body(email_template, nr_model)
-
-            email = {
-                'recipients': recipients,
-                'content': {
-                    'subject': report_name,
-                    'body': email_body,
-                    'attachments': []
-                }
-            }
-            attachments = []
-            attachments.append(
-                {
-                    'fileName': report_name.replace(' - ', ' ').replace(' ', '_') + '.pdf',
-                    'fileBytes': base64.b64encode(report).decode(),
-                    'fileUrl': '',
-                    'attachOrder': '1'
-                }
-            )
-            email['content']['attachments'] = attachments
-            return ReportResource._send_email(email)
-        except Exception as err:
-            return handle_exception(err, 'Error retrieving the report.', 500)
-
-    @staticmethod
-    def _build_email_body(template: str, nr_model):
-        var_map = {
-            '{{NAMES_INFORMATION_URL}}': current_app.config.get('NAMES_INFORMATION_URL'),
-            '{{NAME_REQUEST_URL}}': current_app.config.get('NAME_REQUEST_URL'),
-            '{{NAMEREQUEST_NUMBER}}': nr_model.nrNum,
-            '{{BUSINESS_URL}}': current_app.config.get('BUSINESS_URL'),
-            '{{DECIDE_BUSINESS_URL}}': current_app.config.get('DECIDE_BUSINESS_URL'),
-            '{{CORP_ONLINE_URL}}': current_app.config.get('COLIN_URL'),
-            '{{CORP_FORMS_URL}}': current_app.config.get('CORP_FORMS_URL'),
-            '{{SOCIETIES_URL}}': current_app.config.get('SOCIETIES_URL'),
-            '{{EXPIRATION_DATE}}': nr_model.expirationDate.strftime(DATE_FORMAT)
-        }
-        for template_string, val in var_map.items():
-            template = template.replace(template_string, val)
-        return template
-
 
     def get(self, nr_id):
         try:
@@ -150,24 +45,6 @@ class ReportResource(Resource):
             return ReportResource._get_report(nr_model)
         except Exception as err:
             return handle_exception(err, 'Error retrieving the report.', 500)
-
-    @staticmethod
-    def _send_email(email):
-        """Send the email."""
-        notify_url = current_app.config.get('NOTIFY_API_URL') + current_app.config.get('NOTIFY_API_VERSION')
-        authenticated, token = ReportResource._get_service_client_token()
-        if not authenticated:
-            return make_response(jsonify(message='Error in authentication when sending email'), HTTPStatus.INTERNAL_SERVER_ERROR)
-
-        headers = {
-            'Authorization': 'Bearer {}'.format(token),
-            'Content-Type': 'application/json'
-        }
-        url = notify_url + "/notify"
-        response = requests.request("POST", url, json=email, headers=headers)
-        if response.status_code != 200:
-            raise Exception(response.text)
-        return response.content, response.status_code
 
     @staticmethod
     def _get_report(nr_model):
