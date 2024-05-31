@@ -105,7 +105,8 @@ class SolrQueries:
             '{synonyms_clause}{name_copy_clause}',
         HISTORY:
             '/solr/names/select?sow=false&df=name_exact_match&wt=json&&rows={rows}&q={name}'
-            '&fl=nr_num,name,score,submit_count,name_state_type_cd,start_date,jurisdiction',
+            '&fl=nr_num,name,score,submit_count,name_state_type_cd,start_date,jurisdiction'
+            'fq=name_state_type_cd:A&fq=name_state_type_cd:R',
         TRADEMARKS:
             '/solr/trademarks/select?'
             'defType=edismax'
