@@ -42,19 +42,23 @@ class ReportResource(Resource):
             nr_model = Request.query.get(nr_id)
             if not nr_model:
                 return make_response(jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND)
-            return ReportResource._get_report(nr_model)
+            nr_json = nr_model.json()
+            resp = ReportResource._get_report(nr_json)
+            response = make_response(resp)
+            response.mimetype = "application/octet-stream"
+            return response
         except Exception as err:
             return handle_exception(err, 'Error retrieving the report.', 500)
 
     @staticmethod
     def _get_report(nr_model):
-        if nr_model.stateCd not in [State.APPROVED, State.CONDITIONAL,
+        if nr_model['stateCd'] not in [State.APPROVED, State.CONDITIONAL,
                                     State.CONSUMED, State.EXPIRED, State.REJECTED]:
-            return make_response(jsonify(message='Invalid NR state'.format(nr_id=nr_model.id)), HTTPStatus.BAD_REQUEST)
+            return make_response(jsonify(message='Invalid NR state'.format(nr_id=nr_model['id'])), HTTPStatus.BAD_REQUEST)
 
         authenticated, token = ReportResource._get_service_client_token()
         if not authenticated:
-            return make_response(jsonify(message='Error in authentication'.format(nr_id=nr_model.id)),\
+            return make_response(jsonify(message='Error in authentication'.format(nr_id=nr_model['id'])),\
                     HTTPStatus.INTERNAL_SERVER_ERROR)
 
         headers = {
@@ -75,7 +79,7 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_report_filename(nr_model):
-        return 'NR {}.pdf'.format(nr_model.nrNum).replace(' ', '_')
+        return 'NR {}.pdf'.format(nr_model['nrNum']).replace(' ', '_')
 
     @staticmethod
     def _get_template():
@@ -98,10 +102,10 @@ class ReportResource(Resource):
         nr_service = NameRequestService()
         expiry_days = int(nr_service.get_expiry_days(nr_model))
         expiry_date = nr_service.create_expiry_date(
-            start=nr_model.lastUpdate,
+            start=nr_model['astUpdate'],
             expires_in_days=expiry_days
         )
-        nr_model.expirationDate = expiry_date
+        nr_model['expirationDate'] = expiry_date
 
 
     @staticmethod
@@ -124,25 +128,25 @@ class ReportResource(Resource):
     
     @staticmethod
     def _update_entity_and_action_code(nr_model):
-        if nr_model.requestTypeCd and (not nr_model.entity_type_cd or not nr_model.request_action_cd):
+        if nr_model['requestTypeCd'] and (not nr_model['entity_type_cd'] or not nr_model['request_action_cd']):
             # For the NRO ones.
-            entity_type, request_action = get_mapped_entity_and_action_code(nr_model.requestTypeCd)
-            nr_model.entity_type_cd = entity_type
-            nr_model.request_action_cd = request_action
+            entity_type, request_action = get_mapped_entity_and_action_code(nr_model['requestTypeCd'])
+            nr_model['entity_type_cd'] = entity_type
+            nr_model['request_action_cd'] = request_action
 
     @staticmethod
     def _get_template_data(nr_model):
         ReportResource._update_entity_and_action_code(nr_model)
-        nr_report_json = nr_model.json()
+        nr_report_json = nr_model
         nr_report_json['service_url'] = current_app.config.get('NAME_REQUEST_URL')
-        nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model.entity_type_cd)
-        nr_report_json['legalAct'] = ReportResource._get_legal_act(nr_model.entity_type_cd)
-        isXPRO = nr_model.entity_type_cd in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
+        nr_report_json['entityTypeDescription'] = ReportResource._get_entity_type_description(nr_model['entity_type_cd'])
+        nr_report_json['legalAct'] = ReportResource._get_legal_act(nr_model['entity_type_cd'])
+        isXPRO = nr_model['entity_type_cd'] in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
-        nr_report_json['isModernized'] = ReportResource._is_modernized(nr_model.entity_type_cd)
-        nr_report_json['isColin'] = ReportResource._is_colin(nr_model.entity_type_cd)
-        nr_report_json['isSociety'] = ReportResource._is_society(nr_model.entity_type_cd)
-        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model.entity_type_cd) or ReportResource._is_modernized(nr_model.entity_type_cd) or ReportResource._is_society(nr_model.entity_type_cd))
+        nr_report_json['isModernized'] = ReportResource._is_modernized(nr_model['entity_type_cd'])
+        nr_report_json['isColin'] = ReportResource._is_colin(nr_model['entity_type_cd'])
+        nr_report_json['isSociety'] = ReportResource._is_society(nr_model['entity_type_cd'])
+        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model['entity_type_cd']) or ReportResource._is_modernized(nr_model['entity_type_cd']) or ReportResource._is_society(nr_model['entity_type_cd']))
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
         nr_report_json['nrStateDescription'] = \
@@ -150,20 +154,20 @@ class ReportResource(Resource):
         if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
-            tz_aware_date = nr_model.expirationDate.replace(tzinfo=timezone('UTC'))
+            tz_aware_date = datetime.fromisoformat(nr_model['expirationDate']).replace(tzinfo=timezone('UTC'))
             localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
             nr_report_json['expirationDate'] = localized_date.strftime(DATE_FORMAT)
         else:
             ReportResource._add_expiry_date(nr_model)
-            nr_report_json['expirationDate'] = nr_model.expirationDate.strftime(DATE_FORMAT)
+            nr_report_json['expirationDate'] = nr_model['expirationDate'].strftime(DATE_FORMAT)
         if nr_report_json['submittedDate']:
-            tz_aware_date = nr_model.submittedDate.replace(tzinfo=timezone('UTC'))
+            tz_aware_date = datetime.fromisoformat(nr_model['submittedDate']).replace(tzinfo=timezone('UTC'))
             localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
             nr_report_json['submittedDate'] = localized_date.strftime(DATE_FORMAT)
         if nr_report_json['applicants']['countryTypeCd']:
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
-        actions_obj = ReportResource._get_next_action_text(nr_model.entity_type_cd)
+        actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'])
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
