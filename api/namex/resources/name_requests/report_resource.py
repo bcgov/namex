@@ -102,7 +102,7 @@ class ReportResource(Resource):
         nr_service = NameRequestService()
         expiry_days = int(nr_service.get_expiry_days(nr_model))
         expiry_date = nr_service.create_expiry_date(
-            start=nr_model['astUpdate'],
+            start=nr_model['lastUpdate'],
             expires_in_days=expiry_days
         )
         nr_model['expirationDate'] = expiry_date
