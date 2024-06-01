@@ -16,6 +16,7 @@ from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.logging import setup_logging
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
+from namex.utils.auth import get_client_credentials
 from .api_namespace import api
 
 setup_logging()  # Important to do this first
@@ -193,23 +194,8 @@ class ReportResource(Resource):
         auth_url = current_app.config.get('PAYMENT_SVC_AUTH_URL')
         client_id = current_app.config.get('PAYMENT_SVC_AUTH_CLIENT_ID')
         secret = current_app.config.get('PAYMENT_SVC_CLIENT_SECRET')
-        auth = requests.post(
-            auth_url,
-            auth=(client_id, secret),
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            data={
-                'grant_type': 'client_credentials',
-                'client_id': client_id,
-                'client_secret': secret
-            }
-        )
-        if auth.status_code != 200:
-            return False, auth.json()
+        return get_client_credentials(auth_url, client_id, secret)
 
-        token = dict(auth.json())['access_token']
-        return True, token
 
     @staticmethod
     def _get_request_action_cd_description(request_cd: str):
