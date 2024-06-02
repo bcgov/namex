@@ -33,7 +33,6 @@
             "namex-api",
             "colin-api-namex",
             "solr-synonyms-api",
-            "notify-api",
             "legal-api"
         ]
     },
