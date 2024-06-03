@@ -46,7 +46,8 @@
         "vault": "namex",
         "application": [
             "namex-api",
-            "mras-api"
+            "mras-api",
+            "jwt"
         ]
     },
     {
