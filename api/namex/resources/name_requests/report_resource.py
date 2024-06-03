@@ -101,7 +101,7 @@ class ReportResource(Resource):
     @staticmethod
     def _add_expiry_date(nr_model):
         nr_service = NameRequestService()
-        expiry_days = int(nr_service.get_expiry_days(nr_model))
+        expiry_days = nr_service.get_expiry_days(nr_model['request_action_cd'], nr_model['name_request.requestTypeCd'])
         expiry_date = nr_service.create_expiry_date(
             start=nr_model['lastUpdate'],
             expires_in_days=expiry_days

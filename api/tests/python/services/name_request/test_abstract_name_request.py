@@ -95,7 +95,7 @@ def test_get_expiry_days(client, test_name, days, action_cd, request_type):
     mock_nr.request_action_cd = action_cd
     mock_nr.requestTypeCd = request_type
     mock_nr.expirationDate = None
-    mock_expiry_days = int(nr_svc.get_expiry_days(mock_nr))
+    mock_expiry_days = int(nr_svc.get_expiry_days(mock_nr.request_action_cd, mock_nr.activeUser.requestTypeCd))
 
     assert mock_expiry_days == days
 
