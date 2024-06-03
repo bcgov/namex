@@ -1552,7 +1552,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "move-email-logic-to-emailer"
-resolved_reference = "95df9c0dd2c920d55da0cec88e67ec7acfc0840b"
+resolved_reference = "18d9ad63855fc040219bed1166e3c1d22ed63f37"
 subdirectory = "api"
 
 [[package]]
