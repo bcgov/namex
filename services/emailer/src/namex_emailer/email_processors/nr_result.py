@@ -34,8 +34,12 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         ReportResource._update_entity_and_action_code(nr_model)
         report_name = nr_number + ' - ' + CONSENT_EMAIL_SUBJECT
         recipient_emails = []
-        for applicant in nr_model['applicants']:
-            recipient_emails.append(applicant['emailAddress'])
+        applicants = nr_model['applicants']
+        if isinstance(applicants, dict):
+            recipient_emails.append(applicants['emailAddress'])
+        else:
+            for applicant in applicants:
+                recipient_emails.append(applicant['emailAddress'])
         if not nr_model['expirationDate']:
             ReportResource._add_expiry_date(nr_model)
         recipients = ','.join(recipient_emails)
