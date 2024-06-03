@@ -61,8 +61,6 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
     BUSINESS_URL = os.getenv('BUSINESS_URL', '')
     COLIN_URL = os.getenv('COLIN_URL', '')
     SOCIETIES_URL = os.getenv('SOCIETIES_URL', '')
-    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL', '')
-    NOTIFY_API_VERSION = os.getenv('NOTIFY_API_VERSION', '')
 
     NAMEX_LD_SDK_ID = os.getenv('NAMEX_LD_SDK_ID', '')
 

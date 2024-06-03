@@ -23,7 +23,7 @@ from flask import current_app, request
 from gcp_queue.logging import structured_log
 from jinja2 import Template
 
-import namex_emailer.services.helpers
+from namex_emailer.services.helpers import query_nr_number, get_bearer_token
 from namex_emailer.email_processors import substitute_template_parts
 
 
@@ -32,14 +32,14 @@ def process(email_info: dict) -> dict:
     structured_log(request, "DEBUG", f"NR_notification: {email_info}")
     nr_number = email_info.data.get("request", {}).get("header", {}).get("nrNum", "")
     payment_token = email_info.data.get("request", {}).get("paymentToken", "")
-    template = Path(f'{current_app.config.get("TEMPLATE_PATH")}/NR-PAID.html').read_text()
+    template = Path(f'{current_app.config.get("REPORT_TEMPLATE_PATH")}/NR-PAID.html').read_text()
     filled_template = substitute_template_parts(template)
     # render template with vars
     mail_template = Template(filled_template, autoescape=True)
     html_out = mail_template.render(identifier=nr_number)
 
     # get nr data
-    nr_response = namex_emailer.services.helpers.query_nr_number(nr_number)
+    nr_response = query_nr_number(nr_number)
     if nr_response.status_code != HTTPStatus.OK:
         structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
         return {}
@@ -67,7 +67,7 @@ def process(email_info: dict) -> dict:
 def _get_pdfs(nr_id: str, payment_token: str) -> list:
     """Get the receipt for the name request application."""
     pdfs = []
-    token = namex_emailer.services.helpers.get_bearer_token()
+    token = get_bearer_token()
     if not token or not nr_id or not payment_token:
         return []
 

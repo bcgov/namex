@@ -11,7 +11,8 @@
         "vault": "API",
         "application": [
             "notify-api",
-            "namex-api"
+            "namex-api",
+            "report-api"
         ]
     },
     {
@@ -19,6 +20,13 @@
         "application": [
             "entity-service-account",
             "base"
+        ]
+    },
+    {
+        "vault": "web-url",
+        "application": [
+            "name-request",
+            "bcregistry"
         ]
     },
     {

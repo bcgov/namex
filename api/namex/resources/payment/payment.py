@@ -197,7 +197,7 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
                         msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
                         current_app.logger.debug(msg)
                     if is_reapplication_eligible(nr_model.expirationDate):
-                        expiry_days = int(nr_svc.get_expiry_days(nr_model))
+                        expiry_days = nr_svc.get_expiry_days(nr_model.request_action_cd, nr_model.requestTypeCd)
                         nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
                     payment.payment_completion_date = datetime.utcnow()
 

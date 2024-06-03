@@ -3,7 +3,7 @@
 TODO: Fill in a larger description once the API is defined for V1
 """
 from http import HTTPStatus
-from flask import request, jsonify, g, current_app, get_flashed_messages, make_response
+from flask import request, jsonify, g, current_app, make_response
 from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
 
@@ -35,8 +35,7 @@ from namex.utils.common import (convert_to_ascii,
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.services.nro import NROServicesError
-from namex.resources.name_requests import ReportResource
-from namex.resources.flask_threads import FlaskThread
+from namex.utils import queue_util
 
 import datetime
 
@@ -689,19 +688,10 @@ class Request(Resource):
             return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206)
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
-            thread = FlaskThread(target=Request._email_report, args=(nrd.id, ))
-            thread.daemon = True
-            thread.start()
+            queue_util.publish_email_notification(nrd.nrNum, state)
 
         return make_response(jsonify(message='Request:{} - patched'.format(nr)), 200)
 
-    def _email_report(nr_id):
-        report = ReportResource()
-        report.email_report(nr_id)
-
-    def _email_consent(nr_id):
-        report = ReportResource()
-        report.email_consent_letter(nr_id)
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -859,9 +849,7 @@ class Request(Resource):
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
                 if nrd.consentFlag == 'R':
-                    thread = FlaskThread(target=Request._email_consent, args=(nrd.id, ))
-                    thread.daemon = True
-                    thread.start()
+                    queue_util.publish_email_notification(nrd.nrNum, 'CONSENT_RECEIVED')
 
             # Need this for a re-open
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:

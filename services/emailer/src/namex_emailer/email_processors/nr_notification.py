@@ -22,11 +22,11 @@ from pathlib import Path
 from flask import current_app, request
 from gcp_queue.logging import structured_log
 from jinja2 import Template
-
-# from namex_emailer.services.helpers import query_nr_number, format_as_report_string, as_legislation_timezone
-import namex_emailer.services.helpers
-from namex_emailer.email_processors import substitute_template_parts
 from simple_cloudevent import SimpleCloudEvent
+
+from namex_emailer.email_processors import substitute_template_parts
+from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, query_nr_number
+
 
 class Option(Enum):
     """NR notification option."""
@@ -36,6 +36,11 @@ class Option(Enum):
     RENEWAL = "renewal"
     UPGRADE = "upgrade"
     REFUND = "refund"
+    APPROVED = "APPROVED"
+    CONDITIONAL = "CONDITIONAL"
+    REJECTED = "REJECTED"
+    CONSENT_RECEIVED = "CONSENT_RECEIVED"
+
 
 
 def __is_modernized(legal_type):
@@ -72,7 +77,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     structured_log(request, "DEBUG", f"NR {option} notification: {email_info}")
     nr_number = email_info.data['request']['nrNum']
 
-    nr_response = namex_emailer.services.helpers.query_nr_number(nr_number)
+    nr_response = query_nr_number(nr_number)
     if nr_response.status_code != HTTPStatus.OK:
         structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
         return {}
@@ -82,8 +87,8 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     expiration_date = ""
     if nr_data["expirationDate"]:
         exp_date = datetime.fromisoformat(nr_data["expirationDate"])
-        exp_date_tz = namex_emailer.services.helpers.as_legislation_timezone(exp_date)
-        expiration_date = namex_emailer.services.helpers.format_as_report_string(exp_date_tz)
+        exp_date_tz = as_legislation_timezone(exp_date)
+        expiration_date = format_as_report_string(exp_date_tz)
 
     refund_value = ""
     if option == Option.REFUND.value:

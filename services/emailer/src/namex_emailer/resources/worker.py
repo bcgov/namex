@@ -44,8 +44,8 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 
 import namex_emailer.services.helpers
-from namex_emailer.email_processors import name_request, nr_notification
-from namex_emailer.services import queue, ce_cache
+from namex_emailer.email_processors import name_request, nr_notification, nr_result
+from namex_emailer.services import ce_cache, queue
 
 bp = Blueprint("worker", __name__)
 
@@ -116,6 +116,16 @@ def process_email(email_msg: SimpleCloudEvent):  # pylint: disable=too-many-bran
             nr_notification.Option.REFUND.value,
         ]:
             email = nr_notification.process(email_msg, option)
+        elif option and option in [
+            nr_notification.Option.APPROVED.value,
+            nr_notification.Option.REJECTED.value,
+            nr_notification.Option.CONDITIONAL.value,
+        ]:
+            email = nr_result.email_report(email_msg)
+        elif option and option in [
+            nr_notification.Option.CONSENT_RECEIVED.value,
+        ]:
+            email = nr_result.email_consent_letter(email_msg)
         else:
             email = name_request.process(email_msg)
     else:

@@ -80,6 +80,8 @@ class Config:  # pylint: disable=too-few-public-methods
     # variables
     LEGISLATIVE_TIMEZONE = os.getenv("LEGISLATIVE_TIMEZONE", "America/Vancouver")
     TEMPLATE_PATH = os.getenv("TEMPLATE_PATH", None)
+    REPORT_TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', None)
+
     DASHBOARD_URL = os.getenv("DASHBOARD_URL", None)
     LOG_LEVEL = os.getenv("LOG_LEVEL", None)
 
@@ -91,6 +93,8 @@ class Config:  # pylint: disable=too-few-public-methods
 
     NOTIFY_API_URL = f"{NOTIFY_API_URL + NOTIFY_API_VERSION}/notify"
     NAMEX_SVC_URL = f"{NAMEX_API_URL + NAMEX_API_VERSION}"
+
+    REPORT_SVC_URL = f'{os.getenv("REPORT_API_URL", None)}{os.getenv("REPORT_API_VERSION", None)}/reports'
 
     # service accounts
     ACCOUNT_SVC_AUTH_URL = os.getenv("KEYCLOAK_AUTH_TOKEN_URL")
@@ -107,6 +111,15 @@ class Config:  # pylint: disable=too-few-public-methods
     COLIN_URL = os.getenv("COLIN_URL", "")
     CORP_FORMS_URL = os.getenv("CORP_FORMS_URL", "")
     SOCIETIES_URL = os.getenv("SOCIETIES_URL", "")
+
+    PAYMENT_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
+    PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', '')
+    PAYMENT_SVC_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', '')
+
+    BUSINESS_CHANGES_URL = os.getenv('BUSINESS_CHANGES_URL', '')
+    NAMES_INFORMATION_URL = os.getenv('NAMES_INFORMATION_URL',
+                                      'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/\
+permits-licences/businesses-incorporated-companies/approval-business-name')
 
 
 class Development(Config):  # pylint: disable=too-few-public-methods
