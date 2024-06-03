@@ -17,8 +17,7 @@ launchdarkly-server-sdk = "^8.1.4"
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/pubsub" }
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
-#namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api" }
-namex = { git = "https://github.com/bolyachevets/namex.git", subdirectory = "api", branch="move-email-logic-to-emailer" }
+namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api" }
 requests = "^2.31.0"
 jinja2 = "^3.1.2"
 werkzeug = "^3.0.0"
