@@ -14,6 +14,7 @@ from namex_emailer.services.helpers import query_nr_number
 
 RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
 CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
+DATE_FORMAT = '%B %-d, %Y at %-I:%M %p Pacific time'
 
 EX_COOP_ASSOC = 'Extraprovincial Cooperative Association'
 GENERIC_STEPS = 'Submit appropriate form to BC Registries. Call if assistance required'
@@ -140,5 +141,7 @@ def _build_email_body(template: str, nr_model):
         '{{EXPIRATION_DATE}}': nr_model['expirationDate']
     }
     for template_string, val in var_map.items():
+        if isinstance(val, datetime):
+            val = val.strftime(DATE_FORMAT)
         template = template.replace(template_string, val)
     return template
