@@ -116,12 +116,7 @@ class Config:  # pylint: disable=too-few-public-methods
     PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', '')
     PAYMENT_SVC_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', '')
 
-    DECIDE_BUSINESS_URL = os.getenv('DECIDE_BUSINESS_URL', '')
     BUSINESS_CHANGES_URL = os.getenv('BUSINESS_CHANGES_URL', '')
-    CORP_FORMS_URL = os.getenv('CORP_FORMS_URL', '')
-    BUSINESS_URL = os.getenv('BUSINESS_URL', '')
-    COLIN_URL = os.getenv('COLIN_URL', '')
-    SOCIETIES_URL = os.getenv('SOCIETIES_URL', '')
     NAMES_INFORMATION_URL = os.getenv('NAMES_INFORMATION_URL',
                                       'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/\
 permits-licences/businesses-incorporated-companies/approval-business-name')
