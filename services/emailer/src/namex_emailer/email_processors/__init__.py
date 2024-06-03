@@ -42,7 +42,7 @@ def substitute_template_parts(template_code: str) -> str:
     # substitute template parts - marked up by [[filename]]
     for template_part in template_parts:
         # src/namex_emailer/email_templates/common/nr-footer.html
-        template_part_code = Path(f'{current_app.config.get("TEMPLATE_PATH")}/{template_part}.html').read_text()
+        template_part_code = Path(f'{current_app.config.get("TEMPLATE_PATH")}/template-parts/name-request/{template_part}.html').read_text()
         template_code = template_code.replace("[[{}.html]]".format(template_part), template_part_code)
 
     return template_code
