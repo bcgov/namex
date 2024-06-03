@@ -1552,7 +1552,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bolyachevets/namex.git"
 reference = "move-email-logic-to-emailer"
-resolved_reference = "d29c1d8ef079c5d58e2e14b13280674e4fa575c0"
+resolved_reference = "95df9c0dd2c920d55da0cec88e67ec7acfc0840b"
 subdirectory = "api"
 
 [[package]]
@@ -2959,13 +2959,13 @@ telegram = ["requests"]
 
 [[package]]
 name = "typing-extensions"
-version = "4.12.0"
+version = "4.12.1"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.12.0-py3-none-any.whl", hash = "sha256:b349c66bea9016ac22978d800cfff206d5f9816951f12a7d0ec5578b0a819594"},
-    {file = "typing_extensions-4.12.0.tar.gz", hash = "sha256:8cbcdc8606ebcb0d95453ad7dc5065e6237b6aa230a31e81d0f440c30fed5fd8"},
+    {file = "typing_extensions-4.12.1-py3-none-any.whl", hash = "sha256:6024b58b69089e5a89c347397254e35f1bf02a907728ec7fee9bf0fe837d203a"},
+    {file = "typing_extensions-4.12.1.tar.gz", hash = "sha256:915f5e35ff76f56588223f15fdd5938f9a1cf9195c0de25130c627e4d597f6d1"},
 ]
 
 [[package]]
