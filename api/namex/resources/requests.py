@@ -688,7 +688,7 @@ class Request(Resource):
             return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206)
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
-            queue_util.publish_email_notification(nrd.id, state)
+            queue_util.publish_email_notification(nrd.nrNum, state)
 
         return make_response(jsonify(message='Request:{} - patched'.format(nr)), 200)
 
@@ -849,7 +849,7 @@ class Request(Resource):
             if nrd.consentFlag != orig_nrd['consentFlag']:
                 is_changed_consent = True
                 if nrd.consentFlag == 'R':
-                    queue_util.publish_email_notification(nrd.id, 'CONSENT_RECEIVED')
+                    queue_util.publish_email_notification(nrd.nrNum, 'CONSENT_RECEIVED')
 
             # Need this for a re-open
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
