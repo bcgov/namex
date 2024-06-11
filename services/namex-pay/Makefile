@@ -15,7 +15,7 @@ DOCKER_NAME:=namex-pay
 setup: install ## Setup the project
 
 clean: clean-build clean-pyc clean-test ## Clean the project
-	rm -rf venv/
+	rm -rf .venv/
 
 clean-build: ## Clean build files
 	rm -fr build/
@@ -40,8 +40,8 @@ update: ## Upgrade lock
 	poetry update
 
 install: clean ## Install python virtrual environment
-	test -f venv/bin/activate || python -m venv  $(CURRENT_ABS_DIR)/venv ;\
-	. venv/bin/activate ;\
+	test -f .venv/bin/activate || python3.12 -m venv  $(CURRENT_ABS_DIR)/.venv ;\
+	. .venv/bin/activate ;\
 	pipx install poetry
 	poetry install
 
@@ -52,13 +52,13 @@ install: clean ## Install python virtrual environment
 ci: pylint flake8 test ## CI flow
 
 pylint: ## Linting with pylint
-	. venv/bin/activate && pylint --rcfile=setup.cfg src/$(PROJECT_NAME)
+	. .venv/bin/activate && pylint --rcfile=setup.cfg src/$(PROJECT_NAME)
 
 flake8: ## Linting with flake8 ## tests
-	. venv/bin/activate && flake8 src/$(PROJECT_NAME)
+	. .venv/bin/activate && flake8 src/$(PROJECT_NAME)
 
 test: ## Unit testing
-	. venv/bin/activate && pytest
+	. .venv/bin/activate && pytest
 
 mac-cov: test ## Run the coverage report and display in a browser window (mac)
 	@open -a "Google Chrome" htmlcov/index.html
@@ -119,7 +119,7 @@ tag: push ## tag image
 #################################################################################
 
 run: ## Run the project in local
-	. venv/bin/activate && python run.py
+	. .venv/bin/activate && python3.12 run.py
 
 #################################################################################
 # Self Documenting Commands                                                     #
