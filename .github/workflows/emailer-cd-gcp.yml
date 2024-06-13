@@ -1,0 +1,30 @@
+name: Namex Emailer CD GCP
+
+on:
+  push:
+    branches:
+      - emailer-cloudbuild
+    paths:
+      - "services/emailer/**"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deploy To"
+        required: true
+        type: choice
+        options:
+        - dev
+        - test
+        - sandbox
+        - prod
+
+jobs:
+  namex-emailer-cd:
+    uses: bcgov/bcregistry-sre/.github/workflows/cloud-run-service-cd.yaml@main
+    with:
+      target: ${{ inputs.target }}
+      app_name: "namex-emailer"
+      working_directory: "./services/emailer"
+    secrets:
+      WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
