@@ -3,7 +3,7 @@ name: Namex Emailer CD GCP
 on:
   push:
     branches:
-      - emailer-cloudbuild
+      - main
     paths:
       - "services/emailer/**"
   workflow_dispatch:
