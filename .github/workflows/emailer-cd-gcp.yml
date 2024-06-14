@@ -13,16 +13,20 @@ on:
         required: true
         type: choice
         options:
-        - dev
-        - test
-        - sandbox
-        - prod
+          - dev
+          - test
+          - sandbox
+          - prod
 
 jobs:
   namex-emailer-cd:
+    permissions:
+      id-token: write
+      contents: write
+
     uses: bcgov/bcregistry-sre/.github/workflows/cloud-run-service-cd.yaml@main
     with:
-      target: ${{ inputs.target }}
+      target: ${{ github.event.inputs.target }}  # Corrected the input reference
       app_name: "namex-emailer"
       working_directory: "./services/emailer"
     secrets:
