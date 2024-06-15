@@ -82,13 +82,13 @@ class Config():  # pylint: disable=too-few-public-methods
     NRO_HOST = os.getenv('ORACLE_HOST', '')
     NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
 
-    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
-    EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', '')
+    GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
+    EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
     AUDIENCE = os.getenv('AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Subscriber')
     PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
-    SUB_AUDIENCE = os.getenv('SUB_AUDIENCE', '')
-    SUB_SERVICE_ACCOUNT = os.getenv('SUB_SERVICE_ACCOUNT', '')
+    SUB_AUDIENCE = os.getenv('PAY_SUB_AUDIENCE', '')
+    SUB_SERVICE_ACCOUNT = os.getenv('AUTHPAY_SERVICE_ACCOUNT', '')
     DEBUG_REQUEST = os.getenv('DEBUG_REQUEST', False)
 
     ENVIRONMENT = os.getenv('ENVIRONMENT', 'prod')
@@ -116,7 +116,7 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     DB_HOST = os.getenv('DATABASE_TEST_HOST', '127.0.0.1')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
-    EMAILER_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
+    EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
 class ProdConfig(Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""
