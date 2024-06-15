@@ -23,7 +23,7 @@ license: ## Verify source code license headers.
 setup: clean install ## Setup the project
 
 clean: clean-build clean-pyc clean-test ## Clean the project
-	rm -rf venv/
+	rm -rf .venv/
 
 clean-build: ## Clean build files
 	rm -fr build/
@@ -48,8 +48,8 @@ update: ## Upgrade lock
 	poetry update
 
 install: clean ## Install python virtrual environment
-	test -f venv/bin/activate || python -m venv  $(CURRENT_ABS_DIR)/venv ;\
-	. venv/bin/activate ;\
+	test -f .venv/bin/activate || python3.12 -m venv  $(CURRENT_ABS_DIR)/.venv ;\
+	. .venv/bin/activate ;\
 	pipx install poetry
 	poetry install
 
@@ -60,15 +60,15 @@ install: clean ## Install python virtrual environment
 ci: pylint flake8 test ## CI flow
 
 pylint: ## Linting with pylint
-	. venv/bin/activate && pylint --rcfile=setup.cfg  $(PROJECT_FOLDER_NAME)
+	. .venv/bin/activate && pylint --rcfile=setup.cfg  $(PROJECT_FOLDER_NAME)
 
 flake8: ## Linting with flake8
-	. venv/bin/activate && flake8 $(PROJECT_FOLDER_NAME) tests
+	. .venv/bin/activate && flake8 $(PROJECT_FOLDER_NAME) tests
 
 lint: pylint flake8 ## run all lint type scripts
 
 test: ## Unit testing
-	. venv/bin/activate && pytest
+	. .venv/bin/activate && pytest
 
 mac-cov: local-test ## Run the coverage report and display in a browser window (mac)
 	open -a "Google Chrome" htmlcov/index.html
@@ -129,10 +129,10 @@ tag: push ## tag image
 # COMMANDS - Local                                                              #
 #################################################################################
 run: db ## Run the project in local
-	. venv/bin/activate && python -m flask run -p 5000
+	. venv/bin/activate && python3.12 -m flask run -p 5000
 
 db: ## Update the local database
-	. venv/bin/activate && python -m manage db upgrade
+	. venv/bin/activate && python3.12 -m manage db upgrade
 
 #################################################################################
 # Self Documenting Commands                                                     #
