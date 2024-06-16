@@ -24,6 +24,7 @@ setup: clean install ## Setup the project
 
 clean: clean-build clean-pyc clean-test ## Clean the project
 	rm -rf .venv/
+	rm -rf poetry.lock
 
 clean-build: ## Clean build files
 	rm -fr build/

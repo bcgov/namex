@@ -82,13 +82,13 @@ class Config():  # pylint: disable=too-few-public-methods
         name=DB_NAME,
     )
 
-    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
-    EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', 'namex-receipt-dev')
+    GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
+    EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
     AUDIENCE = os.getenv('AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Subscriber')
     PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
     DEBUG_REQUEST = os.getenv('DEBUG_REQUEST', False)
-    SUB_AUDIENCE = os.getenv('SUB_AUDIENCE', '')
-    SUB_SERVICE_ACCOUNT = os.getenv('SUB_SERVICE_ACCOUNT', '')
+    SUB_AUDIENCE = os.getenv('SOLR_SUB_AUDIENCE', '')
+    SUB_SERVICE_ACCOUNT = os.getenv('BUSINESS_SERVICE_ACCOUNT', '')
 
     SOLR_FEEDER_API_URL = os.getenv('SOLR_FEEDER_API_URL', None)
 
@@ -100,7 +100,6 @@ class Config():  # pylint: disable=too-few-public-methods
     JWT_OIDC_JWKS_URI = os.getenv('JWT_OIDC_JWKS_URI')
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
     JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
-    JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
     JWT_OIDC_CACHING_ENABLED = os.getenv('JWT_OIDC_CACHING_ENABLED')
 
     JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT', '300'))

@@ -104,7 +104,7 @@ def test_gcp_pubsub_connectivity():
     load_dotenv(".env")
 
     app = flask.Flask(__name__)
-    app.config['GCP_AUTH_KEY'] = os.getenv('GCP_AUTH_KEY')
+    app.config['GCP_AUTH_KEY'] = os.getenv('BUSINESS_GCP_AUTH_KEY')
 
     queue = GcpQueue()
     queue.init_app(app)

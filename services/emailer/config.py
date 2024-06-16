@@ -102,7 +102,7 @@ class Config:  # pylint: disable=too-few-public-methods
     ACCOUNT_SVC_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")
     ACCOUNT_SVC_TIMEOUT = os.getenv("KEYCLOAK_TIMEOUT")
 
-    SUB_AUDIENCE = os.getenv('SUB_AUDIENCE', '')
+    SUB_AUDIENCE = os.getenv('EMAILER_SUB_AUDIENCE', '')
     SUB_SERVICE_ACCOUNT = os.getenv('SUB_SERVICE_ACCOUNT', '')
 
     NAME_REQUEST_URL = os.getenv("NAME_REQUEST_URL", "")

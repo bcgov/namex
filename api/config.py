@@ -89,7 +89,6 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
     JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT', '300'))
 
     JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
-    JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
 
     SBC_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
     SBC_SVC_AUTH_CLIENT_ID = os.getenv('NAMEX_SBC_SERVICE_ACCOUNT_CLIENT_ID', '')
@@ -107,9 +106,9 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
 
-    GCP_AUTH_KEY = os.getenv("GCP_AUTH_KEY", None)
-    NAMEX_NR_STATE_TOPIC = os.getenv("NAMEX_NR_STATE_TOPIC", "namex-pay-dev")
-    EMAILER_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
+    GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
+    NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
+    EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
     AUDIENCE = os.getenv("AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Subscriber")
     PUBLISHER_AUDIENCE = os.getenv("PUBLISHER_AUDIENCE", "https://pubsub.googleapis.com/google.pubsub.v1.Publisher")
@@ -154,7 +153,7 @@ class TestConfig(Config):
         port=int(DB_PORT),
         name=DB_NAME
     )
-    EMAILER_TOPIC = os.getenv("EMAILER_TOPIC", "namex-receipt-dev")
+    EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
     # We can't run NRO locally for running our tests
     DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 1))
