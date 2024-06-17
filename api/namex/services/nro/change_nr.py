@@ -212,11 +212,16 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
        otherwise, create a new name_instance and set its start_event_id to event_id
     """
 
+    name_map = {1: None, 2: None, 3: None}
     for name in nr.names:
+        name_map[name.choice] = name
 
-        if (name.choice == 1 and change_flags['is_changed__name1']) or \
-           (name.choice == 2 and change_flags['is_changed__name2']) or \
-           (name.choice == 3 and change_flags['is_changed__name3']):
+    for choice in range(1, 4):
+        name = name_map[choice]
+
+        if (choice == 1 and change_flags['is_changed__name1']) or \
+           (choice == 2 and change_flags['is_changed__name2']) or \
+           (choice == 3 and change_flags['is_changed__name3']):
 
             oracle_cursor.execute("""
             SELECT ni.name_instance_id, ni.name_id
@@ -228,7 +233,7 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
             FOR UPDATE
             """,
                                   request_id=nr.requestId,
-                                  choice=name.choice)
+                                  choice=choice)
             row = oracle_cursor.fetchone()
 
             # if there was a result, this is an existing name record
@@ -244,6 +249,10 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
                 """,
                                       event_id=event_id,
                                       instance_id=ni_id)
+
+                # If the name is deleted or missing, do not insert new name_instance record
+                if name is None or name.name is None:
+                    continue
 
             else:
                 # this is a new name, so create a new NAME and NAME_STATE record
@@ -267,7 +276,7 @@ def _update_nro_names(oracle_cursor, nr, event_id, change_flags):
                                       start_event=event_id)
 
             # If the new name is not blank, do this:
-            if name.name:
+            if name and name.name:
                 oracle_cursor.execute("""
                 INSERT INTO name_instance (name_instance_id, name_id, choice_number, name, start_event_id, search_name)
                 VALUES (name_instance_seq.nextval, :name_id, :choice, :name, :event_id, :search_name)
