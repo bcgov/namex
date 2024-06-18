@@ -38,7 +38,6 @@ from http import HTTPStatus
 
 import requests
 from flask import Blueprint, current_app, request
-from gcp_queue.gcp_auth import ensure_authorized_queue_user
 from gcp_queue.logging import structured_log
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
@@ -51,7 +50,6 @@ bp = Blueprint("worker", __name__)
 
 
 @bp.route("/", methods=("POST",))
-@ensure_authorized_queue_user
 def worker():
     """Process the incoming cloud event
     """
