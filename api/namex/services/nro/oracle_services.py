@@ -179,12 +179,7 @@ class NROServices(object):
             try:
                 cursor = con.cursor()
 
-                # set the fqpn if the schema is required, which is set y the deployer/configurator
-                # if the environment variable is missing from the Flask Config, then skip setting it.
-                if current_app.config.get('NRO_SCHEMA'):
-                    func_name = '{}.nro_datapump_pkg.name_examination_func'.format(current_app.config.get('NRO_SCHEMA'))
-                else:
-                    func_name = 'nro_datapump_pkg.name_examination_func'
+                func_name = 'nro_datapump_pkg.name_examination_func'
 
                 func_vars = [nr_num,           # p_nr_number
                             'H',               # p_status
