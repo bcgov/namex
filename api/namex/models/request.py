@@ -88,7 +88,7 @@ class Request(db.Model):
     activeUser = db.relationship('User', backref=backref('active_user', uselist=False), foreign_keys=[userId])
     submitter = db.relationship('User', backref=backref('submitter', uselist=False), foreign_keys=[submitter_userid])
     # Relationships - Names
-    names = db.relationship('Name', lazy='select')
+    names = db.relationship('Name', lazy='select', order_by='Name.choice')
     # Relationships - Events
     events = db.relationship('Event', lazy='dynamic')
     # Relationships - Applicants
