@@ -2,39 +2,45 @@ import time
 import uuid
 from datetime import datetime, timezone
 
-from flask import current_app
+from flask import current_app, copy_current_request_context
 from simple_cloudevent import SimpleCloudEvent
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from namex.services import queue
+from namex.utils.email_debouncer import email_notification_debouncer
 
+email_debouncer = email_notification_debouncer()
 
 def publish_email_notification(nr_num: str, option: str, refund_value=None):
     """Send notification info to the mail queue."""
-    event_data = {
-        'request': {
-            'nrNum': nr_num,
-            'option': option
+    @copy_current_request_context
+    def send_email():
+        event_data = {
+            'request': {
+                'nrNum': nr_num,
+                'option': option
+            }
         }
-    }
 
-    if refund_value:
-        event_data['request']['refundValue'] = refund_value
+        if refund_value:
+            event_data['request']['refundValue'] = refund_value
 
-    ce = SimpleCloudEvent(
-        id=str(uuid.uuid4()),
-        source=f'/requests/{nr_num}',
-        subject="namerequest",
-        type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
-        time=datetime.now(tz=timezone.utc).isoformat(),
-        data=event_data
-    )
+        ce = SimpleCloudEvent(
+            id=str(uuid.uuid4()),
+            source=f'/requests/{nr_num}',
+            subject="namerequest",
+            type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
+            time=datetime.now(tz=timezone.utc).isoformat(),
+            data=event_data
+        )
 
-    email_topic = current_app.config.get("EMAILER_TOPIC", "mailer")
-    payload = queue.to_queue_message(ce)
-    current_app.logger.debug('About to publish email for %s nrNum=%s', option, nr_num)
-    queue.publish(topic=email_topic, payload=payload)
+        email_topic = current_app.config.get("EMAILER_TOPIC", "mailer")
+        payload = queue.to_queue_message(ce)
+        current_app.logger.debug('About to publish email for %s nrNum=%s', option, nr_num)
+        queue.publish(topic=email_topic, payload=payload)
 
+    # Use the debouncer to prevent spamming emails
+    email_debouncer.debounce(send_email)
 
 def create_name_request_state_msg(nr_num, state_cd, old_state_cd):
     """Builds a name request state message."""
