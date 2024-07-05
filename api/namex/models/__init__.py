@@ -25,5 +25,7 @@ from .admin_tables import DecisionReasonAudit, RestrictedConditionAudit
 from .word_classification import WordClassification, WordClassificationSchema
 from .virtual_word_condition import VirtualWordCondition
 from .nr_number import NRNumber
+from .nr_number_exclude import NRNumberExclude
+from .nr_number_lifespan import NRNumberLifespan
 from .payment import Payment
 from .hotjar_tracking import HotjarTracking

@@ -26,18 +26,17 @@
 from flask import current_app, jsonify, make_response
 from .utils import generate_compressed_name
 from namex.services.nro.change_nr import _get_event_id, _create_nro_transaction
+from namex.services.name_request.generate_new_nr_number import NRNumberService
 from namex.models import State
 import cx_Oracle
 
 
-
-def new_nr(nr, ora_cursor,con):
+def new_nr(nr, ora_cursor, con):
     """Add the Name Request in NRO
     :raises Exception: what ever error we get, let our caller handle, this is here in case we want to wrap it - future
     """
 
-    nr_num_list = _generate_nr_num(ora_cursor)
-    nr_num = nr_num_list.values[0]
+    nr_num = NRNumberService.get_new_nr_num()
     # Set postgres to real NR #
     nr.nrNum = nr_num
 
