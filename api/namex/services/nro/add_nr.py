@@ -228,11 +228,6 @@ def  _create_names(oracle_cursor, nr, eid):
                               search_name=generate_compressed_name(name.name),
                               designation = name.designation)
 
-def _generate_nr_num(oracle_cursor):
-    nr_num = oracle_cursor.var(cx_Oracle.STRING)
-    oracle_cursor.callfunc("nro_util_pkg.get_new_nr_num", nr_num)
-    return nr_num
-
 def set_request_on_hold(oracle_cursor, request_id,eid):
     # set the end event for the existing record
     oracle_cursor.execute("""
