@@ -53,9 +53,6 @@ class NRNumberService:
                 nr_num = f'NR {str(random_num).zfill(7)}'
                 count += 1
 
-                if random_num < floor or random > ceiling:
-                    continue
-
                 if not set_nr_num_lifespan(nr_num, span):
                     continue
 
