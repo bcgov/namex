@@ -119,6 +119,10 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
     SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
+    # Generate new NR Number
+    NR_NUM_LIFESPAN = int(os.getenv('NR_NUM_LIFESPAN', 60))
+
+
 class DevConfig(Config):
     """Dev config used for development."""
 
