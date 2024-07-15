@@ -6,7 +6,7 @@ from flask import current_app, jsonify, make_response, request
 from flask_jwt_oidc import AuthError
 from flask_restx import cors, fields
 
-from namex import jwt, nro
+from namex import jwt
 from namex.constants import NameRequestActions, PaymentState, PaymentStatusCode
 from namex.models import Event
 from namex.models import Payment as PaymentDAO
@@ -33,10 +33,6 @@ MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 
 NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup from somewhere
-
-
-def validate_request(request):
-    return True
 
 
 # Define our DTO models
@@ -187,15 +183,6 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
                 elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
                     # TODO: handle this (refund payment and prevent action?)
 
-                    # the `nr_model.expirationDate` is been set from nro with timezone info
-                    # and `datetime.utcnow()` does not return with timezone info `+00:00`
-                    # replacing timezone info to None in `nr_model.expirationDate` to avoid
-                    # this error: `can't compare offset-naive and offset-aware datetimes`
-                    if nr_model.stateCd != State.APPROVED \
-                            and nr_model.expirationDate.replace(tzinfo=None) + \
-                            timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
-                        msg = f'Extend NR for payment.id={payment.id} nr_model.state{nr_model.stateCd}, nr_model.expires:{nr_model.expirationDate}'
-                        current_app.logger.debug(msg)
                     if is_reapplication_eligible(nr_model.expirationDate):
                         expiry_days = nr_svc.get_expiry_days(nr_model.request_action_cd, nr_model.requestTypeCd)
                         nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
@@ -204,25 +191,6 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
                 nr_model.save_to_db()
                 payment.save_to_db()
                 EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
-                if payment_action in [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                    change_flags = {
-                        'is_changed__request': True,
-                        'is_changed__previous_request': False,
-                        'is_changed__applicant': False,
-                        'is_changed__address': False,
-                        'is_changed__name1': False,
-                        'is_changed__name2': False,
-                        'is_changed__name3': False,
-                        'is_changed__nwpta_ab': False,
-                        'is_changed__nwpta_sk': False,
-                        'is_changed__request_state': False,
-                        'is_changed_consent': False
-                    }
-                    warnings = nro.change_nr(nr_model, change_flags)
-                    if warnings:
-                        # log error for ops, but return success (namex is still up to date)
-                        msg = f'API Error: Unable to update NRO for {nr_model.nrNum} {payment_action}: {warnings}'
-                        current_app.logger.error(msg)
 
             else:
                 # Record the event
@@ -399,7 +367,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 if payment_action in [NameRequestActions.CREATE.value, NameRequestActions.RESUBMIT.value]:
                     # Save the record to NRO, which swaps the NR-L Number for a real NR
                     update_solr = True
-                    nr_model = self.add_records_to_network_services(nr_model, update_solr)
+                    nr_model = self.add_new_nr_number(nr_model, update_solr)
 
             existing_payment = PaymentDAO.find_by_existing_nr_id(nr_id, payment_action)
             if existing_payment:
@@ -770,10 +738,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             # Save the name request
             nr_model.save_to_db()
 
-        # This (optionally) handles the updates for NRO and Solr, if necessary
-        update_solr = False
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
-
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)
 
@@ -812,10 +776,6 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             else:
                 # TODO: Make a custom exception for this?
                 raise PaymentServiceError(message='Submit count maximum of 3 retries has been reached!')
-
-        # This (optionally) handles the updates for NRO and Solr, if necessary
-        update_solr = False
-        nr_model = self.update_records_in_network_services(nr_model, update_solr)
 
         # Update the actions, as things change once the payment is successful
         self.nr_service.current_state_actions = get_nr_state_actions(nr_model.stateCd, nr_model)

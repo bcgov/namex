@@ -265,7 +265,7 @@ class Request(db.Model):
 
         if existing_nr:
             current_app.logger.info('Existing NR found, returning: {}'.format(existing_nr.nrNum))
-            return existing_nr, False
+            return existing_nr
 
         # this will error if there's nothing in the queue - likelihood ~ 0
         result = None
@@ -293,7 +293,7 @@ class Request(db.Model):
 
         db.session.add(result)
         db.session.commit()
-        return result, True
+        return result
 
     @classmethod
     def get_oldest_draft(cls):

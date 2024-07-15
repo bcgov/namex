@@ -1,18 +1,24 @@
+from flask import current_app
 from typing import Callable
 
 from namex.models import Request, State
+from namex.services.name_request.generate_new_nr_number import NRNumberService
 from namex.utils.logging import setup_logging
+from namex.services.name_request.utils import is_temp_nr_num
+from namex.services.name_request import NameRequestService
+from namex.services.name_request.exceptions import NameRequestException
+from namex.services.virtual_word_condition import VirtualWordConditionService
 
-from .abstract_nro_resource import AbstractNROResource
 from .abstract_solr_resource import AbstractSolrResource
 
 
 setup_logging()  # Important to do this first
 
 
-class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
+class AbstractNameRequestResource(AbstractSolrResource):
     _request_data = None
     _nr_action = None
+    _nr_service = None
 
     @property
     def request_data(self):
@@ -29,6 +35,17 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
     @nr_action.setter
     def nr_action(self, nr_action):
         self._nr_action = nr_action
+
+    @property
+    def nr_service(self):
+        try:
+            if not self._nr_service:
+                self._nr_service = NameRequestService()
+                self._nr_service.virtual_wc_service = VirtualWordConditionService()
+        except Exception as err:
+            raise NameRequestException(err, message='Error initializing NameRequestService')
+
+        return self._nr_service
 
     def update_nr(self, nr_model: Request, new_state, on_state_changed: Callable) -> Request:
         """
@@ -148,26 +165,26 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
         # Return the updated name request
         return nr
 
-    def add_records_to_network_services(self, nr_model: Request, update_solr=False) -> Request:
+    def add_new_nr_number(self, nr_model: Request, update_solr=False) -> Request:
+        is_temp_nr = is_temp_nr_num(nr_model.nrNum)
         temp_nr_num = None
+
         if nr_model.stateCd in [State.PENDING_PAYMENT, 
                                 State.DRAFT, 
                                 State.COND_RESERVE, 
                                 State.RESERVED, 
                                 State.CONDITIONAL, 
-                                State.APPROVED] and nr_model.nrNum.startswith('NR L'):
-            existing_nr_num = nr_model.nrNum
-            # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the save_nr handler
-            print('Adding request to NRO')
-            nr_model = self.add_request_to_nro(nr_model, self.save_nr)
-            print('NR is using the temporary NR Number {num}'.format(num=nr_model.nrNum))
+                                State.APPROVED] and is_temp_nr:
+            temp_nr_num = nr_model.nrNum
+
+            nr_num = NRNumberService.get_new_nr_num()
+            nr_model.nrNum = nr_num
+            current_app.logger.debug('NR is using the temporary NR Number {num}'.format(num=nr_num))
 
             # Set the temp NR number if its different
-            if nr_model.nrNum != existing_nr_num:
-                temp_nr_num = existing_nr_num
-                print('Replacing temporary NR Number {temp} -> {new}'.format(temp=temp_nr_num, new=nr_model.nrNum))
+            current_app.logger.debug('Replacing temporary NR Number {temp} -> {new}'.format(temp=temp_nr_num, new=nr_model.nrNum))
 
-            print(repr(nr_model))
+            current_app.logger.debug(repr(nr_model))
 
         # Update SOLR
         if update_solr:
@@ -175,24 +192,20 @@ class AbstractNameRequestResource(AbstractNROResource, AbstractSolrResource):
 
         return nr_model
 
-    def update_records_in_network_services(self, nr_model: Request, update_solr=False) -> Request:
-        temp_nr_num = None
-        if nr_model.stateCd in [State.PENDING_PAYMENT, State.DRAFT, State.CONDITIONAL, State.APPROVED, State.CANCELLED, State.INPROGRESS]:
-            existing_nr_num = nr_model.nrNum
-            # This updates NRO, it should return the nr_model with the updated nrNum, which we save back to postgres in the save_nr handler
-            print('Updating request in NRO')
-            nr_model = self.update_request_in_nro(nr_model, self.save_nr)
+    def update_solr(self, nr_model: Request) -> Request:
+        # List of states that require SOLR update
+        states_to_update = [
+            State.PENDING_PAYMENT,
+            State.DRAFT,
+            State.CONDITIONAL,
+            State.APPROVED,
+            State.CANCELLED,
+            State.INPROGRESS
+        ]
 
-            # Set the temp NR number if its different
-            if nr_model.nrNum != existing_nr_num:
-                temp_nr_num = existing_nr_num
-                print('Replacing temporary NR Number {temp} -> {new}'.format(temp=temp_nr_num, new=nr_model.nrNum))
-
-            print(repr(nr_model))
-
-            # Update SOLR
-            if update_solr:
-                self.update_solr_service(nr_model, temp_nr_num)
+        # Check if the current state of the request is in the list of states to update
+        if nr_model.stateCd in states_to_update:
+            self.update_solr_service(nr_model)
 
         return nr_model
 

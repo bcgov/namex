@@ -1,17 +1,13 @@
-from typing import Callable
-from flask import request, current_app
-
-from namex.utils.logging import setup_logging
+from flask import current_app, request
 
 from namex.constants import NameRequestPatchActions
-from namex.models import State, Request
-
-from namex.services.name_request import NameRequestService
-from namex.services.virtual_word_condition import VirtualWordConditionService
+from namex.models import Request, State
 from namex.services.name_request.exceptions import NameRequestException
+from namex.services.name_request.name_request import NameRequestService
+from namex.utils.logging import setup_logging
 
 from .abstract_nr_resource import AbstractNameRequestResource
-from .constants import request_editable_states, contact_editable_states
+from .constants import contact_editable_states, request_editable_states
 
 setup_logging()  # Important to do this first
 
@@ -22,19 +18,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     Inherits from AbstractNROResource and AbstractSolrResource which extend this class with
     functionality to communicate with NRO services and Solr.
     """
-    _nr_service = None
-
-    @property
-    def nr_service(self):
-        try:
-            if not self._nr_service:
-                self._nr_service = NameRequestService()
-                self._nr_service.virtual_wc_service = VirtualWordConditionService()
-        except Exception as err:
-            raise NameRequestException(err, message='Error initializing NameRequestService')
-
-        return self._nr_service
-
     def initialize(self):
         self.validate_config(current_app)
 
