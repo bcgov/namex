@@ -589,32 +589,8 @@ class Request(Resource):
                         existing_nr.stateCd = State.HOLD
                     existing_nr.save_to_db()
 
-                # if we're changing to DRAFT, update NRO status to "D" in NRO
-                if state == State.DRAFT:
-                    change_flags = {
-                        'is_changed__request': False,
-                        'is_changed__previous_request': False,
-                        'is_changed__applicant': False,
-                        'is_changed__address': False,
-                        'is_changed__name1': False,
-                        'is_changed__name2': False,
-                        'is_changed__name3': False,
-                        'is_changed__nwpta_ab': False,
-                        'is_changed__nwpta_sk': False,
-                        'is_changed__request_state': True,
-                        'is_changed_consent': False
-                    }
-
-                    warnings = nro.change_nr(nrd, change_flags)
-                    if warnings:
-                        MessageServices.add_message(MessageServices.ERROR,
-                                                    'change_request_in_NRO', warnings)
-
                 nrd.stateCd = state
                 nrd.userId = user.id
-
-                if state == State.CANCELLED:
-                    nro.cancel_nr(nrd, user.username)
 
                 # if our state wasn't INPROGRESS and it is now, ensure the furnished flag is N
                 if (start_state in locals()
@@ -649,9 +625,6 @@ class Request(Resource):
                             new_comment.nrId = nrd.id
 
                 ### END comments ###
-            elif consume := json_input.get('consume', None):
-                corp_num = consume.get('corpNum', None)
-                nro.consume_nr(nrd, user, corp_num)
 
             ### PREVIOUS STATE ###
             # - None (null) is a valid value for Previous State
@@ -679,7 +652,7 @@ class Request(Resource):
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def put(nr, *args, **kwargs):
-
+        
         # do the cheap check first before the more expensive ones
         json_input = request.get_json()
         if not json_input:
@@ -1099,11 +1072,6 @@ class Request(Resource):
             # - first set status to H via name_examination proc, which handles clearing all necessary data and states
             # - then set status to D so it's back in draft in NRO for customer to understand status
             if reset:
-                current_app.logger.debug('set state to h for RESET')
-                try:
-                    nro.set_request_status_to_h(nr, user.username)
-                except (NROServicesError, Exception) as err:
-                    MessageServices.add_message('error', 'reset_request_in_NRO', err)
 
                 nrd.expirationDate = None
                 nrd.consentFlag = None
@@ -1111,56 +1079,31 @@ class Request(Resource):
                 is_changed__request = True
                 is_changed_consent = True
 
+            # Update NR Details in NRO (not for reset)
+            else:
                 change_flags = {
                     'is_changed__request': is_changed__request,
-                    'is_changed__previous_request': False,
-                    'is_changed__applicant': False,
-                    'is_changed__address': False,
-                    'is_changed__name1': False,
-                    'is_changed__name2': False,
-                    'is_changed__name3': False,
-                    'is_changed__nwpta_ab': False,
-                    'is_changed__nwpta_sk': False,
+                    'is_changed__previous_request': is_changed__previous_request,
+                    'is_changed__applicant': is_changed__applicant,
+                    'is_changed__address': is_changed__address,
+                    'is_changed__name1': is_changed__name1,
+                    'is_changed__name2': is_changed__name2,
+                    'is_changed__name3': is_changed__name3,
+                    'is_changed__nwpta_ab': is_changed__nwpta_ab,
+                    'is_changed__nwpta_sk': is_changed__nwpta_sk,
                     'is_changed__request_state': is_changed__request_state,
                     'is_changed_consent': is_changed_consent
                 }
-                warnings = nro.change_nr(nrd, change_flags)
-                if warnings:
-                    MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
 
-            # Update NR Details in NRO (not for reset)
-            else:
-                try:
-                    change_flags = {
-                        'is_changed__request': is_changed__request,
-                        'is_changed__previous_request': is_changed__previous_request,
-                        'is_changed__applicant': is_changed__applicant,
-                        'is_changed__address': is_changed__address,
-                        'is_changed__name1': is_changed__name1,
-                        'is_changed__name2': is_changed__name2,
-                        'is_changed__name3': is_changed__name3,
-                        'is_changed__nwpta_ab': is_changed__nwpta_ab,
-                        'is_changed__nwpta_sk': is_changed__nwpta_sk,
-                        'is_changed__request_state': is_changed__request_state,
-                        'is_changed_consent': is_changed_consent
-                    }
+                # if any data has changed from an NR Details edit, update it in Oracle
+                if any(value is True for value in change_flags.values()):
+                    # Save the nr before trying to hit oracle (will format dates same as namerequest.)
+                    nrd.save_to_db()
 
-                    # if any data has changed from an NR Details edit, update it in Oracle
-                    if any(value is True for value in change_flags.values()):
-                        # Save the nr before trying to hit oracle (will format dates same as namerequest.)
-                        nrd.save_to_db()
-
-                        # Delete any names that were blanked out
-                        for nrd_name in nrd.names:
-                            if deleted_names[nrd_name.choice - 1]:
-                                nrd_name.delete_from_db()
-
-                        warnings = nro.change_nr(nrd, change_flags)
-                        if warnings:
-                            MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
-
-                except (NROServicesError, Exception) as err:
-                    MessageServices.add_message('error', 'change_request_in_NRO', err)
+                    # Delete any names that were blanked out
+                    for nrd_name in nrd.names:
+                        if deleted_names[nrd_name.choice - 1]:
+                            nrd_name.delete_from_db()
 
             # if there were errors, return the set of errors
             warning_and_errors = MessageServices.get_all_messages()
