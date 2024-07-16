@@ -2,7 +2,6 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from http import HTTPStatus
 from flask import request, jsonify, g, current_app, make_response
 from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
@@ -13,12 +12,12 @@ from namex.utils.logging import setup_logging
 
 from sqlalchemy.orm import load_only, lazyload, eagerload
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_, func, or_, text, Date
+from sqlalchemy import func, or_, text
 from sqlalchemy.inspection import inspect
 
-from namex import jwt, nro, services
+from namex import jwt
 from namex.exceptions import BusinessException
-from namex.models import db, ValidationError
+from namex.models import db
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
 from namex.models import Applicant, Name, NameSchema, PartnerNameSystemSchema
 from namex.models import User, State, Comment, NameCommentSchema, Event
@@ -34,7 +33,6 @@ from namex.utils.common import (convert_to_ascii,
                                 convert_to_utc_max_date_time)
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
-from namex.services.nro import NROServicesError
 from namex.utils import queue_util
 
 import datetime
@@ -104,6 +102,7 @@ class RequestsQueue(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
         except ServicesError as se:
+            current_app.logger.error(se.with_traceback(None))
             return make_response(jsonify(message='unable to get ot create user, aborting operation'), 500)
         except Exception as unmanaged_error:
             current_app.logger.error(unmanaged_error.with_traceback(None))
@@ -112,29 +111,18 @@ class RequestsQueue(Resource):
         # get the next NR assigned to the User
         try:
             priority_queue = request.args.get('priorityQueue')
-            nr, new_assignment = RequestDAO.get_queued_oldest(user, priority_queue == 'true')
+            nr = RequestDAO.get_queued_oldest(user, priority_queue == 'true')
         except BusinessException as be:
+            current_app.logger.error(be.with_traceback(None))
             return make_response(jsonify(message='There are no more requests in the {} Queue'.format(State.DRAFT)), 404)
         except Exception as unmanaged_error:
             current_app.logger.error(unmanaged_error.with_traceback(None))
             return make_response(jsonify(message='internal server error'), 500)
-        current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
+        current_app.logger.debug('got the nr:{}'.format(nr.nrNum))
 
         # if no NR returned
         if 'nr' not in locals() or not nr:
             return make_response(jsonify(message='No more NRs in Queue to process'), 200)
-
-        # if it's an NR already INPROGRESS and assigned to the user
-        if nr and not new_assignment:
-            return make_response(jsonify(nameRequest='{}'.format(nr.nrNum)), 200)
-
-        # if it's a new assignment, then LOGICALLY lock the record in NRO
-        # if we fail to do that, send back the NR and the errors for user-intervention
-        if new_assignment:
-            warnings = nro.move_control_of_request_from_nro(nr, user)
-
-        if 'warnings' in locals() and warnings:
-            return make_response(jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 206)
 
         EventRecorder.record(user, Event.GET, nr, {})
 
@@ -601,12 +589,6 @@ class Request(Resource):
                         existing_nr.stateCd = State.HOLD
                     existing_nr.save_to_db()
 
-                # if the NR is in DRAFT then LOGICALLY lock the record in NRO
-                # if we fail to do that, send back the NR and the errors for user-intervention
-                # if state is already approved do not update from nro
-                if nrd.stateCd == State.DRAFT and state != State.APPROVED:
-                    warnings = nro.move_control_of_request_from_nro(nrd, user)
-
                 # if we're changing to DRAFT, update NRO status to "D" in NRO
                 if state == State.DRAFT:
                     change_flags = {
@@ -767,16 +749,6 @@ class Request(Resource):
                     except ValueError:
                         pass
                         # pass on this error and catch it when trying to add to record, to be returned
-
-            # ## If the current state is DRAFT, the transfer control from NRO to NAMEX
-            # if the NR is in DRAFT then LOGICALLY lock the record in NRO
-            # if we fail to do that, send back the NR and the errors for user-intervention
-            if nrd.stateCd == State.DRAFT:
-                warnings = nro.move_control_of_request_from_nro(nrd, user)
-                if warnings:
-                    MessageServices.add_message(MessageServices.WARN, 'nro_lock', warnings)
-
-            ### REQUEST HEADER ###
 
             # update request header
 
@@ -1502,13 +1474,6 @@ class SyncNR(Resource):
 
         if not nrd:
             return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
-
-        warnings = nro.move_control_of_request_from_nro(nrd, user, True)
-
-        if warnings:
-            resp = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json()
-            resp['warnings'] = warnings
-            return make_response(jsonify(resp), 206)
 
         return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
 

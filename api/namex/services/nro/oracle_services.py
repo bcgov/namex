@@ -8,10 +8,6 @@ from flask import g, current_app
 from namex.models import Event, Request, State, User
 from namex.services import EventRecorder
 from namex.services.nro import NROServicesError
-from namex.services.nro.add_nr import new_nr
-from namex.services.nro.change_nr import _create_nro_transaction, _get_event_id, update_nr
-from namex.services.nro.checkin_checkout_nr import manage_nr_locks
-from namex.services.nro.consume_nr import consume_nr
 
 from .exceptions import NROServicesError
 from .request_utils import (
@@ -219,100 +215,6 @@ class NROServices(object):
 
         return None
 
-    def move_control_of_request_from_nro(self, nr, user, closed_nr=False):
-        """ HIGHLY DESTRUCTIVE CALL
-
-        This will move the loci of control of a request from NRO to NameX
-        In doing so it'll update the NameX record if it is out of sync with the NRO info
-        with the CURRENT NRO information OVER-WRITING the NameX info
-        It will set the NameX lastUpdate to NOW
-
-        SAFETY checks:
-        This WON'T do anything if the NRO record is not in Draft
-        This WON'T do anything if the NameX record is not in Draft
-        This WON'T do anything if the NameX lastUpdate is newer than the NameX.nroLastUpdate field
-
-        :param nr:
-        :param user:
-        :param closed_nr: boolean
-        :return:
-        """
-        warnings = []
-
-        if not (nr and user):
-            warnings.append({'type': 'warn',
-                             'code': 'unable_to_move_control_from_nro',
-                             'message': 'NameRequest and User must be provided to attempt to move control from NRO.'
-                             })
-            return warnings
-
-        # save the current state, as we'll need to set it back to this before returning
-        nr_saved_state = nr.stateCd
-        # get the last modification timestamp before we alter the record
-        try:
-            nro_last_ts = self.get_last_update_timestamp(nr.requestId)
-        except (NROServicesError, Exception) as err:
-            nro_last_ts = None
-            warnings.append({'type': 'warn',
-                             'code': 'unable_to_get_last_nro_ts',
-                             'message': 'Unable to get last time the NR was updated in NRO'
-            })
-        if not closed_nr:
-            current_app.logger.debug('set state to h')
-            try:
-                self.set_request_status_to_h(nr.nrNum, user.username)
-            except (NROServicesError, Exception) as err:
-                warnings.append({'type': 'warn',
-                                 'code': 'unable_to_set_NR_status_in_NRO_to_H',
-                                 'message': 'Unable to set the NR in NRO to HOLD. '
-                                            'Please contact support to alert them of this issue'
-                                            ' and provide the Request #.'
-                                 })
-
-            current_app.logger.debug('get state')
-            try:
-                nro_req_state = self.get_current_request_state(nr.nrNum)
-            except (NROServicesError, Exception) as err:
-                nro_req_state = None
-
-            if nro_req_state != 'H':
-                warnings.append({'type': 'warn',
-                                 'code': 'unable_to_verify_NR_state_of_H',
-                                 'message': 'Unable to get the current state of the NRO Request'
-                                 })
-                current_app.logger.debug('nro state not set to H, nro-package call must have silently failed - ugh')
-
-        current_app.logger.debug('update records')
-        current_app.logger.debug('nro_last_ts: {}'.format(nro_last_ts))
-        current_app.logger.debug('nr.nroLastUpdate: {}'.format(nr.nroLastUpdate))
-        if 'nro_last_ts' in locals() and nro_last_ts != nr.nroLastUpdate:
-            current_app.logger.debug('nro updated since namex was last updated')
-            try:
-                # mark the NR as being updated
-                nr.stateCd = State.NRO_UPDATING
-                nr.save_to_db()
-
-                nrf = self.fetch_nro_request_and_copy_to_namex_request(user, nr_number=nr.nrNum, name_request=nr)
-                if nrf:
-                    nr = nrf
-                nr.stateCd = nr_saved_state
-                nr.save_to_db()
-                EventRecorder.record(user, Event.UPDATE_FROM_NRO, nr, nr.json())
-
-            except Exception as missed_error:
-                warnings.append({'type': 'warn',
-                                 'code': 'unable_to_update_request_from_NRO',
-                                 'message': 'Unable to update the Request from the NRO system,'
-                                            ' please manually verify record is up to date before'
-                                            ' approving/rejecting.'
-                                 })
-                current_app.logger.error(missed_error.with_traceback(None))
-            finally:
-                # set the NR back to its initial state
-                nr.stateCd = nr_saved_state
-                nr.save_to_db()
-
-        return warnings if len(warnings)>0 else None
 
     def change_nr(self, nr, change_flags):
 
@@ -350,55 +252,6 @@ class NROServices(object):
 
         return warnings if len(warnings)>0 else None
 
-    def add_nr(self, nr):
-        warnings = []
-        try:
-
-            con = self.connection
-            con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
-
-            cursor = con.cursor()
-            new_nr(nr, cursor,con)
-
-            con.commit()
-
-            return None
-
-        except Exception as err:
-            warnings.append({'type': 'warn',
-                             'code': 'unable_to_create_request in_NRO',
-                             'message': 'Unable to create the Request records in NRO,'
-                                        ' please manually verify record is up to date in NRO before'
-                                        ' continuing.'
-                             })
-            current_app.logger.error(err.with_traceback(None))
-
-        return warnings if len(warnings) > 0 else None
-
-    def consume_nr(self, nr, user, corp_num):
-        warnings = []
-        try:
-
-            con = self.connection
-            con.begin()  # explicit transaction in case we need to do other things than just call the stored proc
-
-            cursor = con.cursor()
-            consume_nr(nr, user.username, corp_num, cursor)
-
-            con.commit()
-
-            return None
-
-        except Exception as err:
-            warnings.append({'type': 'warn',
-                             'code': 'unable_to_create_request_changes_in_NRO',
-                             'message': 'Unable to create the Request records in NRO,'
-                                        ' please manually verify record is up to date in NRO before'
-                                        ' continuing.'
-                             })
-            current_app.logger.error(err.with_traceback(None))
-
-        return warnings if len(warnings) > 0 else None
 
     def checkin_checkout_nr(self, nr, action):
         warnings = []
